@@ -1,94 +1,39 @@
 <!--
-Copyright (c) 2021, Oracle and/or its affiliates.
+Copyright 2021, Oracle Corporation and/or its affiliates.
 All rights reserved.  Licensed under the Universal
 Permissive License v 1.0 as shown at
-https://oss.oracle.com/licenses/upl.
+http://oss.oracle.com/licenses/upl.
 
 -->
 
------
-![logo](docs/images/logo-with-name.png)
+# Coherence CLI
 
-![Coherence CI](https://github.com/oracle/coherence-cli/workflows/CI/badge.svg?branch=main)
-[![License](http://img.shields.io/badge/license-UPL%201.0-blue.svg)](https://oss.oracle.com/licenses/upl/)
-[![Go Report Card](https://goreportcard.com/badge/github.com/oracle/coherence-cli)](https://goreportcard.com/report/github.com/oracle/coherence-cli)
-![GitHub release (latest by date)](https://img.shields.io/github/v/release/oracle/coherence-cli)
+The Coherence command line interface (CLI), cohctl, is a lightweight tool, in the tradition of tools such as kubectl, which can be scripted or used interactively 
+to manage and monitor Coherence clusters. You can use cohctl to view cluster information such as services, caches, members, etc, as well as perform various 
+management operations against clusters.
 
-# Coherence Command Line Interface (CLI)
-
-![Coherence Demo](assets/cohctl-terminal.gif "Coherence Demo")
-
-## Contents
-
-* [Overview](#overview)
-* [Why use the Coherence CLI?](#why-use-the-coherence-cli)
-* [Install the CLI](#install-the-cli)
-* [Getting Started](#getting-started)
-* [Supported Coherence Versions](#supported-coherence-versions)
-* [Get Involved](#need-more-help-have-a-suggestion-come-and-say-hello)
-
-## Overview 
-
-The Coherence command line interface, `cohctl`, is a lightweight tool, in the tradition of tools such as kubectl,
-which can be scripted or used interactively to manage and monitor Coherence clusters. You can use `cohctl` to view cluster information
-such as services, caches, members, etc, as well as perform various management operations against clusters.
-
-The CLI accesses clusters using the HTTP Management over REST interface and therefore requires this to be enabled on any clusters
-you want to monitor or manage. See the [Coherence Documentation](https://docs.oracle.com/en/middleware/standalone/coherence/14.1.1.0/rest-reference/quick-start.html)
-for more information on setting up Management over REST.
-
-NOTE: The CLI does not replace current management and monitoring tools such as the [Coherence VisualVM Plugin](https://github.com/oracle/coherence-visualvm),
-[Enterprise Manager](https://docs.oracle.com/cd/E24628_01/install.121/e24215/coherence_getstarted.htm#GSSOA10121), or [Grafana Dashboards](https://oracle.github.io/coherence-operator/docs/latest/#/docs/metrics/040_dashboards), but compliments and
-provides a lightweight and scriptable alternative.
-
-## Why use the Coherence CLI?
-
-The CLI compliments your existing Coherence management tools and allows you to:
-
-* Interactively monitor your Coherence clusters from a lightweight terminal-based interface
-* Monitor service "StatusHA" during rolling restarts of Coherence clusters
-* Script Coherence monitoring and incorporate results into other management tooling
-* Output results in various formats including text, JSON and utilize JsonPath to extract attributes of interest
-* Gather information that may be useful for Oracle Support to help diagnose issues
-* Connect to standalone or WebLogic Server based clusters from commercial versions 12.2.1.4 and above as well as all [Coherence Community Edition](https://github.com/oracle/coherence) (CE) versions
-* Retrieve thread dumps across members
-
-## Install the CLI
-
-The Coherence CLI is available as a binary for most platforms and architectures. See the
-[Install guide](https://oracle.github.io/coherence-cli/docs/latest/#/installation/01_installations) for
-information on downloading the CLI.
+The current version of the ![GitHub release (latest by date)](https://img.shields.io/github/v/release/oracle/coherence-cli)
 
 ## Getting Started
 
-Documentation for the Coherence Operator is available [here](https://oracle.github.io/coherence-cli/docs/latest)
+The fastest way to experience the CLI is to follow the 
+[Quick Start guide](https://oracle.github.io/coherence-cli/docs/latest/#/about/03_quickstart)
 
-The fastest way to experience the Coherence CLI is to follow the
-[Quick Start guide](https://oracle.github.io/coherence-cli/docs/latest/#/about/03_quickstart).
+## Documentation
 
-## Supported Coherence Versions
+[https://oracle.github.io/coherence-coherence-cli/docs/latest](https://oracle.github.io/coherence-coherence-cli/docs/latest)
 
-The CLI supports and is certified against the following Community and Commercial editions of Coherence:
+## Repo
 
-**Coherence Community Edition**
-* 21.12
-* 21.06.x
-* 20.12.2 (JFR commands are not supported)
-* 14.1.1-0-x
-
-**Coherence Grid/ Enterprise Edition**
-* 12.2.1.4.x - minimum patch level of 12.2.1.4.7+ required
-* 14.1.1.0.x - minimum patch level of 14.1.1.0.2+ required
-
-> Note: If you are on a patch set below the minimum recommended above, then CLI may work, but some functionality may not be available. It
-> is always recommended to upgrade to the latest Coherence patch as soon as you are able to.
+GitHub Repository: [https://github.com/oracle/coherence-cli](https://github.com/oracle/coherence-cli)
 
 ## Need more help? Have a suggestion? Come and say "Hello!"
 
-We have a **public Slack channel** where you can get in touch with us to ask questions about using the Coherence CLI
-or give us feedback or suggestions about what features and improvements you would like to see. We would love
-to hear from you. To join our channel,
-please [visit this site to get an invitation](https://join.slack.com/t/oraclecoherence/shared_invite/enQtNzcxNTQwMTAzNjE4LTJkZWI5ZDkzNGEzOTllZDgwZDU3NGM2YjY5YWYwMzM3ODdkNTU2NmNmNDFhOWIxMDZlNjg2MzE3NmMxZWMxMWE).  
-The invitation email will include details of how to access our Slack
-workspace.  After you are logged in, please come to `#coherence-cli` and say, "hello!"
+### Join Our Public Slack Channel
 
+We have a **public Slack channel** where you can get in touch with us to ask questions about using the operator or give us
+feedback or suggestions about what features and improvements you would like to see.
+We would love to hear from you. To join our channel, please 
+[visit this site to get an invitation](https://join.slack.com/t/oraclecoherence/shared_invite/enQtNzcxNTQwMTAzNjE4LTJkZWI5ZDkzNGEzOTllZDgwZDU3NGM2YjY5YWYwMzM3ODdkNTU2NmNmNDFhOWIxMDZlNjg2MzE3NmMxZWMxMWE).
+The invitation email will include details of how to access our Slack workspace. 
+After you are logged in, please come to `#operator` and say, "hello!"
