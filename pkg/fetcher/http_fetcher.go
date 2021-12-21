@@ -801,11 +801,10 @@ func httpRequest(h HTTPFetcher, requestType, urlAppend string, absolute bool, co
 	if httpProxy != "" {
 		proxy, err = URL.Parse(httpProxy)
 		if err != nil {
-			return constants.EmptyByte, fmt.Errorf("unable to parse HTTP_PROXY environment variable: %v", err)
+			return constants.EmptyByte, fmt.Errorf("unable to parse HTTP_PROXY environment variable: %s, %v", httpProxy, err)
 		}
 		tr.Proxy = http.ProxyURL(proxy)
-		Logger.Info("Using HTTP Proxy", []zapcore.Field{
-			zap.String("URL", proxy.String())}...)
+		Logger.Info("Using HTTP Proxy", []zapcore.Field{zap.String("URL", httpProxy)}...)
 	}
 
 	client := &http.Client{Transport: tr,
