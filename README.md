@@ -1,7 +1,6 @@
 <!--
 Copyright 2021, Oracle Corporation and/or its affiliates.
-All rights reserved.  Licensed under the Universal
-Permissive License v 1.0 as shown at
+Licensed under the Universal Permissive License v 1.0 as shown at
 http://oss.oracle.com/licenses/upl.
 
 -->
@@ -31,9 +30,9 @@ GitHub Repository: [https://github.com/oracle/coherence-cli](https://github.com/
 
 ### Join Our Public Slack Channel
 
-We have a **public Slack channel** where you can get in touch with us to ask questions about using the operator or give us
+We have a **public Slack channel** where you can get in touch with us to ask questions about using the Coherence CLI or give us
 feedback or suggestions about what features and improvements you would like to see.
 We would love to hear from you. To join our channel, please 
 [visit this site to get an invitation](https://join.slack.com/t/oraclecoherence/shared_invite/enQtNzcxNTQwMTAzNjE4LTJkZWI5ZDkzNGEzOTllZDgwZDU3NGM2YjY5YWYwMzM3ODdkNTU2NmNmNDFhOWIxMDZlNjg2MzE3NmMxZWMxMWE).
 The invitation email will include details of how to access our Slack workspace. 
-After you are logged in, please come to `#operator` and say, "hello!"
+After you are logged in, please come to `#cli` and say, "hello!"
