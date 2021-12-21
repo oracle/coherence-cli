@@ -1186,7 +1186,7 @@ func formatLinesAllStringsWithAlignmentMax(alignment, stringValues []string, max
 
 	// silently turn off alignments if the values don't match
 	if hasAlignments && numberColumns != alignmentLen {
-		_, _ = fmt.Fprintf(os.Stderr, "Warning: number of columns: %d, alignemnt length: %d\n",
+		_, _ = fmt.Fprintf(os.Stderr, "Warning: number of columns: %d, alignment length: %d\n",
 			numberColumns, alignmentLen)
 		hasAlignments = false
 	}

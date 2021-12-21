@@ -1307,6 +1307,7 @@ func RunTestClusterGetClusterRequest(t *testing.T) {
 	g.Expect(jsonData).To(ContainSubstring("clusterName\":\"" + context.ClusterName + "\""))
 
 	err = json.Unmarshal(data, &cluster)
+	g.Expect(err).To(BeNil())
 	g.Expect(cluster).To(Not(Equal(nil)))
 	g.Expect(cluster.ClusterSize).To(Equal(context.ExpectedServers))
 	g.Expect(cluster.ClusterName).To(Equal(context.ClusterName))
@@ -1345,6 +1346,7 @@ func RunTestClusterGetMembersRequest(t *testing.T) {
 	g.Expect(jsonData).To(ContainSubstring("nodeId\":\"1\""))
 
 	err = json.Unmarshal(data, &members)
+	g.Expect(err).To(BeNil())
 	g.Expect(len(members.Members)).To(Equal(context.ExpectedServers))
 
 	for _, value := range members.Members {
@@ -1391,6 +1393,7 @@ func RunTestClusterServicesRequest(t *testing.T) {
 	g.Expect(jsonData).To(ContainSubstring("nodeId\":\"1\""))
 
 	err = json.Unmarshal(data, &services)
+	g.Expect(err).To(BeNil())
 	g.Expect(len(services.Services) > 0).To(Equal(true))
 
 	for _, value := range services.Services {
@@ -1447,6 +1450,7 @@ func RunTestCachesRequests(t *testing.T) {
 	g.Expect(jsonData).To(ContainSubstring("nodeId\":\"1\""))
 
 	err = json.Unmarshal(data, &caches)
+	g.Expect(err).To(BeNil())
 	g.Expect(len(caches.Details) > 0).To(Equal(true))
 
 	for _, value := range caches.Details {

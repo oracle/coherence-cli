@@ -33,15 +33,6 @@ Download the package installer for the latest version for either Intel or Apple 
 * Intel - https://github.com/oracle/coherence-cli/releases/download/{cli-version}/Oracle-Coherence-CLI-{cli-version}-darwin-amd64.pkg[Oracle-Coherence-CLI-{cli-version}-darwin-amd64.pkg]
 * Apple Silicon - https://github.com/oracle/coherence-cli/releases/download/{cli-version}/Oracle-Coherence-CLI-{cli-version}-darwin-arm64.pkg[Oracle-Coherence-CLI-{cli-version}-darwin-arm64.pkg]
 
-You can also use curl to download:
-
-[source,bash,subs="attributes"]
-----
-curl -Lo cohctl "https://github.com/oracle/coherence-cli/releases/download/{cli-version}/Oracle-Coherence-CLI-{cli-version}-darwin-amd64.pkg"
-----
-
-NOTE: Change the `amd64` to `arm64` for ARM based (Apple Silicon) processor.
-
 NOTE: When you install the pkg it will place the `cohctl` executable in the `/usr/local/bin` directory. You can move it out of this directory if you wish after installation.
 
 [#install-linux]

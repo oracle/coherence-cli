@@ -218,9 +218,12 @@ func CollectDockerLogs() error {
 		}
 
 		logs, err = ExecuteHostCommand("docker", "logs", container)
+		if err != nil {
+			return err
+		}
 
 		//write to build output directory
-		fileName := filepath.Join(directory, container + ".logs")
+		fileName := filepath.Join(directory, container+".logs")
 
 		fmt.Println("Dumping logs for " + container + " to " + fileName)
 
@@ -258,7 +261,7 @@ func StartDockerImage(t *testing.T, image string, name string, httpPort int, clu
 	t.Log(fmt.Sprintf("Starting docker image %s with image name %s, httpPort %d and clusterName %s",
 		image, name, httpPort, clusterName))
 	if delete {
-		StopDockerImage(name)
+		_, _ = StopDockerImage(name)
 	}
 
 	var ports = fmt.Sprintf("%d:%d", httpPort, httpPort)

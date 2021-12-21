@@ -187,7 +187,7 @@ var describeHTTPSessionCmd = &cobra.Command{
 		}
 
 		if !found {
-			return fmt.Errorf("unable to find applicaiton id %s", applicationID)
+			return fmt.Errorf("unable to find application id %s", applicationID)
 		}
 
 		if strings.Contains(OutputFormat, constants.JSONPATH) {

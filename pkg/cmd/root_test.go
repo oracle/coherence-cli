@@ -166,7 +166,7 @@ func TestGetLogsCommands(t *testing.T) {
 	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "INFO,CLI Details", "--config", file, "get", "logs")
 }
 
-// TestTimeoutCommands tests the get adn set timeout commands
+// TestTimeoutCommands tests the get and set timeout commands
 func TestTimeoutCommands(t *testing.T) {
 	cliCmd := Initialize(nil)
 	g := NewGomegaWithT(t)
