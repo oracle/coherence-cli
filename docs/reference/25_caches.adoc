@@ -1,0 +1,94 @@
+///////////////////////////////////////////////////////////////////////////////
+
+    Copyright (c) 2021, Oracle and/or its affiliates.
+    Licensed under the Universal Permissive License v 1.0 as shown at
+    https://oss.oracle.com/licenses/upl.
+
+///////////////////////////////////////////////////////////////////////////////
+
+= Caches
+
+== Caches
+
+=== Overview
+There are various commands that allow you to work with and manage cluster caches.
+
+* <<get-caches, `cohctl get caches`>> - displays the caches for a cluster
+* <<describe-cache, `cohctl describe cache`>> - shows information related to a specific cache and service
+* <<set-cache, `cohctl set cache`>> - sets an attribute for a cache across one or more members
+
+[#get-caches]
+==== Get Caches
+
+include::../../build/_output/docs-gen/get_caches.adoc[tag=text]
+
+*Examples*
+
+Display all caches.
+
+[source,bash]
+----
+$ cohctl get caches -c local
+Total Caches: 3, Total primary storage: 16MB
+
+SERVICE            CACHE     CACHE SIZE       BYTES    MB  AVG SIZE  TOTAL PUTS  TOTAL GETS  TOTAL REMOVES  TOTAL HITS  TOTAL MISSES  HIT PROB
+PartitionedCache   test1        100,000  16,800,000  16MB       168     200,000           0              0           0             0     0.00%
+PartitionedCache   test2            123     142,680   0MB     1,160         246           0              0           0             0     0.00%
+PartitionedCache2  test-123           0           0   0MB         0           0           0              0           0             0     0.00%
+----
+
+Display all caches for a particular service.
+
+[source,bash]
+----
+$ cohctl get caches -c local -s PartitionedCache2
+
+Total Caches: 1, Total primary storage: 0MB
+
+SERVICE            CACHE     CACHE SIZE  BYTES   MB  AVG SIZE  TOTAL PUTS  TOTAL GETS  TOTAL REMOVES  TOTAL HITS  TOTAL MISSES  HIT PROB
+PartitionedCache2  test-123           0      0  0MB         0           0           0              0           0             0     0.00%
+----
+
+[#describe-cache]
+==== Describe Cache
+
+include::../../build/_output/docs-gen/describe_cache.adoc[tag=text]
+
+*Examples*
+
+[source,bash]
+----
+$ cohctl describe cache test -c local -s PartitionedCache
+----
+
+[#set-cache]
+==== Set Cache
+
+include::../../build/_output/docs-gen/set_cache.adoc[tag=text]
+
+See the https://docs.oracle.com/en/middleware/standalone/coherence/14.1.1.0/manage/oracle-coherence-mbeans-reference.html[Cache MBean Reference]
+for more information on the above attributes.
+
+*Examples*
+
+Set the expiry delay for all nodes to 30 seconds. (we are assuming we have 3 storage-enabled nodes)
+
+[source,bash]
+----
+$ cohctl set cache test -a expiryDelay -v 30 -s PartitionedCache
+Using cluster connection 'local' from current context.
+
+Selected service/cache: PartitionedCache/test
+Are you sure you want to set the value of attribute expiryDelay to 30 in tier back for all 3 nodes? (y/n) y
+operation completed
+----
+
+NOTE: See <<docs/examples/15_set_cache_attrs.adoc,here>> for a more detailed example of this command.
+
+
+=== See Also
+
+* <<docs/reference/20_services.adoc,Services>>
+* <<docs/reference/30_topics.adoc,Topics>>
+
+

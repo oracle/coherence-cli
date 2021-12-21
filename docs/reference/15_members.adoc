@@ -1,0 +1,126 @@
+///////////////////////////////////////////////////////////////////////////////
+
+    Copyright (c) 2021, Oracle and/or its affiliates.
+    Licensed under the Universal Permissive License v 1.0 as shown at
+    https://oss.oracle.com/licenses/upl.
+
+///////////////////////////////////////////////////////////////////////////////
+
+= Members
+
+== Members
+
+=== Overview
+There are various cluster commands that allow you to work with and manage cluster members.
+
+* <<get-members, `cohctl get members`>> - displays the members for a cluster
+* <<describe-member, `cohctl describe member`>> - shows information related to a specific member
+* <<set-member, `cohctl set member`>> - sets a member attribute for one or more members
+
+[#get-members]
+==== Get Members
+
+include::../../build/_output/docs-gen/get_members.adoc[tag=text]
+
+*Examples*
+
+Display all members.
+
+[source,bash]
+----
+$ cohctl get members -c local
+
+Cluster Heap - Total: 2.500GB, Used: 305MB, Available: 2.202GB (88.1%)
+
+NODE ID  ADDRESS          PORT  PROCESS  MEMBER  ROLE               MAX HEAP  USED HEAP  AVAIL HEAP
+1        /192.168.1.124  53216    12096  n/a     CoherenceServer     1.000GB       95MB       929MB
+2        /192.168.1.124  53215    12094  n/a     Management            512MB      112MB       400MB
+3        /192.168.1.124  53220    12246  n/a     CoherenceServer     1.000GB       98MB       926MB
+----
+
+Display all members with the role `CoherenceServer`.
+
+[source,bash]
+----
+$ cohctl get members -c local -r CoherenceServer
+Cluster Heap - Total: 2.000GB, Used: 197MB, Available: 1.808GB (90.4%)
+
+NODE ID  ADDRESS          PORT  PROCESS  MEMBER  ROLE             MAX HEAP  USED HEAP  AVAIL HEAP
+1        /192.168.1.124  53216    12096  n/a     CoherenceServer   1.000GB       98MB       926MB
+3        /192.168.1.124  53220    12246  n/a     CoherenceServer   1.000GB       99MB       925MB
+----
+
+NOTE: You can also use `-o wide` to display more columns.
+
+[#describe-member]
+==== Describe Member
+
+include::../../build/_output/docs-gen/describe_member.adoc[tag=text]
+
+*Examples*
+
+Describe member and include heap dump.
+
+[source,bash]
+----
+$ cohctl describe member 1 -D
+----
+
+NOTE: When taking one or more thread dumps, if you want full deadlock analysis, you should set the following system property
+on your Coherence JVMS `-Dcom.oracle.coherence.common.util.Threads.dumpLocks=FULL`
+
+Describe member and include extended information on G1 garbage collection.
+
+[source,bash]
+----
+$ cohctl describe member 1 -Xg1
+----
+
+[#set-member]
+==== Set Member
+
+include::../../build/_output/docs-gen/set_member.adoc[tag=text]
+
+*Examples*
+
+Set the log level for all members.
+
+[source,bash]
+----
+# Check the log level first
+$ cohctl get members -o json | jq | grep loggingLevel
+      "loggingLevel": 6,
+      "loggingLevel": 6,
+      "loggingLevel": 6,
+
+$ cohctl set member all -a loggingLevel -v 6 -c local
+
+re you sure you want to set the value of attribute loggingLevel to 6 for all 3 nodes? (y/n) y
+operation completed
+$ cohctl get members -o json | jq | grep loggingLevel
+      "loggingLevel": 6,
+      "loggingLevel": 6,
+      "loggingLevel": 6,
+----
+
+Set the log level to 9 for node id 1.
+
+[source,bash]
+----
+$ cohctl set member 1 -a loggingLevel -v 9 -c local
+
+Are you sure you want to set the value of attribute loggingLevel to 9 for 1 nodes? (y/n) y
+operation completed
+
+$ cohctl get members -o json | jq | grep loggingLevel
+      "loggingLevel": 9,
+      "loggingLevel": 6,
+      "loggingLevel": 6,
+----
+
+=== See Also
+
+* <<docs/reference/85_diagnostics.adoc,Diagnostics>>
+
+
+

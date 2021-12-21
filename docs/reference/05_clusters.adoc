@@ -1,0 +1,150 @@
+///////////////////////////////////////////////////////////////////////////////
+
+    Copyright (c) 2021, Oracle and/or its affiliates.
+    Licensed under the Universal Permissive License v 1.0 as shown at
+    https://oss.oracle.com/licenses/upl.
+
+///////////////////////////////////////////////////////////////////////////////
+
+= Clusters
+
+== Clusters
+
+=== Overview
+There are various cluster commands that allow you to work with and manage cluster connections.
+
+* <<add-cluster, `cohctl add cluster`>> - adds a cluster connection
+* <<discover-clusters, `cohctl discover clusters`>> - discovers clusters using the Name Service
+* <<remove-cluster, `cohctl remove cluster`>> - removes a cluster connection
+* <<get-clusters, `cohctl get clusters`>> - returns the list of cluster connections
+* <<describe-cluster, `cohctl describe cluster`>> - describes a cluster referred to by a cluster connection
+
+[#add-cluster]
+==== Add Cluster
+
+include::../../build/_output/docs-gen/add_cluster.adoc[tag=text]
+
+*Examples*
+
+[source,bash]
+----
+$ cohctl add cluster local -u http://localhost:30000/management/coherence/cluster
+Added cluster local with type http and URL http://localhost:30000/management/coherence/cluster
+----
+
+*Notes*
+
+Cluster connections are in one of two formats:
+
+* Standalone Coherence - http://host:management-port/management/coherence/cluster
+* WebLogic Server - http://<admin-host>:<admin-port>/management/coherence/latest/clusters
+
+If you are connecting to WebLogic Server or a Management over REST endpoint that has authentication, you can
+specify the user using the `-U` option. To specify a password, you have the following options:
+
+* Enter the password when prompted for, or
+* Use the `-i` or `--stdin` option to read the password from standard in. (Useful for GitHub actions or automated processes)
+
+You can also specify just a host:port and `cohctl` will construct a http connection using those in the correct
+format.
+
+[source,bash]
+----
+$ cohctl add cluster local -u localhost:30000
+Added cluster local with type http and URL http://localhost:30000/management/coherence/cluster
+----
+
+NOTE: If you wish to add a `https` connection, you must enter the entire URL.
+
+NOTE: You can set the `HTTP_PROXY` environment variable to use a Proxy Server to connect to your cluster endpoint.
+
+[#discover-clusters]
+==== Discover Clusters
+
+include::../../build/_output/docs-gen/discover_clusters.adoc[tag=text]
+
+*Examples*
+
+[source,bash]
+----
+$ cohctl discover clusters
+Attempting to discover clusters using the following NameService addresses: [localhost]
+Discovering Management URL for my-cluster on localhost:7574 ...
+Discovering Management URL for test-cluster on localhost:63868 ...
+
+Clusters found:    2
+Without Http Mgmt: 1
+With Http Mgmt:    1
+
+The following clusters do not have Management over REST enabled and cannot be added
+  Cluster: test-cluster, Name Service address: localhost:63868
+
+CONNECTION  CLUSTER NAME  HOST       NS PORT  URL
+my-cluster  my-cluster    localhost     7574  http://127.0.0.1:30000/management/coherence/cluster
+
+Are you sure you want to add the above 1 cluster(s)? (y/n) y
+Added cluster my-cluster with type http and URL http://127.0.0.1:30000/management/coherence/cluster
+
+coherence-cli$ (master)$ cohctl get clusters
+CONNECTION  TYPE  URL                                                  VERSION     CLUSTER NAME  TYPE        CTX
+my-cluster  http  http://127.0.0.1:30000/management/coherence/cluster  14.1.2.0.0  my-cluster    Standalone
+----
+
+NOTE: The cluster connection is automatically generated from the cluster name. If it already exists you will
+be asked for specify a name.
+
+NOTE: If there are two or more Management URL's, you will be asked to select one.
+
+[#remove-cluster]
+==== Remove Cluster
+
+include::../../build/_output/docs-gen/remove_cluster.adoc[tag=text]
+
+*Examples*
+
+[source,bash]
+----
+$ cohctl remove cluster local
+Removed connection for cluster local
+----
+
+NOTE: This command only removes the connection to the cluster that `cohctl` stores. It does not
+affect the running Coherence cluster in any way.
+
+[#get-clusters]
+==== Get Clusters
+
+include::../../build/_output/docs-gen/get_clusters.adoc[tag=text]
+
+*Examples*
+
+[source,bash]
+----
+cohctl get clusters
+
+CONNECTION  TYPE  URL                                                  VERSION  CLUSTER NAME  CLUSTER TYPE  CTX
+local       http  http://localhost:30000/management/coherence/cluster  21.06.1  my-cluster    Standalone
+----
+
+NOTE: An asterix will show in the `CTX` column if the cluster has been set using the `cohctl set context` command.
+
+[#describe-cluster]
+==== Describe Cluster
+
+include::../../build/_output/docs-gen/describe_cluster.adoc[tag=text]
+
+*Examples*
+
+[source,bash]
+----
+cohctl describe cluster local
+----
+
+=== See Also
+
+* https://docs.oracle.com/en/middleware/standalone/coherence/14.1.1.0/rest-reference/quick-start.html[Setting up Management over REST]
+* <<docs/reference/10_contexts.adoc,Contexts>>
+* <<docs/reference/45_nslookup.adoc,NS Lookup>>
+
+
+

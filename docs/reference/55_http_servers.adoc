@@ -1,0 +1,56 @@
+///////////////////////////////////////////////////////////////////////////////
+
+    Copyright (c) 2021, Oracle and/or its affiliates.
+    Licensed under the Universal Permissive License v 1.0 as shown at
+    https://oss.oracle.com/licenses/upl.
+
+///////////////////////////////////////////////////////////////////////////////
+
+= Http Servers
+
+== Http Servers
+
+=== Overview
+There are various commands that allow you to work with and manage http servers.
+
+* <<get-http-servers, `cohctl get http-servers`>> - displays the http servers for a cluster
+* <<describe-http-server, `cohctl describe http-server`>> - shows information related to a specific http server
+
+[#get-http-servers]
+==== Get Http Servers
+
+include::../../build/_output/docs-gen/get_http_servers.adoc[tag=text]
+
+*Examples*
+
+Display all http servers.
+
+[source,bash]
+----
+$ cohctl get http-servers -c local
+NODE ID  HOST IP        SERVICE NAME         SERVER TYPE                  REQUESTS  ERRORS
+1        0.0.0.0:0      ManagementHttpProxy  com..http.DefaultHttpServer         0       0
+2        0.0.0.0:30000  ManagementHttpProxy  com..http.DefaultHttpServer        52       0
+3        0.0.0.0:0      ManagementHttpProxy  com..http.DefaultHttpServer         0       0
+----
+
+NOTE: You can also use `-o wide` to display more columns.
+
+[#describe-http-server]
+==== Describe Http Server
+
+include::../../build/_output/docs-gen/describe_http_server.adoc[tag=text]
+
+*Examples*
+
+[source,bash]
+----
+$ cohctl describe http-proxy ManagementHttpProxy -c local
+----
+
+=== See Also
+
+* <<docs/reference/20_services.adoc,Services>>
+
+
+

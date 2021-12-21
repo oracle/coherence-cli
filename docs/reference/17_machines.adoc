@@ -1,0 +1,76 @@
+///////////////////////////////////////////////////////////////////////////////
+
+    Copyright (c) 2021, Oracle and/or its affiliates.
+    Licensed under the Universal Permissive License v 1.0 as shown at
+    https://oss.oracle.com/licenses/upl.
+
+///////////////////////////////////////////////////////////////////////////////
+
+= Machines
+
+== Machines
+
+=== Overview
+There are various cluster commands that allow you display information about cluster machines.
+
+* <<get-machines, `cohctl get machines`>> - displays the machines for a cluster
+* <<describe-machine, `cohctl describe machine`>> - shows information related to a specific machine
+
+[#get-machines]
+==== Get Members
+
+include::../../build/_output/docs-gen/get_machines.adoc[tag=text]
+
+*Examples*
+
+[source,bash]
+----
+$ cohctl get machines -c local
+
+MACHINE                  PROCESSORS    LOAD  TOTAL MEMORY  FREE MEMORY  % FREE  OS     ARCH   VERSION
+66c301108e8a/172.17.0.2           4  0.3300       8.500GB      5.858GB  68.92%  Linux  amd64  5.10.47-linuxkit
+----
+
+[#describe-machine]
+==== Describe Machine
+
+include::../../build/_output/docs-gen/describe_machine.adoc[tag=text]
+
+*Examples*
+
+Describe machine 66c301108e8a/172.17.0.2.
+
+[source,bash]
+----
+$ cohctl describe machine 66c301108e8a/172.17.0.2 -c local
+
+Machine Name                 :  66c301108e8a/172.17.0.2
+Arch                         :  amd64
+Available Processors         :  4
+Committed Virtual Memory Size:  6.115729408e+09
+Domain                       :  java.lang
+Free Physical Memory Size    :  6.284816384e+09
+Free Swap Space Size         :  1.073737728e+09
+Max File Descriptor Count    :  1.048576e+06
+Name                         :  Linux
+Node Id                      :  1
+Object Name                  :  map[canonicalKeyPropertyListString:
+Open File Descriptor Count   :  164
+Process Cpu Load             :  0.004840661557079468
+Process Cpu Time             :  1.399e+10
+Sub Type                     :  OperatingSystem
+System Cpu Load              :  0.03903903903903904
+System Load Average          :  0.31
+Total Physical Memory Size   :  9.127186432e+09
+Total Swap Space Size        :  1.073737728e+09
+Type                         :  Platform
+Version                      :  5.10.47-linuxkit
+----
+
+
+=== See Also
+
+* <<docs/reference/15_members.adoc,Members>>
+
+
+

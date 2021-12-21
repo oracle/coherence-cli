@@ -1,0 +1,16 @@
+version: "3.5"
+services:
+  coherence1:
+    hostname: server1
+    image: ${COHERENCE_IMAGE}
+    environment:
+      - coherence.wka=server1
+      - coherence.cluster=cluster1
+      - coherence.member=member1
+      - coherence.machine=server1
+      - coherence.site=Site1
+      - coherence.management.http=all
+      - coherence.distributed.persistence-mode=active
+    ports:
+      - 30000:30000
+      - 8080:8080

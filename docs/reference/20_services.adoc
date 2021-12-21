@@ -1,0 +1,118 @@
+///////////////////////////////////////////////////////////////////////////////
+
+    Copyright (c) 2021, Oracle and/or its affiliates.
+    Licensed under the Universal Permissive License v 1.0 as shown at
+    https://oss.oracle.com/licenses/upl.
+
+///////////////////////////////////////////////////////////////////////////////
+
+= Services
+
+== Services
+
+=== Overview
+There are various commands that allow you to work with and manage cluster services.
+
+* <<get-services, `cohctl get services`>> - displays the services for a cluster
+* <<describe-service, `cohctl describe service`>> - shows information related to a specific service
+* <<set-service, `cohctl set service`>> - sets a service attribute across one or more members
+
+[#get-services]
+==== Get Services
+
+include::../../build/_output/docs-gen/get_services.adoc[tag=text]
+
+*Examples*
+
+Display all services.
+
+[source,bash]
+----
+$ cohctl get services -c local
+----
+
+Display all services of type `DistributedCache`
+
+[source,bash]
+----
+$ cohctl get services -c local -t DistributedCache
+----
+
+Watch all services of type `DistributedCache`
+
+[source,bash]
+----
+$ cohctl get services -c local -t DistributedCache -w
+----
+
+Wait for all services of type `DistributedCache` to become `MACHINE-SAFE`.
+
+[source,bash]
+----
+$ cohctl get services -c local -t DistributedCache -w -a MACHINE-SAFE
+----
+
+[#describe-service]
+==== Describe Service
+
+include::../../build/_output/docs-gen/describe_service.adoc[tag=text]
+
+*Examples*
+
+[source,bash]
+----
+$ cohctl describe service PartitionedCache -c local
+----
+
+[#set-service]
+==== Set Service
+
+include::../../build/_output/docs-gen/set_service.adoc[tag=text]
+
+See the https://docs.oracle.com/en/middleware/standalone/coherence/14.1.1.0/manage/oracle-coherence-mbeans-reference.html[Service MBean Reference]
+for more information on the above attributes.
+
+*Examples*
+
+Set the thread count min for a service.
+
+List the services and inspect the current thread count min.
+
+[source,bash]
+----
+$ cohctl get services -c local
+
+SERVICE NAME         TYPE              MEMBERS  STATUS HA  STORAGE  PARTITIONS
+Proxy                Proxy                   2  n/a             -1          -1
+PartitionedTopic     DistributedCache        2  NODE-SAFE        2         257
+PartitionedCache2    DistributedCache        2  NODE-SAFE        2         257
+PartitionedCache     DistributedCache        2  NODE-SAFE        2         257
+ManagementHttpProxy  Proxy                   1  n/a             -1          -1
+
+$ cohctl get services -o  jsonpath="$.items[?(@.name == 'PartitionedCache')]..['nodeId','name','threadCountMin']"
+["2","PartitionedCache",1,"1","PartitionedCache",1]
+----
+
+NOTE: The above shows that the `threadCountMin` is 1 for both nodes.
+
+Set the `threadCountMin` to 10 for each service member.
+
+[source,bash]
+----
+$ cohctl set service PartitionedCache -a threadCountMin -v 10 -c local
+
+Selected service: PartitionedCache
+Are you sure you want to set the value of attribute threadCountMin to 10 for all 2 nodes? (y/n) y
+operation completed
+
+$ cohctl get services -o  jsonpath="$.items[?(@.name == 'PartitionedCache')]..['nodeId','name','threadCountMin']"
+["2","PartitionedCache",10,"1","PartitionedCache",10]
+----
+
+=== See Also
+
+* <<docs/examples/05_rolling_restarts.adoc,Rolling Restarts>>
+* <<docs/reference/25_caches.adoc,Caches>>
+
+
+

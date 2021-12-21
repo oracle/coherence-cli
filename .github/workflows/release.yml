@@ -1,0 +1,150 @@
+# Copyright (c) 2021, Oracle and/or its affiliates.
+# Licensed under the Universal Permissive License v 1.0 as shown at
+# http://oss.oracle.com/licenses/upl.
+
+# ---------------------------------------------------------------------------
+# Coherence CLI GitHub Actions Release build.
+# ---------------------------------------------------------------------------
+name: Release
+
+on:
+  push:
+    tags:
+      - '*'
+
+jobs:
+  build_release:
+    name: build_release
+    runs-on: ubuntu-latest
+    steps:
+    - name: checkout
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+
+    - name: Set up JDK
+      uses: actions/setup-java@v1
+      with:
+        java-version: '1.8'
+
+    - name: Set up Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: 1.16.x
+
+    - name: Code Review
+      shell: bash
+      run: echo make golangci
+
+    - name: Copyright Check
+      shell: bash
+      run: make copyright
+
+    - name: Unit Tests
+      shell: bash
+      run: make test-cohctl && make cohctl
+
+    - name: Set Version
+      shell: bash
+      run: echo "::set-output name=version::$(./bin/cohctl version | grep 'CLI Version:' | awk '{print $3}')"
+      id: version
+
+    - name: E2E Local Tests
+      shell: bash
+      run: COHERENCE_VERSION=21.06.2 make clean build-test-images test-e2e-standalone
+
+    - name: Discovery Tests
+      shell: bash
+      run: make test-clean test-discovery
+
+    - name: Build Docs
+      shell: bash
+      run: make docs
+
+    - name: Build Binaries
+      shell: bash
+      run: |
+        make cohctl-all
+        # Save the bin directory
+        CLI_TMP_BIN=/tmp/coherence-cli-bin
+        mkdir -p ${CLI_TMP_BIN} || true
+        cp -R bin/* ${CLI_TMP_BIN}
+
+    - name: Release GitHub Pages
+      shell: bash
+      run: |
+        git config --local user.name "Github Action"
+        git config --local user.email "$GITHUB_ACTOR@users.noreply.github.com"
+        make release-ghpages
+        # Restore the Binaries directories
+        CLI_TMP_BIN=/tmp/coherence-cli-bin
+        mkdir bin || true
+        cp -R ${CLI_TMP_BIN}/* bin/
+
+    - name: Create Release
+      uses: actions/create-release@v1
+      id: create_release
+      with:
+        draft: false
+        prerelease: false
+        release_name: Coherence CLI - ${{ steps.version.outputs.version }}
+        tag_name: ${{ github.ref }}
+        body: Coherence CLI Release ${{ steps.version.outputs.version }}
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
+
+    - name: Upload linux amd64 artifact
+      uses: actions/upload-release-asset@v1
+      env:
+         GITHUB_TOKEN: ${{ github.token }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./bin/linux/amd64/cohctl
+        asset_name: cohctl-${{ steps.version.outputs.version }}-linux-amd64
+        asset_content_type: application/x-mach-binary
+
+    - name: Upload linux arm64 artifact
+      uses: actions/upload-release-asset@v1
+      env:
+         GITHUB_TOKEN: ${{ github.token }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./bin/linux/arm64/cohctl
+        asset_name: cohctl-${{ steps.version.outputs.version }}-linux-arm64
+        asset_content_type: application/x-executable
+
+    - name: Upload linux 386 artifact
+      uses: actions/upload-release-asset@v1
+      env:
+         GITHUB_TOKEN: ${{ github.token }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./bin/linux/386/cohctl
+        asset_name: cohctl-${{ steps.version.outputs.version }}-linux-386
+        asset_content_type: application/x-executable
+
+    - name: Upload Windows amd64 artifact
+      uses: actions/upload-release-asset@v1
+      env:
+         GITHUB_TOKEN: ${{ github.token }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./bin/windows/amd64/cohctl.exe
+        asset_name: cohctl-${{ steps.version.outputs.version }}-windows-amd64.exe
+        asset_content_type: application/x-dosexec
+
+    - name: Upload Windows arm artifact
+      uses: actions/upload-release-asset@v1
+      env:
+         GITHUB_TOKEN: ${{ github.token }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./bin/windows/arm/cohctl.exe
+        asset_name: cohctl-${{ steps.version.outputs.version }}-windows-arm.exe
+        asset_content_type: application/x-dosexec
+
+    - uses: actions/upload-artifact@v1
+      if: failure()
+      with:
+        name: test-output
+        path: build/_output/test-logs

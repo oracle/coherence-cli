@@ -1,0 +1,36 @@
+version: "3.5"
+services:
+  coherence1:
+    hostname: server1
+    networks:
+      coherence:
+        aliases:
+          - server1
+    env_file:
+      - .env
+    image: ${COHERENCE_IMAGE1}
+    ports:
+      - 30000:30000
+      - 8080:8080
+      - 7574:7574
+    volumes:
+      - ./shared:/shared
+    user: ${CURRENT_UID}
+
+  coherence2:
+    hostname: server2
+    networks:
+      coherence:
+        aliases:
+          - server2
+    env_file:
+      - .env
+    image: ${COHERENCE_IMAGE2}
+    ports:
+      - 30001:30001
+    volumes:
+      - ./shared:/shared
+    user: ${CURRENT_UID}
+
+networks:
+  coherence:

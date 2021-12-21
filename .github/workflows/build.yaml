@@ -1,0 +1,151 @@
+# Copyright 2021, Oracle Corporation and/or its affiliates.  All rights reserved.
+# Licensed under the Universal Permissive License v 1.0 as shown at
+# https://oss.oracle.com/licenses/upl.
+
+# ---------------------------------------------------------------------------
+# Coherence CLI GitHub Actions CI build.
+# ---------------------------------------------------------------------------
+name: CI
+
+on:
+  workflow_dispatch:
+  push:
+    branches-ignore:
+    - gh-pages
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - committed
+    branches-ignore:
+    - gh-pages
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+#   Checkout the source, we need a depth of zero to fetch all of the history otherwise
+#   the copyright check cannot work out the date of the files from Git.
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+
+#   This step will free up disc space on the runner by removing
+#   lots of things that we do not need.
+    - name: Image Cleanup
+      shell: bash
+      run: |
+        echo "Listing 100 largest packages"
+        dpkg-query -Wf '${Installed-Size}\t${Package}\n' | sort -n | tail -n 100
+        df -h
+        echo "Removing large packages"
+        sudo apt-get remove -y '^dotnet-.*'
+        sudo apt-get remove -y '^llvm-.*'
+        sudo apt-get remove -y 'monodoc-http'
+        sudo apt-get remove -y 'php.*'
+        sudo apt-get remove -y azure-cli google-cloud-sdk hhvm google-chrome-stable firefox powershell mono-devel
+        sudo apt-get autoremove -y
+        sudo apt-get clean
+        df -h
+        echo "Removing large directories"
+        rm -rf /usr/share/dotnet/
+        df -h
+
+    - name: Get Docker Images
+      shell: bash
+      run: |
+        docker pull gcr.io/distroless/java:11
+
+    - name: Set up JDK
+      uses: actions/setup-java@v1
+      with:
+        java-version: '1.8'
+
+    - name: Cache Go Modules
+      uses: actions/cache@v1
+      with:
+        path: ~/go/pkg/mod
+        key: ${{ runner.os }}-go-mods-${{ hashFiles('**/go.sum') }}
+        restore-keys: |
+          ${{ runner.os }}-go-mods-
+
+    - name: Cache Maven packages
+      uses: actions/cache@v1
+      with:
+        path: ~/.m2
+        key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+        restore-keys: ${{ runner.os }}-m2
+
+    - name: Set up Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: 1.16.x
+
+    - name: Code Review
+      shell: bash
+      run: |
+        make golangci
+
+    - name: Copyright Check
+      shell: bash
+      run: |
+        make copyright
+
+    - name: Unit Tests
+      shell: bash
+      run: make test-cohctl
+
+    - name: E2E Local Tests
+      shell: bash
+      run: |
+        PROFILES=,executor COHERENCE_VERSION=21.12 make clean build-test-images test-e2e-standalone
+
+    - name: Discovery Tests
+      shell: bash
+      run: make test-clean test-discovery
+
+    - name: Build for all platforms
+      shell: bash
+      run:  make cohctl-all
+
+    - name: Upload Linux amd64
+      uses: actions/upload-artifact@v1
+      if: success()
+      with:
+        name: cohctl-linux-amd64
+        path: bin/linux/amd64/cohctl
+
+    - name: Upload Linux arm64
+      uses: actions/upload-artifact@v1
+      if: success()
+      with:
+        name: cohctl-linux-arm64
+        path: bin/linux/arm64/cohctl
+
+    - name: Upload Linux 386
+      uses: actions/upload-artifact@v1
+      if: success()
+      with:
+        name: cohctl-linux-386
+        path: bin/linux/386/cohctl
+
+    - name: Upload Windows amd64
+      uses: actions/upload-artifact@v1
+      if: success()
+      with:
+        name: cohctl-windows-amd64
+        path: bin/windows/amd64/cohctl.exe
+
+    - name: Upload Windows arm
+      uses: actions/upload-artifact@v1
+      if: success()
+      with:
+        name: cohctl-windows-arm
+        path: bin/windows/arm/cohctl.exe
+
+    - uses: actions/upload-artifact@v1
+      if: failure()
+      with:
+        name: test-output
+        path: build/_output/test-logs

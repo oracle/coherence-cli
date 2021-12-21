@@ -1,0 +1,72 @@
+///////////////////////////////////////////////////////////////////////////////
+
+    Copyright (c) 2021, Oracle and/or its affiliates.
+    Licensed under the Universal Permissive License v 1.0 as shown at
+    https://oss.oracle.com/licenses/upl.
+
+///////////////////////////////////////////////////////////////////////////////
+
+= Command Completion
+
+== Command Completion
+
+The Coherence CLI allows you to generate a script that will help you work with the tool
+by providing command completion.
+
+=== Generate the Script
+
+Use the following command to show the help for the `completion` command
+
+[source,bash]
+----
+$ cohctl completion
+
+Generate the autocompletion script for cohctl for the specified shell.
+See each sub-command's help for details on how to use the generated script.
+
+Usage:
+cohctl completion [command]
+
+Available Commands:
+bash        generate the autocompletion script for bash
+fish        generate the autocompletion script for fish
+powershell  generate the autocompletion script for powershell
+zsh         generate the autocompletion script for zsh
+----
+
+Execute the command for your desired shell. In our case it will be `bash`.
+
+[source,bash]
+----
+$ cohctl completion bash > ~/cohctl-completion.sh
+----
+
+Once you have generated the script, you can source it.
+
+[source,bash]
+----
+$ source ~/cohctl-completion.sh
+----
+
+Once it is sourced the script, you can type `cohctl` and then press `TAB`
+to auto-complete a command and `TAB` twice, and it will show completion
+for a sub command.
+
+Complete the `describe` command by typing the following and then `TAB`.
+
+[source,bash]
+----
+$ cohctl des
+----
+
+Next, when the following is displayed, press `TAB` twice and you will see the available describe options.
+
+[source,bash]
+----
+$ cohctl describe
+
+cohctl describe
+cache        (describe a cache)         machine      (describe a machine)       reporter     (describe a reporter)
+cluster      (describe a cluster)       member       (describe a member)        service      (describe a service)
+http-server  (describe a http server)   proxy        (describe a proxy server)
+----

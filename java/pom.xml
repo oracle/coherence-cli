@@ -1,0 +1,361 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+
+    Copyright (c) 2021, Oracle and/or its affiliates.
+    Licensed under the Universal Permissive License v 1.0 as shown at
+    https://oss.oracle.com/licenses/upl.
+
+-->
+
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>com.oracle.coherence.cli</groupId>
+  <artifactId>coherence-cli-parent</artifactId>
+  <packaging>pom</packaging>
+  <version>1.0.0</version>
+
+  <description>Oracle Coherence Command Line Interface</description>
+  <name>coherence-cli parent</name>
+
+  <modules>
+    <module>coherence-cli-test</module>
+  </modules>
+
+  <properties>
+    <revision>1.0.0</revision>
+    <operator.version>${project.version}</operator.version>
+
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <maven.compiler.source>8</maven.compiler.source>
+    <maven.compiler.target>8</maven.compiler.target>
+
+    <coherence.group.id>com.oracle.coherence.ce</coherence.group.id>
+    <!--  The Coherence jar version (compile time dependency for tests) -->
+    <coherence.version>21.12</coherence.version>
+    <!-- The version of Coherence to use in the test images -->
+    <coherence.test.groupId>com.oracle.coherence.ce</coherence.test.groupId>
+    <coherence.test.version>${coherence.version}</coherence.test.version>
+    
+    <coherence.test.base.image>gcr.io/distroless/java:11</coherence.test.base.image>
+
+    <!-- library dependency versions -->
+    <version.lib.asciidoctor.diagram>2.2.1</version.lib.asciidoctor.diagram>
+    <version.lib.commonjava.directory>1.0</version.lib.commonjava.directory>
+    <version.plugin.helidon-build-tools>2.0.0-M3</version.plugin.helidon-build-tools>
+    <version.plugin.jib>3.1.4</version.plugin.jib>
+    <version.plugin.maven.assembly>3.3.0</version.plugin.maven.assembly>
+    <version.plugin.maven.compiler>3.7.0</version.plugin.maven.compiler>
+    <version.plugin.maven.dependency>3.2.0</version.plugin.maven.dependency>
+    <version.plugin.maven.jar>3.2.0</version.plugin.maven.jar>
+    <version.plugin.maven.shade>3.2.4</version.plugin.maven.shade>
+    <version.plugin.maven.resource>3.1.0</version.plugin.maven.resource>
+
+    <!-- coherence cache config to build with -->
+    <coherence.cache.config>test-cache-config.xml</coherence.cache.config>
+    <coherence.override>coherence-override.xml</coherence.override>
+    <coherence.cluster1>cluster1</coherence.cluster1>
+    <coherence.cluster2>cluster1</coherence.cluster2>
+    <coherence.wka1>server1</coherence.wka1>
+    <coherence.wka2>server1</coherence.wka2>
+    <coherence.secondary.cluster1>cluster2</coherence.secondary.cluster1>
+    <coherence.secondary.cluster2>cluster1</coherence.secondary.cluster2>
+
+    <com.sun.xml.bind.version>2.3.0</com.sun.xml.bind.version>
+    <javax.activation.version>1.1.1</javax.activation.version>
+  </properties>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>com.oracle.coherence.ce</groupId>
+        <artifactId>coherence</artifactId>
+        <version>${coherence.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.oracle.coherence.ce</groupId>
+        <artifactId>coherence-management</artifactId>
+        <version>${coherence.version}</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
+  <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <version>${version.plugin.maven.compiler}</version>
+        </plugin>
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-assembly-plugin</artifactId>
+          <version>${version.plugin.maven.assembly}</version>
+        </plugin>
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-jar-plugin</artifactId>
+          <version>${version.plugin.maven.jar}</version>
+        </plugin>
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-dependency-plugin</artifactId>
+          <version>${version.plugin.maven.dependency}</version>
+        </plugin>
+
+        <plugin>
+          <groupId>io.helidon.build-tools</groupId>
+          <artifactId>sitegen-maven-plugin</artifactId>
+          <version>${version.plugin.helidon-build-tools}</version>
+          <configuration>
+            <siteConfigFile>${top.parent.basedir}/../docs/sitegen.yaml
+            </siteConfigFile>
+            <siteSourceDirectory>${top.parent.basedir}/..</siteSourceDirectory>
+            <siteOutputDirectory>${top.parent.basedir}/../build/_output/docs
+            </siteOutputDirectory>
+            <siteArchiveExcludes>
+              <siteArchiveExclude>.asciidoctor/**</siteArchiveExclude>
+            </siteArchiveExcludes>
+          </configuration>
+          <dependencies>
+            <dependency>
+              <groupId>org.asciidoctor</groupId>
+              <artifactId>asciidoctorj-diagram</artifactId>
+              <version>${version.lib.asciidoctor.diagram}</version>
+            </dependency>
+          </dependencies>
+        </plugin>
+
+        <plugin>
+          <groupId>org.commonjava.maven.plugins</groupId>
+          <artifactId>directory-maven-plugin</artifactId>
+          <version>${version.lib.commonjava.directory}</version>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+
+    <plugins>
+      <plugin>
+        <groupId>org.commonjava.maven.plugins</groupId>
+        <artifactId>directory-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>generate-top-parent-basedir</id>
+            <goals>
+              <goal>highest-basedir</goal>
+            </goals>
+            <phase>validate</phase>
+            <configuration>
+              <property>top.parent.basedir</property>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>io.helidon.build-tools</groupId>
+        <artifactId>sitegen-maven-plugin</artifactId>
+        <extensions>true</extensions>
+      </plugin>
+    </plugins>
+  </build>
+
+  <profiles>
+    <profile>
+      <id>commercial</id>
+      <properties>
+        <coherence.cache.config>test-cache-config-commercial.xml</coherence.cache.config>
+        <coherence.override>coherence-override-commercial.xml</coherence.override>
+      </properties>
+      <modules>
+        <!-- module with mock C*web MBeans -->
+        <module>coherence-cli-test-ge</module>
+      </modules>
+    </profile>
+
+    <profile>
+      <id>federation</id>
+      <properties>
+        <coherence.cache.config>test-cache-config-federation.xml</coherence.cache.config>
+        <coherence.override>coherence-override-federation.xml</coherence.override>
+      </properties>
+      <modules>
+        <!-- module with mock C*web MBeans -->
+        <module>coherence-cli-test-ge</module>
+      </modules>
+    </profile>
+
+    <profile>
+      <id>docs</id>
+      <modules>
+        <module>docs</module>
+      </modules>
+    </profile>
+
+    <!-- member1 image -->
+    <profile>
+      <id>member1</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>com.google.cloud.tools</groupId>
+            <artifactId>jib-maven-plugin</artifactId>
+            <version>${version.plugin.jib}</version>
+            <configuration>
+              <from>
+                <image>docker://${coherence.test.base.image}</image>
+              </from>
+              <container>
+                <jvmFlags>
+                  <jvmFlag>-Dcoherence.wka=server1</jvmFlag>
+                  <jvmFlag>-Dcoherence.cluster=cluster1</jvmFlag>
+                  <jvmFlag>-Dcoherence.member=member1</jvmFlag>
+                  <jvmFlag>-Dcoherence.machine=server1</jvmFlag>
+                  <jvmFlag>-Dcoherence.site=Site1</jvmFlag>
+                  <jvmFlag>-Dcoherence.management=all</jvmFlag>
+                  <jvmFlag>-Dcoherence.management.http=all</jvmFlag>
+                  <jvmFlag>-Dcoherence.management.http.port=30000</jvmFlag>
+                  <jvmFlag>-Dcoherence.log.level=9</jvmFlag>
+                  <jvmFlag>-Dcoherence.distributed.localstorage=true</jvmFlag>
+                  <jvmFlag>-Dcoherence.management.refresh.expiry=1s</jvmFlag>
+                  <jvmFlag>-Dcoherence.cacheconfig=${coherence.cache.config}</jvmFlag>
+                  <jvmFlag>-Dcoherence.override=${coherence.override}</jvmFlag>
+                </jvmFlags>
+                <mainClass>com.oracle.coherence.cli.testing.RestServer</mainClass>
+                <format>OCI</format>
+              </container>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+
+    <!-- member2 image -->
+    <profile>
+      <id>member2</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>com.google.cloud.tools</groupId>
+            <artifactId>jib-maven-plugin</artifactId>
+            <version>${version.plugin.jib}</version>
+            <configuration>
+              <from>
+                <image>docker://${coherence.test.base.image}</image>
+              </from>
+              <container>
+                <jvmFlags>
+                  <jvmFlag>-Dcoherence.wka=server1</jvmFlag>
+                  <jvmFlag>-Dcoherence.cluster=cluster1</jvmFlag>
+                  <jvmFlag>-Dcoherence.member=member2</jvmFlag>
+                  <jvmFlag>-Dcoherence.machine=server2</jvmFlag>
+                  <jvmFlag>-Dcoherence.site=Site1</jvmFlag>
+                  <jvmFlag>-Dcoherence.log.level=9</jvmFlag>
+                  <jvmFlag>-Dcoherence.management.http=all</jvmFlag>
+                  <jvmFlag>-Dcoherence.management.http.port=30000</jvmFlag>
+                  <jvmFlag>-Dcoherence.management.refresh.expiry=1s</jvmFlag>
+                  <jvmFlag>-Dcoherence.distributed.localstorage=true</jvmFlag>
+                  <jvmFlag>-Dcoherence.cacheconfig=${coherence.cache.config}</jvmFlag>
+                  <jvmFlag>-Dcoherence.override=${coherence.override}</jvmFlag>
+                </jvmFlags>
+                <mainClass>com.oracle.coherence.cli.testing.RestServer</mainClass>
+                <format>OCI</format>
+              </container>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+
+    <!-- federation1 image -->
+    <profile>
+      <id>federation1</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>com.google.cloud.tools</groupId>
+            <artifactId>jib-maven-plugin</artifactId>
+            <version>${version.plugin.jib}</version>
+            <configuration>
+              <from>
+                <image>${coherence.test.base.image}</image>
+              </from>
+              <container>
+                <jvmFlags>
+                  <jvmFlag>-Dcoherence.wka=server1</jvmFlag>
+                  <jvmFlag>-Dcoherence.cluster=cluster1</jvmFlag>
+                  <jvmFlag>-Dprimary.cluster=cluster1</jvmFlag>
+                  <jvmFlag>-Dprimary.cluster.host=server1</jvmFlag>
+                  <jvmFlag>-Dsecondary.cluster=cluster2</jvmFlag>
+                  <jvmFlag>-Dsecondary.cluster.host=server2</jvmFlag>
+                  <jvmFlag>-Dcoherence.member=member1</jvmFlag>
+                  <jvmFlag>-Dcoherence.machine=server1</jvmFlag>
+                  <jvmFlag>-Dcoherence.site=Site1</jvmFlag>
+                  <jvmFlag>-Dcoherence.management=all</jvmFlag>
+                  <jvmFlag>-Dcoherence.management.http=all</jvmFlag>
+                  <jvmFlag>-Dcoherence.management.http.port=30000</jvmFlag>
+                  <jvmFlag>-Dcoherence.log.level=9</jvmFlag>
+                  <jvmFlag>-Dcoherence.distributed.localstorage=true</jvmFlag>
+                  <jvmFlag>-Dcoherence.management.refresh.expiry=1s</jvmFlag>
+                  <jvmFlag>-Dcoherence.cacheconfig=${coherence.cache.config}</jvmFlag>
+                  <jvmFlag>-Dcoherence.override=${coherence.override}</jvmFlag>
+                </jvmFlags>
+                <mainClass>com.oracle.coherence.cli.testing.RestServer</mainClass>
+                <format>OCI</format>
+              </container>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+
+    <!-- federation2 image -->
+    <profile>
+      <id>federation2</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>com.google.cloud.tools</groupId>
+            <artifactId>jib-maven-plugin</artifactId>
+            <version>${version.plugin.jib}</version>
+            <configuration>
+              <from>
+                <image>${coherence.test.base.image}</image>
+              </from>
+              <container>
+                <jvmFlags>
+                  <jvmFlag>-Dcoherence.wka=server2</jvmFlag>
+                  <jvmFlag>-Dcoherence.cluster=cluster2</jvmFlag>
+                  <jvmFlag>-Dprimary.cluster=cluster2</jvmFlag>
+                  <jvmFlag>-Dprimary.cluster.host=server2</jvmFlag>
+                  <jvmFlag>-Dsecondary.cluster=cluster1</jvmFlag>
+                  <jvmFlag>-Dsecondary.cluster.host=server1</jvmFlag>
+                  <jvmFlag>-Dcoherence.member=member1</jvmFlag>
+                  <jvmFlag>-Dcoherence.machine=server2</jvmFlag>
+                  <jvmFlag>-Dcoherence.site=Site2</jvmFlag>
+                  <jvmFlag>-Dcoherence.management=all</jvmFlag>
+                  <jvmFlag>-Dcoherence.management.http=all</jvmFlag>
+                  <jvmFlag>-Dcoherence.management.http.port=30001</jvmFlag>
+                  <jvmFlag>-Dcoherence.log.level=9</jvmFlag>
+                  <jvmFlag>-Dcoherence.distributed.localstorage=true</jvmFlag>
+                  <jvmFlag>-Dcoherence.management.refresh.expiry=1s</jvmFlag>
+                  <jvmFlag>-Dcoherence.cacheconfig=${coherence.cache.config}</jvmFlag>
+                  <jvmFlag>-Dcoherence.override=${coherence.override}</jvmFlag>
+                </jvmFlags>
+                <mainClass>com.oracle.coherence.cli.testing.RestServer</mainClass>
+                <format>OCI</format>
+              </container>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
+</project>

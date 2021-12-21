@@ -1,0 +1,81 @@
+///////////////////////////////////////////////////////////////////////////////
+
+    Copyright (c) 2021, Oracle and/or its affiliates.
+    Licensed under the Universal Permissive License v 1.0 as shown at
+    https://oss.oracle.com/licenses/upl.
+
+///////////////////////////////////////////////////////////////////////////////
+
+= Reporters
+
+== Reporters
+
+=== Overview
+There are various commands that allow you to work with and manage Reporters servers.
+
+* <<get-reporters, `cohctl get reporters`>> - displays the reporters for a cluster
+* <<describe-reporter, `cohctl describe reporter`>> - shows information related to a specific reporter
+* <<start-reporter, `cohctl start reporter`>> - starts a reporter on a specific node
+* <<stop-reporter, `cohctl stop reporter`>> - stops a reporter on a specific node
+
+[#get-reporters]
+==== Get Reporters
+
+include::../../build/_output/docs-gen/get_reporters.adoc[tag=text]
+
+*Examples*
+
+Display all http servers.
+
+[source,bash]
+----
+$ cohctl get reporters -c local
+NODE ID  STATE    CONFIG FILE               OUTPUT PATH      BATCH#  LAST REPORT  LAST RUN   AVG RUN  AUTOSTART
+      1  Stopped  reports/report-group.xml  /u01/reports/.        0                    0ms  0.0000ms  false
+      2  Stopped  reports/report-group.xml  /u01/reports/.        0                    0ms  0.0000ms  false
+      3  Stopped  reports/report-group.xml  /u01/reports/.        0                    0ms  0.0000ms  false
+      4  Stopped  reports/report-group.xml  /u01/reports/.        0                    0ms  0.0000ms  false
+----
+
+[#describe-reporter]
+==== Describe Reporter
+
+include::../../build/_output/docs-gen/describe_reporter.adoc[tag=text]
+
+*Examples*
+
+[source,bash]
+----
+$ cohctl describe reporter 1 -c local
+----
+
+[#start-reporter]
+==== Start Reporter
+
+include::../../build/_output/docs-gen/start_reporter.adoc[tag=text]
+
+*Examples*
+
+[source,bash]
+----
+$ cohctl start reporter 1 -c local
+----
+
+[#stop-reporter]
+==== Stop Reporter
+
+include::../../build/_output/docs-gen/stop_reporter.adoc[tag=text]
+
+*Examples*
+
+[source,bash]
+----
+$ cohctl stop reporter 1 -c local
+----
+
+=== See Also
+
+* <<docs/reference/20_services.adoc,Services>>
+
+
+

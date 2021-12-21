@@ -1,0 +1,52 @@
+///////////////////////////////////////////////////////////////////////////////
+
+    Copyright (c) 2021, Oracle and/or its affiliates.
+    Licensed under the Universal Permissive License v 1.0 as shown at
+    https://oss.oracle.com/licenses/upl.
+
+///////////////////////////////////////////////////////////////////////////////
+
+= Http Sessions
+
+== Http Sessions
+
+=== Overview
+There are various commands that allow you to work with and manage Coherence*Web Http session information.
+
+* <<get-http-sessions, `cohctl get http-sessions`>> - displays the Http session details
+* <<describe-http-session, `cohctl describe http-session`>> - shows http session information related to a specific application id
+
+NOTE: This is a Coherence Grid Edition feature only and is not available with Community Edition.
+
+[#get-http-sessions]
+==== Get Http Sessions
+
+include::../../build/_output/docs-gen/get_http_sessions.adoc[tag=text]
+
+*Examples*
+
+Display Http Session data.
+
+[source,bash]
+----
+$ cohctl get http-servers -c local
+
+
+APPLICATION  TYPE                SESSION TIMEOUT  CACHE          OVERFLOW CACHE  AVG SIZE  TOTAL REAPED  AVG DURATION  LAST REAP  SESSION UPDATES
+app-1        HttpSessionManager              600  session-cache                       103             1         1,234        123                3
+app-2        HttpSessionManager              600  session-cache                      1234             0             0          0                5
+----
+
+[#describe-http-session]
+==== Describe Http Session
+
+include::../../build/_output/docs-gen/describe_http_session.adoc[tag=text]
+
+*Examples*
+
+[source,bash]
+----
+$ cohctl describe http-session app-1 -c local
+----
+
+

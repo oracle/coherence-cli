@@ -1,0 +1,183 @@
+///////////////////////////////////////////////////////////////////////////////
+
+    Copyright (c) 2021, Oracle and/or its affiliates.
+    Licensed under the Universal Permissive License v 1.0 as shown at
+    https://oss.oracle.com/licenses/upl.
+
+///////////////////////////////////////////////////////////////////////////////
+
+= Miscellaneous
+
+== Miscellaneous
+
+=== Overview
+This section contains miscellaneous commands for various settings.
+
+* <<version, `cohctl version`>> - displays the CLI version
+* <<get-ingore-certs, `cohctl get ignore-certs`>> - displays the current setting for ignoring invalid SSL certificates
+* <<set-ignore-certs, `cohctl set ignore-certs`>> - sets the current setting for ignoring invalid SSL certificates to true or false
+* <<get-logs, `cohctl get logs`>> - displays the cohctl logs
+* <<get-debug, `cohctl set debug`>> - displays the debug level
+* <<set-debug, `cohctl get debug`>> - sets the debug level on or off
+* <<get-management, `cohctl get management`>> - displays management information for a cluster
+* <<set-management, `cohctl set management`>> - sets management information for a cluster
+
+[#version]
+==== Version
+
+include::../../build/_output/docs-gen/version.adoc[tag=text]
+
+*Examples*
+
+[source,bash]
+----
+$ cohctl version
+Coherence Command Line Interface
+CLI Version: 1.0.0
+Date:        2021-10-18T02:03:03Z
+Commit:      954a008eb87fc9312894d5bbb90edeec8f92bd3a
+OS:          darwin
+OS Version:  amd64
+----
+
+NOTE: You can also use the `-u` option to check for updates. If you are behind a proxy server, you must also
+set the environment variable HTTP_PROXY=http://proxy-host:proxy-port/ so that the update set may be contacted.
+
+[#get-ingore-certs]
+==== Get Ignore Certs
+
+include::../../build/_output/docs-gen/get_ignore_certs.adoc[tag=text]
+
+NOTE: WARNING: You should only use this option when you are sure of the identity of the target server
+
+*Examples*
+
+[source,bash]
+----
+$ cohctl get ignore-certs
+Current setting: false
+----
+
+[#set-ignore-certs]
+==== Set Ignore Certs
+
+include::../../build/_output/docs-gen/set_ignore_certs.adoc[tag=text]
+
+[source,bash]
+----
+$ cohctl set gnore-certs true
+Value is now set to true
+----
+
+[#get-logs]
+==== Get Logs
+
+include::../../build/_output/docs-gen/get_logs.adoc[tag=text]
+
+*Examples*
+
+[source,bash]
+----
+$ cohctl get logs
+----
+
+[#get-debug]
+==== Get Debug
+
+include::../../build/_output/docs-gen/get_debug.adoc[tag=text]
+
+*Examples*
+
+[source,bash]
+----
+$ cohctl get debug
+Current debug level: off
+----
+
+[#set-debug]
+==== Set Debug
+
+include::../../build/_output/docs-gen/set_debug.adoc[tag=text]
+
+*Examples*
+
+[source,bash]
+----
+$ cohctl set debug on
+Debug is now set to on
+----
+
+[#get-management]
+==== Get Management
+
+include::../../build/_output/docs-gen/get_management.adoc[tag=text]
+
+*Examples*
+
+[source,bash]
+----
+$ cohctl get management -c local
+
+Refresh Policy           :  refresh-behind
+Expiry Delay             :  1000
+Refresh Count            :  500
+Refresh Excess Count     :  143
+Refresh On Query         :  false
+Refresh Prediction Count :  24389
+Refresh Time             :  2021-11-22T03:48:17.739Z
+Refresh Timeout Count    :  0
+Remote Notification Count:  0
+Type                     :  Management
+----
+
+[#set-management]
+==== Set Management
+
+include::../../build/_output/docs-gen/set_management.adoc[tag=text]
+
+*Examples*
+
+Set the expiryDelay to 5000ms for a cluster.
+
+[source,bash]
+----
+$ cohctl set management -a expiryDelay -v 5000 -c local
+
+Are you sure you want to set the value of attribute expiryDelay to 6000? (y/n) y
+operation completed
+
+$ cohctl get management -c local
+
+Refresh Policy           :  refresh-behind
+Expiry Delay             :  6000
+Refresh Count            :  500
+Refresh Excess Count     :  143
+Refresh On Query         :  false
+Refresh Prediction Count :  24389
+Refresh Time             :  2021-11-22T03:50:21.370Z
+Refresh Timeout Count    :  0
+Remote Notification Count:  0
+Type                     :  Management
+----
+
+Set the refreshPolicy to `refresh-ahead` for a cluster.
+
+[source,bash]
+----
+$ cohctl set management -a refreshPolicy -v refresh-ahead -c local
+
+Are you sure you want to set the value of attribute refreshPolicy to refresh-ahead? (y/n) y
+
+$ cohctl get management -c local
+
+Refresh Policy           :  refresh-ahead
+Expiry Delay             :  6000
+Refresh Count            :  500
+Refresh Excess Count     :  143
+Refresh On Query         :  false
+Refresh Prediction Count :  24389
+Refresh Time             :  2021-11-22T03:54:36.919Z
+Refresh Timeout Count    :  0
+Remote Notification Count:  0
+Type                     :  Management
+----

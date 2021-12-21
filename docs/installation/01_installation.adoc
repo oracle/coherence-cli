@@ -1,0 +1,93 @@
+///////////////////////////////////////////////////////////////////////////////
+
+    Copyright (c) 2021, Oracle and/or its affiliates.
+    Licensed under the Universal Permissive License v 1.0 as shown at
+    https://oss.oracle.com/licenses/upl.
+
+///////////////////////////////////////////////////////////////////////////////
+
+= Coherence CLI Installation
+
+== Coherence CLI Installation
+
+The Coherence CLI is installable on a variety of platforms and architectures including macOS, Linux and Windows.
+Refer to your operating system below:
+
+*The latest version of the CLI is {cli-version}*.
+
+* <<install-macos, macOS>>
+* <<install-linux, Linux>>
+* <<install-windows, Windows>>
+
+NOTE: See https://github.com/oracle/coherence-cli/releases[here] for all supported platforms.
+
+See <<uninstall, here>> for instructions on removing `cohctl`.
+
+NOTE: If there is a platform you would like included, please submit an issue https://github.com/oracle/coherence-cli/issues/new/choose[here].
+
+[#install-macos]
+=== macOS
+
+Download the package installer for the latest version for either Intel or Apple Silicon (M1) directly below:
+
+* Intel - https://github.com/oracle/coherence-cli/releases/download/{cli-version}/Oracle-Coherence-CLI-{cli-version}-darwin-amd64.pkg[Oracle-Coherence-CLI-{cli-version}-darwin-amd64.pkg]
+* Apple Silicon - https://github.com/oracle/coherence-cli/releases/download/{cli-version}/Oracle-Coherence-CLI-{cli-version}-darwin-arm64.pkg[Oracle-Coherence-CLI-{cli-version}-darwin-arm64.pkg]
+
+You can also use curl to download:
+
+[source,bash,subs="attributes"]
+----
+curl -Lo cohctl "https://github.com/oracle/coherence-cli/releases/download/{cli-version}/Oracle-Coherence-CLI-{cli-version}-darwin-amd64.pkg"
+----
+
+NOTE: Change the `amd64` to `arm64` for ARM based (Apple Silicon) processor.
+
+NOTE: When you install the pkg it will place the `cohctl` executable in the `/usr/local/bin` directory. You can move it out of this directory if you wish after installation.
+
+[#install-linux]
+=== Linux
+
+Install the latest release using curl on Linux:
+
+[source,bash,subs="attributes"]
+----
+curl -Lo cohctl "https://github.com/oracle/coherence-cli/releases/download/{cli-version}/cohctl-{cli-version}-linux-amd64"
+chmod u+x ./cohctl
+----
+
+You can move the executable to your preferred location afterwards.
+
+NOTE: Change the `amd64` to `arm64` for ARM based processor, or to `386` for i386 processors.
+
+To install a specific release, change the version number in the above command.
+
+[#install-windows]
+=== Windows
+
+Install the latest version using curl on Windows and copy to a directory in your PATH:
+
+[source,bash,subs="attributes"]
+----
+curl -Lo cohctl.exe "https://github.com/oracle/coherence-cli/releases/download/{cli-version}/cohctl-{cli-version}-windows-amd64.exe"
+----
+
+NOTE: Change the `amd64` to `arm` for ARM based processor.
+
+[#uninstall]
+=== Removing the CLI
+
+To uninstall `cohctl`, for Mac, issue the following:
+[source,command]
+----
+sudo rm /usr/local/bin/cohctl
+----
+
+For all other platforms, remove the `cohctl` executable from where you copied it to.
+
+If you also wish to uninstall the configuration directory, `.cohctl`, where `cohctl` stores its configuration,
+you will find this off the users home directory. See <<docs/config/10_changing_config_locations.adoc,here>> for more information.
+
+
+=== Next Steps
+
+* <<docs/about/03_quickstart.adoc,Run the Quick Start>>

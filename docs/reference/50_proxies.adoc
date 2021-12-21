@@ -1,0 +1,56 @@
+///////////////////////////////////////////////////////////////////////////////
+
+    Copyright (c) 2021, Oracle and/or its affiliates.
+    Licensed under the Universal Permissive License v 1.0 as shown at
+    https://oss.oracle.com/licenses/upl.
+
+///////////////////////////////////////////////////////////////////////////////
+
+= Proxy Servers
+
+== Proxy Servers
+
+=== Overview
+There are various commands that allow you to work with and manage proxy servers.
+
+* <<get-proxies, `cohctl get proxies`>> - displays the proxy servers for a cluster
+* <<describe-proxy, `cohctl describe proxy`>> - shows information related to a specific proxy server
+
+[#get-proxies]
+==== Get Proxies
+
+include::../../build/_output/docs-gen/get_proxies.adoc[tag=text]
+
+*Examples*
+
+Display all proxy servers.
+
+[source,bash]
+----
+$ cohctl get proxies -c local
+NODE ID  HOST IP              SERVICE NAME  CONNECTIONS  BYTES SENT  BYTES REC
+1        0.0.0.0:53216.41408  Proxy                   0           0          0
+2        0.0.0.0:53215.47265  Proxy                   0           0          0
+3        0.0.0.0:53220.42214  Proxy                   0           0          0
+----
+
+NOTE: You can also use `-o wide` to display more columns.
+
+[#describe-proxy]
+==== Describe Proxy
+
+include::../../build/_output/docs-gen/describe_proxy.adoc[tag=text]
+
+*Examples*
+
+[source,bash]
+----
+$ cohctl describe proxy Proxy -c local
+----
+
+=== See Also
+
+* <<docs/reference/20_services.adoc,Services>>
+
+
+
