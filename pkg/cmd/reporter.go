@@ -157,7 +157,7 @@ var startReporterCmd = &cobra.Command{
 // stopReporterCmd represents the stop reporter command
 var stopReporterCmd = &cobra.Command{
 	Use:   "reporter node-id",
-	Short: "Stops a reporter on a node",
+	Short: "Stop a reporter on a node",
 	Long:  `The 'stop reporter' command stops the Coherence reporter on the specified node.`,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {

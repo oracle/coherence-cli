@@ -132,6 +132,7 @@ type ServiceSummary struct {
 	PartitionsVulnerable int32  `json:"partitionsVulnerable"`
 	PartitionsUnbalanced int32  `json:"partitionsUnbalanced"`
 	StorageEnabled       bool   `json:"storageEnabled"`
+	QuorumStatus         string `json:"quorumStatus"`
 
 	// persistence related
 	PersistenceMode                   string  `json:"persistenceMode"`

@@ -71,6 +71,11 @@ create_doc $DOCS_DIR/replicate_all "${COHCTL} replicate all --help"
 create_doc $DOCS_DIR/get_services "${COHCTL} get services --help"
 create_doc $DOCS_DIR/describe_service "${COHCTL} describe service --help"
 create_doc $DOCS_DIR/set_service "${COHCTL} set service --help"
+create_doc $DOCS_DIR/start_service "${COHCTL} start service --help"
+create_doc $DOCS_DIR/stop_service "${COHCTL} stop service --help"
+create_doc $DOCS_DIR/shutdown_service "${COHCTL} shutdown service --help"
+create_doc $DOCS_DIR/suspend_service "${COHCTL} suspend service --help"
+create_doc $DOCS_DIR/resume_service "${COHCTL} resume service --help"
 
 # Management
 create_doc $DOCS_DIR/get_management "${COHCTL} get management --help"

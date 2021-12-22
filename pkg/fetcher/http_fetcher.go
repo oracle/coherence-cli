@@ -531,30 +531,68 @@ func (h HTTPFetcher) InvokeFederationOperation(serviceName, command, participant
 	return constants.EmptyByte, nil
 }
 
+// InvokeServiceOperation invokes a service operation such as suspend or resume
+func (h HTTPFetcher) InvokeServiceOperation(serviceName, operation string) ([]byte, error) {
+	var (
+		err      error
+		finalURL = "/services/" + getSafeServiceName(h, serviceName) + "/"
+	)
+	if operation == SuspendService {
+		finalURL += "suspend"
+	} else if operation == ResumeService {
+		finalURL += "resume"
+	} else {
+		return constants.EmptyByte, errors.New("invalid operation " + operation)
+	}
+	_, err = httpPostRequest(h, finalURL, constants.EmptyByte)
+	if err != nil {
+		return constants.EmptyByte, fmt.Errorf("unable to %s. %v", operation, err)
+	}
+
+	return constants.EmptyByte, nil
+}
+
+// InvokeServiceMemberOperation invokes a service operation such as start, stop, shutdown against a node
+func (h HTTPFetcher) InvokeServiceMemberOperation(serviceName, nodeID, operation string) ([]byte, error) {
+	var (
+		err      error
+		finalURL = "/services/" + getSafeServiceName(h, serviceName) + "/members/" + nodeID + "/" + operation
+	)
+
+	_, err = httpPostRequest(h, finalURL, constants.EmptyByte)
+	if err != nil {
+		return constants.EmptyByte, fmt.Errorf("unable to invoke %s against service %s and node %s. %v",
+			operation, serviceName, nodeID, err)
+	}
+
+	return constants.EmptyByte, nil
+
+}
+
 // InvokeSnapshotOperation invokes a snapshot operation against a service
 func (h HTTPFetcher) InvokeSnapshotOperation(serviceName, snapshotName, operation string, archived bool) ([]byte, error) {
 	var (
-		err error
-		url = "/services/" + getSafeServiceName(h, serviceName) + "/persistence/"
+		err      error
+		finalURL = "/services/" + getSafeServiceName(h, serviceName) + "/persistence/"
 	)
 	if operation == CreateSnapshot {
-		_, err = httpPostRequest(h, url+"snapshots/"+getSafeServiceName(h, snapshotName), constants.EmptyByte)
+		_, err = httpPostRequest(h, finalURL+"snapshots/"+getSafeServiceName(h, snapshotName), constants.EmptyByte)
 		return constants.EmptyByte, err
 	} else if operation == RemoveSnapshot {
 		if archived {
-			_, err = httpDeleteRequest(h, url+"archives/"+getSafeServiceName(h, snapshotName))
+			_, err = httpDeleteRequest(h, finalURL+"archives/"+getSafeServiceName(h, snapshotName))
 		} else {
-			_, err = httpDeleteRequest(h, url+"snapshots/"+getSafeServiceName(h, snapshotName))
+			_, err = httpDeleteRequest(h, finalURL+"snapshots/"+getSafeServiceName(h, snapshotName))
 		}
 		return constants.EmptyByte, err
 	} else if operation == RecoverSnapshot {
-		_, err = httpPostRequest(h, url+"snapshots/"+getSafeServiceName(h, snapshotName)+"/recover", constants.EmptyByte)
+		_, err = httpPostRequest(h, finalURL+"snapshots/"+getSafeServiceName(h, snapshotName)+"/recover", constants.EmptyByte)
 		return constants.EmptyByte, err
 	} else if operation == RetrieveSnapshot {
-		_, err = httpPostRequest(h, url+"archives/"+getSafeServiceName(h, snapshotName)+"/retrieve", constants.EmptyByte)
+		_, err = httpPostRequest(h, finalURL+"archives/"+getSafeServiceName(h, snapshotName)+"/retrieve", constants.EmptyByte)
 		return constants.EmptyByte, err
 	} else if operation == ArchiveSnapshot {
-		_, err = httpPostRequest(h, url+"archives/"+getSafeServiceName(h, snapshotName), constants.EmptyByte)
+		_, err = httpPostRequest(h, finalURL+"archives/"+getSafeServiceName(h, snapshotName), constants.EmptyByte)
 		if err != nil {
 			return constants.EmptyByte, fmt.Errorf("unable to archive snapshot. Please ensure you have an archiver setup for your service. %v", err)
 		}
@@ -691,7 +729,7 @@ func (h HTTPFetcher) GetClusterName() string {
 
 // getSafeServiceName returns a safe name with quotes removed if connected to WLS and encoded
 func getSafeServiceName(h HTTPFetcher, serviceName string) string {
-	if h.IsWebLogicServer() {
+	if h.IsWebLogicServer() || strings.Contains(serviceName, "\"") {
 		serviceName = strings.ReplaceAll(serviceName, "\"", "")
 	}
 	return url.PathEscape(serviceName)

@@ -40,6 +40,11 @@ func TestServicesCommands(t *testing.T) {
 	common.RunTestServicesCommands(t)
 }
 
+// TestServiceOperations tests various services commands
+func TestServiceOperations(t *testing.T) {
+	common.RunTestServiceOperations(t)
+}
+
 // TestProxyCommands tests various services commands
 func TestProxyCommands(t *testing.T) {
 	common.RunTestProxyCommands(t)
