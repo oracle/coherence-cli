@@ -15,6 +15,9 @@ There are various commands that allow you to work with and manage cluster servic
 
 * <<get-services, `cohctl get services`>> - displays the services for a cluster
 * <<describe-service, `cohctl describe service`>> - shows information related to a specific service
+* <<start-service, `cohctl start service`>> - starts a specific service on a cluster member
+* <<stop-service, `cohctl stop service`>> - forces a specific service to stop on a cluster member
+* <<shutdown-service, `cohctl shutdown service`>> - performs a controlled shut-down of a specific service on a cluster member
 * <<set-service, `cohctl set service`>> - sets a service attribute across one or more members
 
 [#get-services]
@@ -62,6 +65,51 @@ include::../../build/_output/docs-gen/describe_service.adoc[tag=text]
 [source,bash]
 ----
 $ cohctl describe service PartitionedCache -c local
+----
+
+[#start-service]
+==== Start Service
+
+include::../../build/_output/docs-gen/start_service.adoc[tag=text]
+
+*Examples*
+
+[source,bash]
+----
+$ cohctl start service PartitionedCache -n 1 -c local
+
+Are you sure you want to perform start for service PartitionedCache on node 1? (y/n) y
+operation completed
+----
+
+[#stop-service]
+==== Stop Service
+
+include::../../build/_output/docs-gen/stop_service.adoc[tag=text]
+
+*Examples*
+
+[source,bash]
+----
+$ cohctl stop service PartitionedCache -n 1 -c local
+
+Are you sure you want to perform stop for service PartitionedCache on node 1? (y/n) y
+operation completed
+----
+
+[#shutdown-service]
+==== Shutdown Service
+
+include::../../build/_output/docs-gen/shutdown_service.adoc[tag=text]
+
+*Examples*
+
+[source,bash]
+----
+$ cohctl shutdown service PartitionedCache -n 1 -c local
+
+Are you sure you want to perform shutdown for service PartitionedCache on node 1? (y/n) y
+operation completed
 ----
 
 [#set-service]

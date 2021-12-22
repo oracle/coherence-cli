@@ -20,6 +20,8 @@ There are various commands that allow you to work with and issue Persistence com
 * <<remove-snapshot, `cohctl remove snapshot`>> - remove a snapshot for a service
 * <<archive-snapshot, `cohctl archive snapshot`>> - archive a snapshot for a service
 * <<retrieve-snapshot, `cohctl retrieve snapshot`>> - retrieve an archived snapshot for a service
+* <<suspend-service, `cohctl suspend service`>> - suspends a specific service in all the members of a cluster
+* <<resume-service, `cohctl resume service`>> - resumes a specific service in all the members of a cluster
 
 See the https://docs.oracle.com/en/middleware/standalone/coherence/14.1.1.0/administer/persisting-caches.html[Coherence Documentation] for
 more information on Persistence.
@@ -201,6 +203,38 @@ Please use 'cohctl get persistence' to check for idle status to ensure the opera
 NOTE: This operation will retrieve and archived snapshot and distribute it across all available members. Once it has
 been retrieved it can be recovered. You must ensure that a snapshot with the same name as the archived snapshot does
 not exist before you retrieve it.
+
+[#suspend-service]
+==== Suspend Service
+
+include::../../build/_output/docs-gen/suspend_service.adoc[tag=text]
+
+*Examples*
+
+[source,bash]
+----
+$ cohctl suspend service PartitionedCache -c local
+
+Are you sure you want to perform suspend service for service PartitionedCache? (y/n) y
+operation completed
+----
+
+NOTE: You can use the command `cohctl get services -o wide` to show if services have been suspended.
+
+[#resume-service]
+==== Resume Service
+
+include::../../build/_output/docs-gen/resume_service.adoc[tag=text]
+
+*Examples*
+
+[source,bash]
+----
+$ cohctl resume service PartitionedCache -c local
+
+Are you sure you want to perform resume service for service PartitionedCache? (y/n) y
+operation completed
+----
 
 === See Also
 

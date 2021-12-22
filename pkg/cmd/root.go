@@ -410,12 +410,14 @@ func Initialize(command *cobra.Command) *cobra.Command {
 	startCmd.AddCommand(startReporterCmd)
 	startCmd.AddCommand(startJfrCmd)
 	startCmd.AddCommand(startFederationCmd)
+	startCmd.AddCommand(startServiceCmd)
 
 	// stop
 	command.AddCommand(stopCmd)
 	stopCmd.AddCommand(stopReporterCmd)
 	stopCmd.AddCommand(stopJfrCmd)
 	stopCmd.AddCommand(stopFederationCmd)
+	stopCmd.AddCommand(stopServiceCmd)
 
 	// dump
 	command.AddCommand(dumpCmd)
@@ -473,6 +475,18 @@ func Initialize(command *cobra.Command) *cobra.Command {
 
 	// nslookup
 	command.AddCommand(nsLookupCmd)
+
+	// suspend
+	command.AddCommand(suspendCmd)
+	suspendCmd.AddCommand(suspendServiceCmd)
+
+	// resume
+	command.AddCommand(resumeCmd)
+	resumeCmd.AddCommand(resumeServiceCmd)
+
+	// shutdown
+	command.AddCommand(shutdownCmd)
+	shutdownCmd.AddCommand(shutdownServiceCmd)
 
 	return command
 }

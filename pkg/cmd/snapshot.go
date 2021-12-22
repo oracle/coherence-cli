@@ -271,6 +271,7 @@ func invokePersistenceOperation(cmd *cobra.Command, operation, snapshotName stri
 		response       string
 		msg            = operation
 		prefix         = "a"
+		servicesResult []string
 	)
 
 	if snapshotName == "" {
@@ -285,7 +286,7 @@ func invokePersistenceOperation(cmd *cobra.Command, operation, snapshotName stri
 	}
 
 	// get the services
-	servicesResult, err := GetPersistenceServices(dataFetcher)
+	servicesResult, err = GetPersistenceServices(dataFetcher)
 	if err != nil {
 		return err
 	}
@@ -295,7 +296,7 @@ func invokePersistenceOperation(cmd *cobra.Command, operation, snapshotName stri
 	}
 	// if a service was specified then validate
 	if !utils.SliceContains(servicesResult, serviceName) {
-		return fmt.Errorf("cannot find service named %s", serviceName)
+		return fmt.Errorf("cannot find persistence service named %s", serviceName)
 	}
 
 	// depending upon the operation, check if the snapshot exists
@@ -336,6 +337,8 @@ func invokePersistenceOperation(cmd *cobra.Command, operation, snapshotName stri
 		}
 	}
 
+	cmd.Println(FormatCurrentCluster(connection))
+
 	// confirmation
 	if !automaticallyConfirm {
 		cmd.Printf("Are you sure you want to perform %s for snapshot %s and service %s? (y/n) ",
@@ -346,8 +349,6 @@ func invokePersistenceOperation(cmd *cobra.Command, operation, snapshotName stri
 			return nil
 		}
 	}
-
-	cmd.Println(FormatCurrentCluster(connection))
 
 	result, err = dataFetcher.InvokeSnapshotOperation(serviceName, snapshotName, operation, ArchivedSnapshots)
 	if err != nil {

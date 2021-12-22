@@ -813,7 +813,7 @@ func FormatReporters(reporters []config.Reporter) string {
 func FormatServices(services []config.ServiceSummary) string {
 	var (
 		serviceCount   = len(services)
-		alignmentWide  = []string{L, L, R, L, R, R, R, R, R, L}
+		alignmentWide  = []string{L, L, R, L, R, R, R, R, R, L, L}
 		alignment      = []string{L, L, R, L, R, R}
 		finalAlignment []string
 	)
@@ -830,13 +830,16 @@ func FormatServices(services []config.ServiceSummary) string {
 	stringValues[0] = getColumns(ServiceNameColumn, "TYPE", "MEMBERS", "STATUS HA", "STORAGE", "PARTITIONS")
 	if OutputFormat == constants.WIDE {
 		finalAlignment = alignmentWide
-		stringValues[0] = getColumns(stringValues[0], "ENDANGERED", "VULNERABLE", "UNBALANCED", "STATUS")
+		stringValues[0] = getColumns(stringValues[0], "ENDANGERED", "VULNERABLE", "UNBALANCED", "STATUS", "SUSPENDED")
 	} else {
 		finalAlignment = alignment
 	}
 
 	for i, value := range services {
-		var status = "Safe"
+		var (
+			status    = "Safe"
+			suspended = "n/a"
+		)
 		if value.StorageEnabledCount == -1 || value.StatusHA == "n/a" {
 			status = "n/a"
 		} else if value.StatusHA == "ENDANGERED" {
@@ -849,13 +852,21 @@ func FormatServices(services []config.ServiceSummary) string {
 			status = fmt.Sprintf("%d partitions are unbalanced", value.PartitionsUnbalanced)
 		}
 
+		if value.QuorumStatus == "Suspended" {
+			suspended = "yes"
+		} else {
+			if utils.IsDistributedCache(value.ServiceType) {
+				suspended = "no"
+			}
+		}
+
 		stringValues[i+1] = getColumns(value.ServiceName, value.ServiceType, formatSmallInteger(value.MemberCount),
 			value.StatusHA, formatSmallInteger(value.StorageEnabledCount), formatSmallInteger(value.PartitionsAll))
 
 		if OutputFormat == constants.WIDE {
 			stringValues[i+1] = getColumns(stringValues[i+1], formatSmallInteger(value.PartitionsEndangered),
 				formatSmallInteger(value.PartitionsVulnerable),
-				formatSmallInteger(value.PartitionsUnbalanced), status)
+				formatSmallInteger(value.PartitionsUnbalanced), status, suspended)
 		}
 
 	}

@@ -33,7 +33,8 @@ var (
 	attributeValueService  string
 	validAttributesService = []string{"threadCount", "threadCountMin", "threadCountMax",
 		"taskHungThresholdMillis", "requestTimeoutMillis"}
-	nodeIDService string
+	nodeIDService          string
+	nodeIDServiceOperation string
 )
 
 // getServicesCmd represents the get services command
@@ -193,13 +194,7 @@ service is a cache service.`,
 			return err
 		}
 
-		found := false
-		for _, v := range servicesSummary.Services {
-			if v.ServiceName == serviceName {
-				found = true
-				break
-			}
-		}
+		found := serviceExists(serviceName, servicesSummary)
 
 		if !found {
 			return fmt.Errorf("unable to find service with service name '%s'", serviceName)
@@ -541,6 +536,203 @@ taskHungThresholdMillis or requestTimeoutMillis.`,
 	},
 }
 
+// suspendServiceCmd represents the suspend service command
+var suspendServiceCmd = &cobra.Command{
+	Use:   "service service-name",
+	Short: "Suspend a service",
+	Long:  `The 'suspend service' command suspends a specific service in all the members of a cluster.`,
+	Args: func(cmd *cobra.Command, args []string) error {
+		if len(args) != 1 {
+			displayErrorAndExit(cmd, "you must provide a service name")
+		}
+		return nil
+	},
+	RunE: func(cmd *cobra.Command, args []string) error {
+		return issueServiceCommand(cmd, args[0], fetcher.SuspendService)
+	},
+}
+
+// resumeServiceCmd represents the resume service command
+var resumeServiceCmd = &cobra.Command{
+	Use:   "service service-name",
+	Short: "Resume a service",
+	Long:  `The 'resume service' command resumes a specific service in all the members of a cluster.`,
+	Args: func(cmd *cobra.Command, args []string) error {
+		if len(args) != 1 {
+			displayErrorAndExit(cmd, "you must provide a service name")
+		}
+		return nil
+	},
+	RunE: func(cmd *cobra.Command, args []string) error {
+		return issueServiceCommand(cmd, args[0], fetcher.ResumeService)
+	},
+}
+
+// stopServiceCmd represents the stop service command
+var stopServiceCmd = &cobra.Command{
+	Use:   "service service-name",
+	Short: "Stop a service",
+	Long: `The 'stop service' command forces a specific service to stop on a cluster member.
+Use the shutdown service command for normal service termination.`,
+	Args: func(cmd *cobra.Command, args []string) error {
+		if len(args) != 1 {
+			displayErrorAndExit(cmd, "you must provide a service name")
+		}
+		return nil
+	},
+	RunE: func(cmd *cobra.Command, args []string) error {
+		return issueServiceNodeCommand(cmd, args[0], fetcher.StopService)
+	},
+}
+
+// startServiceCmd represents the start service command
+var startServiceCmd = &cobra.Command{
+	Use:   "service service-name",
+	Short: "Start a service",
+	Long:  `The 'start service' command starts a specific service on a cluster member.`,
+	Args: func(cmd *cobra.Command, args []string) error {
+		if len(args) != 1 {
+			displayErrorAndExit(cmd, "you must provide a service name")
+		}
+		return nil
+	},
+	RunE: func(cmd *cobra.Command, args []string) error {
+		return issueServiceNodeCommand(cmd, args[0], fetcher.StartService)
+	},
+}
+
+// shutdownServiceCmd represents the shutdown service command
+var shutdownServiceCmd = &cobra.Command{
+	Use:   "service service-name",
+	Short: "Start a service",
+	Long: `The 'shutdown service' command performs a controlled shut-down of a specific service
+on a cluster member. Shutting down a service is preferred over stopping a service.`,
+	Args: func(cmd *cobra.Command, args []string) error {
+		if len(args) != 1 {
+			displayErrorAndExit(cmd, "you must provide a service name")
+		}
+		return nil
+	},
+	RunE: func(cmd *cobra.Command, args []string) error {
+		return issueServiceNodeCommand(cmd, args[0], fetcher.ShutdownService)
+	},
+}
+
+// issueServiceNodeCommand issues an operation against a service member
+func issueServiceNodeCommand(cmd *cobra.Command, serviceName, operation string) error {
+	var (
+		dataFetcher     fetcher.Fetcher
+		connection      string
+		err             error
+		response        string
+		serviceResult   []byte
+		servicesSummary = config.ServicesSummaries{}
+		nodeIDArray     []string
+	)
+	connection, dataFetcher, err = GetConnectionAndDataFetcher()
+	if err != nil {
+		return err
+	}
+
+	cmd.Println(FormatCurrentCluster(connection))
+
+	serviceResult, err = dataFetcher.GetServiceDetailsJSON()
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(serviceResult, &servicesSummary)
+	if err != nil {
+		return err
+	}
+
+	found := serviceExists(serviceName, servicesSummary)
+
+	if !found {
+		return fmt.Errorf("unable to find service with service name '%s'", serviceName)
+	}
+
+	// validate the nodes
+	nodeIDArray, err = GetNodeIds(dataFetcher)
+	if err != nil {
+		return err
+	}
+
+	// check the node id exists
+	if !utils.IsValidInt(nodeIDServiceOperation) {
+		return fmt.Errorf("invalid value for node id of %s", nodeIDServiceOperation)
+	}
+
+	if !utils.SliceContains(nodeIDArray, nodeIDServiceOperation) {
+		return fmt.Errorf("no node with node id %s exists in this cluster", nodeIDServiceOperation)
+	}
+
+	// confirmation
+	if !automaticallyConfirm {
+		cmd.Printf("Are you sure you want to perform %s for service %s on node %s? (y/n) ",
+			operation, serviceName, nodeIDServiceOperation)
+		_, err = fmt.Scanln(&response)
+		if response != "y" || err != nil {
+			cmd.Println(constants.NoOperation)
+			return nil
+		}
+	}
+
+	_, err = dataFetcher.InvokeServiceMemberOperation(serviceName, nodeIDServiceOperation, operation)
+	if err != nil {
+		return err
+	}
+	cmd.Println("operation completed")
+
+	return nil
+}
+
+// issueServiceCommand issues an operation against a service such as suspend or resume
+func issueServiceCommand(cmd *cobra.Command, serviceName, operation string) error {
+	var (
+		dataFetcher    fetcher.Fetcher
+		connection     string
+		servicesResult []string
+		err            error
+		response       string
+	)
+	connection, dataFetcher, err = GetConnectionAndDataFetcher()
+	if err != nil {
+		return err
+	}
+
+	// get the services
+	servicesResult, err = GetPersistenceServices(dataFetcher)
+	if err != nil {
+		return err
+	}
+
+	cmd.Println(FormatCurrentCluster(connection))
+
+	// if a service was specified then validate
+	if !utils.SliceContains(servicesResult, serviceName) {
+		return fmt.Errorf("cannot find persistence service named %s", serviceName)
+	}
+
+	// confirmation
+	if !automaticallyConfirm {
+		cmd.Printf("Are you sure you want to perform %s for service %s? (y/n) ", operation, serviceName)
+		_, err = fmt.Scanln(&response)
+		if response != "y" || err != nil {
+			cmd.Println(constants.NoOperation)
+			return nil
+		}
+	}
+
+	_, err = dataFetcher.InvokeServiceOperation(serviceName, operation)
+	if err != nil {
+		return err
+	}
+	cmd.Println("operation completed")
+
+	return nil
+}
+
 // isStatusHASaferThan returns true if the statusHaValue is safer that the safestStatusHAValue
 func isStatusHASaferThan(statusHAValue, safestStatusHAValue string) bool {
 	thisIndex := utils.GetSliceIndex(allStatusHA, statusHAValue)
@@ -577,6 +769,19 @@ func DeduplicateServices(servicesSummary config.ServicesSummaries, serviceType s
 	return finalServices
 }
 
+// serviceExists returns true if the service exists in the services summary
+func serviceExists(serviceName string, servicesSummary config.ServicesSummaries) bool {
+	found := false
+	for _, v := range servicesSummary.Services {
+		if v.ServiceName == serviceName {
+			found = true
+			break
+		}
+	}
+
+	return found
+}
+
 func init() {
 	getServicesCmd.Flags().StringVarP(&serviceType, "type", "t", "all",
 		`Service types to show. E.g. DistributedCache, FederatedCache,
@@ -591,4 +796,20 @@ Invocation, Proxy, RemoteCache or ReplicatedCache`)
 	setServiceCmd.Flags().StringVarP(&attributeValueService, "value", "v", "", "attribute value to set")
 	_ = setServiceCmd.MarkFlagRequired("value")
 	setServiceCmd.Flags().StringVarP(&nodeIDService, "node", "n", "all", "comma separated node ids to target")
+
+	suspendServiceCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
+	resumeServiceCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
+
+	stopServiceCmd.Flags().StringVarP(&nodeIDServiceOperation, "node", "n", "", "node id to target")
+	_ = stopServiceCmd.MarkFlagRequired("node")
+	stopServiceCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
+
+	startServiceCmd.Flags().StringVarP(&nodeIDServiceOperation, "node", "n", "", "node id to target")
+	_ = startServiceCmd.MarkFlagRequired("node")
+	startServiceCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
+
+	shutdownServiceCmd.Flags().StringVarP(&nodeIDServiceOperation, "node", "n", "", "node id to target")
+	_ = shutdownServiceCmd.MarkFlagRequired("node")
+	shutdownServiceCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
+
 }

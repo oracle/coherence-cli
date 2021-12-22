@@ -20,6 +20,12 @@ const RecoverSnapshot = "recover snapshot"
 const ArchiveSnapshot = "archive snapshot"
 const RetrieveSnapshot = "retrieve snapshot"
 
+const SuspendService = "suspend service"
+const ResumeService = "resume service"
+const StopService = "stop"
+const StartService = "start"
+const ShutdownService = "shutdown"
+
 const JfrTypeRole = "role"
 const JfrTypeNode = "node"
 const JfrTypeCluster = "cluster"
@@ -144,6 +150,12 @@ type Fetcher interface {
 
 	// InvokeSnapshotOperation invokes a snapshot operation against a service
 	InvokeSnapshotOperation(serviceName, snapshotName, operation string, archived bool) ([]byte, error)
+
+	// InvokeServiceOperation invokes a service operation such as suspend or resume
+	InvokeServiceOperation(serviceName, operation string) ([]byte, error)
+
+	// InvokeServiceMemberOperation invokes a service operation such as start, stop, shutdown against a node
+	InvokeServiceMemberOperation(serviceName, nodeID, operation string) ([]byte, error)
 
 	// GetArchivedSnapshots retrieves the list of archives snapshots
 	GetArchivedSnapshots(serviceName string) ([]byte, error)
