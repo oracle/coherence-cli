@@ -38,7 +38,7 @@ Quick start guide to getting started with the Coherence CLI.
 
 [CARD]
 .Configuration
-[icon=fa-cogs,link=docs/config/05_global_flags.adoc]
+[icon=fa-cogs,link=docs/config/01_overview.adoc]
 --
 Configuration options.
 --

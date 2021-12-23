@@ -301,7 +301,6 @@ serve-docs:   ## Serve the Documentation
 copyright: getcopyright ## Check copyright headers
 	@java -cp scripts/$(COPYRIGHT_JAR) \
 	  org.glassfish.copyright.Copyright -C scripts/copyright.txt \
-	  -X .adoc \
 	  -X bin/ \
 	  -X ./test/test_utils/shared/ \
 	  -X ./test/test_utils/test_utils.go \
@@ -311,11 +310,6 @@ copyright: getcopyright ## Check copyright headers
 	  -X /Dockerfile \
 	  -X .Dockerfile \
 	  -X docs/ \
-	  -X examples/.mvn/ \
-	  -X scripts/copyright.txt \
-	  -X scripts/intellij-codestyle.xml \
-	  -X scripts/istio- \
-	  -X scripts/sdk/ \
 	  -X go.mod \
 	  -X go.sum \
 	  -X HEADER.txt \

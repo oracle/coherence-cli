@@ -27,6 +27,7 @@ You can also specify a different location for the `cohct.yaml` file that is gene
 $ cohctl get clusters --config /u01/my-config.yaml.
 ----
 
-NOTE: It is recommended to leave these values as default unless you have a good reason to change them.
+NOTE: It is recommended to leave these values as default unless you have a good reason to change them
+as you would need to specify the `--config` option on each command execution.
 
 

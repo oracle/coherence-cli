@@ -1,12 +1,12 @@
 ///////////////////////////////////////////////////////////////////////////////
 
-    Copyright (c) 2020, Oracle and/or its affiliates.
+    Copyright (c) 2021, Oracle and/or its affiliates.
     Licensed under the Universal Permissive License v 1.0 as shown at
     https://oss.oracle.com/licenses/upl.
 
 ///////////////////////////////////////////////////////////////////////////////
 
-= Examples
+= Overview
 
 == Examples
 
@@ -33,6 +33,13 @@ Using JSONPath expressions to refine output.
 [link=docs/examples/15_set_cache_attrs.adoc]
 --
 Set cache attributes such as expiry delay.
+--
+
+[CARD]
+.Securing CLI Access
+[link=docs/examples/20_security.adoc]
+--
+Securing access to the Management over REST endpoint.
 --
 
 ====
