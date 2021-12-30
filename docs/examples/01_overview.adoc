@@ -35,11 +35,4 @@ Using JSONPath expressions to refine output.
 Set cache attributes such as expiry delay.
 --
 
-[CARD]
-.Securing CLI Access
-[link=docs/examples/20_security.adoc]
---
-Securing access to the Management over REST endpoint.
---
-
 ====

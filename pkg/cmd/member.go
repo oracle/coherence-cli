@@ -429,6 +429,69 @@ polls, in the logs files, for all members or the selected role by using the -r f
 	},
 }
 
+// shutdownMemberCmd represents the shutdown member command
+var shutdownMemberCmd = &cobra.Command{
+	Use:   "member node-id",
+	Short: "Shutdown a members services",
+	Long: `The 'shutdown member' command shuts down all the clustered services that are
+running on a specific member via a controlled shutdown. A new member will be started in its place.`,
+	Args: func(cmd *cobra.Command, args []string) error {
+		if len(args) != 1 {
+			displayErrorAndExit(cmd, "you must provide a node id")
+		}
+		return nil
+	},
+	RunE: func(cmd *cobra.Command, args []string) error {
+		var (
+			dataFetcher fetcher.Fetcher
+			connection  string
+			err         error
+			response    string
+			nodeIDArray []string
+			nodeID      = args[0]
+		)
+
+		// retrieve the current context or the value from "-c"
+		connection, dataFetcher, err = GetConnectionAndDataFetcher()
+		if err != nil {
+			return err
+		}
+
+		cmd.Println(FormatCurrentCluster(connection))
+
+		nodeIDArray, err = GetNodeIds(dataFetcher)
+		if err != nil {
+			return err
+		}
+
+		if !utils.IsValidInt(nodeID) {
+			return fmt.Errorf("invalid value for node id of %s", nodeID)
+		}
+
+		if !utils.SliceContains(nodeIDArray, nodeID) {
+			return fmt.Errorf("no node with node id %s exists in this cluster", nodeID)
+		}
+
+		// confirmation
+		if !automaticallyConfirm {
+			cmd.Printf("Are you sure you want to shutdown member %s? (y/n) ", nodeID)
+			_, err = fmt.Scanln(&response)
+			if response != "y" || err != nil {
+				cmd.Println(constants.NoOperation)
+				return nil
+			}
+		}
+
+		_, err = dataFetcher.ShutdownMember(nodeID)
+		if err != nil {
+			return err
+		}
+
+		cmd.Println("operation completed")
+		return nil
+	},
+}
+
 // issueClusterCommand issues a variety of cluster commands
 func issueClusterCommand(cmd *cobra.Command, command string) error {
 	var (
@@ -722,4 +785,6 @@ func init() {
 	configureTracingCmd.Flags().Float32VarP(&tracingRatio, "tracingRatio", "t", 1.0, "Tracing ratio to set. -1.0 turns off tracing")
 	_ = configureTracingCmd.MarkFlagRequired("tracingRatio")
 	configureTracingCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
+
+	shutdownMemberCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
 }

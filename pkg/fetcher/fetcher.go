@@ -100,6 +100,9 @@ type Fetcher interface {
 	// GetThreadDump retrieves a thread dump from a member
 	GetThreadDump(memberID string) ([]byte, error)
 
+	// ShutdownMember shuts down a member
+	ShutdownMember(memberID string) ([]byte, error)
+
 	// SetMemberAttribute sets the given attribute for a member
 	SetMemberAttribute(memberID, attribute string, value interface{}) ([]byte, error)
 

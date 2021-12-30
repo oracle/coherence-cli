@@ -487,6 +487,7 @@ func Initialize(command *cobra.Command) *cobra.Command {
 	// shutdown
 	command.AddCommand(shutdownCmd)
 	shutdownCmd.AddCommand(shutdownServiceCmd)
+	shutdownCmd.AddCommand(shutdownMemberCmd)
 
 	return command
 }

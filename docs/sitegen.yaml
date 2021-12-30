@@ -72,6 +72,14 @@ backend:
               items:
                 - includes:
                     - "docs/reference/*.adoc"
+            - title: "Security"
+              pathprefix: "/security"
+              glyph:
+                type: "icon"
+                value: "lock"
+              items:
+                - includes:
+                    - "docs/security/*.adoc"
             - title: "Troubleshooting"
               pathprefix: "/troubleshooting"
               glyph:

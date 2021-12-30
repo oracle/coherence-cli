@@ -51,6 +51,13 @@ Coherence CLI Command Reference.
 --
 
 [CARD]
+.Security
+[icon=lock,link=docs/security/01_overview.adoc]
+--
+Securing CLI access.
+--
+
+[CARD]
 .Troubleshooting
 [icon=fa-question-circle,link=docs/troubleshooting/01_trouble-shooting.adoc]
 --
