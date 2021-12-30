@@ -16,6 +16,7 @@ There are various cluster commands that allow you to work with and manage cluste
 * <<get-members, `cohctl get members`>> - displays the members for a cluster
 * <<describe-member, `cohctl describe member`>> - shows information related to a specific member
 * <<set-member, `cohctl set member`>> - sets a member attribute for one or more members
+* <<shutdown-member, `cohctl shutdown member`>> - shuts down a members services in a controlled manner
 
 [#get-members]
 ==== Get Members
@@ -117,6 +118,21 @@ $ cohctl get members -o json | jq | grep loggingLevel
       "loggingLevel": 6,
       "loggingLevel": 6,
 ----
+
+[#shutdown-member]
+==== Shutdown Member
+
+include::../../build/_output/docs-gen/shutdown_member.adoc[tag=text]
+
+[source,bash]
+----
+$ cohctl shutdown member 1 -c local
+Are you sure you want to shutdown member 1? (y/n) y
+operation completed
+----
+
+NOTE: This command may take a while to complete. Check the server logs for information regarding the
+member's status.  Once the member is shutdown it will restart with a new member id.
 
 === See Also
 

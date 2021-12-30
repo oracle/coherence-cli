@@ -365,6 +365,15 @@ func (h HTTPFetcher) GetThreadDump(memberID string) ([]byte, error) {
 	return result, nil
 }
 
+// ShutdownMember shuts down a member
+func (h HTTPFetcher) ShutdownMember(memberID string) ([]byte, error) {
+	result, err := httpPostRequest(h, "/members/"+memberID+"/shutdown", constants.EmptyByte)
+	if err != nil {
+		return constants.EmptyByte, utils.GetError("cannot shutdown member "+memberID, err)
+	}
+	return result, nil
+}
+
 // DumpClusterHeap instructs the cluster to dump the cluster heap for the role.
 // role of "all" indicates all members
 func (h HTTPFetcher) DumpClusterHeap(role string) ([]byte, error) {

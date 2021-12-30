@@ -55,6 +55,7 @@ create_doc $DOCS_DIR/clear_context "${COHCTL} clear context --help"
 create_doc $DOCS_DIR/get_members "${COHCTL} get members --help"
 create_doc $DOCS_DIR/describe_member "${COHCTL} describe member --help"
 create_doc $DOCS_DIR/set_member "${COHCTL} set member --help"
+create_doc $DOCS_DIR/shutdown_member "${COHCTL} shutdown member --help"
 
 # Machines
 create_doc $DOCS_DIR/get_machines "${COHCTL} get machines --help"
