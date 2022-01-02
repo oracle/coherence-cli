@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Oracle and/or its affiliates.
+ * Copyright (c) 2021, 2022 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -20,6 +20,7 @@ type Cluster struct {
 	MembersDepartureCount int    `json:"membersDepartureCount"`
 }
 
+// Members contains an array of member objects
 type Members struct {
 	Members []Member `json:"items"`
 }
@@ -39,11 +40,12 @@ type Executor struct {
 	TraceLogging         bool   `json:"traceLogging"`
 }
 
+// Executors contains multiple Executor objects
 type Executors struct {
 	Executors []Executor `json:"items"`
 }
 
-// Member describes an individual members output
+// Member contains an individual members output
 type Member struct {
 	NodeID               string  `json:"nodeId"`
 	UnicastAddress       string  `json:"unicastAddress"`
@@ -60,12 +62,12 @@ type Member struct {
 	PublisherSuccessRate float32 `json:"publisherSuccessRate"`
 }
 
-// ProxiesSummary provides a summary of individual proxy servers
+// ProxiesSummary contains a summary of individual proxy servers
 type ProxiesSummary struct {
 	Proxies []ProxySummary `json:"items"`
 }
 
-// ProxySummary describes proxy server summary
+// ProxySummary contains proxy server summary details
 type ProxySummary struct {
 	HostIP                   string `json:"hostIP"`
 	NodeID                   string `json:"nodeId"`
@@ -91,11 +93,12 @@ type ProxySummary struct {
 	ResponseCount5xx  int64  `json:"responseCount5xx"`
 }
 
+// HTTPSessionSummaries contains an array of Coherence*Web Sessions
 type HTTPSessionSummaries struct {
 	HTTPSessions []HTTPSessionSummary `json:"items"`
 }
 
-// HTTPSessionSummary provides a summary of Coherence*Web Sessions
+// HTTPSessionSummary contains a summary of Coherence*Web Sessions
 type HTTPSessionSummary struct {
 	NodeID              string `json:"nodeId"`
 	AppID               string `json:"appId"`
@@ -115,11 +118,12 @@ type HTTPSessionSummary struct {
 	MemberCount         int32
 }
 
+// ServicesSummaries contains an array of ServiceSummary
 type ServicesSummaries struct {
 	Services []ServiceSummary `json:"items"`
 }
 
-// ServiceSummary provides a summary of individual services
+// ServiceSummary contains a summary of individual services
 type ServiceSummary struct {
 	NodeID               string `json:"nodeId"`
 	ServiceName          string `json:"name"`
@@ -148,6 +152,7 @@ type ServiceSummary struct {
 	Idle                           bool
 }
 
+// StatsSummary contains statistics summaries
 type StatsSummary struct {
 	Count   int64   `json:"count"`
 	Average float64 `json:"average"`
@@ -156,10 +161,12 @@ type StatsSummary struct {
 	Sum     float64 `json:"sum"`
 }
 
+// FederationSummaries contains an array of FederationSummary
 type FederationSummaries struct {
 	Services []FederationSummary `json:"items"`
 }
 
+// FederationSummary contains Federation summary details for a service and participant
 type FederationSummary struct {
 	ServiceName                             string       `json:"serviceName"`
 	ParticipantName                         string       `json:"participantName"`
@@ -181,11 +188,12 @@ type FederationSummary struct {
 	CurrentConnectionCount StatsSummary `json:"currentConnectionCount"`
 }
 
-// ServiceMemberDetails provides service members details
+// ServiceMemberDetails contains service members details
 type ServiceMemberDetails struct {
 	Services []ServiceMemberDetail `json:"items"`
 }
 
+// ServiceMemberDetail contains details about a service and node
 type ServiceMemberDetail struct {
 	NodeID                 string  `json:"nodeId"`
 	ThreadCount            int32   `json:"threadCount"`
@@ -200,11 +208,12 @@ type ServiceMemberDetail struct {
 	TaskAverageDuration    float32 `json:"taskAverageDuration"`
 }
 
-// CacheSummaries provides cache summary details
+// CacheSummaries contains cache summary details
 type CacheSummaries struct {
 	Caches []CacheSummaryDetail `json:"items"`
 }
 
+// CacheSummaryDetail contains a summary of cache details
 type CacheSummaryDetail struct {
 	ServiceName  string `json:"service"`
 	CacheName    string `json:"name"`
@@ -217,11 +226,12 @@ type CacheSummaryDetail struct {
 	CacheMisses  int64  `json:"cacheMisses"`
 }
 
-// CacheDetails provides cache details
+// CacheDetails contains cache details
 type CacheDetails struct {
 	Details []CacheDetail `json:"items"`
 }
 
+// CacheDetail contains individual cache details for a cache, tier and node
 type CacheDetail struct {
 	NodeID        string `json:"nodeId"`
 	Tier          string `json:"tier"`
@@ -248,11 +258,12 @@ type CacheDetail struct {
 	IndexInfo                      []string `json:"indexInfo"`
 }
 
-// GenericDetails are a slice of generic Json structures
+// GenericDetails contains a slice of generic Json structures
 type GenericDetails struct {
 	Details []interface{} `json:"items"`
 }
 
+// PersistenceCoordinator contains details about a persistence coordinator
 type PersistenceCoordinator struct {
 	Idle              bool     `json:"idle"`
 	OperationStatus   string   `json:"operationStatus"`
@@ -260,7 +271,7 @@ type PersistenceCoordinator struct {
 	CoordinatorNodeID int32    `json:"coordinatorId"`
 }
 
-// Machine provides machine details
+// Machine contains machine details
 type Machine struct {
 	MachineName             string  `json:"operationStatus"`
 	AvailableProcessors     int32   `json:"availableProcessors"`
@@ -273,11 +284,12 @@ type Machine struct {
 	Version                 string  `json:"version"`
 }
 
-// Reporters provides reporter details
+// Reporters contains reporter details
 type Reporters struct {
 	Reporters []Reporter `json:"items"`
 }
 
+// Reporter contains individual node reporter details
 type Reporter struct {
 	NodeID           string  `json:"nodeId"`
 	State            string  `json:"state"`
@@ -290,11 +302,12 @@ type Reporter struct {
 	AutoStart        bool    `json:"autoStart"`
 }
 
-// ElasticDataValues provides elastic data details
+// ElasticDataValues contains elastic data details
 type ElasticDataValues struct {
 	ElasticData []ElasticData `json:"items"`
 }
 
+// ElasticData contains elastic data information for a node and type
 type ElasticData struct {
 	NodeID                     string  `json:"nodeId"`
 	Name                       string  `json:"name"`
@@ -309,36 +322,39 @@ type ElasticData struct {
 	TotalDataSize              int64   `json:"totalDataSize"`
 }
 
-// Links describe any links returned via HTTP
+// Links contains any links returned via HTTP
 type Links struct {
 	Links []Link `json:"links"`
 }
 
+// Link contains link details
 type Link struct {
 	Rel  string `json:"rel"`
 	Href string `json:"href"`
 }
 
+// ItemLinks contains links for an item
 type ItemLinks struct {
 	Links []Links `json:"items"`
 }
 
-// Snapshots describe snapshots for services
+// Snapshots contains snapshots for services
 type Snapshots struct {
 	ServiceName string   `json:"serviceName"`
 	Snapshots   []string `json:"snapshots"`
 }
 
+// Archives contains arthived snapshots
 type Archives struct {
 	Snapshots []string `json:"archives"`
 }
 
-// StatusValues is a JFR status result
+// StatusValues contains JFR status result
 type StatusValues struct {
 	Status []string `json:"status"`
 }
 
-// SingleStatusValue is a single JFR status result
+// SingleStatusValue contains a single JFR status result
 type SingleStatusValue struct {
 	Status string `json:"status"`
 }

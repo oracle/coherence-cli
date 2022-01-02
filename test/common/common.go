@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Oracle and/or its affiliates.
+ * Copyright (c) 2021, 2022 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -652,6 +652,7 @@ func RunTestReporterCommands(t *testing.T) {
 	test_utils.EnsureCommandContains(g, t, cliCmd, context.ClusterName, "--config", file, "remove", "cluster", "cluster1")
 }
 
+// RunTestThreadDumpsCommands tests thread dump commands
 func RunTestThreadDumpsCommands(t *testing.T) {
 	g := NewGomegaWithT(t)
 	context := test_utils.GetTestContext()

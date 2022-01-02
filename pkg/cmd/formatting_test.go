@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Oracle and/or its affiliates.
+ * Copyright (c) 2021, 2022 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -46,7 +46,7 @@ func TestGetMaxColumnLengths(t *testing.T) {
 	g := NewGomegaWithT(t)
 
 	g.Expect(len(getMaxColumnLengths([]string{}))).To(Equal(0))
-	values := getMaxColumnLengths([]string{"A" + SEP + "B", "B" + SEP + "CDD"})
+	values := getMaxColumnLengths([]string{"A" + sep + "B", "B" + sep + "CDD"})
 	g.Expect(len(values)).To(Equal(2))
 	g.Expect(values[0]).To(Equal(1))
 	g.Expect(values[1]).To(Equal(3))
@@ -94,10 +94,10 @@ string  123      10MB
 
 func TestGetColumns(t *testing.T) {
 	g := NewGomegaWithT(t)
-	g.Expect(getColumns("A", "B")).To(Equal("A" + SEP + "B"))
+	g.Expect(getColumns("A", "B")).To(Equal("A" + sep + "B"))
 	g.Expect(getColumns("A")).To(Equal("A"))
-	g.Expect(getColumns("A", "B", "C")).To(Equal("A" + SEP + "B" + SEP + "C"))
-	g.Expect(getColumns("A", "B", "C", "D")).To(Equal("A" + SEP + "B" + SEP + "C" + SEP + "D"))
+	g.Expect(getColumns("A", "B", "C")).To(Equal("A" + sep + "B" + sep + "C"))
+	g.Expect(getColumns("A", "B", "C", "D")).To(Equal("A" + sep + "B" + sep + "C" + sep + "D"))
 	g.Expect(getColumns()).To(Equal(""))
 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Oracle and/or its affiliates.
+ * Copyright (c) 2021, 2022 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -23,7 +23,7 @@ import (
 	"unicode"
 )
 
-const SEP = "~~"
+const sep = "~~"
 const R = "R"
 const L = "L"
 
@@ -1220,7 +1220,7 @@ func formatLinesAllStringsWithAlignmentMax(alignment, stringValues []string, max
 			continue
 		}
 		// split the values
-		var entry = strings.Split(value, SEP)
+		var entry = strings.Split(value, sep)
 
 		// format each individual field
 		for i, e := range entry {
@@ -1324,19 +1324,19 @@ func formatMB(memoryMB int32) string {
 }
 
 // getMaxColumnLengths returns an array representing the max lengths of columns
-// delimited with the SEP
+// delimited with the sep
 func getMaxColumnLengths(values []string) []int {
 	if len(values) == 0 {
 		return make([]int, 0)
 	}
 	// find the number of values from the first entry
-	var splits = strings.Split(values[0], SEP)
+	var splits = strings.Split(values[0], sep)
 	var numValues = len(splits)
 
 	var lengths = make([]int, numValues)
 
 	for _, value := range values {
-		for j, entry := range strings.Split(value, SEP) {
+		for j, entry := range strings.Split(value, sep) {
 			if len(entry) > lengths[j] {
 				lengths[j] = len(entry)
 			}
@@ -1440,7 +1440,7 @@ func appendColumnValue(v KeyValues, sb *strings.Builder, keyFormat string) {
 	}
 }
 
-// getColumns returns all the values separated by SEP string
+// getColumns returns all the values separated by sep string
 func getColumns(values ...string) string {
 	var (
 		len = len(values)
@@ -1450,7 +1450,7 @@ func getColumns(values ...string) string {
 	for i, value := range values {
 		sb.WriteString(value)
 		if i < len-1 {
-			sb.WriteString(SEP)
+			sb.WriteString(sep)
 		}
 	}
 

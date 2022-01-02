@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Oracle and/or its affiliates.
+ * Copyright (c) 2021, 2022 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -28,6 +28,7 @@ import (
 	"time"
 )
 
+// TestContext is a context to pass to tests
 type TestContext struct {
 	ClusterName     string
 	HttpPort        int
@@ -43,10 +44,12 @@ var (
 	emptyByte          = make([]byte, 0)
 )
 
+// SetTestContext sets the current context
 func SetTestContext(context *TestContext) {
 	currentTestContext = context
 }
 
+// GetTestContext gets the current context
 func GetTestContext() *TestContext {
 	return currentTestContext
 }
@@ -170,6 +173,7 @@ func GetFilePath(fileName string) string {
 	return dir + string(os.PathSeparator) + fileName
 }
 
+// StartCoherenceCluster starts a Coherence cluster
 func StartCoherenceCluster(fileName, url string) error {
 
 	output, err := DockerComposeUp(fileName)
@@ -185,6 +189,7 @@ func StartCoherenceCluster(fileName, url string) error {
 	return nil
 }
 
+// DockerComposeUp runs docker-compose up on a given file
 func DockerComposeUp(composeFile string) (string, error) {
 	fmt.Println("Issuing docker-compose up with file " + composeFile)
 
@@ -199,6 +204,7 @@ func DockerComposeUp(composeFile string) (string, error) {
 	return output, err
 }
 
+// CollectDockerLogs collects docker logs
 func CollectDockerLogs() error {
 	var (
 		output    string
@@ -242,6 +248,7 @@ func CollectDockerLogs() error {
 	return nil
 }
 
+// DockerComposeDown runs docker-compose down on a given file
 func DockerComposeDown(composeFile string) (string, error) {
 	fmt.Println("Issuing docker-compose down with file " + composeFile)
 	// sleep as sometimes docker compose networks are not completely stopped
@@ -281,14 +288,17 @@ func StartDockerImage(t *testing.T, image string, name string, httpPort int, clu
 	return output, WaitForHttpReady(GetManagementUrl(httpPort), 120)
 }
 
+// GetManagementUrl returns the management URL given a management port
 func GetManagementUrl(httpPort int) string {
 	return fmt.Sprintf("http://localhost:%d/management/coherence/cluster", httpPort)
 }
 
+// GetRestUrl returns the REST URL
 func GetRestUrl(restPort int) string {
 	return fmt.Sprintf("http://localhost:%d", restPort)
 }
 
+// IssueGetRequest issues a HTTP GET request using the URL
 func IssueGetRequest(url string) ([]byte, error) {
 	resp, err := http.Get(url)
 	if err != nil {
@@ -307,6 +317,7 @@ func IssueGetRequest(url string) ([]byte, error) {
 	return body, nil
 }
 
+// IssuePostRequest issues a HTTP POST request using the URL
 func IssuePostRequest(url string) ([]byte, error) {
 	resp, err := issueRequest("POST", url, emptyByte)
 
@@ -326,7 +337,6 @@ func IssuePostRequest(url string) ([]byte, error) {
 	return body, nil
 }
 
-// issueRequest issues a request
 func issueRequest(requestType, url string, data []byte) (*http.Response, error) {
 	var (
 		err error
@@ -349,6 +359,7 @@ func issueRequest(requestType, url string, data []byte) (*http.Response, error) 
 	return client.Do(req)
 }
 
+// WaitForHttpReady waits for the HTTP endpoint to be ready
 func WaitForHttpReady(url string, timeout int) error {
 	httpFetcher := fetcher.HTTPFetcher{URL: url, ConnectionType: "http"}
 
@@ -366,7 +377,7 @@ func WaitForHttpReady(url string, timeout int) error {
 		}
 	}
 
-	return errors.New(fmt.Sprintf("Unable to connect to url %s after %d seconds\n", url, timeout))
+	return fmt.Errorf("Unable to connect to url %s after %d seconds\n", url, timeout)
 }
 
 // WaitForIdlePersistence waits for idle persistence coordinator which means the last operation has completed
@@ -401,8 +412,8 @@ func WaitForIdlePersistence(timeout int, dataFetcher fetcher.Fetcher, serviceNam
 		duration += 5
 	}
 
-	return errors.New(fmt.Sprintf("Unable to get to idle for service %s after %d seconds. Last status %s",
-		serviceName, timeout, status))
+	return fmt.Errorf("Unable to get to idle for service %s after %d seconds. Last status %s",
+		serviceName, timeout, status)
 }
 
 // Sleep will sleep for a duration of seconds
@@ -429,12 +440,14 @@ func ExecuteHostCommand(name string, arg ...string) (string, error) {
 	return stringStdOut, nil
 }
 
+// CleanupConfigFileAfterTest cleans up a config file after a test
 func CleanupConfigFileAfterTest(t *testing.T, file string) {
 	t.Cleanup(func() {
 		_ = os.Remove(file)
 	})
 }
 
+// CleanupDirectoryAfterTest cleans up a directory after a test
 func CleanupDirectoryAfterTest(t *testing.T, dir string) {
 	t.Cleanup(func() {
 		_ = os.RemoveAll(dir)
