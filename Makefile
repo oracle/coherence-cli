@@ -1,5 +1,5 @@
 # ----------------------------------------------------------------------------------------------------------------------
-# Copyright (c) 2021, Oracle and/or its affiliates.
+# Copyright (c) 2021, 2022 Oracle and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at
 # https://oss.oracle.com/licenses/upl.
 #
@@ -16,7 +16,7 @@
 
 # The version of the CLI being build - this should be a valid SemVer format
 VERSION ?= 1.0.0
-MILESTONE ?= -RC2
+MILESTONE ?= -RC3
 
 # Maven version is always 1.0.0 as it is only for testing
 MVN_VERSION ?= 1.0.0
