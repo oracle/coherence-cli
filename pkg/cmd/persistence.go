@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Oracle and/or its affiliates.
+ * Copyright (c) 2021, 2022 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -86,9 +86,9 @@ var getPersistenceCmd = &cobra.Command{
 
 func processPersistenceServices(deDuplicatedServices []config.ServiceSummary, dataFetcher fetcher.Fetcher) error {
 	var (
-		wg          sync.WaitGroup
-		errorSink   = createErrorSink()
-		coordinator = config.PersistenceCoordinator{}
+		wg        sync.WaitGroup
+		errorSink = createErrorSink()
+		m         = sync.RWMutex{}
 	)
 
 	wg.Add(len(deDuplicatedServices))
@@ -98,8 +98,9 @@ func processPersistenceServices(deDuplicatedServices []config.ServiceSummary, da
 		go func(service string, index int) {
 			defer wg.Done()
 			var (
-				data []byte
-				err1 error
+				data        []byte
+				err1        error
+				coordinator = config.PersistenceCoordinator{}
 			)
 			data, err1 = dataFetcher.GetPersistenceCoordinator(service)
 			if err1 != nil {
@@ -113,6 +114,9 @@ func processPersistenceServices(deDuplicatedServices []config.ServiceSummary, da
 				return
 			}
 
+			// protect the slice for update
+			m.Lock()
+			defer m.Unlock()
 			deDuplicatedServices[index].Idle = coordinator.Idle
 			deDuplicatedServices[index].Snapshots = coordinator.Snapshots
 			deDuplicatedServices[index].OperationStatus = coordinator.OperationStatus

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Oracle and/or its affiliates.
+ * Copyright (c) 2021, 2022 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -434,7 +434,8 @@ var shutdownMemberCmd = &cobra.Command{
 	Use:   "member node-id",
 	Short: "Shutdown a members services",
 	Long: `The 'shutdown member' command shuts down all the clustered services that are
-running on a specific member via a controlled shutdown. A new member will be started in its place.`,
+running on a specific member via a controlled shutdown. If the services were started using
+DefaultCacheServer, then they will be restarted.`,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
 			displayErrorAndExit(cmd, "you must provide a node id")

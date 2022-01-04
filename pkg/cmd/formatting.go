@@ -1443,13 +1443,13 @@ func appendColumnValue(v KeyValues, sb *strings.Builder, keyFormat string) {
 // getColumns returns all the values separated by sep string
 func getColumns(values ...string) string {
 	var (
-		len = len(values)
-		sb  = strings.Builder{}
+		length = len(values)
+		sb     = strings.Builder{}
 	)
 
 	for i, value := range values {
 		sb.WriteString(value)
-		if i < len-1 {
+		if i < length-1 {
 			sb.WriteString(sep)
 		}
 	}

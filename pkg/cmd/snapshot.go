@@ -62,6 +62,7 @@ local snapshots are shown, but you can use the -a option to show archived snapsh
 			snapshots   = make([]config.Snapshots, 0)
 			wg          sync.WaitGroup
 			errorSink   = createErrorSink()
+			m           = sync.RWMutex{}
 		)
 
 		connection, dataFetcher, err = GetConnectionAndDataFetcher()
@@ -117,6 +118,9 @@ local snapshots are shown, but you can use the -a option to show archived snapsh
 					newSnapshots = append(newSnapshots, coordinator.Snapshots...)
 				}
 
+				// protect the slice for update
+				m.Lock()
+				defer m.Unlock()
 				snapshots = append(snapshots, config.Snapshots{ServiceName: serviceNameValue, Snapshots: newSnapshots})
 			}(service)
 		}

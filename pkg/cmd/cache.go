@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Oracle and/or its affiliates.
+ * Copyright (c) 2021, 2022 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -395,6 +395,7 @@ func getCaches(serviceList []string, dataFetcher fetcher.Fetcher, topicsOnly boo
 		allCachesSummary = make([]config.CacheSummaryDetail, 0)
 		errorSink        = createErrorSink()
 		numServices      = len(serviceList)
+		m                = sync.RWMutex{}
 	)
 
 	// loop through the services and build up the cache list. carry out each service concurrently
@@ -435,6 +436,9 @@ func getCaches(serviceList []string, dataFetcher fetcher.Fetcher, topicsOnly boo
 				finalCaches = append(finalCaches, cachesSummary.Caches[i])
 			}
 
+			// protect the slice for update
+			m.Lock()
+			defer m.Unlock()
 			allCachesSummary = append(allCachesSummary, finalCaches...)
 		}(service)
 	}

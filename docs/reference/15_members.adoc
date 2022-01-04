@@ -132,7 +132,7 @@ operation completed
 ----
 
 NOTE: This command may take a while to complete. Check the server logs for information regarding the
-member's status.  Once the member is shutdown it will restart with a new member id.
+member's status.  If the services were started using DefaultCacheServer, then they will be restarted.
 
 === See Also
 
