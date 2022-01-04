@@ -53,7 +53,7 @@ The CLI compliments your existing Coherence management tools and allows you to:
 
 ## Install the CLI
 
-> Note: The Coherence CLI is currently in pre-release and the latest version is **1.0.0-RC1**.
+> Note: The Coherence CLI is currently in pre-release and the latest version is **1.0.0-RC2**.
 
 The Coherence CLI is available as a binary for most platforms and architectures. See the
 [Install guide](https://oracle.github.io/coherence-cli/docs/1.0.0-RC1/#/docs/installation/01_installation) for
@@ -61,10 +61,10 @@ information on downloading the CLI.
 
 ## Getting Started
 
-Documentation for the Coherence CLI is available [here](https://oracle.github.io/coherence-cli/docs/1.0.0-RC1)
+Documentation for the Coherence CLI is available [here](https://oracle.github.io/coherence-cli/docs/1.0.0-RC2)
 
 The fastest way to experience the Coherence CLI is to follow the
-[Quick Start guide](https://oracle.github.io/coherence-cli/docs/1.0.0-RC1/#/docs/about/03_quickstart).
+[Quick Start guide](https://oracle.github.io/coherence-cli/docs/1.0.0-RC2/#/docs/about/03_quickstart).
 
 ## Supported Coherence Versions
 
