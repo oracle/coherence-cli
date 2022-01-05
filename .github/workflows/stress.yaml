@@ -9,9 +9,11 @@ name: Stress
 
 on:
   workflow_dispatch:
-  push:
-    branches-ignore:
-    - gh-pages
+    inputs:
+      iterations:
+         description: 'Number of iterations'
+         required: true
+         default: '1000'
   schedule:
     # Every day at midnight
     - cron: '0 0 * * *'
@@ -70,9 +72,13 @@ jobs:
       shell: bash
       run:  |
         make test-cluster-startup 
+        ITERS="${{ github.event.inputs.iterations }}"
+        if [ -z "$ITERS" ] ; then
+            ITERS=1000
+        fi
         # Sleep for 20 seconds to allow management startup
         sleep 20
-        ./scripts/run-stress-test.sh bin/cohctl 1000
+        ./scripts/run-stress-test.sh `pwd`/bin/cohctl $ITERS
         ret=$?
         make test-cluster-shutdown
         exit $ret
