@@ -61,7 +61,9 @@ jobs:
 
     - name: Build Binary
       shell: bash
-      run: make cohctl
+      run: |
+        make cohctl
+        chmod u+x bin/cohctl
 
     - name: Build Test Images
       shell: bash

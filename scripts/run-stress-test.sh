@@ -12,17 +12,12 @@
 set -e
 
 if [ $# -ne 2 ] ; then
-  echo "Usage: $0 [cohctl-binary] iterations"
+  echo "Usage: $0 cohctl-binary iterations"
   exit 1
 fi
 
 COHCTL=$1
 ITERS=$2
-
-if [ ! -x $COHCTL ] ; then
-  echo "Cannot execute $COHCTL"
-  exit 2
-fi
 
 CONFIG_DIR=/tmp/$$.config
 trap "rm -rf $CONFIG_DIR" 0 1 2 3
