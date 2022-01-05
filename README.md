@@ -14,7 +14,7 @@ https://oss.oracle.com/licenses/upl.
 
 # Coherence Command Line Interface (CLI)
 
-![Coherence Demo](assets/cohctl-terminal.gif "Coherence Demo")
+![Coherence Demo](assets/cohctl-terminal.gif "Coherence CLI Demo")
 
 ## Contents
 
