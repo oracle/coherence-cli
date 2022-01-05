@@ -9,9 +9,6 @@ name: Stress
 
 on:
   workflow_dispatch:
-  push:
-    branches-ignore:
-    - gh-pages
   schedule:
     # Every day at midnight
     - cron: '0 0 * * *'
@@ -72,7 +69,7 @@ jobs:
         make test-cluster-startup 
         # Sleep for 20 seconds to allow management startup
         sleep 20
-        ./scripts/run-stress-test.sh bin/cohctl 1000
+        ./scripts/run-stress-test.sh `pwd`/bin/cohctl 1000
         ret=$?
         make test-cluster-shutdown
         exit $ret
