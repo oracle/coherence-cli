@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 
-    Copyright (c) 2021, Oracle and/or its affiliates.
+    Copyright (c) 2021, 2022 Oracle and/or its affiliates.
     Licensed under the Universal Permissive License v 1.0 as shown at
     https://oss.oracle.com/licenses/upl.
 
@@ -124,6 +124,13 @@ Display and manage Coherence reporters.
 [link=docs/reference/85_diagnostics.adoc]
 --
 Take multiple thread dumps, heap dumps or JFR's across members.
+--
+
+[CARD]
+.NS Lookup
+[link=docs/reference/45_nslookup.adoc]
+--
+Look up various Name Service endpoints for a cluster.
 --
 
 [CARD]

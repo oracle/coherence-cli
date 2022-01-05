@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 
-    Copyright (c) 2021, Oracle and/or its affiliates.
+    Copyright (c) 2021, 2022 Oracle and/or its affiliates.
     Licensed under the Universal Permissive License v 1.0 as shown at
     https://oss.oracle.com/licenses/upl.
 
@@ -15,8 +15,26 @@ to filter and select data when retrieving information.
 
 Below are some examples of how you could use JSONPath with the CLI. This is not an exhaustive list and the use is only limited by you imagination!
 
-NOTE: In the example below, we are also using the https://github.com/stedolan/jq[jq] utility to format the JSON output.
+NOTE: In the examples below, we are also using the https://github.com/stedolan/jq[jq] utility to format the JSON output.
 
+* <<cluster, Cluster Examples>>
+* <<services, Services Examples>>
+* <<members, Members Examples>>
+* <<caches, Caches Examples>>
+* <<http-proxy, Http Proxies Examples>>
+
+[#cluster]
+=== Cluster
+
+Retrieve the cluster name, version and cluster size from `cohctl describe cluster`.
+
+[source,bash]
+----
+$ cohctl describe cluster my-cluster -o jsonpath="$.cluster..['clusterName', 'version', 'clusterSize']"
+["cluster1","21.12",2]
+----
+
+[#services]
 === Services
 
 Get all service members where the requestAverageDuration > 10 millis.
@@ -40,6 +58,7 @@ $ cohctl get services -o jsonpath="$.items[?(@.requestAverageDuration > 10)]..['
 ]
 ----
 
+[#members]
 === Members
 
 Get all members where the available memory < 250MB
@@ -54,6 +73,7 @@ $ cohctl get members -o jsonpath="$.items[?(@.memoryAvailableMB < 250)]..['nodeI
 ]
 ----
 
+[#caches]
 === Caches
 
 Get caches where total puts > 10000.
@@ -74,6 +94,7 @@ $ cohctl get caches -o jsonpath="$.items[?(@.totalPuts > 10000)]..['service','na
 ]
 ----
 
+[#http-proxy]
 === Http Proxy Servers
 
 Get http proxy servers where total request count > 40.
@@ -107,4 +128,6 @@ $ cohctl get persistence -o jsonpath="$.items[?(@.persistenceLatencyAverage > 0.
 
 == See Also
 
+* https://earthly.dev/blog/jq-select/[An Introduction to JQ]
+* https://goessner.net/articles/JsonPath/[JSONPath examples]
 * <<docs/about/03_quickstart.adoc,Run the Quick Start>>

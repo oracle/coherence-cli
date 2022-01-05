@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 
-    Copyright (c) 2021, Oracle and/or its affiliates.
+    Copyright (c) 2021, 2022 Oracle and/or its affiliates.
     Licensed under the Universal Permissive License v 1.0 as shown at
     https://oss.oracle.com/licenses/upl.
 
@@ -29,6 +29,11 @@ image to start a Coherence CE cluster and expose management on port 30000.
 ----
 docker run -d -p 30000:30000 ghcr.io/oracle/coherence-ce:{coherence-version}
 ----
+
+If you are connecting to a Coherence Commercial version you must be on at least the following patch sets:
+
+* 12.2.1.4.x - minimum patch level of 12.2.1.4.7+ required
+* 14.1.1.0.x - minimum patch level of 14.1.1.0.2+ required
 
 == Contents
 
@@ -105,53 +110,65 @@ Now that the cluster connection is added, you can describe the cluster using the
 $ cohctl describe cluster local
 CLUSTER
 -------
-Cluster Name:    my-cluster
+Cluster Name:    cluster1
 Version:         21.12
-Cluster Size:    3
+Cluster Size:    2
 License Mode:    Development
 Departure Count: 0
 Running:         true
 
+MACHINES
+--------
+MACHINE               PROCESSORS    LOAD  TOTAL MEMORY  FREE MEMORY  % FREE  OS     ARCH   VERSION
+server1/192.168.16.3           4  0.0000       8.500GB      6.369GB  74.93%  Linux  amd64  5.10.47-linuxkit
+/192.168.16.2                  4  0.1200       8.500GB      6.408GB  75.39%  Linux  amd64  5.10.47-linuxkit
+
 MEMBERS
 -------
-Cluster Heap - Total: 1.750GB, Used: 156MB, Available: 1.598GB (91.3%)
-
-NODE ID  ADDRESS          PORT  PROCESS  MEMBER  ROLE              MACHINE  RACK  SITE  PUBLISHER  RECEIVER  MAX HEAP  USED HEAP  AVAIL HEAP
-1        /192.168.1.121  57133  13919    n/a     Management        n/a      n/a   n/a   0.994      1.000     512MB     114MB      398MB
-2        /192.168.1.121  57136  13941    n/a     CoherenceServer   n/a      n/a   n/a   1.000      1.000     1.000GB   23MB       1,001MB
-3        /192.168.1.121  57169  13981    n/a     CoherenceConsole  n/a      n/a   n/a   1.000      1.000     256MB     19MB       237MB
+Total cluster members: 2
+Cluster Heap - Total: 4.254GB, Used: 161MB, Available: 4.097GB (96.3%)
 
 SERVICES
--------
-SERVICE NAME         TYPE              MEMBERS  STATUS HA  STORAGE  PARTITIONS  ENDANGERED  VULNERABLE  UNBALANCED  STATUS
-Proxy                Proxy             2        n/a        -1       -1          -1          -1          -1          n/a
-PartitionedTopic     DistributedCache  2        NODE-SAFE  2        257         0           257         0           257 partitions are vulnerable
-PartitionedCache2    DistributedCache  2        NODE-SAFE  2        257         0           257         0           257 partitions are vulnerable
-PartitionedCache     DistributedCache  2        NODE-SAFE  2        257         0           257         0           257 partitions are vulnerable
-ManagementHttpProxy  Proxy             2        n/a        -1       -1          -1          -1          -1          n/a
+--------
+SERVICE NAME         TYPE              MEMBERS  STATUS HA     STORAGE  PARTITIONS
+Proxy                Proxy                   2  n/a                -1          -1
+PartitionedCache     DistributedCache        2  MACHINE-SAFE        2          31
+ManagementHttpProxy  Proxy                   2  n/a                -1          -1
+
+PERSISTENCE
+-----------
+Total Active Space Used: 0MB
+
+SERVICE NAME       STORAGE COUNT  PERSISTENCE MODE  ACTIVE BYTES  ACTIVE SPACE  AVG LATENCY  MAX LATENCY  SNAPSHOTS  STATUS
+PartitionedCache               2  active                  66,439           0MB      0.000ms          0ms          0  Idle
 
 CACHES
--------
-Total Caches: 2, Total primary storage: 30MB
+------
+Total Caches: 6, Total primary storage: 0MB
 
-SERVICE           CACHE  CACHE SIZE  BYTES       MB    AVG SIZE  TOTAL PUTS  TOTAL GETS  TOTAL REMOVES  TOTAL HITS  TOTAL MISSES  HIT PROB
-PartitionedCache  test1  100,000     26,288,448  25MB  262       200,000     0           0              0           0             0.00%
-PartitionedCache  test2  23,000      5,999,040   5MB   260       46,000      0           0              0           0             0.00%
+SERVICE            CACHE                 CACHE SIZE  BYTES   MB
+PartitionedCache   customers                    123  4,016  0MB
+
+TOPICS
+------
 
 PROXY SERVERS
 -------------
-NODE ID  HOST IP              SERVICE NAME  CONNECTIONS  BYTES SENT  BYTES REC  MSG SENT  MSG RCV  BYTES BACKLOG  MSG BACKLOG  UNAUTH
-1        0.0.0.0:57133.50631  Proxy         0            0           0          0         1        0              0            0
-2        0.0.0.0:57136.59773  Proxy         0            0           0          0         1        0              0            0
+NODE ID  HOST IP        SERVICE NAME  CONNECTIONS  BYTES SENT  BYTES REC
+1        0.0.0.0:20000  Proxy                   0           0          0
+2        0.0.0.0:20000  Proxy                   0           0          0
 
 HTTP SERVERS
 -------------
-NODE ID  HOST IP        SERVICE NAME         SERVER TYPE                                    REQUESTS  ERRORS  RESP 1xx  RESP 2xx  RESP 3xx  RESP 4xx  RESP 5xx
-1        0.0.0.0:30000  ManagementHttpProxy  com.tangosol.coherence.http.DefaultHttpServer  12        0       0         8         0         3         0
-2        0.0.0.0:0      ManagementHttpProxy  com.tangosol.coherence.http.DefaultHttpServer  0         0       0         0         0         0         0
+NODE ID  HOST IP        SERVICE NAME         SERVER TYPE                                    REQUESTS  ERRORS
+1        0.0.0.0:30000  ManagementHttpProxy  com.tangosol.coherence.http.DefaultHttpServer       382       0
+2        0.0.0.0:30000  ManagementHttpProxy  com.tangosol.coherence.http.DefaultHttpServer         0       0
+
 ----
 
 NOTE: Depending upon the services and caches running in your cluster, you will see something slightly different.
+
+NOTE: You can also provide the `-v` (verbose) and `-o wide` (wide format) flags to display more details.
 
 [#step5]
 === 5. Display services
@@ -163,12 +180,10 @@ show the services for the cluster only.
 ----
 $ cohctl get services -c local
 
-SERVICE NAME         TYPE              MEMBERS  STATUS HA  STORAGE  PARTITIONS  ENDANGERED  VULNERABLE  UNBALANCED  STATUS
-Proxy                Proxy             2        n/a        -1       -1          -1          -1          -1          n/a
-PartitionedTopic     DistributedCache  2        NODE-SAFE  2        257         0           257         0           257 partitions are vulnerable
-PartitionedCache2    DistributedCache  2        NODE-SAFE  2        257         0           257         0           257 partitions are vulnerable
-PartitionedCache     DistributedCache  3        NODE-SAFE  2        257         0           257         0           257 partitions are vulnerable
-ManagementHttpProxy  Proxy             2        n/a        -1       -1          -1          -1          -1          n/a
+SERVICE NAME         TYPE              MEMBERS  STATUS HA     STORAGE  PARTITIONS
+Proxy                Proxy                   2  n/a                -1          -1
+PartitionedCache     DistributedCache        2  MACHINE-SAFE        2          31
+ManagementHttpProxy  Proxy                   2  n/a                -1          -1
 ----
 
 All commands other than `describe cluster` require a `-c` option to specify the cluster you wish to
@@ -181,12 +196,10 @@ $ cohctl set context local
 Current context is now local
 
 $ cohctl get services
-SERVICE NAME         TYPE              MEMBERS  STATUS HA  STORAGE  PARTITIONS  ENDANGERED  VULNERABLE  UNBALANCED  STATUS
-Proxy                Proxy             2        n/a        -1       -1          -1          -1          -1          n/a
-PartitionedTopic     DistributedCache  2        NODE-SAFE  2        257         0           257         0           257 partitions are vulnerable
-PartitionedCache2    DistributedCache  2        NODE-SAFE  2        257         0           257         0           257 partitions are vulnerable
-PartitionedCache     DistributedCache  3        NODE-SAFE  2        257         0           257         0           257 partitions are vulnerable
-ManagementHttpProxy  Proxy             2        n/a        -1       -1          -1          -1          -1          n/a
+SERVICE NAME         TYPE              MEMBERS  STATUS HA     STORAGE  PARTITIONS
+Proxy                Proxy                   2  n/a                -1          -1
+PartitionedCache     DistributedCache        2  MACHINE-SAFE        2          31
+ManagementHttpProxy  Proxy                   2  n/a                -1          -1
 ----
 
 [#step6]
@@ -221,26 +234,26 @@ Transport Backlogged Connection List:  [[] [] []]
 
 SERVICE MEMBERS
 ---------------
-NODE ID  THREADS  IDLE  THREAD UTIL  MIN THREADS  MAX THREADS    TASK COUNT  TASK BACKLOG  PRIMARY OWNED  BACKUP OWNED  REQ AVG MS  TASK AVG MS
-1        1        1     0.00%        1            2,147,483,647  1,230       0             129            128           7.0541      0.6220
-2        1        1     0.00%        1            2,147,483,647  1,230       0             128            129           7.7920      0.6569
-3        0        -1    n/a          1            2,147,483,647  -1          0             0              0             2.1454      -1.0000
+NODE ID  THREADS  IDLE  THREAD UTIL  MIN THREADS    MAX THREADS
+      1        1     1        0.00%            2  2,147,483,647
+      2        1     1        0.00%            2  2,147,483,647
+
 
 SERVICE CACHES
 --------------
 Total Caches: 2, Total primary storage: 30MB
 
-SERVICE           CACHE  CACHE SIZE  BYTES       MB    AVG SIZE  TOTAL PUTS  TOTAL GETS  TOTAL REMOVES  TOTAL HITS  TOTAL MISSES  HIT PROB
-PartitionedCache  test1  100,000     26,288,448  25MB  262       200,000     0           0              0           0             0.00%
-PartitionedCache  test2  23,000      5,999,040   5MB   260       46,000      0           0              0           0             0.00%
+SERVICE           CACHE  CACHE SIZE       BYTES    MB
+PartitionedCache  test1     100,000  26,288,448  25MB
+PartitionedCache  test2      23,000   5,999,040   5MB
 
 PERSISTENCE FOR SERVICE
 -----------------------
 Total Active Space Used: 0MB
-NODE ID  PERSISTENCE MODE  ACTIVE BYTES USED  ACTIVE SPACE USED  AVG LATENCY  MAX LATENCY
-1        on-demand         0                  0MB                0.000ms      0ms
-2        on-demand         0                  0MB                0.000ms      0ms
 
+NODE ID  PERSISTENCE MODE  ACTIVE BYTES  ACTIVE SPACE  AVG LATENCY  MAX LATENCY
+      1  active                  44,560           0MB      0.000ms          0ms
+      2  active                  21,879           0MB      0.000ms          0ms
 
 PERSISTENCE COORDINATOR
 -----------------------
@@ -334,4 +347,4 @@ See the <<docs/examples/10_jsonpath.adoc,JSONPath>> examples for more informatio
 
 === Next Steps
 
-Explore more of the commands HERE.
+Explore more of the commands <<docs/reference/01_overview.adoc,here>>.

@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 
-    Copyright (c) 2021, Oracle and/or its affiliates.
+    Copyright (c) 2021, 2022 Oracle and/or its affiliates.
     Licensed under the Universal Permissive License v 1.0 as shown at
     https://oss.oracle.com/licenses/upl.
 
@@ -69,6 +69,9 @@ $ cohctl set gnore-certs true
 Value is now set to true
 ----
 
+NOTE: When you have this option set you will get the following warning every time you execute the CLI
+so it is clear you have disabled SSL validation: `WARNING: SSL Certificate validation has been explicitly disabled`
+
 [#get-logs]
 ==== Get Logs
 
@@ -80,6 +83,10 @@ include::../../build/_output/docs-gen/get_logs.adoc[tag=text]
 ----
 $ cohctl get logs
 ----
+
+NOTE: The default log file location is `$HOME/.cohctl/cohctl.log`.
+
+See the <<docs/config/10_changing_config_locations.adoc,config>> section for more details on changing the log file location.
 
 [#get-debug]
 ==== Get Debug

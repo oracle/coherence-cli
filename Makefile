@@ -309,7 +309,6 @@ copyright: getcopyright ## Check copyright headers
 	  -X build/ \
 	  -X /Dockerfile \
 	  -X .Dockerfile \
-	  -X docs/ \
 	  -X go.mod \
 	  -X go.sum \
 	  -X HEADER.txt \

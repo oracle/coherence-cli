@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 
-    Copyright (c) 2021, Oracle and/or its affiliates.
+    Copyright (c) 2021, 2022 Oracle and/or its affiliates.
     Licensed under the Universal Permissive License v 1.0 as shown at
     https://oss.oracle.com/licenses/upl.
 
@@ -17,7 +17,7 @@ endpoint for various query values.
 You can provide zero or more host/port pairs to this command. If you do not provide a host, `localhost` will
 be used and if you do not provide a port, then the default port `7574` will be used.
 
-* <<nslookup, `cohctl nslookup`>> - displays persistence information for a cluster
+* <<nslookup, `cohctl nslookup`>> - looks up various Name Service endpoints for a cluster host/port
 
 [#nslookup]
 ==== NS Lookup

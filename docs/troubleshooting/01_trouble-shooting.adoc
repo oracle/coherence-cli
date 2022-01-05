@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 
-    Copyright (c) 2021, Oracle and/or its affiliates.
+    Copyright (c) 2021, 2022 Oracle and/or its affiliates.
     Licensed under the Universal Permissive License v 1.0 as shown at
     https://oss.oracle.com/licenses/upl.
 
@@ -15,26 +15,26 @@ This page will be updated and maintained over time to include common issues we s
 
 == Contents
 
-* <<bad, Bad CPU type in executable on OSX>>
+* <<bad, Bad CPU type in executable on macOS>>
 * <<jfr, Null returned in JFR commands>>
 * <<services, Cannot find services with quotes in their names>>
 
 [#bad]
-=== Bad CPU type in executable on OSX
+=== Bad CPU type in executable on macOS
 
 If you received a message similar to the following then it is caused by installing the
-incorrect OSX .pkg for your architecture.  E.g. you may have an AMD Mac and trying to install the
+incorrect macOS .pkg for your architecture.  E.g. you may have an AMD Mac and trying to install the
 Apple Silicon version or visa-versa.
 
 [source,command]
 ----
--bash: /usr/local/bin/cohctl: Bad CPU type in executable
+/usr/local/bin/cohctl: Bad CPU type in executable
 ----
 
 Refer to the <<docs/installation/01_installation.adoc,Coherence CLI Installation section>> to uninstall
 `cohctl` and download the correct pkg for your architecture.
 
-You can run the `uname -a` command from a terminal and the output will indicate which type of architecture you have.
+You can run the `uname -a` command from a terminal and the output will indicate which type of architecture you have. The last value on the line it will be either `x86_64` for AMD or `arm64` for M1.
 
 **AMD Processor**
 
@@ -44,8 +44,9 @@ $ uname -a
 Darwin ... RELEASE_X86_64 x86_64
 ----
 
-**Apple Silicon (M1)**
+**Apple Silicon (M1) Processor**
 
+[source,command]
 ----
 $ uname -a
 Darwin ... RELEASE_ARM64_T8101 arm64
