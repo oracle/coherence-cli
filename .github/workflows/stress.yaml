@@ -1,0 +1,78 @@
+# Copyright 2021, Oracle Corporation and/or its affiliates.
+# Licensed under the Universal Permissive License v 1.0 as shown at
+# https://oss.oracle.com/licenses/upl.
+
+# ---------------------------------------------------------------------------
+# Coherence CLI GitHub Actions Stress build.
+# ---------------------------------------------------------------------------
+name: Stress
+
+on:
+  workflow_dispatch:
+  push:
+    branches-ignore:
+    - gh-pages
+  schedule:
+    # Every day at midnight
+    - cron: '0 0 * * *'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+#   Checkout the source, we need a depth of zero to fetch all of the history otherwise
+#   the copyright check cannot work out the date of the files from Git.
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+
+    - name: Get Docker Images
+      shell: bash
+      run: |
+        docker pull gcr.io/distroless/java:11
+
+    - name: Set up JDK
+      uses: actions/setup-java@v1
+      with:
+        java-version: '1.8'
+
+    - name: Cache Go Modules
+      uses: actions/cache@v1
+      with:
+        path: ~/go/pkg/mod
+        key: ${{ runner.os }}-go-mods-${{ hashFiles('**/go.sum') }}
+        restore-keys: |
+          ${{ runner.os }}-go-mods-
+
+    - name: Cache Maven packages
+      uses: actions/cache@v1
+      with:
+        path: ~/.m2
+        key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+        restore-keys: ${{ runner.os }}-m2
+
+    - name: Set up Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: 1.16.x
+
+    - name: Build Binary
+      shell: bash
+      run: make cohctl
+
+    - name: Build Test Images
+      shell: bash
+      run: |
+        PROFILES=,executor COHERENCE_VERSION=21.12 make clean build-test-images
+
+    - name: Run Stress Test
+      shell: bash
+      run:  |
+        make test-cluster-startup 
+        # Sleep for 20 seconds to allow management startup
+        sleep 20
+        ./scripts/run-stress-test.sh bin/cohctl 1000
+        ret=$?
+        make test-cluster-shutdown
+        exit $ret
