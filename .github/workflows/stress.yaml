@@ -59,10 +59,6 @@ jobs:
       with:
         go-version: 1.16.x
 
-    - name: Build Binary
-      shell: bash
-      run: make clean cohctl-all
-
     - name: Build Test Images
       shell: bash
       run: PROFILES=,executor COHERENCE_VERSION=21.12 make clean build-test-images
@@ -70,6 +66,7 @@ jobs:
     - name: Run Stress Test
       shell: bash
       run:  |
+        make cohctl
         make test-cluster-startup 
         ITERS="${{ github.event.inputs.iterations }}"
         if [ -z "$ITERS" ] ; then
@@ -77,7 +74,7 @@ jobs:
         fi
         # Sleep for 20 seconds to allow management startup
         sleep 20
-        ./scripts/run-stress-test.sh `pwd`/bin/linux/amd64/cohctl $ITERS
+        ./scripts/run-stress-test.sh `pwd`/bin/cohctl $ITERS
         ret=$?
         make test-cluster-shutdown
         exit $ret
