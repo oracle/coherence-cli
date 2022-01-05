@@ -61,14 +61,11 @@ jobs:
 
     - name: Build Binary
       shell: bash
-      run: |
-        make cohctl
-        chmod u+x bin/cohctl
+      run: make clean cohctl-all
 
     - name: Build Test Images
       shell: bash
-      run: |
-        PROFILES=,executor COHERENCE_VERSION=21.12 make clean build-test-images
+      run: PROFILES=,executor COHERENCE_VERSION=21.12 make clean build-test-images
 
     - name: Run Stress Test
       shell: bash
@@ -80,7 +77,7 @@ jobs:
         fi
         # Sleep for 20 seconds to allow management startup
         sleep 20
-        ./scripts/run-stress-test.sh `pwd`/bin/cohctl $ITERS
+        ./scripts/run-stress-test.sh `pwd`/bin/linux/amd64/cohctl $ITERS
         ret=$?
         make test-cluster-shutdown
         exit $ret
