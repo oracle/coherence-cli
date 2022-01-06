@@ -215,7 +215,8 @@ func RunTestMemberCommands(t *testing.T) {
 	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "MEMBER DETAILS,Node Id", "--config", file, "describe", "member", "1")
 
 	// describe a member with extended
-	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "MEMBER DETAILS,Node Id,EXTENDED", "--config", file, "describe", "member", "1", "-X", "g1")
+	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "MEMBER DETAILS,Node Id,EXTENDED",
+		"--config", file, "describe", "member", "1", "-X", "g1OldGen")
 
 	// describe a member with thread dump
 	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "MEMBER DETAILS,Node Id,THREAD DUMP", "--config", file, "describe", "member", "1", "-D")

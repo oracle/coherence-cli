@@ -178,7 +178,8 @@ func CombineByteArraysForJSON(elements [][]byte, elementName []string) ([]byte, 
 	)
 
 	if length != len(elementName) {
-		return constants.EmptyByte, errors.New("element names must be same length and elements")
+		return constants.EmptyByte,
+			fmt.Errorf("element names (%v) must be same length (%d) as elements", elementName, length)
 	}
 
 	result = append(result, openBracket...)
