@@ -144,12 +144,16 @@ Full list of options are JVM dependant, but can include the full values or part 
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var (
-			members      = config.Members{}
-			result       []byte
-			err          error
-			dataFetcher  fetcher.Fetcher
-			extendedData [][]byte
-			connection   string
+			members          = config.Members{}
+			result           []byte
+			err              error
+			dataFetcher      fetcher.Fetcher
+			extendedData     [][]byte
+			connection       string
+			finalResult      []byte
+			finalExtended    []byte
+			jsonPathOrJSON   = strings.Contains(OutputFormat, constants.JSONPATH) || OutputFormat == constants.JSON
+			extendedInfoList []string
 		)
 
 		nodeID := args[0]
@@ -196,39 +200,41 @@ Full list of options are JVM dependant, but can include the full values or part 
 		// retrieve the links for the extended info
 		if extendedInfo != "none" {
 			// retrieve the extended data
-			extendedData, err = dataFetcher.GetExtendedMemberInfoJSON(result, nodeID, strings.Split(extendedInfo, ","))
+			extendedInfoList = strings.Split(extendedInfo, ",")
+			extendedData, err = dataFetcher.GetExtendedMemberInfoJSON(result, nodeID, extendedInfoList)
 			if err != nil {
 				return err
 			}
 		}
 
-		if strings.Contains(OutputFormat, constants.JSONPATH) {
-			// append the extra results
+		if jsonPathOrJSON {
 			if len(extendedData) > 0 {
-				for _, value := range extendedData {
-					result = append(result, value...)
+				finalExtended, err = utils.CombineByteArraysForJSON(extendedData, extendedInfoList)
+				if err != nil {
+					return err
 				}
 			}
-			jsonPathResult, err := utils.GetJSONPathResults(result, OutputFormat)
+			finalResult, err = utils.CombineByteArraysForJSON([][]byte{result, finalExtended}, []string{"member", "extended"})
 			if err != nil {
 				return err
 			}
-			cmd.Println(jsonPathResult)
-			return nil
-		} else if OutputFormat == constants.JSON {
-			cmd.Println(string(result))
-			// add any extended data
-			if len(extendedData) > 0 {
-				for _, value := range extendedData {
-					cmd.Println(string(value))
+
+			if strings.Contains(OutputFormat, constants.JSONPATH) {
+				jsonPathResult, err := utils.GetJSONPathResults(finalResult, OutputFormat)
+				if err != nil {
+					return err
 				}
+				cmd.Println(jsonPathResult)
+				return nil
 			}
+			// JSON
+			cmd.Println(string(finalResult))
 		} else {
 			cmd.Println(FormatCurrentCluster(connection))
 			cmd.Println("MEMBER DETAILS")
 			cmd.Println("--------------")
-			value, err := FormatJSONForDescribe(result, true, "Node Id", "Unicast Address", "Role Name", "Machine Name",
-				"Rack Name", "Site Name")
+			value, err := FormatJSONForDescribe(result, true, "Node Id", "Unicast Address",
+				"Role Name", "Machine Name", "Rack Name", "Site Name")
 			if err != nil {
 				return err
 			}
