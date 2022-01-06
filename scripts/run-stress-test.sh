@@ -11,16 +11,20 @@
 
 set -e
 
-if [ $# -ne 2 ] ; then
-  echo "Usage: $0 cohctl-binary iterations"
+if [ $# -ne 3 ] ; then
+  echo "Usage: $0 cohctl-binary iterations build-output"
   exit 1
 fi
 
 COHCTL=$1
 ITERS=$2
+BUILD_OUTPUT=$3
 
 CONFIG_DIR=/tmp/$$.config
 trap "rm -rf $CONFIG_DIR" 0 1 2 3
+
+echo "Redirecting output to $BUILD_OUTPUT/stress.log..."
+exec > $BUILD_OUTPUT/stress.log 2>&1
 
 mkdir -p $CONFIG_DIR
 

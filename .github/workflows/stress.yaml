@@ -66,15 +66,21 @@ jobs:
     - name: Run Stress Test
       shell: bash
       run:  |
-        make cohctl
+        make cohctl test-cohctl
         make test-cluster-startup 
         ITERS="${{ github.event.inputs.iterations }}"
         if [ -z "$ITERS" ] ; then
-            ITERS=1000
+            ITERS=50000
         fi
         # Sleep for 20 seconds to allow management startup
         sleep 20
-        ./scripts/run-stress-test.sh `pwd`/bin/cohctl $ITERS
+        ./scripts/run-stress-test.sh `pwd`/bin/cohctl $ITERS `pwd`/build/_output
         ret=$?
         make test-cluster-shutdown
         exit $ret
+
+    - uses: actions/upload-artifact@v1
+      if: failure()
+      with:
+        name: test-output
+        path: build/_output/stress.log
