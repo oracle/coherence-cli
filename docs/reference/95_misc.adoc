@@ -21,6 +21,8 @@ This section contains miscellaneous commands for various settings.
 * <<set-debug, `cohctl get debug`>> - sets the debug level on or off
 * <<get-management, `cohctl get management`>> - displays management information for a cluster
 * <<set-management, `cohctl set management`>> - sets management information for a cluster
+* <<get-timeout, `cohctl get timeout`>> - displays the current request timeout (in seconds) for any HTTP requests
+* <<set-timeout, `cohctl set timeout`>> - sets the request timeout (in seconds) for any HTTP requests
 
 [#version]
 ==== Version
@@ -63,9 +65,11 @@ Current setting: false
 
 include::../../build/_output/docs-gen/set_ignore_certs.adoc[tag=text]
 
+*Examples*
+
 [source,bash]
 ----
-$ cohctl set gnore-certs true
+$ cohctl set ignore-certs true
 Value is now set to true
 ----
 
@@ -187,4 +191,34 @@ Refresh Time             :  2021-11-22T03:54:36.919Z
 Refresh Timeout Count    :  0
 Remote Notification Count:  0
 Type                     :  Management
+----
+
+[#get-timeout]
+==== get Timeout
+
+include::../../build/_output/docs-gen/get_timeout.adoc[tag=text]
+
+*Examples*
+
+Displays the current request timeout.
+
+[source,bash]
+----
+$ cohctl get timeout -c local
+Current timeout: 15
+----
+
+[#set-timeout]
+==== Set Timeout
+
+include::../../build/_output/docs-gen/set_timeout.adoc[tag=text]
+
+*Examples*
+
+Set the request timeout ot 15 seconds.
+
+[source,bash]
+----
+$ cohctl set timeout 15 -c local
+Timeout is now set to 15
 ----

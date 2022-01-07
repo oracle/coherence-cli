@@ -60,6 +60,7 @@ type Member struct {
 	MemoryAvailableMB    int32   `json:"memoryAvailableMB"`
 	ReceiverSuccessRate  float32 `json:"receiverSuccessRate"`
 	PublisherSuccessRate float32 `json:"publisherSuccessRate"`
+	TracingSamplingRatio float32 `json:"tracingSamplingRatio"`
 }
 
 // ProxiesSummary contains a summary of individual proxy servers

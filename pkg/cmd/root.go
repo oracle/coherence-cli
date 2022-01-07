@@ -377,6 +377,7 @@ func Initialize(command *cobra.Command) *cobra.Command {
 	getCmd.AddCommand(getExecutorsCmd)
 	getCmd.AddCommand(getManagementCmd)
 	getCmd.AddCommand(getFederationCmd)
+	getCmd.AddCommand(getTracingCmd)
 
 	// set command
 	command.AddCommand(setCmd)

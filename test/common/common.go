@@ -198,6 +198,10 @@ func RunTestMemberCommands(t *testing.T) {
 	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "PUBLISHER,RECEIVER", "--config", file, "get", "members",
 		"-o", "wide", "-c", context.ClusterName)
 
+	// test get tracing
+	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "TRACING ENABLED,SAMPLING RATIO", "--config", file, "get", "tracing",
+		"-c", context.ClusterName)
+
 	// set the current context and ensure the command still succeeds
 	test_utils.EnsureCommandContains(g, t, cliCmd, "cluster1\n", "--config", file, "set", "context", "cluster1")
 

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #
-# Copyright (c) 2021, Oracle and/or its affiliates.
+# Copyright (c) 2021, 2022 Oracle and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at
 # https://oss.oracle.com/licenses/upl.
 #
@@ -122,6 +122,7 @@ create_doc $DOCS_DIR/log_cluster_state "${COHCTL} log cluster-state --help"
 
 # Tracing
 create_doc $DOCS_DIR/configure_tracing "${COHCTL} configure tracing --help"
+create_doc $DOCS_DIR/get_tracing "${COHCTL} get tracing --help"
 
 # Timeout
 create_doc $DOCS_DIR/set_timeout "${COHCTL} set timeout --help"

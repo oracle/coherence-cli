@@ -606,6 +606,44 @@ func FormatClusterConnections(clusters []ClusterConnection) string {
 	return formatLinesAllStrings(stringValues)
 }
 
+// FormatTracing returns the member's tracing details in a column formatted output
+func FormatTracing(members []config.Member) string {
+	var memberCount = len(members)
+
+	if memberCount == 0 {
+		return ""
+	}
+
+	var stringValues = make([]string, memberCount+1)
+
+	sort.Slice(members, func(p, q int) bool {
+		nodeID1, _ := strconv.Atoi(members[p].NodeID)
+		nodeID2, _ := strconv.Atoi(members[q].NodeID)
+		return nodeID1 < nodeID2
+	})
+
+	stringValues[0] = getColumns(NodeIDColumn, AddressColumn, PortColumn, ProcessColumn, MemberColumn, RoleColumn,
+		"TRACING ENABLED", "SAMPLING RATIO")
+
+	for i, value := range members {
+		var (
+			nodeID, _            = strconv.Atoi(value.NodeID)
+			tracingEnabled       = "false"
+			tracingSamplingRatio = "n/a"
+		)
+
+		if value.TracingSamplingRatio != -1 {
+			tracingEnabled = "true"
+			tracingSamplingRatio = formatPublisherReceiver(value.TracingSamplingRatio)
+		}
+
+		stringValues[i+1] = getColumns(formatSmallInteger(int32(nodeID)), value.UnicastAddress,
+			formatPort(value.UnicastPort), value.ProcessName, value.MemberName, value.RoleName, tracingEnabled, tracingSamplingRatio)
+	}
+
+	return formatLinesAllStringsWithAlignment([]string{R, L, R, R, L, L, L, R}, stringValues)
+}
+
 // FormatMembers returns the member's information in a column formatted output
 func FormatMembers(members []config.Member, verbose bool) string {
 	var (
@@ -615,14 +653,14 @@ func FormatMembers(members []config.Member, verbose bool) string {
 		finalAlignment []string
 	)
 
+	if memberCount == 0 {
+		return ""
+	}
+
 	if OutputFormat == constants.TABLE {
 		finalAlignment = alignment
 	} else {
 		finalAlignment = alignmentWide
-	}
-
-	if memberCount == 0 {
-		return ""
 	}
 
 	var stringValues = make([]string, memberCount+1)

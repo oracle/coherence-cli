@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Oracle and/or its affiliates.
+ * Copyright (c) 2021, 2022 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -61,7 +61,8 @@ func (h HTTPFetcher) GetMemberDetailsJSON(verbose bool) ([]byte, error) {
 		// select certain fields otherwise in large clusters fields such as transportStatus
 		// can be extremely large and cause performance issues
 		fields = "&fields=nodeId,unicastAddress,unicastPort,roleName,memberName,machineName," +
-			"rackName,siteName,processName,memoryMaxMB,memoryAvailableMB,receiverSuccessRate,publisherSuccessRate"
+			"rackName,siteName,processName,memoryMaxMB,memoryAvailableMB,receiverSuccessRate," +
+			"publisherSuccessRate,tracingSamplingRatio"
 	}
 	result, err := httpGetRequest(h, "/members/?links="+fields)
 	if err != nil {

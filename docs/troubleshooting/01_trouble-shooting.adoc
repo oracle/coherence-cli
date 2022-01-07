@@ -16,20 +16,26 @@ This page will be updated and maintained over time to include common issues we s
 == Contents
 
 * <<bad, Bad CPU type in executable on macOS>>
+* <<execute, Cannot execute [Exec format error] on Linux>>
 * <<jfr, Null returned in JFR commands>>
 * <<services, Cannot find services with quotes in their names>>
 
 [#bad]
 === Bad CPU type in executable on macOS
 
-If you received a message similar to the following then it is caused by installing the
-incorrect macOS .pkg for your architecture.  E.g. you may have an AMD Mac and trying to install the
-Apple Silicon version or visa-versa.
+==== Problem
+
+You receive a message similar to the following when trying to run the CLI on macOS:
 
 [source,command]
 ----
 /usr/local/bin/cohctl: Bad CPU type in executable
 ----
+
+==== Solution
+
+This is most likely caused by installing the incorrect macOS .pkg for your architecture.  E.g. you may have an AMD Mac and trying to install the
+Apple Silicon version or visa-versa.
 
 Refer to the <<docs/installation/01_installation.adoc,Coherence CLI Installation section>> to uninstall
 `cohctl` and download the correct pkg for your architecture.
@@ -54,13 +60,33 @@ Darwin ... RELEASE_ARM64_T8101 arm64
 
 NOTE: Output above has been truncated for brevity.
 
+[#execute]
+=== Cannot execute [Exec format error] on Linux
+
+==== Problem
+
+You receive a message similar to the following when trying to run the CLI on Linux:
+
+[source,command]
+----
+cohctl: cannot execute [Exec format error]
+----
+
+==== Solution
+
+This is most likely caused by installing the incorrect linux executable for your architecture.  E.g. you may have an AMD Linux machine and trying to use
+the ARM version or visa-versa.
+
+Refer to the <<docs/installation/01_installation.adoc,Coherence CLI Installation section>> to uninstall
+`cohctl` and download the correct binary for your architecture.
+
 [#jfr]
 === Null returned in JFR commands
 
-If you see something similar to the following when running Java Flight Recorder (JFR) commands, where there is a null
-instead of the member number, then this is a known issue.
+==== Problem
 
-You should apply the most recent available Coherence patch on version you are using to resolve this.
+You see something similar to the following when running Java Flight Recorder (JFR) commands, where there is a null
+instead of the member number.
 
 [source,bash]
 ----
@@ -74,8 +100,17 @@ null->
    Use JFR.start to start a recording.
 ----
 
+==== Solution
+
+Then this is a known issue. To resolve you should apply the most recent available
+Coherence patch on version you are using to resolve this.
+
 [#services]
 === Cannot find services with quotes in their names
+
+==== Problem
+
+You are unable to describe or query services with quotes in their names.
 
 Some Coherence services may have quotes in their names, especially if they contain a scope which is
 delimited by a colon, as in WebLogic Server.
@@ -102,7 +137,9 @@ Enter password: *******
 Error: unable to find service with service name 'ExampleGAR:PartitionedPofCache'
 ----
 
-You must surround the service name with single quotes.
+==== Solution
+
+You must surround any service names that have double quotes with single quotes.
 
 [source,bash]
 ----

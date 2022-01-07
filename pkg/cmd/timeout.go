@@ -7,7 +7,6 @@
 package cmd
 
 import (
-	"errors"
 	"fmt"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -21,10 +20,10 @@ const getTimeoutMessage = "Current timeout: "
 var setTimeoutCmd = &cobra.Command{
 	Use:   "timeout value",
 	Short: "set request timeout",
-	Long:  `The 'set timeout' command sets the request timeout for any HTTP requests.`,
+	Long:  `The 'set timeout' command sets the request timeout (in seconds) for any HTTP requests.`,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
-			displayErrorAndExit(cmd, "you must provide a positive integer value for timeout")
+			displayErrorAndExit(cmd, "you must provide a positive integer value for timeout in seconds")
 		}
 		return nil
 	},
@@ -32,9 +31,6 @@ var setTimeoutCmd = &cobra.Command{
 		timeout, err := strconv.Atoi(args[0])
 		if err != nil {
 			return fmt.Errorf("invalid value for timeout of %s", args[0])
-		}
-		if timeout == 0 {
-			return errors.New("you must provide a positive value for timeout")
 		}
 		viper.Set(requestTimeoutKey, timeout)
 		err = WriteConfig()
@@ -50,7 +46,7 @@ var setTimeoutCmd = &cobra.Command{
 var getTimeoutCmd = &cobra.Command{
 	Use:   "timeout",
 	Short: "display the current request timeout",
-	Long:  `The 'get timeout' command displays the current request timeout for any HTTP requests.`,
+	Long:  `The 'get timeout' command displays the current request timeout (in seconds) for any HTTP requests.`,
 	Args:  cobra.ExactArgs(0),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		cmd.Printf("%s%v\n", getTimeoutMessage, Config.RequestTimeout)

@@ -423,6 +423,66 @@ by using the -r flag. You can specify a tracingRatio of -1 to turn off tracing.`
 	},
 }
 
+// getTracingCmd represents the get tracing command
+var getTracingCmd = &cobra.Command{
+	Use:   "tracing",
+	Short: "displays tracing for all members",
+	Long:  `The 'get tracing' command displays tracing status for all members.`,
+	Args:  cobra.ExactArgs(0),
+	RunE: func(cmd *cobra.Command, args []string) error {
+		var (
+			dataFetcher fetcher.Fetcher
+			connection  string
+			err         error
+			members     = config.Members{}
+		)
+
+		// retrieve the current context or the value from "-c"
+		connection, dataFetcher, err = GetConnectionAndDataFetcher()
+		if err != nil {
+			return err
+		}
+
+		for {
+			if watchEnabled {
+				cmd.Println("\n" + time.Now().String())
+			}
+
+			membersResult, err := dataFetcher.GetMemberDetailsJSON(OutputFormat != constants.TABLE && OutputFormat != constants.WIDE)
+			if err != nil {
+				return err
+			}
+
+			if strings.Contains(OutputFormat, constants.JSONPATH) {
+				result, err := utils.GetJSONPathResults(membersResult, OutputFormat)
+				if err != nil {
+					return err
+				}
+				cmd.Println(result)
+			} else if OutputFormat == constants.JSON {
+				cmd.Println(string(membersResult))
+			} else {
+				cmd.Println(FormatCurrentCluster(connection))
+				err = json.Unmarshal(membersResult, &members)
+				if err != nil {
+					return utils.GetError("unable to decode member details", err)
+				}
+
+				cmd.Print(FormatTracing(members.Members))
+			}
+
+			// check to see if we should exit if we are not watching
+			if !watchEnabled {
+				break
+			}
+			// we are watching services so sleep and then repeat until CTRL-C
+			time.Sleep(time.Duration(watchDelay) * time.Second)
+		}
+
+		return nil
+	},
+}
+
 // logClusterStateCmd represents the log cluster-state command
 var logClusterStateCmd = &cobra.Command{
 	Use:   "cluster-state",
