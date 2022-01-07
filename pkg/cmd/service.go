@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Oracle and/or its affiliates.
+ * Copyright (c) 2021, 2022 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -40,7 +40,7 @@ var (
 // getServicesCmd represents the get services command
 var getServicesCmd = &cobra.Command{
 	Use:   "services",
-	Short: "Display services for a cluster",
+	Short: "display services for a cluster",
 	Long: `The 'get services' command displays services for a cluster using various options. 
 You may specify the service type as well a status-ha value to wait for. You
 can also specify '-o wide' to display addition information.`,
@@ -146,7 +146,7 @@ can also specify '-o wide' to display addition information.`,
 // describeService represents the describe service command
 var describeServiceCmd = &cobra.Command{
 	Use:   "service service-name",
-	Short: "Describe a service",
+	Short: "describe a service",
 	Long: `The 'describe service' command shows information related to services. This
 includes information about each service member as well as Persistence information if the
 service is a cache service.`,
@@ -406,7 +406,7 @@ service is a cache service.`,
 // setServiceCmd represents the set service command
 var setServiceCmd = &cobra.Command{
 	Use:   "service <service-name>",
-	Short: "Set a service attribute across one or more members",
+	Short: "set a service attribute across one or more members",
 	Long: `The 'set service' command sets an attribute for a service across one or member nodes.
 The following attribute names are allowed: threadCount, threadCountMin, threadCountMax or
 taskHungThresholdMillis or requestTimeoutMillis.`,
@@ -539,7 +539,7 @@ taskHungThresholdMillis or requestTimeoutMillis.`,
 // suspendServiceCmd represents the suspend service command
 var suspendServiceCmd = &cobra.Command{
 	Use:   "service service-name",
-	Short: "Suspend a service",
+	Short: "suspend a service",
 	Long:  `The 'suspend service' command suspends a specific service in all the members of a cluster.`,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
@@ -555,7 +555,7 @@ var suspendServiceCmd = &cobra.Command{
 // resumeServiceCmd represents the resume service command
 var resumeServiceCmd = &cobra.Command{
 	Use:   "service service-name",
-	Short: "Resume a service",
+	Short: "resume a service",
 	Long:  `The 'resume service' command resumes a specific service in all the members of a cluster.`,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
@@ -571,7 +571,7 @@ var resumeServiceCmd = &cobra.Command{
 // stopServiceCmd represents the stop service command
 var stopServiceCmd = &cobra.Command{
 	Use:   "service service-name",
-	Short: "Stop a service",
+	Short: "stop a service",
 	Long: `The 'stop service' command forces a specific service to stop on a cluster member.
 Use the shutdown service command for normal service termination.`,
 	Args: func(cmd *cobra.Command, args []string) error {
@@ -588,7 +588,7 @@ Use the shutdown service command for normal service termination.`,
 // startServiceCmd represents the start service command
 var startServiceCmd = &cobra.Command{
 	Use:   "service service-name",
-	Short: "Start a service",
+	Short: "start a service",
 	Long:  `The 'start service' command starts a specific service on a cluster member.`,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
@@ -604,7 +604,7 @@ var startServiceCmd = &cobra.Command{
 // shutdownServiceCmd represents the shutdown service command
 var shutdownServiceCmd = &cobra.Command{
 	Use:   "service service-name",
-	Short: "Start a service",
+	Short: "shutdown a service",
 	Long: `The 'shutdown service' command performs a controlled shut-down of a specific service
 on a cluster member. Shutting down a service is preferred over stopping a service.`,
 	Args: func(cmd *cobra.Command, args []string) error {
@@ -784,11 +784,11 @@ func serviceExists(serviceName string, servicesSummary config.ServicesSummaries)
 
 func init() {
 	getServicesCmd.Flags().StringVarP(&serviceType, "type", "t", "all",
-		`Service types to show. E.g. DistributedCache, FederatedCache,
+		`service types to show. E.g. DistributedCache, FederatedCache,
 Invocation, Proxy, RemoteCache or ReplicatedCache`)
 	getServicesCmd.Flags().StringVarP(&statusHAType, "status-ha", "a", "none",
-		"StatusHA to wait for. Used in conjunction with -T option")
-	getServicesCmd.Flags().Int32VarP(&statusHATimeout, "timeout", "T", 60, "Timeout to wait for StatusHA value of all services")
+		"statusHA to wait for. Used in conjunction with -T option")
+	getServicesCmd.Flags().Int32VarP(&statusHATimeout, "timeout", "T", 60, "timeout to wait for StatusHA value of all services")
 
 	setServiceCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
 	setServiceCmd.Flags().StringVarP(&attributeNameService, "attribute", "a", "", "attribute name to set")

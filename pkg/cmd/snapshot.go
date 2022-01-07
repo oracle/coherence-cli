@@ -26,12 +26,14 @@ var (
 
 	// ArchivedSnapshots indicates if we are working with archived snapshots
 	ArchivedSnapshots bool
+
+	archiveMessage = "if true, returns archived snapshots, otherwise local snapshots"
 )
 
 // createSnapshotCmd represents the create snapshot command
 var createSnapshotCmd = &cobra.Command{
 	Use:   "snapshot snapshot-name",
-	Short: "Create a snapshot for a given service",
+	Short: "create a snapshot for a given service",
 	Long: `The 'create snapshot' command creates a snapshot for a given service. If you 
 do not specify the -y option you will be prompted to confirm the operation.`,
 	Args: func(cmd *cobra.Command, args []string) error {
@@ -48,7 +50,7 @@ do not specify the -y option you will be prompted to confirm the operation.`,
 // getSnapshotsCmd represents the get snapshots command
 var getSnapshotsCmd = &cobra.Command{
 	Use:   "snapshots",
-	Short: "Display snapshots for a cluster",
+	Short: "display snapshots for a cluster",
 	Long: `The 'get snapshots' command displays snapshots for a cluster. If 
 no service name is specified then all services are queried. By default 
 local snapshots are shown, but you can use the -a option to show archived snapshots.`,
@@ -174,7 +176,7 @@ local snapshots are shown, but you can use the -a option to show archived snapsh
 // recoverSnapshotCmd represents the recover snapshot command
 var recoverSnapshotCmd = &cobra.Command{
 	Use:   "snapshot snapshot-name",
-	Short: "Recover a snapshot for a given service",
+	Short: "recover a snapshot for a given service",
 	Long: `The 'recover snapshot' command recovers a snapshot for a given service. 
 WARNING: Issuing this command will destroy all service data and replaced with the
 data from the requested snapshot.`,
@@ -192,7 +194,7 @@ data from the requested snapshot.`,
 // removeSnapshotCmd represents the remove snapshot command
 var removeSnapshotCmd = &cobra.Command{
 	Use:   "snapshot snapshot-name",
-	Short: "Remove a snapshot for a given service",
+	Short: "remove a snapshot for a given service",
 	Long: `The 'remove snapshot' command removes a snapshot for a given service. 
 By default local snapshots are removed, but you can use the -a option to remove archived snapshots.`,
 	Args: func(cmd *cobra.Command, args []string) error {
@@ -209,7 +211,7 @@ By default local snapshots are removed, but you can use the -a option to remove 
 // archiveSnapshotCmd represents the arcvhie snapshot command
 var archiveSnapshotCmd = &cobra.Command{
 	Use:   "snapshot snapshot-name",
-	Short: "Archive a snapshot for a given service",
+	Short: "archive a snapshot for a given service",
 	Long: `The 'archive snapshot' command archives a snapshot for a given service. You must
 have an archiver setup on the service for this to be successful.`,
 	Args: func(cmd *cobra.Command, args []string) error {
@@ -226,7 +228,7 @@ have an archiver setup on the service for this to be successful.`,
 // retrieveSnapshotCmd represents the retrieve snapshot command
 var retrieveSnapshotCmd = &cobra.Command{
 	Use:   "snapshot snapshot-name",
-	Short: "Retrieve an archived snapshot for a given service",
+	Short: "retrieve an archived snapshot for a given service",
 	Long:  `The 'retrieve snapshot' command retrieves an archived snapshot for a given service.`,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
@@ -242,19 +244,15 @@ var retrieveSnapshotCmd = &cobra.Command{
 
 func init() {
 	setPersistenceFlags(createSnapshotCmd)
-
 	setPersistenceFlags(recoverSnapshotCmd)
-
 	setPersistenceFlags(archiveSnapshotCmd)
-
 	setPersistenceFlags(retrieveSnapshotCmd)
 
 	getSnapshotsCmd.Flags().StringVarP(&serviceName, serviceNameOption, serviceNameOptionShort, "", serviceNameDescription)
-	getSnapshotsCmd.Flags().BoolVarP(&ArchivedSnapshots, "archived", "a", false, "if true, returns archived snapshots, otherwise local snapshots")
+	getSnapshotsCmd.Flags().BoolVarP(&ArchivedSnapshots, "archived", "a", false, archiveMessage)
 
 	setPersistenceFlags(removeSnapshotCmd)
-	removeSnapshotCmd.Flags().BoolVarP(&ArchivedSnapshots, "archived", "a", false,
-		"If true, refers to archived snapshots, otherwise local snapshots")
+	removeSnapshotCmd.Flags().BoolVarP(&ArchivedSnapshots, "archived", "a", false, archiveMessage)
 }
 
 // setPersistenceFlags sets common flags for persistence operations

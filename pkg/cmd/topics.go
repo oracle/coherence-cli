@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Oracle and/or its affiliates.
+ * Copyright (c) 2021, 2022 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -21,7 +21,7 @@ import (
 // getTopicsCmd represents the get topics command
 var getTopicsCmd = &cobra.Command{
 	Use:   "topics",
-	Short: "Display topics for a cluster",
+	Short: "display topics for a cluster",
 	Long: `The 'get topics' command displays topics for a cluster. If 
 no service name is specified then all services are queried.`,
 	Args: cobra.ExactArgs(0),

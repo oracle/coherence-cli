@@ -49,7 +49,7 @@ const configureTracing = "configure tracing"
 // getMembersCmd represents the get members command
 var getMembersCmd = &cobra.Command{
 	Use:   "members",
-	Short: "Display members for a cluster",
+	Short: "display members for a cluster",
 	Long: `The 'get members' command displays the members for a cluster. You
 can specify '-o wide' to display addition information.`,
 	Args: cobra.ExactArgs(0),
@@ -121,7 +121,7 @@ can specify '-o wide' to display addition information.`,
 // describeMemberCmd represents the describe member command
 var describeMemberCmd = &cobra.Command{
 	Use:   "member node-id",
-	Short: "Describe a member",
+	Short: "describe a member",
 	Long: `The 'describe member' command shows information related to a specific member.
 To display extended information about a member, the -X option can be specified with a comma
 separated list of platform entries to display for. For example:
@@ -281,7 +281,7 @@ Full list of options are JVM dependant, but can include the full values or part 
 // setMemberCmd represents the set member command
 var setMemberCmd = &cobra.Command{
 	Use:   "member {node-ids|all}",
-	Short: "Set a member attribute for one or more members",
+	Short: "set a member attribute for one or more members",
 	Long: `The 'set member' command sets an attribute for one or more member nodes.
 You can specify 'all' to change the value for all nodes, or specify a comma separated
 list of node ids. The following attribute names are allowed:
@@ -402,7 +402,7 @@ or loggingFormat.`,
 // dumpClusterHeapCmd represents the dump cluster-heap command
 var dumpClusterHeapCmd = &cobra.Command{
 	Use:   "cluster-heap",
-	Short: "Dump the cluster heap for all members or a specific role",
+	Short: "dump the cluster heap for all members or a specific role",
 	Long: `The 'dump cluster-heap' command issues a heap dump for all members or the selected role
 by using the -r flag.`,
 	Args: cobra.ExactArgs(0),
@@ -414,7 +414,7 @@ by using the -r flag.`,
 // configureTracingCmd represents the configure tracing command
 var configureTracingCmd = &cobra.Command{
 	Use:   "tracing",
-	Short: "Configure tracing for all members or a specific role",
+	Short: "configure tracing for all members or a specific role",
 	Long: `The 'configure tracing' command configures tracing for all members or the selected role
 by using the -r flag. You can specify a tracingRatio of -1 to turn off tracing.`,
 	Args: cobra.ExactArgs(0),
@@ -438,7 +438,7 @@ polls, in the logs files, for all members or the selected role by using the -r f
 // shutdownMemberCmd represents the shutdown member command
 var shutdownMemberCmd = &cobra.Command{
 	Use:   "member node-id",
-	Short: "Shutdown a members services",
+	Short: "shutdown a members services",
 	Long: `The 'shutdown member' command shuts down all the clustered services that are
 running on a specific member via a controlled shutdown. If the services were started using
 DefaultCacheServer, then they will be restarted.`,
@@ -586,7 +586,7 @@ func issueClusterCommand(cmd *cobra.Command, command string) error {
 // retrieveThreadDumpsCmd represents the retrieve thread-dumps command
 var retrieveThreadDumpsCmd = &cobra.Command{
 	Use:   "thread-dumps node-ids",
-	Short: "Generate and retrieve thread dumps for all or selected members",
+	Short: "generate and retrieve thread dumps for all or selected members",
 	Long: `The 'get thead-dumps' command generates and retrieves thread dumps for all or selected 
 members and places them in the specified output directory'.`,
 	Args: func(cmd *cobra.Command, args []string) error {
@@ -764,10 +764,10 @@ func GetFileName(nodeID string, iteration int32) string {
 }
 
 func init() {
-	getMembersCmd.Flags().StringVarP(&roleName, "role", "r", "all", "Role name to display")
+	getMembersCmd.Flags().StringVarP(&roleName, "role", "r", "all", "role name to display")
 
-	describeMemberCmd.Flags().BoolVarP(&threadDump, "thread-dump", "D", false, "Include a thread dump")
-	describeMemberCmd.Flags().StringVarP(&extendedInfo, "extended", "X", "none", "Include extended information such as g1OldGen, etc. See --help")
+	describeMemberCmd.Flags().BoolVarP(&threadDump, "thread-dump", "D", false, "include a thread dump")
+	describeMemberCmd.Flags().StringVarP(&extendedInfo, "extended", "X", "none", "include extended information such as g1OldGen, etc. See --help")
 
 	setMemberCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
 	setMemberCmd.Flags().StringVarP(&attributeName, "attribute", "a", "", "attribute name to set")
@@ -776,20 +776,20 @@ func init() {
 	_ = setMemberCmd.MarkFlagRequired("value")
 
 	dumpClusterHeapCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
-	dumpClusterHeapCmd.Flags().StringVarP(&dumpRoleName, "role", "r", "all", "Role name to run for")
+	dumpClusterHeapCmd.Flags().StringVarP(&dumpRoleName, "role", "r", "all", "role name to run for")
 
 	logClusterStateCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
-	logClusterStateCmd.Flags().StringVarP(&dumpRoleName, "role", "r", "all", "Role name to run for")
+	logClusterStateCmd.Flags().StringVarP(&dumpRoleName, "role", "r", "all", "role name to run for")
 
-	retrieveThreadDumpsCmd.Flags().Int32VarP(&numThreadDumps, "number", "n", 5, "Number of thread dumps to retrieve")
-	retrieveThreadDumpsCmd.Flags().Int32VarP(&delayBetweenDumps, "dump-delay", "D", 10, "Delay between each thread dump")
-	retrieveThreadDumpsCmd.Flags().StringVarP(&outputDirectory, "output-dir", "O", "", "Existing directory to output thread dumps to")
+	retrieveThreadDumpsCmd.Flags().Int32VarP(&numThreadDumps, "number", "n", 5, "number of thread dumps to retrieve")
+	retrieveThreadDumpsCmd.Flags().Int32VarP(&delayBetweenDumps, "dump-delay", "D", 10, "delay between each thread dump")
+	retrieveThreadDumpsCmd.Flags().StringVarP(&outputDirectory, "output-dir", "O", "", "existing directory to output thread dumps to")
 	_ = retrieveThreadDumpsCmd.MarkFlagRequired("output-dir")
 	retrieveThreadDumpsCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
-	retrieveThreadDumpsCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "Produces verbose output")
+	retrieveThreadDumpsCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "produces verbose output")
 
-	configureTracingCmd.Flags().StringVarP(&configureRole, "role", "r", "", "Role name to configure tracing for")
-	configureTracingCmd.Flags().Float32VarP(&tracingRatio, "tracingRatio", "t", 1.0, "Tracing ratio to set. -1.0 turns off tracing")
+	configureTracingCmd.Flags().StringVarP(&configureRole, "role", "r", "", "role name to configure tracing for")
+	configureTracingCmd.Flags().Float32VarP(&tracingRatio, "tracingRatio", "t", 1.0, "rracing ratio to set. -1.0 turns off tracing")
 	_ = configureTracingCmd.MarkFlagRequired("tracingRatio")
 	configureTracingCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
 

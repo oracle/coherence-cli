@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Oracle and/or its affiliates.
+ * Copyright (c) 2021, 2022 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -21,7 +21,7 @@ import (
 // getHTTPSessionsCmd represents the get http-sessions command
 var getHTTPSessionsCmd = &cobra.Command{
 	Use:   "http-sessions",
-	Short: "Display Coherence*Web Http session information for a cluster",
+	Short: "display Coherence*Web Http session information for a cluster",
 	Long:  `The 'get http-sessions' command displays Coherence*Web Http session information for a cluster.`,
 	Args:  cobra.ExactArgs(0),
 	RunE: func(cmd *cobra.Command, args []string) error {
@@ -134,7 +134,7 @@ func DeduplicateSessions(httpSummary config.HTTPSessionSummaries) []config.HTTPS
 // describeHTTPSessionCmd represents the describe http-session command
 var describeHTTPSessionCmd = &cobra.Command{
 	Use:   "http-session application-id",
-	Short: "Describe a http-session",
+	Short: "describe a http-session",
 	Long:  `The 'describe http-session' command shows information related to a specific Coherence*Web application.`,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {

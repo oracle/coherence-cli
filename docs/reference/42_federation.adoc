@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 
-    Copyright (c) 2021, Oracle and/or its affiliates.
+    Copyright (c) 2021, 2022 Oracle and/or its affiliates.
     Licensed under the Universal Permissive License v 1.0 as shown at
     https://oss.oracle.com/licenses/upl.
 
@@ -15,8 +15,8 @@ There are various commands that allow you to work with and issue Federation comm
 
 * <<get-federation, `cohctl get federation`>> - displays federation details for a cluster
 * <<start-federation, `cohctl start federation`>> - starts federation for a service
-* <<stop-federation, `cohctl stop federation`>> - stop federation for a service
-* <<pause-federation, `cohctl pause federation`>> - pause federation for a service
+* <<stop-federation, `cohctl stop federation`>> - stops federation for a service
+* <<pause-federation, `cohctl pause federation`>> - pauses federation for a service
 * <<replicate-all, `cohctl replicate all`>> - initiates a replicate of all cache entries for a federated service
 
 NOTE: This is a Coherence Grid Edition feature only and is not available with Community Edition.

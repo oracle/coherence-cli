@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Oracle and/or its affiliates.
+ * Copyright (c) 2021, 2022 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -32,7 +32,7 @@ const updateURL = "https://github.com/oracle/coherence-cli/releases"
 // versionCmd represents the version command
 var versionCmd = &cobra.Command{
 	Use:   "version",
-	Short: "Show version information",
+	Short: "show version information",
 	Long: `The 'get version' command displays version and build details for the Coherence-CLI.
 Use the '-u' option to check for updates.`,
 	Args: cobra.ExactArgs(0),
@@ -74,7 +74,7 @@ func isVersionUpdateAvailable(haveVersion, stableVersion string) bool {
 
 func init() {
 	versionCmd.Flags().BoolVarP(&checkForUpdates, "check-updates", "u", false,
-		"If true, will check for updates")
+		"if true, will check for updates")
 }
 
 func getLatestVersion() (string, error) {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Oracle and/or its affiliates.
+ * Copyright (c) 2021, 2022 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -22,7 +22,7 @@ import (
 // getExecutorsCmd represents the get executors command
 var getExecutorsCmd = &cobra.Command{
 	Use:   "executors",
-	Short: "Display executors for a cluster",
+	Short: "display executors for a cluster",
 	Long:  `The 'get executors' command displays the executors for a cluster.`,
 	Args:  cobra.ExactArgs(0),
 	RunE: func(cmd *cobra.Command, args []string) error {
@@ -89,7 +89,7 @@ var getExecutorsCmd = &cobra.Command{
 // describeExecutorCmd represents the describe executor command
 var describeExecutorCmd = &cobra.Command{
 	Use:   "executor executor-name",
-	Short: "Describe an executor",
+	Short: "describe an executor",
 	Long:  `The 'describe executor' command shows information related to a specific executor.`,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {

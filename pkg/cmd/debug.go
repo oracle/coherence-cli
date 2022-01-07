@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Oracle and/or its affiliates.
+ * Copyright (c) 2021, 2022 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -19,7 +19,7 @@ const getDebugMsg = "Current debug level: "
 // setDebugCmd represents the set debug command
 var setDebugCmd = &cobra.Command{
 	Use:   "debug {on|off}}",
-	Short: "Set debug messages to be on or off",
+	Short: "set debug messages to be on or off",
 	Long: `The 'set debug' command sets debug to on or off. If 'on' then additional
 information is logged in the log file (cohctl.log).`,
 	Args: func(cmd *cobra.Command, args []string) error {
@@ -52,7 +52,7 @@ information is logged in the log file (cohctl.log).`,
 // getDebugCmd represents the get debug command
 var getDebugCmd = &cobra.Command{
 	Use:   "debug",
-	Short: "Display the current debug level",
+	Short: "display the current debug level",
 	Long: `The 'get debug' command displays the current debug level. If 'on' then 
 additional information is logged in the log file.`,
 	Args: cobra.ExactArgs(0),

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Oracle and/or its affiliates.
+ * Copyright (c) 2021, 2022 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -22,7 +22,7 @@ var (
 // getIgnoreCertsCmd represents the get ignore-certs
 var getIgnoreCertsCmd = &cobra.Command{
 	Use:   "ignore-certs",
-	Short: "Display the current setting for ignoring invalid SSL Certificates",
+	Short: "display the current setting for ignoring invalid SSL Certificates",
 	Long: `The 'get ignore-certs' command displays the current setting for ignoring 
 invalid SSL Certificates. If 'true' then invalid certificates such as self signed will be allowed. 
 You should only use this option when you are sure of the identify of the target server.`,
@@ -42,7 +42,7 @@ You should only use this option when you are sure of the identify of the target 
 // setIgnoreInvalidCertsCmd represents the set ignore-certs command
 var setIgnoreCertsCmd = &cobra.Command{
 	Use:   "ignore-certs {true|false}",
-	Short: "Set current setting for ignoring invalid SSL Certificates",
+	Short: "set current setting for ignoring invalid SSL Certificates",
 	Long: `The 'set ignore-certs' set the current setting for ignoring
 invalid SSL Certificates. If 'true' then invalid certificates such as self signed will be allowed.
 You should only use this option when you are sure of the identify of the target server.`,

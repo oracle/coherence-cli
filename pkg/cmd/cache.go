@@ -34,7 +34,7 @@ var (
 // getCachesCmd represents the get caches command
 var getCachesCmd = &cobra.Command{
 	Use:   "caches",
-	Short: "Display caches for a cluster",
+	Short: "display caches for a cluster",
 	Long: `The 'get caches' command displays caches for a cluster. If 
 no service name is specified then all services are queried. You
 can specify '-o wide' to display addition information.`,
@@ -118,7 +118,7 @@ can specify '-o wide' to display addition information.`,
 // describeCacheCmd represents the describe cache command
 var describeCacheCmd = &cobra.Command{
 	Use:   "cache cache-name",
-	Short: "Describe a cache",
+	Short: "describe a cache",
 	Long: `The 'describe cache' command displays information related to a specific cache. This
 includes cache size, access, storage and index information across all nodes. You
 can specify '-o wide' to display addition information.`,
@@ -242,7 +242,7 @@ can specify '-o wide' to display addition information.`,
 // setCacheCmd represents the set cache command
 var setCacheCmd = &cobra.Command{
 	Use:   "cache cache-name",
-	Short: "Set an attribute for a cache across one or more members",
+	Short: "set an attribute for a cache across one or more members",
 	Long: `The 'set cache' command sets an attribute for a cache across one or member nodes.
 The following attribute names are allowed: expiryDelay, highUnits, lowUnits,
 batchFactor, refreshFactor or requeueThreshold.`,

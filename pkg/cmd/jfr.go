@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Oracle and/or its affiliates.
+ * Copyright (c) 2021, 2022 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -29,7 +29,7 @@ var (
 // getJfrsCmd represents the get jfrs command
 var getJfrsCmd = &cobra.Command{
 	Use:   "jfrs",
-	Short: "Display Java Flight Recordings for a cluster",
+	Short: "display Java Flight Recordings for a cluster",
 	Long:  `The 'get jfrs' command displays the Java Flight Recordings for a cluster.`,
 	Args:  cobra.ExactArgs(0),
 	RunE: func(cmd *cobra.Command, args []string) error {
@@ -53,7 +53,7 @@ var getJfrsCmd = &cobra.Command{
 // describeJfrCmd represents the describe jfr command
 var describeJfrCmd = &cobra.Command{
 	Use:   "jfr name",
-	Short: "Describe a Java Flight Recording (JFR)",
+	Short: "describe a Java Flight Recording (JFR)",
 	Long:  `The 'describe jfr' command shows information related to a Java Flight Recording (JFR).`,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
@@ -82,7 +82,7 @@ var describeJfrCmd = &cobra.Command{
 // startJfrCmd represents the start jfr command
 var startJfrCmd = &cobra.Command{
 	Use:   "jfr name",
-	Short: "Start a Java Flight Recording (JFR) for all or selected members",
+	Short: "start a Java Flight Recording (JFR) for all or selected members",
 	Long: `The 'start jfr' command starts a Java Flight Recording all or selected members.
 You can specify either a node id or role. If you do not specify either, then the JFR will 
 be run for all members. The default duration is 60 seconds and you can specify a value
@@ -178,7 +178,7 @@ of 0 to make the recording continuous.`,
 // stopJfrCmd represents the start jfr command
 var stopJfrCmd = &cobra.Command{
 	Use:   "jfr name",
-	Short: "Stop a Java Flight Recording (JFR) for all or selected members",
+	Short: "stop a Java Flight Recording (JFR) for all or selected members",
 	Long: `The 'stop jfr' command stops a Java Flight Recording all or selected members.
 You can specify either a node or leave the node blank to stop for all nodes.`,
 	Args: func(cmd *cobra.Command, args []string) error {
@@ -208,7 +208,7 @@ You can specify either a node or leave the node blank to stop for all nodes.`,
 // dumpJfrCmd represents the dump jfr command
 var dumpJfrCmd = &cobra.Command{
 	Use:   "jfr name",
-	Short: "Dump a Java Flight Recording (JFR) for all or selected members",
+	Short: "dump a Java Flight Recording (JFR) for all or selected members",
 	Long: `The 'dump jfr' command dumps a Java Flight Recording all or selected members.
 A JFR command mut be in progress for this to succeed.`,
 	Args: func(cmd *cobra.Command, args []string) error {
@@ -377,12 +377,12 @@ func formatJFROutput(result string) string {
 func init() {
 	describeJfrCmd.Flags().StringVarP(&NodeID, "node", "n", "", "node id to target")
 
-	startJfrCmd.Flags().StringVarP(&outputDirectory, "output-dir", "O", "", "Directory on servers to output JFR's to")
+	startJfrCmd.Flags().StringVarP(&outputDirectory, "output-dir", "O", "", "directory on servers to output JFR's to")
 	_ = startJfrCmd.MarkFlagRequired("output-dir")
 	startJfrCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
-	startJfrCmd.Flags().StringVarP(&jfrRoleName, "role", "r", "all", "Role name to target")
-	startJfrCmd.Flags().StringVarP(&NodeID, "node", "n", "", "Node id to target")
-	startJfrCmd.Flags().Int32VarP(&duration, "duration", "D", 60, "Duration for JFR in seconds. Use 0 for continuous")
+	startJfrCmd.Flags().StringVarP(&jfrRoleName, "role", "r", "all", "role name to target")
+	startJfrCmd.Flags().StringVarP(&NodeID, "node", "n", "", "node id to target")
+	startJfrCmd.Flags().Int32VarP(&duration, "duration", "D", 60, "duration for JFR in seconds. Use 0 for continuous")
 
 	stopJfrCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
 	stopJfrCmd.Flags().StringVarP(&NodeID, "node", "n", "", "node id to target")

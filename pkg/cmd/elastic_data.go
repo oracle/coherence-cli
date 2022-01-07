@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Oracle and/or its affiliates.
+ * Copyright (c) 2021, 2022 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -27,7 +27,7 @@ var (
 // getElasticDataCmd represents the get elastic-data command
 var getElasticDataCmd = &cobra.Command{
 	Use:   "elastic-data",
-	Short: "Display elastic data information for a cluster",
+	Short: "display elastic data information for a cluster",
 	Long: `The 'get elastic-data' command displays the Flash Journal and RAM
 Journal details for the cluster.`,
 	Args: cobra.ExactArgs(0),
@@ -122,7 +122,7 @@ Journal details for the cluster.`,
 // describeElasticDataCmd represents the describe elastic-data command
 var describeElasticDataCmd = &cobra.Command{
 	Use:   "elastic-data {FlashJournalRM|RamJournalRM}",
-	Short: "Describe a flash our ram journal",
+	Short: "describe a flash our ram journal",
 	Long: `The 'describe elastic-data' command shows information related to a specific journal type.
 The allowable values are RamJournalRM or FlashJournalRM.`,
 	Args: func(cmd *cobra.Command, args []string) error {

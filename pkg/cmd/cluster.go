@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Oracle and/or its affiliates.
+ * Copyright (c) 2021, 2022 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -32,12 +32,12 @@ var (
 )
 
 const clusterMessage = "A cluster connection already exists with the name %s for %s\n"
-const ignoreErrorsMessage = "Ignore errors from NS lookup"
+const ignoreErrorsMessage = "ignore errors from NS lookup"
 
 // addClusterCmd represents the add cluster command
 var addClusterCmd = &cobra.Command{
 	Use:   "cluster connection-name",
-	Short: "Add a cluster connection",
+	Short: "add a cluster connection",
 	Long: `The 'add cluster' command adds a new connection to a Coherence cluster. You can
 specify the full url such as https://<host>:<management-port>/management/coherence/cluster.
 You can also specify host and port (for http connections) and the url will be automatically 
@@ -68,7 +68,7 @@ populated constructed.`,
 // removeClusterCmd represents the remove cluster command
 var removeClusterCmd = &cobra.Command{
 	Use:   "cluster connection-name",
-	Short: "Remove a cluster connection",
+	Short: "remove a cluster connection",
 	Long:  `The 'remove cluster' command removes a cluster connection.`,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
@@ -109,7 +109,7 @@ var removeClusterCmd = &cobra.Command{
 // getClustersCmd represents the get clusters command
 var getClustersCmd = &cobra.Command{
 	Use:   "clusters",
-	Short: "Display the list of discovered or manually added clusters",
+	Short: "display the list of discovered or manually added clusters",
 	Long:  `The 'get clusters' command displays the list of cluster connections.`,
 	Args:  cobra.ExactArgs(0),
 	RunE: func(cmd *cobra.Command, args []string) error {
@@ -152,7 +152,7 @@ var getClustersCmd = &cobra.Command{
 // describeClusterCmd represents the describe cluster command
 var describeClusterCmd = &cobra.Command{
 	Use:   "cluster cluster-name",
-	Short: "Describe a cluster",
+	Short: "describe a cluster",
 	Long: `The 'describe cluster' command shows cluster information related to a specific 
 cluster connection, including: cluster overview, members, machines, services, caches, 
 reporters, proxy servers and Http servers. You can specify '-o wide' to display 
@@ -557,7 +557,7 @@ addition information.`,
 // discoverClustersCmd represents the discover clusters command
 var discoverClustersCmd = &cobra.Command{
 	Use:   "clusters",
-	Short: "Discovers clusters using the Name Service",
+	Short: "discover clusters using the Coherence Name Service",
 	Long: `The 'discover clusters' command discovers Coherence clusters using the Name Service.
 You can specify a list of either host:port pairs or if you specify a host name the default cluster
 port of 7574 will be used.
@@ -812,12 +812,12 @@ func addCluster(cmd *cobra.Command, connection, connectionURL, discoveryType, ns
 }
 
 func init() {
-	addClusterCmd.Flags().StringVarP(&connectionURL, "url", "u", "", "Connection URL")
+	addClusterCmd.Flags().StringVarP(&connectionURL, "url", "u", "", "connection URL")
 	_ = addClusterCmd.MarkFlagRequired("url")
-	addClusterCmd.Flags().StringVarP(&connectionType, "type", "t", "http", "Connection type, http")
+	addClusterCmd.Flags().StringVarP(&connectionType, "type", "t", "http", "connection type, http")
 
 	describeClusterCmd.Flags().BoolVarP(&verboseOutput, "verbose", "v", false,
-		"Include verbose output including individual members, reporters and executor details")
+		"include verbose output including individual members, reporters and executor details")
 
 	discoverClustersCmd.PersistentFlags().BoolVarP(&ignoreErrors, "ignore", "I", false, ignoreErrorsMessage)
 	discoverClustersCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)

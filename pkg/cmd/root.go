@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Oracle and/or its affiliates.
+ * Copyright (c) 2021, 2022 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -37,7 +37,7 @@ var watchDelay int32
 var readPassStdin bool
 
 // various command constants
-const clusterConnectionDescription = "Cluster connection name. (not required if context is set)"
+const clusterConnectionDescription = "cluster connection name. (not required if context is set)"
 const connectionNameOption = "connection"
 const clusterNameOptionShort = "c"
 
@@ -45,7 +45,7 @@ const serviceNameDescription = "Service name"
 const serviceNameOption = "service"
 const serviceNameOptionShort = "s"
 
-const userNameDescription = "Basic auth username if authentication is required"
+const userNameDescription = "basic auth username if authentication is required"
 const usernameOption = "username"
 const usernameShort = "U"
 
@@ -55,8 +55,8 @@ const debugContextKey = "debug"
 const ignoreCertsContextKey = "ignoreInvalidCerts"
 const requestTimeoutKey = "requestTimeout"
 
-const confirmOptionMessage = "Automatically confirm the operation"
-const timeoutMessage = "Timeout in seconds for NS Lookup requests"
+const confirmOptionMessage = "automatically confirm the operation"
+const timeoutMessage = "timeout in seconds for NS Lookup requests"
 
 const outputFormats = "table, wide, json or jsonpath=\"...\""
 
@@ -146,12 +146,12 @@ func Execute(version string, date string, commit string) {
 // SetRootCommandFlags sets all the persistent root command flags
 func SetRootCommandFlags(command *cobra.Command) {
 	// Global flags for all commands
-	command.PersistentFlags().StringVar(&cfgDirectory, "config-dir", "", "Config directory (default is $HOME/.cohctl)")
-	command.PersistentFlags().StringVar(&cfgFile, "config", "", "Config file (default is $HOME/.cohctl/cohctl.yaml)")
-	command.PersistentFlags().StringVarP(&OutputFormat, "output", "o", constants.TABLE, "Output format: "+outputFormats)
-	command.PersistentFlags().BoolVarP(&watchEnabled, "watch", "w", false, "Watch output (only available for get commands)")
-	command.PersistentFlags().BoolVarP(&readPassStdin, "stdin", "i", false, "Read password from stdin")
-	command.PersistentFlags().Int32VarP(&watchDelay, "delay", "d", 5, "Delay for watching in seconds")
+	command.PersistentFlags().StringVar(&cfgDirectory, "config-dir", "", "config directory (default is $HOME/.cohctl)")
+	command.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.cohctl/cohctl.yaml)")
+	command.PersistentFlags().StringVarP(&OutputFormat, "output", "o", constants.TABLE, "output format: "+outputFormats)
+	command.PersistentFlags().BoolVarP(&watchEnabled, "watch", "w", false, "watch output (only available for get commands)")
+	command.PersistentFlags().BoolVarP(&readPassStdin, "stdin", "i", false, "read password from stdin")
+	command.PersistentFlags().Int32VarP(&watchDelay, "delay", "d", 5, "delay for watching in seconds")
 	command.PersistentFlags().StringVarP(&Username, usernameOption, usernameShort, "", userNameDescription)
 	command.PersistentFlags().StringVarP(&clusterConnection, connectionNameOption, clusterNameOptionShort, "", clusterConnectionDescription)
 }

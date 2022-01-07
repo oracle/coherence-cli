@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Oracle and/or its affiliates.
+ * Copyright (c) 2021, 2022 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -20,7 +20,7 @@ const getTimeoutMessage = "Current timeout: "
 // setTimeoutCmd represents the set timeout command
 var setTimeoutCmd = &cobra.Command{
 	Use:   "timeout value",
-	Short: "Set request timeout",
+	Short: "set request timeout",
 	Long:  `The 'set timeout' command sets the request timeout for any HTTP requests.`,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
@@ -49,7 +49,7 @@ var setTimeoutCmd = &cobra.Command{
 // getTimeoutCmd represents the get timeout command
 var getTimeoutCmd = &cobra.Command{
 	Use:   "timeout",
-	Short: "Display the current request timeout",
+	Short: "display the current request timeout",
 	Long:  `The 'get timeout' command displays the current request timeout for any HTTP requests.`,
 	Args:  cobra.ExactArgs(0),
 	RunE: func(cmd *cobra.Command, args []string) error {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Oracle and/or its affiliates.
+ * Copyright (c) 2021, 2022 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -18,7 +18,7 @@ var (
 // nsLookupCmd represents the nslookup command
 var nsLookupCmd = &cobra.Command{
 	Use:   "nslookup <host:port>",
-	Short: "Execute a Name Service lookup",
+	Short: "execute a Coherence Name Service lookup",
 	Long: `The 'nslookup' command looks up various Name Service endpoints for a cluster host/port.
 The various options to pass via -q option include: Cluster/name, Cluster/info, NameService/string/Cluster/foreign,
 NameService/string/management/HTTPManagementURL, NameService/string/management/JMXServiceURL, and
@@ -78,7 +78,7 @@ NameService/string/Cluster/foreign/<clustername>/NameService/localPort`,
 
 func init() {
 	nsLookupCmd.Flags().StringVarP(&nsQuery, "query", "q", "",
-		"Query string to pass to Name Service lookup")
+		"query string to pass to Name Service lookup")
 	_ = nsLookupCmd.MarkFlagRequired("query")
 	nsLookupCmd.PersistentFlags().BoolVarP(&ignoreErrors, "ignore", "I", false, ignoreErrorsMessage)
 	nsLookupCmd.Flags().Int32VarP(&timeout, "timeout", "t", 30, timeoutMessage)

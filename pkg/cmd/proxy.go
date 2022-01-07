@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Oracle and/or its affiliates.
+ * Copyright (c) 2021, 2022 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -21,7 +21,7 @@ import (
 // var getProxiesCmd = &cobra.Command{ represents the getProxies command
 var getProxiesCmd = &cobra.Command{
 	Use:   "proxies",
-	Short: "Display Coherence*Extend proxy services for a cluster",
+	Short: "display Coherence*Extend proxy services for a cluster",
 	Long: `The 'get proxies' command displays the list of Coherence*Extend proxy
 servers for a cluster. You can specify '-o wide' to display addition information.`,
 	Args: cobra.ExactArgs(0),
@@ -51,7 +51,7 @@ servers for a cluster. You can specify '-o wide' to display addition information
 // describeProxyCmd represents the describe proxy command
 var describeProxyCmd = &cobra.Command{
 	Use:   "proxy service-name",
-	Short: "Describe a proxy server",
+	Short: "describe a proxy server",
 	Long: `The 'describe proxy' command shows information related to proxy servers including
 all nodes running the proxy service as well as detailed connection information.`,
 	Args: func(cmd *cobra.Command, args []string) error {

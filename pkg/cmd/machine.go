@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Oracle and/or its affiliates.
+ * Copyright (c) 2021, 2022 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -22,7 +22,7 @@ import (
 // getMachinesCmd represents the get machines command
 var getMachinesCmd = &cobra.Command{
 	Use:   "machines",
-	Short: "Display machines for a cluster",
+	Short: "display machines for a cluster",
 	Long:  `The 'get machines' command displays the machines for a cluster.`,
 	Args:  cobra.ExactArgs(0),
 	RunE: func(cmd *cobra.Command, args []string) error {
@@ -154,7 +154,7 @@ func getOSJson(machinesMap map[string]string, dataFetcher fetcher.Fetcher) ([]by
 // describeMachineCmd represents the describe machine command
 var describeMachineCmd = &cobra.Command{
 	Use:   "machine machine-name",
-	Short: "Describe a machine",
+	Short: "describe a machine",
 	Long:  `The 'describe machine' command shows information related to a particular machine.`,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {

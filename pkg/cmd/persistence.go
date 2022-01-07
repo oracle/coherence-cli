@@ -21,7 +21,7 @@ import (
 // getPersistenceCmd represents the get persistence command
 var getPersistenceCmd = &cobra.Command{
 	Use:   "persistence",
-	Short: "Display persistence details for a cluster",
+	Short: "display persistence details for a cluster",
 	Long:  `The 'get persistence' command displays persistence information for a cluster.`,
 	Args:  cobra.ExactArgs(0),
 	RunE: func(cmd *cobra.Command, args []string) error {

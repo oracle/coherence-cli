@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Oracle and/or its affiliates.
+ * Copyright (c) 2021, 2022 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -20,7 +20,7 @@ const clearContextMessage = "Current context was cleared"
 // setContextCmd represents the set context command
 var setContextCmd = &cobra.Command{
 	Use:   "context connection-name",
-	Short: "Set the current context",
+	Short: "set the current context",
 	Long:  `The 'set context' command sets the current context or connection for running commands in.`,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
@@ -47,7 +47,7 @@ var setContextCmd = &cobra.Command{
 // getContextCmd represents the get context command
 var getContextCmd = &cobra.Command{
 	Use:   "context",
-	Short: "Display the current context",
+	Short: "display the current context",
 	Long:  `The 'get context' command displays the current context.`,
 	Args:  cobra.ExactArgs(0),
 	RunE: func(cmd *cobra.Command, args []string) error {
@@ -60,7 +60,7 @@ var getContextCmd = &cobra.Command{
 // clearContextCommand represents the clear context command
 var clearContextCmd = &cobra.Command{
 	Use:   "context",
-	Short: "Clear the current context",
+	Short: "clear the current context",
 	Long:  `The 'clear context' command clears the current context for running commands in.`,
 	Args:  cobra.ExactArgs(0),
 	RunE: func(cmd *cobra.Command, args []string) error {

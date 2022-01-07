@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Oracle and/or its affiliates.
+ * Copyright (c) 2021, 2022 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -21,7 +21,7 @@ import (
 // getReportersCmd represents the get reporters command
 var getReportersCmd = &cobra.Command{
 	Use:   "reporters",
-	Short: "Display reporters for a cluster",
+	Short: "display reporters for a cluster",
 	Long:  `The 'get reporters' command displays the reporters for the cluster.`,
 	Args:  cobra.ExactArgs(0),
 	RunE: func(cmd *cobra.Command, args []string) error {
@@ -80,7 +80,7 @@ var getReportersCmd = &cobra.Command{
 // describeReporterCmd represents the describe reporter command
 var describeReporterCmd = &cobra.Command{
 	Use:   "reporter node-id",
-	Short: "Describe a reporter",
+	Short: "describe a reporter",
 	Long:  `The 'describe reporter' command shows information related to a particular reporter.`,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
@@ -141,7 +141,7 @@ var describeReporterCmd = &cobra.Command{
 // startReporterCmd represents the start reporter command
 var startReporterCmd = &cobra.Command{
 	Use:   "reporter node-id",
-	Short: "Start a reporter on a node",
+	Short: "start a reporter on a node",
 	Long:  `The 'start reporter' command starts the Coherence reporter on the specified node.`,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
@@ -157,7 +157,7 @@ var startReporterCmd = &cobra.Command{
 // stopReporterCmd represents the stop reporter command
 var stopReporterCmd = &cobra.Command{
 	Use:   "reporter node-id",
-	Short: "Stop a reporter on a node",
+	Short: "stop a reporter on a node",
 	Long:  `The 'stop reporter' command stops the Coherence reporter on the specified node.`,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {

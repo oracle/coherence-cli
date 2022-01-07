@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Oracle and/or its affiliates.
+ * Copyright (c) 2021, 2022 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -13,6 +13,6 @@ import (
 // archiveCmd represents the archive command
 var archiveCmd = &cobra.Command{
 	Use:   "archive",
-	Short: "Archive a resource",
+	Short: "archive a resource",
 	Long:  `The 'archive' command archive a resource.`,
 }

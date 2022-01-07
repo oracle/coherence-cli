@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Oracle and/or its affiliates.
+ * Copyright (c) 2021, 2022 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -20,7 +20,7 @@ import (
 // var getHTTPProxiesCmd represents the getHTTPProxiesCmd command
 var getHTTPProxiesCmd = &cobra.Command{
 	Use:   "http-servers",
-	Short: "Display http proxy services for a cluster",
+	Short: "display http proxy services for a cluster",
 	Long:  `The 'get http-servers' command displays the list of http proxy servers for a cluster.`,
 	Args:  cobra.ExactArgs(0),
 	RunE: func(cmd *cobra.Command, args []string) error {
@@ -48,7 +48,7 @@ var getHTTPProxiesCmd = &cobra.Command{
 // describeHTTPProxyCmd represents the describe http-proxy command
 var describeHTTPProxyCmd = &cobra.Command{
 	Use:   "http-server service-name",
-	Short: "Describe a http server",
+	Short: "describe a http server",
 	Long:  `The 'describe http-server' command shows information related to http servers.`,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {

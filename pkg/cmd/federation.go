@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Oracle and/or its affiliates.
+ * Copyright (c) 2021, 2022 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -33,7 +33,7 @@ var (
 // getFederationCmd represents the get federation command
 var getFederationCmd = &cobra.Command{
 	Use:   "federation {destinations|origins|all}",
-	Short: "Display federation details for a cluster",
+	Short: "display federation details for a cluster",
 	Long: `The 'get federation' command displays the federation details for a cluster. 
 You must specify either destinations, origins or all to show both. You 
 can also specify '-o wide' to display addition information.`,
@@ -142,7 +142,7 @@ can also specify '-o wide' to display addition information.`,
 // startFederationCmd represents the start federation command
 var startFederationCmd = &cobra.Command{
 	Use:   "federation service-name",
-	Short: "Start federation for a service",
+	Short: "start federation for a service",
 	Long: `The 'start federation' command starts federation on a service. There
 are various options available using '-m' including:
 - with-sync - start after federating all cache entries
@@ -162,7 +162,7 @@ You may also specify a participant otherwise the command will apply to all parti
 // stopFederationCmd represents the stop federation command
 var stopFederationCmd = &cobra.Command{
 	Use:   "federation service-name",
-	Short: "Stop federation for a service",
+	Short: "stop federation for a service",
 	Long: `The 'stop federation' command stops federation on a service. There
 You may also specify a participant otherwise the command will apply to all participants.`,
 	Args: func(cmd *cobra.Command, args []string) error {
@@ -179,7 +179,7 @@ You may also specify a participant otherwise the command will apply to all parti
 // replicateAllCmd represents the replicate all command
 var replicateAllCmd = &cobra.Command{
 	Use:   "all service-name",
-	Short: "Initiates a replication of all cache entries for a federated service",
+	Short: "initiate a replication of all cache entries for a federated service",
 	Long: `The 'replicate all' command replicates all caches for a federated service.
 You must specify a participant to replicate for.`,
 	Args: func(cmd *cobra.Command, args []string) error {
