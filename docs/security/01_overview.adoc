@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 
-    Copyright (c) 2021, Oracle and/or its affiliates.
+    Copyright (c) 2021, 2022 Oracle and/or its affiliates.
     Licensed under the Universal Permissive License v 1.0 as shown at
     https://oss.oracle.com/licenses/upl.
 
@@ -13,7 +13,11 @@
 The Coherence CLI accesses cluster information using the Management over REST endpoint for the cluster as described in the
 https://docs.oracle.com/en/middleware/standalone/coherence/14.1.1.0/rest-reference/quick-start.html[Coherence documentation].
 
-Coherence HTTP Management Server authentication and authorization are disabled by default but can be enabled as required as outlined below.
+Coherence HTTP Management server authentication and authorization are disabled by
+default. We recommend that this is enabled as outlined in the sections below.
+
+Another option for securing access to the management endpoint is to restrict HTTP access to the REST endpoint from trusted or management subnets
+using standard networking firewall rules.
 
 === Enabling Basic Authentication
 

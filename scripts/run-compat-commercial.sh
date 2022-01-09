@@ -15,9 +15,6 @@ PROFILES=,commercial COHERENCE_VERSION=14.1.1-0-7 COHERENCE_GROUP_ID=com.oracle.
 echo "Coherence GE 12.2.1-4-11"
 PROFILES=,commercial COHERENCE_VERSION=12.2.1-4-11 COHERENCE_GROUP_ID=com.oracle.coherence make clean build-test-images test-e2e-standalone
 
-echo "Coherence GE 14.1.2-0-0-SNAPSHOT"
-PROFILES=,commercial COHERENCE_VERSION=14.1.2-0-0-SNAPSHOT COHERENCE_GROUP_ID=com.oracle.coherence make clean build-test-images test-e2e-standalone
-
 # Federation Tests
 echo "Coherence Federation Test GE 14.1.1-0-7"
 PROFILES=,federation COHERENCE_VERSION=14.1.1-0-7 COHERENCE_GROUP_ID=com.oracle.coherence make clean build-federation-images test-e2e-federation
