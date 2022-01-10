@@ -60,7 +60,7 @@ Use the '-u' option to check for updates.`,
 					cmd.Printf("A newer version of cohctl (%s) is available.\nPlease visit the following URL to update:\n%s\n",
 						latestVersion, updateURL)
 				} else {
-					cmd.Println("you are on the latest version")
+					cmd.Println("You are on the latest version")
 				}
 			}
 		}

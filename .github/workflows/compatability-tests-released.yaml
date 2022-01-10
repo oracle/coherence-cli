@@ -1,0 +1,80 @@
+# Copyright 2022, Oracle Corporation and/or its affiliates.
+# Licensed under the Universal Permissive License v 1.0 as shown at
+# https://oss.oracle.com/licenses/upl.
+
+# ---------------------------------------------------------------------------
+# Coherence CLI Compatability Tests against latest released version
+# ---------------------------------------------------------------------------
+name: Compatability Tests Released
+
+on:
+  workflow_dispatch:
+  schedule:
+    # Every day at 1 am
+    - cron: '0 1 * * *'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        coherenceVersion:
+          - 21.12
+          - 21.06.2
+          - 14.1.1-0-7
+          - 14.1.1-0-6
+
+#   Checkout the source, we need a depth of zero to fetch all of the history otherwise
+#   the copyright check cannot work out the date of the files from Git.
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+
+    - name: Get Docker Images
+      shell: bash
+      run: |
+        docker pull gcr.io/distroless/java:11
+
+    - name: Set up JDK
+      uses: actions/setup-java@v1
+      with:
+        java-version: '1.8'
+
+    - name: Cache Go Modules
+      uses: actions/cache@v1
+      with:
+        path: ~/go/pkg/mod
+        key: ${{ runner.os }}-go-mods-${{ hashFiles('**/go.sum') }}
+        restore-keys: |
+          ${{ runner.os }}-go-mods-
+
+    - name: Cache Maven packages
+      uses: actions/cache@v1
+      with:
+        path: ~/.m2
+        key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+        restore-keys: ${{ runner.os }}-m2
+
+    - name: Set up Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: 1.16.x
+
+    - name: Compatability Tests
+      shell: bash
+      run: |
+        # Getting latest version
+        LATEST=$(curl -s https://oracle.github.io/coherence-cli/stable.txt)
+        echo "Checkout out $LATEST"
+        git checkout $LATEST
+        COHERENCE_VERSION=${{ matrix.coherenceVersion }} make clean build-test-images test-e2e-standalone
+        COHERENCE_VERSION=${{ matrix.coherenceVersion }} make test-clean test-discovery
+
+    - uses: actions/upload-artifact@v1
+      if: failure()
+      with:
+        name: test-output
+        path: build/_output/test-logs
