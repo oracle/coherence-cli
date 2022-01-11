@@ -35,6 +35,8 @@ If you are connecting to a Coherence Commercial version you must be on at least 
 * 12.2.1.4.x - minimum patch level of 12.2.1.4.7+ required
 * 14.1.1.0.x - minimum patch level of 14.1.1.0.2+ required
 
+NOTE: If you are connecting to WebLogic Server then see the <<docs/reference/05_clusters.adoc,Clusters Command Reference>> for more information on the connection requirements.
+
 == Contents
 
 . <<step1, Display the Coherence CLI version>>

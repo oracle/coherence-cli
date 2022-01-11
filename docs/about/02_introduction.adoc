@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 
-    Copyright (c) 2021, Oracle and/or its affiliates.
+    Copyright (c) 2021, 2022 Oracle and/or its affiliates.
     Licensed under the Universal Permissive License v 1.0 as shown at
     https://oss.oracle.com/licenses/upl.
 
@@ -18,15 +18,15 @@ The CLI accesses clusters using the HTTP Management over REST interface and ther
 you want to monitor or manage. See the https://docs.oracle.com/en/middleware/standalone/coherence/14.1.1.0/rest-reference/quick-start.html[Coherence Documentation]
 for more information on setting up Management over REST.
 
-The CLI is certified with all Coherence Community Edition (CE) versions as well as Coherence Commercial versions 12.2.1.4, 14.1.1.0 and above.
+The CLI is certified with the latest Coherence Community Edition (CE) versions as well as Coherence Commercial versions 12.2.1.4, 14.1.1.0 and above.
 
 NOTE: The CLI does not replace current management and monitoring tools such as the https://github.com/oracle/coherence-visualvm[Coherence VisualVM Plugin],
-https://docs.oracle.com/cd/E24628_01/install.121/e24215/coherence_getstarted.htm#GSSOA10121[Enterprise Manager], or https://oracle.github.io/coherence-operator/docs/latest/#/docs/metrics/040_dashboards[Grafana Dashboards], but compliments and
+https://docs.oracle.com/cd/E24628_01/install.121/e24215/coherence_getstarted.htm#GSSOA10121[Enterprise Manager], or https://oracle.github.io/coherence-operator/docs/latest/#/docs/metrics/040_dashboards[Grafana Dashboards], but complements and
 provides a lightweight and scriptable alternative.
 
 == Why use the Coherence CLI?
 
-The CLI compliments your existing Coherence management tools and allows you to:
+The CLI complements your existing Coherence management tools and allows you to:
 
 . Interactively monitor your Coherence clusters from a lightweight terminal-based interface
 . Monitor service "StatusHA" during rolling restarts of Coherence clusters

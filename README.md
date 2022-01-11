@@ -36,19 +36,19 @@ you want to monitor or manage. See the [Coherence Documentation](https://docs.or
 for more information on setting up Management over REST.
 
 NOTE: The CLI does not replace current management and monitoring tools such as the [Coherence VisualVM Plugin](https://github.com/oracle/coherence-visualvm),
-[Enterprise Manager](https://docs.oracle.com/cd/E24628_01/install.121/e24215/coherence_getstarted.htm#GSSOA10121), or [Grafana Dashboards](https://oracle.github.io/coherence-operator/docs/latest/#/docs/metrics/040_dashboards), but compliments and
+[Enterprise Manager](https://docs.oracle.com/cd/E24628_01/install.121/e24215/coherence_getstarted.htm#GSSOA10121), or [Grafana Dashboards](https://oracle.github.io/coherence-operator/docs/latest/#/docs/metrics/040_dashboards), but complements and
 provides a lightweight and scriptable alternative.
 
 ## Why use the Coherence CLI?
 
-The CLI compliments your existing Coherence management tools and allows you to:
+The CLI complements your existing Coherence management tools and allows you to:
 
 * Interactively monitor your Coherence clusters from a lightweight terminal-based interface
 * Monitor service "StatusHA" during rolling restarts of Coherence clusters
 * Script Coherence monitoring and incorporate results into other management tooling
 * Output results in various formats including text, JSON and utilize JsonPath to extract attributes of interest
 * Gather information that may be useful for Oracle Support to help diagnose issues
-* Connect to standalone or WebLogic Server based clusters from commercial versions 12.2.1.4 and above as well as all [Coherence Community Edition](https://github.com/oracle/coherence) (CE) versions
+* Connect to standalone or WebLogic Server based clusters from commercial versions 12.2.1.4 and above as well as the latest [Coherence Community Edition](https://github.com/oracle/coherence) (CE) versions
 * Retrieve thread dumps across members
 
 ## Install the CLI
@@ -72,9 +72,7 @@ The CLI supports and is certified against the following Community and Commercial
 
 **Coherence Community Edition**
 * 21.12
-* 21.06.x
-* 20.12.2 (JFR commands are not supported)
-* 14.1.1-0-x
+* 14.1.1-0-7
 
 **Coherence Grid/ Enterprise Edition**
 * 12.2.1.4.x - minimum patch level of 12.2.1.4.7+ required
