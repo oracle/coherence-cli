@@ -912,13 +912,12 @@ func httpRequest(h HTTPFetcher, requestType, urlAppend string, absolute bool, co
 		Logger.Info("Http Request time", fields...)
 	}
 	if err != nil {
-		if DebugEnabled {
-			Logger.Error("Http Request error", []zapcore.Field{
-				zap.String("url", finalURL),
-				zap.String("content", string(content)),
-				zap.Reflect("error", err),
-			}...)
-		}
+		// always log error
+		Logger.Error("Http Request error", []zapcore.Field{
+			zap.String("url", finalURL),
+			zap.String("content", string(content)),
+			zap.Reflect("error", err),
+		}...)
 		return empty, err
 	}
 

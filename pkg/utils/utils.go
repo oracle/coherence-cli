@@ -30,22 +30,22 @@ var (
 	Logger *zap.Logger
 )
 
-// GetError returns a formatted error and prints to log if debug is on
+// GetError returns a formatted error and prints to log
 func GetError(message string, err error) error {
-	errorDetails := fmt.Sprintf("%v", err)
-	var caller string
-	if DebugEnabled {
-		_, sourceFile, lineNo, ok := runtime.Caller(1)
-		if ok {
-			caller = fmt.Sprintf("%s#%d", filepath.Base(sourceFile), lineNo)
-		}
-		fields := []zapcore.Field{
-			zap.String("location", caller),
-			zap.String("message", message),
-			zap.String("cause", errorDetails),
-		}
-		Logger.Error("Error", fields...)
+	var (
+		errorDetails = fmt.Sprintf("%v", err)
+		caller       = "unknown"
+	)
+	_, sourceFile, lineNo, ok := runtime.Caller(1)
+	if ok {
+		caller = fmt.Sprintf("%s#%d", filepath.Base(sourceFile), lineNo)
 	}
+	fields := []zapcore.Field{
+		zap.String("location", caller),
+		zap.String("message", message),
+		zap.String("cause", errorDetails),
+	}
+	Logger.Error("Error", fields...)
 	return fmt.Errorf("%s: %s", message, errorDetails)
 }
 

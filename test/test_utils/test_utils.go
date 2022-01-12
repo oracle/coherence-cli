@@ -361,11 +361,9 @@ func issueRequest(requestType, url string, data []byte) (*http.Response, error) 
 
 // WaitForHttpReady waits for the HTTP endpoint to be ready
 func WaitForHttpReady(url string, timeout int) error {
-	httpFetcher := fetcher.HTTPFetcher{URL: url, ConnectionType: "http"}
-
 	var duration = 0
 	for duration < timeout {
-		_, err := httpFetcher.GetClusterDetailsJSON()
+		_, err := IssueGetRequest(url)
 		if err != nil {
 			// unable to connect, so wait 5 seconds
 			fmt.Println("Waiting to connect to " + url + ", sleeping 5")
