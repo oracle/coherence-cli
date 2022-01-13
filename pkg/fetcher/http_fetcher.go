@@ -750,7 +750,7 @@ func getSafeServiceName(h HTTPFetcher, serviceName string) string {
 func setUsernamePassword() error {
 	if username == "" {
 		fmt.Print("Enter username: ")
-		fmt.Scanln(&username)
+		_, _ = fmt.Scanln(&username)
 	}
 
 	if username == "" {
@@ -771,6 +771,7 @@ func setUsernamePassword() error {
 		}
 
 		password = string(passwordByte)
+		fmt.Println()
 	}
 	return nil
 }
