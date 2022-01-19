@@ -2,7 +2,7 @@
 
 <!--
 
-    Copyright (c) 2021, Oracle and/or its affiliates.
+    Copyright (c) 2021, 2022 Oracle and/or its affiliates.
     Licensed under the Universal Permissive License v 1.0 as shown at
     https://oss.oracle.com/licenses/upl.
 
@@ -35,7 +35,7 @@
 
     <coherence.group.id>com.oracle.coherence.ce</coherence.group.id>
     <!--  The Coherence jar version (compile time dependency for tests) -->
-    <coherence.version>21.12</coherence.version>
+    <coherence.version>21.12.1</coherence.version>
     <!-- The version of Coherence to use in the test images -->
     <coherence.test.groupId>com.oracle.coherence.ce</coherence.test.groupId>
     <coherence.test.version>${coherence.version}</coherence.test.version>
