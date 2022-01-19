@@ -22,7 +22,7 @@ MILESTONE ?=
 MVN_VERSION ?= 1.0.0
 
 # Coherence CE version to run base tests against
-COHERENCE_VERSION ?= 21.12
+COHERENCE_VERSION ?= 21.12.1
 COHERENCE_GROUP_ID ?= com.oracle.coherence.ce
 COHERENCE_WKA1 ?= server1
 COHERENCE_WKA2 ?= server1
@@ -331,7 +331,6 @@ copyright: getcopyright ## Check copyright headers
 	  -X THIRD_PARTY_LICENSES.txt \
 	  -X .tpl \
 	  -X .txt \
-	  -X .yaml \
 	  -X pkg/data/assets/
 
 # ----------------------------------------------------------------------------------------------------------------------

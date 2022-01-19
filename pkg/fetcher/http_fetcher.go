@@ -828,9 +828,23 @@ func httpRequest(h HTTPFetcher, requestType, urlAppend string, absolute bool, co
 	if !absolute {
 		// For WebLogic server only append the cluster name if it is set.
 		// The clusterName will be "" if it is the initial add cluster request
-		if h.IsWebLogicServer() && h.ClusterName != "" {
-			// Append the cluster name
-			finalURL = h.URL + "/" + url.PathEscape(h.ClusterName) + urlAppend
+		// we must also check if the user has specified the cluster name already
+		// on the URL in the case where there are more than one Coherence
+		// clusters in the WebLogic cluster
+		if h.IsWebLogicServer() {
+			var hasNoClusterOnURL = strings.HasSuffix(h.URL, "/clusters")
+			if h.ClusterName != "" && hasNoClusterOnURL {
+				// Append the cluster name as there is no cluster on the URL
+				finalURL = h.URL + "/" + url.PathEscape(h.ClusterName) + urlAppend
+			} else {
+				// the cluster name must be on the URL so just set it
+				finalURL = h.URL + urlAppend
+
+				// set the cluster to the value on the URL
+				if !hasNoClusterOnURL {
+					h.ClusterName = h.URL[strings.Index(h.URL, "/clusters")+10 : len(h.URL)]
+				}
+			}
 		} else {
 			finalURL = h.URL + urlAppend
 		}

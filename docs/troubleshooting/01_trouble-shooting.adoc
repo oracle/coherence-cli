@@ -19,6 +19,7 @@ This page will be updated and maintained over time to include common issues we s
 * <<execute, Cannot execute [Exec format error] on Linux>>
 * <<jfr, Null returned in JFR commands>>
 * <<services, Cannot find services with quotes in their names>>
+* <<wls, Issues adding correct cluster when WebLogic Server has multiple Coherence clusters>>
 
 [#bad]
 === Bad CPU type in executable on macOS
@@ -155,3 +156,39 @@ Backup Count After Writebehind      :  [1]
 ....
 ----
 
+[#wls]
+=== Issues adding correct cluster when WebLogic Server has multiple Coherence clusters
+
+==== Problem
+
+When adding a connection to a WebLogic Server environment with multiple Coherence clusters,
+present, by default only the first cluster will be added.
+
+In the example below we have a WebLogic Server environment with two Coherence clusters: CoherenceCluster and CoherenceCluster2.
+
+[source,bash]
+----
+$ cohctl add cluster wls1 -U weblogic -u http://host:7001/management/coherence/latest/clusters
+Enter password: *****
+Added cluster wls1 with type http and URL http://thost:7001/management/coherence/latest/clusters
+
+$ cohctl get clusters
+CONNECTION  TYPE  URL                                                     VERSION      CLUSTER NAME       TYPE       CTX
+wls1        http  http://host:7001/management/coherence/latest/clusters   14.1.1.0.0   CoherenceCluster   WebLogic
+----
+
+==== Solution
+
+You must supply the cluster name on the URL to add a specific cluster, rather than adding the default one found.
+
+[source,bash]
+----
+$ cohctl add cluster wls2 -U weblogic -u http://hostname:7001/management/coherence/latest/clusters/CoherenceCluster2
+Enter password: ******
+Added cluster wls2 with type http and URL http://hostname:7001/management/coherence/latest/clusters/CoherenceCluster2
+
+$ cohctl get clusters
+CONNECTION  TYPE  URL                                                                            VERSION      CLUSTER NAME        TYPE        CTX
+wls1        http  http://hostname:7001/management/coherence/latest/clusters                    14.1.1.0.0   CoherenceCluster    WebLogic
+wls2        http  http://hostname:7001/management/coherence/latest/clusters/CoherenceCluster2  14.1.1.0.0   CoherenceCluster2   WebLogic
+----

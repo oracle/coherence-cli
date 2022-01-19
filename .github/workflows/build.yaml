@@ -1,4 +1,4 @@
-# Copyright 2021, Oracle Corporation and/or its affiliates.
+# Copyright 2021, 2022 Oracle Corporation and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at
 # https://oss.oracle.com/licenses/upl.
 
@@ -10,15 +10,9 @@ name: CI
 on:
   workflow_dispatch:
   push:
-    branches-ignore:
-    - gh-pages
+    branches: [ main ]
   pull_request:
-    types:
-      - opened
-      - synchronize
-      - committed
-    branches-ignore:
-    - gh-pages
+    branches: [ main ]
 
 jobs:
   build:
