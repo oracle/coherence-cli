@@ -67,6 +67,7 @@ all nodes running the proxy service as well as detailed connection information.`
 			err            error
 			dataFetcher    fetcher.Fetcher
 			connection     string
+			errorMsg       = "unable to find Proxy service with service name"
 		)
 		serviceName := args[0]
 
@@ -79,6 +80,10 @@ all nodes running the proxy service as well as detailed connection information.`
 		proxyResults, err := dataFetcher.GetProxySummaryJSON()
 		if err != nil {
 			return err
+		}
+
+		if len(proxyResults) == 0 {
+			return fmt.Errorf("%s '%s'", errorMsg, serviceName)
 		}
 
 		err = json.Unmarshal(proxyResults, &proxiesSummary)
@@ -96,7 +101,7 @@ all nodes running the proxy service as well as detailed connection information.`
 			}
 		}
 		if proxyCount == 0 {
-			return fmt.Errorf("unable to find Proxy service with service name '%s'", serviceName)
+			return fmt.Errorf("%s '%s'", errorMsg, serviceName)
 		}
 
 		// we have valid service name so issue queries
@@ -191,6 +196,10 @@ func returnGetProxiesDetails(cmd *cobra.Command, protocol string, dataFetcher fe
 		proxyResults, err := dataFetcher.GetProxySummaryJSON()
 		if err != nil {
 			return "", err
+		}
+
+		if len(proxyResults) == 0 {
+			return "", nil
 		}
 
 		if strings.Contains(OutputFormat, constants.JSONPATH) {

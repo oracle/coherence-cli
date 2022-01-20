@@ -340,7 +340,7 @@ func (h HTTPFetcher) GetCachesSummaryJSONAllServices() ([]byte, error) {
 // GetProxySummaryJSON returns proxy server summary
 func (h HTTPFetcher) GetProxySummaryJSON() ([]byte, error) {
 	result, err := httpGetRequest(h, "/services/proxy/members/?links=")
-	if err != nil {
+	if err != nil && !strings.Contains(err.Error(), "404") {
 		return constants.EmptyByte, utils.GetError("cannot get proxy information", err)
 	}
 	return result, nil
@@ -447,7 +447,7 @@ func (h HTTPFetcher) GetPersistenceCoordinator(serviceName string) ([]byte, erro
 // GetMemberOSJson returns the OS information for the member
 func (h HTTPFetcher) GetMemberOSJson(memberID string) ([]byte, error) {
 	result, err := httpGetRequest(h, "/members/"+memberID+"/platform/operatingSystem?links=")
-	if err != nil {
+	if err != nil && !strings.Contains(err.Error(), "404") {
 		return constants.EmptyByte, utils.GetError("cannot get Member OS for member "+memberID, err)
 	}
 	return result, nil

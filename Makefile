@@ -33,6 +33,9 @@ CLUSTER_PORT ?= 7574
 PROFILES ?=
 COHERENCE_BASE_IMAGE ?= gcr.io/distroless/java:11
 
+# WebLogic Server Test Related
+WEBLOGIC_SERVER_URL ?= http://127.0.0.1:7001
+
 # ----------------------------------------------------------------------------------------------------------------------
 # Options to append to the Maven command
 # ----------------------------------------------------------------------------------------------------------------------
@@ -392,6 +395,13 @@ test-cohctl: test-clean gotestsum $(BUILD_PROPS) ## Run the CLI unit tests
 test-e2e-standalone: test-clean gotestsum $(BUILD_PROPS) ## Run e2e tests with Coherence
 	CGO_ENABLED=0 $(GOTESTSUM) --format testname --junitfile $(TEST_LOGS_DIR)/cohctl-test-e2e-standalone.xml \
 	  -- $(GO_TEST_FLAGS) -v ./test/e2e/standalone/...
+
+# ----------------------------------------------------------------------------------------------------------------------
+# Executes tests against an already running WebLogic Server
+# ----------------------------------------------------------------------------------------------------------------------
+.PHONY: test-weblogic
+test-weblogic: test-clean cohctl $(BUILD_PROPS)  ## Run tests against WebLogic Server
+	./scripts/test-weblogic.sh $(WEBLOGIC_SERVER_URL)
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Executes the Go end to end tests for federation and Coherence
