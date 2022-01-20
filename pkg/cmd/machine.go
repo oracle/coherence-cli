@@ -103,6 +103,10 @@ func getMachines(machinesMap map[string]string, dataFetcher fetcher.Fetcher) ([]
 			return machines, err
 		}
 
+		if len(data) == 0 {
+			continue
+		}
+
 		err = json.Unmarshal(data, &machine)
 		if err != nil {
 			return machines, err
@@ -132,9 +136,11 @@ func getOSJson(machinesMap map[string]string, dataFetcher fetcher.Fetcher) ([]by
 
 		generic := make(map[string]interface{})
 
-		err = json.Unmarshal(data, &generic)
-		if err != nil {
-			return constants.EmptyByte, utils.GetError("unable to unmarshall data", err)
+		if len(data) != 0 {
+			err = json.Unmarshal(data, &generic)
+			if err != nil {
+				return constants.EmptyByte, utils.GetError("unable to unmarshall data", err)
+			}
 		}
 
 		// add the machine name

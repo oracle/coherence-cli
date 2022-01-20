@@ -301,9 +301,11 @@ service is a cache service.`,
 
 			sb.WriteString(value)
 
-			err = json.Unmarshal(proxyResults, &proxiesSummary)
-			if err != nil {
-				return utils.GetError("unable to unmarshall proxy result", err)
+			if len(proxyResults) != 0 {
+				err = json.Unmarshal(proxyResults, &proxiesSummary)
+				if err != nil {
+					return utils.GetError("unable to unmarshall proxy result", err)
+				}
 			}
 
 			// filter out any proxy servers that are not for this service
