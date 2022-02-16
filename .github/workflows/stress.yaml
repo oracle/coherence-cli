@@ -61,7 +61,7 @@ jobs:
 
     - name: Build Test Images
       shell: bash
-      run: PROFILES=,executor COHERENCE_VERSION=21.12.1 make clean build-test-images
+      run: PROFILES=,executor COHERENCE_VERSION=21.12.2 make clean build-test-images
 
     - name: Run Stress Test
       shell: bash
