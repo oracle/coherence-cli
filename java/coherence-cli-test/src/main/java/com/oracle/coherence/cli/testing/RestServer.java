@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, 2021 Oracle and/or its affiliates.
+ * Copyright (c) 2019, 2022 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -8,9 +8,11 @@ package com.oracle.coherence.cli.testing;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.lang.reflect.Constructor;
+
 import java.lang.reflect.Method;
+
 import java.net.InetSocketAddress;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -18,9 +20,7 @@ import java.util.stream.Collectors;
 import com.tangosol.net.CacheFactory;
 import com.tangosol.net.Cluster;
 import com.tangosol.net.DefaultCacheServer;
-import com.tangosol.net.DistributedCacheService;
 import com.tangosol.net.NamedCache;
-import com.tangosol.net.partition.SimplePartitionKey;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
