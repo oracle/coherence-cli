@@ -152,9 +152,9 @@ public class RestServer {
     }
 
     private static void populateFederation(HttpExchange t) throws IOException {
-        populateCache(CacheFactory.getCache("federated-1"), 1000);
-        populateCache(CacheFactory.getCache("federated-2"), 1000);
-        populateCache(CacheFactory.getCache("federated-3"), 1000);
+        populateCache(CacheFactory.getCache("federated-1"), 10000);
+        populateCache(CacheFactory.getCache("federated-2"), 10000);
+        populateCache(CacheFactory.getCache("federated-3"), 10000);
         send(t, 200, "OK");
     }
 

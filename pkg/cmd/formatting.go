@@ -166,7 +166,7 @@ func FormatFederationSummary(federationSummaries []config.FederationSummary, tar
 		}
 	} else { // WIDE
 		if target == destinations {
-			finalAlignment = []string{L, L, R, L, R, R, R, R, R, R, R, R}
+			finalAlignment = []string{L, L, R, L, R, R, R, R, R, R, R, R, R, R, R}
 		} else {
 			finalAlignment = []string{L, L, R, L, R, R, R, R}
 		}
@@ -194,7 +194,8 @@ func FormatFederationSummary(federationSummaries []config.FederationSummary, tar
 
 	if OutputFormat == constants.WIDE {
 		if target == destinations {
-			stringValues[0] = getColumns(stringValues[0], "AVG APPLY", "AVG ROUND TRIP", "AVG BACKLOG DELAY", "REPLICATE")
+			stringValues[0] = getColumns(stringValues[0], "AVG APPLY", "AVG ROUND TRIP", "AVG BACKLOG DELAY", "REPLICATE",
+				"PARTITIONS", "ERRORS", "UNACKED")
 		} else {
 			stringValues[0] = getColumns(stringValues[0], "AVG APPLY", "AVG BACKLOG DELAY")
 		}
@@ -241,7 +242,11 @@ func FormatFederationSummary(federationSummaries []config.FederationSummary, tar
 					formatLatency0(float32(value.MsgApplyTimePercentileMillis.Average)),
 					formatLatency0(float32(value.MsgNetworkRoundTripTimePercentileMillis.Average)),
 					formatLatency0(float32(value.RecordBacklogDelayTimePercentileMillis.Average)),
-					formatPercent(value.ReplicateAllPercentComplete.Average/100))
+					formatPercent(value.ReplicateAllPercentComplete.Average/100),
+					formatLargeInteger(int64(value.ReplicateAllPartitionCount.Sum)),
+					formatLargeInteger(int64(value.ReplicateAllPartitionErrorCount.Sum)),
+					formatLargeInteger(int64(value.TotalReplicateAllPartitionsUnacked.Sum)),
+				)
 			} else {
 				stringValues[i+1] = getColumns(stringValues[i+1],
 					formatLatency0(float32(value.MsgApplyTimePercentileMillis.Average)),
