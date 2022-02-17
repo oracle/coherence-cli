@@ -49,9 +49,18 @@ Display all destinations in wide format.
 ----
 $ cohctl get federation destinations -c local -o wide
 
-SERVICE         DESTINATION        MEMBERS  STATES  DATA SENT  MSG SENT  REC SENT  CURR AVG BWIDTH  AVG APPLY  AVG ROUND TRIP  AVG BACKLOG DELAY  REPLICATE
-FederatedCache  secondary-cluster        2  [IDLE]      204MB     1,028     3,348          0.0Mbps      338ms         1,393ms           37,770ms    100.00%
+SERVICE         DESTINATION        MEMBERS  STATES  DATA SENT  MSG SENT  REC SENT  CURR AVG BWIDTH  AVG APPLY  AVG ROUND TRIP  AVG BACKLOG DELAY  REPLICATE  PARTITIONS  ERRORS  UNACKED
+FederatedCache  secondary-cluster        2  [IDLE]      204MB     1,028     3,348          0.0Mbps      338ms         1,393ms           37,770ms    100.00%          31       0        0
 ----
+
+Using the wide option, the following fields are available in regard to the current (or latest) replicate all operation:
+
+1. REPLICATE - the percent complete for the request
+2. PARTITIONS - the total number of partitions completed for the request
+3. ERRORS - the number of partitions with error responses for the request
+4. UNACKED - the total number of partitions that have been sent but have not yet been acknowledged for the request
+
+NOTE: The last three attributes are only available in the latest Commercial and CE patches. Check your release notes.
 
 Display all origins.
 

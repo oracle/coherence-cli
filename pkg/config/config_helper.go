@@ -187,6 +187,11 @@ type FederationSummary struct {
 	TotalBytesReceived     StatsSummary `json:"totalBytesReceived"`
 	TotalRecordsReceived   StatsSummary `json:"totalRecordsReceived"`
 	CurrentConnectionCount StatsSummary `json:"currentConnectionCount"`
+
+	// additional replicate all stats only available in 21.12.2+ or 14.1.1. FP1
+	ReplicateAllPartitionCount         StatsSummary `json:"replicateAllPartitionCount"`
+	ReplicateAllPartitionErrorCount    StatsSummary `json:"replicateAllPartitionErrorCount"`
+	TotalReplicateAllPartitionsUnacked StatsSummary `json:"totalReplicateAllPartitionsUnacked"`
 }
 
 // ServiceMemberDetails contains service members details
