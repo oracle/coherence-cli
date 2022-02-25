@@ -9,11 +9,11 @@
 # Run compatability tests
 set -e
 
-echo "Coherence CE 21.12.1"
-COHERENCE_VERSION=21.12.1 make clean build-test-images test-e2e-standalone
+echo "Coherence CE 21.12.2"
+COHERENCE_VERSION=21.12.2 make clean build-test-images test-e2e-standalone
 
-echo "Coherence CE 21.12.1 with Executor"
-PROFILES=,executor COHERENCE_VERSION=21.12.1 make clean build-test-images test-e2e-standalone
+echo "Coherence CE 21.12.2 with Executor"
+PROFILES=,executor COHERENCE_VERSION=21.12.2 make clean build-test-images test-e2e-standalone
 
 echo "Coherence CE 21.06.2"
 COHERENCE_VERSION=21.06.2 make clean build-test-images test-e2e-standalone
