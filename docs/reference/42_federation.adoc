@@ -60,7 +60,7 @@ Using the wide option, the following fields are available in regard to the curre
 3. ERRORS - the number of partitions with error responses for the request
 4. UNACKED - the total number of partitions that have been sent but have not yet been acknowledged for the request
 
-NOTE: The last three attributes are only available in the latest Commercial and CE patches. Check your release notes.
+NOTE: The last three attributes are only available in the latest Commercial patches. Check your release notes.
 
 Display all origins.
 
