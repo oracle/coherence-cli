@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Oracle and/or its affiliates.
+ * Copyright (c) 2021, 2022 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -105,6 +105,9 @@ type Fetcher interface {
 
 	// SetMemberAttribute sets the given attribute for a member
 	SetMemberAttribute(memberID, attribute string, value interface{}) ([]byte, error)
+
+	// SetReporterAttribute sets the given attribute for a reporter member
+	SetReporterAttribute(memberID, attribute string, value interface{}) ([]byte, error)
 
 	// SetManagementAttribute sets the given management attribute for a cluster
 	SetManagementAttribute(attribute string, value interface{}) ([]byte, error)

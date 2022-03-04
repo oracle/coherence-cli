@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 
-    Copyright (c) 2021, Oracle and/or its affiliates.
+    Copyright (c) 2021, 2022 Oracle and/or its affiliates.
     Licensed under the Universal Permissive License v 1.0 as shown at
     https://oss.oracle.com/licenses/upl.
 
@@ -17,6 +17,7 @@ There are various commands that allow you to work with and manage Reporters serv
 * <<describe-reporter, `cohctl describe reporter`>> - shows information related to a specific reporter
 * <<start-reporter, `cohctl start reporter`>> - starts a reporter on a specific node
 * <<stop-reporter, `cohctl stop reporter`>> - stops a reporter on a specific node
+* <<set-reporter, `cohctl set reporter`>> - sets a reporter attribute for one or more members
 
 [#get-reporters]
 ==== Get Reporters
@@ -30,11 +31,11 @@ Display all http servers.
 [source,bash]
 ----
 $ cohctl get reporters -c local
-NODE ID  STATE    CONFIG FILE               OUTPUT PATH      BATCH#  LAST REPORT  LAST RUN   AVG RUN  AUTOSTART
-      1  Stopped  reports/report-group.xml  /u01/reports/.        0                    0ms  0.0000ms  false
-      2  Stopped  reports/report-group.xml  /u01/reports/.        0                    0ms  0.0000ms  false
-      3  Stopped  reports/report-group.xml  /u01/reports/.        0                    0ms  0.0000ms  false
-      4  Stopped  reports/report-group.xml  /u01/reports/.        0                    0ms  0.0000ms  false
+NODE ID  STATE    CONFIG FILE               OUTPUT PATH      BATCH#  LAST REPORT  LAST RUN   AVG RUN  INTERVAL  AUTOSTART
+      1  Stopped  reports/report-group.xml  /u01/reports/.        0                    0ms  0.0000ms        60  false
+      2  Stopped  reports/report-group.xml  /u01/reports/.        0                    0ms  0.0000ms        60  false
+      3  Stopped  reports/report-group.xml  /u01/reports/.        0                    0ms  0.0000ms        60  false
+      4  Stopped  reports/report-group.xml  /u01/reports/.        0                    0ms  0.0000ms        60  false
 ----
 
 [#describe-reporter]
@@ -71,6 +72,57 @@ include::../../build/_output/docs-gen/stop_reporter.adoc[tag=text]
 [source,bash]
 ----
 $ cohctl stop reporter 1 -c local
+----
+
+[#set-reporter]
+==== Set Reporter
+
+include::../../build/_output/docs-gen/set_reporter.adoc[tag=text]
+
+*Examples*
+
+Set the output path for all reporters to `/reports`.
+
+[source,bash]
+----
+$ cohctl get reporters -c local
+
+NODE ID  STATE    CONFIG FILE               OUTPUT PATH  BATCH#  LAST REPORT  LAST RUN   AVG RUN  INTERVAL  AUTOSTART
+      1  Stopped  reports/report-group.xml  /u01              0                    0ms  0.0000ms        60  false
+      2  Stopped  reports/report-group.xml  /u01              0                    0ms  0.0000ms        60  false
+
+$ cohctl set reporter all -a outputPath -v /tmp -c local
+
+Are you sure you want to set the value of attribute outputPath to /tmp for all 2 reporter nodes? (y/n) y
+operation completed
+
+$ cohctl get reporters -c local
+
+NODE ID  STATE    CONFIG FILE               OUTPUT PATH  BATCH#  LAST REPORT  LAST RUN   AVG RUN  INTERVAL  AUTOSTART
+      1  Stopped  reports/report-group.xml  /tmp              0                    0ms  0.0000ms        60  false
+      2  Stopped  reports/report-group.xml  /tmp              0                    0ms  0.0000ms        60  false
+----
+
+Set the interval for reporter on node 1 to 120 seconds.
+
+[source,bash]
+----
+$ cohctl get reporters -c local
+
+NODE ID  STATE    CONFIG FILE               OUTPUT PATH  BATCH#  LAST REPORT  LAST RUN   AVG RUN  INTERVAL  AUTOSTART
+      1  Stopped  reports/report-group.xml  /tmp              0                    0ms  0.0000ms        60  false
+      2  Stopped  reports/report-group.xml  /tmp              0                    0ms  0.0000ms        60  false
+
+ohctl set reporter 1 -a intervalSeconds -v 120 -c local
+
+Are you sure you want to set the value of attribute intervalSeconds to 120 for 1 node(s)? (y/n) y
+operation completed
+
+$ cohctl get reporters -c local
+
+NODE ID  STATE    CONFIG FILE               OUTPUT PATH  BATCH#  LAST REPORT  LAST RUN   AVG RUN  INTERVAL  AUTOSTART
+      1  Stopped  reports/report-group.xml  /tmp              0                    0ms  0.0000ms       120  false
+      2  Stopped  reports/report-group.xml  /tmp              0                    0ms  0.0000ms        60  false
 ----
 
 === See Also

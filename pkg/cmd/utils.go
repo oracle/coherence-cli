@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Oracle and/or its affiliates.
+ * Copyright (c) 2021, 2022 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -251,10 +251,14 @@ func IssueReporterCommand(nodeID, command string, cmd *cobra.Command) error {
 	// find the reporter
 	for _, value := range reporters.Reporters {
 		if value.NodeID == nodeID {
-			if command == "start" && value.State != "Stopped" {
-				return fmt.Errorf("the reporter on node %s is already started", nodeID)
-			} else if command == "stop" && value.State == "Stopped" {
-				return fmt.Errorf("the reporter on node %s is already stopped", nodeID)
+			if value.State == "Error" {
+				// ignore
+			} else {
+				if command == "start" && value.State != "Stopped" {
+					return fmt.Errorf("the reporter on node %s is already started", nodeID)
+				} else if command == "stop" && value.State == "Stopped" {
+					return fmt.Errorf("the reporter on node %s is already stopped", nodeID)
+				}
 			}
 		}
 	}

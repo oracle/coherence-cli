@@ -225,6 +225,19 @@ func (h HTTPFetcher) SetMemberAttribute(memberID, attribute string, value interf
 	return result, nil
 }
 
+// SetReporterAttribute sets the given attribute for a reporter member
+func (h HTTPFetcher) SetReporterAttribute(memberID, attribute string, value interface{}) ([]byte, error) {
+	var valueString = getJSONValueString(value)
+
+	payload := []byte(fmt.Sprintf("{\"%s\": %s}", attribute, valueString))
+	result, err := httpPostRequest(h, "/reporters/"+memberID, payload)
+	if err != nil {
+		return constants.EmptyByte, utils.GetError(
+			fmt.Sprintf("cannot set value %vfor attribute %s ", value, attribute), err)
+	}
+	return result, nil
+}
+
 // SetManagementAttribute sets the given management attribute for a cluster
 func (h HTTPFetcher) SetManagementAttribute(attribute string, value interface{}) ([]byte, error) {
 	var valueString = getJSONValueString(value)
