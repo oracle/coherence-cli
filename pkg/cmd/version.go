@@ -7,21 +7,9 @@
 package cmd
 
 import (
-	"bytes"
-	"crypto/tls"
-	"errors"
-	"fmt"
-	"github.com/oracle/coherence-cli/pkg/constants"
-	"github.com/oracle/coherence-cli/pkg/fetcher"
 	"github.com/spf13/cobra"
-	"io"
-	"net/http"
-	"net/http/cookiejar"
-	"net/url"
-	"os"
 	"runtime"
 	"strings"
-	"time"
 )
 
 var checkForUpdates bool
@@ -78,56 +66,10 @@ func init() {
 }
 
 func getLatestVersion() (string, error) {
-	var (
-		err       error
-		req       *http.Request
-		resp      *http.Response
-		body      []byte
-		buffer    bytes.Buffer
-		URL       = url.URL{}
-		httpProxy = os.Getenv("HTTP_PROXY")
-	)
-	cookies, _ := cookiejar.New(nil)
-	tr := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: false, MinVersion: tls.VersionTLS12},
-	}
-
-	if httpProxy != "" {
-		proxy, err := URL.Parse(httpProxy)
-		if err != nil {
-			return "", errors.New("unable to parse HTTP_PROXY environment variable")
-		}
-		tr.Proxy = http.ProxyURL(proxy)
-	}
-
-	client := &http.Client{Transport: tr,
-		Timeout: time.Duration(fetcher.RequestTimeout) * time.Second,
-		Jar:     cookies,
-		CheckRedirect: func(req *http.Request, via []*http.Request) error {
-			return http.ErrUseLastResponse
-		}}
-
-	req, err = http.NewRequest("GET", stableURL, bytes.NewBuffer(constants.EmptyByte))
+	response, err := GetURLContents(stableURL)
 	if err != nil {
 		return "", err
 	}
 
-	resp, err = client.Do(req)
-	if err != nil {
-		return "", err
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != 200 {
-		return "", fmt.Errorf("unable to issue GET to %s: response=%s",
-			stableURL, resp.Status)
-	}
-
-	_, err = io.Copy(&buffer, resp.Body)
-	if err != nil {
-		return "", err
-	}
-
-	body = buffer.Bytes()
-	return string(body), nil
+	return string(response), nil
 }

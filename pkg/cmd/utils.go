@@ -7,16 +7,24 @@
 package cmd
 
 import (
+	"bytes"
+	"crypto/tls"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/oracle/coherence-cli/pkg/config"
 	"github.com/oracle/coherence-cli/pkg/constants"
 	"github.com/oracle/coherence-cli/pkg/fetcher"
 	"github.com/oracle/coherence-cli/pkg/utils"
 	"github.com/spf13/cobra"
+	"io"
+	"net/http"
+	"net/http/cookiejar"
+	"net/url"
 	"os"
 	"strings"
 	"sync"
+	"time"
 )
 
 const federationServiceMsg = "service %s does not exist or is not a federated service"
@@ -452,4 +460,60 @@ func (b *ByteArraySink) AppendByteArray(bytes []byte) {
 	b.Lock()
 	defer b.Unlock()
 	b.values = append(b.values, bytes)
+}
+
+// GetURLContents returns the contents at the given url as a []byte
+func GetURLContents(resourceURL string) ([]byte, error) {
+	var (
+		err       error
+		req       *http.Request
+		resp      *http.Response
+		body      []byte
+		buffer    bytes.Buffer
+		URL       = url.URL{}
+		httpProxy = os.Getenv("HTTP_PROXY")
+	)
+	cookies, _ := cookiejar.New(nil)
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: false, MinVersion: tls.VersionTLS12},
+	}
+
+	if httpProxy != "" {
+		proxy, err := URL.Parse(httpProxy)
+		if err != nil {
+			return body, errors.New("unable to parse HTTP_PROXY environment variable")
+		}
+		tr.Proxy = http.ProxyURL(proxy)
+	}
+
+	client := &http.Client{Transport: tr,
+		Timeout: time.Duration(fetcher.RequestTimeout) * time.Second,
+		Jar:     cookies,
+		CheckRedirect: func(req *http.Request, via []*http.Request) error {
+			return http.ErrUseLastResponse
+		}}
+
+	req, err = http.NewRequest("GET", stableURL, bytes.NewBuffer(constants.EmptyByte))
+	if err != nil {
+		return body, err
+	}
+
+	resp, err = client.Do(req)
+	if err != nil {
+		return body, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != 200 {
+		return body, fmt.Errorf("unable to issue GET to %s: response=%s",
+			resourceURL, resp.Status)
+	}
+
+	_, err = io.Copy(&buffer, resp.Body)
+	if err != nil {
+		return body, err
+	}
+
+	body = buffer.Bytes()
+	return body, nil
 }

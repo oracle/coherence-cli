@@ -29,6 +29,11 @@ var (
 
 	// Logger is the logger to use for writing logs
 	Logger *zap.Logger
+
+	// ErrPort indicates an invalid port value
+	ErrPort = errors.New("port must be between 1024 and 65535")
+
+	defaultMavenURL = "https://repo1.maven.org/maven2"
 )
 
 // GetError returns a formatted error and prints to log
@@ -229,4 +234,26 @@ func IsStorageEnabled(nodeID int, storageMap map[int]bool) bool {
 		return nodeEntry
 	}
 	return false
+}
+
+// ValidatePort validates that a port is valid
+func ValidatePort(port int32) error {
+	if port < 1024 || port > 65535 {
+		return ErrPort
+	}
+
+	return nil
+}
+
+func ValidateVersion(version string) error {
+	if version != "22.06-SNAPSHOT" {
+		return errors.New("invalid coherence version")
+	}
+
+	return nil
+}
+
+// GetCoherenceArtefactURL returns the URL of a Coherence artefact
+func GetCoherenceArtefactURL(artefact, version string) string {
+	return fmt.Sprintf("%s/com/oracle/coherence/ce/%s/%s/%s-%s.jar", defaultMavenURL, artefact, version, artefact, version)
 }

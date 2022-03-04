@@ -480,6 +480,7 @@ func Initialize(command *cobra.Command) *cobra.Command {
 	// create
 	command.AddCommand(createCmd)
 	createCmd.AddCommand(createSnapshotCmd)
+	createCmd.AddCommand(createClusterCmd)
 
 	// recover
 	command.AddCommand(recoverCmd)

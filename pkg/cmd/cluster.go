@@ -51,10 +51,9 @@ populated constructed.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		connection := sanitizeConnectionName(args[0])
 
-		found, clusterConnection := GetClusterConnection(connection)
-		if found {
-			return fmt.Errorf("A connection for cluster named %s already exists with url=%s and type=%s",
-				connection, clusterConnection.ConnectionURL, clusterConnection.ConnectionType)
+		err := ensureUniqueCluster(connection)
+		if err != nil {
+			return err
 		}
 
 		if connectionURL == "" {
@@ -873,6 +872,73 @@ func addCluster(cmd *cobra.Command, connection, connectionURL, discoveryType, ns
 	return nil
 }
 
+// variables specifically for create cluster
+var (
+	httpPort       int32
+	clusterPort    int32
+	clusterVersion string
+	serverCount    int32
+)
+
+// createClusterCmd represents the create cluster command
+var createClusterCmd = &cobra.Command{
+	Use:   "cluster",
+	Short: "create a local Coherence cluster",
+	Long:  `The 'create cluster' command creates a local cluster and adds to the cohctl.yaml file.`,
+	Args: func(cmd *cobra.Command, args []string) error {
+		if len(args) != 1 {
+			displayErrorAndExit(cmd, "you must provide a cluster name")
+		}
+		return nil
+	},
+	RunE: func(cmd *cobra.Command, args []string) error {
+		var (
+			clusterName = sanitizeConnectionName(args[0])
+			err         error
+			response    string
+		)
+
+		// port validation
+		if err = utils.ValidatePort(httpPort); err != nil {
+			return err
+		}
+
+		if err = utils.ValidatePort(clusterPort); err != nil {
+			return err
+		}
+
+		if serverCount < 1 || serverCount > 20 {
+			return errors.New("server count must be between 1 and 20")
+		}
+
+		cmd.Println("Create cluster", clusterName, "http port", httpPort, "cluster port", clusterPort)
+
+		// validate ensure
+		err = ensureUniqueCluster(clusterName)
+		if err != nil {
+			return err
+		}
+
+		if !automaticallyConfirm {
+			cmd.Printf("\nCluster name:    %s\n", clusterName)
+			cmd.Printf("Cluster version: %s\n", clusterVersion)
+			cmd.Printf("Cluster port:    %d\n", clusterPort)
+			cmd.Printf("Management port: %d\n", httpPort)
+			cmd.Printf("Server count:    %d\n", serverCount)
+			cmd.Printf("Are you sure you want to create the cluster with the above details? (y/n) ")
+			_, err = fmt.Scanln(&response)
+			if response != "y" || err != nil {
+				cmd.Println(constants.NoOperation)
+				return nil
+			}
+		}
+
+		cmd.Println("Creating...")
+
+		return nil
+	},
+}
+
 func init() {
 	addClusterCmd.Flags().StringVarP(&connectionURL, "url", "u", "", "connection URL")
 	_ = addClusterCmd.MarkFlagRequired("url")
@@ -886,6 +952,11 @@ func init() {
 	discoverClustersCmd.Flags().Int32VarP(&timeout, "timeout", "t", 30, timeoutMessage)
 
 	removeClusterCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
+	createClusterCmd.Flags().StringVarP(&clusterVersion, "version", "v", "21.12.2", "cluster version")
+	createClusterCmd.Flags().Int32VarP(&httpPort, "http-port", "C", 30000, "Http management port")
+	createClusterCmd.Flags().Int32VarP(&clusterPort, "cluster-port", "H", 7574, "cluster port")
+	createClusterCmd.Flags().Int32VarP(&serverCount, "server-count", "s", 3, "server count")
+	createClusterCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
 }
 
 // sanitizeConnectionName sanitizes a cluster connection
@@ -979,5 +1050,16 @@ func validateTimeout(timeout int32) error {
 	if timeout <= 0 {
 		return errors.New("timeout must be greater than zero")
 	}
+	return nil
+}
+
+// ensureUniqueCluster ensures the connection string is unique
+func ensureUniqueCluster(connection string) error {
+	found, clusterConnection := GetClusterConnection(connection)
+	if found {
+		return fmt.Errorf("A connection for cluster named %s already exists with url=%s and type=%s",
+			connection, clusterConnection.ConnectionURL, clusterConnection.ConnectionType)
+	}
+
 	return nil
 }
