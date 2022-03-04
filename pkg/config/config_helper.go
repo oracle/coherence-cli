@@ -304,6 +304,7 @@ type Reporter struct {
 	LastReport       string  `json:"lastReport"`
 	LastRunMillis    int32   `json:"runLastMillis"`
 	CurrentBatch     int32   `json:"currentBatch"`
+	IntervalSeconds  int32   `json:"intervalSeconds"`
 	RunAverageMillis float64 `json:"runAverageMillis"`
 	AutoStart        bool    `json:"autoStart"`
 }

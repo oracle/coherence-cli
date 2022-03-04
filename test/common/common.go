@@ -649,6 +649,28 @@ func RunTestReporterCommands(t *testing.T) {
 	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "\"lastExecuteTime\"", "--config", file,
 		"get", "reporters", "-c", context.ClusterName, "-o", "json")
 
+	// set the reporter interval to 122 seconds
+	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "operation completed", "--config", file,
+		"set", "reporter", "-c", context.ClusterName, "-a", "intervalSeconds", "-v", "122", "-y", "all")
+
+	test_utils.Sleep(10)
+
+	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "122", "--config", file,
+		"get", "reporters", "-c", context.ClusterName)
+
+	// set the output path to /tmp/output/path
+	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "operation completed", "--config", file,
+		"set", "reporter", "-c", context.ClusterName, "-a", "outputPath", "-v", "/tmp/output/path", "-y", "1")
+
+	test_utils.Sleep(10)
+
+	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "/tmp/output/path", "--config", file,
+		"get", "reporters", "-c", context.ClusterName)
+
+	// try setting an invalid attribute value
+	test_utils.EnsureCommandErrorContains(g, t, cliCmd, "is invalid", "--config", file,
+		"set", "reporter", "-c", context.ClusterName, "-a", "outputPathNotValid", "-v", "/tmp/output/path", "-y", "1")
+
 	// get the reporters using jsonpath
 	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "\"lastExecuteTime\"", "--config", file,
 		"get", "reporters", "-c", context.ClusterName, "-o", "jsonpath=$.items[0]")

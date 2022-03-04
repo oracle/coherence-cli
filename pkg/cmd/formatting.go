@@ -834,7 +834,7 @@ func FormatReporters(reporters []config.Reporter) string {
 	})
 
 	stringValues[0] = getColumns(NodeIDColumn, "STATE", "CONFIG FILE", "OUTPUT PATH",
-		"BATCH#", "LAST REPORT", "LAST RUN", "AVG RUN", "AUTOSTART")
+		"BATCH#", "LAST REPORT", "LAST RUN", "AVG RUN", "INTERVAL", "AUTOSTART")
 
 	for i, value := range reporters {
 		var nodeID, _ = strconv.Atoi(value.NodeID)
@@ -842,14 +842,14 @@ func FormatReporters(reporters []config.Reporter) string {
 		stringValues[i+1] = getColumns(formatSmallInteger(int32(nodeID)), value.State, value.ConfigFile,
 			value.OutputPath, formatSmallInteger(value.CurrentBatch), value.LastReport,
 			formatSmallInteger(value.LastRunMillis)+"ms", formatLargeFloat(value.RunAverageMillis)+"ms",
-			fmt.Sprintf("%v", value.AutoStart))
+			formatSmallInteger(value.IntervalSeconds), fmt.Sprintf("%v", value.AutoStart))
 	}
 
 	if OutputFormat == constants.WIDE {
 		maxLength = 0
 	}
 
-	return formatLinesAllStringsWithAlignmentMax([]string{R, L, L, L, R, L, R, R, L}, stringValues, maxLength)
+	return formatLinesAllStringsWithAlignmentMax([]string{R, L, L, L, R, L, R, R, R, L}, stringValues, maxLength)
 }
 
 // FormatServices returns the services' information in a column formatted output

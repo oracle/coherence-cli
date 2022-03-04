@@ -389,6 +389,7 @@ func Initialize(command *cobra.Command) *cobra.Command {
 	setCmd.AddCommand(setCacheCmd)
 	setCmd.AddCommand(setManagementCmd)
 	setCmd.AddCommand(setServiceCmd)
+	setCmd.AddCommand(setReporterCmd)
 
 	// clear
 	command.AddCommand(clearCmd)
