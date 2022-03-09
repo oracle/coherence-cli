@@ -74,14 +74,14 @@ make clean test-discovery
 ### Run Compatability tests CE
 
 ```bash
-COHERENCE_VERSION=21.12.2    make clean build-test-images test-e2e-standalone
+COHERENCE_VERSION=21.12.3    make clean build-test-images test-e2e-standalone
 COHERENCE_VERSION=14.1.1-0-7 make clean build-test-images test-e2e-standalone
 ```
 
 For 21.12+ you must use the following to enable executors
 
 ```bash
-PROFILES=,executor COHERENCE_VERSION=21.12.2 make clean build-test-images test-e2e-standalone
+PROFILES=,executor COHERENCE_VERSION=21.12.3 make clean build-test-images test-e2e-standalone
 ```
 
 ### Run Compatability tests Commercial

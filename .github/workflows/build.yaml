@@ -93,7 +93,7 @@ jobs:
     - name: E2E Local Tests
       shell: bash
       run: |
-        PROFILES=,executor COHERENCE_VERSION=21.12.2 make clean build-test-images test-e2e-standalone
+        PROFILES=,executor COHERENCE_VERSION=21.12.3 make clean build-test-images test-e2e-standalone
 
     - name: Discovery Tests
       shell: bash
