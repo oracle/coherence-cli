@@ -10,7 +10,7 @@
 set -e
 
 echo "Coherence CE 21.12.3"
-COHERENCE_VERSION=21.12.2 make clean build-test-images test-e2e-standalone
+COHERENCE_VERSION=21.12.3 make clean build-test-images test-e2e-standalone
 
 echo "Coherence CE 21.12.3 with Executor"
 PROFILES=,executor COHERENCE_VERSION=21.12.3 make clean build-test-images test-e2e-standalone
