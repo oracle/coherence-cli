@@ -53,7 +53,7 @@ The CLI complements your existing Coherence management tools and allows you to:
 
 ## Install the CLI
 
-> Note: The Coherence CLI is now GA and the latest version is **1.0.0**.
+> Note: The Coherence CLI is now GA and the latest version is **1.1.0**.
 
 The Coherence CLI is available as a binary for most platforms and architectures. See the
 [Install guide](https://oracle.github.io/coherence-cli/docs/latest/#/docs/installation/01_installation) for
