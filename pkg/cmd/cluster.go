@@ -247,7 +247,7 @@ addition information.`,
 			}
 
 			if jsonPathOrJSON {
-				machinesData, err = getOSJson(machinesMap, dataFetcher)
+				machinesData, err1 = getOSJson(machinesMap, dataFetcher)
 				if err1 != nil {
 					errorSink.AppendError(err1)
 				}
@@ -318,7 +318,7 @@ addition information.`,
 				errorSink.AppendError(err1)
 				return
 			}
-			finalSummariesOrigins, err = getFederationSummaries(federatedServices, incoming, dataFetcher)
+			finalSummariesOrigins, err1 = getFederationSummaries(federatedServices, incoming, dataFetcher)
 			if err1 != nil {
 				errorSink.AppendError(err1)
 				return
@@ -357,7 +357,7 @@ addition information.`,
 
 		errorList := errorSink.GetErrors()
 
-		// check if any of the requests returned errors and only fail if all do
+		// check if any of the requests returned errors and only fail if any do
 		errorCount := len(errorList)
 		if errorCount == waitGroupCount {
 			return utils.GetErrors(errorList)
