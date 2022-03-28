@@ -650,11 +650,11 @@ func FormatTracing(members []config.Member) string {
 }
 
 // FormatMembers returns the member's information in a column formatted output
-func FormatMembers(members []config.Member, verbose bool) string {
+func FormatMembers(members []config.Member, verbose bool, storageMap map[int]bool) string {
 	var (
 		memberCount    = len(members)
-		alignmentWide  = []string{R, L, L, R, L, L, L, L, L, R, R, R, R, R}
-		alignment      = []string{R, L, L, R, L, L, R, R, R}
+		alignmentWide  = []string{R, L, L, R, L, L, L, L, L, R, R, L, R, R, R}
+		alignment      = []string{R, L, L, R, L, L, L, R, R, R}
 		finalAlignment []string
 	)
 
@@ -684,7 +684,7 @@ func FormatMembers(members []config.Member, verbose bool) string {
 	if OutputFormat == constants.WIDE {
 		stringValues[0] = getColumns(stringValues[0], "MACHINE", "RACK", "SITE", "PUBLISHER", "RECEIVER")
 	}
-	stringValues[0] = getColumns(stringValues[0], MaxHeapColumn, UsedHeapColumn, AvailHeapColumn)
+	stringValues[0] = getColumns(stringValues[0], "STORAGE", MaxHeapColumn, UsedHeapColumn, AvailHeapColumn)
 
 	for i, value := range members {
 		var nodeID, _ = strconv.Atoi(value.NodeID)
@@ -699,7 +699,7 @@ func FormatMembers(members []config.Member, verbose bool) string {
 				formatPublisherReceiver(value.PublisherSuccessRate), formatPublisherReceiver(value.ReceiverSuccessRate))
 		}
 
-		stringValues[i+1] = getColumns(stringValues[i+1], formatMB(value.MemoryMaxMB),
+		stringValues[i+1] = getColumns(stringValues[i+1], fmt.Sprintf("%v", utils.IsStorageEnabled(nodeID, storageMap)), formatMB(value.MemoryMaxMB),
 			formatMB(value.MemoryMaxMB-value.MemoryAvailableMB), formatMB(value.MemoryAvailableMB))
 	}
 

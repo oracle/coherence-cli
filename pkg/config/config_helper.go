@@ -61,6 +61,18 @@ type Member struct {
 	ReceiverSuccessRate  float32 `json:"receiverSuccessRate"`
 	PublisherSuccessRate float32 `json:"publisherSuccessRate"`
 	TracingSamplingRatio float32 `json:"tracingSamplingRatio"`
+	StorageEnabled       bool    `json:"storageEnabled"`
+}
+
+// StorageDetails contains a summary of storage member details
+type StorageDetails struct {
+	Details []StorageDetail `json:"items"`
+}
+
+// StorageDetail contains an individual storage details for a member
+type StorageDetail struct {
+	NodeID                 string `json:"nodeId"`
+	OwnedPartitionsPrimary int    `json:"ownedPartitionsPrimary"`
 }
 
 // ProxiesSummary contains a summary of individual proxy servers

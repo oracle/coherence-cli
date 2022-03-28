@@ -11,6 +11,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/ohler55/ojg/jp"
+	"github.com/oracle/coherence-cli/pkg/config"
 	"github.com/oracle/coherence-cli/pkg/constants"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -203,4 +204,28 @@ func CombineByteArraysForJSON(elements [][]byte, elementName []string) ([]byte, 
 		return append(result, closeBracket...), nil
 	}
 	return append(result, closeBracket...), nil
+}
+
+// GetStorageMap returns a map by node Id indicating if the node is storage enabled
+func GetStorageMap(storage config.StorageDetails) map[int]bool {
+	storageMap := make(map[int]bool)
+
+	for _, value := range storage.Details {
+		nodeID, _ := strconv.Atoi(value.NodeID)
+		storageEnabled := value.OwnedPartitionsPrimary > 0
+		if nodeEntry, ok := storageMap[nodeID]; ok {
+			storageMap[nodeID] = nodeEntry || storageEnabled
+		} else {
+			storageMap[nodeID] = storageEnabled
+		}
+	}
+	return storageMap
+}
+
+// IsStorageEnabled returns true or false
+func IsStorageEnabled(nodeID int, storageMap map[int]bool) bool {
+	if nodeEntry, ok := storageMap[nodeID]; ok {
+		return nodeEntry
+	}
+	return false
 }

@@ -70,6 +70,9 @@ type Fetcher interface {
 	// GetServiceDetailsJSON returns member details in raw json
 	GetServiceDetailsJSON() ([]byte, error)
 
+	// GetStorageDetailsJSON returns member storage details in raw json
+	GetStorageDetailsJSON() ([]byte, error)
+
 	// GetExecutorsJSON returns executor details in raw json
 	GetExecutorsJSON() ([]byte, error)
 

@@ -207,7 +207,16 @@ func (h HTTPFetcher) GetExtendedMemberInfoJSON(result []byte, nodeID string, tok
 func (h HTTPFetcher) GetServiceDetailsJSON() ([]byte, error) {
 	result, err := httpGetRequest(h, "/services/members/?links=")
 	if err != nil {
-		return constants.EmptyByte, utils.GetError("cannot get service information", err)
+		return constants.EmptyByte, utils.GetError("cannot get service member information", err)
+	}
+	return result, nil
+}
+
+// GetStorageDetailsJSON returns member storage details in raw json
+func (h HTTPFetcher) GetStorageDetailsJSON() ([]byte, error) {
+	result, err := httpGetRequest(h, "/services/members/?links=&fields=nodeId,ownedPartitionsPrimary")
+	if err != nil {
+		return constants.EmptyByte, utils.GetError("cannot get member storage information", err)
 	}
 	return result, nil
 }
