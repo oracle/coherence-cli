@@ -880,6 +880,8 @@ var (
 	serverCount    int32
 )
 
+const defaultCoherenceVersion = "22.06-SNAPSHOT"
+
 // createClusterCmd represents the create cluster command
 var createClusterCmd = &cobra.Command{
 	Use:   "cluster",
@@ -952,7 +954,7 @@ func init() {
 	discoverClustersCmd.Flags().Int32VarP(&timeout, "timeout", "t", 30, timeoutMessage)
 
 	removeClusterCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
-	createClusterCmd.Flags().StringVarP(&clusterVersion, "version", "v", "21.12.2", "cluster version")
+	createClusterCmd.Flags().StringVarP(&clusterVersion, "version", "v", defaultCoherenceVersion, "cluster version")
 	createClusterCmd.Flags().Int32VarP(&httpPort, "http-port", "C", 30000, "Http management port")
 	createClusterCmd.Flags().Int32VarP(&clusterPort, "cluster-port", "H", 7574, "cluster port")
 	createClusterCmd.Flags().Int32VarP(&serverCount, "server-count", "s", 3, "server count")
