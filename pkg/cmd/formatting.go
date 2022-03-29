@@ -676,8 +676,13 @@ func FormatMembers(members []config.Member, verbose bool, storageMap map[int]boo
 		return nodeID1 < nodeID2
 	})
 
-	var totalMaxMemoryMB int32 = 0
-	var totalAvailMemoryMB int32 = 0
+	var (
+		totalMaxMemoryMB          int32
+		totalAvailMemoryMB        int32
+		totalAvailStorageMemoryMB int32
+		totalMaxStorageMemoryMB   int32
+		availableStoragePercent   float32
+	)
 
 	stringValues[0] = getColumns(NodeIDColumn, AddressColumn, PortColumn, ProcessColumn, MemberColumn, RoleColumn)
 
@@ -687,9 +692,17 @@ func FormatMembers(members []config.Member, verbose bool, storageMap map[int]boo
 	stringValues[0] = getColumns(stringValues[0], "STORAGE", MaxHeapColumn, UsedHeapColumn, AvailHeapColumn)
 
 	for i, value := range members {
-		var nodeID, _ = strconv.Atoi(value.NodeID)
+		var (
+			nodeID, _      = strconv.Atoi(value.NodeID)
+			storageEnabled = utils.IsStorageEnabled(nodeID, storageMap)
+		)
 		totalAvailMemoryMB += value.MemoryAvailableMB
 		totalMaxMemoryMB += value.MemoryMaxMB
+
+		if storageEnabled {
+			totalAvailStorageMemoryMB += value.MemoryAvailableMB
+			totalMaxStorageMemoryMB += value.MemoryMaxMB
+		}
 
 		stringValues[i+1] = getColumns(formatSmallInteger(int32(nodeID)), value.UnicastAddress,
 			formatPort(value.UnicastPort), value.ProcessName, value.MemberName, value.RoleName)
@@ -699,19 +712,29 @@ func FormatMembers(members []config.Member, verbose bool, storageMap map[int]boo
 				formatPublisherReceiver(value.PublisherSuccessRate), formatPublisherReceiver(value.ReceiverSuccessRate))
 		}
 
-		stringValues[i+1] = getColumns(stringValues[i+1], fmt.Sprintf("%v", utils.IsStorageEnabled(nodeID, storageMap)), formatMB(value.MemoryMaxMB),
+		stringValues[i+1] = getColumns(stringValues[i+1], fmt.Sprintf("%v", storageEnabled), formatMB(value.MemoryMaxMB),
 			formatMB(value.MemoryMaxMB-value.MemoryAvailableMB), formatMB(value.MemoryAvailableMB))
 	}
 
 	totalUsedMB := totalMaxMemoryMB - totalAvailMemoryMB
 	availablePercent := float32(totalAvailMemoryMB) / float32(totalMaxMemoryMB) * 100
 
+	totalUsedStorageMB := totalMaxStorageMemoryMB - totalAvailStorageMemoryMB
+
+	if totalAvailStorageMemoryMB > 0 {
+		availableStoragePercent = float32(totalUsedStorageMB) / float32(totalMaxStorageMemoryMB) * 100
+	}
+
 	result :=
 		fmt.Sprintf("Total cluster members: %d\n", memberCount) +
 			fmt.Sprintf("Cluster Heap - Total: %s, Used: %s, Available: %s (%4.1f%%)\n",
 				strings.TrimSpace(formatMB(totalMaxMemoryMB)),
 				strings.TrimSpace(formatMB(totalUsedMB)),
-				strings.TrimSpace(formatMB(totalAvailMemoryMB)), availablePercent)
+				strings.TrimSpace(formatMB(totalAvailMemoryMB)), availablePercent) +
+			fmt.Sprintf("Storage Heap - Total: %s, Used: %s, Available: %s (%4.1f%%)\n",
+				strings.TrimSpace(formatMB(totalMaxStorageMemoryMB)),
+				strings.TrimSpace(formatMB(totalUsedStorageMB)),
+				strings.TrimSpace(formatMB(totalAvailStorageMemoryMB)), availableStoragePercent)
 
 	if verbose {
 		result += formatLinesAllStringsWithAlignment(finalAlignment, stringValues)

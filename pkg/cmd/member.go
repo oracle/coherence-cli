@@ -75,7 +75,6 @@ can specify '-o wide' to display addition information.`,
 				cmd.Println("\n" + time.Now().String())
 			}
 
-			// TODO: Enhancement carry out in parallel
 			membersResult, err = dataFetcher.GetMemberDetailsJSON(OutputFormat != constants.TABLE && OutputFormat != constants.WIDE)
 			if err != nil {
 				return err
