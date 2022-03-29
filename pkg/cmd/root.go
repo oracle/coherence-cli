@@ -29,7 +29,6 @@ import (
 // Global flags
 
 var OutputFormat string
-
 var clusterConnection string
 var serviceName string
 var watchEnabled bool
@@ -563,7 +562,7 @@ func newWinFileSink(u *url.URL) (zap.Sink, error) {
 	return os.OpenFile(u.Path[1:], os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0644)
 }
 
-// initLogging initalizes the logging
+// initLogging initializes the logging
 func initLogging(homeDir string) (*zap.Logger, error) {
 	cfg := zap.NewDevelopmentConfig()
 
