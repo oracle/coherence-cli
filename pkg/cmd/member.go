@@ -63,7 +63,6 @@ can specify '-o wide' to display addition information.`,
 			membersResult []byte
 			storageResult []byte
 			err           error
-			wg            sync.WaitGroup
 		)
 
 		connection, dataFetcher, err = GetConnectionAndDataFetcher()
@@ -76,42 +75,15 @@ can specify '-o wide' to display addition information.`,
 				cmd.Println("\n" + time.Now().String())
 			}
 
-			errorSink := createErrorSink()
+			// TODO: Enhancement carry out in parallel
+			membersResult, err = dataFetcher.GetMemberDetailsJSON(OutputFormat != constants.TABLE && OutputFormat != constants.WIDE)
+			if err != nil {
+				return err
+			}
 
-			// retrieve the member and storage details in parallel
-			wg.Add(2)
-
-			go func() {
-				defer wg.Done()
-				var err1 error
-				membersResult, err1 = dataFetcher.GetMemberDetailsJSON(OutputFormat != constants.TABLE && OutputFormat != constants.WIDE)
-				if err1 != nil {
-					errorSink.AppendError(err1)
-				}
-			}()
-
-			go func() {
-				defer wg.Done()
-				var err1 error
-				storageResult, err1 = dataFetcher.GetStorageDetailsJSON()
-				if err1 != nil {
-					errorSink.AppendError(err1)
-				}
-			}()
-
-			// wait for all data fetchers requests to complete
-			wg.Wait()
-
-			errorList := errorSink.GetErrors()
-
-			// check if any of the requests returned errors and only fail if any do
-			errorCount := len(errorList)
-			if errorCount == 2 {
-				return utils.GetErrors(errorList)
-			} else if errorCount != 0 {
-				// one or more errors.
-				err = utils.GetErrors(errorList)
-				_, _ = fmt.Fprint(os.Stderr, err.Error())
+			storageResult, err = dataFetcher.GetStorageDetailsJSON()
+			if err != nil {
+				return err
 			}
 
 			if strings.Contains(OutputFormat, constants.JSONPATH) {
