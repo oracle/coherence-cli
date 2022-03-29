@@ -31,12 +31,12 @@ Display all members.
 ----
 $ cohctl get members -c local
 
-Cluster Heap - Total: 2.500GB, Used: 305MB, Available: 2.202GB (88.1%)
-
-NODE ID  ADDRESS          PORT  PROCESS  MEMBER  ROLE               MAX HEAP  USED HEAP  AVAIL HEAP
-1        /192.168.1.124  53216    12096  n/a     CoherenceServer     1.000GB       95MB       929MB
-2        /192.168.1.124  53215    12094  n/a     Management            512MB      112MB       400MB
-3        /192.168.1.124  53220    12246  n/a     CoherenceServer     1.000GB       98MB       926MB
+Cluster Heap - Total: 1.250GB, Used: 197MB, Available: 1.058GB (84.6%)
+Storage Heap - Total: 1.000GB, Used: 147MB, Available: 877MB (14.4%)
+NODE ID  ADDRESS          PORT  PROCESS  MEMBER  ROLE                 STORAGE  MAX HEAP  USED HEAP  AVAIL HEAP
+1        /192.168.1.124  53216    12096  n/a     CoherenceServer      true      1.000GB       95MB       929MB
+2        /192.168.1.124  53215    12094  n/a     CoherenceServer      true        512MB      112MB       400MB
+3        /192.168.1.124  53220    12246  n/a     TangosolNetCoherence false     1.000GB       98MB       926MB
 ----
 
 Display all members with the role `CoherenceServer`.
@@ -44,11 +44,10 @@ Display all members with the role `CoherenceServer`.
 [source,bash]
 ----
 $ cohctl get members -c local -r CoherenceServer
-Cluster Heap - Total: 2.000GB, Used: 197MB, Available: 1.808GB (90.4%)
 
-NODE ID  ADDRESS          PORT  PROCESS  MEMBER  ROLE             MAX HEAP  USED HEAP  AVAIL HEAP
-1        /192.168.1.124  53216    12096  n/a     CoherenceServer   1.000GB       98MB       926MB
-3        /192.168.1.124  53220    12246  n/a     CoherenceServer   1.000GB       99MB       925MB
+NODE ID  ADDRESS          PORT  PROCESS  MEMBER  ROLE                 STORAGE  MAX HEAP  USED HEAP  AVAIL HEAP
+1        /192.168.1.124  53216    12096  n/a     CoherenceServer      true      1.000GB       95MB       929MB
+2        /192.168.1.124  53215    12094  n/a     CoherenceServer      true        512MB      112MB       400MB
 ----
 
 NOTE: You can also use `-o wide` to display more columns.

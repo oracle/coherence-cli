@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Oracle and/or its affiliates.
+ * Copyright (c) 2021, 2022 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -9,6 +9,7 @@ package utils
 import (
 	"encoding/json"
 	. "github.com/onsi/gomega"
+	"github.com/oracle/coherence-cli/pkg/config"
 	"testing"
 )
 
@@ -125,4 +126,64 @@ func TestSanitizeSnapshotName(t *testing.T) {
 	g.Expect(SanitizeSnapshotName("test\\tim")).To(Equal("test-tim"))
 	g.Expect(SanitizeSnapshotName("test.tim")).To(Equal("test-tim"))
 	g.Expect(SanitizeSnapshotName("c:test.tim")).To(Equal("c-test-tim"))
+}
+
+func TestGetStorageMap(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	testCase1 := config.StorageDetails{Details: []config.StorageDetail{
+		{NodeID: "1", OwnedPartitionsPrimary: 1},
+		{NodeID: "2", OwnedPartitionsPrimary: 2},
+		{NodeID: "3", OwnedPartitionsPrimary: 0},
+	}}
+
+	result := GetStorageMap(testCase1)
+	g.Expect(len(result)).To(Equal(3))
+	g.Expect(result[1]).To(Equal(true))
+	g.Expect(result[2]).To(Equal(true))
+	g.Expect(result[3]).To(Equal(false))
+
+	g.Expect(IsStorageEnabled(1, result)).To(Equal(true))
+	g.Expect(IsStorageEnabled(2, result)).To(Equal(true))
+	g.Expect(IsStorageEnabled(3, result)).To(Equal(false))
+
+	// test that a single storage count > 0 should make the node storage enabled
+	testCase2 := config.StorageDetails{Details: []config.StorageDetail{
+		{NodeID: "1", OwnedPartitionsPrimary: 1},
+		{NodeID: "1", OwnedPartitionsPrimary: 0},
+		{NodeID: "2", OwnedPartitionsPrimary: 0},
+	}}
+
+	result = GetStorageMap(testCase2)
+	g.Expect(len(result)).To(Equal(2))
+	g.Expect(result[1]).To(Equal(true))
+	g.Expect(result[2]).To(Equal(false))
+
+	// test that a single storage count > 0 should make the node storage enabled when it is second
+	testCase3 := config.StorageDetails{Details: []config.StorageDetail{
+		{NodeID: "1", OwnedPartitionsPrimary: 0},
+		{NodeID: "1", OwnedPartitionsPrimary: 1},
+		{NodeID: "2", OwnedPartitionsPrimary: 0},
+	}}
+
+	result = GetStorageMap(testCase3)
+	g.Expect(len(result)).To(Equal(2))
+	g.Expect(result[1]).To(Equal(true))
+	g.Expect(result[2]).To(Equal(false))
+
+	// test that a single storage count > 0 should make the node storage enabled when it is second
+	testCase4 := config.StorageDetails{Details: []config.StorageDetail{
+		{NodeID: "1", OwnedPartitionsPrimary: 0},
+		{NodeID: "1", OwnedPartitionsPrimary: 1},
+		{NodeID: "2", OwnedPartitionsPrimary: 0},
+		{NodeID: "2", OwnedPartitionsPrimary: 1},
+		{NodeID: "3", OwnedPartitionsPrimary: -1},
+	}}
+
+	result = GetStorageMap(testCase4)
+	g.Expect(len(result)).To(Equal(3))
+	g.Expect(result[1]).To(Equal(true))
+	g.Expect(result[2]).To(Equal(true))
+	g.Expect(result[3]).To(Equal(false))
+
 }

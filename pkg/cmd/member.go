@@ -55,11 +55,17 @@ can specify '-o wide' to display addition information.`,
 	Args: cobra.ExactArgs(0),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var (
-			members     = config.Members{}
-			dataFetcher fetcher.Fetcher
+			members       = config.Members{}
+			storage       = config.StorageDetails{}
+			dataFetcher   fetcher.Fetcher
+			connection    string
+			result        string
+			membersResult []byte
+			storageResult []byte
+			err           error
 		)
 
-		connection, dataFetcher, err := GetConnectionAndDataFetcher()
+		connection, dataFetcher, err = GetConnectionAndDataFetcher()
 		if err != nil {
 			return err
 		}
@@ -69,13 +75,18 @@ can specify '-o wide' to display addition information.`,
 				cmd.Println("\n" + time.Now().String())
 			}
 
-			membersResult, err := dataFetcher.GetMemberDetailsJSON(OutputFormat != constants.TABLE && OutputFormat != constants.WIDE)
+			membersResult, err = dataFetcher.GetMemberDetailsJSON(OutputFormat != constants.TABLE && OutputFormat != constants.WIDE)
+			if err != nil {
+				return err
+			}
+
+			storageResult, err = dataFetcher.GetStorageDetailsJSON()
 			if err != nil {
 				return err
 			}
 
 			if strings.Contains(OutputFormat, constants.JSONPATH) {
-				result, err := utils.GetJSONPathResults(membersResult, OutputFormat)
+				result, err = utils.GetJSONPathResults(membersResult, OutputFormat)
 				if err != nil {
 					return err
 				}
@@ -88,6 +99,13 @@ can specify '-o wide' to display addition information.`,
 				if err != nil {
 					return utils.GetError("unable to decode member details", err)
 				}
+
+				err = json.Unmarshal(storageResult, &storage)
+				if err != nil {
+					return utils.GetError("unable to decode storage details", err)
+				}
+
+				storageMap := utils.GetStorageMap(storage)
 
 				var filteredMembers []config.Member
 
@@ -103,7 +121,7 @@ can specify '-o wide' to display addition information.`,
 					filteredMembers = make([]config.Member, len(members.Members))
 					copy(filteredMembers, members.Members)
 				}
-				cmd.Print(FormatMembers(filteredMembers, true))
+				cmd.Print(FormatMembers(filteredMembers, true, storageMap))
 			}
 
 			// check to see if we should exit if we are not watching

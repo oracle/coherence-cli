@@ -175,6 +175,7 @@ addition information.`,
 			machines                   []config.Machine
 			finalSummariesDestinations []config.FederationSummary
 			finalSummariesOrigins      []config.FederationSummary
+			storage                    = config.StorageDetails{}
 			dataFetcher                fetcher.Fetcher
 			federatedServices          []string
 			edData                     string
@@ -191,13 +192,14 @@ addition information.`,
 			http                       []byte
 			executorsResult            []byte
 			machinesData               []byte
+			storageData                []byte
 			errorSink                  = createErrorSink()
 			cachesData                 string
 			topicsData                 string
 			jsonPathOrJSON             = strings.Contains(OutputFormat, constants.JSONPATH) || OutputFormat == constants.JSON
 		)
 
-		const waitGroupCount = 10
+		const waitGroupCount = 11
 
 		connection := args[0]
 
@@ -256,6 +258,15 @@ addition information.`,
 			defer wg.Done()
 			var err1 error
 			servicesResult, err1 = dataFetcher.GetServiceDetailsJSON()
+			if err1 != nil {
+				errorSink.AppendError(err1)
+			}
+		}()
+
+		go func() {
+			defer wg.Done()
+			var err1 error
+			storageData, err1 = dataFetcher.GetStorageDetailsJSON()
 			if err1 != nil {
 				errorSink.AppendError(err1)
 			}
@@ -406,6 +417,13 @@ addition information.`,
 				return utils.GetError("unable to decode services results", err)
 			}
 
+			err = json.Unmarshal(storageData, &storage)
+			if err != nil {
+				return utils.GetError("unable to decode storage details", err)
+			}
+
+			storageMap := utils.GetStorageMap(storage)
+
 			if len(proxyResults) > 0 {
 				err = json.Unmarshal(proxyResults, &proxiesSummary)
 				if err != nil {
@@ -439,7 +457,7 @@ addition information.`,
 
 			sb.WriteString("\nMEMBERS\n")
 			sb.WriteString("-------\n")
-			sb.WriteString(FormatMembers(members.Members, verboseOutput))
+			sb.WriteString(FormatMembers(members.Members, verboseOutput, storageMap))
 
 			sb.WriteString("\nSERVICES\n")
 			sb.WriteString("--------\n")
