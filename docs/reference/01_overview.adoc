@@ -51,7 +51,7 @@ Display and describe service information.
 
 [CARD]
 .Caches
-[link=docs/reference/25_services.adoc]
+[link=docs/reference/25_caches.adoc]
 --
 Display and describe cache information.
 --

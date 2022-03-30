@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 
-    Copyright (c) 2021, Oracle and/or its affiliates.
+    Copyright (c) 2021, 2022 Oracle and/or its affiliates.
     Licensed under the Universal Permissive License v 1.0 as shown at
     https://oss.oracle.com/licenses/upl.
 
@@ -28,7 +28,7 @@ Display all caches.
 
 [source,bash]
 ----
-$ cohctl get caches -c local
+$ cohctl get caches -c local -o wide
 Total Caches: 3, Total primary storage: 16MB
 
 SERVICE            CACHE     CACHE SIZE       BYTES    MB  AVG SIZE  TOTAL PUTS  TOTAL GETS  TOTAL REMOVES  TOTAL HITS  TOTAL MISSES  HIT PROB
@@ -37,11 +37,13 @@ PartitionedCache   test2            123     142,680   0MB     1,160         246 
 PartitionedCache2  test-123           0           0   0MB         0           0           0              0           0             0     0.00%
 ----
 
+NOTE: If you do not use the `-o wide` option, then you will only see service, cache name, cache size and bytes.
+
 Display all caches for a particular service.
 
 [source,bash]
 ----
-$ cohctl get caches -c local -s PartitionedCache2
+$ cohctl get caches -c local -s PartitionedCache2 -o wide
 
 Total Caches: 1, Total primary storage: 0MB
 
