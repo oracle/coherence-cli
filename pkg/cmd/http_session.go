@@ -147,7 +147,6 @@ var describeHTTPSessionCmd = &cobra.Command{
 			found         bool
 			httpSessions  = config.HTTPSessionSummaries{}
 			finalSessions = make([]config.HTTPSessionSummary, 0)
-			result        []byte
 			err           error
 			dataFetcher   fetcher.Fetcher
 			firstMember   []byte
@@ -191,14 +190,14 @@ var describeHTTPSessionCmd = &cobra.Command{
 		}
 
 		if strings.Contains(OutputFormat, constants.JSONPATH) {
-			jsonPathResult, err := utils.GetJSONPathResults(result, OutputFormat)
+			jsonPathResult, err := utils.GetJSONPathResults(results, OutputFormat)
 			if err != nil {
 				return err
 			}
 			cmd.Println(jsonPathResult)
 			return nil
 		} else if OutputFormat == constants.JSON {
-			cmd.Println(string(result))
+			cmd.Println(string(results))
 		} else {
 			cmd.Println(FormatCurrentCluster(connection))
 			cmd.Println("HTTP SESSION DETAILS")
