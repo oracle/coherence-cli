@@ -1,5 +1,5 @@
 <!--
-Copyright (c) 2021, Oracle and/or its affiliates.
+Copyright (c) 2021, 2022 Oracle and/or its affiliates.
 Licensed under the Universal Permissive License v 1.0 as shown at
 https://oss.oracle.com/licenses/upl.
 -->
@@ -52,8 +52,6 @@ The CLI complements your existing Coherence management tools and allows you to:
 * Retrieve thread dumps across members
 
 ## Install the CLI
-
-> Note: The Coherence CLI is now GA and the latest version is **1.1.0**.
 
 The Coherence CLI is available as a binary for most platforms and architectures. See the
 [Install guide](https://oracle.github.io/coherence-cli/docs/latest/#/docs/installation/01_installation) for
