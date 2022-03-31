@@ -25,7 +25,7 @@ Manage Cluster Connections.
 .Contexts
 [link=docs/reference/10_contexts.adoc]
 --
-Adding arbitrary JVM arguments and system properties.
+Manage cluster connections you are working with.
 --
 
 [CARD]

@@ -11,7 +11,7 @@
 == Reporters
 
 === Overview
-There are various commands that allow you to work with and manage Reporters servers.
+There are various commands that allow you to work with and manage Reporters.
 
 * <<get-reporters, `cohctl get reporters`>> - displays the reporters for a cluster
 * <<describe-reporter, `cohctl describe reporter`>> - shows information related to a specific reporter
