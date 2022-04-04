@@ -20,6 +20,7 @@ This page will be updated and maintained over time to include common issues we s
 * <<jfr, Null returned in JFR commands>>
 * <<services, Cannot find services with quotes in their names>>
 * <<wls, Issues adding correct cluster when WebLogic Server has multiple Coherence clusters>>
+* <<windows, Issues setting reporter path on Windows>>
 
 [#bad]
 === Bad CPU type in executable on macOS
@@ -191,4 +192,35 @@ $ cohctl get clusters
 CONNECTION  TYPE  URL                                                                            VERSION      CLUSTER NAME        TYPE        CTX
 wls1        http  http://hostname:7001/management/coherence/latest/clusters                    14.1.1.0.0   CoherenceCluster    WebLogic
 wls2        http  http://hostname:7001/management/coherence/latest/clusters/CoherenceCluster2  14.1.1.0.0   CoherenceCluster2   WebLogic
+----
+
+[#windows]
+=== Issues setting reporter path on Windows
+
+==== Problem
+
+When trying to set the reporter output path when your server is running on Windows, you
+receive an error `response=500 Internal Server Error`.
+
+For example:
+
+[source,cmd]
+----
+c:\> cohctl -y set reporter 1 -a outputPath -v D:\Temp\my_path
+
+cannot set value D:\Temp\my_path for attribute outputPath : response=500 Internal Server Error,
+url=http://host:port/management/coherence/cluster/reporters/1
+----
+
+NOTE: On inspecting the server log you may see a message similar to `Unrecognized character escape`.
+
+==== Solution
+
+You must escape any backslash (`\`) in the path with an additional backslash:
+
+[source,bash]
+----
+c:\> cohctl -y set reporter 1 -a outputPath -v D:\\Temp\\my_path
+
+operation completed
 ----

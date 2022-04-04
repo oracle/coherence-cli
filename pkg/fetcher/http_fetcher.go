@@ -242,7 +242,7 @@ func (h HTTPFetcher) SetReporterAttribute(memberID, attribute string, value inte
 	result, err := httpPostRequest(h, "/reporters/"+memberID, payload)
 	if err != nil {
 		return constants.EmptyByte, utils.GetError(
-			fmt.Sprintf("cannot set value %vfor attribute %s ", value, attribute), err)
+			fmt.Sprintf("cannot set value %v for attribute %s ", value, attribute), err)
 	}
 	return result, nil
 }
@@ -255,7 +255,7 @@ func (h HTTPFetcher) SetManagementAttribute(attribute string, value interface{})
 	result, err := httpPostRequest(h, "/management/", payload)
 	if err != nil {
 		return constants.EmptyByte, utils.GetError(
-			fmt.Sprintf("cannot set management value %vfor attribute %s ", value, attribute), err)
+			fmt.Sprintf("cannot set management value %v for attribute %s ", value, attribute), err)
 	}
 	return result, nil
 }
@@ -772,7 +772,10 @@ func getSafeServiceName(h HTTPFetcher, serviceName string) string {
 func setUsernamePassword() error {
 	if username == "" {
 		fmt.Print("Enter username: ")
-		_, _ = fmt.Scanln(&username)
+		_, err := fmt.Scanln(&username)
+		if err != nil {
+			return err
+		}
 	}
 
 	if username == "" {
@@ -787,7 +790,7 @@ func setUsernamePassword() error {
 		password = scanner.Text()
 	} else {
 		fmt.Print("Enter password: ")
-		passwordByte, err := term.ReadPassword(0)
+		passwordByte, err := term.ReadPassword(int(os.Stdin.Fd()))
 		if err != nil {
 			return err
 		}
