@@ -60,6 +60,8 @@ include::../../build/_output/docs-gen/start_reporter.adoc[tag=text]
 [source,bash]
 ----
 $ cohctl start reporter 1 -c local
+Are you sure you want to start the reporter on node 1? (y/n) y
+Reporter has been started on node 1
 ----
 
 [#stop-reporter]
@@ -71,7 +73,8 @@ include::../../build/_output/docs-gen/stop_reporter.adoc[tag=text]
 
 [source,bash]
 ----
-$ cohctl stop reporter 1 -c local
+$ cohctl stop reporter 1 -c local -y
+Reporter has been stopped on node 1
 ----
 
 [#set-reporter]

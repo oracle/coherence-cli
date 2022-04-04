@@ -302,6 +302,8 @@ configFile, currentBatch, intervalSeconds or outputPath.`,
 
 func init() {
 	setReporterCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
+	startReporterCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
+	stopReporterCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
 	setReporterCmd.Flags().StringVarP(&reporterAttributeName, "attribute", "a", "", "attribute name to set")
 	_ = setReporterCmd.MarkFlagRequired("attribute")
 	setReporterCmd.Flags().StringVarP(&reporterAttributeValue, "value", "v", "", "attribute value to set")

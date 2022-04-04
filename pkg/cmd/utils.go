@@ -225,6 +225,7 @@ func IssueReporterCommand(nodeID, command string, cmd *cobra.Command) error {
 		action          string
 		reportersResult []byte
 		reporters       = config.Reporters{}
+		response        string
 	)
 
 	if !utils.IsValidInt(nodeID) {
@@ -264,6 +265,16 @@ func IssueReporterCommand(nodeID, command string, cmd *cobra.Command) error {
 	}
 
 	cmd.Println(FormatCurrentCluster(connection))
+
+	if !automaticallyConfirm {
+		cmd.Printf("Are you sure you want to %s the reporter on node %s? (y/n) ",
+			command, nodeID)
+		_, err = fmt.Scanln(&response)
+		if response != "y" || err != nil {
+			cmd.Println(constants.NoOperation)
+			return nil
+		}
+	}
 
 	if command == "start" {
 		action = "started"

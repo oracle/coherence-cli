@@ -631,15 +631,15 @@ func RunTestReporterCommands(t *testing.T) {
 
 	// can't stop a reporter that is already stopped
 	test_utils.EnsureCommandErrorContains(g, t, cliCmd, "already stopped", "--config", file,
-		"stop", "reporter", "1", "-c", context.ClusterName)
+		"stop", "reporter", "1", "-c", context.ClusterName, "-y")
 
 	// start a reporter
 	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "started", "--config", file,
-		"start", "reporter", "1", "-c", context.ClusterName)
+		"start", "reporter", "1", "-c", context.ClusterName, "-y")
 
 	// can't start a reporter that is already started
 	test_utils.EnsureCommandErrorContains(g, t, cliCmd, "already started", "--config", file,
-		"start", "reporter", "1", "-c", context.ClusterName)
+		"start", "reporter", "1", "-c", context.ClusterName, "-y")
 
 	// get the reporters
 	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "Started", "--config", file,
