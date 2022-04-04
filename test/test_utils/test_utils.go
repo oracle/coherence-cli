@@ -175,7 +175,6 @@ func GetFilePath(fileName string) string {
 
 // StartCoherenceCluster starts a Coherence cluster
 func StartCoherenceCluster(fileName, url string) error {
-
 	output, err := DockerComposeUp(fileName)
 	if err != nil {
 		return errors.New(output + ": " + err.Error())
