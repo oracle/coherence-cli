@@ -97,13 +97,13 @@ runCommand get snapshots
 
 # Reporters
 runCommand get reporters
-runCommand start reporter 1
+runCommand start reporter 1 -y
 
 sleep 10
 runCommand describe reporter 1
 grep Started $OUTPUT
 
-runCommand stop reporter 1 || true
+runCommand stop reporter 1 -y || true
 sleep 10
 runCommand describe reporter 1
 grep Stopped $OUTPUT
