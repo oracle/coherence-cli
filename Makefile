@@ -15,7 +15,7 @@
 # ======================================================================================================================
 
 # The version of the CLI being build - this should be a valid SemVer format
-VERSION ?= 1.2.1
+VERSION ?= 1.2.2
 MILESTONE ?=
 
 # Maven version is always 1.0.0 as it is only for testing
