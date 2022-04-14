@@ -1,4 +1,4 @@
-# Copyright 2021, Oracle Corporation and/or its affiliates.
+# Copyright 2021, 2022 Oracle Corporation and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at
 # https://oss.oracle.com/licenses/upl.
 
@@ -79,8 +79,13 @@ jobs:
         cd $CLONE_DIR
         if [ $COH_BRANCH != "main" ] ; then
            git checkout $COH_BRANCH
+           mvn --file prj/pom.xml --batch-mode -e -DskipTests clean install
+        else
+           # main requires updated 2 step build for coherence.jar and everything else
+           mvn --file prj/pom.xml --batch-mode -e -DskipTests clean install
+           mvn --file prj/pom.xml --batch-mode -e -P-coherence,modules -nsu -DskipTests clean install
         fi
-        mvn --file prj/pom.xml --batch-mode -e -DskipTests clean install
+
         cd $DIR
 
     - name: Cache Go Modules
