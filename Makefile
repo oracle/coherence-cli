@@ -193,8 +193,8 @@ build-federation-images: ## Build the Test images for federation
 build-test-images: ## Build the Test images
 	@echo "${MAVEN_BUILD_OPTS}"
 	@ ./scripts/check_image.sh $(COHERENCE_BASE_IMAGE)
-	mvn -f java/coherence-cli-test clean package jib:dockerBuild -DskipTests -P member1$(PROFILES) -Djib.to.image=$(TEST_APPLICATION_IMAGE_1) -Dcoherence.test.base.image=$(COHERENCE_BASE_IMAGE) $(MAVEN_BUILD_OPTS)
-	mvn -f java/coherence-cli-test clean package jib:dockerBuild -DskipTests -P member2$(PROFILES) -Djib.to.image=$(TEST_APPLICATION_IMAGE_2) -Dcoherence.test.base.image=$(COHERENCE_BASE_IMAGE) $(MAVEN_BUILD_OPTS)
+	mvn -f java/coherence-cli-test -nsu clean package jib:dockerBuild -DskipTests -P member1$(PROFILES) -Djib.to.image=$(TEST_APPLICATION_IMAGE_1) -Dcoherence.test.base.image=$(COHERENCE_BASE_IMAGE) $(MAVEN_BUILD_OPTS)
+	mvn -f java/coherence-cli-test -nsu clean package jib:dockerBuild -DskipTests -P member2$(PROFILES) -Djib.to.image=$(TEST_APPLICATION_IMAGE_2) -Dcoherence.test.base.image=$(COHERENCE_BASE_IMAGE) $(MAVEN_BUILD_OPTS)
 	echo "COHERENCE_IMAGE1=$(TEST_APPLICATION_IMAGE_1)" > $(ENV_FILE)
 	echo "COHERENCE_IMAGE2=$(TEST_APPLICATION_IMAGE_2)" >> $(ENV_FILE)
 	echo "CURRENT_UID=$(USER_ID)" >> $(ENV_FILE)
