@@ -29,8 +29,8 @@ func TestFormattingBytes(t *testing.T) {
 	g := NewGomegaWithT(t)
 
 	g.Expect(formatMB(123)).To(Equal("123MB"))
-	g.Expect(formatMB(1200)).To(Equal("1.172GB"))
-	g.Expect(formatMB(1200000)).To(Equal("1.144TB"))
+	g.Expect(formatMB(1200)).To(Equal("1.17GB"))
+	g.Expect(formatMB(1200000)).To(Equal("1.14TB"))
 }
 
 func TestFormattingLatency(t *testing.T) {

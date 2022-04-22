@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Oracle and/or its affiliates.
+ * Copyright (c) 2021, 2022 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -180,6 +180,10 @@ func TestTimeoutCommands(t *testing.T) {
 		_ = os.RemoveAll(file)
 	})
 
+	// set the timeout to 30
+	test_utils.EnsureCommandOutputEquals(g, t, cliCmd, setTimeoutMsg+"30\n", "--config", file, "set", "timeout", "30")
+
+	// get the timeout
 	test_utils.EnsureCommandOutputEquals(g, t, cliCmd, getTimeoutMessage+"30\n", "--config", file, "get", "timeout")
 
 	// set the timeout to 65
