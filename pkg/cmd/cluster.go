@@ -156,7 +156,7 @@ var describeClusterCmd = &cobra.Command{
 	Long: `The 'describe cluster' command shows cluster information related to a specific 
 cluster connection, including: cluster overview, members, machines, services, caches, 
 reporters, proxy servers and Http servers. You can specify '-o wide' to display 
-addition information.`,
+addition information as well as '-v' to displayed additional information.`,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
 			displayErrorAndExit(cmd, "you must provide a cluster connection")
@@ -202,6 +202,12 @@ addition information.`,
 		const waitGroupCount = 11
 
 		connection := args[0]
+
+		// validate units
+		err = validateUnitsValue()
+		if err != nil {
+			return err
+		}
 
 		// do validation for OutputFormat
 		err = checkOutputFormat()
@@ -836,6 +842,7 @@ func init() {
 
 	describeClusterCmd.Flags().BoolVarP(&verboseOutput, "verbose", "v", false,
 		"include verbose output including individual members, reporters and executor details")
+	describeClusterCmd.Flags().StringVarP(&unitsValue, "units", "u", "MB", "memory units: MB or GB")
 
 	discoverClustersCmd.PersistentFlags().BoolVarP(&ignoreErrors, "ignore", "I", false, ignoreErrorsMessage)
 	discoverClustersCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)

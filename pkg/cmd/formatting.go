@@ -40,6 +40,8 @@ const MaxHeapColumn = "MAX HEAP"
 const UsedHeapColumn = "USED HEAP"
 const AvailHeapColumn = "AVAIL HEAP"
 const NameColumn = "NAME"
+const GBUnits = "GB"
+const MBUnits = "MB"
 
 type KeyValues struct {
 	Key   string
@@ -652,11 +654,18 @@ func FormatTracing(members []config.Member) string {
 // FormatMembers returns the member's information in a column formatted output
 func FormatMembers(members []config.Member, verbose bool, storageMap map[int]bool) string {
 	var (
-		memberCount    = len(members)
-		alignmentWide  = []string{R, L, L, R, L, L, L, L, L, R, R, L, R, R, R}
-		alignment      = []string{R, L, L, R, L, L, L, R, R, R}
-		finalAlignment []string
+		memberCount        = len(members)
+		alignmentWide      = []string{R, L, L, R, L, L, L, L, L, R, R, L, R, R, R}
+		alignment          = []string{R, L, L, R, L, L, L, R, R, R}
+		finalAlignment     []string
+		formattingFunction func(memberMB int32) string
 	)
+
+	if unitsValue == MBUnits {
+		formattingFunction = formatMBOnly
+	} else if unitsValue == GBUnits {
+		formattingFunction = formatGBOnly
+	}
 
 	if memberCount == 0 {
 		return ""
@@ -712,8 +721,8 @@ func FormatMembers(members []config.Member, verbose bool, storageMap map[int]boo
 				formatPublisherReceiver(value.PublisherSuccessRate), formatPublisherReceiver(value.ReceiverSuccessRate))
 		}
 
-		stringValues[i+1] = getColumns(stringValues[i+1], fmt.Sprintf("%v", storageEnabled), formatMB(value.MemoryMaxMB),
-			formatMB(value.MemoryMaxMB-value.MemoryAvailableMB), formatMB(value.MemoryAvailableMB))
+		stringValues[i+1] = getColumns(stringValues[i+1], fmt.Sprintf("%v", storageEnabled), formattingFunction(value.MemoryMaxMB),
+			formattingFunction(value.MemoryMaxMB-value.MemoryAvailableMB), formattingFunction(value.MemoryAvailableMB))
 	}
 
 	totalUsedMB := totalMaxMemoryMB - totalAvailMemoryMB
@@ -722,19 +731,19 @@ func FormatMembers(members []config.Member, verbose bool, storageMap map[int]boo
 	totalUsedStorageMB := totalMaxStorageMemoryMB - totalAvailStorageMemoryMB
 
 	if totalAvailStorageMemoryMB > 0 {
-		availableStoragePercent = float32(totalUsedStorageMB) / float32(totalMaxStorageMemoryMB) * 100
+		availableStoragePercent = float32(totalAvailStorageMemoryMB) / float32(totalMaxStorageMemoryMB) * 100
 	}
 
 	result :=
 		fmt.Sprintf("Total cluster members: %d\n", memberCount) +
 			fmt.Sprintf("Cluster Heap - Total: %s, Used: %s, Available: %s (%4.1f%%)\n",
-				strings.TrimSpace(formatMB(totalMaxMemoryMB)),
-				strings.TrimSpace(formatMB(totalUsedMB)),
-				strings.TrimSpace(formatMB(totalAvailMemoryMB)), availablePercent) +
-			fmt.Sprintf("Storage Heap - Total: %s, Used: %s, Available: %s (%4.1f%%)\n",
-				strings.TrimSpace(formatMB(totalMaxStorageMemoryMB)),
-				strings.TrimSpace(formatMB(totalUsedStorageMB)),
-				strings.TrimSpace(formatMB(totalAvailStorageMemoryMB)), availableStoragePercent)
+				strings.TrimSpace(formattingFunction(totalMaxMemoryMB)),
+				strings.TrimSpace(formattingFunction(totalUsedMB)),
+				strings.TrimSpace(formattingFunction(totalAvailMemoryMB)), availablePercent) +
+			fmt.Sprintf("Storage Heap - Total: %s, Used: %s, Available: %s (%4.1f%%)\n\n",
+				strings.TrimSpace(formattingFunction(totalMaxStorageMemoryMB)),
+				strings.TrimSpace(formattingFunction(totalUsedStorageMB)),
+				strings.TrimSpace(formattingFunction(totalAvailStorageMemoryMB)), availableStoragePercent)
 
 	if verbose {
 		result += formatLinesAllStringsWithAlignment(finalAlignment, stringValues)
@@ -1382,11 +1391,19 @@ func formatMB(memoryMB int32) string {
 
 	memory /= 1024
 	if memory < 1024 {
-		return printer.Sprintf("%-.3fGB", memory)
+		return printer.Sprintf("%-.2fGB", memory)
 	}
 
 	memory /= 1024
-	return printer.Sprintf("%-.3fTB", memory)
+	return printer.Sprintf("%-.2fTB", memory)
+}
+
+func formatMBOnly(memoryMB int32) string {
+	return printer.Sprintf("%-.0fMB", float32(memoryMB))
+}
+
+func formatGBOnly(memoryMB int32) string {
+	return printer.Sprintf("%-.2fGB", float32(memoryMB)/1024)
 }
 
 // getMaxColumnLengths returns an array representing the max lengths of columns

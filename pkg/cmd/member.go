@@ -32,10 +32,12 @@ var (
 	dumpRoleName    string
 	configureRole   string
 	roleName        string
+	threadDumpRole  string
 	threadDump      bool
 	extendedInfo    string
 	attributeName   string
 	attributeValue  string
+	unitsValue      string
 	validAttributes = []string{"loggingLevel", "resendDelay", "sendAckDelay",
 		"trafficJamCount", "trafficJamDelay", "loggingLimit,", "loggingFormat"}
 
@@ -64,6 +66,12 @@ can specify '-o wide' to display addition information.`,
 			storageResult []byte
 			err           error
 		)
+
+		// validate units
+		err = validateUnitsValue()
+		if err != nil {
+			return err
+		}
 
 		connection, dataFetcher, err = GetConnectionAndDataFetcher()
 		if err != nil {
@@ -663,28 +671,35 @@ func issueClusterCommand(cmd *cobra.Command, command string) error {
 
 // retrieveThreadDumpsCmd represents the retrieve thread-dumps command
 var retrieveThreadDumpsCmd = &cobra.Command{
-	Use:   "thread-dumps node-ids",
+	Use:   "thread-dumps [node-ids]",
 	Short: "generate and retrieve thread dumps for all or selected members",
 	Long: `The 'get thead-dumps' command generates and retrieves thread dumps for all or selected 
-members and places them in the specified output directory'.`,
+members and places them in the specified output directory. You are also able to specify 
+a role to retrieve thread dumps for.`,
 	Args: func(cmd *cobra.Command, args []string) error {
-		if len(args) != 1 {
-			displayErrorAndExit(cmd, "you must provide a comma separated list of node id's or 'all' for all nodes")
+		if threadDumpRole == "all" && len(args) != 1 {
+			displayErrorAndExit(cmd, "you must provide a comma separated list of node id's, 'all' for all nodes, or specify a role")
 		}
 		return nil
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var (
-			dataFetcher fetcher.Fetcher
-			connection  string
-			err         error
-			nodeIds     []string
-			response    string
-			nodesToDump = args[0]
-			wg          sync.WaitGroup
-			errorSink   = createErrorSink()
-			nodeIDArray []string
+			dataFetcher   fetcher.Fetcher
+			connection    string
+			err           error
+			nodeIds       []string
+			response      string
+			nodesToDump   string
+			wg            sync.WaitGroup
+			errorSink     = createErrorSink()
+			nodeIDArray   []string
+			membersResult []byte
+			members       = config.Members{}
 		)
+
+		if len(args) != 0 {
+			nodesToDump = args[0]
+		}
 
 		if delayBetweenDumps < 5 {
 			return errors.New("delay must be 5 seconds or above")
@@ -713,14 +728,37 @@ members and places them in the specified output directory'.`,
 		if nodesToDump == "all" {
 			nodeIds = append(nodeIds, nodeIDArray...)
 		} else {
-			nodeIds = strings.Split(nodesToDump, ",")
-			for _, value := range nodeIds {
-				if !utils.IsValidInt(value) {
-					return fmt.Errorf("invalid value for node id of %s", value)
+			if threadDumpRole != "all" {
+				// a role other than "all" has been specified so get all the nodes
+				// that match the role
+				membersResult, err = dataFetcher.GetMemberDetailsJSON(false)
+				if err != nil {
+					return err
 				}
 
-				if !utils.SliceContains(nodeIDArray, value) {
-					return fmt.Errorf("no node with node id %s exists in this cluster", value)
+				err = json.Unmarshal(membersResult, &members)
+				if err != nil {
+					return utils.GetError("unable to decode member details", err)
+				}
+
+				for _, member := range members.Members {
+					if member.RoleName == threadDumpRole {
+						nodeIds = append(nodeIds, member.NodeID)
+					}
+				}
+				if len(nodeIds) == 0 {
+					return fmt.Errorf("unable to find any nodes with role %s", threadDumpRole)
+				}
+			} else {
+				nodeIds = strings.Split(nodesToDump, ",")
+				for _, value := range nodeIds {
+					if !utils.IsValidInt(value) {
+						return fmt.Errorf("invalid value for node id of %s", value)
+					}
+
+					if !utils.SliceContains(nodeIDArray, value) {
+						return fmt.Errorf("no node with node id %s exists in this cluster", value)
+					}
 				}
 			}
 		}
@@ -842,7 +880,10 @@ func GetFileName(nodeID string, iteration int32) string {
 }
 
 func init() {
+	var roleDescription = "role name to run for"
+
 	getMembersCmd.Flags().StringVarP(&roleName, "role", "r", "all", "role name to display")
+	getMembersCmd.Flags().StringVarP(&unitsValue, "units", "u", "MB", "memory units: MB or GB")
 
 	describeMemberCmd.Flags().BoolVarP(&threadDump, "thread-dump", "D", false, "include a thread dump")
 	describeMemberCmd.Flags().StringVarP(&extendedInfo, "extended", "X", "none", "include extended information such as g1OldGen, etc. See --help")
@@ -854,22 +895,30 @@ func init() {
 	_ = setMemberCmd.MarkFlagRequired("value")
 
 	dumpClusterHeapCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
-	dumpClusterHeapCmd.Flags().StringVarP(&dumpRoleName, "role", "r", "all", "role name to run for")
+	dumpClusterHeapCmd.Flags().StringVarP(&dumpRoleName, "role", "r", "all", roleDescription)
 
 	logClusterStateCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
-	logClusterStateCmd.Flags().StringVarP(&dumpRoleName, "role", "r", "all", "role name to run for")
+	logClusterStateCmd.Flags().StringVarP(&dumpRoleName, "role", "r", "all", roleDescription)
 
 	retrieveThreadDumpsCmd.Flags().Int32VarP(&numThreadDumps, "number", "n", 5, "number of thread dumps to retrieve")
 	retrieveThreadDumpsCmd.Flags().Int32VarP(&delayBetweenDumps, "dump-delay", "D", 10, "delay between each thread dump")
 	retrieveThreadDumpsCmd.Flags().StringVarP(&outputDirectory, "output-dir", "O", "", "existing directory to output thread dumps to")
+	retrieveThreadDumpsCmd.Flags().StringVarP(&threadDumpRole, "role", "r", "all", roleDescription)
 	_ = retrieveThreadDumpsCmd.MarkFlagRequired("output-dir")
 	retrieveThreadDumpsCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
 	retrieveThreadDumpsCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "produces verbose output")
 
 	configureTracingCmd.Flags().StringVarP(&configureRole, "role", "r", "", "role name to configure tracing for")
-	configureTracingCmd.Flags().Float32VarP(&tracingRatio, "tracingRatio", "t", 1.0, "rracing ratio to set. -1.0 turns off tracing")
+	configureTracingCmd.Flags().Float32VarP(&tracingRatio, "tracingRatio", "t", 1.0, "tracing ratio to set. -1.0 turns off tracing")
 	_ = configureTracingCmd.MarkFlagRequired("tracingRatio")
 	configureTracingCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
 
 	shutdownMemberCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
+}
+
+func validateUnitsValue() error {
+	if unitsValue != MBUnits && unitsValue != GBUnits {
+		return fmt.Errorf("invalid value for units of %s. Must be only %s or %s", unitsValue, MBUnits, GBUnits)
+	}
+	return nil
 }

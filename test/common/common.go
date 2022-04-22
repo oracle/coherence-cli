@@ -712,15 +712,26 @@ func RunTestThreadDumpsCommands(t *testing.T) {
 		}
 	}
 
-	// test invalid node id values
-	test_utils.EnsureCommandErrorContains(g, t, cliCmd, "invalid value", "--config", file, "retrieve", "thread-dumps",
-		"invalidnode", "-O", threadDumpDir, "-c", context.ClusterName, "-y")
+	// should be able to create a thread dump for a single node
+	test_utils.EnsureCommandContains(g, t, cliCmd, "All thread dumps completed", "--config", file, "retrieve", "thread-dumps",
+		"1", "-O", threadDumpDir, "-c", context.ClusterName, "-y", "-D", "5")
+
+	// test invalid role value
+	test_utils.EnsureCommandErrorContains(g, t, cliCmd, "invalid-role", "--config", file, "retrieve", "thread-dumps",
+		"-r", "invalid-role", "-O", threadDumpDir, "-c", context.ClusterName, "-y")
+
+	// should be able to create a thread dump for a role
+	test_utils.EnsureCommandContains(g, t, cliCmd, "All thread dumps completed", "--config", file, "retrieve", "thread-dumps",
+		"-r", "OracleCoherenceCliTestingRestServer", "-O", threadDumpDir, "-c", context.ClusterName, "-y", "-D", "5")
+
+	// re-initialize to overwrite invalid role
+	cliCmd = cmd.Initialize(nil)
 
 	// test invalid node id values
 	test_utils.EnsureCommandErrorContains(g, t, cliCmd, "invalid value", "--config", file, "retrieve", "thread-dumps",
 		"1,X", "-O", threadDumpDir, "-c", context.ClusterName, "-y")
 
-	// test inode 3 which does not exist
+	// test node 3 which does not exist
 	test_utils.EnsureCommandErrorContains(g, t, cliCmd, "no node with node", "--config", file, "retrieve", "thread-dumps",
 		"3", "-O", threadDumpDir, "-c", context.ClusterName, "-y")
 

@@ -239,7 +239,7 @@ Operation completed. Please see cache server log file for more information
 
 include::../../build/_output/docs-gen/retrieve_thread_dumps.adoc[tag=text]
 
-NOTE: When taking one or more thread dumps, if you want full deadlock analysis, you should set the following system property
+NOTE: When taking thread dumps, if you want full deadlock analysis, you should set the following system property
 on your Coherence JVMS `-Dcom.oracle.coherence.common.util.Threads.dumpLocks=FULL`
 
 *Examples*
@@ -289,6 +289,16 @@ This operation will take at least 60 seconds.
 Are you sure you want to retrieve 5 thread dumps, each 15 seconds apart for 2 nodes? (y/n) y
 Completed 5 of 5 (100.00%)
 All thread dumps completed and written to /tmp
+----
+
+Retrieve thread dumps for a given role:
+
+[source,bash]
+----
+$ cohctl retrieve thread-dumps  -O /tmp/ -r TangosolNetCoherence -c local
+
+This operation will take at least 40 seconds.
+Are you sure you want to retrieve 5 thread dumps, each 10 seconds apart for 2 node(s)? (y/n)
 ----
 
 [#configure-tracing]

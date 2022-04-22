@@ -339,6 +339,7 @@ func Initialize(command *cobra.Command) *cobra.Command {
 	Config.CurrentContext = ""
 	dumpRoleName = "all"
 	configureRole = ""
+	threadDumpRole = "all"
 
 	Config.Clusters = make([]ClusterConnection, 0)
 
