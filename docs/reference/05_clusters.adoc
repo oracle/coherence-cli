@@ -105,6 +105,7 @@ include::../../build/_output/docs-gen/remove_cluster.adoc[tag=text]
 [source,bash]
 ----
 $ cohctl remove cluster local
+Are you sure you want to remove the connection to cluster local? (y/n) y
 Removed connection for cluster local
 ----
 

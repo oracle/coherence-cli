@@ -77,11 +77,23 @@ var removeClusterCmd = &cobra.Command{
 		return nil
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
-		clusterName := args[0]
+		var (
+			response    string
+			clusterName = args[0]
+		)
 
 		found, _ := GetClusterConnection(clusterName)
 		if !found {
 			return errors.New(UnableToFindClusterMsg + clusterName)
+		}
+
+		if !automaticallyConfirm {
+			cmd.Printf("Are you sure you want to remove the connection to cluster %s? (y/n) ", clusterName)
+			_, err := fmt.Scanln(&response)
+			if response != "y" || err != nil {
+				cmd.Println(constants.NoOperation)
+				return nil
+			}
 		}
 
 		newConnection := make([]ClusterConnection, 0)
@@ -840,6 +852,8 @@ func init() {
 	discoverClustersCmd.PersistentFlags().BoolVarP(&ignoreErrors, "ignore", "I", false, ignoreErrorsMessage)
 	discoverClustersCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
 	discoverClustersCmd.Flags().Int32VarP(&timeout, "timeout", "t", 30, timeoutMessage)
+
+	removeClusterCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
 }
 
 // sanitizeConnectionName sanitizes a cluster connection

@@ -600,7 +600,7 @@ func RunTestMachinesCommands(t *testing.T) {
 		"-c", context.ClusterName, "-o", "json")
 
 	// remove the cluster entries
-	test_utils.EnsureCommandContains(g, t, cliCmd, context.ClusterName, "--config", file, "remove", "cluster", "cluster1")
+	test_utils.EnsureCommandContains(g, t, cliCmd, context.ClusterName, "--config", file, "remove", "cluster", "cluster1", "-y")
 }
 
 // RunTestReporterCommands tests various reporter commands
@@ -676,7 +676,7 @@ func RunTestReporterCommands(t *testing.T) {
 		"get", "reporters", "-c", context.ClusterName, "-o", "jsonpath=$.items[0]")
 
 	// remove the cluster entries
-	test_utils.EnsureCommandContains(g, t, cliCmd, context.ClusterName, "--config", file, "remove", "cluster", "cluster1")
+	test_utils.EnsureCommandContains(g, t, cliCmd, context.ClusterName, "--config", file, "remove", "cluster", "cluster1", "-y")
 }
 
 // RunTestThreadDumpsCommands tests thread dump commands
@@ -736,7 +736,7 @@ func RunTestThreadDumpsCommands(t *testing.T) {
 		"3", "-O", threadDumpDir, "-c", context.ClusterName, "-y")
 
 	// remove the cluster entries
-	test_utils.EnsureCommandContains(g, t, cliCmd, context.ClusterName, "--config", file, "remove", "cluster", "cluster1")
+	test_utils.EnsureCommandContains(g, t, cliCmd, context.ClusterName, "--config", file, "remove", "cluster", "cluster1", "-y")
 }
 
 // RunTestExecutorCommands runs basic executor tests
@@ -775,7 +775,7 @@ func RunTestExecutorCommands(t *testing.T) {
 		"get", "executors", "-c", context.ClusterName)
 
 	// remove the cluster entries
-	test_utils.EnsureCommandContains(g, t, cliCmd, context.ClusterName, "--config", file, "remove", "cluster", "cluster1")
+	test_utils.EnsureCommandContains(g, t, cliCmd, context.ClusterName, "--config", file, "remove", "cluster", "cluster1", "-y")
 }
 
 // RunTestJFRCommands tests various jfr commands
@@ -864,7 +864,7 @@ func RunTestJFRCommands(t *testing.T) {
 		"--config", file, "stop", "jfr", "test-1", "-y", "-c", context.ClusterName)
 
 	// remove the cluster entries
-	test_utils.EnsureCommandContains(g, t, cliCmd, context.ClusterName, "--config", file, "remove", "cluster", "cluster1")
+	test_utils.EnsureCommandContains(g, t, cliCmd, context.ClusterName, "--config", file, "remove", "cluster", "cluster1", "-y")
 }
 
 // RunTestDumpClusterHeapCommands tests the dump cluster-heap command
@@ -901,7 +901,7 @@ func RunTestDumpClusterHeapCommands(t *testing.T) {
 		"dump", "cluster-heap", "-y", "-c", context.ClusterName, "-r", "OracleCoherenceCliTestingRestServerWrong")
 
 	// remove the cluster entries
-	test_utils.EnsureCommandContains(g, t, cliCmd, context.ClusterName, "--config", file, "remove", "cluster", "cluster1")
+	test_utils.EnsureCommandContains(g, t, cliCmd, context.ClusterName, "--config", file, "remove", "cluster", "cluster1", "-y")
 }
 
 // RunTestConfigureTracingCommands tests the configure tracing command
@@ -958,7 +958,7 @@ func RunTestConfigureTracingCommands(t *testing.T) {
 		"configure", "tracing", "-y", "-c", context.ClusterName, "-r", "OracleCoherenceCliTestingRestServerWrong", "-t", "-1.0")
 
 	// remove the cluster entries
-	test_utils.EnsureCommandContains(g, t, cliCmd, context.ClusterName, "--config", file, "remove", "cluster", "cluster1")
+	test_utils.EnsureCommandContains(g, t, cliCmd, context.ClusterName, "--config", file, "remove", "cluster", "cluster1", "-y")
 }
 
 // RunTestLogClusterStateCommands tests the log cluster-state command
@@ -995,7 +995,7 @@ func RunTestLogClusterStateCommands(t *testing.T) {
 		"log", "cluster-state", "-y", "-c", context.ClusterName, "-r", "OracleCoherenceCliTestingRestServerWrong")
 
 	// remove the cluster entries
-	test_utils.EnsureCommandContains(g, t, cliCmd, context.ClusterName, "--config", file, "remove", "cluster", "cluster1")
+	test_utils.EnsureCommandContains(g, t, cliCmd, context.ClusterName, "--config", file, "remove", "cluster", "cluster1", "-y")
 }
 
 // RunTestHttpSessionCommands tests various elastic data commands
@@ -1047,7 +1047,7 @@ func RunTestHttpSessionCommands(t *testing.T) {
 		"describe", "http-session", "application1123", "-c", context.ClusterName)
 
 	// remove the cluster entries
-	test_utils.EnsureCommandContains(g, t, cliCmd, context.ClusterName, "--config", file, "remove", "cluster", "cluster1")
+	test_utils.EnsureCommandContains(g, t, cliCmd, context.ClusterName, "--config", file, "remove", "cluster", "cluster1", "-y")
 }
 
 // RunTestElasticDataCommands tests various elastic data commands
@@ -1105,7 +1105,7 @@ func RunTestElasticDataCommands(t *testing.T) {
 		"not-valid", "-c", context.ClusterName)
 
 	// remove the cluster entries
-	test_utils.EnsureCommandContains(g, t, cliCmd, context.ClusterName, "--config", file, "remove", "cluster", "cluster1")
+	test_utils.EnsureCommandContains(g, t, cliCmd, context.ClusterName, "--config", file, "remove", "cluster", "cluster1", "-y")
 }
 
 // RunTestCachesCommands tests various caches commands
@@ -1199,7 +1199,7 @@ func RunTestCachesCommands(t *testing.T) {
 		"-c", context.ClusterName)
 
 	// remove the cluster entries
-	test_utils.EnsureCommandContains(g, t, cliCmd, context.ClusterName, "--config", file, "remove", "cluster", "cluster1")
+	test_utils.EnsureCommandContains(g, t, cliCmd, context.ClusterName, "--config", file, "remove", "cluster", "cluster1", "-y")
 }
 
 // RunTestPersistenceCommands tests various caches commands
@@ -1341,7 +1341,7 @@ func RunTestPersistenceCommands(t *testing.T) {
 		file, "get", "persistence", "-c", context.ClusterName, "-o", "jsonpath=$.items[0].persistenceEnvironment")
 
 	// remove the cluster entries
-	test_utils.EnsureCommandContains(g, t, cliCmd, context.ClusterName, "--config", file, "remove", "cluster", "cluster1")
+	test_utils.EnsureCommandContains(g, t, cliCmd, context.ClusterName, "--config", file, "remove", "cluster", "cluster1", "-y")
 }
 
 // RunTestHttpProxyCommands tests various http proxy commands
@@ -1386,7 +1386,7 @@ func RunTestHttpProxyCommands(t *testing.T) {
 		"describe", "http-server", "ManagementHttpProxy", "-o", "jsonpath=$.services")
 
 	// remove the cluster entries
-	test_utils.EnsureCommandContains(g, t, cliCmd, context.ClusterName, "--config", file, "remove", "cluster", "cluster1")
+	test_utils.EnsureCommandContains(g, t, cliCmd, context.ClusterName, "--config", file, "remove", "cluster", "cluster1", "-y")
 }
 
 // RunTestClusterGetClusterRequest tests get cluster http request
@@ -1425,7 +1425,7 @@ func RunTestClusterGetClusterRequest(t *testing.T) {
 	g.Expect(cluster.Running).To(Equal(true))
 
 	// remove the cluster connection
-	test_utils.EnsureCommandContains(g, t, cliCmd, context.ClusterName, "--config", file, "remove", "cluster", "cluster1")
+	test_utils.EnsureCommandContains(g, t, cliCmd, context.ClusterName, "--config", file, "remove", "cluster", "cluster1", "-y")
 }
 
 // RunTestClusterGetMembersRequest tests members http request
@@ -1467,7 +1467,7 @@ func RunTestClusterGetMembersRequest(t *testing.T) {
 	}
 
 	// remove the cluster connection
-	test_utils.EnsureCommandContains(g, t, cliCmd, context.ClusterName, "--config", file, "remove", "cluster", "cluster1")
+	test_utils.EnsureCommandContains(g, t, cliCmd, context.ClusterName, "--config", file, "remove", "cluster", "cluster1", "-y")
 }
 
 // RunTestClusterServicesRequest tests services http request
@@ -1524,7 +1524,7 @@ func RunTestClusterServicesRequest(t *testing.T) {
 	fmt.Println("HELLO")
 
 	// remove the cluster connection
-	test_utils.EnsureCommandContains(g, t, cliCmd, context.ClusterName, "--config", file, "remove", "cluster", "cluster1")
+	test_utils.EnsureCommandContains(g, t, cliCmd, context.ClusterName, "--config", file, "remove", "cluster", "cluster1", "-y")
 }
 
 // RunTestCachesRequests tests caches http request
@@ -1571,7 +1571,7 @@ func RunTestCachesRequests(t *testing.T) {
 	}
 
 	// remove the cluster connection
-	test_utils.EnsureCommandContains(g, t, cliCmd, context.ClusterName, "--config", file, "remove", "cluster", "cluster1")
+	test_utils.EnsureCommandContains(g, t, cliCmd, context.ClusterName, "--config", file, "remove", "cluster", "cluster1", "-y")
 }
 
 // RunTestFederationCommands tests federation commands
@@ -1700,7 +1700,7 @@ func RunTestFederationCommands(t *testing.T) {
 		"get", "federation", "destinations", "-o", "wide", "-c", context.ClusterName)
 
 	// remove the cluster entry
-	test_utils.EnsureCommandContains(g, t, cliCmd, context.ClusterName, "--config", file, "remove", "cluster", "cluster1")
+	test_utils.EnsureCommandContains(g, t, cliCmd, context.ClusterName, "--config", file, "remove", "cluster", "cluster1", "-y")
 
 	// get clusters should return nothing
 	test_utils.EnsureCommandContains(g, t, cliCmd, "", "--config", file, "get", "clusters")
