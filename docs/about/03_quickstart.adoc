@@ -113,7 +113,7 @@ $ cohctl describe cluster local
 CLUSTER
 -------
 Cluster Name:    my-cluster
-Version:         22.06 (dev-timmiddleton)
+Version:         21.12.4
 Cluster Size:    3
 License Mode:    Development
 Departure Count: 0
