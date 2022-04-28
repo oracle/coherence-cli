@@ -144,7 +144,7 @@ var startFederationCmd = &cobra.Command{
 	Use:   "federation service-name",
 	Short: "start federation for a service",
 	Long: `The 'start federation' command starts federation on a service. There
-are various options available using '-m' including:
+are various options available using '-M' including:
 - with-sync - start after federating all cache entries
 - no-backlog - clear any initial backlog and start federating
 You may also specify a participant otherwise the command will apply to all participants.`,
@@ -245,7 +245,7 @@ func getFederationSummaries(federatedServices []string, target string, dataFetch
 func init() {
 	startFederationCmd.Flags().StringVarP(&participant, "participant", "p", "all", participantMessage)
 	startFederationCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
-	startFederationCmd.Flags().StringVarP(&startMode, "start-mode", "m", "",
+	startFederationCmd.Flags().StringVarP(&startMode, "start-mode", "M", "",
 		"the start mode. Leave blank for normal or specify "+fetcher.WithSync+" or "+fetcher.NoBacklog)
 
 	stopFederationCmd.Flags().StringVarP(&participant, "participant", "p", "all", participantMessage)

@@ -25,34 +25,36 @@ include::../../build/_output/docs-gen/get_members.adoc[tag=text]
 
 *Examples*
 
-Display all members.
+Display all members and specify to display memory sizes in MB using `-m` option.
 
 [source,bash]
 ----
-$ cohctl get members -c local
+$ cohctl get members -c local -m
 
-Total cluster members: 4
-Cluster Heap - Total: 1,792MB, Used: 386MB, Available: 1,406MB (78.5%)
-Storage Heap - Total: 1,536MB, Used: 315MB, Available: 1,221MB (79.5%)
+Total cluster members: 3
+Cluster Heap - Total: 4,352 MB Used: 250 MB Available: 4,102 MB (94.3%)
+Storage Heap - Total: 4,096 MB Used: 201 MB Available: 3,895 MB (95.1%)
 
-NODE ID  ADDRESS        PORT   PROCESS  MEMBER  ROLE                  STORAGE  MAX HEAP  USED HEAP  AVAIL HEAP
-      1  192.168.1.118  50999    85665  n/a     Management            true        512MB      162MB       350MB
-      3  192.168.1.118  51004    85733  n/a     CoherenceConsole      false       256MB       71MB       185MB
-      4  192.168.1.118  51000    85687  n/a     TangosolNetCoherence  true        512MB      114MB       398MB
-      5  192.168.1.118  51644    88138  n/a     TangosolNetCoherence  true        512MB       39MB       473MB
+NODE ID  ADDRESS         PORT   PROCESS  MEMBER  ROLE                  STORAGE  MAX HEAP  USED HEAP  AVAIL HEAP
+      1  192.168.1.117  63984    35372  n/a     Management            true     2,048 MB      91 MB    1,957 MB
+      2  192.168.1.117  63995    35398  n/a     TangosolNetCoherence  true     2,048 MB     110 MB    1,938 MB
+      3  192.168.1.117  64013    35430  n/a     CoherenceConsole      false      256 MB      49 MB      207 MB
 ----
 
-NOTE: The default memory display format is `MB` but can be changed to `GB` by using `-u` or `--units` option.
+NOTE: The default memory display format is bytes but can be changed by using `-k`, `-m` or `-g`.
 
-Display all members with the role `CoherenceServer`.
+Display all members with the role `CoherenceConsole`.
 
 [source,bash]
 ----
-$ cohctl get members -c local -r CoherenceServer
+$ cohctl get members -c local -r CoherenceConsole -m
 
-NODE ID  ADDRESS          PORT  PROCESS  MEMBER  ROLE                 STORAGE  MAX HEAP  USED HEAP  AVAIL HEAP
-1        192.168.1.124   53216    12096  n/a     CoherenceServer      true        512MB       95MB       929MB
-2        192.168.1.124   53215    12094  n/a     CoherenceServer      true        512MB      112MB       400MB
+Total cluster members: 1
+Cluster Heap - Total: 256 MB Used: 50 MB Available: 206 MB (80.5%)
+Storage Heap - Total: 0 MB Used: 0 MB Available: 0 MB ( 0.0%)
+
+NODE ID  ADDRESS         PORT   PROCESS  MEMBER  ROLE              STORAGE  MAX HEAP  USED HEAP  AVAIL HEAP
+      3  192.168.1.117  64013    35430  n/a      CoherenceConsole  false      256 MB      50 MB      206 MB
 ----
 
 NOTE: You can also use `-o wide` to display more columns.

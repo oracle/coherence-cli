@@ -29,24 +29,12 @@ Display all topics.
 [source,bash]
 ----
 $ cohctl get topics -c local
-Total Topics: 3, Total primary storage: 0MB
+Total Topics: 3, Total primary storage: 0
 
-SERVICE           TOPIC             UNCONSUMED MSG  BYTES   MB  AVG SIZE  PUBLISHER SENDS  SUBSCRIBER RECEIVES
-PartitionedTopic  private-messages               2  1,024  0MB       512                2                    4
-PartitionedTopic  public-messages               14  7,152  0MB       510               18                   36
-PartitionedTopic2 public-messages2              15  7,444  0MB       510               13                   36
-----
-
-Display all topics for a particular service.
-
-[source,bash]
-----
-$ cohctl get topics -c local -s PartitionedTopic
-Total Topics: 2, Total primary storage: 0MB
-
-SERVICE           TOPIC             UNCONSUMED MSG  BYTES   MB  AVG SIZE  PUBLISHER SENDS  SUBSCRIBER RECEIVES
-PartitionedTopic  private-messages               2  1,024  0MB       512                2                    4
-PartitionedTopic  public-messages               14  7,152  0MB       510               18                   36
+SERVICE           TOPIC             UNCONSUMED MSG   SIZE  AVG SIZE  PUBLISHER SENDS  SUBSCRIBER RECEIVES
+PartitionedTopic  private-messages               2   0 MB       512                2                    4
+PartitionedTopic  public-messages               14   0 MB       510               18                   36
+PartitionedTopic2 public-messages2              15   0 MB       510               13                   36
 ----
 
 NOTE: If you want to describe a topic, please use `get caches` to list the topics caches

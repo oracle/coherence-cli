@@ -203,12 +203,6 @@ addition information as well as '-v' to displayed additional information.`,
 
 		connection := args[0]
 
-		// validate units
-		err = validateUnitsValue()
-		if err != nil {
-			return err
-		}
-
 		// do validation for OutputFormat
 		err = checkOutputFormat()
 		if err != nil {
@@ -842,7 +836,6 @@ func init() {
 
 	describeClusterCmd.Flags().BoolVarP(&verboseOutput, "verbose", "v", false,
 		"include verbose output including individual members, reporters and executor details")
-	describeClusterCmd.Flags().StringVarP(&unitsValue, "units", "u", "MB", "memory units: MB or GB")
 
 	discoverClustersCmd.PersistentFlags().BoolVarP(&ignoreErrors, "ignore", "I", false, ignoreErrorsMessage)
 	discoverClustersCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)

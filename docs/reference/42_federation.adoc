@@ -37,20 +37,20 @@ NOTE: Destinations are clusters that this cluster is sending data to.
 
 [source,bash]
 ----
-$ cohctl get federation destinations -c local
+$ cohctl get federation destinations -c local -m
 
 SERVICE         DESTINATION        MEMBERS  STATES    DATA SENT  MSG SENT  REC SENT  CURR AVG BWIDTH
-FederatedCache  secondary-cluster        2  [PAUSED]        0MB         0         0          0.0Mbps
+FederatedCache  secondary-cluster        2  [PAUSED]       0 MB         0         0          0.0Mbps
 ----
 
 Display all destinations in wide format.
 
 [source,bash]
 ----
-$ cohctl get federation destinations -c local -o wide
+$ cohctl get federation destinations -c local -o wide -m
 
 SERVICE         DESTINATION        MEMBERS  STATES  DATA SENT  MSG SENT  REC SENT  CURR AVG BWIDTH  AVG APPLY  AVG ROUND TRIP  AVG BACKLOG DELAY  REPLICATE  PARTITIONS  ERRORS  UNACKED
-FederatedCache  secondary-cluster        2  [IDLE]      204MB     1,028     3,348          0.0Mbps      338ms         1,393ms           37,770ms    100.00%          31       0        0
+FederatedCache  secondary-cluster        2  [IDLE]     204 MB     1,028     3,348          0.0Mbps      338ms         1,393ms           37,770ms    100.00%          31       0        0
 ----
 
 Using the wide option, the following fields are available in regard to the current (or latest) replicate all operation:
@@ -70,20 +70,20 @@ NOTE: Origins are clusters that this cluster is receiving data from.
 ----
 $ cohctl get federation destinations -c local
 
-cohctl get federation origins -c local
+cohctl get federation origins -c local -m
 
 SERVICE         ORIGIN             REMOTE CONNECTIONS  DATA REC  MSG REC  REC REC
-FederatedCache  secondary-cluster                   2  20MB          755    2,577
+FederatedCache  secondary-cluster                   2     20 MB      755    2,577
 ----
 
 Display all origins in wide format.
 
 [source,bash]
 ----
-$ cohctl get federation origins -c local -o wide
+$ cohctl get federation origins -c local -o wide -m
 
 SERVICE         ORIGIN             REMOTE CONNECTIONS  DATA REC  MSG REC  REC REC  AVG APPLY  AVG BACKLOG DELAY
-FederatedCache  secondary-cluster                   2  20MB          755    2,577    1,456ms              248ms
+FederatedCache  secondary-cluster                   2     20 MB      755    2,577    1,456ms              248ms
 ----
 
 [#start-federation]

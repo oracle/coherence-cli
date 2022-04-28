@@ -28,12 +28,18 @@ import (
 
 // Global flags
 
-var OutputFormat string
-var clusterConnection string
-var serviceName string
-var watchEnabled bool
-var watchDelay int32
-var readPassStdin bool
+var (
+	OutputFormat      string
+	clusterConnection string
+	serviceName       string
+	watchEnabled      bool
+	watchDelay        int32
+	readPassStdin     bool
+
+	kbFormat bool
+	mbFormat bool
+	gbFormat bool
+)
 
 // various command constants
 const clusterConnectionDescription = "cluster connection name. (not required if context is set)"
@@ -153,6 +159,10 @@ func SetRootCommandFlags(command *cobra.Command) {
 	command.PersistentFlags().Int32VarP(&watchDelay, "delay", "d", 5, "delay for watching in seconds")
 	command.PersistentFlags().StringVarP(&Username, usernameOption, usernameShort, "", userNameDescription)
 	command.PersistentFlags().StringVarP(&clusterConnection, connectionNameOption, clusterNameOptionShort, "", clusterConnectionDescription)
+
+	command.PersistentFlags().BoolVarP(&kbFormat, "kb", "k", false, "show sizes in kilobytes (default is bytes)")
+	command.PersistentFlags().BoolVarP(&mbFormat, "mb", "m", false, "show sizes in megabytes (default is bytes)")
+	command.PersistentFlags().BoolVarP(&gbFormat, "gb", "g", false, "show sizes in gigabytes (default is bytes)")
 }
 
 func init() {
@@ -527,10 +537,28 @@ func GetConnectionNameFromContextOrArg() (string, error) {
 // GetConnectionAndDataFetcher returns the connection and dataFetcher
 func GetConnectionAndDataFetcher() (string, fetcher.Fetcher, error) {
 	var (
-		err         error
-		connection  string
-		dataFetcher fetcher.Fetcher
+		err          error
+		connection   string
+		dataFetcher  fetcher.Fetcher
+		optionsCount = 0
 	)
+
+	// do validation of bytes format
+	if kbFormat {
+		optionsCount++
+	}
+
+	if mbFormat {
+		optionsCount++
+	}
+
+	if gbFormat {
+		optionsCount++
+	}
+
+	if optionsCount > 1 {
+		return "", nil, errors.New("you can only supply one size format of -k, -m or -g")
+	}
 
 	// do validation for OutputFormat
 	err = checkOutputFormat()

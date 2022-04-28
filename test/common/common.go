@@ -1132,7 +1132,7 @@ func RunTestCachesCommands(t *testing.T) {
 	_, err = test_utils.IssueGetRequest(restUrl + "/populate")
 	g.Expect(err).To(BeNil())
 
-	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "SERVICE,CACHE,CACHE SIZE,cache-1,cache-2", "--config", file,
+	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "SERVICE,COUNT,SIZE,cache-1,cache-2", "--config", file,
 		"get", "caches", "-c", context.ClusterName)
 
 	// test wide output
@@ -1652,7 +1652,7 @@ func RunTestFederationCommands(t *testing.T) {
 		"get", "federation", "destinations", "-c", context.ClusterName)
 
 	// ensure there is data in the destination cluster
-	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "SERVICE,CACHE,CACHE SIZE,federated-1,federated-2,federated-3",
+	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "SERVICE,CACHE,SIZE,federated-1,federated-2,federated-3",
 		"--config", file, "get", "caches", "-c", "cluster2")
 
 	// Pause federation

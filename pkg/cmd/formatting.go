@@ -40,8 +40,12 @@ const MaxHeapColumn = "MAX HEAP"
 const UsedHeapColumn = "USED HEAP"
 const AvailHeapColumn = "AVAIL HEAP"
 const NameColumn = "NAME"
-const GBUnits = "GB"
-const MBUnits = "MB"
+
+var (
+	KB int64 = 1024
+	MB       = KB * KB
+	GB       = MB * MB
+)
 
 type KeyValues struct {
 	Key   string
@@ -142,11 +146,12 @@ func FormatJSONForDescribe(jsonValue []byte, showAllColumns bool, orderedColumns
 // the target may be destinations or origins and columns will change slightly
 func FormatFederationSummary(federationSummaries []config.FederationSummary, target string) string {
 	var (
-		fedCount       = len(federationSummaries)
-		finalAlignment []string
-		suffix         = "SENT"
-		participantCol = "DESTINATION"
-		memberCol      = "MEMBERS"
+		fedCount           = len(federationSummaries)
+		finalAlignment     []string
+		suffix             = "SENT"
+		participantCol     = "DESTINATION"
+		memberCol          = "MEMBERS"
+		formattingFunction = getFormattingFunction()
 	)
 
 	if fedCount == 0 {
@@ -164,13 +169,13 @@ func FormatFederationSummary(federationSummaries []config.FederationSummary, tar
 		if target == destinations {
 			finalAlignment = []string{L, L, R, L, R, R, R, R}
 		} else {
-			finalAlignment = []string{L, L, R, L, R, R}
+			finalAlignment = []string{L, L, R, R, R, R}
 		}
 	} else { // WIDE
 		if target == destinations {
 			finalAlignment = []string{L, L, R, L, R, R, R, R, R, R, R, R, R, R, R}
 		} else {
-			finalAlignment = []string{L, L, R, L, R, R, R, R}
+			finalAlignment = []string{L, L, R, R, R, R, R, R}
 		}
 	}
 
@@ -229,12 +234,12 @@ func FormatFederationSummary(federationSummaries []config.FederationSummary, tar
 		if target == destinations {
 			stringValues[i+1] = getColumns(value.ServiceName, value.ParticipantName,
 				formatSmallInteger(members), fmt.Sprintf("%v", utils.GetUniqueValues(value.State)),
-				formatMB(int32(bytes/1024/1024)), formatLargeInteger(int64(messages)),
+				formattingFunction(int64(bytes)), formatLargeInteger(int64(messages)),
 				formatLargeInteger(int64(records)), bandwidth)
 		} else {
 			stringValues[i+1] = getColumns(value.ServiceName, value.ParticipantName,
 				formatSmallInteger(members),
-				formatMB(int32(bytes/1024/1024)), formatLargeInteger(int64(messages)),
+				formattingFunction(int64(bytes)), formatLargeInteger(int64(messages)),
 				formatLargeInteger(int64(records)))
 		}
 
@@ -263,15 +268,17 @@ func FormatFederationSummary(federationSummaries []config.FederationSummary, tar
 // FormatCacheSummary returns the cache summary in column formatted output
 func FormatCacheSummary(cacheSummaries []config.CacheSummaryDetail) string {
 	var (
-		cacheCount     = len(cacheSummaries)
-		alignmentWide  = []string{L, L, R, R, R, R, R, R, R, R, R, R}
-		alignment      = []string{L, L, R, R, R}
-		finalAlignment []string
+		cacheCount         = len(cacheSummaries)
+		alignmentWide      = []string{L, L, R, R, R, R, R, R, R, R, R}
+		alignment          = []string{L, L, R, R}
+		finalAlignment     []string
+		formattingFunction = getFormattingFunction()
 	)
 
 	if cacheCount == 0 {
 		return ""
 	}
+
 	if OutputFormat == constants.TABLE {
 		finalAlignment = alignment
 	} else {
@@ -294,7 +301,7 @@ func FormatCacheSummary(cacheSummaries []config.CacheSummaryDetail) string {
 	var totalCaches = len(cacheSummaries)
 	var totalUnits int64 = 0
 
-	stringValues[0] = getColumns(ServiceColumn, CacheColumn, "CACHE SIZE", "BYTES", "MB")
+	stringValues[0] = getColumns(ServiceColumn, CacheColumn, "COUNT", "SIZE")
 
 	if OutputFormat == constants.WIDE {
 		stringValues[0] = getColumns(stringValues[0], "AVG SIZE",
@@ -318,7 +325,7 @@ func FormatCacheSummary(cacheSummaries []config.CacheSummaryDetail) string {
 		}
 
 		stringValues[i+1] = getColumns(value.ServiceName, value.CacheName, formatSmallInteger(value.CacheSize),
-			formatLargeInteger(value.UnitsBytes), formatMB(int32(value.UnitsBytes)/1024/1024))
+			formattingFunction(value.UnitsBytes))
 
 		if OutputFormat == constants.WIDE {
 			stringValues[i+1] = getColumns(stringValues[i+1], formatLargeInteger(avgSize),
@@ -329,15 +336,16 @@ func FormatCacheSummary(cacheSummaries []config.CacheSummaryDetail) string {
 	}
 
 	return fmt.Sprintf("Total Caches: %d, Total primary storage: %s\n\n", totalCaches,
-		strings.TrimSpace(formatMB(int32(totalUnits/1024/1024)))) +
+		strings.TrimSpace(formattingFunction(totalUnits))) +
 		formatLinesAllStringsWithAlignment(finalAlignment, stringValues)
 }
 
 // FormatTopicsSummary returns the topics summary in column formatted output
 func FormatTopicsSummary(cacheSummaries []config.CacheSummaryDetail) string {
 	var (
-		cacheCount = len(cacheSummaries)
-		alignment  = []string{L, L, R, R, R, R, R, R}
+		cacheCount         = len(cacheSummaries)
+		alignment          = []string{L, L, R, R, R, R, R, R}
+		formattingFunction = getFormattingFunction()
 	)
 	if cacheCount == 0 {
 		return ""
@@ -359,7 +367,7 @@ func FormatTopicsSummary(cacheSummaries []config.CacheSummaryDetail) string {
 	var totalTopics = len(cacheSummaries)
 	var totalUnits int64 = 0
 
-	stringValues[0] = getColumns(ServiceColumn, "TOPIC", "UNCONSUMED MSG", "BYTES", "MB", "AVG SIZE",
+	stringValues[0] = getColumns(ServiceColumn, "TOPIC", "UNCONSUMED MSG", "MEMORY", "AVG SIZE",
 		"PUBLISHER SENDS", "SUBSCRIBER RECEIVES")
 
 	for i, value := range cacheSummaries {
@@ -373,12 +381,12 @@ func FormatTopicsSummary(cacheSummaries []config.CacheSummaryDetail) string {
 
 		stringValues[i+1] = getColumns(value.ServiceName, strings.ReplaceAll(value.CacheName, "$topic$", ""),
 			formatSmallInteger(value.CacheSize),
-			formatLargeInteger(value.UnitsBytes), formatMB(int32(value.UnitsBytes)/1024/1024),
+			formattingFunction(value.UnitsBytes),
 			formatLargeInteger(avgSize), formatLargeInteger(value.TotalPuts), formatLargeInteger(value.TotalGets))
 	}
 
 	return fmt.Sprintf("Total Topics: %d, Total primary storage: %s\n\n", totalTopics,
-		strings.TrimSpace(formatMB(int32(totalUnits/1024/1024)))) +
+		strings.TrimSpace(formattingFunction(totalUnits))) +
 		formatLinesAllStringsWithAlignment(alignment, stringValues)
 }
 
@@ -431,13 +439,28 @@ func FormatServiceMembers(serviceMembers []config.ServiceMemberDetail) string {
 	return formatLinesAllStringsWithAlignment(finalAlignment, stringValues)
 }
 
+func getFormattingFunction() func(bytesValue int64) string {
+	if kbFormat {
+		return formatKBOnly
+	}
+	if mbFormat {
+		return formatMBOnly
+	}
+	if gbFormat {
+		return formatGBOnly
+	}
+	return formatBytesOnly
+}
+
 // FormatCacheDetailsSizeAndAccess returns the cache details size and access details in column formatted output
 func FormatCacheDetailsSizeAndAccess(cacheDetails []config.CacheDetail) (string, error) {
 	var (
-		err          error
-		detailsCount = len(cacheDetails)
-		alignment    []string
+		err                error
+		detailsCount       = len(cacheDetails)
+		alignment          []string
+		formattingFunction = getFormattingFunction()
 	)
+
 	if detailsCount == 0 {
 		return "", nil
 	}
@@ -450,14 +473,14 @@ func FormatCacheDetailsSizeAndAccess(cacheDetails []config.CacheDetail) (string,
 		return nodeID1 < nodeID2
 	})
 
-	stringValues[0] = getColumns(NodeIDColumn, "TIER", "SIZE", "MEMORY BYTES", "MEMORY MB",
+	stringValues[0] = getColumns(NodeIDColumn, "TIER", "COUNT", "SIZE",
 		"TOTAL PUTS", "TOTAL GETS", "TOTAL REMOVES")
 	if OutputFormat == constants.WIDE {
-		alignment = []string{R, L, R, R, R, R, R, R, R, R, R, R, R, R}
+		alignment = []string{R, L, R, R, R, R, R, R, R, R, R, R, R}
 		stringValues[0] = getColumns(stringValues[0], "HITS", "MISSES", "HIT PROB", "STORE READS",
 			"WRITES", "FAILURES")
 	} else {
-		alignment = []string{R, L, R, R, R, R, R, R}
+		alignment = []string{R, L, R, R, R, R, R}
 	}
 
 	for i, value := range cacheDetails {
@@ -472,8 +495,8 @@ func FormatCacheDetailsSizeAndAccess(cacheDetails []config.CacheDetail) (string,
 		}
 
 		stringValues[i+1] = getColumns(formatSmallInteger(int32(nodeID)), value.Tier,
-			formatSmallInteger(value.CacheSize), formatLargeInteger(value.UnitsBytes),
-			formatMB(int32(value.UnitsBytes)/1024/1024), formatLargeInteger(value.TotalPuts),
+			formatSmallInteger(value.CacheSize), formattingFunction(value.UnitsBytes),
+			formatLargeInteger(value.TotalPuts),
 			formatLargeInteger(totalGets), formatLargeInteger(value.TotalRemoves))
 		if OutputFormat == constants.WIDE {
 			stringValues[i+1] = getColumns(stringValues[i+1], formatLargeInteger(totalHits),
@@ -492,6 +515,7 @@ func FormatCacheIndexDetails(cacheDetails []config.CacheDetail) string {
 		sb                        = strings.Builder{}
 		totalIndexUnits     int64 = 0
 		totalIndexingMillis int64 = 0
+		formattingFunction        = getFormattingFunction()
 	)
 
 	for _, value := range cacheDetails {
@@ -512,7 +536,7 @@ func FormatCacheIndexDetails(cacheDetails []config.CacheDetail) string {
 	}
 
 	return "Total Indexing Bytes:  " + formatLargeInteger(totalIndexUnits) + "\n" +
-		"Total Indexing:        " + formatMB(int32(totalIndexUnits/1024/1024)) + "\n" +
+		"Total Indexing:        " + formattingFunction(totalIndexUnits) + "\n" +
 		"Total Indexing Millis: " + formatLargeInteger(totalIndexingMillis) + "\n" +
 		"\n" +
 		sb.String()
@@ -521,9 +545,10 @@ func FormatCacheIndexDetails(cacheDetails []config.CacheDetail) string {
 // FormatCacheDetailsStorage returns the cache storage details in column formatted output
 func FormatCacheDetailsStorage(cacheDetails []config.CacheDetail) (string, error) {
 	var (
-		err          error
-		detailsCount = len(cacheDetails)
-		alignment    []string
+		err                error
+		detailsCount       = len(cacheDetails)
+		alignment          []string
+		formattingFunction = getFormattingFunction()
 	)
 	if detailsCount == 0 {
 		return "", nil
@@ -540,9 +565,9 @@ func FormatCacheDetailsStorage(cacheDetails []config.CacheDetail) (string, error
 	stringValues[0] = getColumns(NodeIDColumn, "TIER", "LOCKS GRANTED", "LOCKS PENDING", "LISTENERS",
 		"MAX QUERY MS", "MAX QUERY DESC")
 	if OutputFormat == constants.WIDE {
-		stringValues[0] = getColumns(stringValues[0], "NO OPT AVG", "OPT AVG", "INDEX BYTES",
-			"INDEX MB", "INDEXING MILLIS")
-		alignment = []string{R, L, R, R, R, R, L, R, R, R, R, R}
+		stringValues[0] = getColumns(stringValues[0], "NO OPT AVG", "OPT AVG",
+			"INDEX SIZE", "INDEXING MILLIS")
+		alignment = []string{R, L, R, R, R, R, L, R, R, R, R}
 	} else {
 		alignment = []string{R, L, R, R, R, R, L}
 	}
@@ -556,8 +581,8 @@ func FormatCacheDetailsStorage(cacheDetails []config.CacheDetail) (string, error
 			value.MaxQueryDescription)
 		if OutputFormat == constants.WIDE {
 			stringValues[i+1] = getColumns(stringValues[i+1], formatFloat(float32(value.NonOptimizedQueryAverageMillis)),
-				formatFloat(float32(value.OptimizedQueryAverageMillis)), formatLargeInteger(value.IndexTotalUnits),
-				formatMB(int32(value.IndexTotalUnits/1024/1024)), formatLargeInteger(value.IndexingTotalMillis))
+				formatFloat(float32(value.OptimizedQueryAverageMillis)),
+				formattingFunction(value.IndexTotalUnits), formatLargeInteger(value.IndexingTotalMillis))
 		}
 	}
 
@@ -658,14 +683,8 @@ func FormatMembers(members []config.Member, verbose bool, storageMap map[int]boo
 		alignmentWide      = []string{R, L, L, R, L, L, L, L, L, R, R, L, R, R, R}
 		alignment          = []string{R, L, L, R, L, L, L, R, R, R}
 		finalAlignment     []string
-		formattingFunction func(memberMB int32) string
+		formattingFunction = getFormattingFunction()
 	)
-
-	if unitsValue == MBUnits {
-		formattingFunction = formatMBOnly
-	} else if unitsValue == GBUnits {
-		formattingFunction = formatGBOnly
-	}
 
 	if memberCount == 0 {
 		return ""
@@ -721,8 +740,9 @@ func FormatMembers(members []config.Member, verbose bool, storageMap map[int]boo
 				formatPublisherReceiver(value.PublisherSuccessRate), formatPublisherReceiver(value.ReceiverSuccessRate))
 		}
 
-		stringValues[i+1] = getColumns(stringValues[i+1], fmt.Sprintf("%v", storageEnabled), formattingFunction(value.MemoryMaxMB),
-			formattingFunction(value.MemoryMaxMB-value.MemoryAvailableMB), formattingFunction(value.MemoryAvailableMB))
+		stringValues[i+1] = getColumns(stringValues[i+1], fmt.Sprintf("%v", storageEnabled), formattingFunction(int64(value.MemoryMaxMB)*MB),
+			formattingFunction(int64(value.MemoryMaxMB-value.MemoryAvailableMB)*MB),
+			formattingFunction(int64(value.MemoryAvailableMB)*MB))
 	}
 
 	totalUsedMB := totalMaxMemoryMB - totalAvailMemoryMB
@@ -736,14 +756,14 @@ func FormatMembers(members []config.Member, verbose bool, storageMap map[int]boo
 
 	result :=
 		fmt.Sprintf("Total cluster members: %d\n", memberCount) +
-			fmt.Sprintf("Cluster Heap - Total: %s, Used: %s, Available: %s (%4.1f%%)\n",
-				strings.TrimSpace(formattingFunction(totalMaxMemoryMB)),
-				strings.TrimSpace(formattingFunction(totalUsedMB)),
-				strings.TrimSpace(formattingFunction(totalAvailMemoryMB)), availablePercent) +
-			fmt.Sprintf("Storage Heap - Total: %s, Used: %s, Available: %s (%4.1f%%)\n\n",
-				strings.TrimSpace(formattingFunction(totalMaxStorageMemoryMB)),
-				strings.TrimSpace(formattingFunction(totalUsedStorageMB)),
-				strings.TrimSpace(formattingFunction(totalAvailStorageMemoryMB)), availableStoragePercent)
+			fmt.Sprintf("Cluster Heap - Total: %s Used: %s Available: %s (%4.1f%%)\n",
+				strings.TrimSpace(formattingFunction(int64(totalMaxMemoryMB)*MB)),
+				strings.TrimSpace(formattingFunction(int64(totalUsedMB)*MB)),
+				strings.TrimSpace(formattingFunction(int64(totalAvailMemoryMB)*MB)), availablePercent) +
+			fmt.Sprintf("Storage Heap - Total: %s Used: %s Available: %s (%4.1f%%)\n\n",
+				strings.TrimSpace(formattingFunction(int64(totalMaxStorageMemoryMB)*MB)),
+				strings.TrimSpace(formattingFunction(int64(totalUsedStorageMB)*MB)),
+				strings.TrimSpace(formattingFunction(int64(totalAvailStorageMemoryMB)*MB)), availableStoragePercent)
 
 	if verbose {
 		result += formatLinesAllStringsWithAlignment(finalAlignment, stringValues)
@@ -798,7 +818,10 @@ func FormatExecutors(executors []config.Executor, summary bool) string {
 
 // FormatElasticData formats the elastic data summary
 func FormatElasticData(edData []config.ElasticData, summary bool) string {
-	var edCount = len(edData)
+	var (
+		edCount            = len(edData)
+		formattingFunction = getFormattingFunction()
+	)
 	if edCount == 0 {
 		return ""
 	}
@@ -838,8 +861,8 @@ func FormatElasticData(edData []config.ElasticData, summary bool) string {
 			column1Value = formatSmallInteger(int32(nodeID))
 		}
 		stringValues[i+1] = getColumns(column1Value, formatSmallInteger(data.FileCount), formatSmallInteger(data.MaxJournalFilesNumber),
-			formatPercent(percentUsed), formatMB(int32(data.MaxFileSize/1024/1024)),
-			formatMB(int32(data.TotalDataSize)/1024/1024), formatMB(int32(committed/1024/1024)),
+			formatPercent(percentUsed), formattingFunction(data.MaxFileSize),
+			formattingFunction(data.TotalDataSize), formattingFunction(committed),
 			formatLargeFloat(float64(data.HighestLoadFactor)),
 			formatLargeInteger(data.CompactionCount), formatLargeInteger(data.ExhaustiveCompactionCount))
 	}
@@ -951,7 +974,10 @@ func FormatServices(services []config.ServiceSummary) string {
 
 // FormatMachines returns the machine's information in a column formatted output
 func FormatMachines(machines []config.Machine) string {
-	var serviceCount = len(machines)
+	var (
+		serviceCount       = len(machines)
+		formattingFunction = getFormattingFunction()
+	)
 	if serviceCount == 0 {
 		return ""
 	}
@@ -980,8 +1006,8 @@ func FormatMachines(machines []config.Machine) string {
 		percentFree = float64(value.FreePhysicalMemorySize) / float64(value.TotalPhysicalMemorySize)
 
 		stringValues[i+1] = getColumns(value.MachineName, formatSmallInteger(value.AvailableProcessors),
-			formatFloat(load), formatMB(int32(value.TotalPhysicalMemorySize/1024/1024)),
-			formatMB(int32(value.FreePhysicalMemorySize/1024/1024)),
+			formatFloat(load), formattingFunction(value.TotalPhysicalMemorySize),
+			formattingFunction(value.FreePhysicalMemorySize),
 			formatPercent(percentFree), value.Name, value.Arch, value.Version)
 	}
 
@@ -1044,8 +1070,9 @@ func FormatHTTPSessions(sessions []config.HTTPSessionSummary, isSummary bool) st
 // if isSummary then leave out storage count
 func FormatPersistenceServices(services []config.ServiceSummary, isSummary bool) string {
 	var (
-		serviceCount = len(services)
-		alignment    []string
+		serviceCount       = len(services)
+		alignment          []string
+		formattingFunction = getFormattingFunction()
 	)
 	if serviceCount == 0 {
 		return ""
@@ -1069,12 +1096,12 @@ func FormatPersistenceServices(services []config.ServiceSummary, isSummary bool)
 	)
 
 	if isSummary {
-		alignment = []string{L, R, L, R, R, R, R, R, L}
-		header = getColumns(ServiceNameColumn, "STORAGE COUNT", "PERSISTENCE MODE", "ACTIVE BYTES",
+		alignment = []string{L, R, L, R, R, R, R, L}
+		header = getColumns(ServiceNameColumn, "STORAGE COUNT", "PERSISTENCE MODE",
 			"ACTIVE SPACE", "AVG LATENCY", "MAX LATENCY", "SNAPSHOTS", "STATUS")
 	} else {
-		alignment = []string{R, L, R, R, R, R}
-		header = getColumns(NodeIDColumn, "PERSISTENCE MODE", "ACTIVE BYTES",
+		alignment = []string{R, L, R, R, R}
+		header = getColumns(NodeIDColumn, "PERSISTENCE MODE",
 			"ACTIVE SPACE", "AVG LATENCY", "MAX LATENCY")
 	}
 
@@ -1105,8 +1132,7 @@ func FormatPersistenceServices(services []config.ServiceSummary, isSummary bool)
 		}
 
 		header = getColumns(header, value.PersistenceMode,
-			formatLargeInteger(max(0, value.PersistenceActiveSpaceUsed)),
-			formatMB(int32(max(0, value.PersistenceActiveSpaceUsed)/1024/1024)),
+			formattingFunction(max(0, value.PersistenceActiveSpaceUsed)),
 			formatLatency(float32(averageAverageLatency)),
 			formatLargeInteger(max(value.PersistenceLatencyMax, 0))+"ms")
 
@@ -1118,7 +1144,7 @@ func FormatPersistenceServices(services []config.ServiceSummary, isSummary bool)
 		i++
 	}
 
-	return fmt.Sprintf("Total Active Space Used: %s\n\n", formatMB(int32(max(totalActiveSpaceUsed, 0)/1024/1024))) +
+	return fmt.Sprintf("Total Active Space Used: %s\n\n", formattingFunction(max(totalActiveSpaceUsed, 0))) +
 		formatLinesAllStringsWithAlignment(alignment, stringValues)
 }
 
@@ -1383,27 +1409,20 @@ func formatPercent(value float64) string {
 	return strings.TrimSpace(printer.Sprintf("%6.2f%%", value*100))
 }
 
-func formatMB(memoryMB int32) string {
-	var memory = float32(memoryMB)
-	if memory < 1024 {
-		return printer.Sprintf("%-.0fMB", memory)
-	}
-
-	memory /= 1024
-	if memory < 1024 {
-		return printer.Sprintf("%-.2fGB", memory)
-	}
-
-	memory /= 1024
-	return printer.Sprintf("%-.2fTB", memory)
+func formatBytesOnly(bytesValue int64) string {
+	return printer.Sprintf("%-0d", bytesValue)
 }
 
-func formatMBOnly(memoryMB int32) string {
-	return printer.Sprintf("%-.0fMB", float32(memoryMB))
+func formatKBOnly(bytesValue int64) string {
+	return printer.Sprintf("%-0d KB", bytesValue/1024)
 }
 
-func formatGBOnly(memoryMB int32) string {
-	return printer.Sprintf("%-.2fGB", float32(memoryMB)/1024)
+func formatMBOnly(bytesValue int64) string {
+	return printer.Sprintf("%-0d MB", bytesValue/1024/1024)
+}
+
+func formatGBOnly(bytesValue int64) string {
+	return printer.Sprintf("%-.1f GB", float64(bytesValue)/1024/1024/1024)
 }
 
 // getMaxColumnLengths returns an array representing the max lengths of columns

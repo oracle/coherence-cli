@@ -25,14 +25,6 @@ func TestCreateCamelCaseLabel(t *testing.T) {
 	g.Expect(CreateCamelCaseLabel("")).To(Equal(""))
 }
 
-func TestFormattingBytes(t *testing.T) {
-	g := NewGomegaWithT(t)
-
-	g.Expect(formatMB(123)).To(Equal("123MB"))
-	g.Expect(formatMB(1200)).To(Equal("1.17GB"))
-	g.Expect(formatMB(1200000)).To(Equal("1.14TB"))
-}
-
 func TestFormattingLatency(t *testing.T) {
 	g := NewGomegaWithT(t)
 
@@ -40,6 +32,30 @@ func TestFormattingLatency(t *testing.T) {
 	g.Expect(formatLatency(1)).To(Equal("1.000ms"))
 	g.Expect(formatLatency0(123)).To(Equal("123ms"))
 	g.Expect(formatMbps(123.2)).To(Equal("123.2Mbps"))
+}
+
+func TestFormatting(t *testing.T) {
+
+	var (
+		g        = NewGomegaWithT(t)
+		mb int64 = 1024 * 1024
+	)
+
+	g.Expect(formatBytesOnly(123)).To(Equal("123"))
+	g.Expect(formatBytesOnly(0)).To(Equal("0"))
+	g.Expect(formatKBOnly(0)).To(Equal("0 KB"))
+	g.Expect(formatKBOnly(1024)).To(Equal("1 KB"))
+	g.Expect(formatKBOnly(1000)).To(Equal("0 KB"))
+	g.Expect(formatKBOnly(1025)).To(Equal("1 KB"))
+	g.Expect(formatKBOnly(13000)).To(Equal("12 KB"))
+	g.Expect(formatMBOnly(0)).To(Equal("0 MB"))
+	g.Expect(formatMBOnly(10 * mb)).To(Equal("10 MB"))
+	g.Expect(formatMBOnly(10*mb - 100)).To(Equal("9 MB"))
+
+	g.Expect(formatGBOnly(0)).To(Equal("0.0 GB"))
+	g.Expect(formatGBOnly(123 * mb)).To(Equal("0.1 GB"))
+	g.Expect(formatGBOnly(12344 * mb)).To(Equal("12.1 GB"))
+
 }
 
 func TestGetMaxColumnLengths(t *testing.T) {

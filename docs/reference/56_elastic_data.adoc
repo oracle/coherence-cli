@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 
-    Copyright (c) 2021, Oracle and/or its affiliates.
+    Copyright (c) 2021, 2022 Oracle and/or its affiliates.
     Licensed under the Universal Permissive License v 1.0 as shown at
     https://oss.oracle.com/licenses/upl.
 
@@ -29,11 +29,11 @@ Display elastic data.
 
 [source,bash]
 ----
-$ cohctl get http-servers -c local
+$ cohctl get http-servers -c local -m
 
-NAME            USED FILES  TOTAL FILES  % USED  MAX FILE SIZE  USED SPACE  COMMITTED  HIGHEST LOAD  COMPACTIONS  EXHAUSTIVE
-RamJournalRM            80       19,600   0.41%            1MB         0MB       80MB        0.0041            0           0
-FlashJournalRM          81       41,391   0.20%        2.000GB         0MB  162.000GB        0.0020            0           0
+NAME            USED FILES  TOTAL FILES  % USED  MAX FILE SIZE  USED SPACE   COMMITTED  HIGHEST LOAD  COMPACTIONS  EXHAUSTIVE
+RamJournalRM            80       19,600   0.41%           1 MB        0 MB       80 MB        0.0041            0           0
+FlashJournalRM          81       41,391   0.20%        2,048 MB       0 MB  162,000 GB        0.0020            0           0
 ----
 
 [#describe-elastic-data]

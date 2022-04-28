@@ -37,7 +37,6 @@ var (
 	extendedInfo    string
 	attributeName   string
 	attributeValue  string
-	unitsValue      string
 	validAttributes = []string{"loggingLevel", "resendDelay", "sendAckDelay",
 		"trafficJamCount", "trafficJamDelay", "loggingLimit,", "loggingFormat"}
 
@@ -66,12 +65,6 @@ can specify '-o wide' to display addition information.`,
 			storageResult []byte
 			err           error
 		)
-
-		// validate units
-		err = validateUnitsValue()
-		if err != nil {
-			return err
-		}
 
 		connection, dataFetcher, err = GetConnectionAndDataFetcher()
 		if err != nil {
@@ -883,7 +876,6 @@ func init() {
 	var roleDescription = "role name to run for"
 
 	getMembersCmd.Flags().StringVarP(&roleName, "role", "r", "all", "role name to display")
-	getMembersCmd.Flags().StringVarP(&unitsValue, "units", "u", "MB", "memory units: MB or GB")
 
 	describeMemberCmd.Flags().BoolVarP(&threadDump, "thread-dump", "D", false, "include a thread dump")
 	describeMemberCmd.Flags().StringVarP(&extendedInfo, "extended", "X", "none", "include extended information such as g1OldGen, etc. See --help")
@@ -914,11 +906,4 @@ func init() {
 	configureTracingCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
 
 	shutdownMemberCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
-}
-
-func validateUnitsValue() error {
-	if unitsValue != MBUnits && unitsValue != GBUnits {
-		return fmt.Errorf("invalid value for units of %s. Must be only %s or %s", unitsValue, MBUnits, GBUnits)
-	}
-	return nil
 }

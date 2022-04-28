@@ -24,31 +24,31 @@ include::../../build/_output/docs-gen/get_caches.adoc[tag=text]
 
 *Examples*
 
-Display all caches.
+Display all caches and display cache size in MB using `-m` option.
 
 [source,bash]
 ----
-$ cohctl get caches -c local -o wide
-Total Caches: 3, Total primary storage: 16MB
+$ cohctl get caches -c local -o wide -m
+Total Caches: 2, Total primary storage: 36 MB
 
-SERVICE            CACHE     CACHE SIZE       BYTES    MB  AVG SIZE  TOTAL PUTS  TOTAL GETS  TOTAL REMOVES  TOTAL HITS  TOTAL MISSES  HIT PROB
-PartitionedCache   test1        100,000  16,800,000  16MB       168     200,000           0              0           0             0     0.00%
-PartitionedCache   test2            123     142,680   0MB     1,160         246           0              0           0             0     0.00%
-PartitionedCache2  test-123           0           0   0MB         0           0           0              0           0             0     0.00%
+SERVICE           CACHE        COUNT   SIZE  AVG SIZE  TOTAL PUTS  TOTAL GETS  TOTAL REMOVES  TOTAL HITS  TOTAL MISSES  HIT PROB
+PartitionedCache  customers  100,000  25 MB       262     200,000           0              0           0             0     0.00%
+PartitionedCache  orders      10,000  11 MB     1,160      20,000      20,000              0      20,000             0   100.00%
 ----
 
-NOTE: If you do not use the `-o wide` option, then you will only see service, cache name, cache size and bytes.
+NOTE: If you do not use the `-o wide` option, then you will only see service, cache name, count and size.
 
 Display all caches for a particular service.
 
 [source,bash]
 ----
-$ cohctl get caches -c local -s PartitionedCache2 -o wide
+$ cohctl get caches -c local -s PartitionedCache -o wide -m
 
-Total Caches: 1, Total primary storage: 0MB
+Total Caches: 2, Total primary storage: 36 MB
 
-SERVICE            CACHE     CACHE SIZE  BYTES   MB  AVG SIZE  TOTAL PUTS  TOTAL GETS  TOTAL REMOVES  TOTAL HITS  TOTAL MISSES  HIT PROB
-PartitionedCache2  test-123           0      0  0MB         0           0           0              0           0             0     0.00%
+SERVICE           CACHE        COUNT   SIZE  AVG SIZE  TOTAL PUTS  TOTAL GETS  TOTAL REMOVES  TOTAL HITS  TOTAL MISSES  HIT PROB
+PartitionedCache  customers  100,000  25 MB       262     200,000           0              0           0             0     0.00%
+PartitionedCache  orders      10,000  11 MB     1,160      20,000      20,000              0      20,000             0   100.00%
 ----
 
 [#describe-cache]
@@ -60,76 +60,82 @@ include::../../build/_output/docs-gen/describe_cache.adoc[tag=text]
 
 [source,bash]
 ----
-$ cohctl describe cache test -c local -s PartitionedCache
+$ cohctl describe cache orders -c local -s PartitionedCache -m
 
 CACHE DETAILS
 -------------
 Service         :  PartitionedCache
-Name            :  test
+Name            :  orders
 Type            :  Cache
 Description     :  Implementation: com.tangosol.net.cache.LocalCache
 Cache Store Type:  NONE
 
 CACHE SIZE AND ACCESS DETAILS
 -----------------------------
-NODE ID  TIER     SIZE  MEMORY BYTES  MEMORY MB  TOTAL PUTS  TOTAL GETS  TOTAL REMOVES
-      1  back   50,221    13,202,128       12MB      50,221      50,221              0
-      3  back   49,779    13,086,320       12MB      49,779      49,779              0
-      4  front       0             0        0MB     100,000           0              0
+NODE ID  TIER   COUNT  SIZE  TOTAL PUTS  TOTAL GETS  TOTAL REMOVES
+      1  back   5,022  5 MB       5,022      10,044              0
+      2  back   4,978  5 MB       4,978       9,956              0
+      3  front      0  0 MB      10,000           0              0
 
 CACHE STORAGE DETAILS
 ---------------------
 NODE ID  TIER   LOCKS GRANTED  LOCKS PENDING  LISTENERS  MAX QUERY MS  MAX QUERY DESC
       1  back               0              0          0             0
-      3  back               0              0          0             0
-      4  front              0              0          0             0
+      2  back               0              0          0             0
+      3  front              0              0          0             0
 
 INDEX DETAILS
 -------------
-Total Indexing Bytes:  15,999,992
-Total Indexing:        15MB
-Total Indexing Millis: 800
+Total Indexing Bytes:  2,720,664
+Total Indexing:        2 MB
+Total Indexing Millis: 263
 
-Node:1:   SimpleMapIndex: Extractor=.toString(), Ordered=true, Footprint=7.66MB, Content=50220
-Node:3:   SimpleMapIndex: Extractor=.toString(), Ordered=true, Footprint=7.59MB, Content=49778
+Node:1:   SimpleMapIndex: Extractor=.toString(), Ordered=true, Footprint=784KB, Content=5022
+          SimpleMapIndex: Extractor=.hashCode(), Ordered=true, Footprint=549KB, Content=5022
+Node:2:   SimpleMapIndex: Extractor=.toString(), Ordered=true, Footprint=777KB, Content=4978
+          SimpleMapIndex: Extractor=.hashCode(), Ordered=true, Footprint=544KB, Content=4978
 ----
 
 NOTE: You can also use the `-o wide` option to display more detailed information.
 
+NOTE: The default memory display format is bytes but can be changed by using `-k`, `-m` or `-g`.
+
 [source,bash]
 ----
-$ cohctl describe cache test -c local -s PartitionedCache -o wide
+$ cohctl describe cache test -c local -s PartitionedCache -o wide -m
 
 CACHE DETAILS
 -------------
 Service         :  PartitionedCache
-Name            :  test
+Name            :  orders
 Type            :  Cache
 Description     :  Implementation: com.tangosol.net.cache.LocalCache
 Cache Store Type:  NONE
 
 CACHE SIZE AND ACCESS DETAILS
 -----------------------------
-NODE ID  TIER     SIZE  MEMORY BYTES  MEMORY MB  TOTAL PUTS  TOTAL GETS  TOTAL REMOVES    HITS  MISSES  HIT PROB  STORE READS  WRITES  FAILURES
-      1  back   50,221    13,202,128       12MB      50,221      50,221              0  50,221       0   100.00%           -1      -1        -1
-      3  back   49,779    13,086,320       12MB      49,779      49,779              0  49,779       0   100.00%           -1      -1        -1
-      4  front       0             0        0MB     100,000           0              0       0       0     0.00%           -1      -1        -1
+NODE ID  TIER   COUNT  SIZE  TOTAL PUTS  TOTAL GETS  TOTAL REMOVES    HITS  MISSES  HIT PROB  STORE READS  WRITES  FAILURES
+      1  back   5,022  5 MB       5,022      10,044              0  10,044       0   100.00%           -1      -1        -1
+      2  back   4,978  5 MB       4,978       9,956              0   9,956       0   100.00%           -1      -1        -1
+      3  front      0  0 MB      10,000           0              0       0       0     0.00%           -1      -1        -1
 
 CACHE STORAGE DETAILS
 ---------------------
-NODE ID  TIER   LOCKS GRANTED  LOCKS PENDING  LISTENERS  MAX QUERY MS  MAX QUERY DESC  NO OPT AVG  OPT AVG  INDEX BYTES  INDEX MB  INDEXING MILLIS
-      1  back               0              0          0             0                      0.0000   0.0000    8,035,352       7MB              411
-      3  back               0              0          0             0                      0.0000   0.0000    7,964,640       7MB              389
-      4  front              0              0          0             0                      0.0000   0.0000            0       0MB                0
+NODE ID  TIER   LOCKS GRANTED  LOCKS PENDING  LISTENERS  MAX QUERY MS  MAX QUERY DESC  NO OPT AVG  OPT AVG  INDEX SIZE  INDEXING MILLIS
+      1  back               0              0          0             0                      0.0000   0.0000        1 MB              118
+      2  back               0              0          0             0                      0.0000   0.0000        1 MB              145
+      3  front              0              0          0             0                      0.0000   0.0000        0 MB                0
 
 INDEX DETAILS
 -------------
-Total Indexing Bytes:  15,999,992
-Total Indexing:        15MB
-Total Indexing Millis: 800
+Total Indexing Bytes:  2,720,664
+Total Indexing:        2 MB
+Total Indexing Millis: 263
 
-Node:1:   SimpleMapIndex: Extractor=.toString(), Ordered=true, Footprint=7.66MB, Content=50220
-Node:3:   SimpleMapIndex: Extractor=.toString(), Ordered=true, Footprint=7.59MB, Content=49778
+Node:1:   SimpleMapIndex: Extractor=.toString(), Ordered=true, Footprint=784KB, Content=5022
+          SimpleMapIndex: Extractor=.hashCode(), Ordered=true, Footprint=549KB, Content=5022
+Node:2:   SimpleMapIndex: Extractor=.toString(), Ordered=true, Footprint=777KB, Content=4978
+          SimpleMapIndex: Extractor=.hashCode(), Ordered=true, Footprint=544KB, Content=4978
 ----
 
 [#set-cache]

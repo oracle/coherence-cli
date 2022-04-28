@@ -112,65 +112,75 @@ Now that the cluster connection is added, you can describe the cluster using the
 $ cohctl describe cluster local
 CLUSTER
 -------
-Cluster Name:    cluster1
-Version:         21.12
-Cluster Size:    2
+Cluster Name:    my-cluster
+Version:         22.06 (dev-timmiddleton)
+Cluster Size:    3
 License Mode:    Development
 Departure Count: 0
 Running:         true
 
 MACHINES
 --------
-MACHINE               PROCESSORS    LOAD  TOTAL MEMORY  FREE MEMORY  % FREE  OS     ARCH   VERSION
-server1/192.168.16.3           4  0.0000       8.500GB      6.369GB  74.93%  Linux  amd64  5.10.47-linuxkit
-/192.168.16.2                  4  0.1200       8.500GB      6.408GB  75.39%  Linux  amd64  5.10.47-linuxkit
+MACHINE        PROCESSORS    LOAD    TOTAL MEMORY    FREE MEMORY  % FREE  OS        ARCH    VERSION
+192.168.1.117           8  3.9067  34,359,738,368  1,671,991,296   4.87%  Mac OS X  x86_64  10.16
 
 MEMBERS
 -------
-Total cluster members: 2
-Cluster Heap - Total: 4.254GB, Used: 161MB, Available: 4.097GB (96.3%)
+Total cluster members: 3
+Cluster Heap - Total: 4,563,402,752 Used: 171,966,464 Available: 4,391,436,288 (96.2%)
+Storage Heap - Total: 4,294,967,296 Used: 117,440,512 Available: 4,177,526,784 (97.3%)
 
 SERVICES
 --------
-SERVICE NAME         TYPE              MEMBERS  STATUS HA     STORAGE  PARTITIONS
-Proxy                Proxy                   2  n/a                -1          -1
-PartitionedCache     DistributedCache        2  MACHINE-SAFE        2          31
-ManagementHttpProxy  Proxy                   2  n/a                -1          -1
+SERVICE NAME         TYPE              MEMBERS  STATUS HA   STORAGE  PARTITIONS
+Proxy                Proxy                   2  n/a              -1          -1
+PartitionedTopic     DistributedCache        2  NODE-SAFE         2         257
+PartitionedCache2    DistributedCache        2  NODE-SAFE         2         257
+PartitionedCache     DistributedCache        3  NODE-SAFE         2         257
+ManagementHttpProxy  Proxy                   1  n/a              -1          -1
+"$SYS:Config"        DistributedCache        2  ENDANGERED        2         257
 
 PERSISTENCE
 -----------
-Total Active Space Used: 0MB
+Total Active Space Used: 0
 
-SERVICE NAME       STORAGE COUNT  PERSISTENCE MODE  ACTIVE BYTES  ACTIVE SPACE  AVG LATENCY  MAX LATENCY  SNAPSHOTS  STATUS
-PartitionedCache               2  active                  66,439           0MB      0.000ms          0ms          0  Idle
+SERVICE NAME       STORAGE COUNT  PERSISTENCE MODE  ACTIVE SPACE  AVG LATENCY  MAX LATENCY  SNAPSHOTS  STATUS
+PartitionedTopic               2  on-demand                    0      0.000ms          0ms          1  Idle
+PartitionedCache2              2  on-demand                    0      0.000ms          0ms          3  Idle
+PartitionedCache               2  on-demand                    0      0.000ms          0ms          1  Idle
+"$SYS:Config"                  2  on-demand                    0      0.000ms          0ms          0  Idle
 
 CACHES
 ------
-Total Caches: 6, Total primary storage: 0MB
+Total Caches: 2, Total primary storage: 19,030,328
 
-SERVICE            CACHE                 CACHE SIZE  BYTES   MB
-PartitionedCache   customers                    123  4,016  0MB
+SERVICE           CACHE       COUNT        SIZE
+PartitionedCache  customers  50,230  13,204,808
+PartitionedCache  orders      5,022   5,825,520
 
 TOPICS
 ------
 
 PROXY SERVERS
 -------------
-NODE ID  HOST IP        SERVICE NAME  CONNECTIONS  BYTES SENT  BYTES REC
-1        0.0.0.0:20000  Proxy                   0           0          0
-2        0.0.0.0:20000  Proxy                   0           0          0
+NODE ID  HOST IP              SERVICE NAME  CONNECTIONS  BYTES SENT  BYTES REC
+1        0.0.0.0:63984.55876  Proxy                   0           0          0
+2        0.0.0.0:63995.53744  Proxy                   0           0          0
 
 HTTP SERVERS
 -------------
-NODE ID  HOST IP        SERVICE NAME         SERVER TYPE                                    REQUESTS  ERRORS
-1        0.0.0.0:30000  ManagementHttpProxy  com.tangosol.coherence.http.DefaultHttpServer       382       0
-2        0.0.0.0:30000  ManagementHttpProxy  com.tangosol.coherence.http.DefaultHttpServer         0       0
-
+NODE ID  HOST IP        SERVICE NAME         SERVER TYPE                                 REQUESTS  ERRORS
+1        0.0.0.0:30000  ManagementHttpProxy  com.tangosol.coherence.http.JavaHttpServer         0       0
 ----
 
-NOTE: Depending upon the services and caches running in your cluster, you will see something slightly different.
+==== Notes
 
-NOTE: You can also provide the `-v` (verbose) and `-o wide` (wide format) flags to display more details.
+1. Depending upon the services and caches running in your cluster, you will see something slightly different.
+
+2. You can also provide the `-v` (verbose) and `-o wide` (wide format) flags to display more details.
+
+3. By default, all memory and disk values are displayed in bytes as you can see above.
+You can change this by specifying `-k` for KB, `-m` for MB or `-g` for GB. This applies to all values returned
 
 [#step5]
 === 5. Display services
@@ -223,46 +233,55 @@ SERVICE DETAILS
 Name                                :  PartitionedCache
 Type                                :  [DistributedCache]
 Backup Count                        :  [1]
-Backup Count After Writebehind      :  [1]
-Event Backlog                       :  0
-Event Count                         :  0
 ...
-
-Thread Count Min                    :  [1]
-Thread Count Update Time            :  [1970-01-01T00:00:00.000+00:00]
-Thread Idle Count                   :  2
-Thread Pool Sizing Enabled          :  map[true:3]
-Transport Backlogged Connection List:  [[] [] []]
 
 SERVICE MEMBERS
 ---------------
 NODE ID  THREADS  IDLE  THREAD UTIL  MIN THREADS    MAX THREADS
-      1        1     1        0.00%            2  2,147,483,647
-      2        1     1        0.00%            2  2,147,483,647
-
+      1        1     1        0.00%            1  2,147,483,647
+      2        1     1        0.00%            1  2,147,483,647
+      3        0    -1          n/a            1  2,147,483,647
 
 SERVICE CACHES
 --------------
-Total Caches: 2, Total primary storage: 30MB
+Total Caches: 2, Total primary storage: 37,888,448
 
-SERVICE           CACHE  CACHE SIZE       BYTES    MB
-PartitionedCache  test1     100,000  26,288,448  25MB
-PartitionedCache  test2      23,000   5,999,040   5MB
+SERVICE           CACHE        COUNT        SIZE
+PartitionedCache  customers  100,000  26,288,448
+PartitionedCache  orders      10,000  11,600,000
 
 PERSISTENCE FOR SERVICE
 -----------------------
-Total Active Space Used: 0MB
+Total Active Space Used: 0
 
-NODE ID  PERSISTENCE MODE  ACTIVE BYTES  ACTIVE SPACE  AVG LATENCY  MAX LATENCY
-      1  active                  44,560           0MB      0.000ms          0ms
-      2  active                  21,879           0MB      0.000ms          0ms
+NODE ID  PERSISTENCE MODE  ACTIVE SPACE  AVG LATENCY  MAX LATENCY
+      1  on-demand                    0      0.000ms          0ms
+      2  on-demand                    0      0.000ms          0ms
 
 PERSISTENCE COORDINATOR
 -----------------------
 Coordinator Id  :  1
 Idle            :  true
 Operation Status:  Idle
-Snapshots       :  []
+Snapshots       :  [snapshot-1]
+
+DISTRIBUTION INFORMATION
+------------------------
+Scheduled Distributions:  No distributions are currently scheduled for this service.
+
+PARTITION INFORMATION
+---------------------
+Service                     :  PartitionedCache
+Strategy Name               :  SimpleAssignmentStrategy
+Average Partition Size KB   :  143
+Average Storage Size KB     :  18500
+Backup Count                :  1
+...
+Service Node Count          :  2
+Service Rack Count          :  1
+Service Site Count          :  1
+Type                        :  PartitionAssignment
+
 ----
 
 NOTE: The output above has been truncated for brevity.
@@ -273,28 +292,35 @@ NOTE: The output above has been truncated for brevity.
 For all the `get` commands, you can add the `-w` option to watch the resource continuously until `CTRL-C`
 has been pressed.  In the example below we are watching the cluster members.
 
+NOTE: We are setting the `-m` option to show sizes in MB rather than the default of bytes.
+
 [source,bash]
 ----
-$ cohctl get members -w
-2021-10-13 15:09:52.027636 +0800 AWST m=+0.059034774
+$ cohctl get members -w -m
+
+2022-04-27 15:11:24.393725 +0800 AWST m=+0.031247503
 Using cluster connection 'local' from current context.
 
-Cluster Heap - Total: 1.750GB, Used: 330MB, Available: 1.428GB (81.6%)
+Total cluster members: 3
+Cluster Heap - Total: 4,352 MB Used: 261 MB Available: 4,091 MB (94.0%)
+Storage Heap - Total: 4,096 MB Used: 212 MB Available: 3,884 MB (94.8%)
 
-NODE ID  ADDRESS          PORT  PROCESS  MEMBER  ROLE              MAX HEAP  USED HEAP  AVAIL HEAP
-1        /192.168.1.121  57133  13919    n/a     Management           512MB      186MB       326MB
-2        /192.168.1.121  57136  13941    n/a     CoherenceServer    1.000GB       67MB       957MB
-3        /192.168.1.121  57169  13981    n/a     CoherenceConsole     256MB       77MB       179MB
+NODE ID  ADDRESS        PORT   PROCESS  MEMBER  ROLE                  STORAGE  MAX HEAP  USED HEAP  AVAIL HEAP
+      1  192.168.1.117  63984    35372  n/a     Management            true     2,048 MB     127 MB    1,921 MB
+      2  192.168.1.117  63995    35398  n/a     TangosolNetCoherence  true     2,048 MB      85 MB    1,963 MB
+      3  192.168.1.117  64013    35430  n/a     CoherenceConsole      false      256 MB      49 MB      207 MB
 
-2021-10-13 15:09:57.045536 +0800 AWST m=+5.076898506
+2022-04-27 15:11:29.419558 +0800 AWST m=+5.057038216
 Using cluster connection 'local' from current context.
 
-Cluster Heap - Total: 1.750GB, Used: 332MB, Available: 1.426GB (81.5%)
+Total cluster members: 3
+Cluster Heap - Total: 4,352 MB Used: 263 MB Available: 4,089 MB (94.0%)
+Storage Heap - Total: 4,096 MB Used: 214 MB Available: 3,882 MB (94.8%)
 
-NODE ID  ADDRESS          PORT  PROCESS  MEMBER  ROLE              MAX HEAP  USED HEAP  AVAIL HEAP
-1        /192.168.1.121  57133  13919    n/a     Management           512MB      186MB       326MB
-2        /192.168.1.121  57136  13941    n/a     CoherenceServer    1.000GB       68MB       956MB
-3        /192.168.1.121  57169  13981    n/a     CoherenceConsole     256MB       77MB       179MB
+NODE ID  ADDRESS         PORT   PROCESS  MEMBER  ROLE                  STORAGE  MAX HEAP  USED HEAP  AVAIL HEAP
+      1  192.168.1.117  63984    35372  n/a     Management            true     2,048 MB     129 MB    1,919 MB
+      2  192.168.1.117  63995    35398  n/a     TangosolNetCoherence  true     2,048 MB      85 MB    1,963 MB
+      3  192.168.1.117  64013    35430  n/a     CoherenceConsole      false      256 MB      49 MB      207 MB
 ----
 
 NOTE: You can change the delay from the default of 5 seconds by using `-d` option and specifying the seconds

@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 
-    Copyright (c) 2021, Oracle and/or its affiliates.
+    Copyright (c) 2021, 2022 Oracle and/or its affiliates.
     Licensed under the Universal Permissive License v 1.0 as shown at
     https://oss.oracle.com/licenses/upl.
 
@@ -40,10 +40,10 @@ Display all caches.
 $ cohctl get persistence -c local
 Total Active Space Used: 7MB
 
-SERVICE NAME       STORAGE COUNT  PERSISTENCE MODE  ACTIVE BYTES USED  ACTIVE SPACE USED  AVG LATENCY  MAX LATENCY  SNAPSHOTS  STATUS
-PartitionedTopic               4  active                      652,342                0MB      0.000ms          0ms          0  Idle
-PartitionedCache2              4  active                      365,946                0MB      0.000ms          0ms          0  Idle
-PartitionedCache               4  active                    6,331,471                6MB      0.242ms        188ms          2  Idle
+SERVICE NAME       STORAGE COUNT  PERSISTENCE MODE  ACTIVE SPACE USED  AVG LATENCY  MAX LATENCY  SNAPSHOTS  STATUS
+PartitionedTopic               4  active                      652,342      0.000ms          0ms          0  Idle
+PartitionedCache2              4  active                      365,946      0.000ms          0ms          0  Idle
+PartitionedCache               4  active                    6,331,471      0.242ms        188ms          2  Idle
 ----
 
 [#get-snapshots]
