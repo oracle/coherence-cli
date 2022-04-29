@@ -26,6 +26,8 @@ var (
 	jfrDumpFileName string
 )
 
+const jfrNameUse = "jfr name"
+
 // getJfrsCmd represents the get jfrs command
 var getJfrsCmd = &cobra.Command{
 	Use:   "jfrs",
@@ -52,7 +54,7 @@ var getJfrsCmd = &cobra.Command{
 
 // describeJfrCmd represents the describe jfr command
 var describeJfrCmd = &cobra.Command{
-	Use:   "jfr name",
+	Use:   jfrNameUse,
 	Short: "describe a Java Flight Recording (JFR)",
 	Long:  `The 'describe jfr' command shows information related to a Java Flight Recording (JFR).`,
 	Args: func(cmd *cobra.Command, args []string) error {
@@ -81,7 +83,7 @@ var describeJfrCmd = &cobra.Command{
 
 // startJfrCmd represents the start jfr command
 var startJfrCmd = &cobra.Command{
-	Use:   "jfr name",
+	Use:   jfrNameUse,
 	Short: "start a Java Flight Recording (JFR) for all or selected members",
 	Long: `The 'start jfr' command starts a Java Flight Recording all or selected members.
 You can specify either a node id or role. If you do not specify either, then the JFR will 
@@ -177,7 +179,7 @@ of 0 to make the recording continuous.`,
 
 // stopJfrCmd represents the start jfr command
 var stopJfrCmd = &cobra.Command{
-	Use:   "jfr name",
+	Use:   jfrNameUse,
 	Short: "stop a Java Flight Recording (JFR) for all or selected members",
 	Long: `The 'stop jfr' command stops a Java Flight Recording all or selected members.
 You can specify either a node or leave the node blank to stop for all nodes.`,
@@ -207,7 +209,7 @@ You can specify either a node or leave the node blank to stop for all nodes.`,
 
 // dumpJfrCmd represents the dump jfr command
 var dumpJfrCmd = &cobra.Command{
-	Use:   "jfr name",
+	Use:   jfrNameUse,
 	Short: "dump a Java Flight Recording (JFR) for all or selected members",
 	Long: `The 'dump jfr' command dumps a Java Flight Recording all or selected members.
 A JFR command mut be in progress for this to succeed.`,
@@ -375,20 +377,22 @@ func formatJFROutput(result string) string {
 }
 
 func init() {
-	describeJfrCmd.Flags().StringVarP(&NodeID, "node", "n", "", "node id to target")
+	nodeIDDesc := "node id to target"
+
+	describeJfrCmd.Flags().StringVarP(&NodeID, "node", "n", "", nodeIDDesc)
 
 	startJfrCmd.Flags().StringVarP(&outputDirectory, "output-dir", "O", "", "directory on servers to output JFR's to")
 	_ = startJfrCmd.MarkFlagRequired("output-dir")
 	startJfrCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
 	startJfrCmd.Flags().StringVarP(&jfrRoleName, "role", "r", "all", "role name to target")
-	startJfrCmd.Flags().StringVarP(&NodeID, "node", "n", "", "node id to target")
+	startJfrCmd.Flags().StringVarP(&NodeID, "node", "n", "", nodeIDDesc)
 	startJfrCmd.Flags().Int32VarP(&duration, "duration", "D", 60, "duration for JFR in seconds. Use 0 for continuous")
 
 	stopJfrCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
-	stopJfrCmd.Flags().StringVarP(&NodeID, "node", "n", "", "node id to target")
+	stopJfrCmd.Flags().StringVarP(&NodeID, "node", "n", "", nodeIDDesc)
 
 	dumpJfrCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
-	dumpJfrCmd.Flags().StringVarP(&NodeID, "node", "n", "", "node id to target")
+	dumpJfrCmd.Flags().StringVarP(&NodeID, "node", "n", "", nodeIDDesc)
 	dumpJfrCmd.Flags().StringVarP(&jfrDumpFileName, "filename", "f", "", "filename for jfr dump")
 	_ = dumpJfrCmd.MarkFlagRequired("filename")
 }

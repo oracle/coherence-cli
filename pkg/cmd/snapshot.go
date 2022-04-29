@@ -30,15 +30,18 @@ var (
 	archiveMessage = "if true, returns archived snapshots, otherwise local snapshots"
 )
 
+const provideSnapshot = "you must provide a snapshot name"
+const snapshotUse = "snapshot snapshot-name"
+
 // createSnapshotCmd represents the create snapshot command
 var createSnapshotCmd = &cobra.Command{
-	Use:   "snapshot snapshot-name",
+	Use:   snapshotUse,
 	Short: "create a snapshot for a given service",
 	Long: `The 'create snapshot' command creates a snapshot for a given service. If you 
 do not specify the -y option you will be prompted to confirm the operation.`,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
-			displayErrorAndExit(cmd, "you must provide a snapshot name")
+			displayErrorAndExit(cmd, provideSnapshot)
 		}
 		return nil
 	},
@@ -175,14 +178,14 @@ local snapshots are shown, but you can use the -a option to show archived snapsh
 
 // recoverSnapshotCmd represents the recover snapshot command
 var recoverSnapshotCmd = &cobra.Command{
-	Use:   "snapshot snapshot-name",
+	Use:   snapshotUse,
 	Short: "recover a snapshot for a given service",
 	Long: `The 'recover snapshot' command recovers a snapshot for a given service. 
 WARNING: Issuing this command will destroy all service data and replaced with the
 data from the requested snapshot.`,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
-			displayErrorAndExit(cmd, "you must provide a snapshot name")
+			displayErrorAndExit(cmd, provideSnapshot)
 		}
 		return nil
 	},
@@ -193,13 +196,13 @@ data from the requested snapshot.`,
 
 // removeSnapshotCmd represents the remove snapshot command
 var removeSnapshotCmd = &cobra.Command{
-	Use:   "snapshot snapshot-name",
+	Use:   snapshotUse,
 	Short: "remove a snapshot for a given service",
 	Long: `The 'remove snapshot' command removes a snapshot for a given service. 
 By default local snapshots are removed, but you can use the -a option to remove archived snapshots.`,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
-			displayErrorAndExit(cmd, "you must provide a snapshot name")
+			displayErrorAndExit(cmd, provideSnapshot)
 		}
 		return nil
 	},
@@ -208,15 +211,15 @@ By default local snapshots are removed, but you can use the -a option to remove 
 	},
 }
 
-// archiveSnapshotCmd represents the arcvhie snapshot command
+// archiveSnapshotCmd represents the archive snapshot command
 var archiveSnapshotCmd = &cobra.Command{
-	Use:   "snapshot snapshot-name",
+	Use:   snapshotUse,
 	Short: "archive a snapshot for a given service",
 	Long: `The 'archive snapshot' command archives a snapshot for a given service. You must
 have an archiver setup on the service for this to be successful.`,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
-			displayErrorAndExit(cmd, "you must provide a snapshot name")
+			displayErrorAndExit(cmd, provideSnapshot)
 		}
 		return nil
 	},
@@ -227,12 +230,12 @@ have an archiver setup on the service for this to be successful.`,
 
 // retrieveSnapshotCmd represents the retrieve snapshot command
 var retrieveSnapshotCmd = &cobra.Command{
-	Use:   "snapshot snapshot-name",
+	Use:   snapshotUse,
 	Short: "retrieve an archived snapshot for a given service",
 	Long:  `The 'retrieve snapshot' command retrieves an archived snapshot for a given service.`,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
-			displayErrorAndExit(cmd, "you must provide a snapshot name")
+			displayErrorAndExit(cmd, provideSnapshot)
 		}
 		return nil
 	},

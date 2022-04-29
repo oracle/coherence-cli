@@ -37,6 +37,10 @@ var (
 	nodeIDServiceOperation string
 )
 
+const serviceUse = "service service-name"
+const provideServiceName = "you must provide a service name"
+const unableToFindService = "unable to find service with service name '%s'"
+
 // getServicesCmd represents the get services command
 var getServicesCmd = &cobra.Command{
 	Use:   "services",
@@ -145,14 +149,14 @@ can also specify '-o wide' to display addition information.`,
 
 // describeService represents the describe service command
 var describeServiceCmd = &cobra.Command{
-	Use:   "service service-name",
+	Use:   serviceUse,
 	Short: "describe a service",
 	Long: `The 'describe service' command shows information related to services. This
 includes information about each service member as well as Persistence information if the
 service is a cache service.`,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
-			displayErrorAndExit(cmd, "you must provide a service name")
+			displayErrorAndExit(cmd, provideServiceName)
 		}
 		return nil
 	},
@@ -197,7 +201,7 @@ service is a cache service.`,
 		found := serviceExists(serviceName, servicesSummary)
 
 		if !found {
-			return fmt.Errorf("unable to find service with service name '%s'", serviceName)
+			return fmt.Errorf(unableToFindService, serviceName)
 		}
 
 		// we have valid service name so issue queries in parallel
@@ -414,7 +418,7 @@ The following attribute names are allowed: threadCount, threadCountMin, threadCo
 taskHungThresholdMillis or requestTimeoutMillis.`,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
-			displayErrorAndExit(cmd, "you must provide a service name")
+			displayErrorAndExit(cmd, provideServiceName)
 		}
 		return nil
 	},
@@ -473,7 +477,7 @@ taskHungThresholdMillis or requestTimeoutMillis.`,
 		}
 
 		if !found {
-			return fmt.Errorf("unable to find service with service name '%s'", serviceName)
+			return fmt.Errorf(unableToFindService, serviceName)
 		}
 
 		// validate the nodes
@@ -532,7 +536,7 @@ taskHungThresholdMillis or requestTimeoutMillis.`,
 		if len(errorList) > 0 {
 			return utils.GetErrors(errorList)
 		}
-		cmd.Println("operation completed")
+		cmd.Println(OperationCompleted)
 
 		return nil
 	},
@@ -540,12 +544,12 @@ taskHungThresholdMillis or requestTimeoutMillis.`,
 
 // suspendServiceCmd represents the suspend service command
 var suspendServiceCmd = &cobra.Command{
-	Use:   "service service-name",
+	Use:   serviceUse,
 	Short: "suspend a service",
 	Long:  `The 'suspend service' command suspends a specific service in all the members of a cluster.`,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
-			displayErrorAndExit(cmd, "you must provide a service name")
+			displayErrorAndExit(cmd, provideServiceName)
 		}
 		return nil
 	},
@@ -556,12 +560,12 @@ var suspendServiceCmd = &cobra.Command{
 
 // resumeServiceCmd represents the resume service command
 var resumeServiceCmd = &cobra.Command{
-	Use:   "service service-name",
+	Use:   serviceUse,
 	Short: "resume a service",
 	Long:  `The 'resume service' command resumes a specific service in all the members of a cluster.`,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
-			displayErrorAndExit(cmd, "you must provide a service name")
+			displayErrorAndExit(cmd, provideServiceName)
 		}
 		return nil
 	},
@@ -572,13 +576,13 @@ var resumeServiceCmd = &cobra.Command{
 
 // stopServiceCmd represents the stop service command
 var stopServiceCmd = &cobra.Command{
-	Use:   "service service-name",
+	Use:   serviceUse,
 	Short: "stop a service",
 	Long: `The 'stop service' command forces a specific service to stop on a cluster member.
 Use the shutdown service command for normal service termination.`,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
-			displayErrorAndExit(cmd, "you must provide a service name")
+			displayErrorAndExit(cmd, provideServiceName)
 		}
 		return nil
 	},
@@ -589,12 +593,12 @@ Use the shutdown service command for normal service termination.`,
 
 // startServiceCmd represents the start service command
 var startServiceCmd = &cobra.Command{
-	Use:   "service service-name",
+	Use:   serviceUse,
 	Short: "start a service",
 	Long:  `The 'start service' command starts a specific service on a cluster member.`,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
-			displayErrorAndExit(cmd, "you must provide a service name")
+			displayErrorAndExit(cmd, provideServiceName)
 		}
 		return nil
 	},
@@ -605,13 +609,13 @@ var startServiceCmd = &cobra.Command{
 
 // shutdownServiceCmd represents the shutdown service command
 var shutdownServiceCmd = &cobra.Command{
-	Use:   "service service-name",
+	Use:   serviceUse,
 	Short: "shutdown a service",
 	Long: `The 'shutdown service' command performs a controlled shut-down of a specific service
 on a cluster member. Shutting down a service is preferred over stopping a service.`,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
-			displayErrorAndExit(cmd, "you must provide a service name")
+			displayErrorAndExit(cmd, provideServiceName)
 		}
 		return nil
 	},
@@ -651,7 +655,7 @@ func issueServiceNodeCommand(cmd *cobra.Command, serviceName, operation string) 
 	found := serviceExists(serviceName, servicesSummary)
 
 	if !found {
-		return fmt.Errorf("unable to find service with service name '%s'", serviceName)
+		return fmt.Errorf(unableToFindService, serviceName)
 	}
 
 	// validate the nodes
@@ -684,7 +688,7 @@ func issueServiceNodeCommand(cmd *cobra.Command, serviceName, operation string) 
 	if err != nil {
 		return err
 	}
-	cmd.Println("operation completed")
+	cmd.Println(OperationCompleted)
 
 	return nil
 }
@@ -730,7 +734,7 @@ func issueServiceCommand(cmd *cobra.Command, serviceName, operation string) erro
 	if err != nil {
 		return err
 	}
-	cmd.Println("operation completed")
+	cmd.Println(OperationCompleted)
 
 	return nil
 }

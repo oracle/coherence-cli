@@ -372,7 +372,7 @@ func IssueFederationCommand(cmd *cobra.Command, serviceName, command, participan
 		return err
 	}
 
-	cmd.Println("operation completed")
+	cmd.Println(OperationCompleted)
 
 	return nil
 }

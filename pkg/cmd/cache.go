@@ -369,7 +369,7 @@ batchFactor, refreshFactor or requeueThreshold.`,
 		if len(errorList) > 0 {
 			return utils.GetErrors(errorList)
 		}
-		cmd.Println("operation completed")
+		cmd.Println(OperationCompleted)
 
 		return nil
 	},

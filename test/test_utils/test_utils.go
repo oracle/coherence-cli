@@ -39,6 +39,9 @@ type TestContext struct {
 	Password        string
 }
 
+const failedToExecute = "Failed to execute 'cliCmd.Execute()'."
+const errMessage = "Error msg "
+
 var (
 	currentTestContext *TestContext
 	emptyByte          = make([]byte, 0)
@@ -97,7 +100,7 @@ func EnsureCommandContains(g *WithT, t *testing.T, command *cobra.Command, expec
 	_, output, err := ExecuteCommand(t, command, args...)
 	t.Log("Actual Output=[" + output + "], expected to contain=[" + expected + "]")
 	if err != nil {
-		t.Fatal("Failed to execute 'cliCmd.Execute()'.", "Error msg ", err)
+		t.Fatal(failedToExecute, errMessage, err)
 	}
 	g.Expect(strings.Contains(output, expected)).To(Equal(true))
 }
@@ -107,7 +110,7 @@ func EnsureCommandNotContains(g *WithT, t *testing.T, command *cobra.Command, ex
 	_, output, err := ExecuteCommand(t, command, args...)
 	t.Log("Actual Output=[" + output + "], expected NOT to contain=[" + expected + "]")
 	if err != nil {
-		t.Fatal("Failed to execute 'cliCmd.Execute()'.", "Error msg ", err)
+		t.Fatal(failedToExecute, errMessage, err)
 	}
 	g.Expect(strings.Contains(output, expected)).To(Equal(false))
 }
@@ -118,7 +121,7 @@ func EnsureCommandContainsAll(g *WithT, t *testing.T, command *cobra.Command, ex
 	_, output, err := ExecuteCommand(t, command, args...)
 	t.Log("Actual Output=[" + output + "], expected to contain=[" + expectedCSV + "]")
 	if err != nil {
-		t.Fatal("Failed to execute 'cliCmd.Execute()'.", "Error msg ", err)
+		t.Fatal(failedToExecute, errMessage, err)
 	}
 	for _, value := range strings.Split(expectedCSV, ",") {
 		g.Expect(strings.Contains(output, value)).To(Equal(true))
@@ -129,7 +132,7 @@ func EnsureCommandContainsAll(g *WithT, t *testing.T, command *cobra.Command, ex
 func GetCommandOutput(t *testing.T, command *cobra.Command, args ...string) string {
 	_, output, err := ExecuteCommand(t, command, args...)
 	if err != nil {
-		t.Fatal("Failed to execute 'cliCmd.Execute()'.", "Error msg ", err)
+		t.Fatal(failedToExecute, errMessage, err)
 	}
 	return output
 }
@@ -148,7 +151,7 @@ func EnsureCommandOutputEquals(g *WithT, t *testing.T, command *cobra.Command, e
 	_, output, err := ExecuteCommand(t, command, args...)
 	t.Log("Actual Output=[" + output + "], expected=[" + expected + "]")
 	if err != nil {
-		t.Fatal("Failed to execute 'cliCmd.Execute()'.", "Error msg ", err)
+		t.Fatal(failedToExecute, errMessage, err)
 	}
 	g.Expect(output == expected).To(Equal(true))
 }

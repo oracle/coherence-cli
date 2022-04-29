@@ -46,6 +46,8 @@ var (
 const dumpClusterHeap = "dump cluster heap"
 const logClusterState = "log cluster state"
 const configureTracing = "configure tracing"
+const unableToDecode = "unable to decode member details"
+const noNodeID = "no node with node id %s exists in this cluster"
 
 // getMembersCmd represents the get members command
 var getMembersCmd = &cobra.Command{
@@ -98,7 +100,7 @@ can specify '-o wide' to display addition information.`,
 				cmd.Println(FormatCurrentCluster(connection))
 				err = json.Unmarshal(membersResult, &members)
 				if err != nil {
-					return utils.GetError("unable to decode member details", err)
+					return utils.GetError(unableToDecode, err)
 				}
 
 				err = json.Unmarshal(storageResult, &storage)
@@ -376,7 +378,7 @@ or loggingFormat.`,
 				}
 
 				if !utils.SliceContains(nodeIDArray, value) {
-					return fmt.Errorf("no node with node id %s exists in this cluster", value)
+					return fmt.Errorf(noNodeID, value)
 				}
 			}
 			confirmMessage = fmt.Sprintf("%d node(s)", len(nodeIds))
@@ -412,7 +414,7 @@ or loggingFormat.`,
 		if len(errorList) > 0 {
 			return utils.GetErrors(errorList)
 		}
-		cmd.Println("operation completed")
+		cmd.Println(OperationCompleted)
 
 		return nil
 	},
@@ -484,7 +486,7 @@ var getTracingCmd = &cobra.Command{
 				cmd.Println(FormatCurrentCluster(connection))
 				err = json.Unmarshal(membersResult, &members)
 				if err != nil {
-					return utils.GetError("unable to decode member details", err)
+					return utils.GetError(unableToDecode, err)
 				}
 
 				cmd.Print(FormatTracing(members.Members))
@@ -555,7 +557,7 @@ DefaultCacheServer, then they will be restarted.`,
 		}
 
 		if !utils.SliceContains(nodeIDArray, nodeID) {
-			return fmt.Errorf("no node with node id %s exists in this cluster", nodeID)
+			return fmt.Errorf(noNodeID, nodeID)
 		}
 
 		// confirmation
@@ -573,7 +575,7 @@ DefaultCacheServer, then they will be restarted.`,
 			return err
 		}
 
-		cmd.Println("operation completed")
+		cmd.Println(OperationCompleted)
 		return nil
 	},
 }
@@ -606,7 +608,7 @@ func issueClusterCommand(cmd *cobra.Command, command string) error {
 
 	err = json.Unmarshal(membersResult, &members)
 	if err != nil {
-		return utils.GetError("unable to decode member details", err)
+		return utils.GetError(unableToDecode, err)
 	}
 
 	cmd.Println(FormatCurrentCluster(connection))
@@ -731,7 +733,7 @@ a role to retrieve thread dumps for.`,
 
 				err = json.Unmarshal(membersResult, &members)
 				if err != nil {
-					return utils.GetError("unable to decode member details", err)
+					return utils.GetError(unableToDecode, err)
 				}
 
 				for _, member := range members.Members {
@@ -750,7 +752,7 @@ a role to retrieve thread dumps for.`,
 					}
 
 					if !utils.SliceContains(nodeIDArray, value) {
-						return fmt.Errorf("no node with node id %s exists in this cluster", value)
+						return fmt.Errorf(noNodeID, value)
 					}
 				}
 			}

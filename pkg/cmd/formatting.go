@@ -40,6 +40,7 @@ const MaxHeapColumn = "MAX HEAP"
 const UsedHeapColumn = "USED HEAP"
 const AvailHeapColumn = "AVAIL HEAP"
 const NameColumn = "NAME"
+const avgeSize = "AVG SIZE"
 
 var (
 	KB int64 = 1024
@@ -304,7 +305,7 @@ func FormatCacheSummary(cacheSummaries []config.CacheSummaryDetail) string {
 	stringValues[0] = getColumns(ServiceColumn, CacheColumn, "COUNT", "SIZE")
 
 	if OutputFormat == constants.WIDE {
-		stringValues[0] = getColumns(stringValues[0], "AVG SIZE",
+		stringValues[0] = getColumns(stringValues[0], avgeSize,
 			"TOTAL PUTS", "TOTAL GETS", "TOTAL REMOVES", "TOTAL HITS", "TOTAL MISSES", "HIT PROB")
 	}
 
@@ -367,7 +368,7 @@ func FormatTopicsSummary(cacheSummaries []config.CacheSummaryDetail) string {
 	var totalTopics = len(cacheSummaries)
 	var totalUnits int64 = 0
 
-	stringValues[0] = getColumns(ServiceColumn, "TOPIC", "UNCONSUMED MSG", "MEMORY", "AVG SIZE",
+	stringValues[0] = getColumns(ServiceColumn, "TOPIC", "UNCONSUMED MSG", "MEMORY", avgeSize,
 		"PUBLISHER SENDS", "SUBSCRIBER RECEIVES")
 
 	for i, value := range cacheSummaries {
@@ -1020,7 +1021,7 @@ func FormatHTTPSessions(sessions []config.HTTPSessionSummary, isSummary bool) st
 		serviceCount = len(sessions)
 		alignment    []string
 		header       = getColumns("TYPE", "SESSION TIMEOUT", CacheColumn, "OVERFLOW",
-			"AVG SIZE", "TOTAL REAPED", "AVG DURATION", "LAST REAP", "UPDATES")
+			avgeSize, "TOTAL REAPED", "AVG DURATION", "LAST REAP", "UPDATES")
 	)
 	if serviceCount == 0 {
 		return ""

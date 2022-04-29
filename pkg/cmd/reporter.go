@@ -24,6 +24,8 @@ const reporterConfigFile = "configFile"
 const reporterCurrentBatch = "currentBatch"
 const reporterIntervalSeconds = "intervalSeconds"
 const reporterOutputPath = "outputPath"
+const reporterUse = "reporter node-id"
+const provideNodeID = "you must provide a node id"
 
 var (
 	validReporterAttributes = []string{reporterConfigFile, reporterCurrentBatch, reporterIntervalSeconds, reporterOutputPath}
@@ -92,12 +94,12 @@ var getReportersCmd = &cobra.Command{
 
 // describeReporterCmd represents the describe reporter command
 var describeReporterCmd = &cobra.Command{
-	Use:   "reporter node-id",
+	Use:   reporterUse,
 	Short: "describe a reporter",
 	Long:  `The 'describe reporter' command shows information related to a particular reporter.`,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
-			displayErrorAndExit(cmd, "you must provide a node id")
+			displayErrorAndExit(cmd, provideNodeID)
 		}
 		return nil
 	},
@@ -153,12 +155,12 @@ var describeReporterCmd = &cobra.Command{
 
 // startReporterCmd represents the start reporter command
 var startReporterCmd = &cobra.Command{
-	Use:   "reporter node-id",
+	Use:   reporterUse,
 	Short: "start a reporter on a node",
 	Long:  `The 'start reporter' command starts the Coherence reporter on the specified node.`,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
-			displayErrorAndExit(cmd, "you must provide a node id")
+			displayErrorAndExit(cmd, provideNodeID)
 		}
 		return nil
 	},
@@ -169,12 +171,12 @@ var startReporterCmd = &cobra.Command{
 
 // stopReporterCmd represents the stop reporter command
 var stopReporterCmd = &cobra.Command{
-	Use:   "reporter node-id",
+	Use:   reporterUse,
 	Short: "stop a reporter on a node",
 	Long:  `The 'stop reporter' command stops the Coherence reporter on the specified node.`,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
-			displayErrorAndExit(cmd, "you must provide a node id")
+			displayErrorAndExit(cmd, provideNodeID)
 		}
 		return nil
 	},
@@ -294,7 +296,7 @@ configFile, currentBatch, intervalSeconds or outputPath.`,
 		if len(errorList) > 0 {
 			return utils.GetErrors(errorList)
 		}
-		cmd.Println("operation completed")
+		cmd.Println(OperationCompleted)
 
 		return nil
 	},

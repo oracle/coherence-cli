@@ -65,6 +65,8 @@ const timeoutMessage = "timeout in seconds for NS Lookup requests"
 
 const outputFormats = "table, wide, json or jsonpath=\"...\""
 
+const OperationCompleted = "operation completed"
+
 // config file related
 
 const configName = "cohctl"

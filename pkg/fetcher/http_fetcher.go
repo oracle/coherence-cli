@@ -35,6 +35,8 @@ var (
 	password string
 )
 
+const links = "?links="
+
 // HTTPFetcher is an implementation of a Fetcher to retrieve data from Management over REST
 type HTTPFetcher struct {
 	URL            string
@@ -73,7 +75,7 @@ func (h HTTPFetcher) GetMemberDetailsJSON(verbose bool) ([]byte, error) {
 
 // GetSingleMemberDetailsJSON returns a single members details in raw json
 func (h HTTPFetcher) GetSingleMemberDetailsJSON(nodeID string) ([]byte, error) {
-	result, err := httpGetRequest(h, "/members/"+nodeID+"?links=")
+	result, err := httpGetRequest(h, "/members/"+nodeID+links)
 	if err != nil {
 		return constants.EmptyByte, utils.GetError("cannot get member information nodeId = "+nodeID, err)
 	}
@@ -305,7 +307,7 @@ func (h HTTPFetcher) GetExecutorsJSON() ([]byte, error) {
 
 // GetSingleServiceDetailsJSON returns a single service details in raw json
 func (h HTTPFetcher) GetSingleServiceDetailsJSON(serviceName string) ([]byte, error) {
-	result, err := httpGetRequest(h, "/services/"+getSafeServiceName(h, serviceName)+"?links=")
+	result, err := httpGetRequest(h, "/services/"+getSafeServiceName(h, serviceName)+links)
 	if err != nil {
 		return constants.EmptyByte, utils.GetError("cannot get service information for service "+serviceName, err)
 	}
@@ -486,7 +488,7 @@ func (h HTTPFetcher) GetReportersJSON() ([]byte, error) {
 
 // GetReporterJSON returns reporter for a node in raw json
 func (h HTTPFetcher) GetReporterJSON(nodeID string) ([]byte, error) {
-	result, err := httpGetRequest(h, "/reporters/"+nodeID+"?links=")
+	result, err := httpGetRequest(h, "/reporters/"+nodeID+links)
 	if err != nil {
 		return constants.EmptyByte, utils.GetError("cannot get reporter for node "+nodeID, err)
 	}
@@ -715,11 +717,11 @@ func jfrOperation(h HTTPFetcher, jfrName, operation, jfrType, target, filename s
 
 // getInitialURL returns an initial URL for a JFR operation
 func getInitialURL(jfrOperation, jfrType, target string) string {
-	finalURL := "/diagnostic-cmd/" + jfrOperation + "?links="
+	finalURL := "/diagnostic-cmd/" + jfrOperation + links
 	if jfrType == JfrTypeRole {
 		finalURL += "&role=" + url.QueryEscape(target)
 	} else if jfrType == JfrTypeNode {
-		finalURL = "/members/" + target + "/diagnostic-cmd/" + jfrOperation + "?links="
+		finalURL = "/members/" + target + "/diagnostic-cmd/" + jfrOperation + links
 	}
 	return finalURL
 }

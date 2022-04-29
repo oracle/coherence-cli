@@ -19,10 +19,13 @@ import (
 	"testing"
 )
 
+const cliVersion = "CLI Version:"
+const configOption = "--config"
+
 func TestVersionCommand(t *testing.T) {
 	g := NewGomegaWithT(t)
 	cliCmd := Initialize(nil)
-	test_utils.EnsureCommandContains(g, t, cliCmd, "CLI Version:", "version")
+	test_utils.EnsureCommandContains(g, t, cliCmd, cliVersion, "version")
 }
 
 func TestSettingConfigDirectoryOnly(t *testing.T) {
@@ -30,7 +33,7 @@ func TestSettingConfigDirectoryOnly(t *testing.T) {
 	g := NewGomegaWithT(t)
 	dir := test_utils.CreateTempDirectory("temp")
 
-	test_utils.EnsureCommandContains(g, t, cliCmd, "CLI Version:", "--config-dir", dir, "version")
+	test_utils.EnsureCommandContains(g, t, cliCmd, cliVersion, "--config-dir", dir, "version")
 
 	// we should see a file in the temp directory with the name of cohctl.yaml
 	g.Expect(test_utils.FileExistsInDirectory(dir, configName+"."+configType)).To(Equal(true))
@@ -47,7 +50,7 @@ func TestSettingConfigFileOnly(t *testing.T) {
 
 	file := filepath.Join(dir, "my-config.yaml")
 
-	test_utils.EnsureCommandContains(g, t, cliCmd, "CLI Version:", "--config", file, "version")
+	test_utils.EnsureCommandContains(g, t, cliCmd, cliVersion, configOption, file, "version")
 
 	// we should see a file in the temp directory with the name of cohctl.yaml
 	g.Expect(test_utils.FileExistsInDirectory(dir, "my-config.yaml")).To(Equal(true))
@@ -67,10 +70,10 @@ func TestContextCommands(t *testing.T) {
 		_ = os.RemoveAll(file)
 	})
 
-	test_utils.EnsureCommandOutputEquals(g, t, cliCmd, getContextMsg+"\n", "--config", file, "get", "context")
+	test_utils.EnsureCommandOutputEquals(g, t, cliCmd, getContextMsg+"\n", configOption, file, "get", "context")
 
 	// try to set a context when there is no cluster
-	test_utils.EnsureCommandErrorContains(g, t, cliCmd, UnableToFindClusterMsg, "--config", file, "set", "context", "cluster1")
+	test_utils.EnsureCommandErrorContains(g, t, cliCmd, UnableToFindClusterMsg, configOption, file, "set", "context", "cluster1")
 
 	// manually add a cluster, so we have a context to set
 	newCluster := ClusterConnection{Name: "cluster1", ConnectionType: "http", ConnectionURL: "dummy",
@@ -78,12 +81,12 @@ func TestContextCommands(t *testing.T) {
 	Config.Clusters = append(Config.Clusters, newCluster)
 
 	// set the context
-	test_utils.EnsureCommandOutputEquals(g, t, cliCmd, setContextMsg+"cluster1\n", "--config", file, "set", "context", "cluster1")
+	test_utils.EnsureCommandOutputEquals(g, t, cliCmd, setContextMsg+"cluster1\n", configOption, file, "set", "context", "cluster1")
 
 	g.Expect(viper.GetString(currentContextKey)).To(Equal("cluster1"))
 
 	// clear the context
-	test_utils.EnsureCommandOutputEquals(g, t, cliCmd, clearContextMessage+"\n", "--config", file, "clear", "context")
+	test_utils.EnsureCommandOutputEquals(g, t, cliCmd, clearContextMessage+"\n", configOption, file, "clear", "context")
 
 	g.Expect(viper.GetString(currentContextKey)).To(Equal(""))
 }
@@ -102,18 +105,18 @@ func TestDebugCommands(t *testing.T) {
 		_ = os.RemoveAll(file)
 	})
 
-	test_utils.EnsureCommandOutputEquals(g, t, cliCmd, getDebugMsg+"off\n", "--config", file, "get", "debug")
+	test_utils.EnsureCommandOutputEquals(g, t, cliCmd, getDebugMsg+"off\n", configOption, file, "get", "debug")
 
 	// set the debug to true
-	test_utils.EnsureCommandOutputEquals(g, t, cliCmd, setDebugMsg+"on\n", "--config", file, "set", "debug", "on")
+	test_utils.EnsureCommandOutputEquals(g, t, cliCmd, setDebugMsg+"on\n", configOption, file, "set", "debug", "on")
 
-	test_utils.EnsureCommandOutputEquals(g, t, cliCmd, getDebugMsg+"on\n", "--config", file, "get", "debug")
+	test_utils.EnsureCommandOutputEquals(g, t, cliCmd, getDebugMsg+"on\n", configOption, file, "get", "debug")
 
 	// set the debug to false
-	test_utils.EnsureCommandOutputEquals(g, t, cliCmd, setDebugMsg+"off\n", "--config", file, "set", "debug", "off")
+	test_utils.EnsureCommandOutputEquals(g, t, cliCmd, setDebugMsg+"off\n", configOption, file, "set", "debug", "off")
 
 	// set the debug to invalid value
-	test_utils.EnsureCommandErrorContains(g, t, cliCmd, setDebugError, "--config", file, "set", "debug", "dont-know")
+	test_utils.EnsureCommandErrorContains(g, t, cliCmd, setDebugError, configOption, file, "set", "debug", "dont-know")
 }
 
 // TestIgnoreCertsCommands tests the get and set ignore-certs commands
@@ -131,18 +134,18 @@ func TestIgnoreCertsCommands(t *testing.T) {
 	})
 
 	// get the default value
-	test_utils.EnsureCommandOutputEquals(g, t, cliCmd, getIgnoreCertsMsg+"false\n", "--config", file, "get", "ignore-certs")
+	test_utils.EnsureCommandOutputEquals(g, t, cliCmd, getIgnoreCertsMsg+"false\n", configOption, file, "get", "ignore-certs")
 
 	// set the ignore-certs to true
-	test_utils.EnsureCommandOutputEquals(g, t, cliCmd, setIgnoreCertsMsg+"true\n", "--config", file, "set", "ignore-certs", "true")
+	test_utils.EnsureCommandOutputEquals(g, t, cliCmd, setIgnoreCertsMsg+"true\n", configOption, file, "set", "ignore-certs", "true")
 
-	test_utils.EnsureCommandOutputEquals(g, t, cliCmd, getIgnoreCertsMsg+"true\n", "--config", file, "get", "ignore-certs")
+	test_utils.EnsureCommandOutputEquals(g, t, cliCmd, getIgnoreCertsMsg+"true\n", configOption, file, "get", "ignore-certs")
 
 	// set the ignore-certs to false
-	test_utils.EnsureCommandOutputEquals(g, t, cliCmd, setIgnoreCertsMsg+"false\n", "--config", file, "set", "ignore-certs", "false")
+	test_utils.EnsureCommandOutputEquals(g, t, cliCmd, setIgnoreCertsMsg+"false\n", configOption, file, "set", "ignore-certs", "false")
 
 	// set the ignore-certs to invalid value
-	test_utils.EnsureCommandErrorContains(g, t, cliCmd, setIgnoreCertsError, "--config", file, "set", "ignore-certs", "dont-know")
+	test_utils.EnsureCommandErrorContains(g, t, cliCmd, setIgnoreCertsError, configOption, file, "set", "ignore-certs", "dont-know")
 }
 
 // TestGetLogsCommands tests the get logs command
@@ -160,10 +163,10 @@ func TestGetLogsCommands(t *testing.T) {
 	})
 
 	// generate a log message
-	test_utils.EnsureCommandContains(g, t, cliCmd, "CLI Version:", "version")
+	test_utils.EnsureCommandContains(g, t, cliCmd, cliVersion, "version")
 
 	// ensure we can get logs
-	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "INFO,CLI Details", "--config", file, "get", "logs")
+	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "INFO,CLI Details", configOption, file, "get", "logs")
 }
 
 // TestTimeoutCommands tests the get and set timeout commands
@@ -181,30 +184,36 @@ func TestTimeoutCommands(t *testing.T) {
 	})
 
 	// set the timeout to 30
-	test_utils.EnsureCommandOutputEquals(g, t, cliCmd, setTimeoutMsg+"30\n", "--config", file, "set", "timeout", "30")
+	test_utils.EnsureCommandOutputEquals(g, t, cliCmd, setTimeoutMsg+"30\n", configOption, file, "set", "timeout", "30")
 
 	// get the timeout
-	test_utils.EnsureCommandOutputEquals(g, t, cliCmd, getTimeoutMessage+"30\n", "--config", file, "get", "timeout")
+	test_utils.EnsureCommandOutputEquals(g, t, cliCmd, getTimeoutMessage+"30\n", configOption, file, "get", "timeout")
 
 	// set the timeout to 65
-	test_utils.EnsureCommandOutputEquals(g, t, cliCmd, setTimeoutMsg+"65\n", "--config", file, "set", "timeout", "65")
+	test_utils.EnsureCommandOutputEquals(g, t, cliCmd, setTimeoutMsg+"65\n", configOption, file, "set", "timeout", "65")
 
 	// set the timeout to an invalid value
-	test_utils.EnsureCommandErrorContains(g, t, cliCmd, "invalid", "--config", file, "set", "timeout", "123c")
+	test_utils.EnsureCommandErrorContains(g, t, cliCmd, "invalid", configOption, file, "set", "timeout", "123c")
 }
 
 func TestIsStatusHASaferThan(t *testing.T) {
-	g := NewGomegaWithT(t)
+	var (
+		g           = NewGomegaWithT(t)
+		machineSafe = "MACHINE-SAFE"
+		nodeSafe    = "NODE-SAFE"
+		siteSafe    = "SITE-SAFE"
+		rackSafe    = "RACK-SAFE"
+	)
 
-	g.Expect(isStatusHASaferThan("NODE-SAFE", "NODE-SAFE")).Should(Equal(true))
-	g.Expect(isStatusHASaferThan("NODE-SAFE", "MACHINE-SAFE")).Should(Equal(false))
-	g.Expect(isStatusHASaferThan("MACHINE-SAFE", "SITE-SAFE")).Should(Equal(false))
-	g.Expect(isStatusHASaferThan("RACK-SAFE", "SITE-SAFE")).Should(Equal(false))
-	g.Expect(isStatusHASaferThan("NODE-SAFE", "ENDANGERED")).Should(Equal(true))
-	g.Expect(isStatusHASaferThan("MACHINE-SAFE", "NODE-SAFE")).Should(Equal(true))
-	g.Expect(isStatusHASaferThan("RACK-SAFE", "MACHINE-SAFE")).Should(Equal(true))
-	g.Expect(isStatusHASaferThan("SITE-SAFE", "MACHINE-SAFE")).Should(Equal(true))
-	g.Expect(isStatusHASaferThan("SITE-SAFE", "RACK-SAFE")).Should(Equal(true))
+	g.Expect(isStatusHASaferThan(nodeSafe, nodeSafe)).Should(Equal(true))
+	g.Expect(isStatusHASaferThan(nodeSafe, machineSafe)).Should(Equal(false))
+	g.Expect(isStatusHASaferThan(machineSafe, siteSafe)).Should(Equal(false))
+	g.Expect(isStatusHASaferThan(rackSafe, siteSafe)).Should(Equal(false))
+	g.Expect(isStatusHASaferThan(nodeSafe, "ENDANGERED")).Should(Equal(true))
+	g.Expect(isStatusHASaferThan(machineSafe, nodeSafe)).Should(Equal(true))
+	g.Expect(isStatusHASaferThan(rackSafe, machineSafe)).Should(Equal(true))
+	g.Expect(isStatusHASaferThan(siteSafe, machineSafe)).Should(Equal(true))
+	g.Expect(isStatusHASaferThan(siteSafe, rackSafe)).Should(Equal(true))
 }
 
 func TestGetDataFetcher(t *testing.T) {
