@@ -10,11 +10,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/oracle/coherence-cli/pkg/config"
-	"github.com/oracle/coherence-cli/pkg/constants"
 	"github.com/oracle/coherence-cli/pkg/fetcher"
 	"github.com/oracle/coherence-cli/pkg/utils"
 	"github.com/spf13/cobra"
-	"strings"
 )
 
 // var getHTTPProxiesCmd represents the getHTTPProxiesCmd command
@@ -96,40 +94,10 @@ var describeHTTPProxyCmd = &cobra.Command{
 			return err
 		}
 
-		if strings.Contains(OutputFormat, constants.JSONPATH) || OutputFormat == constants.JSON {
-			finalResult, err := utils.CombineByteArraysForJSON([][]byte{serviceResult, proxyResults}, []string{"services", "members"})
-			if err != nil {
-				return err
-			}
-			if strings.Contains(OutputFormat, constants.JSONPATH) {
-				result, err := utils.GetJSONPathResults(finalResult, OutputFormat)
-				if err != nil {
-					return err
-				}
-				cmd.Println(result)
-				return nil
-			}
-			cmd.Println(string(finalResult))
-			return nil
-		}
-		cmd.Print(FormatCurrentCluster(connection))
-		cmd.Print("\nHTTP SERVER SERVICE DETAILS\n")
-		cmd.Print("-------------------------------\n")
-		value, err := FormatJSONForDescribe(serviceResult, true, "Name", "Type")
+		err = displayProxyDetails(cmd, dataFetcher, connection, "http", serviceResult, proxyResults)
 		if err != nil {
 			return err
 		}
-
-		cmd.Println(value)
-
-		cmd.Print("HTTP SERVER MEMBER DETAILS\n")
-		cmd.Print("--------------------------\n")
-		value, err = returnGetProxiesDetails(cmd, "http", dataFetcher)
-		if err != nil {
-			return err
-		}
-
-		cmd.Println(value)
 
 		return nil
 	},

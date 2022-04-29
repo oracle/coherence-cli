@@ -539,7 +539,7 @@ addition information as well as '-v' to displayed additional information.`,
 
 			if len(proxiesSummary.Proxies) > 0 {
 				sb.WriteString("\nHTTP SERVERS\n")
-				sb.WriteString("-------------\n")
+				sb.WriteString("------------\n")
 				sb.WriteString(FormatProxyServers(proxiesSummary.Proxies, "http"))
 			}
 

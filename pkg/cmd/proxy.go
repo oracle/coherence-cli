@@ -125,41 +125,10 @@ all nodes running the proxy service as well as detailed connection information.`
 			}
 		}
 
-		if strings.Contains(OutputFormat, constants.JSONPATH) || OutputFormat == constants.JSON {
-			finalResult, err := utils.CombineByteArraysForJSON([][]byte{serviceResult, proxyResults}, []string{"services", "members"})
-			if err != nil {
-				return err
-			}
-			if strings.Contains(OutputFormat, constants.JSONPATH) {
-				result, err := utils.GetJSONPathResults(finalResult, OutputFormat)
-				if err != nil {
-					return err
-				}
-				cmd.Println(result)
-				return nil
-			}
-			cmd.Println(string(finalResult))
-			return nil
-		}
-
-		cmd.Print(FormatCurrentCluster(connection))
-		cmd.Print("\nPROXY SERVICE DETAILS\n")
-		cmd.Print("---------------------\n")
-		value, err := FormatJSONForDescribe(serviceResult, true, "Name", "Type")
+		err = displayProxyDetails(cmd, dataFetcher, connection, "tcp", serviceResult, proxyResults)
 		if err != nil {
 			return err
 		}
-
-		cmd.Println(value)
-
-		cmd.Print("PROXY MEMBER DETAILS\n")
-		cmd.Print("--------------------\n")
-		value, err = returnGetProxiesDetails(cmd, "tcp", dataFetcher)
-		if err != nil {
-			return err
-		}
-
-		cmd.Println(value)
 
 		cmd.Print("PROXY CONNECTIONS\n")
 		cmd.Print("-----------------\n")
@@ -182,6 +151,61 @@ all nodes running the proxy service as well as detailed connection information.`
 
 		return nil
 	},
+}
+
+func displayProxyDetails(cmd *cobra.Command, dataFetcher fetcher.Fetcher, connection, protocol string, serviceResult, proxyResults []byte) error {
+	var (
+		err         error
+		finalResult []byte
+		result      string
+		details     = "PROXY SERVICE DETAILS"
+		member      = "PROXY MEMBER DETAILS"
+		header      = ""
+	)
+
+	if protocol == "http" {
+		details = "HTTP SERVER SERVICE DETAILS"
+		member = "HTTP SERVER MEMBER DETAILS"
+		header = "------"
+	}
+
+	if strings.Contains(OutputFormat, constants.JSONPATH) || OutputFormat == constants.JSON {
+		finalResult, err = utils.CombineByteArraysForJSON([][]byte{serviceResult, proxyResults}, []string{"services", "members"})
+		if err != nil {
+			return err
+		}
+		if strings.Contains(OutputFormat, constants.JSONPATH) {
+			result, err = utils.GetJSONPathResults(finalResult, OutputFormat)
+			if err != nil {
+				return err
+			}
+			cmd.Println(result)
+			return nil
+		}
+		cmd.Println(string(finalResult))
+		return nil
+	}
+
+	cmd.Print(FormatCurrentCluster(connection))
+	cmd.Print("\n" + details + "\n")
+	cmd.Print("---------------------" + header + "\n")
+	value, err := FormatJSONForDescribe(serviceResult, true, "Name", "Type")
+	if err != nil {
+		return err
+	}
+
+	cmd.Println(value)
+
+	cmd.Print(member + "\n")
+	cmd.Print("--------------------" + header + "\n")
+	value, err = returnGetProxiesDetails(cmd, protocol, dataFetcher)
+	if err != nil {
+		return err
+	}
+
+	cmd.Println(value)
+
+	return nil
 }
 
 func returnGetProxiesDetails(cmd *cobra.Command, protocol string, dataFetcher fetcher.Fetcher) (string, error) {

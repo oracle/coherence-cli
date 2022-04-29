@@ -24,6 +24,8 @@ import (
 
 const configArg = "--config"
 const addedCluster = "Added cluster"
+const version1221 = "12.2.1"
+const version1411 = "14.1.1"
 
 //
 // These tests run each of the CLI commands and inspects the output to ensure that the
@@ -279,7 +281,7 @@ func RunTestServicesCommands(t *testing.T) {
 	test_utils.EnsureCommandNotContains(g, t, cliCmd, "DistributedCache", configArg, file, "get", "services",
 		"-t", "Proxy")
 
-	if strings.Contains(versionString, "12.2.1") || strings.Contains(versionString, "14.1.1") {
+	if strings.Contains(versionString, version1221) || strings.Contains(versionString, version1411) {
 		t.Log("workaround Coh Bug in test as version is " + versionString)
 	} else {
 		// test we can set threadCountMin on a service
@@ -497,7 +499,7 @@ func RunTestSetMemberCommands(t *testing.T) {
 	version, err = test_utils.IssueGetRequest(restUrl + "/version")
 	g.Expect(err).To(BeNil())
 	versionString := string(version)
-	if strings.Contains(versionString, "14.1.1.") || strings.Contains(versionString, "12.2.1") ||
+	if strings.Contains(versionString, version1411) || strings.Contains(versionString, version1221) ||
 		strings.Contains(versionString, "20.06") {
 		t.Log("Ignoring test as version is " + versionString)
 		return
@@ -801,7 +803,7 @@ func RunTestJFRCommands(t *testing.T) {
 	version, err = test_utils.IssueGetRequest(restUrl + "/version")
 	g.Expect(err).To(BeNil())
 	versionString := string(version)
-	if strings.Contains(versionString, "14.1.1.") || strings.Contains(versionString, "12.2.1") ||
+	if strings.Contains(versionString, version1411) || strings.Contains(versionString, version1221) ||
 		strings.Contains(versionString, "20.06") {
 		t.Log("Ignoring test as version is " + versionString)
 		return
