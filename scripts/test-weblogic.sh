@@ -141,4 +141,6 @@ runCommand set ignore-certs false
 runCommand get ignore-certs
 grep false $OUTPUT
 
+runCommand remove cluster wls -y
+
 
