@@ -686,8 +686,11 @@ func RunTestReporterCommands(t *testing.T) {
 
 // RunTestThreadDumpsCommands tests thread dump commands
 func RunTestThreadDumpsCommands(t *testing.T) {
-	g := NewGomegaWithT(t)
-	context := test_utils.GetTestContext()
+	var (
+		g              = NewGomegaWithT(t)
+		context        = test_utils.GetTestContext()
+		allThreadDumps = "All thread dumps completed"
+	)
 
 	file, err := test_utils.CreateNewConfigYaml("config.yaml")
 	if err != nil {
@@ -707,7 +710,7 @@ func RunTestThreadDumpsCommands(t *testing.T) {
 		context.ClusterName, "-u", context.Url)
 
 	// should be able to create a thread dump
-	test_utils.EnsureCommandContains(g, t, cliCmd, "All thread dumps completed", configArg, file, "retrieve", "thread-dumps",
+	test_utils.EnsureCommandContains(g, t, cliCmd, allThreadDumps, configArg, file, "retrieve", "thread-dumps",
 		"all", "-O", threadDumpDir, "-c", context.ClusterName, "-y", "-D", "5")
 
 	// assert that the thread dumps exist
@@ -718,7 +721,7 @@ func RunTestThreadDumpsCommands(t *testing.T) {
 	}
 
 	// should be able to create a thread dump for a single node
-	test_utils.EnsureCommandContains(g, t, cliCmd, "All thread dumps completed", configArg, file, "retrieve", "thread-dumps",
+	test_utils.EnsureCommandContains(g, t, cliCmd, allThreadDumps, configArg, file, "retrieve", "thread-dumps",
 		"1", "-O", threadDumpDir, "-c", context.ClusterName, "-y", "-D", "5")
 
 	// test invalid role value
@@ -726,7 +729,7 @@ func RunTestThreadDumpsCommands(t *testing.T) {
 		"-r", "invalid-role", "-O", threadDumpDir, "-c", context.ClusterName, "-y")
 
 	// should be able to create a thread dump for a role
-	test_utils.EnsureCommandContains(g, t, cliCmd, "All thread dumps completed", configArg, file, "retrieve", "thread-dumps",
+	test_utils.EnsureCommandContains(g, t, cliCmd, allThreadDumps, configArg, file, "retrieve", "thread-dumps",
 		"-r", "OracleCoherenceCliTestingRestServer", "-O", threadDumpDir, "-c", context.ClusterName, "-y", "-D", "5")
 
 	// re-initialize to overwrite invalid role

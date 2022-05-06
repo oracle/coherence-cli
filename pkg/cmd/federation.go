@@ -23,6 +23,8 @@ const origins = "origins"
 const outgoing = "outgoing"
 const incoming = "incoming"
 const participantMessage = "participant to apply to"
+const supplyService = "you must provide a service name"
+const federationUse = "federation service-name"
 
 var (
 	participant             string
@@ -141,7 +143,7 @@ can also specify '-o wide' to display addition information.`,
 
 // startFederationCmd represents the start federation command
 var startFederationCmd = &cobra.Command{
-	Use:   "federation service-name",
+	Use:   federationUse,
 	Short: "start federation for a service",
 	Long: `The 'start federation' command starts federation on a service. There
 are various options available using '-M' including:
@@ -150,7 +152,7 @@ are various options available using '-M' including:
 You may also specify a participant otherwise the command will apply to all participants.`,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
-			displayErrorAndExit(cmd, "you must provide a service name")
+			displayErrorAndExit(cmd, supplyService)
 		}
 		return nil
 	},
@@ -161,13 +163,13 @@ You may also specify a participant otherwise the command will apply to all parti
 
 // stopFederationCmd represents the stop federation command
 var stopFederationCmd = &cobra.Command{
-	Use:   "federation service-name",
+	Use:   federationUse,
 	Short: "stop federation for a service",
 	Long: `The 'stop federation' command stops federation on a service. There
 You may also specify a participant otherwise the command will apply to all participants.`,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
-			displayErrorAndExit(cmd, "you must provide a service name")
+			displayErrorAndExit(cmd, supplyService)
 		}
 		return nil
 	},
@@ -184,7 +186,7 @@ var replicateAllCmd = &cobra.Command{
 You must specify a participant to replicate for.`,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
-			displayErrorAndExit(cmd, "you must provide a service name")
+			displayErrorAndExit(cmd, supplyService)
 		}
 		return nil
 	},
@@ -195,13 +197,13 @@ You must specify a participant to replicate for.`,
 
 // pauseFederationCmd represents the pause federation command
 var pauseFederationCmd = &cobra.Command{
-	Use:   "federation service-name",
+	Use:   federationUse,
 	Short: "Pause federation for a service",
 	Long: `The 'pause' command stops federation on a service.
 You may also specify a participant otherwise the command will apply to all participants.`,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
-			displayErrorAndExit(cmd, "you must provide a service name")
+			displayErrorAndExit(cmd, supplyService)
 		}
 		return nil
 	},

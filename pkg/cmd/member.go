@@ -48,6 +48,7 @@ const logClusterState = "log cluster state"
 const configureTracing = "configure tracing"
 const unableToDecode = "unable to decode member details"
 const noNodeID = "no node with node id %s exists in this cluster"
+const invalidNodeID = "invalid value for node id of %s"
 
 // getMembersCmd represents the get members command
 var getMembersCmd = &cobra.Command{
@@ -374,7 +375,7 @@ or loggingFormat.`,
 			nodeIds = strings.Split(loggingNodeIds, ",")
 			for _, value := range nodeIds {
 				if !utils.IsValidInt(value) {
-					return fmt.Errorf("invalid value for node id of %s", value)
+					return fmt.Errorf(invalidNodeID, value)
 				}
 
 				if !utils.SliceContains(nodeIDArray, value) {
@@ -553,7 +554,7 @@ DefaultCacheServer, then they will be restarted.`,
 		}
 
 		if !utils.IsValidInt(nodeID) {
-			return fmt.Errorf("invalid value for node id of %s", nodeID)
+			return fmt.Errorf(invalidNodeID, nodeID)
 		}
 
 		if !utils.SliceContains(nodeIDArray, nodeID) {
@@ -748,7 +749,7 @@ a role to retrieve thread dumps for.`,
 				nodeIds = strings.Split(nodesToDump, ",")
 				for _, value := range nodeIds {
 					if !utils.IsValidInt(value) {
-						return fmt.Errorf("invalid value for node id of %s", value)
+						return fmt.Errorf(invalidNodeID, value)
 					}
 
 					if !utils.SliceContains(nodeIDArray, value) {

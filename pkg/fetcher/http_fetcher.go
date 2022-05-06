@@ -36,6 +36,8 @@ var (
 )
 
 const links = "?links="
+const jsonStringFormat = "{\"%s\": %s}"
+const servicesPath = "/services/"
 
 // HTTPFetcher is an implementation of a Fetcher to retrieve data from Management over REST
 type HTTPFetcher struct {
@@ -227,7 +229,7 @@ func (h HTTPFetcher) GetStorageDetailsJSON() ([]byte, error) {
 func (h HTTPFetcher) SetMemberAttribute(memberID, attribute string, value interface{}) ([]byte, error) {
 	var valueString = getJSONValueString(value)
 
-	payload := []byte(fmt.Sprintf("{\"%s\": %s}", attribute, valueString))
+	payload := []byte(fmt.Sprintf(jsonStringFormat, attribute, valueString))
 	result, err := httpPostRequest(h, "/members/"+memberID, payload)
 	if err != nil {
 		return constants.EmptyByte, utils.GetError(
@@ -240,7 +242,7 @@ func (h HTTPFetcher) SetMemberAttribute(memberID, attribute string, value interf
 func (h HTTPFetcher) SetReporterAttribute(memberID, attribute string, value interface{}) ([]byte, error) {
 	var valueString = getJSONValueString(value)
 
-	payload := []byte(fmt.Sprintf("{\"%s\": %s}", attribute, valueString))
+	payload := []byte(fmt.Sprintf(jsonStringFormat, attribute, valueString))
 	result, err := httpPostRequest(h, "/reporters/"+memberID, payload)
 	if err != nil {
 		return constants.EmptyByte, utils.GetError(
@@ -252,7 +254,7 @@ func (h HTTPFetcher) SetReporterAttribute(memberID, attribute string, value inte
 // SetManagementAttribute sets the given management attribute for a cluster
 func (h HTTPFetcher) SetManagementAttribute(attribute string, value interface{}) ([]byte, error) {
 	var valueString = getJSONValueString(value)
-	payload := []byte(fmt.Sprintf("{\"%s\": %s}", attribute, valueString))
+	payload := []byte(fmt.Sprintf(jsonStringFormat, attribute, valueString))
 
 	result, err := httpPostRequest(h, "/management/", payload)
 	if err != nil {
@@ -265,9 +267,9 @@ func (h HTTPFetcher) SetManagementAttribute(attribute string, value interface{})
 // SetCacheAttribute sets the given attribute for a cache
 func (h HTTPFetcher) SetCacheAttribute(memberID, serviceName, cacheName, tier, attribute string, value interface{}) ([]byte, error) {
 	var valueString = getJSONValueString(value)
-	payload := []byte(fmt.Sprintf("{\"%s\": %s}", attribute, valueString))
+	payload := []byte(fmt.Sprintf(jsonStringFormat, attribute, valueString))
 
-	result, err := httpPostRequest(h, "/services/"+getSafeServiceName(h, serviceName)+
+	result, err := httpPostRequest(h, servicesPath+getSafeServiceName(h, serviceName)+
 		"/caches/"+url.PathEscape(cacheName)+"/members/"+memberID+"?tier="+tier, payload)
 	if err != nil {
 		return constants.EmptyByte, utils.GetError(
@@ -280,9 +282,9 @@ func (h HTTPFetcher) SetCacheAttribute(memberID, serviceName, cacheName, tier, a
 // SetServiceAttribute sets the given attribute for a service
 func (h HTTPFetcher) SetServiceAttribute(memberID, serviceName, attribute string, value interface{}) ([]byte, error) {
 	var valueString = getJSONValueString(value)
-	payload := []byte(fmt.Sprintf("{\"%s\": %s}", attribute, valueString))
+	payload := []byte(fmt.Sprintf(jsonStringFormat, attribute, valueString))
 
-	result, err := httpPostRequest(h, "/services/"+getSafeServiceName(h, serviceName)+"/members/"+memberID, payload)
+	result, err := httpPostRequest(h, servicesPath+getSafeServiceName(h, serviceName)+"/members/"+memberID, payload)
 	if err != nil {
 		return constants.EmptyByte, utils.GetError(
 			fmt.Sprintf("cannot set value %v for attribute %s for service %s and member %s", value, attribute,
@@ -307,7 +309,7 @@ func (h HTTPFetcher) GetExecutorsJSON() ([]byte, error) {
 
 // GetSingleServiceDetailsJSON returns a single service details in raw json
 func (h HTTPFetcher) GetSingleServiceDetailsJSON(serviceName string) ([]byte, error) {
-	result, err := httpGetRequest(h, "/services/"+getSafeServiceName(h, serviceName)+links)
+	result, err := httpGetRequest(h, servicesPath+getSafeServiceName(h, serviceName)+links)
 	if err != nil {
 		return constants.EmptyByte, utils.GetError("cannot get service information for service "+serviceName, err)
 	}
@@ -316,7 +318,7 @@ func (h HTTPFetcher) GetSingleServiceDetailsJSON(serviceName string) ([]byte, er
 
 // GetScheduledDistributionsJSON returns scheduled distributions for a service
 func (h HTTPFetcher) GetScheduledDistributionsJSON(serviceName string) ([]byte, error) {
-	result, err := httpGetRequest(h, "/services/"+getSafeServiceName(h, serviceName)+
+	result, err := httpGetRequest(h, servicesPath+getSafeServiceName(h, serviceName)+
 		"/partition/scheduledDistributions?links=")
 	if err != nil {
 		return constants.EmptyByte, utils.GetError("cannot get scheduled distributions for service "+serviceName, err)
@@ -326,7 +328,7 @@ func (h HTTPFetcher) GetScheduledDistributionsJSON(serviceName string) ([]byte, 
 
 // GetServicePartitionsJSON returns partition information for a service
 func (h HTTPFetcher) GetServicePartitionsJSON(serviceName string) ([]byte, error) {
-	result, err := httpGetRequest(h, "/services/"+getSafeServiceName(h, serviceName)+
+	result, err := httpGetRequest(h, servicesPath+getSafeServiceName(h, serviceName)+
 		"/partition/?links=")
 	if err != nil {
 		return constants.EmptyByte, utils.GetError("cannot get scheduled distributions for service "+serviceName, err)
@@ -336,7 +338,7 @@ func (h HTTPFetcher) GetServicePartitionsJSON(serviceName string) ([]byte, error
 
 // GetServiceMembersDetailsJSON returns all the service member details for a service
 func (h HTTPFetcher) GetServiceMembersDetailsJSON(serviceName string) ([]byte, error) {
-	result, err := httpGetRequest(h, "/services/"+getSafeServiceName(h, serviceName)+"/members/?links=")
+	result, err := httpGetRequest(h, servicesPath+getSafeServiceName(h, serviceName)+"/members/?links=")
 	if err != nil {
 		return constants.EmptyByte, utils.GetError("cannot get service member information for service "+serviceName, err)
 	}
@@ -345,7 +347,7 @@ func (h HTTPFetcher) GetServiceMembersDetailsJSON(serviceName string) ([]byte, e
 
 // GetCachesSummaryJSON returns summary caches details for a service
 func (h HTTPFetcher) GetCachesSummaryJSON(serviceName string) ([]byte, error) {
-	result, err := httpGetRequest(h, "/services/"+getSafeServiceName(h, serviceName)+"/caches?links=")
+	result, err := httpGetRequest(h, servicesPath+getSafeServiceName(h, serviceName)+"/caches?links=")
 	if err != nil {
 		return constants.EmptyByte, utils.GetError("cannot get caches summary information for service "+serviceName, err)
 	}
@@ -372,7 +374,7 @@ func (h HTTPFetcher) GetProxySummaryJSON() ([]byte, error) {
 
 // GetProxyConnectionsJSON returns the proxy connections for the specified service and node
 func (h HTTPFetcher) GetProxyConnectionsJSON(serviceName, nodeID string) ([]byte, error) {
-	result, err := httpGetRequest(h, "/services/"+getSafeServiceName(h, serviceName)+"/members/"+
+	result, err := httpGetRequest(h, servicesPath+getSafeServiceName(h, serviceName)+"/members/"+
 		nodeID+"/proxy/connections?links=")
 	if err != nil {
 		return constants.EmptyByte, utils.GetError("cannot get proxy connections for service "+serviceName+
@@ -450,7 +452,7 @@ func (h HTTPFetcher) LogClusterState(role string) ([]byte, error) {
 
 // GetCacheMembers retrieves cache member details
 func (h HTTPFetcher) GetCacheMembers(serviceName, cacheName string) ([]byte, error) {
-	result, err := httpGetRequest(h, "/services/"+getSafeServiceName(h, serviceName)+"/caches/"+
+	result, err := httpGetRequest(h, servicesPath+getSafeServiceName(h, serviceName)+"/caches/"+
 		url.PathEscape(cacheName)+"/members?links=")
 	if err != nil && !strings.Contains(err.Error(), "404") {
 		return constants.EmptyByte, utils.GetError("cannot get cache members for service "+serviceName+
@@ -461,7 +463,7 @@ func (h HTTPFetcher) GetCacheMembers(serviceName, cacheName string) ([]byte, err
 
 // GetPersistenceCoordinator retrieves persistence coordinator details
 func (h HTTPFetcher) GetPersistenceCoordinator(serviceName string) ([]byte, error) {
-	result, err := httpGetRequest(h, "/services/"+getSafeServiceName(h, serviceName)+"/persistence?links=")
+	result, err := httpGetRequest(h, servicesPath+getSafeServiceName(h, serviceName)+"/persistence?links=")
 	if err != nil {
 		return constants.EmptyByte, utils.GetError("cannot get persistence coordinator for service "+serviceName, err)
 	}
@@ -525,7 +527,7 @@ func (h HTTPFetcher) GetElasticDataDetails(journalType string) ([]byte, error) {
 
 // GetArchivedSnapshots retrieves the list of archives snapshots
 func (h HTTPFetcher) GetArchivedSnapshots(serviceName string) ([]byte, error) {
-	result, err := httpGetRequest(h, "/services/"+getSafeServiceName(h, serviceName)+"/persistence/archives?links=")
+	result, err := httpGetRequest(h, servicesPath+getSafeServiceName(h, serviceName)+"/persistence/archives?links=")
 	if err != nil {
 		return constants.EmptyByte, utils.GetError("cannot get archives for "+serviceName, err)
 	}
@@ -536,7 +538,7 @@ func (h HTTPFetcher) GetArchivedSnapshots(serviceName string) ([]byte, error) {
 func (h HTTPFetcher) InvokeFederationOperation(serviceName, command, participant, mode string) ([]byte, error) {
 	var (
 		err error
-		url = "/services/" + getSafeServiceName(h, serviceName) + "/federation/"
+		url = servicesPath + getSafeServiceName(h, serviceName) + "/federation/"
 	)
 
 	if participant != "all" {
@@ -569,7 +571,7 @@ func (h HTTPFetcher) InvokeFederationOperation(serviceName, command, participant
 func (h HTTPFetcher) InvokeServiceOperation(serviceName, operation string) ([]byte, error) {
 	var (
 		err      error
-		finalURL = "/services/" + getSafeServiceName(h, serviceName) + "/"
+		finalURL = servicesPath + getSafeServiceName(h, serviceName) + "/"
 	)
 	if operation == SuspendService {
 		finalURL += "suspend"
@@ -590,7 +592,7 @@ func (h HTTPFetcher) InvokeServiceOperation(serviceName, operation string) ([]by
 func (h HTTPFetcher) InvokeServiceMemberOperation(serviceName, nodeID, operation string) ([]byte, error) {
 	var (
 		err      error
-		finalURL = "/services/" + getSafeServiceName(h, serviceName) + "/members/" + nodeID + "/" + operation
+		finalURL = servicesPath + getSafeServiceName(h, serviceName) + "/members/" + nodeID + "/" + operation
 	)
 
 	_, err = httpPostRequest(h, finalURL, constants.EmptyByte)
@@ -606,27 +608,29 @@ func (h HTTPFetcher) InvokeServiceMemberOperation(serviceName, nodeID, operation
 // InvokeSnapshotOperation invokes a snapshot operation against a service
 func (h HTTPFetcher) InvokeSnapshotOperation(serviceName, snapshotName, operation string, archived bool) ([]byte, error) {
 	var (
-		err      error
-		finalURL = "/services/" + getSafeServiceName(h, serviceName) + "/persistence/"
+		err       error
+		finalURL  = servicesPath + getSafeServiceName(h, serviceName) + "/persistence/"
+		snapshots = "snapshots/"
+		archives  = "archives/"
 	)
 	if operation == CreateSnapshot {
-		_, err = httpPostRequest(h, finalURL+"snapshots/"+getSafeServiceName(h, snapshotName), constants.EmptyByte)
+		_, err = httpPostRequest(h, finalURL+snapshots+getSafeServiceName(h, snapshotName), constants.EmptyByte)
 		return constants.EmptyByte, err
 	} else if operation == RemoveSnapshot {
 		if archived {
-			_, err = httpDeleteRequest(h, finalURL+"archives/"+getSafeServiceName(h, snapshotName))
+			_, err = httpDeleteRequest(h, finalURL+archives+getSafeServiceName(h, snapshotName))
 		} else {
-			_, err = httpDeleteRequest(h, finalURL+"snapshots/"+getSafeServiceName(h, snapshotName))
+			_, err = httpDeleteRequest(h, finalURL+snapshots+getSafeServiceName(h, snapshotName))
 		}
 		return constants.EmptyByte, err
 	} else if operation == RecoverSnapshot {
-		_, err = httpPostRequest(h, finalURL+"snapshots/"+getSafeServiceName(h, snapshotName)+"/recover", constants.EmptyByte)
+		_, err = httpPostRequest(h, finalURL+snapshots+getSafeServiceName(h, snapshotName)+"/recover", constants.EmptyByte)
 		return constants.EmptyByte, err
 	} else if operation == RetrieveSnapshot {
-		_, err = httpPostRequest(h, finalURL+"archives/"+getSafeServiceName(h, snapshotName)+"/retrieve", constants.EmptyByte)
+		_, err = httpPostRequest(h, finalURL+archives+getSafeServiceName(h, snapshotName)+"/retrieve", constants.EmptyByte)
 		return constants.EmptyByte, err
 	} else if operation == ArchiveSnapshot {
-		_, err = httpPostRequest(h, finalURL+"archives/"+getSafeServiceName(h, snapshotName), constants.EmptyByte)
+		_, err = httpPostRequest(h, finalURL+archives+getSafeServiceName(h, snapshotName), constants.EmptyByte)
 		if err != nil {
 			return constants.EmptyByte, fmt.Errorf("unable to archive snapshot. Please ensure you have an archiver setup for your service. %v", err)
 		}
@@ -677,7 +681,7 @@ func (h HTTPFetcher) CheckJFR(jfrName, jfrType, target string) ([]byte, error) {
 
 // GetFederationStatisticsJSON returns federation statistics for a service and type
 func (h HTTPFetcher) GetFederationStatisticsJSON(serviceName, federationType string) ([]byte, error) {
-	result, err := httpGetRequest(h, "/services/"+getSafeServiceName(h, serviceName)+
+	result, err := httpGetRequest(h, servicesPath+getSafeServiceName(h, serviceName)+
 		"/federation/statistics/"+federationType+"/participants?links=")
 	// workaround bug with incoming returning 500 if no federation, ignore 404 as this means no incoming
 	if err != nil && !strings.Contains(err.Error(), "500") && !strings.Contains(err.Error(), "404") {

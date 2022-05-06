@@ -27,6 +27,7 @@ var (
 )
 
 const jfrNameUse = "jfr name"
+const supplyJFR = "you must provide a JFR name"
 
 // getJfrsCmd represents the get jfrs command
 var getJfrsCmd = &cobra.Command{
@@ -59,7 +60,7 @@ var describeJfrCmd = &cobra.Command{
 	Long:  `The 'describe jfr' command shows information related to a Java Flight Recording (JFR).`,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
-			displayErrorAndExit(cmd, "you must provide a JFR name")
+			displayErrorAndExit(cmd, supplyJFR)
 		}
 		return nil
 	},
@@ -91,7 +92,7 @@ be run for all members. The default duration is 60 seconds and you can specify a
 of 0 to make the recording continuous.`,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
-			displayErrorAndExit(cmd, "you must provide a JFR name")
+			displayErrorAndExit(cmd, supplyJFR)
 		}
 		return nil
 	},
@@ -185,7 +186,7 @@ var stopJfrCmd = &cobra.Command{
 You can specify either a node or leave the node blank to stop for all nodes.`,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
-			displayErrorAndExit(cmd, "you must provide a JFR name")
+			displayErrorAndExit(cmd, supplyJFR)
 		}
 		return nil
 	},
@@ -215,7 +216,7 @@ var dumpJfrCmd = &cobra.Command{
 A JFR command mut be in progress for this to succeed.`,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
-			displayErrorAndExit(cmd, "you must provide a JFR name")
+			displayErrorAndExit(cmd, supplyJFR)
 		}
 		return nil
 	},
