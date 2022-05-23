@@ -759,6 +759,10 @@ you can confirm if you wish to add the discovered clusters.`,
 		cmd.Println()
 		cmd.Println(FormatDiscoveredClusters(discoveredClusters))
 
+		if withHTTP == 0 {
+			return errors.New("no clusters have Management over REST enabled")
+		}
+
 		if !automaticallyConfirm {
 			cmd.Printf("Are you sure you want to add the above %d cluster(s)? (y/n) ", withHTTP)
 			_, err = fmt.Scanln(&response)
