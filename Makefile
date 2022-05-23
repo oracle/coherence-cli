@@ -456,7 +456,7 @@ test-clean: gotestsum ## Clean the go test cache
 # ----------------------------------------------------------------------------------------------------------------------
 $(TOOLS_BIN)/golangci-lint:
 	@mkdir -p $(TOOLS_BIN)
-	curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | sh -s -- -b $(TOOLS_BIN) v1.43.0
+	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(TOOLS_BIN)  v1.46.2
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Find or download gotestsum
