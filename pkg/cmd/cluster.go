@@ -49,7 +49,7 @@ populated constructed.`,
 		return nil
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
-		connection := args[0]
+		connection := sanitizeConnectionName(args[0])
 
 		found, clusterConnection := GetClusterConnection(connection)
 		if found {
@@ -749,10 +749,14 @@ you can confirm if you wish to add the discovered clusters.`,
 				// cluster connection was found
 				cmd.Printf(clusterMessage, safeConnectionName, conn.ConnectionURL)
 				newConnection, err = acceptConnection(cmd, "Please enter a cluster name: ")
+				newConnection = sanitizeConnectionName(newConnection)
+				if len(newConnection) == 0 {
+					return errors.New("invalid connection name")
+				}
 				if err != nil {
 					return err
 				}
-				discoveredClusters[i].ConnectionName = sanitizeConnectionName(newConnection)
+				discoveredClusters[i].ConnectionName = newConnection
 			}
 		}
 
@@ -862,7 +866,8 @@ func init() {
 
 // sanitizeConnectionName sanitizes a cluster connection
 func sanitizeConnectionName(connectionName string) string {
-	return replaceAll(connectionName, "$", ",", " ", "'", "\"", "(", ")", "[", "]", "\\")
+	return replaceAll(connectionName, "$", ",", " ", "'", "\"", "(", ")", "[", "]", "\\", "*",
+		"%", "^", "&", "#", "/", "@", ";", "!")
 }
 
 // replaceAll replaces all the specified values with ""
