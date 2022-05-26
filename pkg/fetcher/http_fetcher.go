@@ -38,6 +38,7 @@ var (
 const links = "?links="
 const jsonStringFormat = "{\"%s\": %s}"
 const servicesPath = "/services/"
+const membersPath = "/members/"
 
 // HTTPFetcher is an implementation of a Fetcher to retrieve data from Management over REST
 type HTTPFetcher struct {
@@ -77,7 +78,7 @@ func (h HTTPFetcher) GetMemberDetailsJSON(verbose bool) ([]byte, error) {
 
 // GetSingleMemberDetailsJSON returns a single members details in raw json
 func (h HTTPFetcher) GetSingleMemberDetailsJSON(nodeID string) ([]byte, error) {
-	result, err := httpGetRequest(h, "/members/"+nodeID+links)
+	result, err := httpGetRequest(h, membersPath+nodeID+links)
 	if err != nil {
 		return constants.EmptyByte, utils.GetError("cannot get member information nodeId = "+nodeID, err)
 	}
@@ -174,7 +175,7 @@ func (h HTTPFetcher) GetExtendedMemberInfoJSON(result []byte, nodeID string, tok
 		finalNodeID = member.MemberName
 	}
 
-	result, err := httpGetRequest(h, "/members/"+finalNodeID+"?fields=none")
+	result, err := httpGetRequest(h, membersPath+finalNodeID+"?fields=none")
 	if err != nil && !strings.Contains(err.Error(), "404") {
 		return extendedData, utils.GetError("unable to get member links nodeId = "+finalNodeID, err)
 	}
@@ -197,7 +198,7 @@ func (h HTTPFetcher) GetExtendedMemberInfoJSON(result []byte, nodeID string, tok
 			}
 		}
 		if found {
-			newData, err = getLinkData(h, "/members/"+finalNodeID+"/"+value.Rel)
+			newData, err = getLinkData(h, membersPath+finalNodeID+"/"+value.Rel)
 			if err != nil && !strings.Contains(err.Error(), "404") {
 				return extendedData, utils.GetError("unable to retrieve link data", err)
 			}
@@ -230,7 +231,7 @@ func (h HTTPFetcher) SetMemberAttribute(memberID, attribute string, value interf
 	var valueString = getJSONValueString(value)
 
 	payload := []byte(fmt.Sprintf(jsonStringFormat, attribute, valueString))
-	result, err := httpPostRequest(h, "/members/"+memberID, payload)
+	result, err := httpPostRequest(h, membersPath+memberID, payload)
 	if err != nil {
 		return constants.EmptyByte, utils.GetError(
 			fmt.Sprintf("cannot set value %vfor attribute %s ", value, attribute), err)
@@ -270,7 +271,7 @@ func (h HTTPFetcher) SetCacheAttribute(memberID, serviceName, cacheName, tier, a
 	payload := []byte(fmt.Sprintf(jsonStringFormat, attribute, valueString))
 
 	result, err := httpPostRequest(h, servicesPath+getSafeServiceName(h, serviceName)+
-		"/caches/"+url.PathEscape(cacheName)+"/members/"+memberID+"?tier="+tier, payload)
+		"/caches/"+url.PathEscape(cacheName)+membersPath+memberID+"?tier="+tier, payload)
 	if err != nil {
 		return constants.EmptyByte, utils.GetError(
 			fmt.Sprintf("cannot set value %v for attribute %s for cache %s/%s and member %s", value, attribute,
@@ -284,7 +285,7 @@ func (h HTTPFetcher) SetServiceAttribute(memberID, serviceName, attribute string
 	var valueString = getJSONValueString(value)
 	payload := []byte(fmt.Sprintf(jsonStringFormat, attribute, valueString))
 
-	result, err := httpPostRequest(h, servicesPath+getSafeServiceName(h, serviceName)+"/members/"+memberID, payload)
+	result, err := httpPostRequest(h, servicesPath+getSafeServiceName(h, serviceName)+membersPath+memberID, payload)
 	if err != nil {
 		return constants.EmptyByte, utils.GetError(
 			fmt.Sprintf("cannot set value %v for attribute %s for service %s and member %s", value, attribute,
@@ -374,7 +375,7 @@ func (h HTTPFetcher) GetProxySummaryJSON() ([]byte, error) {
 
 // GetProxyConnectionsJSON returns the proxy connections for the specified service and node
 func (h HTTPFetcher) GetProxyConnectionsJSON(serviceName, nodeID string) ([]byte, error) {
-	result, err := httpGetRequest(h, servicesPath+getSafeServiceName(h, serviceName)+"/members/"+
+	result, err := httpGetRequest(h, servicesPath+getSafeServiceName(h, serviceName)+membersPath+
 		nodeID+"/proxy/connections?links=")
 	if err != nil {
 		return constants.EmptyByte, utils.GetError("cannot get proxy connections for service "+serviceName+
@@ -385,7 +386,7 @@ func (h HTTPFetcher) GetProxyConnectionsJSON(serviceName, nodeID string) ([]byte
 
 // GetThreadDump retrieves a thread dump from a member
 func (h HTTPFetcher) GetThreadDump(memberID string) ([]byte, error) {
-	result, err := httpGetRequest(h, "/members/"+memberID+"/state")
+	result, err := httpGetRequest(h, membersPath+memberID+"/state")
 	if err != nil {
 		return constants.EmptyByte, utils.GetError("cannot logMemberState for member "+memberID, err)
 	}
@@ -394,7 +395,7 @@ func (h HTTPFetcher) GetThreadDump(memberID string) ([]byte, error) {
 
 // ShutdownMember shuts down a member
 func (h HTTPFetcher) ShutdownMember(memberID string) ([]byte, error) {
-	result, err := httpPostRequest(h, "/members/"+memberID+"/shutdown", constants.EmptyByte)
+	result, err := httpPostRequest(h, membersPath+memberID+"/shutdown", constants.EmptyByte)
 	if err != nil {
 		return constants.EmptyByte, utils.GetError("cannot shutdown member "+memberID, err)
 	}
@@ -472,7 +473,7 @@ func (h HTTPFetcher) GetPersistenceCoordinator(serviceName string) ([]byte, erro
 
 // GetMemberOSJson returns the OS information for the member
 func (h HTTPFetcher) GetMemberOSJson(memberID string) ([]byte, error) {
-	result, err := httpGetRequest(h, "/members/"+memberID+"/platform/operatingSystem?links=")
+	result, err := httpGetRequest(h, membersPath+memberID+"/platform/operatingSystem?links=")
 	if err != nil && !strings.Contains(err.Error(), "404") {
 		return constants.EmptyByte, utils.GetError("cannot get Member OS for member "+memberID, err)
 	}
@@ -592,7 +593,7 @@ func (h HTTPFetcher) InvokeServiceOperation(serviceName, operation string) ([]by
 func (h HTTPFetcher) InvokeServiceMemberOperation(serviceName, nodeID, operation string) ([]byte, error) {
 	var (
 		err      error
-		finalURL = servicesPath + getSafeServiceName(h, serviceName) + "/members/" + nodeID + "/" + operation
+		finalURL = servicesPath + getSafeServiceName(h, serviceName) + membersPath + nodeID + "/" + operation
 	)
 
 	_, err = httpPostRequest(h, finalURL, constants.EmptyByte)
@@ -725,7 +726,7 @@ func getInitialURL(jfrOperation, jfrType, target string) string {
 	if jfrType == JfrTypeRole {
 		finalURL += "&role=" + url.QueryEscape(target)
 	} else if jfrType == JfrTypeNode {
-		finalURL = "/members/" + target + "/diagnostic-cmd/" + jfrOperation + links
+		finalURL = membersPath + target + "/diagnostic-cmd/" + jfrOperation + links
 	}
 	return finalURL
 }
