@@ -363,7 +363,7 @@ type Snapshots struct {
 	Snapshots   []string `json:"snapshots"`
 }
 
-// Archives contains arthived snapshots
+// Archives contains archived snapshots
 type Archives struct {
 	Snapshots []string `json:"archives"`
 }

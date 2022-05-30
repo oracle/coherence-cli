@@ -441,6 +441,7 @@ func FormatServiceMembers(serviceMembers []config.ServiceMemberDetail) string {
 }
 
 func getFormattingFunction() func(bytesValue int64) string {
+	// first check for a specific override of the format
 	if kbFormat {
 		return formatKBOnly
 	}
@@ -450,6 +451,18 @@ func getFormattingFunction() func(bytesValue int64) string {
 	if gbFormat {
 		return formatGBOnly
 	}
+
+	// then, check for default bytes format in config if none was set
+	if Config.DefaultBytesFormat == bytesFormatK {
+		return formatKBOnly
+	}
+	if Config.DefaultBytesFormat == bytesFormatM {
+		return formatMBOnly
+	}
+	if Config.DefaultBytesFormat == bytesFormatG {
+		return formatGBOnly
+	}
+
 	return formatBytesOnly
 }
 

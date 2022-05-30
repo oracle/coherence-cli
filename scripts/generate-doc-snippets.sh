@@ -145,6 +145,11 @@ create_doc $DOCS_DIR/describe_http_session "${COHCTL} describe http-session --he
 create_doc $DOCS_DIR/set_debug "${COHCTL} set debug --help"
 create_doc $DOCS_DIR/get_debug "${COHCTL} get debug --help"
 
+# Bytes Display
+create_doc $DOCS_DIR/set_bytes_format "${COHCTL} set bytes-format --help"
+create_doc $DOCS_DIR/get_bytes_format "${COHCTL} get bytes-format --help"
+create_doc $DOCS_DIR/clear_bytes_format "${COHCTL} clear bytes-format --help"
+
 # Ignore Certs
 create_doc $DOCS_DIR/set_ignore_certs "${COHCTL} set ignore-certs --help"
 create_doc $DOCS_DIR/get_ignore_certs "${COHCTL} get ignore-certs --help"

@@ -14,5 +14,5 @@ import (
 var setCmd = &cobra.Command{
 	Use:   "set",
 	Short: "set a configuration value",
-	Long:  `The 'set' command sets the current context, debug, timeout value or to ignore invalid SSL certificates.`,
+	Long:  `The 'set' command sets the current context, debug, timeout value, bytes format or to ignore invalid SSL certificates.`,
 }

@@ -59,6 +59,7 @@ const currentContextKey = "currentContext"
 const debugContextKey = "debug"
 const ignoreCertsContextKey = "ignoreInvalidCerts"
 const requestTimeoutKey = "requestTimeout"
+const defaultBytesFormatKey = "defaultBytesFormat"
 
 const confirmOptionMessage = "automatically confirm the operation"
 const timeoutMessage = "timeout in seconds for NS Lookup requests"
@@ -111,6 +112,7 @@ type CoherenceCLIConfig struct {
 	Debug              bool                `json:"debug"`
 	RequestTimeout     int32               `json:"requestTimeout"`
 	IgnoreInvalidCerts bool                `json:"ignoreInvalidCerts"`
+	DefaultBytesFormat string              `json:"defaultBytesFormat"`
 }
 
 // ClusterConnection describes an individual connection to a cluster
@@ -390,6 +392,7 @@ func Initialize(command *cobra.Command) *cobra.Command {
 	getCmd.AddCommand(getManagementCmd)
 	getCmd.AddCommand(getFederationCmd)
 	getCmd.AddCommand(getTracingCmd)
+	getCmd.AddCommand(getBytesFormatCmd)
 
 	// set command
 	command.AddCommand(setCmd)
@@ -402,10 +405,12 @@ func Initialize(command *cobra.Command) *cobra.Command {
 	setCmd.AddCommand(setManagementCmd)
 	setCmd.AddCommand(setServiceCmd)
 	setCmd.AddCommand(setReporterCmd)
+	setCmd.AddCommand(setBytesFormatCmd)
 
 	// clear
 	command.AddCommand(clearCmd)
 	clearCmd.AddCommand(clearContextCmd)
+	clearCmd.AddCommand(clearBytesFormatCmd)
 
 	// add
 	command.AddCommand(addCmd)
