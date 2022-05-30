@@ -451,6 +451,9 @@ func getFormattingFunction() func(bytesValue int64) string {
 	if gbFormat {
 		return formatGBOnly
 	}
+	if bFormat {
+		return formatBytesOnly
+	}
 
 	// then, check for default bytes format in config if none was set
 	if Config.DefaultBytesFormat == bytesFormatK {
