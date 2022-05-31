@@ -122,7 +122,7 @@ Journal details for the cluster.`,
 // describeElasticDataCmd represents the describe elastic-data command
 var describeElasticDataCmd = &cobra.Command{
 	Use:   "elastic-data {FlashJournalRM|RamJournalRM}",
-	Short: "describe a flash our ram journal",
+	Short: "describe a flash or ram journal",
 	Long: `The 'describe elastic-data' command shows information related to a specific journal type.
 The allowable values are RamJournalRM or FlashJournalRM.`,
 	Args: func(cmd *cobra.Command, args []string) error {

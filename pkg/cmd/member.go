@@ -448,7 +448,7 @@ by using the -r flag. You can specify a tracingRatio of -1 to turn off tracing.`
 // getTracingCmd represents the get tracing command
 var getTracingCmd = &cobra.Command{
 	Use:   "tracing",
-	Short: "displays tracing for all members",
+	Short: "display tracing for all members",
 	Long:  `The 'get tracing' command displays tracing status for all members.`,
 	Args:  cobra.ExactArgs(0),
 	RunE: func(cmd *cobra.Command, args []string) error {
