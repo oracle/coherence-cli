@@ -121,8 +121,12 @@ func TestDebugCommands(t *testing.T) {
 
 // TestIgnoreCertsCommands tests the get and set ignore-certs commands
 func TestIgnoreCertsCommands(t *testing.T) {
-	cliCmd := Initialize(nil)
-	g := NewGomegaWithT(t)
+
+	var (
+		cliCmd      = Initialize(nil)
+		g           = NewGomegaWithT(t)
+		ignoreCerts = "ignore-certs"
+	)
 
 	file, err := test_utils.CreateNewConfigYaml("config.yaml")
 	if err != nil {
@@ -134,18 +138,18 @@ func TestIgnoreCertsCommands(t *testing.T) {
 	})
 
 	// get the default value
-	test_utils.EnsureCommandOutputEquals(g, t, cliCmd, getIgnoreCertsMsg+"false\n", configOption, file, "get", "ignore-certs")
+	test_utils.EnsureCommandOutputEquals(g, t, cliCmd, getIgnoreCertsMsg+"false\n", configOption, file, "get", ignoreCerts)
 
 	// set the ignore-certs to true
-	test_utils.EnsureCommandOutputEquals(g, t, cliCmd, setIgnoreCertsMsg+"true\n", configOption, file, "set", "ignore-certs", "true")
+	test_utils.EnsureCommandOutputEquals(g, t, cliCmd, setIgnoreCertsMsg+"true\n", configOption, file, "set", ignoreCerts, "true")
 
-	test_utils.EnsureCommandOutputEquals(g, t, cliCmd, getIgnoreCertsMsg+"true\n", configOption, file, "get", "ignore-certs")
+	test_utils.EnsureCommandOutputEquals(g, t, cliCmd, getIgnoreCertsMsg+"true\n", configOption, file, "get", ignoreCerts)
 
 	// set the ignore-certs to false
-	test_utils.EnsureCommandOutputEquals(g, t, cliCmd, setIgnoreCertsMsg+"false\n", configOption, file, "set", "ignore-certs", "false")
+	test_utils.EnsureCommandOutputEquals(g, t, cliCmd, setIgnoreCertsMsg+"false\n", configOption, file, "set", ignoreCerts, "false")
 
 	// set the ignore-certs to invalid value
-	test_utils.EnsureCommandErrorContains(g, t, cliCmd, setIgnoreCertsError, configOption, file, "set", "ignore-certs", "dont-know")
+	test_utils.EnsureCommandErrorContains(g, t, cliCmd, setIgnoreCertsError, configOption, file, "set", ignoreCerts, "dont-know")
 }
 
 // TestGetLogsCommands tests the get logs command
