@@ -1109,17 +1109,18 @@ func FormatPersistenceServices(services []config.ServiceSummary, isSummary bool)
 	var (
 		averageAverageLatency float64
 		totalActiveSpaceUsed  int64
+		totalBackupSpaceUsed  int64
 		header                string
 	)
 
 	if isSummary {
-		alignment = []string{L, R, L, R, R, R, R, L}
+		alignment = []string{L, R, L, R, R, R, R, R, L}
 		header = getColumns(ServiceNameColumn, "STORAGE COUNT", "PERSISTENCE MODE",
-			"ACTIVE SPACE", "AVG LATENCY", "MAX LATENCY", "SNAPSHOTS", "STATUS")
+			"ACTIVE SPACE", "BACKUP SPACE", "AVG LATENCY", "MAX LATENCY", "SNAPSHOTS", "STATUS")
 	} else {
-		alignment = []string{R, L, R, R, R}
+		alignment = []string{R, L, R, R, R, R}
 		header = getColumns(NodeIDColumn, "PERSISTENCE MODE",
-			"ACTIVE SPACE", "AVG LATENCY", "MAX LATENCY")
+			"ACTIVE SPACE", "BACKUP SPACE", "AVG LATENCY", "MAX LATENCY")
 	}
 
 	stringValues[0] = header
@@ -1141,6 +1142,7 @@ func FormatPersistenceServices(services []config.ServiceSummary, isSummary bool)
 			averageAverageLatency = value.PersistenceLatencyAverage
 		}
 		totalActiveSpaceUsed += value.PersistenceActiveSpaceUsed
+		totalBackupSpaceUsed += value.PersistenceBackupSpaceUsed
 
 		if isSummary {
 			header = getColumns(value.ServiceName, formatSmallInteger(value.StorageEnabledCount))
@@ -1150,6 +1152,7 @@ func FormatPersistenceServices(services []config.ServiceSummary, isSummary bool)
 
 		header = getColumns(header, value.PersistenceMode,
 			formattingFunction(max(0, value.PersistenceActiveSpaceUsed)),
+			formattingFunction(max(0, value.PersistenceBackupSpaceUsed)),
 			formatLatency(float32(averageAverageLatency)),
 			formatLargeInteger(max(value.PersistenceLatencyMax, 0))+"ms")
 
@@ -1161,7 +1164,8 @@ func FormatPersistenceServices(services []config.ServiceSummary, isSummary bool)
 		i++
 	}
 
-	return fmt.Sprintf("Total Active Space Used: %s\n\n", formattingFunction(max(totalActiveSpaceUsed, 0))) +
+	return fmt.Sprintf("Total Active Space Used: %s\n", formattingFunction(max(totalActiveSpaceUsed, 0))) +
+		fmt.Sprintf("Total Backup Space Used: %s\n\n", formattingFunction(max(totalBackupSpaceUsed, 0))) +
 		formatLinesAllStringsWithAlignment(alignment, stringValues)
 }
 

@@ -158,6 +158,7 @@ func DeduplicatePersistenceServices(servicesSummary config.ServicesSummaries) []
 			if foundIndex >= 0 {
 				// update the existing service
 				finalServices[foundIndex].PersistenceActiveSpaceUsed += value.PersistenceActiveSpaceUsed
+				finalServices[foundIndex].PersistenceBackupSpaceUsed += value.PersistenceBackupSpaceUsed
 				finalServices[foundIndex].PersistenceLatencyAverageTotal += value.PersistenceLatencyAverage
 				if value.PersistenceLatencyMax > finalServices[foundIndex].PersistenceLatencyMax {
 					finalServices[foundIndex].PersistenceLatencyMax = value.PersistenceLatencyMax

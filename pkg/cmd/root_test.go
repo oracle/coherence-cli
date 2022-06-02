@@ -404,11 +404,13 @@ func TestDeduplicatePersistenceServices(t *testing.T) {
 	for _, value := range result {
 		if value.ServiceName == "DistributedCache1" {
 			g.Expect(value.PersistenceActiveSpaceUsed).To(Equal(int64(30)))
+			g.Expect(value.PersistenceBackupSpaceUsed).To(Equal(int64(15)))
 			g.Expect(value.PersistenceLatencyAverageTotal).To(Equal(1.0))
 			g.Expect(value.PersistenceLatencyMax).To(Equal(int64(3)))
 		} else {
 			// federated
 			g.Expect(value.PersistenceActiveSpaceUsed).To(Equal(int64(10)))
+			g.Expect(value.PersistenceBackupSpaceUsed).To(Equal(int64(5)))
 			g.Expect(value.PersistenceLatencyAverageTotal).To(Equal(1.0))
 			g.Expect(value.PersistenceLatencyMax).To(Equal(int64(1)))
 		}
@@ -431,6 +433,7 @@ func generateServiceSummary(serviceName, serviceType string, nodes int) []config
 			MemberCount:                    int32(nodes),
 			StorageEnabled:                 true,
 			PersistenceActiveSpaceUsed:     10,
+			PersistenceBackupSpaceUsed:     5,
 			PersistenceLatencyAverageTotal: 1.0,
 			PersistenceLatencyMax:          int64(i),
 		})

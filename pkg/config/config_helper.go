@@ -154,6 +154,7 @@ type ServiceSummary struct {
 	// persistence related
 	PersistenceMode                   string  `json:"persistenceMode"`
 	PersistenceActiveSpaceUsed        int64   `json:"persistenceActiveSpaceUsed"`
+	PersistenceBackupSpaceUsed        int64   `json:"persistenceBackupSpaceUsed"`
 	PersistenceLatencyMax             int64   `json:"persistenceLatencyMax"`
 	PersistenceLatencyAverage         float64 `json:"persistenceLatencyAverage"`
 	PersistenceSnapshotSpaceAvailable int64   `json:"persistenceSnapshotSpaceAvailable"`
