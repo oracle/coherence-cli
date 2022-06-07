@@ -27,7 +27,6 @@ var getExecutorsCmd = &cobra.Command{
 	Args:  cobra.ExactArgs(0),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var (
-			executors       = config.Executors{}
 			dataFetcher     fetcher.Fetcher
 			executorsResult []byte
 		)
@@ -38,9 +37,7 @@ var getExecutorsCmd = &cobra.Command{
 		}
 
 		for {
-			if watchEnabled {
-				cmd.Println("\n" + time.Now().String())
-			}
+			var executors config.Executors
 
 			executors, err = getExecutorDetails(dataFetcher, OutputFormat == constants.TABLE)
 			if err != nil {
@@ -70,6 +67,10 @@ var getExecutorsCmd = &cobra.Command{
 					cmd.Println(string(executorsResult))
 				}
 			} else {
+				if watchEnabled {
+					cmd.Println("\n" + time.Now().String())
+				}
+
 				cmd.Println(FormatCurrentCluster(connection))
 				cmd.Print(FormatExecutors(executors.Executors, true))
 			}

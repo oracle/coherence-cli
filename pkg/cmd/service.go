@@ -51,11 +51,10 @@ can also specify '-o wide' to display addition information.`,
 	Args: cobra.ExactArgs(0),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var (
-			servicesSummary = config.ServicesSummaries{}
-			err             error
-			statusHAValues  []string
-			dataFetcher     fetcher.Fetcher
-			connection      string
+			err            error
+			statusHAValues []string
+			dataFetcher    fetcher.Fetcher
+			connection     string
 		)
 
 		if statusHAType != "none" {
@@ -80,9 +79,8 @@ can also specify '-o wide' to display addition information.`,
 		startTime := time.Now()
 
 		for {
-			if watchEnabled {
-				cmd.Println("\n" + time.Now().String())
-			}
+			var servicesSummary = config.ServicesSummaries{}
+
 			servicesResult, err := dataFetcher.GetServiceDetailsJSON()
 			if err != nil {
 				return err
@@ -97,6 +95,10 @@ can also specify '-o wide' to display addition information.`,
 			} else if OutputFormat == constants.JSON {
 				cmd.Println(string(servicesResult))
 			} else {
+				if watchEnabled {
+					cmd.Println("\n" + time.Now().String())
+				}
+
 				cmd.Println(FormatCurrentCluster(connection))
 				err = json.Unmarshal(servicesResult, &servicesSummary)
 				if err != nil {

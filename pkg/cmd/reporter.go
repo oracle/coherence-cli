@@ -41,7 +41,6 @@ var getReportersCmd = &cobra.Command{
 	Args:  cobra.ExactArgs(0),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var (
-			reporters   = config.Reporters{}
 			dataFetcher fetcher.Fetcher
 			connection  string
 			err         error
@@ -53,9 +52,7 @@ var getReportersCmd = &cobra.Command{
 		}
 
 		for {
-			if watchEnabled {
-				cmd.Println("\n" + time.Now().String())
-			}
+			var reporters = config.Reporters{}
 
 			reportersResult, err := dataFetcher.GetReportersJSON()
 			if err != nil {
@@ -71,6 +68,10 @@ var getReportersCmd = &cobra.Command{
 			} else if OutputFormat == constants.JSON {
 				cmd.Println(string(reportersResult))
 			} else {
+				if watchEnabled {
+					cmd.Println("\n" + time.Now().String())
+				}
+
 				cmd.Println(FormatCurrentCluster(connection))
 				err = json.Unmarshal(reportersResult, &reporters)
 				if err != nil {

@@ -59,8 +59,6 @@ can specify '-o wide' to display addition information.`,
 	Args: cobra.ExactArgs(0),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var (
-			members       = config.Members{}
-			storage       = config.StorageDetails{}
 			dataFetcher   fetcher.Fetcher
 			connection    string
 			result        string
@@ -75,9 +73,10 @@ can specify '-o wide' to display addition information.`,
 		}
 
 		for {
-			if watchEnabled {
-				cmd.Println("\n" + time.Now().String())
-			}
+			var (
+				members = config.Members{}
+				storage = config.StorageDetails{}
+			)
 
 			membersResult, err = dataFetcher.GetMemberDetailsJSON(OutputFormat != constants.TABLE && OutputFormat != constants.WIDE)
 			if err != nil {
@@ -98,6 +97,10 @@ can specify '-o wide' to display addition information.`,
 			} else if OutputFormat == constants.JSON {
 				cmd.Println(string(membersResult))
 			} else {
+				if watchEnabled {
+					cmd.Println("\n" + time.Now().String())
+				}
+
 				cmd.Println(FormatCurrentCluster(connection))
 				err = json.Unmarshal(membersResult, &members)
 				if err != nil {

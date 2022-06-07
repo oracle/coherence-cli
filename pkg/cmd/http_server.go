@@ -25,13 +25,15 @@ var getHTTPProxiesCmd = &cobra.Command{
 		var (
 			err         error
 			dataFetcher fetcher.Fetcher
+			connection  string
 		)
-		_, dataFetcher, err = GetConnectionAndDataFetcher()
+
+		connection, dataFetcher, err = GetConnectionAndDataFetcher()
 		if err != nil {
 			return err
 		}
 
-		details, err := returnGetProxiesDetails(cmd, "http", dataFetcher)
+		details, err := returnGetProxiesDetails(cmd, "http", dataFetcher, connection)
 		if err != nil {
 			return err
 		}

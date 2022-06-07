@@ -29,14 +29,15 @@ servers for a cluster. You can specify '-o wide' to display addition information
 		var (
 			err         error
 			dataFetcher fetcher.Fetcher
+			connection  string
 		)
 
-		_, dataFetcher, err = GetConnectionAndDataFetcher()
+		connection, dataFetcher, err = GetConnectionAndDataFetcher()
 		if err != nil {
 			return err
 		}
 
-		details, err := returnGetProxiesDetails(cmd, "tcp", dataFetcher)
+		details, err := returnGetProxiesDetails(cmd, "tcp", dataFetcher, connection)
 		if err != nil {
 			return err
 		}
@@ -186,7 +187,6 @@ func displayProxyDetails(cmd *cobra.Command, dataFetcher fetcher.Fetcher, connec
 		return nil
 	}
 
-	cmd.Print(FormatCurrentCluster(connection))
 	cmd.Print("\n" + details + "\n")
 	cmd.Print("---------------------" + header + "\n")
 	value, err := FormatJSONForDescribe(serviceResult, true, "Name", "Type")
@@ -198,7 +198,7 @@ func displayProxyDetails(cmd *cobra.Command, dataFetcher fetcher.Fetcher, connec
 
 	cmd.Print(member + "\n")
 	cmd.Print("--------------------" + header + "\n")
-	value, err = returnGetProxiesDetails(cmd, protocol, dataFetcher)
+	value, err = returnGetProxiesDetails(cmd, protocol, dataFetcher, connection)
 	if err != nil {
 		return err
 	}
@@ -208,14 +208,11 @@ func displayProxyDetails(cmd *cobra.Command, dataFetcher fetcher.Fetcher, connec
 	return nil
 }
 
-func returnGetProxiesDetails(cmd *cobra.Command, protocol string, dataFetcher fetcher.Fetcher) (string, error) {
-	var proxiesSummary = config.ProxiesSummary{}
+func returnGetProxiesDetails(cmd *cobra.Command, protocol string, dataFetcher fetcher.Fetcher, connection string) (string, error) {
 	var sb strings.Builder
-
 	for {
-		if watchEnabled {
-			sb.WriteString("\n" + time.Now().String() + "\n")
-		}
+		var proxiesSummary = config.ProxiesSummary{}
+		sb = strings.Builder{}
 
 		proxyResults, err := dataFetcher.GetProxySummaryJSON()
 		if err != nil {
@@ -235,6 +232,11 @@ func returnGetProxiesDetails(cmd *cobra.Command, protocol string, dataFetcher fe
 		} else if OutputFormat == constants.JSON {
 			sb.WriteString(string(proxyResults))
 		} else {
+			if watchEnabled {
+				sb.WriteString("\n" + time.Now().String() + "\n")
+			}
+			sb.WriteString(FormatCurrentCluster(connection))
+
 			err = json.Unmarshal(proxyResults, &proxiesSummary)
 			if err != nil {
 				return "", utils.GetError("unable to unmarshall proxy result", err)

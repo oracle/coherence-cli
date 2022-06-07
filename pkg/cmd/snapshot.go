@@ -64,7 +64,6 @@ local snapshots are shown, but you can use the -a option to show archived snapsh
 			connection  string
 			data        []byte
 			dataFetcher fetcher.Fetcher
-			snapshots   = make([]config.Snapshots, 0)
 			wg          sync.WaitGroup
 			errorSink   = createErrorSink()
 			m           = sync.RWMutex{}
@@ -89,87 +88,91 @@ local snapshots are shown, but you can use the -a option to show archived snapsh
 			servicesResult = []string{serviceName}
 		}
 
-		// retrieve the snapshot list concurrently for each service
-		wg.Add(len(servicesResult))
-		for _, service := range servicesResult {
-			go func(serviceNameValue string) {
-				defer wg.Done()
-				var (
-					snapshotList []string
-					coordData    []byte
-					coordinator  = config.PersistenceCoordinator{}
-				)
-				newSnapshots := make([]string, 0)
-				if ArchivedSnapshots {
-					snapshotList, err = GetArchivedSnapshots(dataFetcher, serviceNameValue)
-					if err != nil {
-						errorSink.AppendError(err)
-						return
-					}
-					newSnapshots = append(newSnapshots, snapshotList...)
-				} else {
-					coordData, err = dataFetcher.GetPersistenceCoordinator(serviceNameValue)
-					if err != nil {
-						errorSink.AppendError(err)
-						return
+		for {
+			var snapshots = make([]config.Snapshots, 0)
+
+			// retrieve the snapshot list concurrently for each service
+			wg.Add(len(servicesResult))
+			for _, service := range servicesResult {
+				go func(serviceNameValue string) {
+					defer wg.Done()
+					var (
+						snapshotList []string
+						coordData    []byte
+						coordinator  = config.PersistenceCoordinator{}
+					)
+					newSnapshots := make([]string, 0)
+					if ArchivedSnapshots {
+						snapshotList, err = GetArchivedSnapshots(dataFetcher, serviceNameValue)
+						if err != nil {
+							errorSink.AppendError(err)
+							return
+						}
+						newSnapshots = append(newSnapshots, snapshotList...)
+					} else {
+						coordData, err = dataFetcher.GetPersistenceCoordinator(serviceNameValue)
+						if err != nil {
+							errorSink.AppendError(err)
+							return
+						}
+
+						err = json.Unmarshal(coordData, &coordinator)
+						if err != nil {
+							errorSink.AppendError(err)
+							return
+						}
+
+						newSnapshots = append(newSnapshots, coordinator.Snapshots...)
 					}
 
-					err = json.Unmarshal(coordData, &coordinator)
-					if err != nil {
-						errorSink.AppendError(err)
-						return
-					}
+					// protect the slice for update
+					m.Lock()
+					defer m.Unlock()
+					snapshots = append(snapshots, config.Snapshots{ServiceName: serviceNameValue, Snapshots: newSnapshots})
+				}(service)
+			}
 
-					newSnapshots = append(newSnapshots, coordinator.Snapshots...)
+			// wait for the results
+			wg.Wait()
+			errorList := errorSink.GetErrors()
+
+			if len(errorList) > 0 {
+				return utils.GetErrors(errorList)
+			}
+
+			if strings.Contains(OutputFormat, constants.JSONPATH) {
+				data, err = json.Marshal(snapshots)
+				if err != nil {
+					return err
 				}
-
-				// protect the slice for update
-				m.Lock()
-				defer m.Unlock()
-				snapshots = append(snapshots, config.Snapshots{ServiceName: serviceNameValue, Snapshots: newSnapshots})
-			}(service)
-		}
-
-		// wait for the results
-		wg.Wait()
-		errorList := errorSink.GetErrors()
-
-		if len(errorList) > 0 {
-			return utils.GetErrors(errorList)
-		}
-
-		if strings.Contains(OutputFormat, constants.JSONPATH) {
-			data, err = json.Marshal(snapshots)
-			if err != nil {
-				return err
-			}
-			result, err := utils.GetJSONPathResults(data, OutputFormat)
-			if err != nil {
-				return err
-			}
-			cmd.Println(result)
-		} else if OutputFormat == constants.JSON {
-			data, err = json.Marshal(snapshots)
-			if err != nil {
-				return err
-			}
-			cmd.Println(string(data))
-		} else {
-			cmd.Println(FormatCurrentCluster(connection))
-			for {
+				result, err := utils.GetJSONPathResults(data, OutputFormat)
+				if err != nil {
+					return err
+				}
+				cmd.Println(result)
+			} else if OutputFormat == constants.JSON {
+				data, err = json.Marshal(snapshots)
+				if err != nil {
+					return err
+				}
+				cmd.Println(string(data))
+			} else {
 				if watchEnabled {
 					cmd.Println("\n" + time.Now().String())
 				}
 
+				cmd.Println(FormatCurrentCluster(connection))
+
 				cmd.Println(FormatSnapshots(snapshots, ArchivedSnapshots))
 
-				// check to see if we should exit if we are not watching
-				if !watchEnabled {
-					break
-				}
-				// we are watching so sleep and then repeat until CTRL-C
-				time.Sleep(time.Duration(watchDelay) * time.Second)
 			}
+
+			// check to see if we should exit if we are not watching
+			if !watchEnabled {
+				break
+			}
+			// we are watching so sleep and then repeat until CTRL-C
+			time.Sleep(time.Duration(watchDelay) * time.Second)
 		}
 
 		return nil

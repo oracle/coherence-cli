@@ -26,10 +26,9 @@ var getPersistenceCmd = &cobra.Command{
 	Args:  cobra.ExactArgs(0),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var (
-			servicesSummary = config.ServicesSummaries{}
-			err             error
-			dataFetcher     fetcher.Fetcher
-			connection      string
+			err         error
+			dataFetcher fetcher.Fetcher
+			connection  string
 		)
 
 		connection, dataFetcher, err = GetConnectionAndDataFetcher()
@@ -38,9 +37,8 @@ var getPersistenceCmd = &cobra.Command{
 		}
 
 		for {
-			if watchEnabled {
-				cmd.Println("\n" + time.Now().String())
-			}
+			var servicesSummary = config.ServicesSummaries{}
+
 			servicesResult, err := dataFetcher.GetServiceDetailsJSON()
 
 			if err != nil {
@@ -55,6 +53,10 @@ var getPersistenceCmd = &cobra.Command{
 			} else if OutputFormat == constants.JSON {
 				cmd.Println(string(servicesResult))
 			} else {
+				if watchEnabled {
+					cmd.Println("\n" + time.Now().String())
+				}
+
 				cmd.Println(FormatCurrentCluster(connection))
 				err = json.Unmarshal(servicesResult, &servicesSummary)
 				if err != nil {

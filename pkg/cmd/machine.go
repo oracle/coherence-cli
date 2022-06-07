@@ -28,7 +28,6 @@ var getMachinesCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var (
 			dataFetcher fetcher.Fetcher
-			machines    []config.Machine
 			jsonData    []byte
 			connection  string
 			err         error
@@ -40,9 +39,7 @@ var getMachinesCmd = &cobra.Command{
 		}
 
 		for {
-			if watchEnabled {
-				cmd.Println("\n" + time.Now().String())
-			}
+			var machines []config.Machine
 
 			// create a list of the unique machine names and one node from the machine to query for details
 			machinesMap, err := GetMachineList(dataFetcher)
@@ -66,6 +63,10 @@ var getMachinesCmd = &cobra.Command{
 			} else if OutputFormat == constants.JSON {
 				cmd.Println(string(jsonData))
 			} else {
+				if watchEnabled {
+					cmd.Println("\n" + time.Now().String())
+				}
+
 				cmd.Println(FormatCurrentCluster(connection))
 
 				machines, err = getMachines(machinesMap, dataFetcher)

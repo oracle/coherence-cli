@@ -47,13 +47,11 @@ can also specify '-o wide' to display addition information.`,
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var (
-			err                        error
-			dataFetcher                fetcher.Fetcher
-			connection                 string
-			federatedServices          []string
-			finalSummariesDestinations []config.FederationSummary
-			finalSummariesOrigins      []config.FederationSummary
-			target                     string
+			err               error
+			dataFetcher       fetcher.Fetcher
+			connection        string
+			federatedServices []string
+			target            string
 		)
 
 		if args[0] == destinations {
@@ -83,9 +81,10 @@ can also specify '-o wide' to display addition information.`,
 		}
 
 		for {
-			if watchEnabled {
-				cmd.Println("\n" + time.Now().String())
-			}
+			var (
+				finalSummariesDestinations []config.FederationSummary
+				finalSummariesOrigins      []config.FederationSummary
+			)
 
 			if target == outgoing || target == "all" {
 				finalSummariesDestinations, err = getFederationSummaries(federatedServices, outgoing, dataFetcher)
@@ -119,6 +118,10 @@ can also specify '-o wide' to display addition information.`,
 					cmd.Println(string(finalData))
 				}
 			} else {
+				if watchEnabled {
+					cmd.Println("\n" + time.Now().String())
+				}
+
 				cmd.Println(FormatCurrentCluster(connection))
 
 				if len(finalSummariesDestinations) > 0 {

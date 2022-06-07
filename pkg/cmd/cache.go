@@ -41,10 +41,9 @@ can specify '-o wide' to display addition information.`,
 	Args: cobra.ExactArgs(0),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var (
-			err             error
-			servicesSummary = config.ServicesSummaries{}
-			connection      string
-			dataFetcher     fetcher.Fetcher
+			err         error
+			connection  string
+			dataFetcher fetcher.Fetcher
 		)
 
 		connection, dataFetcher, err = GetConnectionAndDataFetcher()
@@ -52,32 +51,35 @@ can specify '-o wide' to display addition information.`,
 			return err
 		}
 
-		// get the services
-		servicesResult, err := dataFetcher.GetServiceDetailsJSON()
-		if err != nil {
-			return err
-		}
+		for {
+			var servicesSummary = config.ServicesSummaries{}
 
-		if strings.Contains(OutputFormat, constants.JSONPATH) || OutputFormat == constants.JSON {
-			data, err := dataFetcher.GetCachesSummaryJSONAllServices()
+			// get the services
+			servicesResult, err := dataFetcher.GetServiceDetailsJSON()
 			if err != nil {
 				return err
 			}
-			if strings.Contains(OutputFormat, constants.JSONPATH) {
-				result, err := utils.GetJSONPathResults(data, OutputFormat)
+
+			if strings.Contains(OutputFormat, constants.JSONPATH) || OutputFormat == constants.JSON {
+				data, err := dataFetcher.GetCachesSummaryJSONAllServices()
 				if err != nil {
 					return err
 				}
-				cmd.Println(result)
+				if strings.Contains(OutputFormat, constants.JSONPATH) {
+					result, err := utils.GetJSONPathResults(data, OutputFormat)
+					if err != nil {
+						return err
+					}
+					cmd.Println(result)
+				} else {
+					cmd.Println(string(data))
+				}
 			} else {
-				cmd.Println(string(data))
-			}
-		} else {
-			cmd.Println(FormatCurrentCluster(connection))
-			for {
 				if watchEnabled {
 					cmd.Println("\n" + time.Now().String())
 				}
+
+				cmd.Println(FormatCurrentCluster(connection))
 
 				err = json.Unmarshal(servicesResult, &servicesSummary)
 				if err != nil {
@@ -102,13 +104,14 @@ can specify '-o wide' to display addition information.`,
 				}
 				cmd.Println(value)
 
-				// check to see if we should exit if we are not watching
-				if !watchEnabled {
-					break
-				}
-				// we are watching so sleep and then repeat until CTRL-C
-				time.Sleep(time.Duration(watchDelay) * time.Second)
 			}
+
+			// check to see if we should exit if we are not watching
+			if !watchEnabled {
+				break
+			}
+			// we are watching so sleep and then repeat until CTRL-C
+			time.Sleep(time.Duration(watchDelay) * time.Second)
 		}
 
 		return nil

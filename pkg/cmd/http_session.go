@@ -144,13 +144,11 @@ var describeHTTPSessionCmd = &cobra.Command{
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var (
-			found         bool
-			httpSessions  = config.HTTPSessionSummaries{}
-			finalSessions = make([]config.HTTPSessionSummary, 0)
-			err           error
-			dataFetcher   fetcher.Fetcher
-			firstMember   []byte
-			connection    string
+			found       bool
+			err         error
+			dataFetcher fetcher.Fetcher
+			firstMember []byte
+			connection  string
 		)
 
 		applicationID := args[0]
@@ -160,57 +158,74 @@ var describeHTTPSessionCmd = &cobra.Command{
 			return err
 		}
 
-		// check the application id exists
-		results, err := dataFetcher.GetHTTPSessionDetailsJSON()
-		if err != nil {
-			return err
-		}
+		for {
+			var (
+				httpSessions  = config.HTTPSessionSummaries{}
+				finalSessions = make([]config.HTTPSessionSummary, 0)
+			)
 
-		err = json.Unmarshal(results, &httpSessions)
-		if err != nil {
-			return utils.GetError("unable to decode Coherence*Web details", err)
-		}
+			// check the application id exists
+			results, err := dataFetcher.GetHTTPSessionDetailsJSON()
+			if err != nil {
+				return err
+			}
 
-		for _, value := range httpSessions.HTTPSessions {
-			if value.AppID == applicationID {
-				found = true
-				if len(firstMember) == 0 {
-					// save the first member to format
-					firstMember, err = json.Marshal(value)
-					if err != nil {
-						return err
+			err = json.Unmarshal(results, &httpSessions)
+			if err != nil {
+				return utils.GetError("unable to decode Coherence*Web details", err)
+			}
+
+			for _, value := range httpSessions.HTTPSessions {
+				if value.AppID == applicationID {
+					found = true
+					if len(firstMember) == 0 {
+						// save the first member to format
+						firstMember, err = json.Marshal(value)
+						if err != nil {
+							return err
+						}
 					}
+					finalSessions = append(finalSessions, value)
 				}
-				finalSessions = append(finalSessions, value)
 			}
-		}
 
-		if !found {
-			return fmt.Errorf("unable to find application id %s", applicationID)
-		}
-
-		if strings.Contains(OutputFormat, constants.JSONPATH) {
-			jsonPathResult, err := utils.GetJSONPathResults(results, OutputFormat)
-			if err != nil {
-				return err
+			if !found {
+				return fmt.Errorf("unable to find application id %s", applicationID)
 			}
-			cmd.Println(jsonPathResult)
-			return nil
-		} else if OutputFormat == constants.JSON {
-			cmd.Println(string(results))
-		} else {
-			cmd.Println(FormatCurrentCluster(connection))
-			cmd.Println("HTTP SESSION DETAILS")
-			cmd.Println("--------------------")
-			value, err := FormatJSONForDescribe(firstMember, false, "App Id", "Type",
-				"Session Cache Name", "Overflow Cache Name")
-			if err != nil {
-				return err
-			}
-			cmd.Println(value)
-			cmd.Print(FormatHTTPSessions(finalSessions, false))
-		}
 
+			if strings.Contains(OutputFormat, constants.JSONPATH) {
+				jsonPathResult, err := utils.GetJSONPathResults(results, OutputFormat)
+				if err != nil {
+					return err
+				}
+				cmd.Println(jsonPathResult)
+				return nil
+			} else if OutputFormat == constants.JSON {
+				cmd.Println(string(results))
+			} else {
+				if watchEnabled {
+					cmd.Println("\n" + time.Now().String())
+				}
+
+				cmd.Println(FormatCurrentCluster(connection))
+				cmd.Println("HTTP SESSION DETAILS")
+				cmd.Println("--------------------")
+				value, err := FormatJSONForDescribe(firstMember, false, "App Id", "Type",
+					"Session Cache Name", "Overflow Cache Name")
+				if err != nil {
+					return err
+				}
+				cmd.Println(value)
+				cmd.Print(FormatHTTPSessions(finalSessions, false))
+			}
+
+			// check to see if we should exit if we are not watching
+			if !watchEnabled {
+				break
+			}
+			// we are watching services so sleep and then repeat until CTRL-C
+			time.Sleep(time.Duration(watchDelay) * time.Second)
+		}
 		return nil
 	},
 }
