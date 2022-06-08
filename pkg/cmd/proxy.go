@@ -235,7 +235,8 @@ func returnGetProxiesDetails(cmd *cobra.Command, protocol string, dataFetcher fe
 			if watchEnabled {
 				sb.WriteString("\n" + time.Now().String() + "\n")
 			}
-			sb.WriteString(FormatCurrentCluster(connection))
+
+			sb.WriteString(FormatCurrentCluster(connection) + "\n")
 
 			err = json.Unmarshal(proxyResults, &proxiesSummary)
 			if err != nil {
