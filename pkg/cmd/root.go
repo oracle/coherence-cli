@@ -395,6 +395,7 @@ func Initialize(command *cobra.Command) *cobra.Command {
 	getCmd.AddCommand(getFederationCmd)
 	getCmd.AddCommand(getTracingCmd)
 	getCmd.AddCommand(getBytesFormatCmd)
+	getCmd.AddCommand(getHealthCmd)
 
 	// set command
 	command.AddCommand(setCmd)

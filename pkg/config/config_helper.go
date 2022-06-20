@@ -166,6 +166,26 @@ type ServiceSummary struct {
 	Idle                           bool
 }
 
+// HealthSummaries contains and array of HealthSummary
+type HealthSummaries struct {
+	Summaries []HealthSummary `json:"items"`
+}
+
+// HealthSummary contains individual health summary details
+type HealthSummary struct {
+	Type              string `json:"type"`
+	SubType           string `json:"subType"`
+	Name              string `json:"name"`
+	Description       string `json:"description"`
+	NodeID            string `json:"nodeId"`
+	ClassName         string `json:"className"`
+	MemberHealthCheck bool   `json:"memberHealthCheck"`
+	Ready             bool   `json:"ready"`
+	Started           bool   `json:"started"`
+	Live              bool   `json:"live"`
+	Safe              bool   `json:"safe"`
+}
+
 // StatsSummary contains statistics summaries
 type StatsSummary struct {
 	Count   int64   `json:"count"`

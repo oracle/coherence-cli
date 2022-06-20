@@ -23,7 +23,7 @@ There are various commands that allow you to work with and issue Persistence com
 * <<suspend-service, `cohctl suspend service`>> - suspends a specific service in all the members of a cluster
 * <<resume-service, `cohctl resume service`>> - resumes a specific service in all the members of a cluster
 
-See the https://docs.oracle.com/en/middleware/standalone/coherence/14.1.1.0/administer/persisting-caches.html[Coherence Documentation] for
+See the {commercial-docs-base-url}/administer/persisting-caches.html[Coherence Documentation] for
 more information on Persistence.
 
 [#get-persistence]
@@ -181,7 +181,8 @@ Please use 'cohctl get persistence' to check for idle status to ensure the opera
 
 NOTE: When you issue the archive snapshot command, the snapshots on the separate servers are sent to a
 central location. Coherence provides a directory archiver implementation which will store the archive on a shared
-filesystem available to all members.  You can also create your own archiver implementations. See https://docs.oracle.com/en/middleware/standalone/coherence/14.1.1.0/administer/persisting-caches.html[the Coherence documentation]
+filesystem available to all members.  You can also create your own archiver implementations.
+See {commercial-docs-base-url}/administer/persisting-caches.html[the Coherence documentation]
 for more details.
 
 [#retrieve-snapshot]
@@ -238,7 +239,7 @@ operation completed
 
 === See Also
 
-* https://docs.oracle.com/en/middleware/standalone/coherence/14.1.1.0/administer/persisting-caches.html[Persisting Caches in the Coherence Documentation]
+* {commercial-docs-base-url}/administer/persisting-caches.html[Persisting Caches in the Coherence Documentation]
 * <<docs/reference/20_services.adoc,Services>>
 
 

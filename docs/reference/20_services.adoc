@@ -117,7 +117,7 @@ operation completed
 
 include::../../build/_output/docs-gen/set_service.adoc[tag=text]
 
-See the https://docs.oracle.com/en/middleware/standalone/coherence/14.1.1.0/manage/oracle-coherence-mbeans-reference.html[Service MBean Reference]
+See the {commercial-docs-base-url}/manage/oracle-coherence-mbeans-reference.html[Service MBean Reference]
 for more information on the above attributes.
 
 *Examples*

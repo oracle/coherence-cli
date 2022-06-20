@@ -13,7 +13,7 @@
 This example shows you how to set various attributes for a cache at runtime.  Only the *settable* attributes
 such as the following can be modified: expiryDelay, highUnits, lowUnits, batchFactor, refreshFactor and requeueThreshold.
 
-See the https://docs.oracle.com/en/middleware/standalone/coherence/14.1.1.0/manage/oracle-coherence-mbeans-reference.html#GUID-A443DF50-F151-4E9B-AFC9-DFEDF4B149E7[Cache MBean Reference]
+See the {commercial-docs-base-url}/manage/oracle-coherence-mbeans-reference.html#GUID-A443DF50-F151-4E9B-AFC9-DFEDF4B149E7[Cache MBean Reference]
 for more information on the above attributes.
 
 In the example below, we will set the `expiryDelay` for a cache.
@@ -135,4 +135,4 @@ $ cohctl describe cache test -s PartitionedCache -o jsonpath="$.items[?(@.name =
 
 === See Also
 
-* https://docs.oracle.com/en/middleware/standalone/coherence/14.1.1.0/manage/oracle-coherence-mbeans-reference.html#GUID-A443DF50-F151-4E9B-AFC9-DFEDF4B149E7[Cache MBean Reference]
+* {commercial-docs-base-url}/manage/oracle-coherence-mbeans-reference.html#GUID-A443DF50-F151-4E9B-AFC9-DFEDF4B149E7[Cache MBean Reference]

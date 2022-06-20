@@ -473,16 +473,29 @@ func (h HTTPFetcher) GetPersistenceCoordinator(serviceName string) ([]byte, erro
 
 // GetMemberOSJson returns the OS information for the member
 func (h HTTPFetcher) GetMemberOSJson(memberID string) ([]byte, error) {
-	result, err := httpGetRequest(h, membersPath+memberID+"/platform/operatingSystem?links=")
+	result, err := httpGetRequest(h, membersPath+memberID+"/platform/operatingSystem"+links)
 	if err != nil && !strings.Contains(err.Error(), "404") {
 		return constants.EmptyByte, utils.GetError("cannot get Member OS for member "+memberID, err)
 	}
 	return result, nil
 }
 
+// GetMembersHealth returns the health for the members in the cluster
+func (h HTTPFetcher) GetMembersHealth() ([]byte, error) {
+	result, err := httpGetRequest(h, "/health"+membersPath+links)
+	if err != nil && !strings.Contains(err.Error(), "404") {
+		return constants.EmptyByte, utils.GetError("cannot get member health information", err)
+	}
+	if len(result) == 0 {
+		// no health
+		return constants.EmptyByte, nil
+	}
+	return result, nil
+}
+
 // GetReportersJSON returns reporters in raw json
 func (h HTTPFetcher) GetReportersJSON() ([]byte, error) {
-	result, err := httpGetRequest(h, "/reporters?links=")
+	result, err := httpGetRequest(h, "/reporters"+links)
 	if err != nil {
 		return constants.EmptyByte, utils.GetError("cannot get reporters:", err)
 	}

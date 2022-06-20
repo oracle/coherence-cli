@@ -31,7 +31,7 @@ In this example we have a cluster called `my-cluster` with the following setup:
 === Run the example
 
 In this example we will carry out a rolling restart of our cluster to simulate applying an application code patch to
-our cluster. For more details on rolling restarts, please see https://docs.oracle.com/en/middleware/standalone/coherence/14.1.1.0/develop-applications/starting-and-stopping-cluster-members.html[Starting and Stopping Cluster Members] in the Coherence documentation.
+our cluster. For more details on rolling restarts, please see {commercial-docs-base-url}/develop-applications/starting-and-stopping-cluster-members.html[Starting and Stopping Cluster Members] in the Coherence documentation.
 
 The process will be:
 
@@ -159,5 +159,5 @@ $ cohctl get services -t DistributedCache -w -a MACHINE-SAFE
 == See Also
 
 * <<docs/reference/20_services.adoc,Services>>
-* https://docs.oracle.com/en/middleware/standalone/coherence/14.1.1.0/develop-applications/starting-and-stopping-cluster-members.html[Starting and Stopping Cluster Members]
-* https://docs.oracle.com/en/middleware/standalone/coherence/14.1.1.0/manage/oracle-coherence-mbeans-reference.html[Coherence MBean Reference]
+* {commercial-docs-base-url}/develop-applications/starting-and-stopping-cluster-members.html[Starting and Stopping Cluster Members]
+* {commercial-docs-base-url}/manage/oracle-coherence-mbeans-reference.html[Coherence MBean Reference]

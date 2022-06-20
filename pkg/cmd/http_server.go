@@ -15,7 +15,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// var getHTTPProxiesCmd represents the getHTTPProxiesCmd command
+// getHTTPProxiesCmd represents the get http-servers command
 var getHTTPProxiesCmd = &cobra.Command{
 	Use:   "http-servers",
 	Short: "display http proxy services for a cluster",

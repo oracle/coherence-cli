@@ -141,6 +141,9 @@ create_doc $DOCS_DIR/describe_executor "${COHCTL} describe executor --help"
 create_doc $DOCS_DIR/get_http_sessions "${COHCTL} get http-sessions --help"
 create_doc $DOCS_DIR/describe_http_session "${COHCTL} describe http-session --help"
 
+# Health
+create_doc $DOCS_DIR/get_health "${COHCTL} get health --help"
+
 # Debug
 create_doc $DOCS_DIR/set_debug "${COHCTL} set debug --help"
 create_doc $DOCS_DIR/get_debug "${COHCTL} get debug --help"

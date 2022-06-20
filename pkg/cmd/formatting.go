@@ -693,6 +693,60 @@ func FormatTracing(members []config.Member) string {
 	return formatLinesAllStringsWithAlignment([]string{R, L, R, R, L, L, L, R}, stringValues)
 }
 
+// FormatMemberHealth returns member health  in a column formatted output
+func FormatMemberHealth(health []config.HealthSummary) string {
+	var (
+		healthCount    = len(health)
+		alignmentWide  = []string{R, L, L, L, L, L, L, L, L, L}
+		alignment      = []string{R, L, L, L, L, L, L, L, L}
+		finalAlignment []string
+	)
+	if healthCount == 0 {
+		return ""
+	}
+
+	if OutputFormat == constants.TABLE {
+		finalAlignment = alignment
+	} else {
+		finalAlignment = alignmentWide
+	}
+
+	var stringValues = make([]string, healthCount+1)
+
+	sort.Slice(health, func(p, q int) bool {
+		nodeID1, _ := strconv.Atoi(health[p].NodeID)
+		nodeID2, _ := strconv.Atoi(health[q].NodeID)
+
+		if nodeID1 == nodeID2 {
+			return strings.Compare(health[p].Name, health[q].Name) > 0
+		}
+		return nodeID1 < nodeID2
+	})
+
+	stringValues[0] = getColumns(NodeIDColumn, "NAME", "SUB TYPE", "STARTED", "LIVE", "READY", "SAFE", "MEMBER HEALTH",
+		"DESCRIPTION")
+
+	if OutputFormat == constants.WIDE {
+		stringValues[0] = getColumns(stringValues[0], "CLASS")
+	}
+
+	for i, value := range health {
+		var nodeID, _ = strconv.Atoi(value.NodeID)
+
+		stringValues[i+1] = getColumns(formatSmallInteger(int32(nodeID)), value.Name, value.SubType,
+			formatBool(value.Started), formatBool(value.Live), formatBool(value.Ready), formatBool(value.Safe),
+			formatBool(value.MemberHealthCheck), value.Description)
+
+		if OutputFormat == constants.WIDE {
+			stringValues[i+1] = getColumns(stringValues[i+1], value.ClassName)
+		}
+
+	}
+
+	return formatLinesAllStringsWithAlignment(finalAlignment, stringValues)
+
+}
+
 // FormatMembers returns the member's information in a column formatted output
 func FormatMembers(members []config.Member, verbose bool, storageMap map[int]bool) string {
 	var (
@@ -1444,6 +1498,10 @@ func formatMBOnly(bytesValue int64) string {
 
 func formatGBOnly(bytesValue int64) string {
 	return printer.Sprintf("%-.1f GB", float64(bytesValue)/1024/1024/1024)
+}
+
+func formatBool(boolValue bool) string {
+	return printer.Sprintf("%v", boolValue)
 }
 
 // getMaxColumnLengths returns an array representing the max lengths of columns

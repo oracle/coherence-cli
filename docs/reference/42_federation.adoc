@@ -21,7 +21,7 @@ There are various commands that allow you to work with and issue Federation comm
 
 NOTE: This is a Coherence Grid Edition feature only and is not available with Community Edition.
 
-See the https://docs.oracle.com/en/middleware/standalone/coherence/14.1.1.0/administer/federating-caches-clusters.html[Coherence Documentation] for
+See the {commercial-docs-base-url}/administer/federating-caches-clusters.html[Coherence Documentation] for
 more information on Federation.
 
 [#get-federation]
@@ -189,7 +189,7 @@ You should use the command `cohctl get federation destinations -o wide` to show 
 
 === See Also
 
-* https://docs.oracle.com/en/middleware/standalone/coherence/14.1.1.0/administer/federating-caches-clusters.html[Federating Caches in the Coherence Documentation]
+* {commercial-docs-base-url}/administer/federating-caches-clusters.html[Federating Caches in the Coherence Documentation]
 * <<docs/reference/20_services.adoc,Services>>
 
 

@@ -143,7 +143,7 @@ Node:2:   SimpleMapIndex: Extractor=.toString(), Ordered=true, Footprint=777KB, 
 
 include::../../build/_output/docs-gen/set_cache.adoc[tag=text]
 
-See the https://docs.oracle.com/en/middleware/standalone/coherence/14.1.1.0/manage/oracle-coherence-mbeans-reference.html[Cache MBean Reference]
+See the {commercial-docs-base-url}/manage/oracle-coherence-mbeans-reference.html[Cache MBean Reference]
 for more information on the above attributes.
 
 *Examples*

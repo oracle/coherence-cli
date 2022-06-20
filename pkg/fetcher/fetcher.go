@@ -139,6 +139,9 @@ type Fetcher interface {
 	// GetMemberOSJson returns the OS information for the member
 	GetMemberOSJson(memberID string) ([]byte, error)
 
+	// GetMembersHealth returns the health for the members in the cluster
+	GetMembersHealth() ([]byte, error)
+
 	// GetManagementJSON returns the management information
 	GetManagementJSON() ([]byte, error)
 

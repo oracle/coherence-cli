@@ -184,6 +184,7 @@ addition information as well as '-v' to displayed additional information.`,
 			reporters                  = config.Reporters{}
 			httpSessions               = config.HTTPSessionSummaries{}
 			executors                  = config.Executors{}
+			healthSummaries            = config.HealthSummaries{}
 			machines                   []config.Machine
 			finalSummariesDestinations []config.FederationSummary
 			finalSummariesOrigins      []config.FederationSummary
@@ -205,13 +206,14 @@ addition information as well as '-v' to displayed additional information.`,
 			executorsResult            []byte
 			machinesData               []byte
 			storageData                []byte
+			healthResult               []byte
 			errorSink                  = createErrorSink()
 			cachesData                 string
 			topicsData                 string
 			jsonPathOrJSON             = strings.Contains(OutputFormat, constants.JSONPATH) || OutputFormat == constants.JSON
 		)
 
-		const waitGroupCount = 11
+		const waitGroupCount = 12
 
 		connection := args[0]
 
@@ -270,6 +272,15 @@ addition information as well as '-v' to displayed additional information.`,
 			defer wg.Done()
 			var err1 error
 			servicesResult, err1 = dataFetcher.GetServiceDetailsJSON()
+			if err1 != nil {
+				errorSink.AppendError(err1)
+			}
+		}()
+
+		go func() {
+			defer wg.Done()
+			var err1 error
+			healthResult, err1 = dataFetcher.GetMembersHealth()
 			if err1 != nil {
 				errorSink.AppendError(err1)
 			}
@@ -397,9 +408,9 @@ addition information as well as '-v' to displayed additional information.`,
 			finalResult, err := utils.CombineByteArraysForJSON(
 				[][]byte{clusterResult, machinesData, membersResult, servicesResult, cachesResult,
 					proxyResults, reportersResult, ramResult, flashResult, http, executorsResult,
-					jsonDataDest, jsonDataOrigins},
+					jsonDataDest, jsonDataOrigins, healthResult},
 				[]string{"cluster", "machines", "members", "services", "caches", "proxies", "reporters", constants.RAMJournal,
-					constants.FlashJournal, "httpServers", "executors", "federationDestinations", "federationOrigins"})
+					constants.FlashJournal, "httpServers", "executors", "federationDestinations", "federationOrigins", "health"})
 			if err != nil {
 				return err
 			}
@@ -454,6 +465,13 @@ addition information as well as '-v' to displayed additional information.`,
 				err = json.Unmarshal(http, &httpSessions)
 				if err != nil {
 					return utils.GetError("unable to decode Coherence*Web details", err)
+				}
+			}
+
+			if len(healthResult) > 0 {
+				err = json.Unmarshal(healthResult, &healthSummaries)
+				if err != nil {
+					return err
 				}
 			}
 
@@ -552,6 +570,12 @@ addition information as well as '-v' to displayed additional information.`,
 					sb.WriteString("\nEXECUTORS\n")
 					sb.WriteString("---------\n")
 					sb.WriteString(FormatExecutors(executors.Executors, true))
+				}
+
+				if len(healthSummaries.Summaries) > 0 {
+					sb.WriteString("\nHEALTH\n")
+					sb.WriteString("------\n")
+					sb.WriteString(FormatMemberHealth(healthSummaries.Summaries))
 				}
 			}
 

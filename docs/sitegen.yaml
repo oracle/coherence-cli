@@ -11,6 +11,7 @@ engine:
       - "asciidoctor-diagram"
     attributes:
       plantumlconfig: "_plantuml-config.txt"
+      commercial-docs-base-url: "https://docs.oracle.com/en/middleware/standalone/coherence/14.1.1.0"
       cli-version: "${cli.version}"
       coherence-version: "${coherence.version}"
 assets:

@@ -127,6 +127,13 @@ Take multiple thread dumps, heap dumps or JFR's across members.
 --
 
 [CARD]
+.Health
+[link=docs/reference/90_health.adoc]
+--
+Display health information.
+--
+
+[CARD]
 .NS Lookup
 [link=docs/reference/45_nslookup.adoc]
 --

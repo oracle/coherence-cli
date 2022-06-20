@@ -19,7 +19,7 @@ This guide is a simple set of steps to get you started with the Coherence CLI.
 
 2. You must have a Coherence cluster running that has Management over REST configured.
 +
-NOTE: See the https://docs.oracle.com/en/middleware/standalone/coherence/14.1.1.0/rest-reference/quick-start.html[Coherence Documentation]
+NOTE: See the {commercial-docs-base-url}/rest-reference/quick-start.html[Coherence Documentation]
 for more information on setting up Management over REST.
 +
 If you do not have a cluster running with Management over REST, you can run the following Docker

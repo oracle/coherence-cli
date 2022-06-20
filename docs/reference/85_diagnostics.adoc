@@ -14,7 +14,7 @@
 There are various commands that allow you to obtain diagnostic output such as
 Java Flight Recordings or JFR's, heap dumps and thread dumps.
 
-* <<get-jfrs, `cohctl get jfrs`>> - displays the JFR's for a cluster
+* <<get-jfrs, `cohctl get jfrs`>> - display the JFR's for a cluster
 * <<start-jfr, `cohctl start jfr`>> - start a JFR for all or selected members
 * <<describe-jfr, `cohctl describe jfr`>> - describe a JFR
 * <<stop-jfr, `cohctl stop jfr`>> - stop a JFR for all or selected members
@@ -358,7 +358,7 @@ NODE ID  ADDRESS      PORT  PROCESS  MEMBER  ROLE                TRACING ENABLED
 === See Also
 
 * <<docs/reference/15_members.adoc,Members>>
-* https://docs.oracle.com/en/middleware/standalone/coherence/14.1.1.0/develop-applications/debugging-coherence.html[Distributed Tracing in Coherence]
+* {commercial-docs-base-url}/develop-applications/debugging-coherence.html[Distributed Tracing in Coherence]
 
 
 

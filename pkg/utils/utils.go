@@ -52,7 +52,8 @@ func GetError(message string, err error) error {
 
 // IsDistributedCache returns true if the service type is distributed
 func IsDistributedCache(serviceType string) bool {
-	return serviceType == constants.DistributedService || serviceType == constants.FederatedService
+	return serviceType == constants.DistributedService || serviceType == constants.FederatedService ||
+		serviceType == constants.PagedTopic
 }
 
 // SliceContains returns true of the slice contains the value

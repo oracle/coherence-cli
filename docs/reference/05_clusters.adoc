@@ -143,8 +143,8 @@ cohctl describe cluster local
 
 === See Also
 
-* https://docs.oracle.com/en/middleware/standalone/coherence/14.1.1.0/rest-reference/quick-start.html[Setting up Management over REST]
-* https://docs.oracle.com/en/middleware/standalone/coherence/14.1.1.0/secure/securing-oracle-oracle-http-management-rest-server.html[Securing Oracle Coherence HTTP Management Over REST Server]
+* {commercial-docs-base-url}/rest-reference/quick-start.html[Setting up Management over REST]
+* {commercial-docs-base-url}/secure/securing-oracle-oracle-http-management-rest-server.html[Securing Oracle Coherence HTTP Management Over REST Server]
 * <<docs/reference/10_contexts.adoc,Contexts>>
 * <<docs/reference/45_nslookup.adoc,NS Lookup>>
 * <<docs/reference/95_misc#set-timeout,Setting request timeout>>
