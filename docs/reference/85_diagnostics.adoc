@@ -24,6 +24,7 @@ Java Flight Recordings or JFR's, heap dumps and thread dumps.
 * <<retrieve-thread-dumps, `cohctl retrieve thread-dumps`>> - retrieves thread dumps for all or specific nodes
 * <<configure-tracing, `cohctl configure tracing`>> - configures tracing for all members or a specific role
 * <<get-tracing, `cohctl get tracing`>> - displays tracing status for all members
+* <<get-environment, `cohctl get environment`>> - displays the environment for a member
 
 
 [#get-jfrs]
@@ -354,6 +355,29 @@ $ cohctl get tracing -c local
 NODE ID  ADDRESS      PORT  PROCESS  MEMBER  ROLE                TRACING ENABLED  SAMPLING RATIO
       1  /127.0.0.1  62255    13464  n/a     DefaultCacheServer  true                      1.000
 ----
+
+[#get-environment]
+==== Get Environment
+
+include::../../build/_output/docs-gen/get_environment.adoc[tag=text]
+
+*Examples*
+
+Display the member environment for a member.
+
+[source,bash]
+----
+$ cohctl get environment 1 -c local
+
+Java Version: 11.0.10
+Java Vendor:
+ - Name: Oracle Corporation
+ - Version: 18.9
+Java Virtual Machine:
+...
+----
+
+NOTE: Output has been truncated above.
 
 === See Also
 

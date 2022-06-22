@@ -144,6 +144,9 @@ create_doc $DOCS_DIR/describe_http_session "${COHCTL} describe http-session --he
 # Health
 create_doc $DOCS_DIR/get_health "${COHCTL} get health --help"
 
+# Environment
+create_doc $DOCS_DIR/get_environment "${COHCTL} get environment --help"
+
 # Debug
 create_doc $DOCS_DIR/set_debug "${COHCTL} set debug --help"
 create_doc $DOCS_DIR/get_debug "${COHCTL} get debug --help"

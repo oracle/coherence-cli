@@ -106,6 +106,9 @@ type Fetcher interface {
 	// ShutdownMember shuts down a member
 	ShutdownMember(memberID string) ([]byte, error)
 
+	// GetEnvironment returns the environment for a member
+	GetEnvironment(memberID string) ([]byte, error)
+
 	// SetMemberAttribute sets the given attribute for a member
 	SetMemberAttribute(memberID, attribute string, value interface{}) ([]byte, error)
 

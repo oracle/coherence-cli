@@ -402,6 +402,15 @@ func (h HTTPFetcher) ShutdownMember(memberID string) ([]byte, error) {
 	return result, nil
 }
 
+// GetEnvironment returns the environment for a member
+func (h HTTPFetcher) GetEnvironment(memberID string) ([]byte, error) {
+	result, err := httpGetRequest(h, membersPath+memberID+"/environment"+links)
+	if err != nil {
+		return constants.EmptyByte, utils.GetError("cannot get environment "+memberID, err)
+	}
+	return result, nil
+}
+
 // DumpClusterHeap instructs the cluster to dump the cluster heap for the role.
 // role of "all" indicates all members
 func (h HTTPFetcher) DumpClusterHeap(role string) ([]byte, error) {
