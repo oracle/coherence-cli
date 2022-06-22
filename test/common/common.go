@@ -1352,7 +1352,7 @@ func RunTestPersistenceCommands(t *testing.T) {
 
 	// test jsonpath output
 	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "SafeBerkeleyDBEnvironment", configArg,
-		file, "get", "persistence", "-c", context.ClusterName, "-o", "jsonpath=$.items[0].persistenceEnvironment")
+		file, "get", "persistence", "-c", context.ClusterName, "-o", "jsonpath=$.items[*].persistenceEnvironment")
 
 	// remove the cluster entries
 	test_utils.EnsureCommandContains(g, t, cliCmd, context.ClusterName, configArg, file, "remove", "cluster", "cluster1", "-y")
