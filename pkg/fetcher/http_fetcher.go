@@ -175,7 +175,7 @@ func (h HTTPFetcher) GetExtendedMemberInfoJSON(result []byte, nodeID string, tok
 		finalNodeID = member.MemberName
 	}
 
-	result, err := httpGetRequest(h, membersPath+finalNodeID+"?fields=none")
+	result, err := httpGetRequest(h, membersPath+finalNodeID+"?fields=nodeId")
 	if err != nil && !strings.Contains(err.Error(), "404") {
 		return extendedData, utils.GetError("unable to get member links nodeId = "+finalNodeID, err)
 	}
