@@ -244,20 +244,30 @@ func RunTestMemberCommands(t *testing.T) {
 	test_utils.EnsureCommandContains(g, t, cliCmd, context.ClusterName, configArg, file, "remove", "cluster", "cluster1")
 }
 
+func getVersion(restUrl string) (string, error) {
+	var (
+		err     error
+		version []byte
+	)
+	version, err = test_utils.IssueGetRequest(restUrl + "/version")
+	if err != nil {
+		return "", err
+	}
+	return string(version), nil
+}
+
 // RunTestServicesCommands tests various services commands
 func RunTestServicesCommands(t *testing.T) {
 	var (
 		g             = NewGomegaWithT(t)
 		err           error
-		version       []byte
 		versionString string
 		context       = test_utils.GetTestContext()
 		restUrl       = context.RestUrl
 	)
 
-	version, err = test_utils.IssueGetRequest(restUrl + "/version")
+	versionString, err = getVersion(restUrl)
 	g.Expect(err).To(BeNil())
-	versionString = string(version)
 
 	file, err := test_utils.CreateNewConfigYaml("config.yaml")
 	if err != nil {
@@ -494,17 +504,18 @@ func RunTestManagementCommands(t *testing.T) {
 // RunTestSetMemberCommands tests various set member commands
 func RunTestSetMemberCommands(t *testing.T) {
 	var (
-		g       = NewGomegaWithT(t)
-		context = test_utils.GetTestContext()
-		err     error
-		version []byte
-		restUrl = context.RestUrl
+		g             = NewGomegaWithT(t)
+		context       = test_utils.GetTestContext()
+		err           error
+		versionString string
+		restUrl       = context.RestUrl
 	)
 
 	// Skip if the cluster version is 14.1.1.X as there is an issue with set log level which is being investigated
-	version, err = test_utils.IssueGetRequest(restUrl + "/version")
+
+	versionString, err = getVersion(restUrl)
+
 	g.Expect(err).To(BeNil())
-	versionString := string(version)
 	if strings.Contains(versionString, version1411) || strings.Contains(versionString, version1221) ||
 		strings.Contains(versionString, "20.06") {
 		t.Log("Ignoring test as version is " + versionString)
@@ -795,11 +806,11 @@ func RunTestExecutorCommands(t *testing.T) {
 // RunTestJFRCommands tests various jfr commands
 func RunTestJFRCommands(t *testing.T) {
 	var (
-		g       = NewGomegaWithT(t)
-		context = test_utils.GetTestContext()
-		err     error
-		version []byte
-		restUrl = context.RestUrl
+		g             = NewGomegaWithT(t)
+		context       = test_utils.GetTestContext()
+		err           error
+		versionString string
+		restUrl       = context.RestUrl
 	)
 
 	file, err := test_utils.CreateNewConfigYaml("config.yaml")
@@ -809,9 +820,9 @@ func RunTestJFRCommands(t *testing.T) {
 
 	// Skip if the cluster version is 14.1.1.X or 12.2.1.4.X as we are running the test with JDK 11
 	// as JFR was only in open JDK since 11
-	version, err = test_utils.IssueGetRequest(restUrl + "/version")
+	versionString, err = getVersion(restUrl)
 	g.Expect(err).To(BeNil())
-	versionString := string(version)
+
 	if strings.Contains(versionString, version1411) || strings.Contains(versionString, version1221) ||
 		strings.Contains(versionString, "20.06") {
 		t.Log("Ignoring test as version is " + versionString)
@@ -926,7 +937,6 @@ func RunTestConfigureTracingCommands(t *testing.T) {
 		g             = NewGomegaWithT(t)
 		context       = test_utils.GetTestContext()
 		err           error
-		version       []byte
 		versionString string
 		restUrl       = context.RestUrl
 	)
@@ -938,9 +948,8 @@ func RunTestConfigureTracingCommands(t *testing.T) {
 
 	test_utils.CleanupConfigFileAfterTest(t, file)
 
-	version, err = test_utils.IssueGetRequest(restUrl + "/version")
+	versionString, err = getVersion(restUrl)
 	g.Expect(err).To(BeNil())
-	versionString = string(version)
 
 	if strings.Contains(versionString, "12.2.1.") {
 		t.Log("Ignoring as tracing not supported in version " + versionString)
@@ -1358,6 +1367,46 @@ func RunTestPersistenceCommands(t *testing.T) {
 	test_utils.EnsureCommandContains(g, t, cliCmd, context.ClusterName, configArg, file, "remove", "cluster", "cluster1", "-y")
 }
 
+// RunTestHealthCommands tests various health commands
+func RunTestHealthCommands(t *testing.T) {
+	var (
+		g             = NewGomegaWithT(t)
+		context       = test_utils.GetTestContext()
+		versionString string
+		err           error
+	)
+
+	versionString, err = getVersion(context.RestUrl)
+	g.Expect(err).To(BeNil())
+
+	// ignore test if health is not enabled in this version
+	if !isHealthEnabled(versionString) {
+		return
+	}
+
+	file, err := test_utils.CreateNewConfigYaml("config.yaml")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	test_utils.CleanupConfigFileAfterTest(t, file)
+
+	cliCmd := cmd.Initialize(nil)
+
+	// should be able to add new cluster
+	test_utils.EnsureCommandContains(g, t, cliCmd, addedCluster, configArg, file, "add", "cluster",
+		context.ClusterName, "-u", context.Url)
+
+	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "MEMBER HEALTH,STARTED,LIVE,READY,SAFE", configArg, file, "get", "health",
+		"-c", context.ClusterName)
+
+	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "MEMBERS,STARTED,LIVE,READY,SAFE", configArg, file, "get", "health",
+		"-S", "-c", context.ClusterName)
+
+	// remove the cluster entries
+	test_utils.EnsureCommandContains(g, t, cliCmd, context.ClusterName, configArg, file, "remove", "cluster", "cluster1", "-y")
+}
+
 // RunTestHttpProxyCommands tests various http proxy commands
 func RunTestHttpProxyCommands(t *testing.T) {
 	g := NewGomegaWithT(t)
@@ -1729,4 +1778,9 @@ func GetDataFetcher(g *WithT, clusterName string) fetcher.Fetcher {
 		"", clusterName)
 	g.Expect(err).To(BeNil())
 	return dataFetcher
+}
+
+// isHealthEnabled returns true if health API is enabled, which is 14.1.1.2206 and 22.06+
+func isHealthEnabled(version string) bool {
+	return strings.Contains(version, "22") || strings.Contains(version, "23")
 }

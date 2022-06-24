@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Oracle and/or its affiliates.
+ * Copyright (c) 2021, 2022 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -78,6 +78,11 @@ func TestPersistenceCommands(t *testing.T) {
 // TestReporterCommands tests reporter commands
 func TestReporterCommands(t *testing.T) {
 	common.RunTestReporterCommands(t)
+}
+
+// TestHealthCommands tests health commands
+func TestHealthCommands(t *testing.T) {
+	common.RunTestHealthCommands(t)
 }
 
 // TestElasticDataCommands tests elastic data commands

@@ -186,6 +186,18 @@ type HealthSummary struct {
 	Safe              bool   `json:"safe"`
 }
 
+// HealthSummaryShort contains summarised health across all nodes for a SubType and Name
+type HealthSummaryShort struct {
+	TotalCount   int32
+	SubType      string
+	Name         string
+	Description  string
+	ReadyCount   int32
+	StartedCount int32
+	LiveCount    int32
+	SafeCount    int32
+}
+
 // StatsSummary contains statistics summaries
 type StatsSummary struct {
 	Count   int64   `json:"count"`

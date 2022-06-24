@@ -69,6 +69,26 @@ NODE ID  NAME     SUB TYPE   STARTED  LIVE  READY  SAFE  MEMBER HEALTH  DESCRIPT
 
 NOTE: You can use `-o wide` to display additional information.
 
+*Examples*
+
+Return a health summary for the cluster for all health endpoints, by using the `-S` option,
+to show how many members are in each state.
+
+[source,bash]
+----
+$ cohctl get health -c local -S
+
+NAME                  SUB TYPE   MEMBERS  STARTED  LIVE  READY  SAFE
+Proxy                 Service          3        3     3      3     3
+PartitionedTopic      Service          3        3     3      3   1/3
+PartitionedCache      Service          3        3     3      3   1/3
+MetricsHttpProxy      Service          1        1     1      1     1
+ManagementHttpProxy   Service          1        1     1      1     1
+Default               Coherence        3        3     3      3     3
+$SYS:HealthHttpProxy  Service          3        3     3      3     3
+$SYS:Config           Service          3        3     3      3     3
+----
+
 === See Also
 
 * <<docs/reference/20_services.adoc,Services>>

@@ -9,6 +9,9 @@
 # Run compatability tests
 set -e
 
+echo "Coherence CE 22.06-SNAPSHOT"
+COHERENCE_VERSION=22.06-SNAPSHOT make clean build-test-images test-e2e-standalone
+
 echo "Coherence CE 21.12.4"
 COHERENCE_VERSION=21.12.4 make clean build-test-images test-e2e-standalone
 

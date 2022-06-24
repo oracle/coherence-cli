@@ -693,7 +693,40 @@ func FormatTracing(members []config.Member) string {
 	return formatLinesAllStringsWithAlignment([]string{R, L, R, R, L, L, L, R}, stringValues)
 }
 
-// FormatMemberHealth returns member health  in a column formatted output
+// FormatHealthSummary returns member health in a short or summary view
+func FormatHealthSummary(health []config.HealthSummaryShort) string {
+	var (
+		healthCount = len(health)
+		alignment   = []string{L, L, R, R, R, R, R}
+	)
+
+	var stringValues = make([]string, healthCount+1)
+
+	sort.Slice(health, func(p, q int) bool {
+		return strings.Compare(health[p].Name, health[q].Name) > 0
+	})
+
+	stringValues[0] = getColumns("NAME", "SUB TYPE", "MEMBERS", "STARTED", "LIVE", "READY", "SAFE")
+
+	for i, value := range health {
+		stringValues[i+1] = getColumns(value.Name, value.SubType, formatSmallInteger(value.TotalCount),
+			getCountString(value.TotalCount, value.StartedCount),
+			getCountString(value.TotalCount, value.LiveCount),
+			getCountString(value.TotalCount, value.ReadyCount),
+			getCountString(value.TotalCount, value.SafeCount))
+	}
+
+	return formatLinesAllStringsWithAlignment(alignment, stringValues)
+}
+
+func getCountString(total, ready int32) string {
+	if ready == total {
+		return formatSmallInteger(total)
+	}
+	return formatSmallInteger(ready) + "/" + formatSmallInteger(total)
+}
+
+// FormatMemberHealth returns member health in a column formatted output
 func FormatMemberHealth(health []config.HealthSummary) string {
 	var (
 		healthCount    = len(health)
@@ -744,7 +777,6 @@ func FormatMemberHealth(health []config.HealthSummary) string {
 	}
 
 	return formatLinesAllStringsWithAlignment(finalAlignment, stringValues)
-
 }
 
 // FormatMembers returns the member's information in a column formatted output

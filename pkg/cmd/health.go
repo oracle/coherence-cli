@@ -21,6 +21,7 @@ import (
 var (
 	healthSubType string
 	healthName    string
+	healthSummary bool
 )
 
 // getHealthCmd represents the get health command
@@ -85,7 +86,13 @@ var getHealthCmd = &cobra.Command{
 					return fmt.Errorf("filter on sub-type=%s and name=%s returned no entries", healthSubType, healthName)
 				}
 
-				cmd.Println(FormatMemberHealth(filtered))
+				if healthSummary {
+					// summarise the health data across nodes
+					healthShort := summariseHealth(filtered)
+					cmd.Println(FormatHealthSummary(healthShort))
+				} else {
+					cmd.Println(FormatMemberHealth(filtered))
+				}
 			}
 
 			// check to see if we should exit if we are not watching
@@ -118,7 +125,61 @@ func filterHealth(health config.HealthSummaries) []config.HealthSummary {
 	return filtered
 }
 
+func summariseHealth(health []config.HealthSummary) []config.HealthSummaryShort {
+	var (
+		healthShort = make([]config.HealthSummaryShort, 0)
+	)
+
+	for _, value := range health {
+		i := findIndex(healthShort, value.Name, value.SubType)
+		var entry config.HealthSummaryShort
+		if i == -1 {
+			// not found so append a new one
+			entry = config.HealthSummaryShort{Name: value.Name, SubType: value.SubType}
+			healthShort = append(healthShort, entry)
+			i = int32(len(healthShort) - 1)
+		} else {
+			// use existing
+			entry = healthShort[i]
+		}
+
+		// update the entry values
+		entry.TotalCount++
+		if value.Started {
+			entry.StartedCount++
+		}
+
+		if value.Ready {
+			entry.ReadyCount++
+		}
+
+		if value.Live {
+			entry.LiveCount++
+		}
+
+		if value.Safe {
+			entry.SafeCount++
+		}
+
+		healthShort[i] = entry
+	}
+
+	return healthShort
+}
+
+// findIndex finds the index of the entry for name and subType, -1 means no entry found
+func findIndex(health []config.HealthSummaryShort, name, subType string) int32 {
+	for i, value := range health {
+		if value.Name == name && value.SubType == subType {
+			return int32(i)
+		}
+	}
+
+	return -1 // not found
+}
+
 func init() {
 	getHealthCmd.Flags().StringVarP(&healthSubType, "sub-type", "s", "all", "health sub-type")
 	getHealthCmd.Flags().StringVarP(&healthName, "name", "n", "all", "health name")
+	getHealthCmd.Flags().BoolVarP(&healthSummary, "summary", "S", false, "if true, returns a summary across nodes")
 }
