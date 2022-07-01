@@ -474,6 +474,7 @@ func Initialize(command *cobra.Command) *cobra.Command {
 	describeCmd.AddCommand(describeHTTPSessionCmd)
 	describeCmd.AddCommand(describeJfrCmd)
 	describeCmd.AddCommand(describeExecutorCmd)
+	describeCmd.AddCommand(describeFederationCmd)
 
 	// create
 	command.AddCommand(createCmd)

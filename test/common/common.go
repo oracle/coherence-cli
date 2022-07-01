@@ -1756,11 +1756,15 @@ func RunTestFederationCommands(t *testing.T) {
 	test_utils.EnsureCommandContainsAll(g, t, cliCmd, cmd.OperationCompleted, configArg, file,
 		"replicate", "all", "FederatedService", "-p", "cluster2", "-y", "-c", context.ClusterName)
 
-	test_utils.Sleep(10)
+	test_utils.Sleep(30)
 
 	// get wide output and check for 100.00%
 	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "cluster2,REPLICATE,100.00%", configArg, file,
 		"get", "federation", "destinations", "-o", "wide", "-c", context.ClusterName)
+
+	// test describe cluster
+	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "AVG BACKLOG DELAY,AVG APPLY,cluster2", configArg, file,
+		"describe", "federation", "FederatedService", "-p", "cluster2", "-T", "destinations", "-o", "wide", "-c", context.ClusterName)
 
 	// remove the cluster entry
 	test_utils.EnsureCommandContains(g, t, cliCmd, context.ClusterName, configArg, file, "remove", "cluster", "cluster1", "-y")

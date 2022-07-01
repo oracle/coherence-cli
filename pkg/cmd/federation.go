@@ -8,6 +8,7 @@ package cmd
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/oracle/coherence-cli/pkg/config"
 	"github.com/oracle/coherence-cli/pkg/constants"
@@ -15,6 +16,7 @@ import (
 	"github.com/oracle/coherence-cli/pkg/utils"
 	"github.com/spf13/cobra"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -30,6 +32,7 @@ var (
 	participant             string
 	startMode               string
 	replicateAllParticipant string
+	describeFederationType  string
 )
 
 // getFederationCmd represents the get federation command
@@ -225,7 +228,7 @@ func getFederationSummaries(federatedServices []string, target string, dataFetch
 	)
 	// retrieve the details for each service
 	for _, value := range federatedServices {
-		data, err = dataFetcher.GetFederationStatisticsJSON(value, target)
+		data, err = dataFetcher.GetFederationStatistics(value, target)
 		if err != nil {
 			return finalSummaries, err
 		}
@@ -247,6 +250,193 @@ func getFederationSummaries(federatedServices []string, target string, dataFetch
 	return finalSummaries, nil
 }
 
+// describeFederationCmd represents the describe federation command
+var describeFederationCmd = &cobra.Command{
+	Use:   federationUse,
+	Short: "describe federation details for a given service and participant",
+	Long: `The 'describe federation' command displays the federation details for a given
+service, type and participant. Specify -T to set type destinations or origins and -p for participant.`,
+	Args: func(cmd *cobra.Command, args []string) error {
+		if len(args) != 1 {
+			displayErrorAndExit(cmd, "you must provide a service name")
+		}
+		return nil
+	},
+	RunE: func(cmd *cobra.Command, args []string) error {
+		var (
+			err               error
+			dataFetcher       fetcher.Fetcher
+			connection        string
+			federatedServices []string
+			service           = args[0]
+			nodeIDArray       []string
+			errorSink         = createErrorSink()
+			byteSink          = createByteArraySink()
+			wg                sync.WaitGroup
+			output            string
+			target            string
+		)
+
+		if participant == "all" {
+			return errors.New("please provide a participant")
+		}
+
+		// retrieve the current context or the value from "-c"
+		connection, dataFetcher, err = GetConnectionAndDataFetcher()
+		if err != nil {
+			return err
+		}
+
+		// filter the federated services only
+		federatedServices, err = GetFederatedServices(dataFetcher)
+		if err != nil {
+			return err
+		}
+
+		if len(federatedServices) == 0 {
+			return nil
+		}
+
+		// validate the federated service is valid
+		if !utils.SliceContains(federatedServices, service) {
+			return fmt.Errorf(federationServiceMsg, service)
+		}
+
+		// validate the type
+		if describeFederationType != destinations && describeFederationType != origins {
+			return fmt.Errorf("type must be %s or %s", destinations, origins)
+		}
+
+		// get all node Id's
+		nodeIDArray, err = GetNodeIds(dataFetcher)
+		if err != nil {
+			return err
+		}
+
+		var nodesLen = len(nodeIDArray)
+		if nodesLen == 0 {
+			return errors.New("no members found")
+		}
+
+		// retrieve federation details for all services and members for the participant
+		// http://127.0.0.1:8080/management/coherence/cluster/services/{service}/members/{member}/federation/statistics/{outgoing|incoming}/participants/{participant}?links=
+
+		wg.Add(nodesLen)
+
+		if describeFederationType == destinations {
+			target = outgoing
+		} else {
+			target = incoming
+		}
+		for _, value := range nodeIDArray {
+			go func(nodeID string) {
+				var (
+					err1   error
+					result []byte
+				)
+				defer wg.Done()
+				result, err1 = dataFetcher.GetFederationDetails(service, target, nodeID, participant)
+				if err1 != nil {
+					errorSink.AppendError(err1)
+				} else {
+					byteSink.AppendByteArray(result)
+				}
+			}(value)
+		}
+
+		wg.Wait()
+		errorList := errorSink.GetErrors()
+
+		if len(errorList) > 0 {
+			return utils.GetErrors(errorList)
+		}
+
+		// now we have the details
+		results := byteSink.GetByteArrays()
+		numResults := len(results)
+
+		// check to see if all results were empty and this will indicate no matches for participant and type
+		found := false
+		for _, v := range results {
+			if len(v) > 0 {
+				found = true
+				break
+			}
+		}
+
+		if !found {
+			return fmt.Errorf("unable to find participant %s for service %s and type %s", participant, service, describeFederationType)
+		}
+
+		if strings.Contains(OutputFormat, constants.JSONPATH) || OutputFormat == constants.JSON {
+			// encode for json output
+			finalData := make([]byte, 0)
+			finalData = append(finalData, []byte("{ \"items\": [")...)
+
+			for i, v := range byteSink.GetByteArrays() {
+				finalData = append(finalData, v...)
+				// only append "," if not last entry
+				if i < numResults-1 {
+					finalData = append(finalData, []byte(",")...)
+				}
+			}
+
+			finalData = append(finalData, []byte("] }")...)
+			if strings.Contains(OutputFormat, constants.JSONPATH) {
+				result, err := utils.GetJSONPathResults(finalData, OutputFormat)
+				if err != nil {
+					return err
+				}
+				cmd.Println(result)
+			} else {
+				cmd.Println(finalData)
+			}
+		} else {
+			var sb strings.Builder
+
+			sb.WriteString(FormatCurrentCluster(connection))
+
+			sb.WriteString("\nFEDERATION DETAILS\n")
+			sb.WriteString("------------------\n")
+
+			sb.WriteString(fmt.Sprintf("Service:     %s\n", service))
+			sb.WriteString(fmt.Sprintf("Type:        %s\n", describeFederationType))
+			sb.WriteString(fmt.Sprintf("Participant: %s\n\n", participant))
+
+			if verboseOutput {
+				for _, v := range results {
+					output, err = FormatJSONForDescribe(v, true,
+						"Node Id", "Service", "Name", "Type")
+					if err != nil {
+						return err
+					}
+					sb.WriteString(output + "\n")
+				}
+			} else {
+				// not verbose output so unmarshall the original results
+				var federationData = make([]config.FederationDescription, 0)
+				for _, v := range results {
+					if len(v) > 0 {
+						var entry = config.FederationDescription{}
+						err = json.Unmarshal(v, &entry)
+						if err != nil {
+							return utils.GetError("unable to unmarshal federation details", err)
+						}
+						federationData = append(federationData, entry)
+					}
+				}
+
+				// output
+				sb.WriteString(FormatFederationDetails(federationData, describeFederationType))
+			}
+
+			cmd.Println(sb.String())
+		}
+
+		return nil
+	},
+}
+
 func init() {
 	startFederationCmd.Flags().StringVarP(&participant, "participant", "p", "all", participantMessage)
 	startFederationCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
@@ -262,4 +452,9 @@ func init() {
 
 	pauseFederationCmd.Flags().StringVarP(&participant, "participant", "p", "all", participantMessage)
 	pauseFederationCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
+
+	describeFederationCmd.Flags().StringVarP(&participant, "participant", "p", "all", participantMessage)
+	describeFederationCmd.Flags().StringVarP(&describeFederationType, "type", "T", outgoing, "type to describe "+outgoing+" or "+incoming)
+	describeFederationCmd.Flags().BoolVarP(&verboseOutput, "verbose", "v", false,
+		"include verbose output including all attributes")
 }

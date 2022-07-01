@@ -143,6 +143,111 @@ func FormatJSONForDescribe(jsonValue []byte, showAllColumns bool, orderedColumns
 	return sb.String(), nil
 }
 
+func FormatFederationDetails(federationDetails []config.FederationDescription, target string) string {
+	var (
+		fedCount           = len(federationDetails)
+		finalAlignment     []string
+		suffix             = "SENT"
+		formattingFunction = getFormattingFunction()
+	)
+
+	if fedCount == 0 {
+		return ""
+	}
+
+	sort.Slice(federationDetails, func(p, q int) bool {
+		nodeID1, _ := strconv.Atoi(federationDetails[p].NodeID)
+		nodeID2, _ := strconv.Atoi(federationDetails[q].NodeID)
+		return nodeID1 < nodeID2
+	})
+
+	var stringValues = make([]string, fedCount+1)
+
+	if OutputFormat == constants.TABLE {
+		if target == destinations {
+			finalAlignment = []string{R, L, R, R, R, R}
+		} else {
+			finalAlignment = []string{R, R, R, R, R}
+		}
+	} else { // WIDE
+		if target == destinations {
+			finalAlignment = []string{R, L, R, R, R, R, R, R, R, R, R, R, R}
+		} else {
+			finalAlignment = []string{R, R, R, R, R, R, R}
+		}
+	}
+
+	if target == destinations {
+		stringValues[0] = getColumns(NodeIDColumn, "STATE", "DATA "+suffix, "MSG "+suffix, "REC "+suffix, "CURR BWIDTH")
+	} else {
+		suffix = "REC"
+		stringValues[0] = getColumns(NodeIDColumn, "CONNECTED", "DATA "+suffix, "MSG "+suffix, "REC "+suffix)
+	}
+
+	if OutputFormat == constants.WIDE {
+		if target == destinations {
+			stringValues[0] = getColumns(stringValues[0], "AVG APPLY", "AVG ROUND TRIP", "AVG BACKLOG DELAY", "REPLICATE",
+				"PARTITIONS", "ERRORS", "UNACKED")
+		} else {
+			stringValues[0] = getColumns(stringValues[0], "AVG APPLY", "AVG BACKLOG DELAY")
+		}
+	}
+
+	var (
+		bytes     int64
+		messages  int64
+		records   int64
+		bandwidth string
+	)
+
+	for i, value := range federationDetails {
+		var nodeID, _ = strconv.Atoi(value.NodeID)
+		stringValues[i+1] = getColumns(formatSmallInteger(int32(nodeID)))
+
+		if target == "destinations" {
+			bytes = value.TotalBytesSent
+			messages = value.TotalMsgSent
+			records = value.TotalRecordsSent
+			bandwidth = formatMbps(float32(value.CurrentBandwidth))
+		} else {
+			bytes = value.TotalBytesReceived
+			messages = value.TotalMsgReceived
+			records = value.TotalRecordsReceived
+			bandwidth = "n/a"
+		}
+
+		if target == destinations {
+			stringValues[i+1] = getColumns(stringValues[i+1], value.State,
+				formattingFunction(bytes), formatLargeInteger(messages),
+				formatLargeInteger(records), bandwidth)
+		} else {
+			stringValues[i+1] = getColumns(stringValues[i+1], formatSmallInteger(value.CurrentConnectionCount),
+				formattingFunction(bytes), formatLargeInteger(messages),
+				formatLargeInteger(records))
+		}
+
+		if OutputFormat == constants.WIDE {
+			if target == destinations {
+				stringValues[i+1] = getColumns(stringValues[i+1],
+					formatLatency0(float32(value.MsgApplyTimePercentileMillis)),
+					formatLatency0(float32(value.MsgNetworkRoundTripTimePercentileMillis)),
+					formatLatency0(float32(value.RecordBacklogDelayTimePercentileMillis)),
+					formatPercent(float64(value.ReplicateAllPercentComplete)/100.0),
+					formatLargeInteger(value.ReplicateAllPartitionCount),
+					formatLargeInteger(value.ReplicateAllPartitionErrorCount),
+					formatLargeInteger(value.TotalReplicateAllPartitionsUnacked),
+				)
+			} else {
+				stringValues[i+1] = getColumns(stringValues[i+1],
+					formatLatency0(float32(value.MsgApplyTimePercentileMillis)),
+					formatLatency0(float32(value.RecordBacklogDelayTimePercentileMillis)))
+			}
+		}
+	}
+
+	return formatLinesAllStringsWithAlignment(finalAlignment, stringValues)
+}
+
 // FormatFederationSummary returns the federation summary in column formatted output
 // the target may be destinations or origins and columns will change slightly
 func FormatFederationSummary(federationSummaries []config.FederationSummary, target string) string {

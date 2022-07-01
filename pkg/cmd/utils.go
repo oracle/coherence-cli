@@ -19,6 +19,8 @@ import (
 	"sync"
 )
 
+const federationServiceMsg = "service %s does not exist or is not a federated service"
+
 func displayErrorAndExit(cmd *cobra.Command, message string) {
 	_, _ = fmt.Fprintln(os.Stderr, "Error: "+message)
 	_, _ = fmt.Fprintln(os.Stderr, "Provide the --help flag to display full help")
@@ -328,7 +330,7 @@ func IssueFederationCommand(cmd *cobra.Command, serviceName, command, participan
 	cmd.Println(FormatCurrentCluster(connection))
 
 	if !utils.SliceContains(federatedServices, serviceName) {
-		return fmt.Errorf("service %s does not exist or is not a federated service", serviceName)
+		return fmt.Errorf(federationServiceMsg, serviceName)
 	}
 
 	finalSummariesDestinations, err = getFederationSummaries(federatedServices, outgoing, dataFetcher)
@@ -425,4 +427,29 @@ func (e *ErrorSink) AppendError(err error) {
 	e.Lock()
 	defer e.Unlock()
 	e.errors = append(e.errors, err)
+}
+
+// ByteArraySink is a thread safe byte array
+type ByteArraySink struct {
+	sync.RWMutex
+	values [][]byte
+}
+
+// ByteArray creates a byte array sync
+func createByteArraySink() ByteArraySink {
+	return ByteArraySink{
+		values: make([][]byte, 0),
+	}
+}
+
+// GetByteArrays returns the values for an GetByteArrays
+func (b *ByteArraySink) GetByteArrays() [][]byte {
+	return b.values
+}
+
+// AppendByteArray appends a byte array
+func (b *ByteArraySink) AppendByteArray(bytes []byte) {
+	b.Lock()
+	defer b.Unlock()
+	b.values = append(b.values, bytes)
 }

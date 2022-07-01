@@ -190,8 +190,11 @@ type Fetcher interface {
 	// CheckJFR checks a JFR. type is "cluster" or "node" and target is the node id if type "node"
 	CheckJFR(jfrName, jfrType, target string) ([]byte, error)
 
-	// GetFederationStatisticsJSON returns federation statistics for a service and type
-	GetFederationStatisticsJSON(serviceName, federationType string) ([]byte, error)
+	// GetFederationStatistics returns federation statistics for a service and type
+	GetFederationStatistics(serviceName, federationType string) ([]byte, error)
+
+	// GetFederationDetails returns federation statistics for a service and type and participant
+	GetFederationDetails(serviceName, federationType, nodeID, participant string) ([]byte, error)
 
 	// InvokeFederationOperation invokes a federation operation against a service and participant
 	InvokeFederationOperation(serviceName, command, participant, mode string) ([]byte, error)

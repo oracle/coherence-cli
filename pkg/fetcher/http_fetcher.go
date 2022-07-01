@@ -702,13 +702,26 @@ func (h HTTPFetcher) CheckJFR(jfrName, jfrType, target string) ([]byte, error) {
 	return jfrOperation(h, jfrName, CheckJFR, jfrType, target, "")
 }
 
-// GetFederationStatisticsJSON returns federation statistics for a service and type
-func (h HTTPFetcher) GetFederationStatisticsJSON(serviceName, federationType string) ([]byte, error) {
+// GetFederationStatistics returns federation statistics for a service and type
+func (h HTTPFetcher) GetFederationStatistics(serviceName, federationType string) ([]byte, error) {
 	result, err := httpGetRequest(h, servicesPath+getSafeServiceName(h, serviceName)+
-		"/federation/statistics/"+federationType+"/participants?links=")
+		"/federation/statistics/"+federationType+"/participants"+links)
 	// workaround bug with incoming returning 500 if no federation, ignore 404 as this means no incoming
 	if err != nil && !strings.Contains(err.Error(), "500") && !strings.Contains(err.Error(), "404") {
 		return constants.EmptyByte, utils.GetError("cannot get federation statistics for "+serviceName+" and "+federationType, err)
+	}
+	if len(result) == 0 {
+		return constants.EmptyByte, nil
+	}
+	return result, nil
+}
+
+// GetFederationDetails returns federation statistics for a service and type and participant
+func (h HTTPFetcher) GetFederationDetails(serviceName, federationType, nodeID, participant string) ([]byte, error) {
+	result, err := httpGetRequest(h, servicesPath+getSafeServiceName(h, serviceName)+membersPath+nodeID+
+		"/federation/statistics/"+federationType+"/participants/"+participant+links)
+	if err != nil && !strings.Contains(err.Error(), "500") && !strings.Contains(err.Error(), "404") {
+		return constants.EmptyByte, utils.GetError("cannot get federation details for "+serviceName+" and "+federationType, err)
 	}
 	if len(result) == 0 {
 		return constants.EmptyByte, nil
@@ -960,15 +973,6 @@ func httpRequest(h HTTPFetcher, requestType, urlAppend string, absolute bool, co
 		return empty, err
 	}
 
-	if resp.StatusCode != 200 {
-		return empty, fmt.Errorf("response=%s, url=%s", resp.Status, finalURL)
-	}
-
-	body = buffer.Bytes()
-	if len(body) > 0 && !isValidJSON(body) {
-		return empty, errors.New("invalid JSON body")
-	}
-
 	if DebugEnabled {
 		fields := []zapcore.Field{
 			zap.String("type", requestType),
@@ -980,6 +984,16 @@ func httpRequest(h HTTPFetcher, requestType, urlAppend string, absolute bool, co
 		}
 		Logger.Info("Http Request time", fields...)
 	}
+
+	if resp.StatusCode != 200 {
+		return empty, fmt.Errorf("response=%s, url=%s", resp.Status, finalURL)
+	}
+
+	body = buffer.Bytes()
+	if len(body) > 0 && !isValidJSON(body) {
+		return empty, errors.New("invalid JSON body")
+	}
+
 	if err != nil {
 		// always log error
 		Logger.Error("Http Request error", []zapcore.Field{

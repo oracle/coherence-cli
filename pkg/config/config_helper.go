@@ -239,6 +239,31 @@ type FederationSummary struct {
 	TotalReplicateAllPartitionsUnacked StatsSummary `json:"totalReplicateAllPartitionsUnacked"`
 }
 
+// FederationDescription contains federation description details
+type FederationDescription struct {
+	NodeID                                  string  `json:"nodeId"`
+	State                                   string  `json:"state"`
+	TotalMsgSent                            int64   `json:"totalMsgSent"`
+	TotalBytesSent                          int64   `json:"totalBytesSent"`
+	TotalRecordsSent                        int64   `json:"totalRecordsSent"`
+	MsgNetworkRoundTripTimePercentileMillis int64   `json:"msgNetworkRoundTripTimePercentileMillis"`
+	MsgApplyTimePercentileMillis            int64   `json:"msgApplyTimePercentileMillis"`
+	RecordBacklogDelayTimePercentileMillis  int64   `json:"recordBacklogDelayTimePercentileMillis"`
+	ReplicateAllPercentComplete             int64   `json:"replicateAllPercentComplete"`
+	ReplicateAllTotalTime                   int64   `json:"replicateAllTotalTime"`
+	CurrentBandwidth                        float64 `json:"currentBandwidth"`
+
+	TotalMsgReceived       int64 `json:"totalMsgReceived"` // incoming
+	TotalBytesReceived     int64 `json:"totalBytesReceived"`
+	TotalRecordsReceived   int64 `json:"totalRecordsReceived"`
+	CurrentConnectionCount int32 `json:"currentConnectionCount"`
+
+	// additional replicate all stats only available in 21.12.2+ or 14.1.1. FP1
+	ReplicateAllPartitionCount         int64 `json:"replicateAllPartitionCount"`
+	ReplicateAllPartitionErrorCount    int64 `json:"replicateAllPartitionErrorCount"`
+	TotalReplicateAllPartitionsUnacked int64 `json:"totalReplicateAllPartitionsUnacked"`
+}
+
 // ServiceMemberDetails contains service members details
 type ServiceMemberDetails struct {
 	Services []ServiceMemberDetail `json:"items"`
