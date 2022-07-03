@@ -37,7 +37,7 @@ jobs:
     - name: Set up JDK
       uses: actions/setup-java@v1
       with:
-        java-version: '1.8'
+        java-version: '11'
 
     - name: Cache Go Modules
       uses: actions/cache@v1
@@ -61,7 +61,7 @@ jobs:
 
     - name: Build Test Images
       shell: bash
-      run: PROFILES=,executor COHERENCE_VERSION=21.12.3 make clean build-test-images
+      run: PROFILES=,executor COHERENCE_VERSION=22.06 make clean build-test-images
 
     - name: Run Stress Test
       shell: bash
