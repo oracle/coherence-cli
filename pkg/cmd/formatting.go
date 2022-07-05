@@ -40,7 +40,9 @@ const MaxHeapColumn = "MAX HEAP"
 const UsedHeapColumn = "USED HEAP"
 const AvailHeapColumn = "AVAIL HEAP"
 const NameColumn = "NAME"
-const avgeSize = "AVG SIZE"
+const avgSize = "AVG SIZE"
+const avgApply = "AVG APPLY"
+const avgBacklogDelay = "AVG BACKLOG DELAY"
 
 var (
 	KB int64 = 1024
@@ -186,10 +188,10 @@ func FormatFederationDetails(federationDetails []config.FederationDescription, t
 
 	if OutputFormat == constants.WIDE {
 		if target == destinations {
-			stringValues[0] = getColumns(stringValues[0], "AVG APPLY", "AVG ROUND TRIP", "AVG BACKLOG DELAY", "REPLICATE",
+			stringValues[0] = getColumns(stringValues[0], avgApply, "AVG ROUND TRIP", avgBacklogDelay, "REPLICATE",
 				"PARTITIONS", "ERRORS", "UNACKED")
 		} else {
-			stringValues[0] = getColumns(stringValues[0], "AVG APPLY", "AVG BACKLOG DELAY")
+			stringValues[0] = getColumns(stringValues[0], avgApply, avgBacklogDelay)
 		}
 	}
 
@@ -307,10 +309,10 @@ func FormatFederationSummary(federationSummaries []config.FederationSummary, tar
 
 	if OutputFormat == constants.WIDE {
 		if target == destinations {
-			stringValues[0] = getColumns(stringValues[0], "AVG APPLY", "AVG ROUND TRIP", "AVG BACKLOG DELAY", "REPLICATE",
+			stringValues[0] = getColumns(stringValues[0], avgApply, "AVG ROUND TRIP", avgBacklogDelay, "REPLICATE",
 				"PARTITIONS", "ERRORS", "UNACKED")
 		} else {
-			stringValues[0] = getColumns(stringValues[0], "AVG APPLY", "AVG BACKLOG DELAY")
+			stringValues[0] = getColumns(stringValues[0], avgApply, avgBacklogDelay)
 		}
 	}
 
@@ -410,7 +412,7 @@ func FormatCacheSummary(cacheSummaries []config.CacheSummaryDetail) string {
 	stringValues[0] = getColumns(ServiceColumn, CacheColumn, "COUNT", "SIZE")
 
 	if OutputFormat == constants.WIDE {
-		stringValues[0] = getColumns(stringValues[0], avgeSize,
+		stringValues[0] = getColumns(stringValues[0], avgSize,
 			"TOTAL PUTS", "TOTAL GETS", "TOTAL REMOVES", "TOTAL HITS", "TOTAL MISSES", "HIT PROB")
 	}
 
@@ -473,7 +475,7 @@ func FormatTopicsSummary(cacheSummaries []config.CacheSummaryDetail) string {
 	var totalTopics = len(cacheSummaries)
 	var totalUnits int64 = 0
 
-	stringValues[0] = getColumns(ServiceColumn, "TOPIC", "UNCONSUMED MSG", "MEMORY", avgeSize,
+	stringValues[0] = getColumns(ServiceColumn, "TOPIC", "UNCONSUMED MSG", "MEMORY", avgSize,
 		"PUBLISHER SENDS", "SUBSCRIBER RECEIVES")
 
 	for i, value := range cacheSummaries {
@@ -1228,7 +1230,7 @@ func FormatHTTPSessions(sessions []config.HTTPSessionSummary, isSummary bool) st
 		serviceCount = len(sessions)
 		alignment    []string
 		header       = getColumns("TYPE", "SESSION TIMEOUT", CacheColumn, "OVERFLOW",
-			avgeSize, "TOTAL REAPED", "AVG DURATION", "LAST REAP", "UPDATES")
+			avgSize, "TOTAL REAPED", "AVG DURATION", "LAST REAP", "UPDATES")
 	)
 	if serviceCount == 0 {
 		return ""

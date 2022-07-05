@@ -26,6 +26,10 @@ const configArg = "--config"
 const addedCluster = "Added cluster"
 const version1221 = "12.2.1"
 const version1411 = "14.1.1"
+const configYaml = "config.yaml"
+const nodeID = "NODE ID"
+const jsonPathServices = "jsonpath=$.services"
+const doesNotExist = "does not exist"
 
 //
 // These tests run each of the CLI commands and inspects the output to ensure that the
@@ -38,7 +42,7 @@ func RunTestClusterCommands(t *testing.T) {
 
 	g := NewGomegaWithT(t)
 
-	file, err := test_utils.CreateNewConfigYaml("config.yaml")
+	file, err := test_utils.CreateNewConfigYaml(configYaml)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -132,7 +136,7 @@ func RunTestClusterCommands(t *testing.T) {
 func RunTestNSLookupCommands(t *testing.T) {
 	g := NewGomegaWithT(t)
 
-	file, err := test_utils.CreateNewConfigYaml("config.yaml")
+	file, err := test_utils.CreateNewConfigYaml(configYaml)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -161,7 +165,7 @@ func RunTestNSLookupCommands(t *testing.T) {
 func RunTestDiscoverClustersCommands(t *testing.T) {
 	g := NewGomegaWithT(t)
 
-	file, err := test_utils.CreateNewConfigYaml("config.yaml")
+	file, err := test_utils.CreateNewConfigYaml(configYaml)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -188,7 +192,7 @@ func RunTestMemberCommands(t *testing.T) {
 	g := NewGomegaWithT(t)
 	context := test_utils.GetTestContext()
 
-	file, err := test_utils.CreateNewConfigYaml("config.yaml")
+	file, err := test_utils.CreateNewConfigYaml(configYaml)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -202,7 +206,7 @@ func RunTestMemberCommands(t *testing.T) {
 		context.ClusterName, "-u", context.Url)
 
 	// test default output format
-	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "NODE ID", configArg, file, "get", "members",
+	test_utils.EnsureCommandContainsAll(g, t, cliCmd, nodeID, configArg, file, "get", "members",
 		"-c", context.ClusterName)
 
 	// test wide output format
@@ -216,10 +220,10 @@ func RunTestMemberCommands(t *testing.T) {
 	// set the current context and ensure the command still succeeds
 	test_utils.EnsureCommandContains(g, t, cliCmd, "cluster1\n", configArg, file, "set", "context", "cluster1")
 
-	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "NODE ID", configArg, file, "get", "members")
+	test_utils.EnsureCommandContainsAll(g, t, cliCmd, nodeID, configArg, file, "get", "members")
 
 	// should receive values
-	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "NODE ID", configArg, file, "get", "members",
+	test_utils.EnsureCommandContainsAll(g, t, cliCmd, nodeID, configArg, file, "get", "members",
 		"-r", "OracleCoherenceCliTestingRestServer")
 
 	// should not receive values
@@ -269,7 +273,7 @@ func RunTestServicesCommands(t *testing.T) {
 	versionString, err = getVersion(restUrl)
 	g.Expect(err).To(BeNil())
 
-	file, err := test_utils.CreateNewConfigYaml("config.yaml")
+	file, err := test_utils.CreateNewConfigYaml(configYaml)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -324,7 +328,7 @@ func RunTestServicesCommands(t *testing.T) {
 	// test jsonpath
 	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "\"eventInterceptorInfo\",PartitionedCache",
 		configArg, file, "describe", "service", "PartitionedCache", "-c", context.ClusterName,
-		"-o", "jsonpath=$.services")
+		"-o", jsonPathServices)
 
 	// remove the cluster entries
 	test_utils.EnsureCommandContains(g, t, cliCmd, context.ClusterName, configArg, file, "remove", "cluster", "cluster1")
@@ -338,7 +342,7 @@ func RunTestServiceOperations(t *testing.T) {
 		context = test_utils.GetTestContext()
 	)
 
-	file, err := test_utils.CreateNewConfigYaml("config.yaml")
+	file, err := test_utils.CreateNewConfigYaml(configYaml)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -407,7 +411,7 @@ func RunTestProxyCommands(t *testing.T) {
 	g := NewGomegaWithT(t)
 	context := test_utils.GetTestContext()
 
-	file, err := test_utils.CreateNewConfigYaml("config.yaml")
+	file, err := test_utils.CreateNewConfigYaml(configYaml)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -438,7 +442,7 @@ func RunTestProxyCommands(t *testing.T) {
 
 	// test jsonpath
 	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "\"eventInterceptorInfo\"", configArg, file,
-		"describe", "proxy", "Proxy", "-o", "jsonpath=$.services")
+		"describe", "proxy", "Proxy", "-o", jsonPathServices)
 
 	// remove the cluster entries
 	test_utils.EnsureCommandContains(g, t, cliCmd, context.ClusterName, configArg, file, "remove", "cluster", "cluster1")
@@ -449,7 +453,7 @@ func RunTestManagementCommands(t *testing.T) {
 	g := NewGomegaWithT(t)
 	context := test_utils.GetTestContext()
 
-	file, err := test_utils.CreateNewConfigYaml("config.yaml")
+	file, err := test_utils.CreateNewConfigYaml(configYaml)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -522,7 +526,7 @@ func RunTestSetMemberCommands(t *testing.T) {
 		return
 	}
 
-	file, err := test_utils.CreateNewConfigYaml("config.yaml")
+	file, err := test_utils.CreateNewConfigYaml(configYaml)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -586,7 +590,7 @@ func RunTestMachinesCommands(t *testing.T) {
 	g := NewGomegaWithT(t)
 	context := test_utils.GetTestContext()
 
-	file, err := test_utils.CreateNewConfigYaml("config.yaml")
+	file, err := test_utils.CreateNewConfigYaml(configYaml)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -627,10 +631,14 @@ func RunTestMachinesCommands(t *testing.T) {
 
 // RunTestReporterCommands tests various reporter commands
 func RunTestReporterCommands(t *testing.T) {
-	g := NewGomegaWithT(t)
-	context := test_utils.GetTestContext()
+	var (
+		g       = NewGomegaWithT(t)
+		context = test_utils.GetTestContext()
+	)
 
-	file, err := test_utils.CreateNewConfigYaml("config.yaml")
+	const outputPath = "/tmp/output/path"
+
+	file, err := test_utils.CreateNewConfigYaml(configYaml)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -682,16 +690,16 @@ func RunTestReporterCommands(t *testing.T) {
 
 	// set the output path to /tmp/output/path
 	test_utils.EnsureCommandContainsAll(g, t, cliCmd, cmd.OperationCompleted, configArg, file,
-		"set", "reporter", "-c", context.ClusterName, "-a", "outputPath", "-v", "/tmp/output/path", "-y", "1")
+		"set", "reporter", "-c", context.ClusterName, "-a", "outputPath", "-v", outputPath, "-y", "1")
 
 	test_utils.Sleep(10)
 
-	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "/tmp/output/path", configArg, file,
+	test_utils.EnsureCommandContainsAll(g, t, cliCmd, outputPath, configArg, file,
 		"get", "reporters", "-c", context.ClusterName)
 
 	// try setting an invalid attribute value
 	test_utils.EnsureCommandErrorContains(g, t, cliCmd, "is invalid", configArg, file,
-		"set", "reporter", "-c", context.ClusterName, "-a", "outputPathNotValid", "-v", "/tmp/output/path", "-y", "1")
+		"set", "reporter", "-c", context.ClusterName, "-a", "outputPathNotValid", "-v", outputPath, "-y", "1")
 
 	// get the reporters using jsonpath
 	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "\"lastExecuteTime\"", configArg, file,
@@ -709,7 +717,7 @@ func RunTestThreadDumpsCommands(t *testing.T) {
 		allThreadDumps = "All thread dumps completed"
 	)
 
-	file, err := test_utils.CreateNewConfigYaml("config.yaml")
+	file, err := test_utils.CreateNewConfigYaml(configYaml)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -782,7 +790,7 @@ func RunTestExecutorCommands(t *testing.T) {
 		return
 	}
 
-	file, err := test_utils.CreateNewConfigYaml("config.yaml")
+	file, err := test_utils.CreateNewConfigYaml(configYaml)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -813,7 +821,9 @@ func RunTestJFRCommands(t *testing.T) {
 		restUrl       = context.RestUrl
 	)
 
-	file, err := test_utils.CreateNewConfigYaml("config.yaml")
+	const jfrName = "test-1"
+
+	file, err := test_utils.CreateNewConfigYaml(configYaml)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -843,15 +853,15 @@ func RunTestJFRCommands(t *testing.T) {
 
 	// should be able to create a JFR
 	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "Started recording 1", configArg, file,
-		"start", "jfr", "test-1", "-O", "/tmp", "-D", "25", "-y", "-c", context.ClusterName)
+		"start", "jfr", jfrName, "-O", "/tmp", "-D", "25", "-y", "-c", context.ClusterName)
 
 	// should be able to describe the JFR
 	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "Recording,duration", configArg, file,
-		"describe", "jfr", "test-1", "-c", context.ClusterName)
+		"describe", "jfr", jfrName, "-c", context.ClusterName)
 
 	// should be able to dump the JFR
 	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "Dumped recording,tim.jfr", configArg, file,
-		"dump", "jfr", "test-1", "-f", "/tmp/tim.jfr", "-c", context.ClusterName)
+		"dump", "jfr", jfrName, "-f", "/tmp/tim.jfr", "-c", context.ClusterName)
 
 	// should be able to see the JFRS running
 	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "name=test-1 duration=25s", configArg, file,
@@ -865,28 +875,28 @@ func RunTestJFRCommands(t *testing.T) {
 		"get", "jfrs", "-c", context.ClusterName)
 
 	// try to start a JFR on an invalid node
-	test_utils.EnsureCommandErrorContains(g, t, cliCmd, "does not exist", configArg, file,
-		"start", "jfr", "test-1", "-O", "/tmp", "-n", "100", "-y", "-c", context.ClusterName)
+	test_utils.EnsureCommandErrorContains(g, t, cliCmd, doesNotExist, configArg, file,
+		"start", "jfr", jfrName, "-O", "/tmp", "-n", "100", "-y", "-c", context.ClusterName)
 
 	// reset node id
 	cmd.NodeID = ""
 
 	// should be able to create a JFR for the role OracleCoherenceCliTestingRestServer
 	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "Started recording 2", configArg, file,
-		"start", "jfr", "test-1", "-O", "/tmp", "-D", "20", "-r", "OracleCoherenceCliTestingRestServer", "-y",
+		"start", "jfr", jfrName, "-O", "/tmp", "-D", "20", "-r", "OracleCoherenceCliTestingRestServer", "-y",
 		"-c", context.ClusterName)
 
 	// should be able to dump the recording
 	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "Dumped recording \"test-1\",1-tim.jfr,2-tim.jfr",
-		configArg, file, "dump", "jfr", "test-1", "-y", "-c", context.ClusterName)
+		configArg, file, "dump", "jfr", jfrName, "-y", "-c", context.ClusterName)
 
 	// should be able to describe the recording
 	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "running",
-		configArg, file, "describe", "jfr", "test-1", "-c", context.ClusterName)
+		configArg, file, "describe", "jfr", jfrName, "-c", context.ClusterName)
 
 	// should be able to stop the JFR
 	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "Stopped",
-		configArg, file, "stop", "jfr", "test-1", "-y", "-c", context.ClusterName)
+		configArg, file, "stop", "jfr", jfrName, "-y", "-c", context.ClusterName)
 
 	// remove the cluster entries
 	test_utils.EnsureCommandContains(g, t, cliCmd, context.ClusterName, configArg, file, "remove", "cluster", "cluster1", "-y")
@@ -900,7 +910,10 @@ func RunTestDumpClusterHeapCommands(t *testing.T) {
 		err     error
 	)
 
-	file, err := test_utils.CreateNewConfigYaml("config.yaml")
+	const clusterHeap = "cluster-heap"
+	const dump = "dump"
+
+	file, err := test_utils.CreateNewConfigYaml(configYaml)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -915,15 +928,15 @@ func RunTestDumpClusterHeapCommands(t *testing.T) {
 
 	// should be able to dump cluster heap for all members
 	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "Operation completed", configArg, file,
-		"dump", "cluster-heap", "-y", "-c", context.ClusterName)
+		dump, clusterHeap, "-y", "-c", context.ClusterName)
 
 	// should be able to dump cluster heap for a specific role
 	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "Operation completed", configArg, file,
-		"dump", "cluster-heap", "-y", "-c", context.ClusterName, "-r", "OracleCoherenceCliTestingRestServer")
+		dump, clusterHeap, "-y", "-c", context.ClusterName, "-r", "OracleCoherenceCliTestingRestServer")
 
 	// an invalid role should cause an error
 	test_utils.EnsureCommandErrorContains(g, t, cliCmd, "unable to find members with role name", configArg, file,
-		"dump", "cluster-heap", "-y", "-c", context.ClusterName, "-r", "OracleCoherenceCliTestingRestServerWrong")
+		dump, clusterHeap, "-y", "-c", context.ClusterName, "-r", "OracleCoherenceCliTestingRestServerWrong")
 
 	// remove the cluster entries
 	test_utils.EnsureCommandContains(g, t, cliCmd, context.ClusterName, configArg, file, "remove", "cluster", "cluster1", "-y")
@@ -941,7 +954,7 @@ func RunTestConfigureTracingCommands(t *testing.T) {
 		restUrl       = context.RestUrl
 	)
 
-	file, err := test_utils.CreateNewConfigYaml("config.yaml")
+	file, err := test_utils.CreateNewConfigYaml(configYaml)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -992,7 +1005,9 @@ func RunTestLogClusterStateCommands(t *testing.T) {
 		err     error
 	)
 
-	file, err := test_utils.CreateNewConfigYaml("config.yaml")
+	const clusterState = "cluster-state"
+
+	file, err := test_utils.CreateNewConfigYaml(configYaml)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -1007,15 +1022,15 @@ func RunTestLogClusterStateCommands(t *testing.T) {
 
 	// should be able to dump cluster heap for all members
 	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "completed", configArg, file,
-		"log", "cluster-state", "-y", "-c", context.ClusterName)
+		"log", clusterState, "-y", "-c", context.ClusterName)
 
 	// should be able to dump cluster heap for a specific role
 	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "completed", configArg, file,
-		"log", "cluster-state", "-y", "-c", context.ClusterName, "-r", "OracleCoherenceCliTestingRestServer")
+		"log", clusterState, "-y", "-c", context.ClusterName, "-r", "OracleCoherenceCliTestingRestServer")
 
 	// an invalid role should cause an error
 	test_utils.EnsureCommandErrorContains(g, t, cliCmd, "unable to find members with role name", configArg, file,
-		"log", "cluster-state", "-y", "-c", context.ClusterName, "-r", "OracleCoherenceCliTestingRestServerWrong")
+		"log", clusterState, "-y", "-c", context.ClusterName, "-r", "OracleCoherenceCliTestingRestServerWrong")
 
 	// remove the cluster entries
 	test_utils.EnsureCommandContains(g, t, cliCmd, context.ClusterName, configArg, file, "remove", "cluster", "cluster1", "-y")
@@ -1031,7 +1046,7 @@ func RunTestHttpSessionCommands(t *testing.T) {
 		restUrl = context.RestUrl
 	)
 
-	file, err := test_utils.CreateNewConfigYaml("config.yaml")
+	file, err := test_utils.CreateNewConfigYaml(configYaml)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -1083,7 +1098,9 @@ func RunTestElasticDataCommands(t *testing.T) {
 		restUrl = context.RestUrl
 	)
 
-	file, err := test_utils.CreateNewConfigYaml("config.yaml")
+	const elasticData = "elastic-data"
+
+	file, err := test_utils.CreateNewConfigYaml(configYaml)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -1112,19 +1129,19 @@ func RunTestElasticDataCommands(t *testing.T) {
 		context.ClusterName, "-u", context.Url)
 
 	// get the elastic data
-	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "FlashJournalRM,RamJournalRM", configArg, file, "get", "elastic-data",
+	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "FlashJournalRM,RamJournalRM", configArg, file, "get", elasticData,
 		"-c", context.ClusterName)
 
 	// describe Ram Journal
-	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "RAM JOURNAL DETAILS", configArg, file, "describe", "elastic-data",
+	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "RAM JOURNAL DETAILS", configArg, file, "describe", elasticData,
 		"RamJournalRM", "-c", context.ClusterName)
 
 	// describe Flash Journal
-	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "FLASH JOURNAL DETAILS", configArg, file, "describe", "elastic-data",
+	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "FLASH JOURNAL DETAILS", configArg, file, "describe", elasticData,
 		"FlashJournalRM", "-c", context.ClusterName)
 
 	// describe invalid type
-	test_utils.EnsureCommandErrorContains(g, t, cliCmd, cmd.ElasticDataMessage, configArg, file, "describe", "elastic-data",
+	test_utils.EnsureCommandErrorContains(g, t, cliCmd, cmd.ElasticDataMessage, configArg, file, "describe", elasticData,
 		"not-valid", "-c", context.ClusterName)
 
 	// remove the cluster entries
@@ -1136,7 +1153,9 @@ func RunTestCachesCommands(t *testing.T) {
 	g := NewGomegaWithT(t)
 	context := test_utils.GetTestContext()
 
-	file, err := test_utils.CreateNewConfigYaml("config.yaml")
+	const cacheName = "cache-1"
+
+	file, err := test_utils.CreateNewConfigYaml(configYaml)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -1164,19 +1183,19 @@ func RunTestCachesCommands(t *testing.T) {
 
 	// test describe cache without service
 	test_utils.EnsureCommandErrorContains(g, t, cliCmd, "\"service\" not set", configArg, file, "describe", "cache",
-		"cache-1", "-c", context.ClusterName)
+		cacheName, "-c", context.ClusterName)
 
 	// test describe cache with invalid service
 	test_utils.EnsureCommandErrorContains(g, t, cliCmd, "unable to find service", configArg, file, "describe", "cache",
-		"cache-1", "-s", "invalid-service", "-c", context.ClusterName)
+		cacheName, "-s", "invalid-service", "-c", context.ClusterName)
 
 	// test describe cache without correct service
 	test_utils.EnsureCommandErrorContains(g, t, cliCmd, "no cache named cache-1", configArg, file, "describe", "cache",
-		"cache-1", "-s", "PartitionedCache2", "-c", context.ClusterName)
+		cacheName, "-s", "PartitionedCache2", "-c", context.ClusterName)
 
 	// test describe cache-1
 	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "NODE ID,TIER,SIZE,LOCKS GRANTED,INDEX DETAILS", configArg, file, "describe", "cache",
-		"cache-1", "-s", "PartitionedCache", "-c", context.ClusterName)
+		cacheName, "-s", "PartitionedCache", "-c", context.ClusterName)
 
 	// test describe cache-2
 	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "NODE ID,TIER,SIZE,LOCKS GRANTED,INDEX DETAILS", configArg, file, "describe", "cache",
@@ -1184,17 +1203,17 @@ func RunTestCachesCommands(t *testing.T) {
 
 	// test set cache errors - invalid tier
 	test_utils.EnsureCommandErrorContains(g, t, cliCmd, cmd.InvalidTierMsg, configArg, file,
-		"set", "cache", "cache-1", "-a", "expiryDelay", "-v", "30", "-s", "PartitionedCache", "-y",
+		"set", "cache", cacheName, "-a", "expiryDelay", "-v", "30", "-s", "PartitionedCache", "-y",
 		"-c", context.ClusterName, "-t", "invalid")
 
 	// test set cache errors - invalid float value
 	test_utils.EnsureCommandErrorContains(g, t, cliCmd, "invalid", configArg, file,
-		"set", "cache", "cache-1", "-a", "expiryDelay", "-v", "30.fhfhfh", "-s", "PartitionedCache", "-y",
+		"set", "cache", cacheName, "-a", "expiryDelay", "-v", "30.fhfhfh", "-s", "PartitionedCache", "-y",
 		"-c", context.ClusterName, "-t", "back")
 
 	// test set expiry to 30 seconds
 	test_utils.EnsureCommandContainsAll(g, t, cliCmd, cmd.OperationCompleted, configArg, file,
-		"set", "cache", "cache-1", "-a", "expiryDelay", "-v", "30", "-s", "PartitionedCache", "-y",
+		"set", "cache", cacheName, "-a", "expiryDelay", "-v", "30", "-s", "PartitionedCache", "-y",
 		"-c", context.ClusterName)
 
 	test_utils.Sleep(15)
@@ -1206,7 +1225,7 @@ func RunTestCachesCommands(t *testing.T) {
 
 	// test set expiry to 60 seconds
 	test_utils.EnsureCommandContainsAll(g, t, cliCmd, cmd.OperationCompleted, configArg, file,
-		"set", "cache", "cache-1", "-a", "expiryDelay", "-v", "60", "-y", "-s", "PartitionedCache",
+		"set", "cache", cacheName, "-a", "expiryDelay", "-v", "60", "-y", "-s", "PartitionedCache",
 		"-c", context.ClusterName)
 
 	test_utils.Sleep(10)
@@ -1218,7 +1237,7 @@ func RunTestCachesCommands(t *testing.T) {
 
 	// test set invalid attribute
 	test_utils.EnsureCommandErrorContains(g, t, cliCmd, "attribute name expiryDelayd is invalid", configArg, file,
-		"set", "cache", "cache-1", "-a", "expiryDelayd", "-v", "60", "-y", "-s", "PartitionedCache",
+		"set", "cache", cacheName, "-a", "expiryDelayd", "-v", "60", "-y", "-s", "PartitionedCache",
 		"-c", context.ClusterName)
 
 	// remove the cluster entries
@@ -1235,7 +1254,7 @@ func RunTestPersistenceCommands(t *testing.T) {
 		services     []string
 	)
 
-	file, err := test_utils.CreateNewConfigYaml("config.yaml")
+	file, err := test_utils.CreateNewConfigYaml(configYaml)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -1335,7 +1354,7 @@ func RunTestPersistenceCommands(t *testing.T) {
 		configArg, file, "describe", "service", serviceName, "-c", context.ClusterName)
 
 	// try to archive a snapshot that does not exist
-	test_utils.EnsureCommandErrorContains(g, t, cliCmd, "does not exist", configArg,
+	test_utils.EnsureCommandErrorContains(g, t, cliCmd, doesNotExist, configArg,
 		file, "archive", "snapshot", snapshotName, "-c", context.ClusterName, "-y", "-s", serviceName)
 
 	cmd.ArchivedSnapshots = false
@@ -1348,11 +1367,11 @@ func RunTestPersistenceCommands(t *testing.T) {
 
 	cmd.ArchivedSnapshots = false
 	// try to recover a snapshot that doesn't exist
-	test_utils.EnsureCommandErrorContains(g, t, cliCmd, "does not exist", configArg,
+	test_utils.EnsureCommandErrorContains(g, t, cliCmd, doesNotExist, configArg,
 		file, "recover", "snapshot", snapshotName, "-c", context.ClusterName, "-y", "-s", serviceName)
 
 	// try to retrieve a snapshot that doesn't exist
-	test_utils.EnsureCommandErrorContains(g, t, cliCmd, "does not exist", configArg,
+	test_utils.EnsureCommandErrorContains(g, t, cliCmd, doesNotExist, configArg,
 		file, "retrieve", "snapshot", snapshotName, "-c", context.ClusterName, "-y", "-s", serviceName)
 
 	// test json output
@@ -1384,7 +1403,7 @@ func RunTestHealthCommands(t *testing.T) {
 		return
 	}
 
-	file, err := test_utils.CreateNewConfigYaml("config.yaml")
+	file, err := test_utils.CreateNewConfigYaml(configYaml)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -1412,7 +1431,7 @@ func RunTestHttpProxyCommands(t *testing.T) {
 	g := NewGomegaWithT(t)
 	context := test_utils.GetTestContext()
 
-	file, err := test_utils.CreateNewConfigYaml("config.yaml")
+	file, err := test_utils.CreateNewConfigYaml(configYaml)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -1446,7 +1465,7 @@ func RunTestHttpProxyCommands(t *testing.T) {
 
 	// test jsonpath output
 	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "\"eventInterceptorInfo\"", configArg, file,
-		"describe", "http-server", "ManagementHttpProxy", "-o", "jsonpath=$.services")
+		"describe", "http-server", "ManagementHttpProxy", "-o", jsonPathServices)
 
 	// remove the cluster entries
 	test_utils.EnsureCommandContains(g, t, cliCmd, context.ClusterName, configArg, file, "remove", "cluster", "cluster1", "-y")
@@ -1458,7 +1477,7 @@ func RunTestClusterGetClusterRequest(t *testing.T) {
 	context := test_utils.GetTestContext()
 	var cluster = config.Cluster{}
 
-	file, err := test_utils.CreateNewConfigYaml("config.yaml")
+	file, err := test_utils.CreateNewConfigYaml(configYaml)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -1497,7 +1516,7 @@ func RunTestClusterGetMembersRequest(t *testing.T) {
 	context := test_utils.GetTestContext()
 	var members = config.Members{}
 
-	file, err := test_utils.CreateNewConfigYaml("config.yaml")
+	file, err := test_utils.CreateNewConfigYaml(configYaml)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -1544,7 +1563,7 @@ func RunTestClusterServicesRequest(t *testing.T) {
 		data     []byte
 	)
 
-	file, err := test_utils.CreateNewConfigYaml("config.yaml")
+	file, err := test_utils.CreateNewConfigYaml(configYaml)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -1596,7 +1615,7 @@ func RunTestCachesRequests(t *testing.T) {
 	context := test_utils.GetTestContext()
 	var caches = config.CacheDetails{}
 
-	file, err := test_utils.CreateNewConfigYaml("config.yaml")
+	file, err := test_utils.CreateNewConfigYaml(configYaml)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -1645,7 +1664,7 @@ func RunTestFederationCommands(t *testing.T) {
 		g       = NewGomegaWithT(t)
 	)
 
-	file, err := test_utils.CreateNewConfigYaml("config.yaml")
+	file, err := test_utils.CreateNewConfigYaml(configYaml)
 	if err != nil {
 		t.Fatal(err)
 	}

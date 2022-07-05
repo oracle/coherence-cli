@@ -39,6 +39,8 @@ const links = "?links="
 const jsonStringFormat = "{\"%s\": %s}"
 const servicesPath = "/services/"
 const membersPath = "/members/"
+const reportersPath = "/reporters/"
+const rolePrefix = "{\"role\": \""
 
 // HTTPFetcher is an implementation of a Fetcher to retrieve data from Management over REST
 type HTTPFetcher struct {
@@ -244,7 +246,7 @@ func (h HTTPFetcher) SetReporterAttribute(memberID, attribute string, value inte
 	var valueString = getJSONValueString(value)
 
 	payload := []byte(fmt.Sprintf(jsonStringFormat, attribute, valueString))
-	result, err := httpPostRequest(h, "/reporters/"+memberID, payload)
+	result, err := httpPostRequest(h, reportersPath+memberID, payload)
 	if err != nil {
 		return constants.EmptyByte, utils.GetError(
 			fmt.Sprintf("cannot set value %v for attribute %s ", value, attribute), err)
@@ -418,7 +420,7 @@ func (h HTTPFetcher) DumpClusterHeap(role string) ([]byte, error) {
 		payload = constants.EmptyByte
 	)
 	if role != "all" {
-		payload = []byte("{\"role\": \"" + role + "\"}")
+		payload = []byte(rolePrefix + role + "\"}")
 	}
 	result, err := httpPostRequest(h, "/dumpClusterHeap", payload)
 	if err != nil {
@@ -436,7 +438,7 @@ func (h HTTPFetcher) ConfigureTracing(role string, tracingRatio float32) ([]byte
 		role = ""
 	}
 
-	payload = []byte("{\"role\": \"" + role + "\", \"tracingRatio\": " + fmt.Sprintf("%v", tracingRatio) + "}")
+	payload = []byte(rolePrefix + role + "\", \"tracingRatio\": " + fmt.Sprintf("%v", tracingRatio) + "}")
 
 	result, err := httpPostRequest(h, "/configureTracing", payload)
 	if err != nil {
@@ -451,7 +453,7 @@ func (h HTTPFetcher) LogClusterState(role string) ([]byte, error) {
 		payload = constants.EmptyByte
 	)
 	if role != "all" {
-		payload = []byte("{\"role\": \"" + role + "\"}")
+		payload = []byte(rolePrefix + role + "\"}")
 	}
 	result, err := httpPostRequest(h, "/logClusterState", payload)
 	if err != nil {
@@ -513,7 +515,7 @@ func (h HTTPFetcher) GetReportersJSON() ([]byte, error) {
 
 // GetReporterJSON returns reporter for a node in raw json
 func (h HTTPFetcher) GetReporterJSON(nodeID string) ([]byte, error) {
-	result, err := httpGetRequest(h, "/reporters/"+nodeID+links)
+	result, err := httpGetRequest(h, reportersPath+nodeID+links)
 	if err != nil {
 		return constants.EmptyByte, utils.GetError("cannot get reporter for node "+nodeID, err)
 	}
@@ -768,7 +770,7 @@ func getInitialURL(jfrOperation, jfrType, target string) string {
 
 // issueReporterCommand issues a reporter command for a node
 func issueReporterCommand(h HTTPFetcher, nodeID, command string) ([]byte, error) {
-	_, err := httpPostRequest(h, "/reporters/"+nodeID+"/"+command, constants.EmptyByte)
+	_, err := httpPostRequest(h, reportersPath+nodeID+"/"+command, constants.EmptyByte)
 	if err != nil {
 		return nil, utils.GetError("cannot issue "+command+" reporter on "+nodeID, err)
 	}

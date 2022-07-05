@@ -115,16 +115,19 @@ func getJSON(g *WithT, data []byte) interface{} {
 }
 
 func TestSanitizeSnapshotName(t *testing.T) {
-	g := NewGomegaWithT(t)
+	var (
+		g        = NewGomegaWithT(t)
+		expected = "test-tim"
+	)
 	g.Expect(SanitizeSnapshotName("abc123")).To(Equal("abc123"))
 	g.Expect(SanitizeSnapshotName("abc_123")).To(Equal("abc_123"))
 	g.Expect(SanitizeSnapshotName("abc-123")).To(Equal("abc-123"))
 	g.Expect(SanitizeSnapshotName("abc123~")).To(Equal("abc123-"))
 	g.Expect(SanitizeSnapshotName("abc123 ")).To(Equal("abc123-"))
 	g.Expect(SanitizeSnapshotName("!@#$%^")).To(Equal("------"))
-	g.Expect(SanitizeSnapshotName("test/tim")).To(Equal("test-tim"))
-	g.Expect(SanitizeSnapshotName("test\\tim")).To(Equal("test-tim"))
-	g.Expect(SanitizeSnapshotName("test.tim")).To(Equal("test-tim"))
+	g.Expect(SanitizeSnapshotName("test/tim")).To(Equal(expected))
+	g.Expect(SanitizeSnapshotName("test\\tim")).To(Equal(expected))
+	g.Expect(SanitizeSnapshotName("test.tim")).To(Equal(expected))
 	g.Expect(SanitizeSnapshotName("c:test.tim")).To(Equal("c-test-tim"))
 }
 

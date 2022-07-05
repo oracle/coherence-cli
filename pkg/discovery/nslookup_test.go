@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Oracle and/or its affiliates.
+ * Copyright (c) 2021, 2022 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -57,6 +57,7 @@ func TestBasicConnection(t *testing.T) {
 		clusterPort = os.Getenv("CLUSTER_PORT")
 		hostName    = "localhost"
 		clusters    []ClusterNSPort
+		result      = "result: "
 	)
 
 	if clusterPort != "" {
@@ -66,23 +67,23 @@ func TestBasicConnection(t *testing.T) {
 	g.Expect(err).To(BeNil())
 
 	s, err := ns.Lookup(ClusterNameLookup)
-	fmt.Println("result: ", s)
+	fmt.Println(result, s)
 	g.Expect(err).To(BeNil())
 
 	s, err = ns.Lookup(ClusterInfoLookup)
-	fmt.Println("result: ", s)
+	fmt.Println(result, s)
 	g.Expect(err).To(BeNil())
 
 	s, err = ns.Lookup(JMXLookup)
-	fmt.Println("result: ", s)
+	fmt.Println(result, s)
 	g.Expect(err).To(BeNil())
 
 	s, err = ns.Lookup(NSPrefix + ManagementLookup)
-	fmt.Println("result: ", s)
+	fmt.Println(result, s)
 	g.Expect(err).To(BeNil())
 
 	s, err = ns.Lookup("dummy")
-	fmt.Println("result: ", s)
+	fmt.Println(result, s)
 	g.Expect(s).To(BeEmpty())
 	g.Expect(err).To(BeNil())
 

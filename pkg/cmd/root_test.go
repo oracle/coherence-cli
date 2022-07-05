@@ -21,6 +21,7 @@ import (
 
 const cliVersion = "CLI Version:"
 const configOption = "--config"
+const configYaml = "config.yaml"
 
 func TestVersionCommand(t *testing.T) {
 	g := NewGomegaWithT(t)
@@ -61,7 +62,7 @@ func TestContextCommands(t *testing.T) {
 	cliCmd := Initialize(nil)
 	g := NewGomegaWithT(t)
 
-	file, err := test_utils.CreateNewConfigYaml("config.yaml")
+	file, err := test_utils.CreateNewConfigYaml(configYaml)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -96,7 +97,7 @@ func TestDebugCommands(t *testing.T) {
 	cliCmd := Initialize(nil)
 	g := NewGomegaWithT(t)
 
-	file, err := test_utils.CreateNewConfigYaml("config.yaml")
+	file, err := test_utils.CreateNewConfigYaml(configYaml)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -128,7 +129,7 @@ func TestIgnoreCertsCommands(t *testing.T) {
 		ignoreCerts = "ignore-certs"
 	)
 
-	file, err := test_utils.CreateNewConfigYaml("config.yaml")
+	file, err := test_utils.CreateNewConfigYaml(configYaml)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -157,7 +158,7 @@ func TestGetLogsCommands(t *testing.T) {
 	cliCmd := Initialize(nil)
 	g := NewGomegaWithT(t)
 
-	file, err := test_utils.CreateNewConfigYaml("config.yaml")
+	file, err := test_utils.CreateNewConfigYaml(configYaml)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -178,7 +179,7 @@ func TestTimeoutCommands(t *testing.T) {
 	cliCmd := Initialize(nil)
 	g := NewGomegaWithT(t)
 
-	file, err := test_utils.CreateNewConfigYaml("config.yaml")
+	file, err := test_utils.CreateNewConfigYaml(configYaml)
 	if err != nil {
 		t.Fatal(err)
 	}
