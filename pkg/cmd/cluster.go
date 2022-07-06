@@ -610,7 +610,7 @@ addition information as well as '-v' to displayed additional information.`,
 
 // discoverClustersCmd represents the discover clusters command
 var discoverClustersCmd = &cobra.Command{
-	Use:   "clusters",
+	Use:   "clusters [host[:port]...]",
 	Short: "discover clusters using the Coherence Name Service",
 	Long: `The 'discover clusters' command discovers Coherence clusters using the Name Service.
 You can specify a list of either host:port pairs or if you specify a host name the default cluster
