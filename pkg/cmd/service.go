@@ -25,7 +25,7 @@ var (
 	serviceType       string
 	statusHATimeout   int32
 	statusHAType      string
-	validServiceTypes = []string{"DistributedCache", "FederatedCache", "Invocation", "Proxy", "RemoteCache", "ReplicatedCache", "all"}
+	validServiceTypes = []string{"DistributedCache", "FederatedCache", "Invocation", "Proxy", "RemoteCache", "ReplicatedCache", "all", "PagedTopic"}
 	validStatusHA     = []string{"NODE-SAFE", "MACHINE-SAFE", "RACK-SAFE", "SITE-SAFE"}
 	allStatusHA       = []string{"ENDANGERED", "NODE-SAFE", "MACHINE-SAFE", "RACK-SAFE", "SITE-SAFE"}
 
@@ -68,7 +68,7 @@ can also specify '-o wide' to display addition information.`,
 
 		// check service type
 		if serviceType != "" && !utils.SliceContains(validServiceTypes, serviceType) {
-			return fmt.Errorf("invalid service type of '%s' specified", serviceType)
+			return fmt.Errorf("invalid service type of '%s' specified. \nValid types are %v", serviceType, validServiceTypes)
 		}
 
 		connection, dataFetcher, err = GetConnectionAndDataFetcher()
