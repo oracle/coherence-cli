@@ -9,6 +9,10 @@ https://oss.oracle.com/licenses/upl.
 
 ![Coherence CI](https://github.com/oracle/coherence-cli/workflows/CI/badge.svg?branch=main)
 [![License](http://img.shields.io/badge/license-UPL%201.0-blue.svg)](https://oss.oracle.com/licenses/upl/)
+
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=oracle_coherence-cli&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=oracle_coherence-cli)
+[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=oracle_coherence-cli&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=oracle_coherence-cli)
+
 [![Go Report Card](https://goreportcard.com/badge/github.com/oracle/coherence-cli)](https://goreportcard.com/report/github.com/oracle/coherence-cli)
 ![GitHub release (latest by date)](https://img.shields.io/github/v/release/oracle/coherence-cli)
 
