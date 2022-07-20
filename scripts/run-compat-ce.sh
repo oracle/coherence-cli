@@ -18,5 +18,5 @@ COHERENCE_VERSION=22.06 make clean build-test-images test-e2e-standalone
 echo "Coherence CE 22.06 with Executor"
 PROFILES=,executor COHERENCE_VERSION=22.06 make clean build-test-images test-e2e-standalone
 
-echo "Coherence CE 14.1.1-0-9"
-COHERENCE_VERSION=14.1.1-0-9 make clean build-test-images test-e2e-standalone
+echo "Coherence CE 14.1.1-0-10"
+COHERENCE_VERSION=14.1.1-0-10 make clean build-test-images test-e2e-standalone

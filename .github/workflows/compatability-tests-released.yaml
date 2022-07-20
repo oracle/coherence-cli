@@ -24,8 +24,8 @@ jobs:
           - 21.12.4
           - 22.06
           - 21.06.2
+          - 14.1.1-0-10
           - 14.1.1-0-9
-          - 14.1.1-0-8
 
 #   Checkout the source, we need a depth of zero to fetch all of the history otherwise
 #   the copyright check cannot work out the date of the files from Git.
