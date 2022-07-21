@@ -24,6 +24,7 @@ import (
 var (
 	attributeNameCache   string
 	attributeValueCache  string
+	ignoreSpecialCaches  bool
 	validAttributesCache = []string{"expiryDelay", "highUnits", "lowUnits", "batchFactor", "refreshFactor",
 		"requeueThreshold"}
 	nodeIDCache    string
@@ -35,9 +36,10 @@ var (
 var getCachesCmd = &cobra.Command{
 	Use:   "caches",
 	Short: "display caches for a cluster",
-	Long: `The 'get caches' command displays caches for a cluster. If 
-no service name is specified then all services are queried. You
-can specify '-o wide' to display addition information.`,
+	Long: `The 'get caches' command displays caches for a cluster. If no service
+name is specified then all services are queried. You can specify '-o wide' to
+display addition information. Use '-I' to ignore internal caches such as those
+used by Federation.`,
 	Args: cobra.ExactArgs(0),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var (
@@ -123,8 +125,8 @@ var describeCacheCmd = &cobra.Command{
 	Use:   "cache cache-name",
 	Short: "describe a cache",
 	Long: `The 'describe cache' command displays information related to a specific cache. This
-includes cache size, access, storage and index information across all nodes. You
-can specify '-o wide' to display addition information.`,
+includes cache size, access, storage and index information across all nodes.
+You can specify '-o wide' to display addition information.`,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
 			displayErrorAndExit(cmd, "you must provide a cache name")
@@ -427,7 +429,8 @@ func getCaches(serviceList []string, dataFetcher fetcher.Fetcher, topicsOnly boo
 			finalCaches := make([]config.CacheSummaryDetail, 0)
 
 			for i := range cachesSummary.Caches {
-				if topicsOnly && !strings.Contains(cachesSummary.Caches[i].CacheName, "$topic$") {
+				if (topicsOnly && !strings.Contains(cachesSummary.Caches[i].CacheName, "$topic$")) ||
+					ignoreSpecialCaches && strings.Contains(cachesSummary.Caches[i].CacheName, "$") {
 					continue
 				}
 
@@ -460,6 +463,7 @@ func getCaches(serviceList []string, dataFetcher fetcher.Fetcher, topicsOnly boo
 
 func init() {
 	getCachesCmd.Flags().StringVarP(&serviceName, serviceNameOption, serviceNameOptionShort, "", serviceNameDescription)
+	getCachesCmd.Flags().BoolVarP(&ignoreSpecialCaches, "ignore-special", "I", false, "ignore caches with $ in name")
 
 	describeCacheCmd.Flags().StringVarP(&serviceName, serviceNameOption, serviceNameOptionShort, "", serviceNameDescription)
 	_ = describeCacheCmd.MarkFlagRequired(serviceNameOption)
