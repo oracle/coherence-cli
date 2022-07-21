@@ -32,6 +32,7 @@ services:
     image: ${COHERENCE_IMAGE2}
     ports:
       - 30001:30001
+      - 8081:8080
     volumes:
       - ./shared:/shared
     user: ${CURRENT_UID}

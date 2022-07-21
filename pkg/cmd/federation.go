@@ -389,7 +389,7 @@ service, type and participant. Specify -T to set type destinations or origins an
 				}
 				cmd.Println(result)
 			} else {
-				cmd.Println(finalData)
+				cmd.Println(string(finalData))
 			}
 		} else {
 			var sb strings.Builder
