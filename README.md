@@ -73,13 +73,15 @@ The fastest way to experience the Coherence CLI is to follow the
 The CLI supports and is certified against the following Community and Commercial editions of Coherence:
 
 **Coherence Community Edition**
+* 22.06.x
 * 21.12.x
-* 14.1.1-0-7
-* 14.1.1-0-8
+* 14.1.1-0-10
+* 14.1.1-0-9
 
 **Coherence Grid/ Enterprise Edition**
 * 12.2.1.4.x - minimum patch level of 12.2.1.4.7+ required
 * 14.1.1.0.x - minimum patch level of 14.1.1.0.2+ required
+* 14.1.1.2206.x Feature Pack
 
 > Note: If you are on a patch set below the minimum recommended above, then CLI may work, but some functionality may not be available. It
 > is always recommended to upgrade to the latest Coherence patch as soon as you are able to.
