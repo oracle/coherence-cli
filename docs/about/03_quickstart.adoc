@@ -180,7 +180,7 @@ NODE ID  HOST IP        SERVICE NAME         SERVER TYPE                        
 2. You can also provide the `-v` (verbose) and `-o wide` (wide format) flags to display more details.
 
 3. By default, all memory and disk values are displayed in bytes as you can see above.
-You can change this by specifying `-k` for KB, `-m` for MB or `-g` for GB. This applies to all values returned
+You can change this by specifying `-k` for KB, `-m` for MB or `-g` for GB. This applies to all memory or disk values returned.
 
 [#step5]
 === 5. Display services
@@ -208,6 +208,8 @@ $ cohctl set context local
 Current context is now local
 
 $ cohctl get services
+Using cluster connection 'local' from current context.
+
 SERVICE NAME         TYPE              MEMBERS  STATUS HA     STORAGE  PARTITIONS
 Proxy                Proxy                   2  n/a                -1          -1
 PartitionedCache     DistributedCache        2  MACHINE-SAFE        2          31

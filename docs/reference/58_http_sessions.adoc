@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 
-    Copyright (c) 2021, Oracle and/or its affiliates.
+    Copyright (c) 2021, 2022 Oracle and/or its affiliates.
     Licensed under the Universal Permissive License v 1.0 as shown at
     https://oss.oracle.com/licenses/upl.
 
@@ -30,7 +30,6 @@ Display Http Session data.
 [source,bash]
 ----
 $ cohctl get http-servers -c local
-
 
 APPLICATION  TYPE                SESSION TIMEOUT  CACHE          OVERFLOW CACHE  AVG SIZE  TOTAL REAPED  AVG DURATION  LAST REAP  SESSION UPDATES
 app-1        HttpSessionManager              600  session-cache                       103             1         1,234        123                3

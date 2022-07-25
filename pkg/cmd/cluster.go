@@ -40,7 +40,7 @@ var addClusterCmd = &cobra.Command{
 	Short: "add a cluster connection",
 	Long: `The 'add cluster' command adds a new connection to a Coherence cluster. You can
 specify the full url such as https://<host>:<management-port>/management/coherence/cluster.
-You can also specify host and port (for http connections) and the url will be automatically 
+You can also specify host:port (for http connections) and the url will be automatically
 populated constructed.`,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
