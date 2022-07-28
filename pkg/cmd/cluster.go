@@ -880,13 +880,15 @@ var (
 	serverCount    int32
 )
 
-const defaultCoherenceVersion = "22.06-SNAPSHOT"
+const defaultCoherenceVersion = "22.06"
 
 // createClusterCmd represents the create cluster command
 var createClusterCmd = &cobra.Command{
 	Use:   "cluster",
 	Short: "create a local Coherence cluster",
-	Long:  `The 'create cluster' command creates a local cluster and adds to the cohctl.yaml file.`,
+	Long: `The 'create cluster' command creates a local cluster and adds to the cohctl.yaml file.
+You must have the 'mvn' executable and 'java' executable in your PATH for this to work.
+Note: This cluster is only for development/testing purposes using Coherence CE, and should not be used in a production capacity.`,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
 			displayErrorAndExit(cmd, "you must provide a cluster name")
@@ -899,6 +901,11 @@ var createClusterCmd = &cobra.Command{
 			err         error
 			response    string
 		)
+
+		// validate the Java and Maven executable are present and in the path
+		if err = checkCreateRequirements(); err != nil {
+			return err
+		}
 
 		// port validation
 		if err = utils.ValidatePort(httpPort); err != nil {
@@ -936,6 +943,11 @@ var createClusterCmd = &cobra.Command{
 		}
 
 		cmd.Println("Creating...")
+
+		// download the coherence dependencies
+		if err = getCoherenceDependencies(cmd, clusterVersion); err != nil {
+			return fmt.Errorf("unable to get depdencies for coherence version %s: %v", clusterVersion, err)
+		}
 
 		return nil
 	},

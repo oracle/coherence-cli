@@ -72,6 +72,7 @@ const OperationCompleted = "operation completed"
 // config file related
 
 const configName = "cohctl"
+const logsDirName = "logs"
 const configType = "yaml"
 const configDir = ".cohctl"
 const logFile = "cohctl.log"
@@ -82,6 +83,9 @@ var (
 
 	// configuration directory
 	cfgDirectory string
+
+	// logs directory
+	logsDirectory string
 
 	// Config is the CLI config
 	Config CoherenceCLIConfig
@@ -126,6 +130,10 @@ type ClusterConnection struct {
 	ClusterVersion       string `json:"clusterVersion"`
 	ClusterName          string `json:"clusterName"` // the actual cluster name
 	ClusterType          string `json:"clusterType"`
+	ManuallyCreated      bool   `json:"manuallyCreated"` // indicates if this was created by the create cluster command
+	BaseClasspath        string `json:"baseClasspath"`   // the minimum required classes coherence.jar and coherence-json
+	AdditionalClasspath  string `json:"additionalClasspath"`
+	ProcessIDs           []int  `json:"processIDs"` // process id's of started members
 }
 
 // rootCmd represents the base command when called without any subcommands
@@ -293,9 +301,18 @@ func initConfig() {
 		}
 	}
 
+	// setup logs directory
+	logsDirectory = filepath.Join(cfgDirectory, logsDirName)
+	err = ensureLogsDir()
+	if err != nil {
+		fmt.Printf("unable to create logs directory: %s, %v", logsDirectory, err)
+		os.Exit(1)
+	}
+
 	Logger.Info("Configuration loaded", []zapcore.Field{
 		zap.String("configFile", cfgFile),
 		zap.String("configDir", cfgDirectory),
+		zap.String("logsDir", logsDirectory),
 	}...)
 
 	// check for newer version of cohctl and carry out any upgrade tasks
@@ -341,6 +358,22 @@ func WriteConfig() error {
 	err := viper.WriteConfig()
 	if err != nil {
 		return errors.New("unable to write config: " + err.Error())
+	}
+	return nil
+}
+
+// GetConfigDir returns the configuration directory
+func GetConfigDir() string {
+	return cfgDirectory
+}
+
+func GetLogDirectory() string {
+	return logsDirectory
+}
+
+func ensureLogsDir() error {
+	if err := utils.EnsureDirectory(GetLogDirectory()); err != nil {
+		return err
 	}
 	return nil
 }
