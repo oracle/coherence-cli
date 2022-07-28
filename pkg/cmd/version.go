@@ -43,8 +43,8 @@ Use the '-u' option to check for updates.`,
 		)
 
 		cmd.Printf("Coherence Command Line Interface\nCLI Version:  %s\nDate:         %s\n"+
-			"Commit:       %s\nOS:           %s\nArchitecture: %s\n",
-			Version, Date, Commit, runtime.GOOS, runtime.GOARCH)
+			"Commit:       %s\nOS:           %s\nArchitecture: %s\nGo Version:   %s\n",
+			Version, Date, Commit, runtime.GOOS, runtime.GOARCH, runtime.Version())
 
 		if checkForUpdates {
 			cmd.Println("\nChecking for updates...")
