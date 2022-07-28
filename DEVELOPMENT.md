@@ -21,7 +21,7 @@ This section outlines how to build the CLI.
 
 ### Pre-Requisites
 
-1. Install Go version 1.16 or above from [https://golang.org/doc/install](https://golang.org/doc/install).
+1. Install Go version 1.17 or above from [https://golang.org/doc/install](https://golang.org/doc/install).
 2. Maven 3.6.3+
 3. JDK 1.8+
 
