@@ -26,6 +26,9 @@ jobs:
           - 22.06
           - 14.1.1-0-10
           - 14.1.1-0-9
+        javaImage:
+          - gcr.io/distroless/java:11
+          - gcr.io/distroless/java17
 
 #   Checkout the source, we need a depth of zero to fetch all of the history otherwise
 #   the copyright check cannot work out the date of the files from Git.
@@ -38,6 +41,7 @@ jobs:
       shell: bash
       run: |
         docker pull gcr.io/distroless/java:11
+        docker pull gcr.io/distroless/java17
 
     - name: Set up JDK
       uses: actions/setup-java@v1
@@ -71,8 +75,8 @@ jobs:
         LATEST=$(curl -s https://oracle.github.io/coherence-cli/stable.txt)
         echo "Checkout out $LATEST"
         git checkout $LATEST
-        COHERENCE_VERSION=${{ matrix.coherenceVersion }} make clean build-test-images test-e2e-standalone
-        COHERENCE_VERSION=${{ matrix.coherenceVersion }} make test-clean test-discovery
+        COHERENCE_BASE_IMAGE=${{ matrix.javaImage }} COHERENCE_VERSION=${{ matrix.coherenceVersion }} make clean build-test-images test-e2e-standalone
+        COHERENCE_BASE_IMAGE=${{ matrix.javaImage }} COHERENCE_VERSION=${{ matrix.coherenceVersion }} make test-clean test-discovery
 
     - uses: actions/upload-artifact@v1
       if: failure()
