@@ -75,8 +75,14 @@ jobs:
         LATEST=$(curl -s https://oracle.github.io/coherence-cli/stable.txt)
         echo "Checkout out $LATEST"
         git checkout $LATEST
-        COHERENCE_BASE_IMAGE=${{ matrix.javaImage }} COHERENCE_VERSION=${{ matrix.coherenceVersion }} make clean build-test-images test-e2e-standalone
-        COHERENCE_BASE_IMAGE=${{ matrix.javaImage }} COHERENCE_VERSION=${{ matrix.coherenceVersion }} make test-clean test-discovery
+        export COHERENCE_BASE_IMAGE=${{ matrix.javaImage }}
+        export COHERENCE_VERSION=${{ matrix.coherenceVersion }}
+        if [ ${COHERENCE_VERSION} == "21.12.4" -a ${COHERENCE_BASE_IMAGE} == "gcr.io/distroless/java17" ] ; then
+           echo "Skipping..."
+        else
+            make clean build-test-images test-e2e-standalone
+            make test-clean test-discovery
+        fi
 
     - uses: actions/upload-artifact@v1
       if: failure()
