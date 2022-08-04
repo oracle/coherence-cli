@@ -15,8 +15,15 @@ import (
 	"github.com/oracle/coherence-cli/pkg/fetcher"
 	"github.com/oracle/coherence-cli/pkg/utils"
 	"github.com/spf13/cobra"
+	"strconv"
 	"strings"
 	"time"
+)
+
+var (
+	executorAttributeName   string
+	executorAttributeValue  string
+	executorValidAttributes = []string{"traceLogging"}
 )
 
 // getExecutorsCmd represents the get executors command
@@ -172,6 +179,87 @@ var describeExecutorCmd = &cobra.Command{
 	},
 }
 
+// setExecutorCmd represents the set executor command
+var setExecutorCmd = &cobra.Command{
+	Use:   "executor executor-name",
+	Short: "set an executor attribute",
+	Long: `The 'set executor' command sets an attribute for a specific executor across
+all nodes. The following attribute names are allowed: traceLogging.`,
+	Args: func(cmd *cobra.Command, args []string) error {
+		if len(args) != 1 {
+			displayErrorAndExit(cmd, "you must provide an executor name")
+		}
+		return nil
+	},
+	RunE: func(cmd *cobra.Command, args []string) error {
+		var (
+			err            error
+			dataFetcher    fetcher.Fetcher
+			executors      = config.Executors{}
+			finalExecutors = config.Executors{}
+			executor       = args[0]
+			response       string
+			actualValue    interface{}
+		)
+
+		if !utils.SliceContains(executorValidAttributes, executorAttributeName) {
+			return fmt.Errorf("attribute name %s is invalid. Please choose one of\n%v",
+				executorAttributeName, executorValidAttributes)
+		}
+
+		if executorAttributeName == executorValidAttributes[0] {
+			if executorAttributeValue != "true" && executorAttributeValue != "false" {
+				return fmt.Errorf("value for %s should be true or false", executorAttributeName)
+			}
+			actualValue, _ = strconv.ParseBool(executorAttributeValue)
+		}
+
+		// retrieve the current context or the value from "-c"
+		_, dataFetcher, err = GetConnectionAndDataFetcher()
+		if err != nil {
+			return err
+		}
+
+		executors, err = getExecutorDetails(dataFetcher, false)
+		if err != nil {
+			return err
+		}
+
+		if len(executors.Executors) == 0 {
+			return errors.New("unable to find any executors in this cluster")
+		}
+
+		// filter out any executors without the name
+		for _, value := range executors.Executors {
+			if value.Name == executor {
+				finalExecutors.Executors = append(finalExecutors.Executors, value)
+			}
+		}
+
+		if len(finalExecutors.Executors) == 0 {
+			return fmt.Errorf("unable to find executor with name %s", executor)
+		}
+
+		if !automaticallyConfirm {
+			cmd.Printf("Are you sure you want to set the value of attribute %s to %s for %s? (y/n) ",
+				executorAttributeName, executorAttributeValue, executor)
+			_, err = fmt.Scanln(&response)
+			if response != "y" || err != nil {
+				cmd.Println(constants.NoOperation)
+				return nil
+			}
+		}
+
+		_, err = dataFetcher.SetExecutorAttribute(executor, executorAttributeName, actualValue)
+		if err != nil {
+			return err
+		}
+		cmd.Println(OperationCompleted)
+
+		return nil
+	},
+}
+
 // getExecutorDetails returns the executor details for the cluster
 // if summary is true then the data is summarised by name
 func getExecutorDetails(dataFetcher fetcher.Fetcher, summary bool) (config.Executors, error) {
@@ -225,4 +313,12 @@ func getExecutorDetails(dataFetcher fetcher.Fetcher, summary bool) (config.Execu
 	}
 
 	return executors, nil
+}
+
+func init() {
+	setExecutorCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
+	setExecutorCmd.Flags().StringVarP(&executorAttributeName, "attribute", "a", "", "attribute name to set")
+	_ = setExecutorCmd.MarkFlagRequired("attribute")
+	setExecutorCmd.Flags().StringVarP(&executorAttributeValue, "value", "v", "", "attribute value to set")
+	_ = setExecutorCmd.MarkFlagRequired("value")
 }

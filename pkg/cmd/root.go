@@ -410,6 +410,7 @@ func Initialize(command *cobra.Command) *cobra.Command {
 	setCmd.AddCommand(setServiceCmd)
 	setCmd.AddCommand(setReporterCmd)
 	setCmd.AddCommand(setBytesFormatCmd)
+	setCmd.AddCommand(setExecutorCmd)
 
 	// clear
 	command.AddCommand(clearCmd)

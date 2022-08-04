@@ -136,6 +136,7 @@ create_doc $DOCS_DIR/describe_elastic_data "${COHCTL} describe elastic-data --he
 
 # Executors
 create_doc $DOCS_DIR/get_executors "${COHCTL} get executors --help"
+create_doc $DOCS_DIR/set_executor "${COHCTL} set executor --help"
 create_doc $DOCS_DIR/describe_executor "${COHCTL} describe executor --help"
 
 # Http session

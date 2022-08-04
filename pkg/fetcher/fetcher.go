@@ -112,6 +112,9 @@ type Fetcher interface {
 	// SetMemberAttribute sets the given attribute for a member
 	SetMemberAttribute(memberID, attribute string, value interface{}) ([]byte, error)
 
+	// SetExecutorAttribute sets the given attribute for an executor
+	SetExecutorAttribute(executor, attribute string, value interface{}) ([]byte, error)
+
 	// SetReporterAttribute sets the given attribute for a reporter member
 	SetReporterAttribute(memberID, attribute string, value interface{}) ([]byte, error)
 

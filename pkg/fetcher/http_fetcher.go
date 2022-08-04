@@ -236,7 +236,20 @@ func (h HTTPFetcher) SetMemberAttribute(memberID, attribute string, value interf
 	result, err := httpPostRequest(h, membersPath+memberID, payload)
 	if err != nil {
 		return constants.EmptyByte, utils.GetError(
-			fmt.Sprintf("cannot set value %vfor attribute %s ", value, attribute), err)
+			fmt.Sprintf("cannot set member value %vfor attribute %s ", value, attribute), err)
+	}
+	return result, nil
+}
+
+// SetExecutorAttribute sets the given attribute for an executor
+func (h HTTPFetcher) SetExecutorAttribute(executor, attribute string, value interface{}) ([]byte, error) {
+	var valueString = getJSONValueString(value)
+
+	payload := []byte(fmt.Sprintf(jsonStringFormat, attribute, valueString))
+	result, err := httpPostRequest(h, "/executors/"+executor, payload)
+	if err != nil {
+		return constants.EmptyByte, utils.GetError(
+			fmt.Sprintf("cannot set executor value %vfor attribute %s ", value, attribute), err)
 	}
 	return result, nil
 }
@@ -1052,7 +1065,7 @@ func getJSONValueString(value interface{}) string {
 	case string:
 		return fmt.Sprintf("\"%v\"", value)
 	default:
-		// default we are assuming is a number
+		// default we are assuming is a number or bool
 		return fmt.Sprintf("%v", value)
 	}
 }

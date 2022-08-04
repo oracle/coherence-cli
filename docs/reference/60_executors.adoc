@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 
-    Copyright (c) 2021, Oracle and/or its affiliates.
+    Copyright (c) 2021, 2022 Oracle and/or its affiliates.
     Licensed under the Universal Permissive License v 1.0 as shown at
     https://oss.oracle.com/licenses/upl.
 
@@ -15,6 +15,7 @@ There are various commands that allow you to work with and manage Executors.
 
 * <<get-executors, `cohctl get executors`>> - displays the executors for a cluster
 * <<describe-executor, `cohctl describe executor`>> - shows information related to a specific executor
+* <<set-executor, `cohctl set executor`>> - sets an attribute for a specific executor across all nodes
 
 [#get-executors]
 ==== Get Executors
@@ -75,6 +76,23 @@ Tasks Rejected Count   :  0
 Trace Logging          :  false
 ----
 
+
+[#set-executor]
+==== Set Executors
+
+include::../../build/_output/docs-gen/set_executor.adoc[tag=text]
+
+*Examples*
+
+Turn on trace logging for the coherence-concurrent-default-executor executor.
+
+[source,bash]
+----
+$ cohctl set executor coherence-concurrent-default-executor -a traceLogging -v true -c local
+
+Are you sure you want to set the value of attribute traceLogging to true for coherence-concurrent-default-executor? (y/n) y
+operation completed
+----
 
 
 
