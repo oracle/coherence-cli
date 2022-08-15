@@ -1,11 +1,11 @@
-# Copyright 2021, 2022 Oracle Corporation and/or its affiliates.
+# Copyright 2022 Oracle Corporation and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at
 # https://oss.oracle.com/licenses/upl.
 
 # ---------------------------------------------------------------------------
-# Coherence CLI CI Snapshots
+# Coherence CLI CI Snapshots for ce-14.1.1.0.x
 # ---------------------------------------------------------------------------
-name: CI Snapshots
+name: CI Snapshots 14.1.1.0
 
 on:
   workflow_dispatch:
@@ -24,7 +24,7 @@ jobs:
       fail-fast: false
       matrix:
         branch:
-          - main
+          - v14.1.1.0
 
 #   Checkout the source, we need a depth of zero to fetch all of the history otherwise
 #   the copyright check cannot work out the date of the files from Git.
@@ -57,12 +57,12 @@ jobs:
     - name: Get Docker Images
       shell: bash
       run: |
-        docker pull gcr.io/distroless/java17
+        docker pull gcr.io/distroless/java:11
 
-    - name: Set up JDK 17 for Build
+    - name: Set up JDK 11 for Build
       uses: actions/setup-java@v1
       with:
-        java-version: '17'
+        java-version: '11'
 
     - name: Build Coherence Snapshot
       shell: bash
@@ -75,8 +75,9 @@ jobs:
         CLONE_DIR=coherence-$COH_BRANCH
         cd /tmp
         git clone https://github.com/oracle/coherence.git $CLONE_DIR
-        cd $CLONE_DIR/prj
-        make all
+        cd $CLONE_DIR
+        git checkout $COH_BRANCH
+        mvn --file prj/pom.xml --batch-mode -e -DskipTests clean install
         cd $DIR
 
     - name: Cache Go Modules
@@ -112,7 +113,8 @@ jobs:
         COH_VERSION=`cat ${POM_FILE} | grep '<revision>' | sed -e 's,^.*<revision>,,' -e 's,</revision>.*$,,'`
 
         echo "Running verify against $COH_VERSION"
-        COHERENCE_BASE_IMAGE=gcr.io/distroless/java17 COHERENCE_VERSION=$COH_VERSION make clean build-test-images test-e2e-standalone
+
+        COHERENCE_VERSION=$COH_VERSION make clean build-test-images test-e2e-standalone
         COHERENCE_VERSION=$COH_VERSION make test-clean test-discovery
 
     - uses: actions/upload-artifact@v1
