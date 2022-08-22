@@ -255,7 +255,7 @@ var describeFederationCmd = &cobra.Command{
 	Use:   federationUse,
 	Short: "describe federation details for a given service and participant",
 	Long: `The 'describe federation' command displays the federation details for a given
-service, type and participant. Specify -T to set type destinations or origins and -p for participant.`,
+service, type and participant. Specify -T to set type outgoing or incoming and -p for participant.`,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
 			displayErrorAndExit(cmd, "you must provide a service name")
