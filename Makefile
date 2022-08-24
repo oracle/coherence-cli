@@ -425,6 +425,14 @@ test-discovery: test-clean gotestsum $(BUILD_PROPS) ## Run Discovery tests with 
 	make test-coherence-shutdown
 
 # ----------------------------------------------------------------------------------------------------------------------
+# Executes the Go create cluster tests for standalone Coherence
+# ----------------------------------------------------------------------------------------------------------------------
+.PHONY: test-create-cluster
+test-create-cluster: test-clean gotestsum $(BUILD_PROPS) ## Run create cluster tests
+	CGO_ENABLED=0 $(GOTESTSUM) --format testname --junitfile $(TEST_LOGS_DIR)/cohctl-test-e2e.xml \
+	  -- $(GO_TEST_FLAGS) -v  ./test/e2e/create/...
+
+# ----------------------------------------------------------------------------------------------------------------------
 # Executes the Go end to end tests and unit tests for standalone Coherence with coverage
 # ----------------------------------------------------------------------------------------------------------------------
 .PHONY: test-coverage
