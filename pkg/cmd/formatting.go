@@ -780,7 +780,7 @@ func FormatProcesses(processes []config.Process) string {
 	stringValues[0] = getColumns("PROCESS ID", "RUNNING", NodeIDColumn, MemberColumn, RoleColumn)
 
 	for i, value := range processes {
-		nodeID, _ := strconv.Atoi(value.NodeID) //#nosec
+		var nodeID, _ = strconv.Atoi(value.NodeID)
 		stringValues[i+1] = getColumns(formatProcessID(value.ProcessID), formatBool(value.Running),
 			formatSmallInteger(int32(nodeID)), value.MemberName, value.RoleName)
 	}
