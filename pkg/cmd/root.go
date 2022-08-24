@@ -65,6 +65,7 @@ const defaultBytesFormatKey = "defaultBytesFormat"
 const confirmOptionMessage = "automatically confirm the operation"
 const timeoutMessage = "timeout in seconds for NS Lookup requests"
 const heapMemoryMessage = "heap memory to allocate for JVM"
+const heapMemoryArg = "heap-memory"
 const serverCountMessage = "server count"
 
 const outputFormats = "table, wide, json or jsonpath=\"...\""

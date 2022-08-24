@@ -34,6 +34,7 @@ var (
 
 const clusterMessage = "A cluster connection already exists with the name %s for %s\n"
 const ignoreErrorsMessage = "ignore errors from NS lookup"
+const youMustProviderClusterMessage = "you must provide a cluster name"
 
 // addClusterCmd represents the add cluster command
 var addClusterCmd = &cobra.Command{
@@ -905,7 +906,7 @@ in a production capacity. Supported versions are: CE 22.06 and above and 14.1.1.
 NOTE: This is an experimental feature and my be altered or removed in the future.`,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
-			displayErrorAndExit(cmd, "you must provide a cluster name")
+			displayErrorAndExit(cmd, youMustProviderClusterMessage)
 		}
 		return nil
 	},
@@ -1025,7 +1026,7 @@ var startClusterCmd = &cobra.Command{
 	Long:  `The 'start cluster' command starts a cluster that was manually created.`,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
-			displayErrorAndExit(cmd, "you must provide a cluster name")
+			displayErrorAndExit(cmd, youMustProviderClusterMessage)
 		}
 		return nil
 	},
@@ -1041,7 +1042,7 @@ var stopClusterCmd = &cobra.Command{
 	Long:  `The 'stop cluster' command stops a cluster that was manually created or started.`,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
-			displayErrorAndExit(cmd, "you must provide a cluster name")
+			displayErrorAndExit(cmd, youMustProviderClusterMessage)
 		}
 		return nil
 	},
@@ -1270,7 +1271,7 @@ func init() {
 	createClusterCmd.Flags().Int32VarP(&httpPort, "http-port", "P", 30000, "Http management port")
 	createClusterCmd.Flags().Int32VarP(&clusterPort, "cluster-port", "H", 7574, "cluster port")
 	createClusterCmd.Flags().Int32VarP(&serverCount, "server-count", "s", 3, serverCountMessage)
-	createClusterCmd.Flags().StringVarP(&heapMemory, "heap-memory", "M", defaultHeap, heapMemoryMessage)
+	createClusterCmd.Flags().StringVarP(&heapMemory, heapMemoryArg, "M", defaultHeap, heapMemoryMessage)
 	createClusterCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
 	createClusterCmd.Flags().BoolVarP(&useCommercial, "commercial", "C", false, "use commercial Coherence groupID (default is CE)")
 
@@ -1278,10 +1279,10 @@ func init() {
 
 	startClusterCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
 	startClusterCmd.Flags().Int32VarP(&serverCount, "server-count", "s", 3, serverCountMessage)
-	startClusterCmd.Flags().StringVarP(&heapMemory, "heap-memory", "M", defaultHeap, heapMemoryMessage)
+	startClusterCmd.Flags().StringVarP(&heapMemory, heapMemoryArg, "M", defaultHeap, heapMemoryMessage)
 
-	startConsoleCmd.Flags().StringVarP(&heapMemory, "heap-memory", "M", defaultHeap, heapMemoryMessage)
-	startCohQLCmd.Flags().StringVarP(&heapMemory, "heap-memory", "M", defaultHeap, heapMemoryMessage)
+	startConsoleCmd.Flags().StringVarP(&heapMemory, heapMemoryArg, "M", defaultHeap, heapMemoryMessage)
+	startCohQLCmd.Flags().StringVarP(&heapMemory, heapMemoryArg, "M", defaultHeap, heapMemoryMessage)
 }
 
 // sanitizeConnectionName sanitizes a cluster connection
