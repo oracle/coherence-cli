@@ -333,7 +333,10 @@ copyright: getcopyright ## Check copyright headers
 	  -X THIRD_PARTY_LICENSES.txt \
 	  -X .tpl \
 	  -X .txt \
-	  -X pkg/data/assets/
+	  -X pkg/data/assets/ \
+	  -X pkg/cmd/fork_windows.go \
+	  -X pkg/cmd/fork_darwin.go \
+	  -X pkg/cmd/fork_linux.go
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Executes golangci-lint to perform various code review checks on the source.

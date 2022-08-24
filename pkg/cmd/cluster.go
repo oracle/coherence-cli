@@ -21,6 +21,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"time"
 )
 
 var (
@@ -81,9 +82,14 @@ var removeClusterCmd = &cobra.Command{
 			clusterName = args[0]
 		)
 
-		found, _ := GetClusterConnection(clusterName)
+		found, connection := GetClusterConnection(clusterName)
 		if !found {
 			return errors.New(UnableToFindClusterMsg + clusterName)
+		}
+
+		processCount := len(connection.ProcessIDs)
+		if processCount > 0 {
+			return fmt.Errorf("cluster %s has %d processes running. You must stop the cluster before removing it", clusterName, processCount)
 		}
 
 		if !automaticallyConfirm {
@@ -127,6 +133,7 @@ var getClustersCmd = &cobra.Command{
 		var (
 			err          error
 			result       []byte
+			jsonResult   []byte
 			stringResult string
 		)
 		outputFormat, _ := cmd.Flags().GetString("output")
@@ -138,7 +145,7 @@ var getClustersCmd = &cobra.Command{
 
 		var clusters = Config.Clusters
 		if strings.Contains(outputFormat, constants.JSONPATH) {
-			var jsonResult, err = json.Marshal(clusters)
+			jsonResult, err = json.Marshal(clusters)
 			if err != nil {
 				return err
 			}
@@ -878,17 +885,24 @@ var (
 	clusterPort    int32
 	clusterVersion string
 	serverCount    int32
+	heapMemory     string
+	useCommercial  bool
 )
 
 const defaultCoherenceVersion = "22.06"
+const startClusterCommand = "start cluster"
+const stopClusterCommand = "stop cluster"
+const defaultHeap = "512m"
 
 // createClusterCmd represents the create cluster command
 var createClusterCmd = &cobra.Command{
 	Use:   "cluster",
 	Short: "create a local Coherence cluster",
 	Long: `The 'create cluster' command creates a local cluster and adds to the cohctl.yaml file.
-You must have the 'mvn' executable and 'java' executable in your PATH for this to work.
-Note: This cluster is only for development/testing purposes using Coherence CE, and should not be used in a production capacity.`,
+You must have the 'mvn' executable and 'java' 11+ executable in your PATH for this to work.
+This cluster is only for development/testing purposes and should not be used, and is not supported
+in a production capacity. Supported versions are: CE 22.06 and above and 14.1.1.2206.1 and above.
+NOTE: This is an experimental feature and my be altered or removed in the future.`,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
 			displayErrorAndExit(cmd, "you must provide a cluster name")
@@ -900,6 +914,9 @@ Note: This cluster is only for development/testing purposes using Coherence CE, 
 			clusterName = sanitizeConnectionName(args[0])
 			err         error
 			response    string
+			processIDs  []string
+			groupID     = getCoherenceGroupID()
+			cpEntry     string
 		)
 
 		// validate the Java and Maven executable are present and in the path
@@ -934,6 +951,8 @@ Note: This cluster is only for development/testing purposes using Coherence CE, 
 			cmd.Printf("Cluster port:    %d\n", clusterPort)
 			cmd.Printf("Management port: %d\n", httpPort)
 			cmd.Printf("Server count:    %d\n", serverCount)
+			cmd.Printf("Initial memory:  %s\n", heapMemory)
+			cmd.Printf("Group ID:        %s\n", groupID)
 			cmd.Printf("Are you sure you want to create the cluster with the above details? (y/n) ")
 			_, err = fmt.Scanln(&response)
 			if response != "y" || err != nil {
@@ -942,15 +961,295 @@ Note: This cluster is only for development/testing purposes using Coherence CE, 
 			}
 		}
 
-		cmd.Println("Creating...")
+		// update default jars based up coherence group and version
+		updateDefaultJars()
+		cmd.Printf("Checking Maven dependencies for version %s\n", clusterVersion)
 
 		// download the coherence dependencies
 		if err = getCoherenceDependencies(cmd, clusterVersion); err != nil {
 			return fmt.Errorf("unable to get depdencies for coherence version %s: %v", clusterVersion, err)
 		}
 
+		// generate classpath
+		classpath := make([]string, 0)
+		for _, entry := range defaultJars {
+			cpEntry, err = getMavenClasspath(entry.GroupID, entry.Artefact, entry.Version)
+			if err != nil {
+				return err
+			}
+			classpath = append(classpath, cpEntry)
+		}
+		// TODO: allow additional classpath
+
+		// generate startup arguments
+		arguments := fmt.Sprintf("-Dcoherence.cluster=%s -Dcoherence.clusterport=%d -Dcoherence.ttl=0 -Dcoherence.wka=127.0.0.1 -Djava.net.preferIPv4Stack=true",
+			clusterName, clusterPort)
+
+		// add the new cluster
+		newCluster := ClusterConnection{Name: clusterName, ConnectionType: "http",
+			ConnectionURL:   fmt.Sprintf("http://localhost:%d/management/coherence/cluster", httpPort),
+			ManuallyCreated: true, ClusterVersion: clusterVersion, ClusterName: clusterName,
+			ClusterType: "Standalone", BaseClasspath: strings.Join(classpath, getClasspathSeparator()),
+			Arguments: arguments, ManagementPort: httpPort}
+
+		// TODO: Give option to not start cluster
+		cmd.Printf("Starting %d cluster members for cluster %s\n", serverCount, clusterName)
+
+		cmd.Println("Starting cluster...")
+		processIDs, err = startCluster(cmd, newCluster, serverCount)
+
+		if err != nil {
+			return err
+		}
+
+		newCluster.ProcessIDs = convertProcessIDs(processIDs)
+
+		Config.Clusters = append(Config.Clusters, newCluster)
+
+		viper.Set(clusterKey, Config.Clusters)
+		err = WriteConfig()
+		if err != nil {
+			return err
+		}
+
+		cmd.Printf("Cluster added and started with process ids: %v\n", processIDs)
+
 		return nil
 	},
+}
+
+// startClusterCmd represents the start cluster command
+var startClusterCmd = &cobra.Command{
+	Use:   "cluster",
+	Short: "start a local Coherence cluster",
+	Long:  `The 'start cluster' command starts a cluster that was manually created.`,
+	Args: func(cmd *cobra.Command, args []string) error {
+		if len(args) != 1 {
+			displayErrorAndExit(cmd, "you must provide a cluster name")
+		}
+		return nil
+	},
+	RunE: func(cmd *cobra.Command, args []string) error {
+		return runClusterOperation(cmd, args[0], startClusterCommand)
+	},
+}
+
+// stopClusterCmd represents the stop cluster command
+var stopClusterCmd = &cobra.Command{
+	Use:   "cluster",
+	Short: "stop a local Coherence cluster",
+	Long:  `The 'stop cluster' command stops a cluster that was manually created or started.`,
+	Args: func(cmd *cobra.Command, args []string) error {
+		if len(args) != 1 {
+			displayErrorAndExit(cmd, "you must provide a cluster name")
+		}
+		return nil
+	},
+	RunE: func(cmd *cobra.Command, args []string) error {
+		return runClusterOperation(cmd, args[0], stopClusterCommand)
+	},
+}
+
+// startConsoleCmd represents the start console command
+var startConsoleCmd = &cobra.Command{
+	Use:   "console",
+	Short: "start a console client against the local Coherence cluster",
+	Long:  `The 'start console' command starts a console client against a cluster that was manually created.`,
+	Args:  cobra.ExactArgs(0),
+	RunE: func(cmd *cobra.Command, args []string) error {
+		return runStartClientOperation(cmd, consoleClass)
+	},
+}
+
+// startCohQL represents the start cohql command
+var startCohQLCmd = &cobra.Command{
+	Use:   "cohql",
+	Short: "start a CohQL client against the local Coherence cluster",
+	Long:  `The 'start cohql' command starts a CohQL client against a cluster that was manually created.`,
+	Args:  cobra.ExactArgs(0),
+	RunE: func(cmd *cobra.Command, args []string) error {
+		return runStartClientOperation(cmd, cohQLClass)
+	},
+}
+
+// getProcsCmd represents the get procs command
+var getProcsCmd = &cobra.Command{
+	Use:   "procs",
+	Short: "display processes started for a cluster",
+	Long:  `The 'get procs' command displays processes started for a cluster.`,
+	Args:  cobra.ExactArgs(0),
+	RunE: func(cmd *cobra.Command, args []string) error {
+		var (
+			err           error
+			connection    string
+			jsonResult    []byte
+			membersResult []byte
+			dataFetcher   fetcher.Fetcher
+		)
+
+		connection, dataFetcher, err = GetConnectionAndDataFetcher()
+		if err != nil {
+			return err
+		}
+
+		_, clusterConnection := getConnection(connection)
+
+		if err = checkOperation(clusterConnection, "get procs"); err != nil {
+			return err
+		}
+
+		for {
+			var members = config.Members{}
+
+			// retrieve the members to see if we can match up to running process
+			membersResult, _ = dataFetcher.GetMemberDetailsJSON(OutputFormat != constants.TABLE && OutputFormat != constants.WIDE)
+
+			if len(membersResult) > 0 {
+				err = json.Unmarshal(membersResult, &members)
+				if err != nil {
+					return utils.GetError(unableToDecode, err)
+				}
+			}
+
+			var processes = getProcesses(clusterConnection.ProcessIDs, members)
+
+			if strings.Contains(OutputFormat, constants.JSONPATH) || OutputFormat == constants.JSON {
+				jsonResult, err = json.Marshal(processes)
+				if err != nil {
+					return err
+				}
+				if strings.Contains(OutputFormat, constants.JSONPATH) {
+					result, err := utils.GetJSONPathResults(jsonResult, OutputFormat)
+					if err != nil {
+						return err
+					}
+					cmd.Println(result)
+				} else {
+					cmd.Println(string(jsonResult))
+				}
+			} else {
+				cmd.Println(FormatCurrentCluster(connection))
+
+				cmd.Println(FormatProcesses(processes.ProcessList))
+			}
+
+			// check to see if we should exit if we are not watching
+			if !watchEnabled {
+				break
+			}
+			// we are watching so sleep and then repeat until CTRL-C
+			time.Sleep(time.Duration(watchDelay) * time.Second)
+		}
+
+		return nil
+
+	},
+}
+
+func runStartClientOperation(cmd *cobra.Command, class string) error {
+	var (
+		err        error
+		connection string
+	)
+
+	connection, _, err = GetConnectionAndDataFetcher()
+	if err != nil {
+		return err
+	}
+
+	_, clusterConn := getConnection(connection)
+
+	if err = checkOperation(clusterConn, class); err != nil {
+		return err
+	}
+
+	return startClient(cmd, clusterConn, class)
+}
+
+func runClusterOperation(cmd *cobra.Command, connectionName, operation string) error {
+	var (
+		err        error
+		response   string
+		proc       *os.Process
+		processIDs []string
+	)
+
+	// validate the Java and Maven executable are present and in the path
+	if err = checkCreateRequirements(); err != nil {
+		return err
+	}
+
+	found, connection := GetClusterConnection(connectionName)
+	if !found {
+		return errors.New(UnableToFindClusterMsg + connectionName)
+	}
+
+	if err = checkOperation(connection, operation); err != nil {
+		return err
+	}
+
+	numProcesses := len(connection.ProcessIDs)
+
+	if operation == stopClusterCommand && numProcesses == 0 {
+		return fmt.Errorf("the cluster %s does not appear to be started", connection.Name)
+	}
+	if operation == startClusterCommand && numProcesses > 0 {
+		return fmt.Errorf("the cluster %s appears to be already started with process ids: %v", connection.Name, connection.ProcessIDs)
+	}
+
+	if !automaticallyConfirm {
+		if operation == startClusterCommand {
+			cmd.Printf("Are you sure you want to start %d members for cluster %s? (y/n) ", serverCount, connection.Name)
+		} else {
+			cmd.Printf("Are you sure you want to stop %d members for the cluster %s? (y/n) ", numProcesses, connection.Name)
+		}
+
+		_, err = fmt.Scanln(&response)
+		if response != "y" || err != nil {
+			cmd.Println(constants.NoOperation)
+			return nil
+		}
+	}
+
+	if operation == stopClusterCommand {
+		count := 0
+		for _, v := range connection.ProcessIDs {
+			proc, err = os.FindProcess(v)
+			if err != nil {
+				// silently ignore as it may have gone already
+			} else {
+				err = proc.Kill()
+				if err != nil {
+					// ignore as process may have exited
+					cmd.Printf("unable to kill process %v\n", proc.Pid)
+				} else {
+					count++
+					cmd.Printf("killed process %d\n", proc.Pid)
+				}
+			}
+		}
+
+		// reset the process Ids
+		if err = updateConnectionPIDS(connection.Name, make([]int, 0)); err != nil {
+			return err
+		}
+
+		cmd.Printf("%d processes were stopped for cluster %s\n", count, connection.Name)
+	} else {
+		processIDs, err = startCluster(cmd, connection, serverCount)
+		if err != nil {
+			return err
+		}
+
+		ProcessIDs := convertProcessIDs(processIDs)
+		cmd.Printf("Cluster %s and started with process ids: %v\n", connection.Name, ProcessIDs)
+
+		if err = updateConnectionPIDS(connection.Name, ProcessIDs); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 func init() {
@@ -966,11 +1265,23 @@ func init() {
 	discoverClustersCmd.Flags().Int32VarP(&timeout, "timeout", "t", 30, timeoutMessage)
 
 	removeClusterCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
+
 	createClusterCmd.Flags().StringVarP(&clusterVersion, "version", "v", defaultCoherenceVersion, "cluster version")
-	createClusterCmd.Flags().Int32VarP(&httpPort, "http-port", "C", 30000, "Http management port")
+	createClusterCmd.Flags().Int32VarP(&httpPort, "http-port", "P", 30000, "Http management port")
 	createClusterCmd.Flags().Int32VarP(&clusterPort, "cluster-port", "H", 7574, "cluster port")
-	createClusterCmd.Flags().Int32VarP(&serverCount, "server-count", "s", 3, "server count")
+	createClusterCmd.Flags().Int32VarP(&serverCount, "server-count", "s", 3, serverCountMessage)
+	createClusterCmd.Flags().StringVarP(&heapMemory, "heap-memory", "M", defaultHeap, heapMemoryMessage)
 	createClusterCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
+	createClusterCmd.Flags().BoolVarP(&useCommercial, "commercial", "C", false, "use commercial Coherence groupID (default is CE)")
+
+	stopClusterCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
+
+	startClusterCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
+	startClusterCmd.Flags().Int32VarP(&serverCount, "server-count", "s", 3, serverCountMessage)
+	startClusterCmd.Flags().StringVarP(&heapMemory, "heap-memory", "M", defaultHeap, heapMemoryMessage)
+
+	startConsoleCmd.Flags().StringVarP(&heapMemory, "heap-memory", "M", defaultHeap, heapMemoryMessage)
+	startCohQLCmd.Flags().StringVarP(&heapMemory, "heap-memory", "M", defaultHeap, heapMemoryMessage)
 }
 
 // sanitizeConnectionName sanitizes a cluster connection
@@ -1069,10 +1380,10 @@ func validateTimeout(timeout int32) error {
 
 // ensureUniqueCluster ensures the connection string is unique
 func ensureUniqueCluster(connection string) error {
-	found, clusterConnection := GetClusterConnection(connection)
+	found, clusterConn := GetClusterConnection(connection)
 	if found {
 		return fmt.Errorf("A connection for cluster named %s already exists with url=%s and type=%s",
-			connection, clusterConnection.ConnectionURL, clusterConnection.ConnectionType)
+			connection, clusterConn.ConnectionURL, clusterConn.ConnectionType)
 	}
 
 	return nil

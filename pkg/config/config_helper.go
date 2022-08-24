@@ -399,6 +399,28 @@ type ElasticData struct {
 	TotalDataSize              int64   `json:"totalDataSize"`
 }
 
+// Process contains process information
+type Process struct {
+	ProcessID  int    `json:"processId"`
+	Running    bool   `json:"running"`
+	NodeID     string `json:"nodeId"`
+	RoleName   string `json:"roleName"`
+	MemberName string `json:"memberName"`
+}
+
+// Processes contains a list of processes
+type Processes struct {
+	ProcessList []Process `json:"items"`
+}
+
+// DefaultDependency holds the default dependencies for starting a Cache server
+type DefaultDependency struct {
+	GroupID     string
+	Artefact    string
+	IsCoherence bool
+	Version     string
+}
+
 // Links contains any links returned via HTTP
 type Links struct {
 	Links []Link `json:"links"`

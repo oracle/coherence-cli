@@ -25,3 +25,9 @@ linters:
 issues:
   exclude:
     - stutter
+
+run:
+  skip-files:
+    - fork_darwin.go
+    - fork_linux.go
+    - fork_windows.go

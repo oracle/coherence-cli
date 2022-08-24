@@ -64,6 +64,8 @@ const defaultBytesFormatKey = "defaultBytesFormat"
 
 const confirmOptionMessage = "automatically confirm the operation"
 const timeoutMessage = "timeout in seconds for NS Lookup requests"
+const heapMemoryMessage = "heap memory to allocate for JVM"
+const serverCountMessage = "server count"
 
 const outputFormats = "table, wide, json or jsonpath=\"...\""
 
@@ -133,7 +135,9 @@ type ClusterConnection struct {
 	ManuallyCreated      bool   `json:"manuallyCreated"` // indicates if this was created by the create cluster command
 	BaseClasspath        string `json:"baseClasspath"`   // the minimum required classes coherence.jar and coherence-json
 	AdditionalClasspath  string `json:"additionalClasspath"`
-	ProcessIDs           []int  `json:"processIDs"` // process id's of started members
+	Arguments            string `json:"arguments"`      // arguments to start cluster with including cluster name, etc
+	ManagementPort       int32  `json:"managementPort"` // arguments to start cluster with including cluster name, etc
+	ProcessIDs           []int  `json:"processIDs"`     // process id's of started members
 }
 
 // rootCmd represents the base command when called without any subcommands
@@ -430,6 +434,7 @@ func Initialize(command *cobra.Command) *cobra.Command {
 	getCmd.AddCommand(getBytesFormatCmd)
 	getCmd.AddCommand(getHealthCmd)
 	getCmd.AddCommand(getEnvironmentCmd)
+	getCmd.AddCommand(getProcsCmd)
 
 	// set command
 	command.AddCommand(setCmd)
@@ -468,6 +473,9 @@ func Initialize(command *cobra.Command) *cobra.Command {
 	startCmd.AddCommand(startJfrCmd)
 	startCmd.AddCommand(startFederationCmd)
 	startCmd.AddCommand(startServiceCmd)
+	startCmd.AddCommand(startClusterCmd)
+	startCmd.AddCommand(startConsoleCmd)
+	startCmd.AddCommand(startCohQLCmd)
 
 	// stop
 	command.AddCommand(stopCmd)
@@ -475,6 +483,7 @@ func Initialize(command *cobra.Command) *cobra.Command {
 	stopCmd.AddCommand(stopJfrCmd)
 	stopCmd.AddCommand(stopFederationCmd)
 	stopCmd.AddCommand(stopServiceCmd)
+	stopCmd.AddCommand(stopClusterCmd)
 
 	// dump
 	command.AddCommand(dumpCmd)
