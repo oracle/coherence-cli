@@ -1809,6 +1809,7 @@ func isHealthEnabled(version string) bool {
 }
 
 // RunTestCreateCommands tests various create cluster commands
+// Expiremntal only
 func RunTestCreateCommands(t *testing.T) {
 	var (
 		g           = NewGomegaWithT(t)
@@ -1859,5 +1860,4 @@ func RunTestCreateCommands(t *testing.T) {
 	// shutdown the cluster
 	test_utils.EnsureCommandContains(g, t, cliCmd, "Removed connection for cluster tim", configArg, file, "remove", "cluster",
 		clusterName, "-y")
-
 }

@@ -17,6 +17,7 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"time"
 )
 
 const consoleClass = "com.tangosol.net.CacheFactory"
@@ -54,16 +55,10 @@ func checkCreateRequirements() error {
 }
 
 func getJavaExec() string {
-	if isWindows() {
-		return "java"
-	}
 	return "java"
 }
 
 func getMvnExec() string {
-	if isWindows() {
-		return "mvn"
-	}
 	return "mvn"
 }
 
@@ -87,13 +82,20 @@ func getCoherenceDependencies(cmd *cobra.Command, coherenceVersion string) error
 	return nil
 }
 
+func validateLogLevel(logLevel int32) error {
+	if logLevel < 0 || logLevel > 9 {
+		return fmt.Errorf("log level must be between 0 and 9")
+	}
+	return nil
+}
+
 func updateDefaultJars() {
 	groupID := getCoherenceGroupID()
 
 	for _, entry := range defaultJars {
 		if entry.IsCoherence {
 			entry.GroupID = groupID
-			entry.Version = clusterVersion
+			entry.Version = clusterVersionParam
 		}
 	}
 }
@@ -135,6 +137,8 @@ func startCluster(cmd *cobra.Command, connection ClusterConnection, serverCount 
 			return processIDs, utils.GetError(fmt.Sprintf("unable to start member %s", member), err)
 		}
 		processIDs = append(processIDs, PID)
+
+		time.Sleep(time.Duration(startupDelayParam) * time.Second)
 	}
 
 	return processIDs, nil
@@ -143,7 +147,8 @@ func startCluster(cmd *cobra.Command, connection ClusterConnection, serverCount 
 // getCommonArguments returns arguments that are common to clients and servers
 func getCommonArguments(connection ClusterConnection) []string {
 	splitArguments := strings.Split(connection.Arguments, " ")
-	return append(splitArguments, "-cp", connection.BaseClasspath)
+	return append(splitArguments, "-cp", connection.BaseClasspath, getPersistenceProperty(connection.PersistenceMode),
+		getLogLevelProperty(logLevelParam))
 }
 
 func startClient(cmd *cobra.Command, connection ClusterConnection, class string) error {
@@ -173,7 +178,7 @@ func getCacheServerArgs(member string, httpPort int32) []string {
 		baseArgs = append(baseArgs, "-Dcoherence.management.http=all", fmt.Sprintf("-Dcoherence.management.http.port=%d", httpPort),
 			"-Dcoherence.management=all")
 	}
-	baseArgs = append(baseArgs, "-Xms"+heapMemory, "-Xmx"+heapMemory)
+	baseArgs = append(baseArgs, "-Xms"+heapMemoryParam, "-Xmx"+heapMemoryParam)
 
 	return append(baseArgs, getMemberProperty(member), "-Dcoherence.log.level=6", "com.tangosol.net.Coherence")
 }
@@ -182,7 +187,7 @@ func getCacheServerArgs(member string, httpPort int32) []string {
 // console or cohQL
 func getClientArgs(member, class string) []string {
 	baseArgs := make([]string, 0)
-	baseArgs = append(baseArgs, "-Xms"+heapMemory, "-Xmx"+heapMemory)
+	baseArgs = append(baseArgs, "-Xms"+heapMemoryParam, "-Xmx"+heapMemoryParam)
 
 	return append(baseArgs, getMemberProperty("client"), "-Dcoherence.log.level=5",
 		"-Dcoherence.distributed.localstorage=false", class)
@@ -190,6 +195,14 @@ func getClientArgs(member, class string) []string {
 
 func getMemberProperty(member string) string {
 	return fmt.Sprintf("-Dcoherence.member=%s", member)
+}
+
+func getPersistenceProperty(persistenceMode string) string {
+	return fmt.Sprintf("-Dcoherence.distributed.persistence.mode=%s", persistenceMode)
+}
+
+func getLogLevelProperty(logLevel int32) string {
+	return fmt.Sprintf("-Dcoherence.log.level=%d", logLevel)
 }
 
 // convertProcessIDs converts an array of string processes to int array
@@ -215,7 +228,7 @@ func getDependencyArgs(groupID, artefact, version string) []string {
 }
 
 func getCoherenceGroupID() string {
-	if useCommercial {
+	if useCommercialParam {
 		return "com.oracle.coherence"
 	}
 	return "com.oracle.coherence.ce"

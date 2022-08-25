@@ -65,8 +65,12 @@ const defaultBytesFormatKey = "defaultBytesFormat"
 const confirmOptionMessage = "automatically confirm the operation"
 const timeoutMessage = "timeout in seconds for NS Lookup requests"
 const heapMemoryMessage = "heap memory to allocate for JVM"
+const startupDelayMessage = "startup delay in seconds for each server"
 const heapMemoryArg = "heap-memory"
+const logLevelArg = "log-level"
+const startupDelayArg = "startup-delay"
 const serverCountMessage = "server count"
+const logLevelMessage = "Coherence log level"
 
 const outputFormats = "table, wide, json or jsonpath=\"...\""
 
@@ -127,18 +131,21 @@ type CoherenceCLIConfig struct {
 type ClusterConnection struct {
 	Name                 string `json:"name"` // the name the user gives to the cluster connection
 	DiscoveryType        string `json:"discoveryType"`
-	ConnectionType       string `json:"connectionType"`
+	ConnectionType       string `json:"connectionType"` // currently only valid value is "http"
 	ConnectionURL        string `json:"url"`
 	NameServiceDiscovery string `json:"nameServiceDiscovery"`
-	ClusterVersion       string `json:"clusterVersion"`
+	ClusterVersion       string `json:"clusterVersionParam"`
 	ClusterName          string `json:"clusterName"` // the actual cluster name
 	ClusterType          string `json:"clusterType"`
-	ManuallyCreated      bool   `json:"manuallyCreated"` // indicates if this was created by the create cluster command
-	BaseClasspath        string `json:"baseClasspath"`   // the minimum required classes coherence.jar and coherence-json
-	AdditionalClasspath  string `json:"additionalClasspath"`
-	Arguments            string `json:"arguments"`      // arguments to start cluster with including cluster name, etc
-	ManagementPort       int32  `json:"managementPort"` // arguments to start cluster with including cluster name, etc
-	ProcessIDs           []int  `json:"processIDs"`     // process id's of started members
+
+	// the following attributes are specific to manually created clusters
+	ManuallyCreated     bool   `json:"manuallyCreated"`     // indicates if this was created by the create cluster command
+	BaseClasspath       string `json:"baseClasspath"`       // the minimum required classes coherence.jar and coherence-json
+	AdditionalClasspath string `json:"additionalClasspath"` // additional classpath provided by the user
+	Arguments           string `json:"arguments"`           // arguments to start cluster with including cluster name, etc
+	ManagementPort      int32  `json:"managementPort"`      // arguments to start cluster with including cluster name, etc
+	ProcessIDs          []int  `json:"processIDs"`          // process id's of started members
+	PersistenceMode     string `json:"persistenceMode"`
 }
 
 // rootCmd represents the base command when called without any subcommands
