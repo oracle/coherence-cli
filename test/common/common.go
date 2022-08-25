@@ -25,7 +25,7 @@ import (
 const configArg = "--config"
 const addedCluster = "Added cluster"
 const version1221 = "12.2.1"
-const version1411 = "14.1.1.0"
+const version1411 = "14.1.1"
 const configYaml = "config.yaml"
 const nodeID = "NODE ID"
 const jsonPathServices = "jsonpath=$.services"
