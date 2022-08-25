@@ -72,14 +72,16 @@ func getMvnExec() string {
 
 // getCoherenceDependencies runs the mvn dependency:get command to download coherence.jar and coherence-json.jar
 // which are the minimum requirements to create a cluster with management over rest enabled
-func getCoherenceDependencies(cmd *cobra.Command, coherenceVersion string) error {
+func getCoherenceDependencies(cmd *cobra.Command) error {
 	var (
 		mvnExec = getMvnExec()
 		err     error
 		result  string
 	)
 
+	cmd.Println("Ensuring dependencies")
 	for _, entry := range defaultJars {
+		cmd.Printf("- groupId=%s, artefact=%s, version=%s\n", entry.GroupID, entry.Artefact, entry.Version)
 		result, err = runCommand(mvnExec, getDependencyArgs(entry.GroupID, entry.Artefact, entry.Version))
 		if err != nil {
 			cmd.Println(result)

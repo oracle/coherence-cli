@@ -951,7 +951,7 @@ NOTE: This is an experimental feature and my be altered or removed in the future
 			splitArtefacts = strings.Split(additionalArtefactsParam, ",")
 			for _, v := range splitArtefacts {
 				if !utils.SliceContains(validCoherenceArtefacts, v) {
-					return fmt.Errorf("invalid additional artefact specified: %s", v)
+					return fmt.Errorf("invalid additional artefact specified: %s.\nValid values are: %v", v, validCoherenceArtefacts)
 				}
 			}
 		}
@@ -997,8 +997,8 @@ NOTE: This is an experimental feature and my be altered or removed in the future
 		cmd.Printf("Checking %d Maven dependencies for Coherence version %s\n", len(defaultJars), clusterVersionParam)
 
 		// download the coherence dependencies
-		if err = getCoherenceDependencies(cmd, clusterVersionParam); err != nil {
-			return fmt.Errorf("unable to get depdencies for coherence version %s: %v", clusterVersionParam, err)
+		if err = getCoherenceDependencies(cmd); err != nil {
+			return fmt.Errorf("unable to get some depdencies: %v", err)
 		}
 
 		// generate classpath
