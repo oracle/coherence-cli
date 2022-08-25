@@ -26,6 +26,6 @@ func signalProcess(proc *os.Process) error {
 	return nil
 }
 
-func handleCTRLC() {
-	// no-op
-}
+//func handleCTRLC() {
+//	// no-op
+//}

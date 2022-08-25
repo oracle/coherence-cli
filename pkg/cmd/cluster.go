@@ -960,8 +960,6 @@ NOTE: This is an experimental feature and my be altered or removed in the future
 			return errors.New("server count must be between 1 and 20")
 		}
 
-		cmd.Println("Create cluster", clusterName, "http port", httpPortParam, "cluster port", clusterPortParam)
-
 		// validate ensure
 		err = ensureUniqueCluster(clusterName)
 		if err != nil {
@@ -1027,7 +1025,6 @@ NOTE: This is an experimental feature and my be altered or removed in the future
 		// TODO: Give option to not start cluster
 		cmd.Printf("Starting %d cluster members for cluster %s\n", serverCountParam, clusterName)
 
-		cmd.Println("Starting cluster...")
 		processIDs, err = startCluster(cmd, newCluster, serverCountParam)
 
 		if err != nil {
