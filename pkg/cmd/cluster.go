@@ -894,7 +894,7 @@ var (
 	startupDelayParam     int32
 )
 
-const defaultCoherenceVersion = "22.06"
+const defaultCoherenceVersion = "22.06.1"
 const startClusterCommand = "start cluster"
 const stopClusterCommand = "stop cluster"
 const defaultHeap = "512m"
@@ -1288,8 +1288,8 @@ func init() {
 	createClusterCmd.Flags().StringVarP(&clusterVersionParam, "version", "v", defaultCoherenceVersion, "cluster version")
 	createClusterCmd.Flags().StringVarP(&persistenceModeParam, "persistence-mode", "P", "on-demand",
 		fmt.Sprintf("persistence mode %v", validPersistenceModes))
-	createClusterCmd.Flags().Int32VarP(&httpPortParam, "http-port", "p", 30000, "Http management port")
-	createClusterCmd.Flags().Int32VarP(&clusterPortParam, "cluster-port", "H", 7574, "cluster port")
+	createClusterCmd.Flags().Int32VarP(&httpPortParam, "http-port", "H", 30000, "Http management port")
+	createClusterCmd.Flags().Int32VarP(&clusterPortParam, "cluster-port", "p", 7574, "cluster port")
 	createClusterCmd.Flags().Int32VarP(&logLevelParam, logLevelArg, "l", 5, logLevelMessage)
 	createClusterCmd.Flags().Int32VarP(&startupDelayParam, startupDelayArg, "D", 1, startupDelayMessage)
 	createClusterCmd.Flags().Int32VarP(&serverCountParam, "server-count", "s", 3, serverCountMessage)
