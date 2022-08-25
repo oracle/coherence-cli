@@ -70,7 +70,7 @@ const heapMemoryArg = "heap-memory"
 const logLevelArg = "log-level"
 const startupDelayArg = "startup-delay"
 const serverCountMessage = "server count"
-const logLevelMessage = "Coherence log level"
+const logLevelMessage = "coherence log level"
 
 const outputFormats = "table, wide, json or jsonpath=\"...\""
 

@@ -882,16 +882,17 @@ func addCluster(cmd *cobra.Command, connection, connectionURL, discoveryType, ns
 
 // variables specifically for create cluster
 var (
-	httpPortParam         int32
-	clusterPortParam      int32
-	clusterVersionParam   string
-	serverCountParam      int32
-	logLevelParam         int32
-	heapMemoryParam       string
-	useCommercialParam    bool
-	validPersistenceModes = []string{"on-demand", "active", "active-backup", "active-async"}
-	persistenceModeParam  string
-	startupDelayParam     int32
+	httpPortParam            int32
+	clusterPortParam         int32
+	clusterVersionParam      string
+	serverCountParam         int32
+	logLevelParam            int32
+	heapMemoryParam          string
+	useCommercialParam       bool
+	validPersistenceModes    = []string{"on-demand", "active", "active-backup", "active-async"}
+	persistenceModeParam     string
+	startupDelayParam        int32
+	additionalArtefactsParam string
 )
 
 const defaultCoherenceVersion = "22.06.1"
@@ -916,12 +917,13 @@ NOTE: This is an experimental feature and my be altered or removed in the future
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var (
-			clusterName = sanitizeConnectionName(args[0])
-			err         error
-			response    string
-			processIDs  []string
-			groupID     = getCoherenceGroupID()
-			cpEntry     string
+			clusterName    = sanitizeConnectionName(args[0])
+			err            error
+			response       string
+			processIDs     []string
+			groupID        = getCoherenceGroupID()
+			cpEntry        string
+			splitArtefacts []string
 		)
 
 		// validate the Java and Maven executable are present and in the path
@@ -944,6 +946,16 @@ NOTE: This is an experimental feature and my be altered or removed in the future
 			return err
 		}
 
+		// validate any additional artefacts
+		if additionalArtefactsParam != "" {
+			splitArtefacts = strings.Split(additionalArtefactsParam, ",")
+			for _, v := range splitArtefacts {
+				if !utils.SliceContains(validCoherenceArtefacts, v) {
+					return fmt.Errorf("invalid additional artefact specified: %s", v)
+				}
+			}
+		}
+
 		if serverCountParam < 1 || serverCountParam > 20 {
 			return errors.New("server count must be between 1 and 20")
 		}
@@ -957,14 +969,15 @@ NOTE: This is an experimental feature and my be altered or removed in the future
 		}
 
 		if !automaticallyConfirm {
-			cmd.Printf("\nCluster name:     %s\n", clusterName)
-			cmd.Printf("Cluster version:  %s\n", clusterVersionParam)
-			cmd.Printf("Cluster port:     %d\n", clusterPortParam)
-			cmd.Printf("Management port:  %d\n", httpPortParam)
-			cmd.Printf("Server count:     %d\n", serverCountParam)
-			cmd.Printf("Initial memory:   %s\n", heapMemoryParam)
-			cmd.Printf("Persistence mode: %s\n", persistenceModeParam)
-			cmd.Printf("Group ID:         %s\n", groupID)
+			cmd.Printf("\nCluster name:         %s\n", clusterName)
+			cmd.Printf("Cluster version:      %s\n", clusterVersionParam)
+			cmd.Printf("Cluster port:         %d\n", clusterPortParam)
+			cmd.Printf("Management port:      %d\n", httpPortParam)
+			cmd.Printf("Server count:         %d\n", serverCountParam)
+			cmd.Printf("Initial memory:       %s\n", heapMemoryParam)
+			cmd.Printf("Persistence mode:     %s\n", persistenceModeParam)
+			cmd.Printf("Group ID:             %s\n", groupID)
+			cmd.Printf("Additional artefacts: %v\n", additionalArtefactsParam)
 			cmd.Printf("Are you sure you want to create the cluster with the above details? (y/n) ")
 			_, err = fmt.Scanln(&response)
 			if response != "y" || err != nil {
@@ -975,7 +988,15 @@ NOTE: This is an experimental feature and my be altered or removed in the future
 
 		// update default jars based up coherence group and version
 		updateDefaultJars()
-		cmd.Printf("Checking Maven dependencies for version %s\n", clusterVersionParam)
+
+		// update default jars with additional artefacts
+		if len(splitArtefacts) > 0 {
+			for _, v := range splitArtefacts {
+				defaultJars = append(defaultJars, &config.DefaultDependency{GroupID: groupID, Artefact: v, IsCoherence: true, Version: clusterVersionParam})
+			}
+		}
+
+		cmd.Printf("Checking %d Maven dependencies for Coherence version %s\n", len(defaultJars), clusterVersionParam)
 
 		// download the coherence dependencies
 		if err = getCoherenceDependencies(cmd, clusterVersionParam); err != nil {
@@ -991,7 +1012,6 @@ NOTE: This is an experimental feature and my be altered or removed in the future
 			}
 			classpath = append(classpath, cpEntry)
 		}
-		// TODO: allow additional classpath
 
 		// generate startup arguments
 		arguments := fmt.Sprintf("-Dcoherence.cluster=%s -Dcoherence.clusterport=%d -Dcoherence.ttl=0 -Dcoherence.wka=127.0.0.1 -Djava.net.preferIPv4Stack=true",
@@ -1288,12 +1308,13 @@ func init() {
 	createClusterCmd.Flags().StringVarP(&clusterVersionParam, "version", "v", defaultCoherenceVersion, "cluster version")
 	createClusterCmd.Flags().StringVarP(&persistenceModeParam, "persistence-mode", "P", "on-demand",
 		fmt.Sprintf("persistence mode %v", validPersistenceModes))
-	createClusterCmd.Flags().Int32VarP(&httpPortParam, "http-port", "H", 30000, "Http management port")
+	createClusterCmd.Flags().Int32VarP(&httpPortParam, "http-port", "H", 30000, "http management port")
 	createClusterCmd.Flags().Int32VarP(&clusterPortParam, "cluster-port", "p", 7574, "cluster port")
 	createClusterCmd.Flags().Int32VarP(&logLevelParam, logLevelArg, "l", 5, logLevelMessage)
 	createClusterCmd.Flags().Int32VarP(&startupDelayParam, startupDelayArg, "D", 1, startupDelayMessage)
 	createClusterCmd.Flags().Int32VarP(&serverCountParam, "server-count", "s", 3, serverCountMessage)
 	createClusterCmd.Flags().StringVarP(&heapMemoryParam, heapMemoryArg, "M", defaultHeap, heapMemoryMessage)
+	createClusterCmd.Flags().StringVarP(&additionalArtefactsParam, "additional-artefacts", "a", "", "additional comma separated Coherence artefacts")
 	createClusterCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
 	createClusterCmd.Flags().BoolVarP(&useCommercialParam, "commercial", "C", false, "use commercial Coherence groupID (default is CE)")
 

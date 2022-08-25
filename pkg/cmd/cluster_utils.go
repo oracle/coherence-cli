@@ -25,11 +25,19 @@ const cohQLClass = "com.tangosol.coherence.dslquery.QueryPlus"
 const ceGroupID = "com.oracle.cohrence.ce"
 
 // default Jars to use
-var defaultJars = []*config.DefaultDependency{
-	{GroupID: ceGroupID, Artefact: "coherence", IsCoherence: true},
-	{GroupID: ceGroupID, Artefact: "coherence-json", IsCoherence: true},
-	{GroupID: "org.jline", Artefact: "jline", IsCoherence: false, Version: "3.20.0"},
-}
+var (
+	defaultJars = []*config.DefaultDependency{
+		{GroupID: ceGroupID, Artefact: "coherence", IsCoherence: true},
+		{GroupID: ceGroupID, Artefact: "coherence-json", IsCoherence: true},
+		{GroupID: "org.jline", Artefact: "jline", IsCoherence: false, Version: "3.20.0"},
+	}
+
+	// list of additional coherence artefacts
+	validCoherenceArtefacts = []string{"coherence-cdi-server", "coherence-cdi", "coherence-concurrent", "coherence-grpc-proxy",
+		"coherence-grpc", "coherence-helidon-client", "coherence-helidon-grpc-proxy", "coherence-http-netty", "coherence-java-client",
+		"coherence-jcache", "coherence-jpa", "coherence-management", "coherence-micrometer", "coherence-mp-config",
+		"coherence-mp-metrics", "coherence-rest"}
+)
 
 // checkCreateRequirements validates that all the necessary requirements are fulfilled
 // for creating a cluster. This includes mvn and java executables. Nil is returned to
@@ -169,6 +177,10 @@ func startClient(cmd *cobra.Command, connection ClusterConnection, class string)
 	if err != nil {
 		return utils.GetError(fmt.Sprintf("unable to start %s: %v", class, result), err)
 	}
+
+	// handle CTRL-C
+	//handleCTRLC()
+
 	return process.Wait()
 }
 

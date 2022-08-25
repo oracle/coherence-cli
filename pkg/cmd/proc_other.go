@@ -1,4 +1,4 @@
-//go:build darwin
+//go:build darwin || linux
 
 /*
  * Copyright (c) 2022, Oracle and/or its affiliates.
@@ -9,8 +9,10 @@
 package cmd
 
 import (
+	"fmt"
 	"os"
 	"os/exec"
+	"os/signal"
 	"syscall"
 )
 
@@ -23,4 +25,16 @@ func setForkProcess(process *exec.Cmd) {
 
 func signalProcess(proc *os.Process) error {
 	return proc.Signal(syscall.SIGCONT)
+}
+
+func handleCTRLC() {
+	chanSignal := make(chan os.Signal, 1)
+	chanDone := make(chan struct{})
+	signal.Notify(chanSignal, os.Interrupt)
+	go func() {
+		<-chanSignal
+		fmt.Println("CTRL-C Received")
+		close(chanDone)
+	}()
+	<-chanDone
 }

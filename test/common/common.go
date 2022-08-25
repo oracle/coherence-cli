@@ -25,7 +25,7 @@ import (
 const configArg = "--config"
 const addedCluster = "Added cluster"
 const version1221 = "12.2.1"
-const version1411 = "14.1.1"
+const version1411 = "14.1.1.0"
 const configYaml = "config.yaml"
 const nodeID = "NODE ID"
 const jsonPathServices = "jsonpath=$.services"
@@ -516,7 +516,6 @@ func RunTestSetMemberCommands(t *testing.T) {
 	)
 
 	// Skip if the cluster version is 14.1.1.X as there is an issue with set log level which is being investigated
-
 	versionString, err = getVersion(restUrl)
 
 	g.Expect(err).To(BeNil())

@@ -1,4 +1,4 @@
-//go:build linux
+//go:build windows
 
 /*
  * Copyright (c) 2022, Oracle and/or its affiliates.
@@ -14,13 +14,18 @@ import (
 	"syscall"
 )
 
-// setForkProcess set the process to be forked for linux
-func setForkProcess(process *exec.Cmd) {
-	process.SysProcAttr = &syscall.SysProcAttr{
-		Setsid: true,
+// setForkProcess set the process to be forked for windows
+func setForkProcess(cmd *exec.Cmd) {
+	cmd.SysProcAttr = &syscall.SysProcAttr{
+		CreationFlags: syscall.CREATE_NEW_PROCESS_GROUP,
 	}
 }
 
 func signalProcess(proc *os.Process) error {
-	return proc.Signal(syscall.SIGCONT)
+	// no-op
+	return nil
+}
+
+func handleCTRLC() {
+	// no-op
 }
