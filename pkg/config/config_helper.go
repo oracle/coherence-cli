@@ -277,7 +277,7 @@ type ServiceMemberDetail struct {
 	ThreadCountMax         int32   `json:"threadCountMax"`
 	ThreadIdleCount        int32   `json:"threadIdleCount"`
 	TaskCount              int32   `json:"taskCount"`
-	TaskCountBacklog       int32   `json:"taskCountBacklog"`
+	TaskBacklog            int32   `json:"taskBacklog"`
 	OwnedPartitionsPrimary int32   `json:"ownedPartitionsPrimary"`
 	OwnedPartitionsBackup  int32   `json:"ownedPartitionsBackup"`
 	RequestAverageDuration float32 `json:"requestAverageDuration"`

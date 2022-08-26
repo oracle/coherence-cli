@@ -443,6 +443,7 @@ func Initialize(command *cobra.Command) *cobra.Command {
 	getCmd.AddCommand(getHealthCmd)
 	getCmd.AddCommand(getEnvironmentCmd)
 	getCmd.AddCommand(getProcsCmd)
+	getCmd.AddCommand(getServiceMembersCmd)
 
 	// set command
 	command.AddCommand(setCmd)

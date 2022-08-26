@@ -538,7 +538,7 @@ func FormatServiceMembers(serviceMembers []config.ServiceMemberDetail) string {
 			formatSmallInteger(value.ThreadCountMin), formatSmallInteger(value.ThreadCountMax))
 		if OutputFormat == constants.WIDE {
 			stringValues[i+1] = getColumns(stringValues[i+1],
-				formatSmallInteger(value.TaskCount), formatSmallInteger(value.TaskCountBacklog),
+				formatSmallInteger(value.TaskCount), formatSmallInteger(value.TaskBacklog),
 				formatSmallInteger(value.OwnedPartitionsPrimary), formatSmallInteger(value.OwnedPartitionsBackup),
 				formatFloat(value.RequestAverageDuration), formatFloat(value.TaskAverageDuration))
 		}
