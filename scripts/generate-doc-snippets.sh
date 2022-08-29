@@ -46,6 +46,13 @@ create_doc $DOCS_DIR/get_clusters "${COHCTL} get clusters --help"
 create_doc $DOCS_DIR/describe_cluster "${COHCTL} describe cluster --help"
 create_doc $DOCS_DIR/discover_clusters "${COHCTL} discover clusters --help"
 
+# Create Cluster
+create_doc $DOCS_DIR/create_cluster "${COHCTL} create cluster --help"
+create_doc $DOCS_DIR/start_cluster "${COHCTL} start cluster --help"
+create_doc $DOCS_DIR/stop_cluster "${COHCTL} stop cluster --help"
+create_doc $DOCS_DIR/start_console "${COHCTL} start console --help"
+create_doc $DOCS_DIR/start_cohql "${COHCTL} start cohql --help"
+
 # Context
 create_doc $DOCS_DIR/set_context "${COHCTL} set context --help"
 create_doc $DOCS_DIR/get_context "${COHCTL} get context --help"
@@ -71,6 +78,7 @@ create_doc $DOCS_DIR/replicate_all "${COHCTL} replicate all --help"
 
 # Services
 create_doc $DOCS_DIR/get_services "${COHCTL} get services --help"
+create_doc $DOCS_DIR/get_service_members "${COHCTL} get service-members --help"
 create_doc $DOCS_DIR/describe_service "${COHCTL} describe service --help"
 create_doc $DOCS_DIR/set_service "${COHCTL} set service --help"
 create_doc $DOCS_DIR/start_service "${COHCTL} start service --help"

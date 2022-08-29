@@ -147,4 +147,11 @@ Look up various Name Service endpoints for a cluster.
 Various settings related commands.
 --
 
+[CARD]
+.Create Clusters
+[link=docs/reference/98_create_clusters.adoc]
+--
+Experimental command to create development clusters.
+--
+
 ====

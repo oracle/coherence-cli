@@ -154,7 +154,7 @@ can also specify '-o wide' to display addition information.`,
 var getServiceMembersCmd = &cobra.Command{
 	Use:   "service-members",
 	Short: "display service members for a cluster",
-	Long:  `The 'get service-members' command displays service members for a cluster using various options.`,
+	Long:  `The 'get service-members' command displays service members for a cluster.`,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
 			displayErrorAndExit(cmd, provideServiceName)
