@@ -9,6 +9,7 @@ package cmd
 import (
 	. "github.com/onsi/gomega"
 	"github.com/oracle/coherence-cli/pkg/discovery"
+	"os"
 	"testing"
 )
 
@@ -42,4 +43,17 @@ func TestFormatCluster(t *testing.T) {
 	g := NewGomegaWithT(t)
 	cluster := discovery.DiscoveredCluster{ClusterName: "tim", Host: "localhost", NSPort: 7574}
 	g.Expect(formatCluster(cluster)).To(Equal("Cluster: tim, Name Service address: localhost:7574\n"))
+}
+
+func TestGetMavenClasspath(t *testing.T) {
+	g := NewGomegaWithT(t)
+	home, _ := os.UserHomeDir()
+
+	path, err := getMavenClasspath("com.oracle.coherence.ce", "coherence", "22.06")
+	g.Expect(err).To(BeNil())
+	g.Expect(path).To(Equal(home + "/.m2/repository/com/oracle/coherence/ce/coherence/22.06/coherence-22.06.jar"))
+
+	path, err = getMavenClasspath("com.oracle.coherence.ce", "coherence", "22.09")
+	g.Expect(err).To(BeNil())
+	g.Expect(path).To(Equal(home + "/.m2/repository/com/oracle/coherence/ce/coherence/22.09/coherence-22.09.jar"))
 }

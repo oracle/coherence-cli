@@ -538,7 +538,7 @@ func FormatServiceMembers(serviceMembers []config.ServiceMemberDetail) string {
 			formatSmallInteger(value.ThreadCountMin), formatSmallInteger(value.ThreadCountMax))
 		if OutputFormat == constants.WIDE {
 			stringValues[i+1] = getColumns(stringValues[i+1],
-				formatSmallInteger(value.TaskCount), formatSmallInteger(value.TaskCountBacklog),
+				formatSmallInteger(value.TaskCount), formatSmallInteger(value.TaskBacklog),
 				formatSmallInteger(value.OwnedPartitionsPrimary), formatSmallInteger(value.OwnedPartitionsBackup),
 				formatFloat(value.RequestAverageDuration), formatFloat(value.TaskAverageDuration))
 		}
@@ -741,6 +741,7 @@ func FormatClusterConnections(clusters []ClusterConnection) string {
 	var (
 		clusterCount   = len(clusters)
 		currentContext string
+		manualCluster  string
 	)
 	if clusterCount == 0 {
 		return ""
@@ -748,18 +749,43 @@ func FormatClusterConnections(clusters []ClusterConnection) string {
 
 	var stringValues = make([]string, clusterCount+1)
 
-	stringValues[0] = getColumns("CONNECTION", "TYPE", "URL", "VERSION", "CLUSTER NAME", "TYPE", "CTX")
+	stringValues[0] = getColumns("CONNECTION", "TYPE", "URL", "VERSION", "CLUSTER NAME", "TYPE", "CTX", "MANUAL")
 
 	for i, value := range clusters {
 		currentContext = ""
 		if Config.CurrentContext == value.Name {
 			currentContext = "*"
 		}
+		if value.ManuallyCreated {
+			manualCluster = "Y"
+		}
 		stringValues[i+1] = getColumns(value.Name, value.ConnectionType, value.ConnectionURL,
-			value.ClusterVersion, value.ClusterName, value.ClusterType, currentContext)
+			value.ClusterVersion, value.ClusterName, value.ClusterType, currentContext, manualCluster)
 	}
 
 	return formatLinesAllStrings(stringValues)
+}
+
+// FormatProcesses returns the processes in a column formatted output
+func FormatProcesses(processes []config.Process) string {
+	var (
+		procCount = len(processes)
+	)
+	if procCount == 0 {
+		return ""
+	}
+
+	var stringValues = make([]string, procCount+1)
+
+	stringValues[0] = getColumns("PROCESS ID", "RUNNING", NodeIDColumn, MemberColumn, RoleColumn)
+
+	for i, value := range processes {
+		var nodeID, _ = strconv.Atoi(value.NodeID)
+		stringValues[i+1] = getColumns(formatProcessID(value.ProcessID), formatBool(value.Running),
+			formatSmallInteger(int32(nodeID)), value.MemberName, value.RoleName)
+	}
+
+	return formatLinesAllStringsWithAlignment([]string{R, L, R, L, L}, stringValues)
 }
 
 // FormatTracing returns the member's tracing details in a column formatted output
@@ -1641,6 +1667,10 @@ func formatGBOnly(bytesValue int64) string {
 
 func formatBool(boolValue bool) string {
 	return printer.Sprintf("%v", boolValue)
+}
+
+func formatProcessID(PID int) string {
+	return fmt.Sprintf("%d", PID)
 }
 
 // getMaxColumnLengths returns an array representing the max lengths of columns

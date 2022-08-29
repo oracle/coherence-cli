@@ -333,7 +333,9 @@ copyright: getcopyright ## Check copyright headers
 	  -X THIRD_PARTY_LICENSES.txt \
 	  -X .tpl \
 	  -X .txt \
-	  -X pkg/data/assets/
+	  -X pkg/data/assets/ \
+	  -X pkg/cmd/proc_windows.go \
+	  -X pkg/cmd/proc_other.go
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Executes golangci-lint to perform various code review checks on the source.
@@ -420,6 +422,14 @@ test-discovery: test-clean gotestsum $(BUILD_PROPS) ## Run Discovery tests with 
 	CGO_ENABLED=0 $(GOTESTSUM) --format testname --junitfile $(TEST_LOGS_DIR)/cohctl-test-e2e.xml \
 	  -- $(GO_TEST_FLAGS) -v  ./test/e2e/discovery/...
 	make test-coherence-shutdown
+
+# ----------------------------------------------------------------------------------------------------------------------
+# Executes the Go create cluster tests for standalone Coherence
+# ----------------------------------------------------------------------------------------------------------------------
+.PHONY: test-create-cluster
+test-create-cluster: test-clean gotestsum $(BUILD_PROPS) ## Run create cluster tests
+	CGO_ENABLED=0 $(GOTESTSUM) --format testname --junitfile $(TEST_LOGS_DIR)/cohctl-test-e2e.xml \
+	  -- $(GO_TEST_FLAGS) -v  ./test/e2e/create/...
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Executes the Go end to end tests and unit tests for standalone Coherence with coverage

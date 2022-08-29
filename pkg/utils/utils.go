@@ -29,6 +29,9 @@ var (
 
 	// Logger is the logger to use for writing logs
 	Logger *zap.Logger
+
+	// ErrPort indicates an invalid port value
+	ErrPort = errors.New("port must be between 1024 and 65535")
 )
 
 // GetError returns a formatted error and prints to log
@@ -229,4 +232,13 @@ func IsStorageEnabled(nodeID int, storageMap map[int]bool) bool {
 		return nodeEntry
 	}
 	return false
+}
+
+// ValidatePort validates that a port is valid
+func ValidatePort(port int32) error {
+	if port < 1024 || port > 65535 {
+		return ErrPort
+	}
+
+	return nil
 }

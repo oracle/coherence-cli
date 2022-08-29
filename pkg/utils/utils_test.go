@@ -188,5 +188,16 @@ func TestGetStorageMap(t *testing.T) {
 	g.Expect(result[1]).To(Equal(true))
 	g.Expect(result[2]).To(Equal(true))
 	g.Expect(result[3]).To(Equal(false))
+}
 
+func TestPortValidation(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	g.Expect(ValidatePort(100)).Should(Equal(ErrPort))
+	g.Expect(ValidatePort(1023)).Should(Equal(ErrPort))
+	g.Expect(ValidatePort(65536)).Should(Equal(ErrPort))
+	g.Expect(ValidatePort(-1)).Should(Equal(ErrPort))
+	g.Expect(ValidatePort(1024)).ShouldNot(HaveOccurred())
+	g.Expect(ValidatePort(65535)).ShouldNot(HaveOccurred())
+	g.Expect(ValidatePort(12345)).ShouldNot(HaveOccurred())
 }

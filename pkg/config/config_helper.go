@@ -277,7 +277,7 @@ type ServiceMemberDetail struct {
 	ThreadCountMax         int32   `json:"threadCountMax"`
 	ThreadIdleCount        int32   `json:"threadIdleCount"`
 	TaskCount              int32   `json:"taskCount"`
-	TaskCountBacklog       int32   `json:"taskCountBacklog"`
+	TaskBacklog            int32   `json:"taskBacklog"`
 	OwnedPartitionsPrimary int32   `json:"ownedPartitionsPrimary"`
 	OwnedPartitionsBackup  int32   `json:"ownedPartitionsBackup"`
 	RequestAverageDuration float32 `json:"requestAverageDuration"`
@@ -397,6 +397,28 @@ type ElasticData struct {
 	ExhaustiveCompactionCount  int64   `json:"exhaustiveCompactionCount"`
 	MaxFileSize                int64   `json:"maxFileSize"`
 	TotalDataSize              int64   `json:"totalDataSize"`
+}
+
+// Process contains process information
+type Process struct {
+	ProcessID  int    `json:"processId"`
+	Running    bool   `json:"running"`
+	NodeID     string `json:"nodeId"`
+	RoleName   string `json:"roleName"`
+	MemberName string `json:"memberName"`
+}
+
+// Processes contains a list of processes
+type Processes struct {
+	ProcessList []Process `json:"items"`
+}
+
+// DefaultDependency holds the default dependencies for starting a Cache server
+type DefaultDependency struct {
+	GroupID     string
+	Artifact    string
+	IsCoherence bool
+	Version     string
 }
 
 // Links contains any links returned via HTTP

@@ -64,6 +64,13 @@ const defaultBytesFormatKey = "defaultBytesFormat"
 
 const confirmOptionMessage = "automatically confirm the operation"
 const timeoutMessage = "timeout in seconds for NS Lookup requests"
+const heapMemoryMessage = "heap memory to allocate for JVM"
+const startupDelayMessage = "startup delay in seconds for each server"
+const heapMemoryArg = "heap-memory"
+const logLevelArg = "log-level"
+const startupDelayArg = "startup-delay"
+const serverCountMessage = "server count"
+const logLevelMessage = "coherence log level"
 
 const outputFormats = "table, wide, json or jsonpath=\"...\""
 
@@ -72,6 +79,7 @@ const OperationCompleted = "operation completed"
 // config file related
 
 const configName = "cohctl"
+const logsDirName = "logs"
 const configType = "yaml"
 const configDir = ".cohctl"
 const logFile = "cohctl.log"
@@ -82,6 +90,9 @@ var (
 
 	// configuration directory
 	cfgDirectory string
+
+	// logs directory
+	logsDirectory string
 
 	// Config is the CLI config
 	Config CoherenceCLIConfig
@@ -120,12 +131,21 @@ type CoherenceCLIConfig struct {
 type ClusterConnection struct {
 	Name                 string `json:"name"` // the name the user gives to the cluster connection
 	DiscoveryType        string `json:"discoveryType"`
-	ConnectionType       string `json:"connectionType"`
+	ConnectionType       string `json:"connectionType"` // currently only valid value is "http"
 	ConnectionURL        string `json:"url"`
 	NameServiceDiscovery string `json:"nameServiceDiscovery"`
-	ClusterVersion       string `json:"clusterVersion"`
+	ClusterVersion       string `json:"clusterVersionParam"`
 	ClusterName          string `json:"clusterName"` // the actual cluster name
 	ClusterType          string `json:"clusterType"`
+
+	// the following attributes are specific to manually created clusters
+	ManuallyCreated     bool   `json:"manuallyCreated"`     // indicates if this was created by the create cluster command
+	BaseClasspath       string `json:"baseClasspath"`       // the minimum required classes coherence.jar and coherence-json
+	AdditionalClasspath string `json:"additionalClasspath"` // additional classpath provided by the user
+	Arguments           string `json:"arguments"`           // arguments to start cluster with including cluster name, etc
+	ManagementPort      int32  `json:"managementPort"`      // arguments to start cluster with including cluster name, etc
+	ProcessIDs          []int  `json:"processIDs"`          // process id's of started members
+	PersistenceMode     string `json:"persistenceMode"`
 }
 
 // rootCmd represents the base command when called without any subcommands
@@ -293,9 +313,18 @@ func initConfig() {
 		}
 	}
 
+	// setup logs directory
+	logsDirectory = filepath.Join(cfgDirectory, logsDirName)
+	err = ensureLogsDir()
+	if err != nil {
+		fmt.Printf("unable to create logs directory: %s, %v", logsDirectory, err)
+		os.Exit(1)
+	}
+
 	Logger.Info("Configuration loaded", []zapcore.Field{
 		zap.String("configFile", cfgFile),
 		zap.String("configDir", cfgDirectory),
+		zap.String("logsDir", logsDirectory),
 	}...)
 
 	// check for newer version of cohctl and carry out any upgrade tasks
@@ -341,6 +370,22 @@ func WriteConfig() error {
 	err := viper.WriteConfig()
 	if err != nil {
 		return errors.New("unable to write config: " + err.Error())
+	}
+	return nil
+}
+
+// GetConfigDir returns the configuration directory
+func GetConfigDir() string {
+	return cfgDirectory
+}
+
+func GetLogDirectory() string {
+	return logsDirectory
+}
+
+func ensureLogsDir() error {
+	if err := utils.EnsureDirectory(GetLogDirectory()); err != nil {
+		return err
 	}
 	return nil
 }
@@ -397,6 +442,8 @@ func Initialize(command *cobra.Command) *cobra.Command {
 	getCmd.AddCommand(getBytesFormatCmd)
 	getCmd.AddCommand(getHealthCmd)
 	getCmd.AddCommand(getEnvironmentCmd)
+	getCmd.AddCommand(getProcsCmd)
+	getCmd.AddCommand(getServiceMembersCmd)
 
 	// set command
 	command.AddCommand(setCmd)
@@ -435,6 +482,9 @@ func Initialize(command *cobra.Command) *cobra.Command {
 	startCmd.AddCommand(startJfrCmd)
 	startCmd.AddCommand(startFederationCmd)
 	startCmd.AddCommand(startServiceCmd)
+	startCmd.AddCommand(startClusterCmd)
+	startCmd.AddCommand(startConsoleCmd)
+	startCmd.AddCommand(startCohQLCmd)
 
 	// stop
 	command.AddCommand(stopCmd)
@@ -442,6 +492,7 @@ func Initialize(command *cobra.Command) *cobra.Command {
 	stopCmd.AddCommand(stopJfrCmd)
 	stopCmd.AddCommand(stopFederationCmd)
 	stopCmd.AddCommand(stopServiceCmd)
+	stopCmd.AddCommand(stopClusterCmd)
 
 	// dump
 	command.AddCommand(dumpCmd)
@@ -480,6 +531,7 @@ func Initialize(command *cobra.Command) *cobra.Command {
 	// create
 	command.AddCommand(createCmd)
 	createCmd.AddCommand(createSnapshotCmd)
+	createCmd.AddCommand(createClusterCmd)
 
 	// recover
 	command.AddCommand(recoverCmd)

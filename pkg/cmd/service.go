@@ -35,6 +35,7 @@ var (
 		"taskHungThresholdMillis", "requestTimeoutMillis"}
 	nodeIDService          string
 	nodeIDServiceOperation string
+	excludeStorageDisabled bool
 )
 
 const serviceUse = "service service-name"
@@ -142,6 +143,108 @@ can also specify '-o wide' to display addition information.`,
 			}
 
 			// we are watching so sleep and then repeat until CTRL-C
+			time.Sleep(time.Duration(watchDelay) * time.Second)
+		}
+
+		return nil
+	},
+}
+
+// getServiceMembersCmd represents the get service-members command
+var getServiceMembersCmd = &cobra.Command{
+	Use:   "service-members",
+	Short: "display service members for a cluster",
+	Long:  `The 'get service-members' command displays service members for a cluster using various options.`,
+	Args: func(cmd *cobra.Command, args []string) error {
+		if len(args) != 1 {
+			displayErrorAndExit(cmd, provideServiceName)
+		}
+		return nil
+	},
+	RunE: func(cmd *cobra.Command, args []string) error {
+		var (
+			err             error
+			dataFetcher     fetcher.Fetcher
+			serviceResult   []byte
+			connection      string
+			servicesSummary = config.ServicesSummaries{}
+		)
+
+		serviceName := args[0]
+
+		// retrieve the current context or the value from "-c"
+		connection, dataFetcher, err = GetConnectionAndDataFetcher()
+		if err != nil {
+			return err
+		}
+
+		serviceResult, err = dataFetcher.GetServiceDetailsJSON()
+		if err != nil {
+			return err
+		}
+
+		err = json.Unmarshal(serviceResult, &servicesSummary)
+		if err != nil {
+			return err
+		}
+
+		found := serviceExists(serviceName, servicesSummary)
+
+		if !found {
+			return fmt.Errorf(unableToFindService, serviceName)
+		}
+		for {
+			var (
+				membersResult  []byte
+				membersDetails = config.ServiceMemberDetails{}
+			)
+			membersResult, err = dataFetcher.GetServiceMembersDetailsJSON(serviceName)
+			if err != nil {
+				return err
+			}
+
+			if strings.Contains(OutputFormat, constants.JSONPATH) || OutputFormat == constants.JSON {
+				if strings.Contains(OutputFormat, constants.JSONPATH) {
+					result, err := utils.GetJSONPathResults(membersResult, OutputFormat)
+					if err != nil {
+						return err
+					}
+					cmd.Println(result)
+					return nil
+				}
+				cmd.Println(string(membersResult))
+			} else {
+				cmd.Println(FormatCurrentCluster(connection))
+
+				err = json.Unmarshal(membersResult, &membersDetails)
+				if err != nil {
+					return utils.GetError("unable to unmarshall members result", err)
+				}
+
+				var finalDetails []config.ServiceMemberDetail
+
+				if excludeStorageDisabled {
+					// remove any entries where idle threads == -1 which indicates client
+					var newMemberDetails = make([]config.ServiceMemberDetail, 0)
+					for _, v := range membersDetails.Services {
+						if v.OwnedPartitionsPrimary > 0 {
+							newMemberDetails = append(newMemberDetails, v)
+						}
+					}
+					finalDetails = newMemberDetails
+				} else {
+					finalDetails = membersDetails.Services
+				}
+
+				cmd.Println("Service: " + serviceName)
+				cmd.Println(FormatServiceMembers(finalDetails))
+			}
+
+			// check to see if we should exit if we are not watching
+			if !watchEnabled {
+				break
+			}
+			// we are watching services so sleep and then repeat until CTRL-C
 			time.Sleep(time.Duration(watchDelay) * time.Second)
 		}
 
@@ -820,4 +923,5 @@ Invocation, Proxy, RemoteCache or ReplicatedCache`)
 	_ = shutdownServiceCmd.MarkFlagRequired("node")
 	shutdownServiceCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
 
+	getServiceMembersCmd.Flags().BoolVarP(&excludeStorageDisabled, "exclude", "x", false, "exclude storage-disabled clients")
 }

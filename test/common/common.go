@@ -516,7 +516,6 @@ func RunTestSetMemberCommands(t *testing.T) {
 	)
 
 	// Skip if the cluster version is 14.1.1.X as there is an issue with set log level which is being investigated
-
 	versionString, err = getVersion(restUrl)
 
 	g.Expect(err).To(BeNil())
@@ -1806,4 +1805,58 @@ func GetDataFetcher(g *WithT, clusterName string) fetcher.Fetcher {
 // isHealthEnabled returns true if health API is enabled, which is 14.1.1.2206 and 22.06+
 func isHealthEnabled(version string) bool {
 	return strings.Contains(version, "22") || strings.Contains(version, "23")
+}
+
+// RunTestCreateCommands tests various create cluster commands
+// Expiremntal only
+func RunTestCreateCommands(t *testing.T) {
+	var (
+		g           = NewGomegaWithT(t)
+		clusterName = "tim"
+	)
+
+	file, err := test_utils.CreateNewConfigYaml(configYaml)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	test_utils.CleanupConfigFileAfterTest(t, file)
+
+	cliCmd := cmd.Initialize(nil)
+
+	// should be able to create a new cluster and start it using the defaults
+	test_utils.EnsureCommandContains(g, t, cliCmd, "Cluster added and started with process ids", configArg, file, "create", "cluster",
+		clusterName, "-y")
+
+	// sleep to wait to cluster startup
+	test_utils.Sleep(20)
+
+	// test get members
+	test_utils.EnsureCommandContainsAll(g, t, cliCmd, nodeID, configArg, file, "get", "members",
+		"-c", clusterName)
+
+	// shutdown the cluster
+	test_utils.EnsureCommandContains(g, t, cliCmd, "3 processes were stopped for cluster tim", configArg, file, "stop", "cluster",
+		clusterName, "-y")
+
+	test_utils.Sleep(10)
+
+	// re-start the cluster
+	test_utils.EnsureCommandContains(g, t, cliCmd, "Cluster tim and started with process ids", configArg, file, "start", "cluster",
+		clusterName, "-y", "-s", "4")
+
+	// sleep to wait to cluster startup
+	test_utils.Sleep(20)
+
+	// test get members
+	test_utils.EnsureCommandContainsAll(g, t, cliCmd, nodeID, configArg, file, "get", "members",
+		"-c", clusterName)
+
+	// shutdown the cluster
+	test_utils.EnsureCommandContains(g, t, cliCmd, "4 processes were stopped for cluster tim", configArg, file, "stop", "cluster",
+		clusterName, "-y")
+
+	// shutdown the cluster
+	test_utils.EnsureCommandContains(g, t, cliCmd, "Removed connection for cluster tim", configArg, file, "remove", "cluster",
+		clusterName, "-y")
 }
