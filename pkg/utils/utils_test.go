@@ -201,12 +201,3 @@ func TestPortValidation(t *testing.T) {
 	g.Expect(ValidatePort(65535)).ShouldNot(HaveOccurred())
 	g.Expect(ValidatePort(12345)).ShouldNot(HaveOccurred())
 }
-
-func TestGetCoherenceArtefactURL(t *testing.T) {
-	g := NewGomegaWithT(t)
-
-	g.Expect(GetCoherenceArtefactURL("coherence", "21.12.2")).
-		To(Equal("https://repo1.maven.org/maven2/com/oracle/coherence/ce/coherence/21.12.2/coherence-21.12.2.jar"))
-	g.Expect(GetCoherenceArtefactURL("coherence-json", "21.12.2")).
-		To(Equal("https://repo1.maven.org/maven2/com/oracle/coherence/ce/coherence-json/21.12.2/coherence-json-21.12.2.jar"))
-}

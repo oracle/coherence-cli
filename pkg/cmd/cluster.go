@@ -893,7 +893,7 @@ var (
 	validPersistenceModes    = []string{"on-demand", "active", "active-backup", "active-async"}
 	persistenceModeParam     string
 	startupDelayParam        int32
-	additionalArtefactsParam string
+	additionalArtifactsParam string
 )
 
 const defaultCoherenceVersion = "22.06.1"
@@ -924,7 +924,7 @@ NOTE: This is an experimental feature and my be altered or removed in the future
 			processIDs     []string
 			groupID        = getCoherenceGroupID()
 			cpEntry        string
-			splitArtefacts []string
+			splitArtifacts []string
 		)
 
 		// validate the Java and Maven executable are present and in the path
@@ -947,17 +947,17 @@ NOTE: This is an experimental feature and my be altered or removed in the future
 			return err
 		}
 
-		// validate any additional artefacts
-		if additionalArtefactsParam != "" {
-			splitArtefacts = strings.Split(additionalArtefactsParam, ",")
-			for _, v := range splitArtefacts {
+		// validate any additional artifacts
+		if additionalArtifactsParam != "" {
+			splitArtifacts = strings.Split(additionalArtifactsParam, ",")
+			for _, v := range splitArtifacts {
 				if strings.Contains(v, ":") {
 					// could be G:A:V format so validate
 					if len(strings.Split(v, ":")) != 3 {
-						return fmt.Errorf("invalid G:A:V format for other artefact specified: %s", v)
+						return fmt.Errorf("invalid G:A:V format for other artifact specified: %s", v)
 					}
-				} else if !utils.SliceContains(validCoherenceArtefacts, v) {
-					return fmt.Errorf("invalid additional artefact specified: %s.\nValid values are: %v", v, validCoherenceArtefacts)
+				} else if !utils.SliceContains(validCoherenceArtifacts, v) {
+					return fmt.Errorf("invalid additional artifact specified: %s.\nValid values are: %v", v, validCoherenceArtifacts)
 				}
 			}
 		}
@@ -981,7 +981,7 @@ NOTE: This is an experimental feature and my be altered or removed in the future
 			cmd.Printf("Initial memory:       %s\n", heapMemoryParam)
 			cmd.Printf("Persistence mode:     %s\n", persistenceModeParam)
 			cmd.Printf("Group ID:             %s\n", groupID)
-			cmd.Printf("Additional artefacts: %v\n", additionalArtefactsParam)
+			cmd.Printf("Additional artifacts: %v\n", additionalArtifactsParam)
 			cmd.Printf("Are you sure you want to create the cluster with the above details? (y/n) ")
 			_, err = fmt.Scanln(&response)
 			if response != "y" || err != nil {
@@ -993,23 +993,23 @@ NOTE: This is an experimental feature and my be altered or removed in the future
 		// update default jars based up coherence group and version
 		updateDefaultJars()
 
-		// update default jars with additional artefacts
-		if len(splitArtefacts) > 0 {
-			for _, v := range splitArtefacts {
+		// update default jars with additional artifacts
+		if len(splitArtifacts) > 0 {
+			for _, v := range splitArtifacts {
 				if strings.Contains(v, ":") {
 					// G:A:V format
 					gav := strings.Split(v, ":")
-					defaultJars = append(defaultJars, &config.DefaultDependency{GroupID: gav[0], Artefact: gav[1], Version: gav[2], IsCoherence: false})
+					defaultJars = append(defaultJars, &config.DefaultDependency{GroupID: gav[0], Artifact: gav[1], Version: gav[2], IsCoherence: false})
 				} else {
-					defaultJars = append(defaultJars, &config.DefaultDependency{GroupID: groupID, Artefact: v, IsCoherence: true, Version: clusterVersionParam})
+					defaultJars = append(defaultJars, &config.DefaultDependency{GroupID: groupID, Artifact: v, IsCoherence: true, Version: clusterVersionParam})
 				}
 			}
 		}
 
 		if skipMavenDepsParam {
-			cmd.Println("\nSkipping downloading Maven artefacts")
+			cmd.Println("\nSkipping downloading Maven artifcts")
 		} else {
-			cmd.Printf("\nChecking %d Maven dependencies for Coherence version %s\n", len(defaultJars), clusterVersionParam)
+			cmd.Printf("\nChecking %d Maven dependencies...\n", len(defaultJars))
 
 			// download the coherence dependencies
 			if err = getCoherenceDependencies(cmd); err != nil {
@@ -1020,7 +1020,7 @@ NOTE: This is an experimental feature and my be altered or removed in the future
 		// generate classpath
 		classpath := make([]string, 0)
 		for _, entry := range defaultJars {
-			cpEntry, err = getMavenClasspath(entry.GroupID, entry.Artefact, entry.Version)
+			cpEntry, err = getMavenClasspath(entry.GroupID, entry.Artifact, entry.Version)
 			if err != nil {
 				return err
 			}
@@ -1327,10 +1327,10 @@ func init() {
 	createClusterCmd.Flags().Int32VarP(&startupDelayParam, startupDelayArg, "D", 1, startupDelayMessage)
 	createClusterCmd.Flags().Int32VarP(&serverCountParam, "server-count", "s", 3, serverCountMessage)
 	createClusterCmd.Flags().StringVarP(&heapMemoryParam, heapMemoryArg, "M", defaultHeap, heapMemoryMessage)
-	createClusterCmd.Flags().StringVarP(&additionalArtefactsParam, "additional-artefacts", "a", "", "additional comma separated Coherence artefacts or others in G:A:V format")
+	createClusterCmd.Flags().StringVarP(&additionalArtifactsParam, "additional", "a", "", "additional comma separated Coherence artifacts or others in G:A:V format")
 	createClusterCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
 	createClusterCmd.Flags().BoolVarP(&useCommercialParam, "commercial", "C", false, "use commercial Coherence groupID (default is CE)")
-	createClusterCmd.Flags().BoolVarP(&skipMavenDepsParam, "skip-deps", "S", false, "skip pulling Maven artefacts")
+	createClusterCmd.Flags().BoolVarP(&skipMavenDepsParam, "skip-deps", "S", false, "skip pulling Maven artifacts")
 
 	stopClusterCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
 

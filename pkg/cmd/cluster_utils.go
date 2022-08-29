@@ -15,6 +15,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -27,13 +28,13 @@ const ceGroupID = "com.oracle.cohrence.ce"
 // default Jars to use
 var (
 	defaultJars = []*config.DefaultDependency{
-		{GroupID: ceGroupID, Artefact: "coherence", IsCoherence: true},
-		{GroupID: ceGroupID, Artefact: "coherence-json", IsCoherence: true},
-		{GroupID: "org.jline", Artefact: "jline", IsCoherence: false, Version: "3.20.0"},
+		{GroupID: ceGroupID, Artifact: "coherence", IsCoherence: true},
+		{GroupID: ceGroupID, Artifact: "coherence-json", IsCoherence: true},
+		{GroupID: "org.jline", Artifact: "jline", IsCoherence: false, Version: "3.20.0"},
 	}
 
-	// list of additional coherence artefacts
-	validCoherenceArtefacts = []string{"coherence-cdi-server", "coherence-cdi", "coherence-concurrent", "coherence-grpc-proxy",
+	// list of additional coherence artifacts
+	validCoherenceArtifacts = []string{"coherence-cdi-server", "coherence-cdi", "coherence-concurrent", "coherence-grpc-proxy",
 		"coherence-grpc", "coherence-helidon-client", "coherence-helidon-grpc-proxy", "coherence-http-netty", "coherence-java-client",
 		"coherence-jcache", "coherence-jpa", "coherence-management", "coherence-micrometer", "coherence-mp-config",
 		"coherence-mp-metrics", "coherence-rest"}
@@ -79,10 +80,17 @@ func getCoherenceDependencies(cmd *cobra.Command) error {
 		result  string
 	)
 
-	cmd.Println("Ensuring dependencies")
+	// sort the defaultJars
+	sort.Slice(defaultJars, func(p, q int) bool {
+		if defaultJars[p].GroupID == defaultJars[q].GroupID {
+			return strings.Compare(defaultJars[p].Artifact, defaultJars[q].Artifact) < 0
+		}
+		return strings.Compare(defaultJars[p].GroupID, defaultJars[q].GroupID) < 0
+	})
+
 	for _, entry := range defaultJars {
-		cmd.Printf("- groupId=%s, artefact=%s, version=%s\n", entry.GroupID, entry.Artefact, entry.Version)
-		result, err = runCommand(mvnExec, getDependencyArgs(entry.GroupID, entry.Artefact, entry.Version))
+		cmd.Printf("- %s:%s:%s\n", entry.GroupID, entry.Artifact, entry.Version)
+		result, err = runCommand(mvnExec, getDependencyArgs(entry.GroupID, entry.Artifact, entry.Version))
 		if err != nil {
 			cmd.Println(result)
 			return err
@@ -237,8 +245,8 @@ func checkOperation(connection ClusterConnection, operation string) error {
 	return fmt.Errorf("cluster %s was not manually created, unable to perform operation %s", connection.Name, operation)
 }
 
-func getDependencyArgs(groupID, artefact, version string) []string {
-	return []string{"-DgroupId=" + groupID, "-DartifactId=" + artefact, "-Dversion=" + version, "dependency:get"}
+func getDependencyArgs(groupID, artifact, version string) []string {
+	return []string{"-DgroupId=" + groupID, "-DartifactId=" + artifact, "-Dversion=" + version, "dependency:get"}
 }
 
 func getCoherenceGroupID() string {
@@ -248,7 +256,7 @@ func getCoherenceGroupID() string {
 	return "com.oracle.coherence.ce"
 }
 
-func getMavenClasspath(groupID, artefact, version string) (string, error) {
+func getMavenClasspath(groupID, artifact, version string) (string, error) {
 	home, err := os.UserHomeDir()
 	if err != nil {
 		return "", utils.GetError("unable to get user home directory", err)
@@ -260,7 +268,7 @@ func getMavenClasspath(groupID, artefact, version string) (string, error) {
 	for _, v := range groupIDSplit {
 		baseDir = filepath.Join(baseDir, v)
 	}
-	return filepath.Join(baseDir, artefact, version, fmt.Sprintf("%s-%s.jar", artefact, version)), nil
+	return filepath.Join(baseDir, artifact, version, fmt.Sprintf("%s-%s.jar", artifact, version)), nil
 }
 
 func runCommand(command string, arguments []string) (string, error) {

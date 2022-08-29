@@ -416,7 +416,7 @@ type Processes struct {
 // DefaultDependency holds the default dependencies for starting a Cache server
 type DefaultDependency struct {
 	GroupID     string
-	Artefact    string
+	Artifact    string
 	IsCoherence bool
 	Version     string
 }
