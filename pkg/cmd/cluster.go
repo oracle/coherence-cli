@@ -1038,7 +1038,6 @@ NOTE: This is an experimental feature and my be altered or removed in the future
 			ClusterType: "Standalone", BaseClasspath: strings.Join(classpath, getClasspathSeparator()),
 			Arguments: arguments, ManagementPort: httpPortParam, PersistenceMode: persistenceModeParam}
 
-		// TODO: Give option to not start cluster
 		cmd.Printf("Starting %d cluster members for cluster %s\n", serverCountParam, clusterName)
 
 		processIDs, err = startCluster(cmd, newCluster, serverCountParam)
