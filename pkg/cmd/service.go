@@ -134,7 +134,7 @@ can also specify '-o wide' to display addition information.`,
 				}
 
 				if elapsedSeconds > statusHATimeout {
-					return fmt.Errorf("status HA value of %s or better NOT reached in %d seconds for all service types od %s",
+					return fmt.Errorf("status HA value of %s or better NOT reached in %d seconds for all service types of %s",
 						statusHAType, elapsedSeconds, serviceType)
 				}
 
