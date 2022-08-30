@@ -148,6 +148,7 @@ cohctl describe cluster local
 * <<docs/reference/10_contexts.adoc,Contexts>>
 * <<docs/reference/45_nslookup.adoc,NS Lookup>>
 * <<docs/reference/95_misc#set-timeout,Setting request timeout>>
+* <<docs/reference/98_create_clusters.adoc,Creating Development Clusters>>
 
 
 

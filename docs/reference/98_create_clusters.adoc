@@ -1,0 +1,215 @@
+///////////////////////////////////////////////////////////////////////////////
+
+    Copyright (c) 2022, Oracle and/or its affiliates.
+    Licensed under the Universal Permissive License v 1.0 as shown at
+    https://oss.oracle.com/licenses/upl.
+
+///////////////////////////////////////////////////////////////////////////////
+
+= Creating Clusters
+
+== Creating Clusters
+
+=== Overview
+There are various cluster commands that allow you to create and work with local development based clusters.
+
+These commands allow you to create local only development based clusters (scoped to localhost) for Coherence CE 22.06.x and
+Commercial 14.1.1.2206.x versions and above.
+
+Once you create a local cluster, you can manage and monitor them in the same way as you can with discovered
+or manually added clusters.
+
+NOTE: These commands are experimental only and may be changed or removed in the future. It is *not supported* to use
+these commands to create production clusters.
+
+* <<create-cluster, `cohctl create cluster`>> - creates a local cluster and adds to the cohctl.yaml file
+* <<stop-cluster, `cohctl stop cluster`>> - stops a cluster that was manually created or started
+* <<start-cluster, `cohctl start cluster`>> - starts a cluster that was manually created
+* <<start-console, `cohctl start console`>> - starts a console client against a cluster that was manually created
+* <<start-cohql, `cohctl start cohql`>> - starts a CohQL client against a cluster that was manually created
+
+[#create-cluster]
+==== Create
+
+include::../../build/_output/docs-gen/create_cluster.adoc[tag=text]
+
+*Examples*
+
+Add and start a cluster using all default values.
+
+[source,bash,subs="attributes"]]
+----
+$ cohctl create cluster local
+
+Cluster name:         local
+Cluster version:      {coherence-version}
+Cluster port:         7574
+Management port:      30000
+Server count:         3
+Initial memory:       512m
+Persistence mode:     on-demand
+Group ID:             com.oracle.coherence.ce
+Additional artifacts:
+Are you sure you want to create the cluster with the above details? (y/n) y
+
+Checking 3 Maven dependencies...
+- com.oracle.coherence.ce:coherence:{coherence-version}
+- com.oracle.coherence.ce:coherence-json:{coherence-version}
+- org.jline:jline:3.20.0
+Starting 3 cluster members for cluster local
+Starting cluster member storage-0...
+Starting cluster member storage-1...
+Starting cluster member storage-2...
+Cluster added and started with process ids: [46188 46189 46190]
+
+$ cohctl get members -c local
+
+Total cluster members: 3
+Cluster Heap - Total: 1,536 MB Used: 243 MB Available: 1,293 MB (84.2%)
+Storage Heap - Total: 1,536 MB Used: 243 MB Available: 1,293 MB (84.2%)
+
+NODE ID  ADDRESS     PORT   PROCESS  MEMBER     ROLE             STORAGE  MAX HEAP  USED HEAP  AVAIL HEAP
+      1  /127.0.0.1  49249    56173  storage-0  CoherenceServer  true       512 MB      97 MB      415 MB
+      2  /127.0.0.1  49255    56179  storage-2  CoherenceServer  true       512 MB      76 MB      436 MB
+      3  /127.0.0.1  49254    56174  storage-1  CoherenceServer  true       512 MB      70 MB      442 MB
+----
+
+NOTE: By default, Coherence CE groupId is used and the version is {coherence-version}. You can change this via using `-C` for commercial and `-v` to change the Coherence version.
+
+NOTE: Additional dependencies `coherence-json` is included to enable Management over REST and `jline` is included for `CohQL` history support.
+
+Add and start a commercial Coherence cluster (14.1.1.2206.1) and set initial memory for each cluster to 1g and use active persistence mode.
+
+[source,bash]
+----
+$ cohctl create cluster local -C -v 14.1.1-2206-1 -M 1g -P active -S
+
+Cluster name:         local
+Cluster version:      14.1.1-2206-1
+Cluster port:         7574
+Management port:      30000
+Server count:         3
+Initial memory:       1g
+Persistence mode:     active
+Group ID:             com.oracle.coherence
+Additional artifacts:
+Are you sure you want to create the cluster with the above details? (y/n) y
+
+Skipping downloading Maven artifcts
+Starting 3 cluster members for cluster local
+Starting cluster member storage-0...
+Starting cluster member storage-1...
+Starting cluster member storage-2...
+Cluster added and started with process ids: [47190 47191 47192]
+----
+
+NOTE: In this example we are using the `-S` option to skip downloading maven artifacts as we know they are already installed locally.
+
+Add and start a cluster using all default values but include additional `coherence-rest` and opentracing dependencies.
+
+[source,bash,subs="attributes"]]
+----
+$ cohctl create cluster local -a coherence-rest,io.opentracing:opentracing-api:0.33.0,io.opentracing:opentracing-util:0.33.0
+
+Cluster name:         local
+Cluster version:      {coherence-version}
+Cluster port:         7574
+Management port:      30000
+Server count:         3
+Initial memory:       512m
+Persistence mode:     on-demand
+Group ID:             com.oracle.coherence.ce
+Additional artifacts: coherence-rest,io.opentracing:opentracing-api:0.33.0,io.opentracing:opentracing-util:0.33.0
+Are you sure you want to create the cluster with the above details? (y/n) y
+
+Checking 6 Maven dependencies...
+- com.oracle.coherence.ce:coherence:{coherence-version}
+- com.oracle.coherence.ce:coherence-json:{coherence-version}
+- com.oracle.coherence.ce:coherence-rest:{coherence-version}
+- io.opentracing:opentracing-api:0.33.0
+- io.opentracing:opentracing-util:0.33.0
+- org.jline:jline:3.20.0
+Starting 3 cluster members for cluster local
+Starting cluster member storage-0...
+Starting cluster member storage-1...
+Starting cluster member storage-2...
+Cluster added and started with process ids: [3324 3330 3331]
+----
+
+[#stop-cluster]
+==== Stop Cluster
+
+include::../../build/_output/docs-gen/stop_cluster.adoc[tag=text]
+
+[source,bash]
+----
+$ cohctl stop cluster local
+Are you sure you want to stop 3 members for the cluster local? (y/n) y
+killed process 47760
+killed process 47761
+killed process 47762
+3 processes were stopped for cluster local
+----
+
+[#start-cluster]
+==== Start Cluster
+
+include::../../build/_output/docs-gen/start_cluster.adoc[tag=text]
+
+Start a cluster and specify heap size of `1g`. (default is 512m)
+
+[source,bash]
+----
+$ cohctl start cluster local -M 1g
+Are you sure you want to start 3 members for cluster local? (y/n) y
+Starting cluster member storage-0...
+Starting cluster member storage-1...
+Starting cluster member storage-2...
+Cluster local and started with process ids: [48066 48067 48068]
+----
+
+[#start-console]
+==== Start Console
+
+include::../../build/_output/docs-gen/start_console.adoc[tag=text]
+
+Start a Coherence console.
+
+[source,bash]
+----
+$ cohctl start console -c local
+Starting client com.tangosol.net.CacheFactory...
+2022-08-29 16:00:01.346/0.620 Oracle Coherence 22.06.1 <Info> (thread=main, member=n/a): Loaded operational configuration from "jar:file:/Users/timmiddleton/.m2/repository/com/oracle/coherence/ce/coherence/22.06.1/coherence-22.06.1.jar!/tangosol-coherence.xml"
+...
+
+Map (?):
+----
+
+NOTE: Use `bye` to quit the console.
+
+[#start-cohql]
+==== Start CohQL
+
+include::../../build/_output/docs-gen/start_cohql.adoc[tag=text]
+
+Start a Coherence CohQL session.
+
+[source,bash]
+----
+$ cohctl start cohql -c local
+
+Starting client com.tangosol.coherence.dslquery.QueryPlus...
+Coherence Command Line Tool
+
+CohQL>
+----
+
+NOTE: Use `bye` to quit the console.
+
+=== See Also
+
+* <<docs/reference/05_clusters.adoc,Clusters>>
+
+
+
+

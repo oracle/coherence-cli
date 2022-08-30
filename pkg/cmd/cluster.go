@@ -889,6 +889,7 @@ var (
 	logLevelParam            int32
 	heapMemoryParam          string
 	useCommercialParam       bool
+	extendClientParam        bool
 	skipMavenDepsParam       bool
 	validPersistenceModes    = []string{"on-demand", "active", "active-backup", "active-async"}
 	persistenceModeParam     string
@@ -905,10 +906,11 @@ const defaultHeap = "512m"
 var createClusterCmd = &cobra.Command{
 	Use:   "cluster",
 	Short: "create a local Coherence cluster",
-	Long: `The 'create cluster' command creates a local cluster and adds to the cohctl.yaml file.
-You must have the 'mvn' executable and 'java' 11+ executable in your PATH for this to work.
-This cluster is only for development/testing purposes and should not be used, and is not supported
-in a production capacity. Supported versions are: CE 22.06 and above and 14.1.1.2206.1 and above.
+	Long: `The 'create cluster' command creates a local cluster, adds to the cohctl.yaml file 
+and starts it. You must have the 'mvn' executable and 'java' 11+ executable in your PATH for 
+this to work. This cluster is only for development/testing purposes and should not be used, 
+and is not supported in a production capacity. Supported versions are: CE 22.06 and above and 
+commercial 14.1.1.2206.1 and above.
 NOTE: This is an experimental feature and my be altered or removed in the future.`,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
@@ -1344,6 +1346,7 @@ func init() {
 
 	startCohQLCmd.Flags().StringVarP(&heapMemoryParam, heapMemoryArg, "M", defaultHeap, heapMemoryMessage)
 	startCohQLCmd.Flags().Int32VarP(&logLevelParam, logLevelArg, "l", 5, logLevelMessage)
+	startCohQLCmd.Flags().BoolVarP(&extendClientParam, "extend", "X", false, "start CohQL as Extend client. Only works for default cache config")
 }
 
 // sanitizeConnectionName sanitizes a cluster connection
