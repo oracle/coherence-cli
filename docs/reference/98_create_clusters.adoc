@@ -41,14 +41,14 @@ Add and start a cluster using all default values.
 ----
 $ cohctl create cluster local
 
-Cluster name:         local
-Cluster version:      {coherence-version}
-Cluster port:         7574
-Management port:      30000
-Server count:         3
-Initial memory:       512m
-Persistence mode:     on-demand
-Group ID:             com.oracle.coherence.ce
+Cluster name:           local
+Cluster version:        {coherence-version}
+Cluster port:           7574
+Management port:        30000
+Server count:           3
+Initial memory:         512m
+Persistence mode:       on-demand
+Group ID:               com.oracle.coherence.ce
 Additional artifacts:
 Are you sure you want to create the cluster with the above details? (y/n) y
 
@@ -111,15 +111,15 @@ Add and start a cluster using all default values but include additional `coheren
 ----
 $ cohctl create cluster local -a coherence-rest,io.opentracing:opentracing-api:0.33.0,io.opentracing:opentracing-util:0.33.0
 
-Cluster name:         local
-Cluster version:      {coherence-version}
-Cluster port:         7574
-Management port:      30000
-Server count:         3
-Initial memory:       512m
-Persistence mode:     on-demand
-Group ID:             com.oracle.coherence.ce
-Additional artifacts: coherence-rest,io.opentracing:opentracing-api:0.33.0,io.opentracing:opentracing-util:0.33.0
+Cluster name:           local
+Cluster version:        {coherence-version}
+Cluster port:           7574
+Management port:        30000
+Server count:           3
+Initial memory:         512m
+Persistence mode:       on-demand
+Group ID:               com.oracle.coherence.ce
+Additional artifacts:   coherence-rest,io.opentracing:opentracing-api:0.33.0,io.opentracing:opentracing-util:0.33.0
 Are you sure you want to create the cluster with the above details? (y/n) y
 
 Checking 6 Maven dependencies...

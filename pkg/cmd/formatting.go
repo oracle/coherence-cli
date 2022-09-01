@@ -758,6 +758,8 @@ func FormatClusterConnections(clusters []ClusterConnection) string {
 		}
 		if value.ManuallyCreated {
 			manualCluster = "Y"
+		} else {
+			manualCluster = "N"
 		}
 		stringValues[i+1] = getColumns(value.Name, value.ConnectionType, value.ConnectionURL,
 			value.ClusterVersion, value.ClusterName, value.ClusterType, currentContext, manualCluster)

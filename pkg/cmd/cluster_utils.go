@@ -12,6 +12,7 @@ import (
 	"github.com/oracle/coherence-cli/pkg/utils"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -24,6 +25,8 @@ import (
 const consoleClass = "com.tangosol.net.CacheFactory"
 const cohQLClass = "com.tangosol.coherence.dslquery.QueryPlus"
 const ceGroupID = "com.oracle.cohrence.ce"
+const fileTypeJar = "jar"
+const fileTypePom = "pom"
 
 // default Jars to use
 var (
@@ -36,7 +39,7 @@ var (
 	// list of additional coherence artifacts
 	validCoherenceArtifacts = []string{"coherence-cdi-server", "coherence-cdi", "coherence-concurrent", "coherence-grpc-proxy",
 		"coherence-grpc", "coherence-helidon-client", "coherence-helidon-grpc-proxy", "coherence-http-netty", "coherence-java-client",
-		"coherence-jcache", "coherence-jpa", "coherence-management", "coherence-micrometer", "coherence-mp-config",
+		"coherence-jcache", "coherence-jpa", "coherence-management", "coherence-micrometer", "coherence-mp-config", "coherence-metrics",
 		"coherence-mp-metrics", "coherence-rest"}
 )
 
@@ -118,8 +121,9 @@ func updateDefaultJars() {
 	}
 }
 
-// startCluster starts a cluster
-func startCluster(cmd *cobra.Command, connection ClusterConnection, serverCount int32) ([]string, error) {
+// startCluster starts a cluster. If existingCount > 1 then this means we are
+// scaling a cluster, otherwise we are startin
+func startCluster(cmd *cobra.Command, connection ClusterConnection, serverCount, existingCount int32) ([]string, error) {
 	var (
 		err        error
 		processIDs = make([]string, 0)
@@ -127,11 +131,16 @@ func startCluster(cmd *cobra.Command, connection ClusterConnection, serverCount 
 		counter    int32
 	)
 
+	// if we are scaling then set the http port to -1 so no more management servers are started
+	if existingCount > 0 {
+		mgmtPort = -1
+	}
+
 	if err = checkOperation(connection, startClusterCommand); err != nil {
 		return processIDs, err
 	}
 
-	for counter = 0; counter < serverCount; counter++ {
+	for counter = existingCount; counter < serverCount+existingCount; counter++ {
 		var (
 			member        = fmt.Sprintf("storage-%d", counter)
 			arguments     = getCommonArguments(connection)
@@ -250,8 +259,55 @@ func checkOperation(connection ClusterConnection, operation string) error {
 	return fmt.Errorf("cluster %s was not manually created, unable to perform operation %s", connection.Name, operation)
 }
 
+// getTransitiveClasspath returns the transitive classpath by using mvn dependency:build-classpath,
+// outputting to temp file and reading in
+func getTransitiveClasspath(groupID, artifact, version string) (string, error) {
+	var (
+		err       error
+		pomFile   string
+		file      *os.File
+		classpath string
+		output    string
+		data      []byte
+		mvnExec   = getMvnExec()
+		arguments = []string{"dependency:build-classpath", "-DincludeScope=runtime", "-f"}
+	)
+
+	pomFile, err = getMavenClasspath(groupID, artifact, version, fileTypePom)
+	if err != nil {
+		return classpath, err
+	}
+
+	file, err = os.CreateTemp("", "classpath")
+	if err != nil {
+		return classpath, utils.GetError("unable to create temporary file", err)
+	}
+
+	defer os.Remove(file.Name())
+
+	// execute the build-classpath command
+	output, err = runCommand(mvnExec, append(arguments, pomFile, fmt.Sprintf("-Dmdep.outputFile=%s", file.Name())))
+
+	if err != nil {
+		return output, utils.GetError("unable to run dependency:build-classpath", err)
+	}
+
+	// no we have a valid file, read it in
+	data, err = ioutil.ReadFile(file.Name())
+	if err != nil {
+		return output, utils.GetError("unable to read from temp file", err)
+	}
+
+	return string(data), nil
+}
+
 func getDependencyArgs(groupID, artifact, version string) []string {
-	return []string{"-DgroupId=" + groupID, "-DartifactId=" + artifact, "-Dversion=" + version, "dependency:get"}
+	gavArgs := getGAVArgs(groupID, artifact, version)
+	return append(gavArgs, "dependency:get", "-Dtransitive=true")
+}
+
+func getGAVArgs(groupID, artifact, version string) []string {
+	return []string{"-DgroupId=" + groupID, "-DartifactId=" + artifact, "-Dversion=" + version}
 }
 
 func getCoherenceGroupID() string {
@@ -261,7 +317,8 @@ func getCoherenceGroupID() string {
 	return "com.oracle.coherence.ce"
 }
 
-func getMavenClasspath(groupID, artifact, version string) (string, error) {
+// getMavenClasspath returns the maven classpath for the given GAV and fileType
+func getMavenClasspath(groupID, artifact, version, fileType string) (string, error) {
 	home, err := os.UserHomeDir()
 	if err != nil {
 		return "", utils.GetError("unable to get user home directory", err)
@@ -273,7 +330,7 @@ func getMavenClasspath(groupID, artifact, version string) (string, error) {
 	for _, v := range groupIDSplit {
 		baseDir = filepath.Join(baseDir, v)
 	}
-	return filepath.Join(baseDir, artifact, version, fmt.Sprintf("%s-%s.jar", artifact, version)), nil
+	return filepath.Join(baseDir, artifact, version, fmt.Sprintf("%s-%s.%s", artifact, version, fileType)), nil
 }
 
 func runCommand(command string, arguments []string) (string, error) {
@@ -338,12 +395,18 @@ func getClasspathSeparator() string {
 }
 
 // updateConnectionPIDS updates PIDS for a given connection
-func updateConnectionPIDS(connectionName string, PIDs []int) error {
+func updateConnectionPIDS(connectionName string, PIDs []int, scale bool) error {
 	clusters := Config.Clusters
 
 	for i, cluster := range clusters {
 		if cluster.Name == connectionName {
-			Config.Clusters[i].ProcessIDs = PIDs
+			if scale {
+				// append the pids as we are scaling
+				Config.Clusters[i].ProcessIDs = append(Config.Clusters[i].ProcessIDs, PIDs...)
+			} else {
+				// overwrite pids as we are starting new cluster or stopping
+				Config.Clusters[i].ProcessIDs = PIDs
+			}
 		}
 	}
 

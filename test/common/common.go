@@ -1843,7 +1843,7 @@ func RunTestCreateCommands(t *testing.T) {
 
 	// re-start the cluster
 	test_utils.EnsureCommandContains(g, t, cliCmd, "Cluster tim and started with process ids", configArg, file, "start", "cluster",
-		clusterName, "-y", "-s", "4")
+		clusterName, "-y", "-r", "6")
 
 	// sleep to wait to cluster startup
 	test_utils.Sleep(20)
@@ -1853,8 +1853,13 @@ func RunTestCreateCommands(t *testing.T) {
 		"-c", clusterName)
 
 	// shutdown the cluster
-	test_utils.EnsureCommandContains(g, t, cliCmd, "4 processes were stopped for cluster tim", configArg, file, "stop", "cluster",
+	test_utils.EnsureCommandContains(g, t, cliCmd, "6 processes were stopped for cluster tim", configArg, file, "stop", "cluster",
 		clusterName, "-y")
+
+	// try to create a cluster with the same name
+	// test set cache errors - invalid tier
+	test_utils.EnsureCommandErrorContains(g, t, cliCmd, "A connection for cluster named tim already exists", configArg, file, configArg,
+		file, "create", "cluster", clusterName, "-y")
 
 	// shutdown the cluster
 	test_utils.EnsureCommandContains(g, t, cliCmd, "Removed connection for cluster tim", configArg, file, "remove", "cluster",

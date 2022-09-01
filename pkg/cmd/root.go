@@ -69,7 +69,7 @@ const startupDelayMessage = "startup delay in seconds for each server"
 const heapMemoryArg = "heap-memory"
 const logLevelArg = "log-level"
 const startupDelayArg = "startup-delay"
-const serverCountMessage = "server count"
+const serverCountMessage = "number of replicas"
 const logLevelMessage = "coherence log level"
 
 const outputFormats = "table, wide, json or jsonpath=\"...\""
@@ -565,6 +565,10 @@ func Initialize(command *cobra.Command) *cobra.Command {
 	command.AddCommand(shutdownCmd)
 	shutdownCmd.AddCommand(shutdownServiceCmd)
 	shutdownCmd.AddCommand(shutdownMemberCmd)
+
+	// scale
+	command.AddCommand(scaleCmd)
+	scaleCmd.AddCommand(scaleClusterCmd)
 
 	return command
 }
