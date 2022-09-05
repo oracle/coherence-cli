@@ -1825,7 +1825,7 @@ func RunTestCreateCommands(t *testing.T) {
 	cliCmd := cmd.Initialize(nil)
 
 	// should be able to create a new cluster and start it using the defaults
-	test_utils.EnsureCommandContains(g, t, cliCmd, "Cluster added and started with process ids", configArg, file, "create", "cluster",
+	test_utils.EnsureCommandContains(g, t, cliCmd, "Cluster added and started", configArg, file, "create", "cluster",
 		clusterName, "-y")
 
 	// sleep to wait to cluster startup
@@ -1842,7 +1842,7 @@ func RunTestCreateCommands(t *testing.T) {
 	test_utils.Sleep(10)
 
 	// re-start the cluster
-	test_utils.EnsureCommandContains(g, t, cliCmd, "Cluster tim and started with process ids", configArg, file, "start", "cluster",
+	test_utils.EnsureCommandContains(g, t, cliCmd, "Cluster tim started", configArg, file, "start", "cluster",
 		clusterName, "-y", "-r", "6")
 
 	// sleep to wait to cluster startup
@@ -1855,6 +1855,9 @@ func RunTestCreateCommands(t *testing.T) {
 	// shutdown the cluster
 	test_utils.EnsureCommandContains(g, t, cliCmd, "6 processes were stopped for cluster tim", configArg, file, "stop", "cluster",
 		clusterName, "-y")
+
+	// sleep to wait to cluster shutdown
+	test_utils.Sleep(10)
 
 	// try to create a cluster with the same name
 	// test set cache errors - invalid tier

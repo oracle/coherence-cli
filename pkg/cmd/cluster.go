@@ -84,7 +84,7 @@ var removeClusterCmd = &cobra.Command{
 			err         error
 		)
 
-		found, _ := GetClusterConnection(clusterName)
+		found, cluster := GetClusterConnection(clusterName)
 		if !found {
 			return errors.New(UnableToFindClusterMsg + clusterName)
 		}
@@ -95,7 +95,9 @@ var removeClusterCmd = &cobra.Command{
 		}
 
 		processCount := len(getRunningProcesses(dataFetcher))
-		if processCount > 0 {
+
+		// only check for running members if the cluster was manually created
+		if processCount > 0 && cluster.ManuallyCreated {
 			return fmt.Errorf("cluster %s has %d processes running. You must stop the cluster before removing it", clusterName, processCount)
 		}
 
