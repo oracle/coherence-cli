@@ -46,18 +46,21 @@ func TestFormatCluster(t *testing.T) {
 }
 
 func TestGetMavenClasspath(t *testing.T) {
-	g := NewGomegaWithT(t)
+	var (
+		g  = NewGomegaWithT(t)
+		ce = "com.oracle.coherence.ce"
+	)
 	home, _ := os.UserHomeDir()
 
-	path, err := getMavenClasspath("com.oracle.coherence.ce", "coherence", "22.06", fileTypeJar)
+	path, err := getMavenClasspath(ce, "coherence", "22.06", fileTypeJar)
 	g.Expect(err).To(BeNil())
 	g.Expect(path).To(Equal(home + "/.m2/repository/com/oracle/coherence/ce/coherence/22.06/coherence-22.06.jar"))
 
-	path, err = getMavenClasspath("com.oracle.coherence.ce", "coherence", "22.09", fileTypeJar)
+	path, err = getMavenClasspath(ce, "coherence", "22.09", fileTypeJar)
 	g.Expect(err).To(BeNil())
 	g.Expect(path).To(Equal(home + "/.m2/repository/com/oracle/coherence/ce/coherence/22.09/coherence-22.09.jar"))
 
-	path, err = getMavenClasspath("com.oracle.coherence.ce", "coherence", "22.09", fileTypePom)
+	path, err = getMavenClasspath(ce, "coherence", "22.09", fileTypePom)
 	g.Expect(err).To(BeNil())
 	g.Expect(path).To(Equal(home + "/.m2/repository/com/oracle/coherence/ce/coherence/22.09/coherence-22.09.pom"))
 }
