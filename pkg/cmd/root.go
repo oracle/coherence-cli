@@ -70,6 +70,7 @@ const heapMemoryArg = "heap-memory"
 const logLevelArg = "log-level"
 const startupDelayArg = "startup-delay"
 const serverCountMessage = "number of replicas"
+const metricsPortMessage = "starting port for metrics"
 const logLevelMessage = "coherence log level"
 
 const outputFormats = "table, wide, json or jsonpath=\"...\""

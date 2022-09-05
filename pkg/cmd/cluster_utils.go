@@ -126,9 +126,10 @@ func updateDefaultJars() {
 // scaling a cluster, otherwise we are starting one
 func startCluster(cmd *cobra.Command, connection ClusterConnection, serverCount, existingCount int32) error {
 	var (
-		err      error
-		mgmtPort = connection.ManagementPort
-		counter  int32
+		err              error
+		mgmtPort         = connection.ManagementPort
+		counter          int32
+		metricsStartPort = metricsStartPortParam
 	)
 
 	// if we are scaling then set the http port to -1 so no more management servers are started
@@ -146,6 +147,13 @@ func startCluster(cmd *cobra.Command, connection ClusterConnection, serverCount,
 			arguments     = getCommonArguments(connection)
 			memberLogFile string
 		)
+
+		// check if metrics start port specified
+		if metricsStartPort > 0 {
+			metricsArgs := []string{"-Dcoherence.metrics.http.enabled=true", fmt.Sprintf("-Dcoherence.metrics.http.port=%d", metricsStartPort)}
+			metricsStartPort++
+			arguments = append(arguments, metricsArgs...)
+		}
 
 		arguments = append(arguments, getCacheServerArgs(member, mgmtPort)...)
 

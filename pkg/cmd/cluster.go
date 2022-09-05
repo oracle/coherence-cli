@@ -895,6 +895,7 @@ var (
 	wkaParam                 string
 	clusterVersionParam      string
 	replicaCountParam        int32
+	metricsStartPortParam    int32
 	logLevelParam            int32
 	heapMemoryParam          string
 	useCommercialParam       bool
@@ -910,7 +911,7 @@ const defaultCoherenceVersion = "22.06.1"
 const startClusterCommand = "start cluster"
 const scaleClusterCommand = "scale cluster"
 const stopClusterCommand = "stop cluster"
-const defaultHeap = "96m"
+const defaultHeap = "128m"
 
 // createClusterCmd represents the create cluster command
 var createClusterCmd = &cobra.Command{
@@ -961,6 +962,13 @@ NOTE: This is an experimental feature and my be altered or removed in the future
 		// validate cluster port
 		if err = utils.ValidatePort(clusterPortParam); err != nil {
 			return err
+		}
+
+		// validate metrics port
+		if metricsStartPortParam > 0 {
+			if err = utils.ValidatePort(metricsStartPortParam); err != nil {
+				return err
+			}
 		}
 
 		// validate any additional artifacts
@@ -1204,6 +1212,13 @@ func runClusterOperation(cmd *cobra.Command, connectionName, operation string) e
 		return err
 	}
 
+	// validate metrics port
+	if metricsStartPortParam > 0 {
+		if err = utils.ValidatePort(metricsStartPortParam); err != nil {
+			return err
+		}
+	}
+
 	found, connection := GetClusterConnection(connectionName)
 	if !found {
 		return errors.New(UnableToFindClusterMsg + connectionName)
@@ -1330,11 +1345,13 @@ func init() {
 	createClusterCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
 	createClusterCmd.Flags().BoolVarP(&useCommercialParam, "commercial", "C", false, "use commercial Coherence groupID (default is CE)")
 	createClusterCmd.Flags().BoolVarP(&skipMavenDepsParam, "skip-deps", "S", false, "skip pulling Maven artifacts")
+	createClusterCmd.Flags().Int32VarP(&metricsStartPortParam, "metrics-port", "t", 0, metricsPortMessage)
 
 	stopClusterCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
 
 	startClusterCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
 	startClusterCmd.Flags().Int32VarP(&replicaCountParam, "replicas", "r", 3, serverCountMessage)
+	startClusterCmd.Flags().Int32VarP(&metricsStartPortParam, "metrics-port", "t", 0, metricsPortMessage)
 	startClusterCmd.Flags().StringVarP(&heapMemoryParam, heapMemoryArg, "M", defaultHeap, heapMemoryMessage)
 	startClusterCmd.Flags().Int32VarP(&logLevelParam, logLevelArg, "l", 5, logLevelMessage)
 	startClusterCmd.Flags().Int32VarP(&startupDelayParam, startupDelayArg, "D", 1, startupDelayMessage)
@@ -1351,6 +1368,7 @@ func init() {
 	scaleClusterCmd.Flags().StringVarP(&heapMemoryParam, heapMemoryArg, "M", defaultHeap, heapMemoryMessage)
 	scaleClusterCmd.Flags().Int32VarP(&logLevelParam, logLevelArg, "l", 5, logLevelMessage)
 	scaleClusterCmd.Flags().Int32VarP(&startupDelayParam, startupDelayArg, "D", 1, startupDelayMessage)
+	scaleClusterCmd.Flags().Int32VarP(&metricsStartPortParam, "metrics-port", "t", 0, metricsPortMessage)
 }
 
 // sanitizeConnectionName sanitizes a cluster connection
