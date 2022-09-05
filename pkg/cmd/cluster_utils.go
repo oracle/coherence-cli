@@ -7,11 +7,12 @@
 package cmd
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/oracle/coherence-cli/pkg/config"
+	"github.com/oracle/coherence-cli/pkg/fetcher"
 	"github.com/oracle/coherence-cli/pkg/utils"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -122,13 +123,12 @@ func updateDefaultJars() {
 }
 
 // startCluster starts a cluster. If existingCount > 1 then this means we are
-// scaling a cluster, otherwise we are startin
-func startCluster(cmd *cobra.Command, connection ClusterConnection, serverCount, existingCount int32) ([]string, error) {
+// scaling a cluster, otherwise we are starting one
+func startCluster(cmd *cobra.Command, connection ClusterConnection, serverCount, existingCount int32) error {
 	var (
-		err        error
-		processIDs = make([]string, 0)
-		mgmtPort   = connection.ManagementPort
-		counter    int32
+		err      error
+		mgmtPort = connection.ManagementPort
+		counter  int32
 	)
 
 	// if we are scaling then set the http port to -1 so no more management servers are started
@@ -137,7 +137,7 @@ func startCluster(cmd *cobra.Command, connection ClusterConnection, serverCount,
 	}
 
 	if err = checkOperation(connection, startClusterCommand); err != nil {
-		return processIDs, err
+		return err
 	}
 
 	for counter = existingCount; counter < serverCount+existingCount; counter++ {
@@ -145,7 +145,6 @@ func startCluster(cmd *cobra.Command, connection ClusterConnection, serverCount,
 			member        = fmt.Sprintf("storage-%d", counter)
 			arguments     = getCommonArguments(connection)
 			memberLogFile string
-			PID           string
 		)
 
 		arguments = append(arguments, getCacheServerArgs(member, mgmtPort)...)
@@ -155,20 +154,19 @@ func startCluster(cmd *cobra.Command, connection ClusterConnection, serverCount,
 
 		memberLogFile, err = getLogFile(connection.Name, member)
 		if err != nil {
-			return processIDs, err
+			return err
 		}
 
 		cmd.Printf("Starting cluster member %s...\n", member)
-		PID, err = runCommandAsync(getJavaExec(), memberLogFile, arguments)
+		_, err = runCommandAsync(getJavaExec(), memberLogFile, arguments)
 		if err != nil {
-			return processIDs, utils.GetError(fmt.Sprintf("unable to start member %s", member), err)
+			return utils.GetError(fmt.Sprintf("unable to start member %s", member), err)
 		}
-		processIDs = append(processIDs, PID)
 
 		time.Sleep(time.Duration(startupDelayParam) * time.Second)
 	}
 
-	return processIDs, nil
+	return nil
 }
 
 // getCommonArguments returns arguments that are common to clients and servers
@@ -241,11 +239,29 @@ func getLogLevelProperty(logLevel int32) string {
 	return fmt.Sprintf("-Dcoherence.log.level=%d", logLevel)
 }
 
-// convertProcessIDs converts an array of string processes to int array
-func convertProcessIDs(processIDs []string) []int {
-	PIDS := make([]int, 0)
-	for _, v := range processIDs {
-		pid, _ := strconv.Atoi(v)
+// getRunningProcesses returns the running process ID's for a cluster
+// connection from a dataFetcher. Returns an empty slice if none are running
+func getRunningProcesses(dataFetcher fetcher.Fetcher) []int {
+	var (
+		PIDS          = make([]int, 0)
+		err           error
+		membersResult []byte
+		members       = config.Members{}
+	)
+
+	membersResult, err = dataFetcher.GetMemberDetailsJSON(false)
+	if err != nil {
+		return PIDS
+	}
+
+	// unmarshall and assume any errors means no PIDS are running
+	err = json.Unmarshal(membersResult, &members)
+	if err != nil {
+		return PIDS
+	}
+
+	for _, v := range members.Members {
+		pid, _ := strconv.Atoi(v.ProcessName)
 		PIDS = append(PIDS, pid)
 	}
 
@@ -394,28 +410,6 @@ func getClasspathSeparator() string {
 	return ":"
 }
 
-// updateConnectionPIDS updates PIDS for a given connection
-func updateConnectionPIDS(connectionName string, PIDs []int, scale bool) error {
-	clusters := Config.Clusters
-
-	for i, cluster := range clusters {
-		if cluster.Name == connectionName {
-			if scale {
-				// append the pids as we are scaling
-				Config.Clusters[i].ProcessIDs = append(Config.Clusters[i].ProcessIDs, PIDs...)
-			} else {
-				// overwrite pids as we are starting new cluster or stopping
-				Config.Clusters[i].ProcessIDs = PIDs
-			}
-		}
-	}
-
-	viper.Set("clusters", Config.Clusters)
-	err := WriteConfig()
-
-	return err
-}
-
 // getConnection returns a ClusterConnection
 func getConnection(connectionName string) (bool, ClusterConnection) {
 	for _, cluster := range Config.Clusters {
@@ -424,46 +418,4 @@ func getConnection(connectionName string) (bool, ClusterConnection) {
 		}
 	}
 	return false, ClusterConnection{}
-}
-
-func getProcesses(PIDS []int, members config.Members) config.Processes {
-	var (
-		proc        *os.Process
-		processList = make([]config.Process, 0)
-		err         error
-		running     bool
-	)
-
-	for _, v := range PIDS {
-		running = false
-		member := config.Member{}
-
-		proc, err = os.FindProcess(v)
-		if err == nil {
-			// signal the process as FindProcess always returns true on POSIX
-			if err = signalProcess(proc); err == nil {
-				running = true
-
-				// as the member is running, try to find the member with the same process name
-				var procID = fmt.Sprintf("%v", v)
-
-				for _, m := range members.Members {
-					if procID == m.ProcessName {
-						member = m
-						break
-					}
-				}
-			}
-		}
-
-		processList = append(processList, config.Process{
-			ProcessID:  v,
-			Running:    running,
-			NodeID:     member.NodeID,
-			RoleName:   member.RoleName,
-			MemberName: member.MemberName,
-		})
-	}
-
-	return config.Processes{ProcessList: processList}
 }

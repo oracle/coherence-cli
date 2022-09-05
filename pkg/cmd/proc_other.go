@@ -9,7 +9,6 @@
 package cmd
 
 import (
-	"os"
 	"os/exec"
 	"syscall"
 )
@@ -19,10 +18,6 @@ func setForkProcess(process *exec.Cmd) {
 	process.SysProcAttr = &syscall.SysProcAttr{
 		Setsid: true,
 	}
-}
-
-func signalProcess(proc *os.Process) error {
-	return proc.Signal(syscall.SIGCONT)
 }
 
 //func handleCTRLC() {

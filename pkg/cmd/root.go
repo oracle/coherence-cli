@@ -144,7 +144,6 @@ type ClusterConnection struct {
 	AdditionalClasspath string `json:"additionalClasspath"` // additional classpath provided by the user
 	Arguments           string `json:"arguments"`           // arguments to start cluster with including cluster name, etc
 	ManagementPort      int32  `json:"managementPort"`      // arguments to start cluster with including cluster name, etc
-	ProcessIDs          []int  `json:"processIDs"`          // process id's of started members
 	PersistenceMode     string `json:"persistenceMode"`
 }
 
@@ -442,7 +441,6 @@ func Initialize(command *cobra.Command) *cobra.Command {
 	getCmd.AddCommand(getBytesFormatCmd)
 	getCmd.AddCommand(getHealthCmd)
 	getCmd.AddCommand(getEnvironmentCmd)
-	getCmd.AddCommand(getProcsCmd)
 	getCmd.AddCommand(getServiceMembersCmd)
 
 	// set command

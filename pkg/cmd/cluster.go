@@ -21,7 +21,6 @@ import (
 	"strconv"
 	"strings"
 	"sync"
-	"time"
 )
 
 var (
@@ -81,14 +80,21 @@ var removeClusterCmd = &cobra.Command{
 		var (
 			response    string
 			clusterName = args[0]
+			dataFetcher fetcher.Fetcher
+			err         error
 		)
 
-		found, connection := GetClusterConnection(clusterName)
+		found, _ := GetClusterConnection(clusterName)
 		if !found {
 			return errors.New(UnableToFindClusterMsg + clusterName)
 		}
 
-		processCount := len(connection.ProcessIDs)
+		dataFetcher, err = GetDataFetcher(clusterName)
+		if err != nil {
+			return err
+		}
+
+		processCount := len(getRunningProcesses(dataFetcher))
 		if processCount > 0 {
 			return fmt.Errorf("cluster %s has %d processes running. You must stop the cluster before removing it", clusterName, processCount)
 		}
@@ -113,7 +119,7 @@ var removeClusterCmd = &cobra.Command{
 		Config.Clusters = newConnection
 
 		viper.Set("clusters", Config.Clusters)
-		err := WriteConfig()
+		err = WriteConfig()
 		if err != nil {
 			return err
 		}
@@ -925,7 +931,6 @@ NOTE: This is an experimental feature and my be altered or removed in the future
 			clusterName    = sanitizeConnectionName(args[0])
 			err            error
 			response       string
-			processIDs     []string
 			groupID        = getCoherenceGroupID()
 			cpEntry        string
 			splitArtifacts []string
@@ -1016,7 +1021,7 @@ NOTE: This is an experimental feature and my be altered or removed in the future
 		}
 
 		if skipMavenDepsParam {
-			cmd.Println("\nSkipping downloading Maven artifcts")
+			cmd.Println("\nSkipping downloading Maven artifacts")
 		} else {
 			cmd.Printf("\nChecking %d Maven dependencies...\n", len(defaultJars))
 
@@ -1038,7 +1043,7 @@ NOTE: This is an experimental feature and my be altered or removed in the future
 			classpath = append(classpath, cpEntry)
 
 			// get transitive deps
-			if entry.Artifact != "jline" || entry.Artifact == "coherence" {
+			if entry.Artifact != "jline" && entry.Artifact != "coherence" {
 				// if we have specified to get transitive dependencies, then we need to use the downloaded pom
 				// file for the dependency and get the classpath. Ignore coherence and jline as this will
 				// bring in many dependencies due to me not uet figuring out how to not bring in optional deps
@@ -1064,13 +1069,11 @@ NOTE: This is an experimental feature and my be altered or removed in the future
 
 		cmd.Printf("Starting %d cluster members for cluster %s\n", replicaCountParam, clusterName)
 
-		processIDs, err = startCluster(cmd, newCluster, replicaCountParam, 0)
+		err = startCluster(cmd, newCluster, replicaCountParam, 0)
 
 		if err != nil {
 			return err
 		}
-
-		newCluster.ProcessIDs = convertProcessIDs(processIDs)
 
 		Config.Clusters = append(Config.Clusters, newCluster)
 
@@ -1080,7 +1083,7 @@ NOTE: This is an experimental feature and my be altered or removed in the future
 			return err
 		}
 
-		cmd.Printf("Cluster added and started with process ids: %v\n", processIDs)
+		cmd.Println("Cluster added and started")
 
 		return nil
 	},
@@ -1156,80 +1159,6 @@ var startCohQLCmd = &cobra.Command{
 	},
 }
 
-// getProcsCmd represents the get procs command
-var getProcsCmd = &cobra.Command{
-	Use:   "procs",
-	Short: "display processes started for a cluster",
-	Long:  `The 'get procs' command displays processes started for a cluster.`,
-	Args:  cobra.ExactArgs(0),
-	RunE: func(cmd *cobra.Command, args []string) error {
-		var (
-			err           error
-			connection    string
-			jsonResult    []byte
-			membersResult []byte
-			dataFetcher   fetcher.Fetcher
-		)
-
-		connection, dataFetcher, err = GetConnectionAndDataFetcher()
-		if err != nil {
-			return err
-		}
-
-		_, clusterConnection := getConnection(connection)
-
-		if err = checkOperation(clusterConnection, "get procs"); err != nil {
-			return err
-		}
-
-		for {
-			var members = config.Members{}
-
-			// retrieve the members to see if we can match up to running process
-			membersResult, _ = dataFetcher.GetMemberDetailsJSON(OutputFormat != constants.TABLE && OutputFormat != constants.WIDE)
-
-			if len(membersResult) > 0 {
-				err = json.Unmarshal(membersResult, &members)
-				if err != nil {
-					return utils.GetError(unableToDecode, err)
-				}
-			}
-
-			var processes = getProcesses(clusterConnection.ProcessIDs, members)
-
-			if strings.Contains(OutputFormat, constants.JSONPATH) || OutputFormat == constants.JSON {
-				jsonResult, err = json.Marshal(processes)
-				if err != nil {
-					return err
-				}
-				if strings.Contains(OutputFormat, constants.JSONPATH) {
-					result, err := utils.GetJSONPathResults(jsonResult, OutputFormat)
-					if err != nil {
-						return err
-					}
-					cmd.Println(result)
-				} else {
-					cmd.Println(string(jsonResult))
-				}
-			} else {
-				cmd.Println(FormatCurrentCluster(connection))
-
-				cmd.Println(FormatProcesses(processes.ProcessList))
-			}
-
-			// check to see if we should exit if we are not watching
-			if !watchEnabled {
-				break
-			}
-			// we are watching so sleep and then repeat until CTRL-C
-			time.Sleep(time.Duration(watchDelay) * time.Second)
-		}
-
-		return nil
-
-	},
-}
-
 func runStartClientOperation(cmd *cobra.Command, class string) error {
 	var (
 		err        error
@@ -1262,9 +1191,10 @@ func runClusterOperation(cmd *cobra.Command, connectionName, operation string) e
 		err         error
 		response    string
 		proc        *os.Process
-		processIDs  []string
+		processIDs  []int
 		serverDelta int32
 		scaleType   string
+		dataFetcher fetcher.Fetcher
 	)
 
 	// validate the Java and Maven executable are present and in the path
@@ -1281,13 +1211,21 @@ func runClusterOperation(cmd *cobra.Command, connectionName, operation string) e
 		return err
 	}
 
-	numProcesses := int32(len(connection.ProcessIDs))
+	dataFetcher, err = GetDataFetcher(connectionName)
+	if err != nil {
+		return err
+	}
+
+	// retrieve the slice of running PIDS
+	processIDs = getRunningProcesses(dataFetcher)
+
+	numProcesses := int32(len(processIDs))
 
 	if (operation == stopClusterCommand || operation == scaleClusterCommand) && numProcesses == 0 {
 		return fmt.Errorf("the cluster %s does not appear to be started", connection.Name)
 	}
 	if operation == startClusterCommand && numProcesses > 0 {
-		return fmt.Errorf("the cluster %s appears to be already started with process ids: %v", connection.Name, connection.ProcessIDs)
+		return fmt.Errorf("the cluster %s appears to be already started with process ids: %v", connection.Name, processIDs)
 	}
 
 	if !automaticallyConfirm {
@@ -1328,7 +1266,7 @@ func runClusterOperation(cmd *cobra.Command, connectionName, operation string) e
 
 	if operation == stopClusterCommand {
 		count := 0
-		for _, v := range connection.ProcessIDs {
+		for _, v := range processIDs {
 			proc, err = os.FindProcess(v)
 			if err != nil {
 				// silently ignore as it may have gone already
@@ -1344,29 +1282,19 @@ func runClusterOperation(cmd *cobra.Command, connectionName, operation string) e
 			}
 		}
 
-		// reset the process Ids
-		if err = updateConnectionPIDS(connection.Name, make([]int, 0), false); err != nil {
-			return err
-		}
-
 		cmd.Printf("%d processes were stopped for cluster %s\n", count, connection.Name)
 	} else {
-		var scale = false
+		var message = "started"
 		if operation == scaleClusterCommand {
-			scale = true
+			message = "scaled"
 		}
 
-		processIDs, err = startCluster(cmd, connection, replicaCountParam, numProcesses)
+		err = startCluster(cmd, connection, replicaCountParam, numProcesses)
 		if err != nil {
 			return err
 		}
 
-		ProcessIDs := convertProcessIDs(processIDs)
-		cmd.Printf("Cluster %s and started with process ids: %v\n", connection.Name, ProcessIDs)
-
-		if err = updateConnectionPIDS(connection.Name, ProcessIDs, scale); err != nil {
-			return err
-		}
+		cmd.Printf("Cluster %s %s\n", connection.Name, message)
 	}
 
 	return nil

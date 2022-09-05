@@ -9,7 +9,6 @@
 package cmd
 
 import (
-	"os"
 	"os/exec"
 	"syscall"
 )
@@ -19,11 +18,6 @@ func setForkProcess(cmd *exec.Cmd) {
 	cmd.SysProcAttr = &syscall.SysProcAttr{
 		CreationFlags: syscall.CREATE_NEW_PROCESS_GROUP,
 	}
-}
-
-func signalProcess(proc *os.Process) error {
-	// no-op
-	return nil
 }
 
 //func handleCTRLC() {
