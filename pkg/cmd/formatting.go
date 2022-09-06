@@ -1227,7 +1227,7 @@ func FormatMachines(machines []config.Machine) string {
 	})
 
 	var (
-		load        float32
+		load        string
 		percentFree float64
 	)
 
@@ -1236,15 +1236,15 @@ func FormatMachines(machines []config.Machine) string {
 
 	for i, value := range machines {
 		if value.SystemLoadAverage >= 0 {
-			load = value.SystemLoadAverage
+			load = fmt.Sprintf("%v", value.SystemLoadAverage)
 		} else {
-			load = value.SystemCPULoad
+			load = fmt.Sprintf("%v", value.SystemCPULoad)
 		}
 
 		percentFree = float64(value.FreePhysicalMemorySize) / float64(value.TotalPhysicalMemorySize)
 
 		stringValues[i+1] = getColumns(value.MachineName, formatSmallInteger(value.AvailableProcessors),
-			formatFloat(load), formattingFunction(value.TotalPhysicalMemorySize),
+			load, formattingFunction(value.TotalPhysicalMemorySize),
 			formattingFunction(value.FreePhysicalMemorySize),
 			formatPercent(percentFree), value.Name, value.Arch, value.Version)
 	}
