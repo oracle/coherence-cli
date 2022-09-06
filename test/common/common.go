@@ -547,6 +547,10 @@ func RunTestSetMemberCommands(t *testing.T) {
 	test_utils.EnsureCommandContains(g, t, cliCmd, addedCluster, configArg, file, "add", "cluster",
 		context.ClusterName, "-u", context.Url)
 
+	// Set management expiry to 100 ms
+	test_utils.EnsureCommandContains(g, t, cliCmd, cmd.OperationCompleted, configArg, file, "set", "management",
+		"-a", "expiryDelay", "-v", "100", "-y", "-c", "cluster1")
+
 	// should be able to set the log level to 1 for all members
 	test_utils.EnsureCommandContains(g, t, cliCmd, cmd.OperationCompleted, configArg, file, "set", "member",
 		"all", "-a", "loggingLevel", "-v", "1", "-y", "-c", "cluster1")
@@ -562,7 +566,7 @@ func RunTestSetMemberCommands(t *testing.T) {
 	test_utils.EnsureCommandContains(g, t, cliCmd, cmd.OperationCompleted, configArg, file, "set", "member",
 		"1", "-a", "loggingLevel", "-v", "6", "-y", "-c", "cluster1")
 
-	test_utils.Sleep(5)
+	test_utils.Sleep(10)
 
 	// query the log level - should have log level 9 and 6
 	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "\"loggingLevel\":1,\"loggingLevel\":6", configArg,
