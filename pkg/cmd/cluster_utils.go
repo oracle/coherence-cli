@@ -202,9 +202,9 @@ func startClient(cmd *cobra.Command, connection ClusterConnection, class string)
 	if err != nil {
 		return utils.GetError(fmt.Sprintf("unable to start %s: %v", class, result), err)
 	}
-
-	// handle CTRL-C
-	//handleCTRLC()
+	//
+	//// handle CTRL-C
+	//handleCTRLC(process.Process)
 
 	return process.Wait()
 }
@@ -243,7 +243,7 @@ func getClientArgs(member, class string) []string {
 	}
 
 	return append(baseArgs, getMemberProperty("client"), "-Dcoherence.log.level=5",
-		"-Dcoherence.distributed.localstorage=false", class)
+		"-Dcoherence.distributed.localstorage=false", "-Dcoherence.shutdownhook=force", class)
 }
 
 func getMemberProperty(member string) string {

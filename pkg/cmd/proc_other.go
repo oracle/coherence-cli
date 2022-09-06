@@ -20,7 +20,7 @@ func setForkProcess(process *exec.Cmd) {
 	}
 }
 
-//func handleCTRLC() {
+//func handleCTRLC(proc *os.Process) {
 //	chanSignal := make(chan os.Signal, 1)
 //	chanDone := make(chan struct{})
 //	signal.Notify(chanSignal, os.Interrupt)
@@ -30,4 +30,7 @@ func setForkProcess(process *exec.Cmd) {
 //		close(chanDone)
 //	}()
 //	<-chanDone
+//
+//	_ = proc.Kill()
+//	os.Exit(1)
 //}

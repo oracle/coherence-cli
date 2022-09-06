@@ -19,6 +19,8 @@ Commercial 14.1.1.2206.x versions and above.
 Once you create a local cluster, you can manage and monitor them in the same way as you can with discovered
 or manually added clusters.
 
+When you create a cluster, the first node started will always have management over REST enabled.
+
 NOTE: These commands are experimental only and may be changed or removed in the future. It is *not supported* to use
 these commands to create production clusters.
 
@@ -28,6 +30,7 @@ these commands to create production clusters.
 * <<start-cluster, `cohctl start cluster`>> - starts a cluster that was manually created
 * <<start-console, `cohctl start console`>> - starts a console client against a cluster that was manually created
 * <<start-cohql, `cohctl start cohql`>> - starts a CohQL client against a cluster that was manually created
+* <<start-class, `cohctl start class`>> - starts a specific Java class against the local Coherence cluster
 * <<set-default-heap, `cohctl set default-heap`>> - sets default heap for creating and starting clusters
 * <<get-default-heap, `cohctl get default-heap`>> - gets default heap for creating and starting clusters
 * <<clear-default-heap, `cohctl clear default-heap`>> - clears default heap for creating and starting clusters
@@ -244,6 +247,18 @@ CohQL>
 ----
 
 NOTE: Use `bye` to quit the console.
+
+[#start-class]
+==== Start Class
+
+include::../../build/_output/docs-gen/start_class.adoc[tag=text]
+
+[source,bash]
+----
+$ cohctl start class com.my.company.Class -c local
+
+Starting client com.my.company.Class...
+----
 
 [#set-default-heap]
 ==== Set Default Heap

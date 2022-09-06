@@ -53,6 +53,7 @@ create_doc $DOCS_DIR/start_cluster "${COHCTL} start cluster --help"
 create_doc $DOCS_DIR/stop_cluster "${COHCTL} stop cluster --help"
 create_doc $DOCS_DIR/start_console "${COHCTL} start console --help"
 create_doc $DOCS_DIR/start_cohql "${COHCTL} start cohql --help"
+create_doc $DOCS_DIR/start_class "${COHCTL} start class --help"
 
 # Context
 create_doc $DOCS_DIR/set_context "${COHCTL} set context --help"

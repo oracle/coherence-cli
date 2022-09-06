@@ -1174,6 +1174,23 @@ var startCohQLCmd = &cobra.Command{
 	},
 }
 
+// startClassCmd represents the start class command
+var startClassCmd = &cobra.Command{
+	Use:   "class",
+	Short: "start a specific Java class against the local Coherence cluster",
+	Long: `The 'start class' command starts a specific Java class against the local Coherence cluster.
+The class name must include the full package and class name.`,
+	Args: func(cmd *cobra.Command, args []string) error {
+		if len(args) != 1 {
+			displayErrorAndExit(cmd, "you must provide a class to run")
+		}
+		return nil
+	},
+	RunE: func(cmd *cobra.Command, args []string) error {
+		return runStartClientOperation(cmd, args[0])
+	},
+}
+
 func runStartClientOperation(cmd *cobra.Command, class string) error {
 	var (
 		err        error
@@ -1367,6 +1384,10 @@ func init() {
 	startCohQLCmd.Flags().StringVarP(&heapMemoryParam, heapMemoryArg, "M", defaultHeap, heapMemoryMessage)
 	startCohQLCmd.Flags().Int32VarP(&logLevelParam, logLevelArg, "l", 5, logLevelMessage)
 	startCohQLCmd.Flags().BoolVarP(&extendClientParam, "extend", "X", false, "start CohQL as Extend client. Only works for default cache config")
+
+	startClassCmd.Flags().StringVarP(&heapMemoryParam, heapMemoryArg, "M", defaultHeap, heapMemoryMessage)
+	startClassCmd.Flags().Int32VarP(&logLevelParam, logLevelArg, "l", 5, logLevelMessage)
+	startClassCmd.Flags().BoolVarP(&extendClientParam, "extend", "X", false, "start CohQL as Extend client. Only works for default cache config")
 
 	scaleClusterCmd.Flags().Int32VarP(&replicaCountParam, "replicas", "r", 3, serverCountMessage)
 	scaleClusterCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)

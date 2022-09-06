@@ -489,6 +489,7 @@ func Initialize(command *cobra.Command) *cobra.Command {
 	startCmd.AddCommand(startClusterCmd)
 	startCmd.AddCommand(startConsoleCmd)
 	startCmd.AddCommand(startCohQLCmd)
+	startCmd.AddCommand(startClassCmd)
 
 	// stop
 	command.AddCommand(stopCmd)
