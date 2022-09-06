@@ -210,12 +210,23 @@ func startClient(cmd *cobra.Command, connection ClusterConnection, class string)
 }
 
 func getCacheServerArgs(member string, httpPort int32) []string {
-	baseArgs := make([]string, 0)
+	var (
+		baseArgs = make([]string, 0)
+		heap     string
+	)
 	if httpPort != -1 {
 		baseArgs = append(baseArgs, "-Dcoherence.management.http=all", fmt.Sprintf("-Dcoherence.management.http.port=%d", httpPort),
 			"-Dcoherence.management=all")
 	}
-	baseArgs = append(baseArgs, "-Xms"+heapMemoryParam, "-Xmx"+heapMemoryParam)
+
+	// if the default-heap is set in config then use this
+	if Config.DefaultHeap != "" {
+		heap = Config.DefaultHeap
+	} else {
+		heap = heapMemoryParam
+	}
+
+	baseArgs = append(baseArgs, "-Xms"+heap, "-Xmx"+heap)
 
 	return append(baseArgs, getMemberProperty(member), "-Dcoherence.log.level=6", "com.tangosol.net.Coherence")
 }

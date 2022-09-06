@@ -23,10 +23,14 @@ NOTE: These commands are experimental only and may be changed or removed in the 
 these commands to create production clusters.
 
 * <<create-cluster, `cohctl create cluster`>> - creates a local cluster and adds to the cohctl.yaml file
+* <<scale-cluster, `cohctl scale cluster`>> - scales a cluster that was manually created
 * <<stop-cluster, `cohctl stop cluster`>> - stops a cluster that was manually created or started
 * <<start-cluster, `cohctl start cluster`>> - starts a cluster that was manually created
 * <<start-console, `cohctl start console`>> - starts a console client against a cluster that was manually created
 * <<start-cohql, `cohctl start cohql`>> - starts a CohQL client against a cluster that was manually created
+* <<set-default-heap, `cohctl set default-heap`>> - sets default heap for creating and starting clusters
+* <<get-default-heap, `cohctl get default-heap`>> - gets default heap for creating and starting clusters
+* <<clear-default-heap, `cohctl clear default-heap`>> - clears default heap for creating and starting clusters
 
 [#create-cluster]
 ==== Create
@@ -46,7 +50,7 @@ Cluster version:        {coherence-version}
 Cluster port:           7574
 Management port:        30000
 Server count:           3
-Initial memory:         512m
+Initial memory:         256m
 Persistence mode:       on-demand
 Group ID:               com.oracle.coherence.ce
 Additional artifacts:
@@ -60,7 +64,7 @@ Starting 3 cluster members for cluster local
 Starting cluster member storage-0...
 Starting cluster member storage-1...
 Starting cluster member storage-2...
-Cluster added and started with process ids: [46188 46189 46190]
+Cluster added and started
 
 $ cohctl get members -c local
 
@@ -100,7 +104,7 @@ Starting 3 cluster members for cluster local
 Starting cluster member storage-0...
 Starting cluster member storage-1...
 Starting cluster member storage-2...
-Cluster added and started with process ids: [47190 47191 47192]
+Cluster added and started
 ----
 
 NOTE: In this example we are using the `-S` option to skip downloading maven artifacts as we know they are already installed locally.
@@ -116,7 +120,7 @@ Cluster version:        {coherence-version}
 Cluster port:           7574
 Management port:        30000
 Server count:           3
-Initial memory:         512m
+Initial memory:         256m
 Persistence mode:       on-demand
 Group ID:               com.oracle.coherence.ce
 Additional artifacts:   coherence-rest,io.opentracing:opentracing-api:0.33.0,io.opentracing:opentracing-util:0.33.0
@@ -136,6 +140,22 @@ Starting cluster member storage-2...
 Cluster added and started with process ids: [3324 3330 3331]
 ----
 
+[#scale-cluster]
+==== Scale Cluster
+
+include::../../build/_output/docs-gen/scale_cluster.adoc[tag=text]
+
+[source,bash]
+----
+$ cohctl scale cluster local -r 4
+
+Are you sure you want to scale the cluster local up by 1 member(s) to 4 members? (y/n) y
+Starting cluster member storage-3...
+Cluster local scaled
+----
+
+NOTE: It is not yet supported to scale down a cluster.
+
 [#stop-cluster]
 ==== Stop Cluster
 
@@ -144,6 +164,7 @@ include::../../build/_output/docs-gen/stop_cluster.adoc[tag=text]
 [source,bash]
 ----
 $ cohctl stop cluster local
+
 Are you sure you want to stop 3 members for the cluster local? (y/n) y
 killed process 47760
 killed process 47761
@@ -156,16 +177,33 @@ killed process 47762
 
 include::../../build/_output/docs-gen/start_cluster.adoc[tag=text]
 
-Start a cluster and specify heap size of `1g`. (default is 512m)
+*Examples*
+
+Start a cluster and specify heap size of `1g`. (default is 256m)
 
 [source,bash]
 ----
 $ cohctl start cluster local -M 1g
+
 Are you sure you want to start 3 members for cluster local? (y/n) y
 Starting cluster member storage-0...
 Starting cluster member storage-1...
 Starting cluster member storage-2...
-Cluster local and started with process ids: [48066 48067 48068]
+Cluster local and started
+----
+
+Start a cluster and specify heap size of `1g` with 4 replicas/members.
+
+[source,bash]
+----
+$ cohctl start cluster local -M 1g -r 4
+
+Are you sure you want to start 4 members for cluster local? (y/n) y
+Starting cluster member storage-0...
+Starting cluster member storage-1...
+Starting cluster member storage-2...
+Starting cluster member storage-3...
+Cluster local and started
 ----
 
 [#start-console]
@@ -178,6 +216,7 @@ Start a Coherence console.
 [source,bash]
 ----
 $ cohctl start console -c local
+
 Starting client com.tangosol.net.CacheFactory...
 2022-08-29 16:00:01.346/0.620 Oracle Coherence 22.06.1 <Info> (thread=main, member=n/a): Loaded operational configuration from "jar:file:/Users/timmiddleton/.m2/repository/com/oracle/coherence/ce/coherence/22.06.1/coherence-22.06.1.jar!/tangosol-coherence.xml"
 ...
@@ -205,6 +244,44 @@ CohQL>
 ----
 
 NOTE: Use `bye` to quit the console.
+
+[#set-default-heap]
+==== Set Default Heap
+
+include::../../build/_output/docs-gen/set_default_heap.adoc[tag=text]
+
+Set default heap to 512m.
+
+[source,bash]
+----
+$ cohctl set default-heap 512m
+Default heap is now set to 512m
+----
+
+[#get-default-heap]
+==== Get Default Heap
+
+include::../../build/_output/docs-gen/get_default_heap.adoc[tag=text]
+
+[source,bash]
+----
+$ cohctl get default-heap
+Current default heap: 512m
+----
+
+
+[#clear-default-heap]
+==== Clear Default Heap
+
+include::../../build/_output/docs-gen/clear_default_heap.adoc[tag=text]
+
+[source,bash]
+----
+$ cohctl clear default-heap
+Default heap has been cleared
+----
+
+NOTE: If no default-heap is set, then the default of 256m is used.
 
 === See Also
 

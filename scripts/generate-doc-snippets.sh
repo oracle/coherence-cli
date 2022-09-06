@@ -48,6 +48,7 @@ create_doc $DOCS_DIR/discover_clusters "${COHCTL} discover clusters --help"
 
 # Create Cluster
 create_doc $DOCS_DIR/create_cluster "${COHCTL} create cluster --help"
+create_doc $DOCS_DIR/scale_cluster "${COHCTL} scale cluster --help"
 create_doc $DOCS_DIR/start_cluster "${COHCTL} start cluster --help"
 create_doc $DOCS_DIR/stop_cluster "${COHCTL} stop cluster --help"
 create_doc $DOCS_DIR/start_console "${COHCTL} start console --help"
@@ -165,6 +166,11 @@ create_doc $DOCS_DIR/get_debug "${COHCTL} get debug --help"
 create_doc $DOCS_DIR/set_bytes_format "${COHCTL} set bytes-format --help"
 create_doc $DOCS_DIR/get_bytes_format "${COHCTL} get bytes-format --help"
 create_doc $DOCS_DIR/clear_bytes_format "${COHCTL} clear bytes-format --help"
+
+# Default Heap
+create_doc $DOCS_DIR/set_default_heap "${COHCTL} set default-heap --help"
+create_doc $DOCS_DIR/get_default_heap "${COHCTL} get default-heap --help"
+create_doc $DOCS_DIR/clear_default_heap "${COHCTL} clear default-heap --help"
 
 # Ignore Certs
 create_doc $DOCS_DIR/set_ignore_certs "${COHCTL} set ignore-certs --help"

@@ -57,8 +57,17 @@ func RunTestClusterCommands(t *testing.T) {
 	// set default format to "m"
 	test_utils.EnsureCommandContains(g, t, cliCmd, "Bytes format is now set to m", configArg, file, "set", "bytes-format", "m")
 
-	// clear defaut format
+	// clear default format
 	test_utils.EnsureCommandContains(g, t, cliCmd, "Default bytes format has been cleared", configArg, file, "clear", "bytes-format")
+
+	// set default heap to 512m
+	test_utils.EnsureCommandContains(g, t, cliCmd, "Default heap is now set to 512m", configArg, file, "set", "default-heap", "512m")
+
+	// get default heap
+	test_utils.EnsureCommandContains(g, t, cliCmd, "Current default heap: 512m", configArg, file, "get", "default-heap")
+
+	// clear default heap
+	test_utils.EnsureCommandContains(g, t, cliCmd, "Default heap has been cleared", configArg, file, "clear", "default-heap")
 
 	// get clusters should return nothing
 	test_utils.EnsureCommandContains(g, t, cliCmd, "", configArg, file, "get", "clusters")

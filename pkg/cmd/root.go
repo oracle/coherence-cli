@@ -61,10 +61,11 @@ const debugContextKey = "debug"
 const ignoreCertsContextKey = "ignoreInvalidCerts"
 const requestTimeoutKey = "requestTimeout"
 const defaultBytesFormatKey = "defaultBytesFormat"
+const defaultHeapKey = "defaultHeap"
 
 const confirmOptionMessage = "automatically confirm the operation"
 const timeoutMessage = "timeout in seconds for NS Lookup requests"
-const heapMemoryMessage = "heap memory to allocate for JVM"
+const heapMemoryMessage = "heap memory to allocate for JVM if default-heap not set"
 const startupDelayMessage = "startup delay in seconds for each server"
 const heapMemoryArg = "heap-memory"
 const logLevelArg = "log-level"
@@ -126,6 +127,7 @@ type CoherenceCLIConfig struct {
 	RequestTimeout     int32               `json:"requestTimeout"`
 	IgnoreInvalidCerts bool                `json:"ignoreInvalidCerts"`
 	DefaultBytesFormat string              `json:"defaultBytesFormat"`
+	DefaultHeap        string              `json:"defaultHeap"`
 }
 
 // ClusterConnection describes an individual connection to a cluster
@@ -443,6 +445,7 @@ func Initialize(command *cobra.Command) *cobra.Command {
 	getCmd.AddCommand(getHealthCmd)
 	getCmd.AddCommand(getEnvironmentCmd)
 	getCmd.AddCommand(getServiceMembersCmd)
+	getCmd.AddCommand(getDefaultHeapCmd)
 
 	// set command
 	command.AddCommand(setCmd)
@@ -457,11 +460,13 @@ func Initialize(command *cobra.Command) *cobra.Command {
 	setCmd.AddCommand(setReporterCmd)
 	setCmd.AddCommand(setBytesFormatCmd)
 	setCmd.AddCommand(setExecutorCmd)
+	setCmd.AddCommand(setDefaultHeapCmd)
 
 	// clear
 	command.AddCommand(clearCmd)
 	clearCmd.AddCommand(clearContextCmd)
 	clearCmd.AddCommand(clearBytesFormatCmd)
+	clearCmd.AddCommand(clearDefaultHeapCmd)
 
 	// add
 	command.AddCommand(addCmd)

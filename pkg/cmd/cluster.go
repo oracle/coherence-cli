@@ -911,7 +911,7 @@ const defaultCoherenceVersion = "22.06.1"
 const startClusterCommand = "start cluster"
 const scaleClusterCommand = "scale cluster"
 const stopClusterCommand = "stop cluster"
-const defaultHeap = "128m"
+const defaultHeap = "265m"
 
 // createClusterCmd represents the create cluster command
 var createClusterCmd = &cobra.Command{
@@ -996,13 +996,18 @@ NOTE: This is an experimental feature and my be altered or removed in the future
 			return err
 		}
 
+		heap := Config.DefaultHeap
+		if heap == "" {
+			heap = heapMemoryParam
+		}
+
 		if !automaticallyConfirm {
 			cmd.Printf("\nCluster name:         %s\n", clusterName)
 			cmd.Printf("Cluster version:      %s\n", clusterVersionParam)
 			cmd.Printf("Cluster port:         %d\n", clusterPortParam)
 			cmd.Printf("Management port:      %d\n", httpPortParam)
 			cmd.Printf("Replica count:        %d\n", replicaCountParam)
-			cmd.Printf("Initial memory:       %s\n", heapMemoryParam)
+			cmd.Printf("Initial memory:       %s\n", heap)
 			cmd.Printf("Persistence mode:     %s\n", persistenceModeParam)
 			cmd.Printf("Group ID:             %s\n", groupID)
 			cmd.Printf("Additional artifacts: %v\n", additionalArtifactsParam)
@@ -1119,7 +1124,7 @@ var startClusterCmd = &cobra.Command{
 var scaleClusterCmd = &cobra.Command{
 	Use:   "cluster",
 	Short: "scales a local Coherence cluster",
-	Long:  `The 'scale cluster' command scales a cluster sthat was manually created.`,
+	Long:  `The 'scale cluster' command scales a cluster that was manually created.`,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
 			displayErrorAndExit(cmd, youMustProviderClusterMessage)
