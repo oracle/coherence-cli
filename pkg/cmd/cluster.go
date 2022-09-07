@@ -78,7 +78,6 @@ var removeClusterCmd = &cobra.Command{
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var (
-			response    string
 			clusterName = args[0]
 			dataFetcher fetcher.Fetcher
 			err         error
@@ -101,13 +100,9 @@ var removeClusterCmd = &cobra.Command{
 			return fmt.Errorf("cluster %s has %d processes running. You must stop the cluster before removing it", clusterName, processCount)
 		}
 
-		if !automaticallyConfirm {
-			cmd.Printf("Are you sure you want to remove the connection to cluster %s? (y/n) ", clusterName)
-			_, err := fmt.Scanln(&response)
-			if response != "y" || err != nil {
-				cmd.Println(constants.NoOperation)
-				return nil
-			}
+		// confirm the operation
+		if !confirmOperation(cmd, fmt.Sprintf("Are you sure you want to remove the connection to cluster %s? (y/n) ", clusterName)) {
+			return nil
 		}
 
 		newConnection := make([]ClusterConnection, 0)
@@ -636,7 +631,6 @@ you can confirm if you wish to add the discovered clusters.`,
 		var (
 			count               = len(args)
 			clustersWithoutHTTP = make([]int, 0)
-			response            string
 			numEndpoints        int
 			hostPorts           []string
 			err                 error
@@ -806,13 +800,9 @@ you can confirm if you wish to add the discovered clusters.`,
 			return errors.New("no clusters have Management over REST enabled")
 		}
 
-		if !automaticallyConfirm {
-			cmd.Printf("Are you sure you want to add the above %d cluster(s)? (y/n) ", withHTTP)
-			_, err = fmt.Scanln(&response)
-			if response != "y" || err != nil {
-				cmd.Println(constants.NoOperation)
-				return nil
-			}
+		// confirm the operation
+		if !confirmOperation(cmd, fmt.Sprintf("Are you sure you want to add the above %d cluster(s)? (y/n) ", withHTTP)) {
+			return nil
 		}
 
 		// add the clusters
@@ -934,7 +924,6 @@ NOTE: This is an experimental feature and my be altered or removed in the future
 		var (
 			clusterName    = sanitizeConnectionName(args[0])
 			err            error
-			response       string
 			groupID        = getCoherenceGroupID()
 			cpEntry        string
 			splitArtifacts []string
@@ -1018,10 +1007,9 @@ NOTE: This is an experimental feature and my be altered or removed in the future
 			cmd.Printf("Group ID:             %s\n", groupID)
 			cmd.Printf("Additional artifacts: %v\n", additionalArtifactsParam)
 			cmd.Printf("Startup Profile:      %v\n", profileValueParam)
-			cmd.Printf("Are you sure you want to create the cluster with the above details? (y/n) ")
-			_, err = fmt.Scanln(&response)
-			if response != "y" || err != nil {
-				cmd.Println(constants.NoOperation)
+
+			// confirm the operation
+			if !confirmOperation(cmd, "Are you sure you want to create the cluster with the above details? (y/n) ") {
 				return nil
 			}
 		}
@@ -1227,13 +1215,13 @@ func runStartClientOperation(cmd *cobra.Command, class string) error {
 
 func runClusterOperation(cmd *cobra.Command, connectionName, operation string) error {
 	var (
-		err         error
-		response    string
-		proc        *os.Process
-		processIDs  []int
-		serverDelta int32
-		scaleType   string
-		dataFetcher fetcher.Fetcher
+		err            error
+		proc           *os.Process
+		processIDs     []int
+		serverDelta    int32
+		scaleType      string
+		dataFetcher    fetcher.Fetcher
+		confirmMessage string
 	)
 
 	// validate the Java and Maven executable are present and in the path
@@ -1296,21 +1284,21 @@ func runClusterOperation(cmd *cobra.Command, connectionName, operation string) e
 				scaleType = "down"
 			}
 
-			cmd.Printf("Are you sure you want to scale the cluster %s %s by %d member(s) to %d members? (y/n) ", connection.Name, scaleType, serverDelta, replicaCountParam)
+			confirmMessage = fmt.Sprintf("Are you sure you want to scale the cluster %s %s by %d member(s) to %d members? (y/n) ",
+				connection.Name, scaleType, serverDelta, replicaCountParam)
 			replicaCountParam = serverDelta
 		} else if operation == startClusterCommand {
 			if replicaCountParam < 1 {
 				return errors.New("replica count must be 1 or more")
 			}
 
-			cmd.Printf("Are you sure you want to start %d members for cluster %s? (y/n) ", replicaCountParam, connection.Name)
+			confirmMessage = fmt.Sprintf("Are you sure you want to start %d members for cluster %s? (y/n) ", replicaCountParam, connection.Name)
 		} else {
-			cmd.Printf("Are you sure you want to stop %d members for the cluster %s? (y/n) ", numProcesses, connection.Name)
+			confirmMessage = fmt.Sprintf("Are you sure you want to stop %d members for the cluster %s? (y/n) ", numProcesses, connection.Name)
 		}
 
-		_, err = fmt.Scanln(&response)
-		if response != "y" || err != nil {
-			cmd.Println(constants.NoOperation)
+		// confirm the operation
+		if !confirmOperation(cmd, confirmMessage) {
 			return nil
 		}
 	}
@@ -1379,14 +1367,14 @@ func init() {
 	createClusterCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
 	createClusterCmd.Flags().BoolVarP(&useCommercialParam, "commercial", "C", false, "use commercial Coherence groupID (default is CE)")
 	createClusterCmd.Flags().BoolVarP(&skipMavenDepsParam, "skip-deps", "S", false, "skip pulling Maven artifacts")
-	createClusterCmd.Flags().Int32VarP(&metricsStartPortParam, "metrics-port", "t", 0, metricsPortMessage)
+	createClusterCmd.Flags().Int32VarP(&metricsStartPortParam, metricsPortArg, "t", 0, metricsPortMessage)
 	createClusterCmd.Flags().StringVarP(&profileValueParam, profileArg, "P", "", profileMessage)
 
 	stopClusterCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
 
 	startClusterCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
 	startClusterCmd.Flags().Int32VarP(&replicaCountParam, "replicas", "r", 3, serverCountMessage)
-	startClusterCmd.Flags().Int32VarP(&metricsStartPortParam, "metrics-port", "t", 0, metricsPortMessage)
+	startClusterCmd.Flags().Int32VarP(&metricsStartPortParam, metricsPortArg, "t", 0, metricsPortMessage)
 	startClusterCmd.Flags().StringVarP(&heapMemoryParam, heapMemoryArg, "M", defaultHeap, heapMemoryMessage)
 	startClusterCmd.Flags().StringVarP(&profileValueParam, profileArg, "P", "", profileMessage)
 	startClusterCmd.Flags().Int32VarP(&logLevelParam, logLevelArg, "l", 5, logLevelMessage)
@@ -1408,7 +1396,7 @@ func init() {
 	scaleClusterCmd.Flags().StringVarP(&heapMemoryParam, heapMemoryArg, "M", defaultHeap, heapMemoryMessage)
 	scaleClusterCmd.Flags().Int32VarP(&logLevelParam, logLevelArg, "l", 5, logLevelMessage)
 	scaleClusterCmd.Flags().Int32VarP(&startupDelayParam, startupDelayArg, "D", 1, startupDelayMessage)
-	scaleClusterCmd.Flags().Int32VarP(&metricsStartPortParam, "metrics-port", "t", 0, metricsPortMessage)
+	scaleClusterCmd.Flags().Int32VarP(&metricsStartPortParam, metricsPortArg, "t", 0, metricsPortMessage)
 	scaleClusterCmd.Flags().StringVarP(&profileValueParam, profileArg, "P", "", profileMessage)
 }
 

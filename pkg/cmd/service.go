@@ -537,7 +537,6 @@ taskHungThresholdMillis or requestTimeoutMillis.`,
 			nodeIDArray     []string
 			nodeIds         []string
 			confirmMessage  string
-			response        string
 			intValue        int
 			errorSink       = createErrorSink()
 			wg              sync.WaitGroup
@@ -612,11 +611,9 @@ taskHungThresholdMillis or requestTimeoutMillis.`,
 
 		if !automaticallyConfirm {
 			cmd.Printf("Selected service: %s\n", serviceName)
-			cmd.Printf("Are you sure you want to set the value of attribute %s to %s for %s? (y/n) ",
-				attributeNameService, attributeValueService, confirmMessage)
-			_, err = fmt.Scanln(&response)
-			if response != "y" || err != nil {
-				cmd.Println(constants.NoOperation)
+			// confirm the operation
+			if !confirmOperation(cmd, fmt.Sprintf("Are you sure you want to set the value of attribute %s to %s for %s? (y/n) ",
+				attributeNameService, attributeValueService, confirmMessage)) {
 				return nil
 			}
 		}
@@ -734,7 +731,6 @@ func issueServiceNodeCommand(cmd *cobra.Command, serviceName, operation string) 
 		dataFetcher     fetcher.Fetcher
 		connection      string
 		err             error
-		response        string
 		serviceResult   []byte
 		servicesSummary = config.ServicesSummaries{}
 		nodeIDArray     []string
@@ -777,15 +773,10 @@ func issueServiceNodeCommand(cmd *cobra.Command, serviceName, operation string) 
 		return fmt.Errorf("no node with node id %s exists in this cluster", nodeIDServiceOperation)
 	}
 
-	// confirmation
-	if !automaticallyConfirm {
-		cmd.Printf("Are you sure you want to perform %s for service %s on node %s? (y/n) ",
-			operation, serviceName, nodeIDServiceOperation)
-		_, err = fmt.Scanln(&response)
-		if response != "y" || err != nil {
-			cmd.Println(constants.NoOperation)
-			return nil
-		}
+	// confirm the operation
+	if !confirmOperation(cmd, fmt.Sprintf("Are you sure you want to perform %s for service %s on node %s? (y/n) ",
+		operation, serviceName, nodeIDServiceOperation)) {
+		return nil
 	}
 
 	_, err = dataFetcher.InvokeServiceMemberOperation(serviceName, nodeIDServiceOperation, operation)
@@ -804,7 +795,6 @@ func issueServiceCommand(cmd *cobra.Command, serviceName, operation string) erro
 		connection     string
 		servicesResult []string
 		err            error
-		response       string
 	)
 	connection, dataFetcher, err = GetConnectionAndDataFetcher()
 	if err != nil {
@@ -824,14 +814,9 @@ func issueServiceCommand(cmd *cobra.Command, serviceName, operation string) erro
 		return fmt.Errorf("cannot find persistence service named %s", serviceName)
 	}
 
-	// confirmation
-	if !automaticallyConfirm {
-		cmd.Printf("Are you sure you want to perform %s for service %s? (y/n) ", operation, serviceName)
-		_, err = fmt.Scanln(&response)
-		if response != "y" || err != nil {
-			cmd.Println(constants.NoOperation)
-			return nil
-		}
+	// confirm the operation
+	if !confirmOperation(cmd, fmt.Sprintf("Are you sure you want to perform %s for service %s? (y/n) ", operation, serviceName)) {
+		return nil
 	}
 
 	_, err = dataFetcher.InvokeServiceOperation(serviceName, operation)

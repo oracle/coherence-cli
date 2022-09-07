@@ -267,7 +267,6 @@ batchFactor, refreshFactor or requeueThreshold.`,
 			nodeIds        []string
 			nodeIDArray    []string
 			confirmMessage string
-			response       string
 			errorSink      = createErrorSink()
 			wg             sync.WaitGroup
 			floatValue     float64
@@ -341,15 +340,11 @@ batchFactor, refreshFactor or requeueThreshold.`,
 
 		cmd.Println(FormatCurrentCluster(connection))
 
-		if !automaticallyConfirm {
-			cmd.Printf("Selected service/cache: %s/%s\n", serviceName, cacheName)
-			cmd.Printf("Are you sure you want to set the value of attribute %s to %s in tier %s for %s? (y/n) ",
-				attributeNameCache, attributeValueCache, tier, confirmMessage)
-			_, err = fmt.Scanln(&response)
-			if response != "y" || err != nil {
-				cmd.Println(constants.NoOperation)
-				return nil
-			}
+		// confirm the operation
+		if !confirmOperation(cmd, fmt.Sprintf("Selected service/cache: %s/%s\n", serviceName, cacheName)+
+			fmt.Sprintf("Are you sure you want to set the value of attribute %s to %s in tier %s for %s? (y/n) ",
+				attributeNameCache, attributeValueCache, tier, confirmMessage)) {
+			return nil
 		}
 
 		nodeCount := len(nodeIds)

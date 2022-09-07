@@ -100,7 +100,6 @@ The following attribute names are allowed: expiryDelay and refreshPolicy.`,
 			dataFetcher fetcher.Fetcher
 			connection  string
 			err         error
-			response    string
 			actualValue interface{}
 			intValue    int
 		)
@@ -137,14 +136,10 @@ The following attribute names are allowed: expiryDelay and refreshPolicy.`,
 
 		cmd.Println(FormatCurrentCluster(connection))
 
-		if !automaticallyConfirm {
-			cmd.Printf("Are you sure you want to set the value of attribute %s to %s? (y/n) ",
-				attributeNameMgmt, attributeValueMgmt)
-			_, err = fmt.Scanln(&response)
-			if response != "y" || err != nil {
-				cmd.Println(constants.NoOperation)
-				return nil
-			}
+		// confirm the operation
+		if !confirmOperation(cmd, fmt.Sprintf("Are you sure you want to set the value of attribute %s to %s? (y/n) ",
+			attributeNameMgmt, attributeValueMgmt)) {
+			return nil
 		}
 
 		_, err = dataFetcher.SetManagementAttribute(attributeNameMgmt, actualValue)

@@ -201,7 +201,6 @@ all nodes. The following attribute names are allowed: traceLogging.`,
 			executors      = config.Executors{}
 			finalExecutors = config.Executors{}
 			executor       = args[0]
-			response       string
 			actualValue    interface{}
 		)
 
@@ -243,14 +242,10 @@ all nodes. The following attribute names are allowed: traceLogging.`,
 			return fmt.Errorf("unable to find executor with name %s", executor)
 		}
 
-		if !automaticallyConfirm {
-			cmd.Printf("Are you sure you want to set the value of attribute %s to %s for %s? (y/n) ",
-				executorAttributeName, executorAttributeValue, executor)
-			_, err = fmt.Scanln(&response)
-			if response != "y" || err != nil {
-				cmd.Println(constants.NoOperation)
-				return nil
-			}
+		// confirm the operation
+		if !confirmOperation(cmd, fmt.Sprintf("Are you sure you want to set the value of attribute %s to %s for %s? (y/n) ",
+			executorAttributeName, executorAttributeValue, executor)) {
+			return nil
 		}
 
 		_, err = dataFetcher.SetExecutorAttribute(executor, executorAttributeName, actualValue)
