@@ -385,7 +385,7 @@ func isOperationSupported(operation, resetNodeIDs string, dataFetcher fetcher.Fe
 
 	// version 14.1.1.0.X and 12.2.1.x versions have limited support for resetStatistics
 	// all other versions are assumed to be supported
-	if strings.Contains(clusterVersion, "14.1.1.0") || strings.Contains(clusterVersion, "12.2.1.") {
+	if strings.Contains(clusterVersion, "14.1.1"+".0") || strings.Contains(clusterVersion, "12.2.1.") {
 		if operation == fetcher.ResetMembers && resetNodeIDs == "all" {
 			return fmt.Errorf("you can only reset member statistics for an individual node in Coherence version %s", clusterVersion)
 		}
