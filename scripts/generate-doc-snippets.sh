@@ -54,6 +54,9 @@ create_doc $DOCS_DIR/stop_cluster "${COHCTL} stop cluster --help"
 create_doc $DOCS_DIR/start_console "${COHCTL} start console --help"
 create_doc $DOCS_DIR/start_cohql "${COHCTL} start cohql --help"
 create_doc $DOCS_DIR/start_class "${COHCTL} start class --help"
+create_doc $DOCS_DIR/get_profiles "${COHCTL} get profiles --help"
+create_doc $DOCS_DIR/set_profile "${COHCTL} set profile --help"
+create_doc $DOCS_DIR/remove_profile "${COHCTL} remove profile --help"
 
 # Context
 create_doc $DOCS_DIR/set_context "${COHCTL} set context --help"
@@ -185,6 +188,16 @@ create_doc $DOCS_DIR/get_logs "${COHCTL} get logs --help"
 
 # Thread Dump
 create_doc $DOCS_DIR/retrieve_thread_dumps "${COHCTL} retrieve thread-dumps --help"
+
+# Reset Stats
+create_doc $DOCS_DIR/reset_cache_stats "${COHCTL} reset cache-stats --help"
+create_doc $DOCS_DIR/reset_executor_stats "${COHCTL} reset executor-stats --help"
+create_doc $DOCS_DIR/reset_federation_stats "${COHCTL} reset federation-stats --help"
+create_doc $DOCS_DIR/reset_flashjournal_stats "${COHCTL} reset flashjournal-stats --help"
+create_doc $DOCS_DIR/reset_ramjournal_stats "${COHCTL} reset ramjournal-stats --help"
+create_doc $DOCS_DIR/reset_member_stats "${COHCTL} reset member-stats --help"
+create_doc $DOCS_DIR/reset_reporter_stats "${COHCTL} reset reporter-stats --help"
+create_doc $DOCS_DIR/reset_service_stats "${COHCTL} reset service-stats --help"
 
 # Persistence
 create_doc $DOCS_DIR/get_persistence "${COHCTL} get persistence --help"

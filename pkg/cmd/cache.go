@@ -32,6 +32,8 @@ var (
 	InvalidTierMsg = "tier must be back or front"
 )
 
+const provideCacheMessage = "you must provide a cache name"
+
 // getCachesCmd represents the get caches command
 var getCachesCmd = &cobra.Command{
 	Use:   "caches",
@@ -129,7 +131,7 @@ includes cache size, access, storage and index information across all nodes.
 You can specify '-o wide' to display addition information.`,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
-			displayErrorAndExit(cmd, "you must provide a cache name")
+			displayErrorAndExit(cmd, provideCacheMessage)
 		}
 		return nil
 	},

@@ -736,6 +736,26 @@ func FormatDiscoveredClusters(clusters []discovery.DiscoveredCluster) string {
 	return formatLinesAllStringsWithAlignment([]string{L, L, L, R, L}, stringValues)
 }
 
+// FormatProfiles returns the profiles in a column formatted output
+func FormatProfiles(profiles []ProfileValue) string {
+	var (
+		profileCount = len(profiles)
+	)
+	if profileCount == 0 {
+		return ""
+	}
+
+	var stringValues = make([]string, profileCount+1)
+
+	stringValues[0] = getColumns("PROFILE", "VALUE")
+
+	for i, value := range profiles {
+		stringValues[i+1] = getColumns(value.Name, value.Value)
+	}
+
+	return formatLinesAllStrings(stringValues)
+}
+
 // FormatClusterConnections returns the cluster information in a column formatted output
 func FormatClusterConnections(clusters []ClusterConnection) string {
 	var (

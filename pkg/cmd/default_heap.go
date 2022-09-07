@@ -18,7 +18,7 @@ const invalidDefaultHeapValue = "you must provide a value"
 
 // setDefaultHeapCmd represents the set default-heap command
 var setDefaultHeapCmd = &cobra.Command{
-	Use:   "default-heap {value}",
+	Use:   "default-heap value",
 	Short: "set default heap for creating and starting clusters",
 	Long: `The 'set default-heap' command sets the default heap when creating and starting cluster.
 Valid values are in the format suitable for -Xms such as 256m, 1g, etc.`,

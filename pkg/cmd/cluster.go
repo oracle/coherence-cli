@@ -905,6 +905,7 @@ var (
 	persistenceModeParam     string
 	startupDelayParam        int32
 	additionalArtifactsParam string
+	profileValueParam        string
 )
 
 const defaultCoherenceVersion = "22.06.1"
@@ -1001,6 +1002,11 @@ NOTE: This is an experimental feature and my be altered or removed in the future
 			heap = heapMemoryParam
 		}
 
+		// validate profile
+		if err = validateProfile(); err != nil {
+			return err
+		}
+
 		if !automaticallyConfirm {
 			cmd.Printf("\nCluster name:         %s\n", clusterName)
 			cmd.Printf("Cluster version:      %s\n", clusterVersionParam)
@@ -1011,6 +1017,7 @@ NOTE: This is an experimental feature and my be altered or removed in the future
 			cmd.Printf("Persistence mode:     %s\n", persistenceModeParam)
 			cmd.Printf("Group ID:             %s\n", groupID)
 			cmd.Printf("Additional artifacts: %v\n", additionalArtifactsParam)
+			cmd.Printf("Startup Profile:      %v\n", profileValueParam)
 			cmd.Printf("Are you sure you want to create the cluster with the above details? (y/n) ")
 			_, err = fmt.Scanln(&response)
 			if response != "y" || err != nil {
@@ -1241,6 +1248,11 @@ func runClusterOperation(cmd *cobra.Command, connectionName, operation string) e
 		}
 	}
 
+	// validate profile
+	if err = validateProfile(); err != nil {
+		return err
+	}
+
 	found, connection := GetClusterConnection(connectionName)
 	if !found {
 		return errors.New(UnableToFindClusterMsg + connectionName)
@@ -1354,7 +1366,7 @@ func init() {
 	removeClusterCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
 
 	createClusterCmd.Flags().StringVarP(&clusterVersionParam, "version", "v", defaultCoherenceVersion, "cluster version")
-	createClusterCmd.Flags().StringVarP(&persistenceModeParam, "persistence-mode", "P", "on-demand",
+	createClusterCmd.Flags().StringVarP(&persistenceModeParam, "persistence-mode", "s", "on-demand",
 		fmt.Sprintf("persistence mode %v", validPersistenceModes))
 	createClusterCmd.Flags().Int32VarP(&httpPortParam, "http-port", "H", 30000, "http management port")
 	createClusterCmd.Flags().Int32VarP(&clusterPortParam, "cluster-port", "p", 7574, "cluster port")
@@ -1368,6 +1380,7 @@ func init() {
 	createClusterCmd.Flags().BoolVarP(&useCommercialParam, "commercial", "C", false, "use commercial Coherence groupID (default is CE)")
 	createClusterCmd.Flags().BoolVarP(&skipMavenDepsParam, "skip-deps", "S", false, "skip pulling Maven artifacts")
 	createClusterCmd.Flags().Int32VarP(&metricsStartPortParam, "metrics-port", "t", 0, metricsPortMessage)
+	createClusterCmd.Flags().StringVarP(&profileValueParam, profileArg, "P", "", profileMessage)
 
 	stopClusterCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
 
@@ -1375,6 +1388,7 @@ func init() {
 	startClusterCmd.Flags().Int32VarP(&replicaCountParam, "replicas", "r", 3, serverCountMessage)
 	startClusterCmd.Flags().Int32VarP(&metricsStartPortParam, "metrics-port", "t", 0, metricsPortMessage)
 	startClusterCmd.Flags().StringVarP(&heapMemoryParam, heapMemoryArg, "M", defaultHeap, heapMemoryMessage)
+	startClusterCmd.Flags().StringVarP(&profileValueParam, profileArg, "P", "", profileMessage)
 	startClusterCmd.Flags().Int32VarP(&logLevelParam, logLevelArg, "l", 5, logLevelMessage)
 	startClusterCmd.Flags().Int32VarP(&startupDelayParam, startupDelayArg, "D", 1, startupDelayMessage)
 
@@ -1395,6 +1409,7 @@ func init() {
 	scaleClusterCmd.Flags().Int32VarP(&logLevelParam, logLevelArg, "l", 5, logLevelMessage)
 	scaleClusterCmd.Flags().Int32VarP(&startupDelayParam, startupDelayArg, "D", 1, startupDelayMessage)
 	scaleClusterCmd.Flags().Int32VarP(&metricsStartPortParam, "metrics-port", "t", 0, metricsPortMessage)
+	scaleClusterCmd.Flags().StringVarP(&profileValueParam, profileArg, "P", "", profileMessage)
 }
 
 // sanitizeConnectionName sanitizes a cluster connection
@@ -1497,6 +1512,16 @@ func ensureUniqueCluster(connection string) error {
 	if found {
 		return fmt.Errorf("A connection for cluster named %s already exists with url=%s and type=%s",
 			connection, clusterConn.ConnectionURL, clusterConn.ConnectionType)
+	}
+
+	return nil
+}
+
+// validateProfile validates the given profile param
+func validateProfile() error {
+	startupProfile := getProfileValue(profileValueParam)
+	if profileValueParam != "" && startupProfile == "" {
+		return fmt.Errorf("a profile with the name %s does not exist", profileValueParam)
 	}
 
 	return nil

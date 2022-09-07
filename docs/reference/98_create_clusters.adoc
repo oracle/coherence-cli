@@ -21,6 +21,9 @@ or manually added clusters.
 
 When you create a cluster, the first node started will always have management over REST enabled.
 
+You may also specify a profile when you start a cluster using the `-P` option. The value of the profile
+, which is a string containing "-Dkey=value" pairs, will be included in the cache servers started.
+
 NOTE: These commands are experimental only and may be changed or removed in the future. It is *not supported* to use
 these commands to create production clusters.
 
@@ -34,6 +37,9 @@ these commands to create production clusters.
 * <<set-default-heap, `cohctl set default-heap`>> - sets default heap for creating and starting clusters
 * <<get-default-heap, `cohctl get default-heap`>> - gets default heap for creating and starting clusters
 * <<clear-default-heap, `cohctl clear default-heap`>> - clears default heap for creating and starting clusters
+* <<set-profile, `cohctl set profile`>> - set a profile value for creating and starting clusters
+* <<remove-profile, `cohctl remove profile`>> - removes a profile value from the list of profile
+* <<get-profils, `cohctl get profiles`>> - displays the profiles that have been created
 
 [#create-cluster]
 ==== Create
@@ -284,7 +290,6 @@ $ cohctl get default-heap
 Current default heap: 512m
 ----
 
-
 [#clear-default-heap]
 ==== Clear Default Heap
 
@@ -297,6 +302,46 @@ Default heap has been cleared
 ----
 
 NOTE: If no default-heap is set, then the default of 256m is used.
+
+[#set-profile]
+==== Set Profile
+
+include::../../build/_output/docs-gen/set_profile.adoc[tag=text]
+
+[source,bash]
+----
+$ cohctl set profile debug-enabled -v "-Dmy.debug.enabled=true -Dmy.debug.level=10"
+Are you sure you want to set the profile debug-enabled to a value of [-Dmy.debug.enabled=true -Dmy.debug.level=10]? (y/n) y
+profile debug-enabled was set to value [-Dmy.debug.enabled=true -Dmy.debug.level=10]
+----
+
+When you have set the profile you can startup or create a cluster using that profile by
+specifying `-P profile-name` for the `cohctl start cluster` or `cohctl create cluster` commands.
+
+[#remove-profile]
+==== Remove Profile
+
+include::../../build/_output/docs-gen/remove_profile.adoc[tag=text]
+
+[source,bash]
+----
+$ cohctl remove profile debug-enabled
+Are you sure you want to remove the profile debug-enabled? (y/n) y
+profile debug-enabled was removed
+----
+
+[#get-profiles]
+==== Get Profiles
+
+include::../../build/_output/docs-gen/get_profiles.adoc[tag=text]
+
+[source,bash]
+----
+$ cohctl get profiles
+PROFILE    VALUE
+profile1   -Dproperty1.value=2
+profile2   -Dproperty2.value=2 -Dproperty3.value=4
+----
 
 === See Also
 

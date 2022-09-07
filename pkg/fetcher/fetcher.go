@@ -26,6 +26,15 @@ const StopService = "stop"
 const StartService = "start"
 const ShutdownService = "shutdown"
 
+const ResetMembers = "members"
+const ResetReporters = "reporters"
+const ResetRAMJournal = "ram journal"
+const ResetFlashJournal = "flash journal"
+const ResetService = "service"
+const ResetCache = "cache"
+const ResetFederation = "federation"
+const ResetExecutor = "executor"
+
 const JfrTypeRole = "role"
 const JfrTypeNode = "node"
 const JfrTypeCluster = "cluster"
@@ -171,6 +180,9 @@ type Fetcher interface {
 
 	// InvokeServiceOperation invokes a service operation such as suspend or resume
 	InvokeServiceOperation(serviceName, operation string) ([]byte, error)
+
+	// InvokeResetStatistics invokes a reset statistics operation
+	InvokeResetStatistics(operation string, nodeID string, args []string) ([]byte, error)
 
 	// InvokeServiceMemberOperation invokes a service operation such as start, stop, shutdown against a node
 	InvokeServiceMemberOperation(serviceName, nodeID, operation string) ([]byte, error)

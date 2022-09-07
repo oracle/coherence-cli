@@ -130,7 +130,15 @@ func startCluster(cmd *cobra.Command, connection ClusterConnection, serverCount,
 		mgmtPort         = connection.ManagementPort
 		counter          int32
 		metricsStartPort = metricsStartPortParam
+		startupProfile   = getProfileValue(profileValueParam)
+		profileArgs      = make([]string, 0)
 	)
+
+	// check if any profiles have been specified
+	if profileValueParam != "" {
+		// this profile param has already been validated
+		profileArgs = strings.Split(startupProfile, " ")
+	}
 
 	// if we are scaling then set the http port to -1 so no more management servers are started
 	if existingCount > 0 {
@@ -144,7 +152,7 @@ func startCluster(cmd *cobra.Command, connection ClusterConnection, serverCount,
 	for counter = existingCount; counter < serverCount+existingCount; counter++ {
 		var (
 			member        = fmt.Sprintf("storage-%d", counter)
-			arguments     = getCommonArguments(connection)
+			arguments     = append(profileArgs, getCommonArguments(connection)...)
 			memberLogFile string
 		)
 

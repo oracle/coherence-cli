@@ -152,7 +152,7 @@ can also specify '-o wide' to display addition information.`,
 
 // getServiceMembersCmd represents the get service-members command
 var getServiceMembersCmd = &cobra.Command{
-	Use:   "service-members",
+	Use:   "service-members service-name",
 	Short: "display service members for a cluster",
 	Long:  `The 'get service-members' command displays service members for a cluster.`,
 	Args: func(cmd *cobra.Command, args []string) error {
@@ -621,8 +621,7 @@ taskHungThresholdMillis or requestTimeoutMillis.`,
 			}
 		}
 
-		nodeCount := len(nodeIds)
-		wg.Add(nodeCount)
+		wg.Add(len(nodeIds))
 
 		for _, value := range nodeIds {
 			go func(nodeId string) {
@@ -906,7 +905,7 @@ Invocation, Proxy, RemoteCache or ReplicatedCache`)
 	_ = setServiceCmd.MarkFlagRequired("attribute")
 	setServiceCmd.Flags().StringVarP(&attributeValueService, "value", "v", "", "attribute value to set")
 	_ = setServiceCmd.MarkFlagRequired("value")
-	setServiceCmd.Flags().StringVarP(&nodeIDService, "node", "n", "all", "comma separated node ids to target")
+	setServiceCmd.Flags().StringVarP(&nodeIDService, "node", "n", "all", commaSeparatedIDMessage)
 
 	suspendServiceCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
 	resumeServiceCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)

@@ -62,6 +62,7 @@ public class RestServer {
             server.createContext("/version", RestServer::version);
             server.createContext("/registerMBeans", RestServer::registerMBeans);
             server.createContext("/executorPresent", RestServer::isExecutorPresent);
+            server.createContext("/healthPresent", RestServer::isHealthCheckPresent);
 
             server.setExecutor(null); // creates a default executor
             server.start();
@@ -170,9 +171,23 @@ public class RestServer {
         send(t, 200, Boolean.toString(canFindExecutor()));
     }
 
+    private static void isHealthCheckPresent(HttpExchange t) throws IOException {
+        send(t, 200, Boolean.toString(canFindHealthCheck()));
+    }
+
     private static boolean canFindExecutor() {
         try {
             Class.forName("com.oracle.coherence.concurrent.executor.ClusteredExecutorInfo");
+            return true;
+        }
+        catch (ClassNotFoundException e) {
+            return false;
+        }
+    }
+
+    private static boolean canFindHealthCheck() {
+        try {
+            Class.forName("com.tangosol.util.HealthCheck");
             return true;
         }
         catch (ClassNotFoundException e) {
