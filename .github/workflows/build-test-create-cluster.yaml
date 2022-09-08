@@ -38,6 +38,13 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-go-mods-
 
+    - name: Cache Maven packages
+      uses: actions/cache@v1
+      with:
+        path: ~/.m2
+        key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+        restore-keys: ${{ runner.os }}-m2
+
     - name: Set up Go
       uses: actions/setup-go@v2
       with:
@@ -45,7 +52,7 @@ jobs:
 
     - name: Build cohctl
       shell: bash
-      run: make clean cohctl
+      run: make cohctl
 
     - name: Create Cluster Tests
       shell: bash

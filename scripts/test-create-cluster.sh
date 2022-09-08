@@ -36,6 +36,29 @@ function pause() {
    sleep 5
 }
 
+function wait_for_ready() {
+  counter=10
+  PORT=$1
+  if [ -z "$PORT" ] ; then
+    PORT=30000
+  fi
+  pause
+  echo "waiting for management to be ready on $PORT ..."
+  while [ $counter -gt 0 ]
+  do
+    curl http://127.0.0.1:${PORT}/management/coherence/cluster > /dev/null 2>&1
+    ret=$?
+    if [ $ret -eq 0 ] ; then
+        echo "Management ready"
+        return 0
+    fi
+    pause
+    let counter=counter-1
+  done
+  echo "Management failed to be ready"
+  exit 1
+}
+
 function message() {
     echo "========================================================="
     echo "$*"
@@ -62,8 +85,7 @@ message "Create Cluster"
 runCommand create cluster local -y -v $VERSION
 runCommand set context local
 
-# Wait for startup
-pause
+wait_for_ready
 
 runCommand get clusters
 runCommand get members
@@ -77,7 +99,7 @@ grep "[3,3,3]" $OUTPUT
 # Scale the cluster to 6 members
 message "Scale Cluster to 6 members"
 runCommand scale cluster local -y -r 6
-pause
+pause && pause && pause
 
 # Check the members of PartitionedCache
 runCommand get services -o jsonpath="$.items[?(@.name=='PartitionedCache')].memberCount"
@@ -90,7 +112,7 @@ runCommand stop cluster local -y
 
 message "Startup cluster with 5 members"
 runCommand start cluster local -y -r 5
-pause && pause && pause
+wait_for_ready
 
 runCommand get services -o jsonpath="$.items[?(@.name=='PartitionedCache')].memberCount"
 grep "[5,5,5,]" $OUTPUT
@@ -101,7 +123,7 @@ pause
 
 message "Start cluster using different HTTP port"
 runCommand create cluster local -H 30001 -l 9 -y
-pause
+wait_for_ready 30001
 
 message "Add a cluster to point to newly created cluster on port 30001"
 runCommand add cluster local2 -u http://127.0.0.1:30001/management/coherence/cluster
@@ -115,7 +137,7 @@ message "Startup cluster using different memory setting"
 runCommand clear default-heap
 runCommand start cluster local -r 4 -M 1g -y
 runCommand set bytes-format m
-pause
+wait_for_ready 30001
 
 runCommand get members
 grep "1,024 MB" $OUTPUT > /dev/null 2>&1
@@ -128,7 +150,7 @@ runCommand remove cluster local -y
 
 message "Run CohQL"
 runCommand create cluster local -y -M 512m -S
-pause
+wait_for_ready
 
 echo "insert into test key(1) value(1);" > /tmp/file.cohql
 runCommand start cohql -f /tmp/file.cohql
@@ -141,7 +163,7 @@ runCommand remove cluster local -y
 
 message "Create cluster with executor"
 runCommand create cluster local -y -M 512m -a coherence-concurrent
-pause
+wait_for_ready
 
 runCommand get executors
 grep default $OUTPUT
