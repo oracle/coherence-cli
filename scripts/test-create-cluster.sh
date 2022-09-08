@@ -50,6 +50,7 @@ function wait_for_ready() {
     ret=$?
     if [ $ret -eq 0 ] ; then
         echo "Management ready"
+        pause
         return 0
     fi
     pause
