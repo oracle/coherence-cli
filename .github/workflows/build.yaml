@@ -99,10 +99,6 @@ jobs:
       shell: bash
       run: make test-clean test-discovery
 
-    - name: Create Cluster Tests
-      shell: bash
-      run: make test-clean test-create-cluster
-
     - name: Build for all platforms
       shell: bash
       run:  make cohctl-all

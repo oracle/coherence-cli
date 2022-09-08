@@ -7,6 +7,7 @@
 #
 
 # Test various command related to creating/ starting/ stopping and scaling clusters
+# environment variables COM and COHERENCE_VERSION accepted
 
 pwd
 
@@ -16,6 +17,7 @@ if [ $# -ne 1 ] ; then
 fi
 
 VERSION=$1
+
 CONFIG_DIR=/tmp/$$.create
 DIR=`pwd`
 OUTPUT=/tmp/$$.output
@@ -26,6 +28,7 @@ trap "cp ${CONFIG_DIR}/cohctl.log /tmp && rm -rf ${CONFIG_DIR} $OUTPUT" 0 1 2 3
 echo
 echo "Config Dir: ${CONFIG_DIR}"
 echo "Version:    ${VERSION}"
+echo "Commercial: ${COM}"
 echo
 
 # Default command
@@ -57,12 +60,18 @@ function wait_for_ready() {
     let counter=counter-1
   done
   echo "Management failed to be ready"
+  save_logs
   exit 1
 }
 
 function message() {
     echo "========================================================="
     echo "$*"
+}
+
+function save_logs() {
+    mkdir -p build/_output/test-logs
+    cp ${CONFIG_DIR}/logs/local/*.log build/_output/test-logs
 }
 
 function runCommand() {
@@ -73,6 +82,8 @@ function runCommand() {
     cat $OUTPUT
     if [ $ret -ne 0 ] ; then
       echo "Command failed"
+      # copy the log files
+      save_logs
       exit 1
     fi
 }
@@ -83,7 +94,7 @@ runCommand set debug on
 
 # Create a cluster
 message "Create Cluster"
-runCommand create cluster local -y -v $VERSION
+runCommand create cluster local -y -v $VERSION $COM
 runCommand set context local
 
 wait_for_ready
@@ -123,7 +134,7 @@ runCommand remove cluster local -y
 pause
 
 message "Start cluster using different HTTP port"
-runCommand create cluster local -H 30001 -l 9 -y
+runCommand create cluster local -H 30001 -l 9 -y $COM -v $VERSION
 wait_for_ready 30001
 
 message "Add a cluster to point to newly created cluster on port 30001"
@@ -150,7 +161,7 @@ pause
 runCommand remove cluster local -y
 
 message "Run CohQL"
-runCommand create cluster local -y -M 512m -S
+runCommand create cluster local -y -M 512m -S $COM -v $VERSION
 wait_for_ready
 
 echo "insert into test key(1) value(1);" > /tmp/file.cohql
@@ -162,16 +173,19 @@ runCommand stop cluster local -y
 pause
 runCommand remove cluster local -y
 
-message "Create cluster with executor"
-runCommand create cluster local -y -M 512m -a coherence-concurrent
-wait_for_ready
+# Don't run concurrent test for commercial
+if [ -z "$COM" ] ; then
+  message "Create cluster with executor"
+  runCommand create cluster local -y -M 512m -a coherence-concurrent -v $VERSION
+  wait_for_ready
 
-runCommand get executors
-grep default $OUTPUT
+  runCommand get executors
+  grep default $OUTPUT
 
-runCommand stop cluster local -y
-pause
-runCommand remove cluster local -y
+  runCommand stop cluster local -y
+  pause
+  runCommand remove cluster local -y
+fi
 
 
 
