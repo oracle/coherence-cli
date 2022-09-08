@@ -680,7 +680,7 @@ func (h HTTPFetcher) InvokeResetStatistics(operation string, nodeID string, args
 
 	_, err = httpPostRequest(h, finalURL, constants.EmptyByte)
 	if err != nil {
-		return constants.EmptyByte, fmt.Errorf("unable to %s. %v", operation, err)
+		return constants.EmptyByte, fmt.Errorf("unable to reset %s. %v", operation, err)
 	}
 
 	return constants.EmptyByte, nil
