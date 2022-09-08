@@ -240,7 +240,7 @@ NOTE: Use `bye` to quit the console.
 
 include::../../build/_output/docs-gen/start_cohql.adoc[tag=text]
 
-Start a Coherence CohQL session.
+Start a CohQL session.
 
 [source,bash]
 ----
@@ -253,6 +253,24 @@ CohQL>
 ----
 
 NOTE: Use `bye` to quit the console.
+
+Start a CohQL Session and execute a statement
+
+[source,bash]
+----
+$ cohctl start cohql -c local -S "insert into test key(1) value(1)"
+
+...
+----
+
+Start a CohQL Session and execute statements from a file.
+
+[source,bash]
+----
+$ cohctl start cohql -c local -f /tmp/run.cohql
+
+...
+----
 
 [#start-class]
 ==== Start Class

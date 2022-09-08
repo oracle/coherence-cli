@@ -1,0 +1,58 @@
+# Copyright 2021, 2022 Oracle Corporation and/or its affiliates.
+# Licensed under the Universal Permissive License v 1.0 as shown at
+# https://oss.oracle.com/licenses/upl.
+
+# ---------------------------------------------------------------------------
+# Coherence CLI GitHub Actions CI build - Test Create
+# ---------------------------------------------------------------------------
+name: CI Test Create Cluster
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+#   Checkout the source, we need a depth of zero to fetch all of the history otherwise
+#   the copyright check cannot work out the date of the files from Git.
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+
+    - name: Set up JDK
+      uses: actions/setup-java@v1
+      with:
+        java-version: '11'
+
+    - name: Cache Go Modules
+      uses: actions/cache@v1
+      with:
+        path: ~/go/pkg/mod
+        key: ${{ runner.os }}-go-mods-${{ hashFiles('**/go.sum') }}
+        restore-keys: |
+          ${{ runner.os }}-go-mods-
+
+    - name: Set up Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: 1.17.x
+
+    - name: Build cohctl
+      shell: bash
+      run: make clean cohctl
+
+    - name: Create Cluster Tests
+      shell: bash
+      run: make test-clean test-create-cluster
+
+    - uses: actions/upload-artifact@v1
+      if: failure()
+      with:
+        name: test-output
+        path: build/_output/test-logs

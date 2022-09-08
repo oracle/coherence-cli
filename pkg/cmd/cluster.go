@@ -896,6 +896,8 @@ var (
 	startupDelayParam        int32
 	additionalArtifactsParam string
 	profileValueParam        string
+	fileNameParam            string
+	statementParam           string
 )
 
 const defaultCoherenceVersion = "22.06.1"
@@ -996,22 +998,20 @@ NOTE: This is an experimental feature and my be altered or removed in the future
 			return err
 		}
 
-		if !automaticallyConfirm {
-			cmd.Printf("\nCluster name:         %s\n", clusterName)
-			cmd.Printf("Cluster version:      %s\n", clusterVersionParam)
-			cmd.Printf("Cluster port:         %d\n", clusterPortParam)
-			cmd.Printf("Management port:      %d\n", httpPortParam)
-			cmd.Printf("Replica count:        %d\n", replicaCountParam)
-			cmd.Printf("Initial memory:       %s\n", heap)
-			cmd.Printf("Persistence mode:     %s\n", persistenceModeParam)
-			cmd.Printf("Group ID:             %s\n", groupID)
-			cmd.Printf("Additional artifacts: %v\n", additionalArtifactsParam)
-			cmd.Printf("Startup Profile:      %v\n", profileValueParam)
+		cmd.Printf("\nCluster name:         %s\n", clusterName)
+		cmd.Printf("Cluster version:      %s\n", clusterVersionParam)
+		cmd.Printf("Cluster port:         %d\n", clusterPortParam)
+		cmd.Printf("Management port:      %d\n", httpPortParam)
+		cmd.Printf("Replica count:        %d\n", replicaCountParam)
+		cmd.Printf("Initial memory:       %s\n", heap)
+		cmd.Printf("Persistence mode:     %s\n", persistenceModeParam)
+		cmd.Printf("Group ID:             %s\n", groupID)
+		cmd.Printf("Additional artifacts: %v\n", additionalArtifactsParam)
+		cmd.Printf("Startup Profile:      %v\n", profileValueParam)
 
-			// confirm the operation
-			if !confirmOperation(cmd, "Are you sure you want to create the cluster with the above details? (y/n) ") {
-				return nil
-			}
+		// confirm the operation
+		if !confirmOperation(cmd, "Are you sure you want to create the cluster with the above details? (y/n) ") {
+			return nil
 		}
 
 		// update default jars based up coherence group and version
@@ -1267,40 +1267,38 @@ func runClusterOperation(cmd *cobra.Command, connectionName, operation string) e
 		return fmt.Errorf("the cluster %s appears to be already started with process ids: %v", connection.Name, processIDs)
 	}
 
-	if !automaticallyConfirm {
-		if operation == scaleClusterCommand {
-			if replicaCountParam < 1 {
-				return errors.New("replicas must be a positive value")
-			} else if replicaCountParam == numProcesses {
-				return fmt.Errorf("the cluster already running %d members. Please privde a different replica value", numProcesses)
-			}
-			if replicaCountParam <= numProcesses {
-				return errors.New("scaling down a cluster is not yet supported")
-			}
-			serverDelta = replicaCountParam - numProcesses
-			if serverDelta > 0 {
-				scaleType = "up"
-			} else {
-				scaleType = "down"
-			}
-
-			confirmMessage = fmt.Sprintf("Are you sure you want to scale the cluster %s %s by %d member(s) to %d members? (y/n) ",
-				connection.Name, scaleType, serverDelta, replicaCountParam)
-			replicaCountParam = serverDelta
-		} else if operation == startClusterCommand {
-			if replicaCountParam < 1 {
-				return errors.New("replica count must be 1 or more")
-			}
-
-			confirmMessage = fmt.Sprintf("Are you sure you want to start %d members for cluster %s? (y/n) ", replicaCountParam, connection.Name)
+	if operation == scaleClusterCommand {
+		if replicaCountParam < 1 {
+			return errors.New("replicas must be a positive value")
+		} else if replicaCountParam == numProcesses {
+			return fmt.Errorf("the cluster already running %d members. Please privde a different replica value", numProcesses)
+		}
+		if replicaCountParam <= numProcesses {
+			return errors.New("scaling down a cluster is not yet supported")
+		}
+		serverDelta = replicaCountParam - numProcesses
+		if serverDelta > 0 {
+			scaleType = "up"
 		} else {
-			confirmMessage = fmt.Sprintf("Are you sure you want to stop %d members for the cluster %s? (y/n) ", numProcesses, connection.Name)
+			scaleType = "down"
 		}
 
-		// confirm the operation
-		if !confirmOperation(cmd, confirmMessage) {
-			return nil
+		confirmMessage = fmt.Sprintf("Are you sure you want to scale the cluster %s %s by %d member(s) to %d members? (y/n) ",
+			connection.Name, scaleType, serverDelta, replicaCountParam)
+		replicaCountParam = serverDelta
+	} else if operation == startClusterCommand {
+		if replicaCountParam < 1 {
+			return errors.New("replica count must be 1 or more")
 		}
+
+		confirmMessage = fmt.Sprintf("Are you sure you want to start %d members for cluster %s? (y/n) ", replicaCountParam, connection.Name)
+	} else {
+		confirmMessage = fmt.Sprintf("Are you sure you want to stop %d members for the cluster %s? (y/n) ", numProcesses, connection.Name)
+	}
+
+	// confirm the operation
+	if !confirmOperation(cmd, confirmMessage) {
+		return nil
 	}
 
 	if operation == stopClusterCommand {
@@ -1384,6 +1382,8 @@ func init() {
 	startConsoleCmd.Flags().Int32VarP(&logLevelParam, logLevelArg, "l", 5, logLevelMessage)
 
 	startCohQLCmd.Flags().StringVarP(&heapMemoryParam, heapMemoryArg, "M", defaultHeap, heapMemoryMessage)
+	startCohQLCmd.Flags().StringVarP(&fileNameParam, "file", "f", "", "file name to read CohQL commands from")
+	startCohQLCmd.Flags().StringVarP(&statementParam, "statement", "S", "", "statement to execute enclosed in double quotes")
 	startCohQLCmd.Flags().Int32VarP(&logLevelParam, logLevelArg, "l", 5, logLevelMessage)
 	startCohQLCmd.Flags().BoolVarP(&extendClientParam, "extend", "X", false, "start CohQL as Extend client. Only works for default cache config")
 

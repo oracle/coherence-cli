@@ -609,13 +609,11 @@ taskHungThresholdMillis or requestTimeoutMillis.`,
 
 		cmd.Println(FormatCurrentCluster(connection))
 
-		if !automaticallyConfirm {
-			cmd.Printf("Selected service: %s\n", serviceName)
-			// confirm the operation
-			if !confirmOperation(cmd, fmt.Sprintf("Are you sure you want to set the value of attribute %s to %s for %s? (y/n) ",
-				attributeNameService, attributeValueService, confirmMessage)) {
-				return nil
-			}
+		cmd.Printf("Selected service: %s\n", serviceName)
+		// confirm the operation
+		if !confirmOperation(cmd, fmt.Sprintf("Are you sure you want to set the value of attribute %s to %s for %s? (y/n) ",
+			attributeNameService, attributeValueService, confirmMessage)) {
+			return nil
 		}
 
 		wg.Add(len(nodeIds))

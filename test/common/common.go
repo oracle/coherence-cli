@@ -1825,68 +1825,6 @@ func isHealthEnabled(restUrl string) bool {
 	return err != nil && string(result) == "true"
 }
 
-// RunTestCreateCommands tests various create cluster commands
-// Experimental only
-func RunTestCreateCommands(t *testing.T) {
-	var (
-		g           = NewGomegaWithT(t)
-		clusterName = "tim"
-	)
-
-	file, err := test_utils.CreateNewConfigYaml(configYaml)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	test_utils.CleanupConfigFileAfterTest(t, file)
-
-	cliCmd := cmd.Initialize(nil)
-
-	// should be able to create a new cluster and start it using the defaults
-	test_utils.EnsureCommandContains(g, t, cliCmd, "Cluster added and started", configArg, file, "create", "cluster",
-		clusterName, "-y")
-
-	// sleep to wait to cluster startup
-	test_utils.Sleep(20)
-
-	// test get members
-	test_utils.EnsureCommandContainsAll(g, t, cliCmd, nodeID, configArg, file, "get", "members",
-		"-c", clusterName)
-
-	// shutdown the cluster
-	test_utils.EnsureCommandContains(g, t, cliCmd, "3 processes were stopped for cluster tim", configArg, file, "stop", "cluster",
-		clusterName, "-y")
-
-	test_utils.Sleep(10)
-
-	// re-start the cluster
-	test_utils.EnsureCommandContains(g, t, cliCmd, "Cluster tim started", configArg, file, "start", "cluster",
-		clusterName, "-y", "-r", "6")
-
-	// sleep to wait to cluster startup
-	test_utils.Sleep(20)
-
-	// test get members
-	test_utils.EnsureCommandContainsAll(g, t, cliCmd, nodeID, configArg, file, "get", "members",
-		"-c", clusterName)
-
-	// shutdown the cluster
-	test_utils.EnsureCommandContains(g, t, cliCmd, "6 processes were stopped for cluster tim", configArg, file, "stop", "cluster",
-		clusterName, "-y")
-
-	// sleep to wait to cluster shutdown
-	test_utils.Sleep(10)
-
-	// try to create a cluster with the same name
-	// test set cache errors - invalid tier
-	test_utils.EnsureCommandErrorContains(g, t, cliCmd, "A connection for cluster named tim already exists", configArg, file, configArg,
-		file, "create", "cluster", clusterName, "-y")
-
-	// shutdown the cluster
-	test_utils.EnsureCommandContains(g, t, cliCmd, "Removed connection for cluster tim", configArg, file, "remove", "cluster",
-		clusterName, "-y")
-}
-
 // RunTestProfileCommands tests profile commands
 func RunTestProfileCommands(t *testing.T) {
 	g := NewGomegaWithT(t)
