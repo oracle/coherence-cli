@@ -21,7 +21,6 @@ import (
 	"strconv"
 	"strings"
 	"sync"
-	"time"
 )
 
 var (
@@ -79,27 +78,31 @@ var removeClusterCmd = &cobra.Command{
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var (
-			response    string
 			clusterName = args[0]
+			dataFetcher fetcher.Fetcher
+			err         error
 		)
 
-		found, connection := GetClusterConnection(clusterName)
+		found, cluster := GetClusterConnection(clusterName)
 		if !found {
 			return errors.New(UnableToFindClusterMsg + clusterName)
 		}
 
-		processCount := len(connection.ProcessIDs)
-		if processCount > 0 {
+		dataFetcher, err = GetDataFetcher(clusterName)
+		if err != nil {
+			return err
+		}
+
+		processCount := len(getRunningProcesses(dataFetcher))
+
+		// only check for running members if the cluster was manually created
+		if processCount > 0 && cluster.ManuallyCreated {
 			return fmt.Errorf("cluster %s has %d processes running. You must stop the cluster before removing it", clusterName, processCount)
 		}
 
-		if !automaticallyConfirm {
-			cmd.Printf("Are you sure you want to remove the connection to cluster %s? (y/n) ", clusterName)
-			_, err := fmt.Scanln(&response)
-			if response != "y" || err != nil {
-				cmd.Println(constants.NoOperation)
-				return nil
-			}
+		// confirm the operation
+		if !confirmOperation(cmd, fmt.Sprintf("Are you sure you want to remove the connection to cluster %s? (y/n) ", clusterName)) {
+			return nil
 		}
 
 		newConnection := make([]ClusterConnection, 0)
@@ -113,7 +116,7 @@ var removeClusterCmd = &cobra.Command{
 		Config.Clusters = newConnection
 
 		viper.Set("clusters", Config.Clusters)
-		err := WriteConfig()
+		err = WriteConfig()
 		if err != nil {
 			return err
 		}
@@ -628,7 +631,6 @@ you can confirm if you wish to add the discovered clusters.`,
 		var (
 			count               = len(args)
 			clustersWithoutHTTP = make([]int, 0)
-			response            string
 			numEndpoints        int
 			hostPorts           []string
 			err                 error
@@ -798,13 +800,9 @@ you can confirm if you wish to add the discovered clusters.`,
 			return errors.New("no clusters have Management over REST enabled")
 		}
 
-		if !automaticallyConfirm {
-			cmd.Printf("Are you sure you want to add the above %d cluster(s)? (y/n) ", withHTTP)
-			_, err = fmt.Scanln(&response)
-			if response != "y" || err != nil {
-				cmd.Println(constants.NoOperation)
-				return nil
-			}
+		// confirm the operation
+		if !confirmOperation(cmd, fmt.Sprintf("Are you sure you want to add the above %d cluster(s)? (y/n) ", withHTTP)) {
+			return nil
 		}
 
 		// add the clusters
@@ -884,8 +882,10 @@ func addCluster(cmd *cobra.Command, connection, connectionURL, discoveryType, ns
 var (
 	httpPortParam            int32
 	clusterPortParam         int32
+	wkaParam                 string
 	clusterVersionParam      string
-	serverCountParam         int32
+	replicaCountParam        int32
+	metricsStartPortParam    int32
 	logLevelParam            int32
 	heapMemoryParam          string
 	useCommercialParam       bool
@@ -895,12 +895,16 @@ var (
 	persistenceModeParam     string
 	startupDelayParam        int32
 	additionalArtifactsParam string
+	profileValueParam        string
+	fileNameParam            string
+	statementParam           string
 )
 
 const defaultCoherenceVersion = "22.06.1"
 const startClusterCommand = "start cluster"
+const scaleClusterCommand = "scale cluster"
 const stopClusterCommand = "stop cluster"
-const defaultHeap = "512m"
+const defaultHeap = "265m"
 
 // createClusterCmd represents the create cluster command
 var createClusterCmd = &cobra.Command{
@@ -922,8 +926,6 @@ NOTE: This is an experimental feature and my be altered or removed in the future
 		var (
 			clusterName    = sanitizeConnectionName(args[0])
 			err            error
-			response       string
-			processIDs     []string
 			groupID        = getCoherenceGroupID()
 			cpEntry        string
 			splitArtifacts []string
@@ -944,9 +946,21 @@ NOTE: This is an experimental feature and my be altered or removed in the future
 			return err
 		}
 
-		// validate port
+		// validate http port
 		if err = utils.ValidatePort(httpPortParam); err != nil {
 			return err
+		}
+
+		// validate cluster port
+		if err = utils.ValidatePort(clusterPortParam); err != nil {
+			return err
+		}
+
+		// validate metrics port
+		if metricsStartPortParam > 0 {
+			if err = utils.ValidatePort(metricsStartPortParam); err != nil {
+				return err
+			}
 		}
 
 		// validate any additional artifacts
@@ -964,8 +978,8 @@ NOTE: This is an experimental feature and my be altered or removed in the future
 			}
 		}
 
-		if serverCountParam < 1 || serverCountParam > 20 {
-			return errors.New("server count must be between 1 and 20")
+		if replicaCountParam < 1 {
+			return errors.New("replica count must be 1 or more")
 		}
 
 		// validate ensure
@@ -974,22 +988,30 @@ NOTE: This is an experimental feature and my be altered or removed in the future
 			return err
 		}
 
-		if !automaticallyConfirm {
-			cmd.Printf("\nCluster name:         %s\n", clusterName)
-			cmd.Printf("Cluster version:      %s\n", clusterVersionParam)
-			cmd.Printf("Cluster port:         %d\n", clusterPortParam)
-			cmd.Printf("Management port:      %d\n", httpPortParam)
-			cmd.Printf("Server count:         %d\n", serverCountParam)
-			cmd.Printf("Initial memory:       %s\n", heapMemoryParam)
-			cmd.Printf("Persistence mode:     %s\n", persistenceModeParam)
-			cmd.Printf("Group ID:             %s\n", groupID)
-			cmd.Printf("Additional artifacts: %v\n", additionalArtifactsParam)
-			cmd.Printf("Are you sure you want to create the cluster with the above details? (y/n) ")
-			_, err = fmt.Scanln(&response)
-			if response != "y" || err != nil {
-				cmd.Println(constants.NoOperation)
-				return nil
-			}
+		heap := Config.DefaultHeap
+		if heap == "" {
+			heap = heapMemoryParam
+		}
+
+		// validate profile
+		if err = validateProfile(); err != nil {
+			return err
+		}
+
+		cmd.Printf("\nCluster name:         %s\n", clusterName)
+		cmd.Printf("Cluster version:      %s\n", clusterVersionParam)
+		cmd.Printf("Cluster port:         %d\n", clusterPortParam)
+		cmd.Printf("Management port:      %d\n", httpPortParam)
+		cmd.Printf("Replica count:        %d\n", replicaCountParam)
+		cmd.Printf("Initial memory:       %s\n", heap)
+		cmd.Printf("Persistence mode:     %s\n", persistenceModeParam)
+		cmd.Printf("Group ID:             %s\n", groupID)
+		cmd.Printf("Additional artifacts: %v\n", additionalArtifactsParam)
+		cmd.Printf("Startup Profile:      %v\n", profileValueParam)
+
+		// confirm the operation
+		if !confirmOperation(cmd, "Are you sure you want to create the cluster with the above details? (y/n) ") {
+			return nil
 		}
 
 		// update default jars based up coherence group and version
@@ -1009,7 +1031,7 @@ NOTE: This is an experimental feature and my be altered or removed in the future
 		}
 
 		if skipMavenDepsParam {
-			cmd.Println("\nSkipping downloading Maven artifcts")
+			cmd.Println("\nSkipping downloading Maven artifacts")
 		} else {
 			cmd.Printf("\nChecking %d Maven dependencies...\n", len(defaultJars))
 
@@ -1022,16 +1044,31 @@ NOTE: This is an experimental feature and my be altered or removed in the future
 		// generate classpath
 		classpath := make([]string, 0)
 		for _, entry := range defaultJars {
-			cpEntry, err = getMavenClasspath(entry.GroupID, entry.Artifact, entry.Version)
+			// get the maven repository classpath for the jar
+			cpEntry, err = getMavenClasspath(entry.GroupID, entry.Artifact, entry.Version, fileTypeJar)
+
 			if err != nil {
 				return err
 			}
 			classpath = append(classpath, cpEntry)
+
+			// get transitive deps
+			if entry.Artifact != "jline" && entry.Artifact != "coherence" {
+				// if we have specified to get transitive dependencies, then we need to use the downloaded pom
+				// file for the dependency and get the classpath. Ignore coherence and jline as this will
+				// bring in many dependencies due to me not uet figuring out how to not bring in optional deps
+				cpEntry, err = getTransitiveClasspath(entry.GroupID, entry.Artifact, entry.Version)
+
+				if err != nil {
+					return err
+				}
+				classpath = append(classpath, cpEntry)
+			}
 		}
 
 		// generate startup arguments
-		arguments := fmt.Sprintf("-Dcoherence.cluster=%s -Dcoherence.clusterport=%d -Dcoherence.ttl=0 -Dcoherence.wka=127.0.0.1 -Djava.net.preferIPv4Stack=true",
-			clusterName, clusterPortParam)
+		arguments := fmt.Sprintf("-Dcoherence.cluster=%s -Dcoherence.clusterport=%d -Dcoherence.ttl=0 -Dcoherence.wka=%s -Djava.net.preferIPv4Stack=true",
+			clusterName, clusterPortParam, wkaParam)
 
 		// add the new cluster
 		newCluster := ClusterConnection{Name: clusterName, ConnectionType: "http",
@@ -1040,15 +1077,13 @@ NOTE: This is an experimental feature and my be altered or removed in the future
 			ClusterType: "Standalone", BaseClasspath: strings.Join(classpath, getClasspathSeparator()),
 			Arguments: arguments, ManagementPort: httpPortParam, PersistenceMode: persistenceModeParam}
 
-		cmd.Printf("Starting %d cluster members for cluster %s\n", serverCountParam, clusterName)
+		cmd.Printf("Starting %d cluster members for cluster %s\n", replicaCountParam, clusterName)
 
-		processIDs, err = startCluster(cmd, newCluster, serverCountParam)
+		err = startCluster(cmd, newCluster, replicaCountParam, 0)
 
 		if err != nil {
 			return err
 		}
-
-		newCluster.ProcessIDs = convertProcessIDs(processIDs)
 
 		Config.Clusters = append(Config.Clusters, newCluster)
 
@@ -1058,7 +1093,7 @@ NOTE: This is an experimental feature and my be altered or removed in the future
 			return err
 		}
 
-		cmd.Printf("Cluster added and started with process ids: %v\n", processIDs)
+		cmd.Println("Cluster added and started")
 
 		return nil
 	},
@@ -1077,6 +1112,22 @@ var startClusterCmd = &cobra.Command{
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
 		return runClusterOperation(cmd, args[0], startClusterCommand)
+	},
+}
+
+// scaleClusterCmd represents the start cluster command
+var scaleClusterCmd = &cobra.Command{
+	Use:   "cluster",
+	Short: "scales a local Coherence cluster",
+	Long:  `The 'scale cluster' command scales a cluster that was manually created.`,
+	Args: func(cmd *cobra.Command, args []string) error {
+		if len(args) != 1 {
+			displayErrorAndExit(cmd, youMustProviderClusterMessage)
+		}
+		return nil
+	},
+	RunE: func(cmd *cobra.Command, args []string) error {
+		return runClusterOperation(cmd, args[0], scaleClusterCommand)
 	},
 }
 
@@ -1118,77 +1169,20 @@ var startCohQLCmd = &cobra.Command{
 	},
 }
 
-// getProcsCmd represents the get procs command
-var getProcsCmd = &cobra.Command{
-	Use:   "procs",
-	Short: "display processes started for a cluster",
-	Long:  `The 'get procs' command displays processes started for a cluster.`,
-	Args:  cobra.ExactArgs(0),
-	RunE: func(cmd *cobra.Command, args []string) error {
-		var (
-			err           error
-			connection    string
-			jsonResult    []byte
-			membersResult []byte
-			dataFetcher   fetcher.Fetcher
-		)
-
-		connection, dataFetcher, err = GetConnectionAndDataFetcher()
-		if err != nil {
-			return err
+// startClassCmd represents the start class command
+var startClassCmd = &cobra.Command{
+	Use:   "class",
+	Short: "start a specific Java class against the local Coherence cluster",
+	Long: `The 'start class' command starts a specific Java class against the local Coherence cluster.
+The class name must include the full package and class name.`,
+	Args: func(cmd *cobra.Command, args []string) error {
+		if len(args) != 1 {
+			displayErrorAndExit(cmd, "you must provide a class to run")
 		}
-
-		_, clusterConnection := getConnection(connection)
-
-		if err = checkOperation(clusterConnection, "get procs"); err != nil {
-			return err
-		}
-
-		for {
-			var members = config.Members{}
-
-			// retrieve the members to see if we can match up to running process
-			membersResult, _ = dataFetcher.GetMemberDetailsJSON(OutputFormat != constants.TABLE && OutputFormat != constants.WIDE)
-
-			if len(membersResult) > 0 {
-				err = json.Unmarshal(membersResult, &members)
-				if err != nil {
-					return utils.GetError(unableToDecode, err)
-				}
-			}
-
-			var processes = getProcesses(clusterConnection.ProcessIDs, members)
-
-			if strings.Contains(OutputFormat, constants.JSONPATH) || OutputFormat == constants.JSON {
-				jsonResult, err = json.Marshal(processes)
-				if err != nil {
-					return err
-				}
-				if strings.Contains(OutputFormat, constants.JSONPATH) {
-					result, err := utils.GetJSONPathResults(jsonResult, OutputFormat)
-					if err != nil {
-						return err
-					}
-					cmd.Println(result)
-				} else {
-					cmd.Println(string(jsonResult))
-				}
-			} else {
-				cmd.Println(FormatCurrentCluster(connection))
-
-				cmd.Println(FormatProcesses(processes.ProcessList))
-			}
-
-			// check to see if we should exit if we are not watching
-			if !watchEnabled {
-				break
-			}
-			// we are watching so sleep and then repeat until CTRL-C
-			time.Sleep(time.Duration(watchDelay) * time.Second)
-		}
-
 		return nil
-
+	},
+	RunE: func(cmd *cobra.Command, args []string) error {
+		return runStartClientOperation(cmd, args[0])
 	},
 }
 
@@ -1221,14 +1215,29 @@ func runStartClientOperation(cmd *cobra.Command, class string) error {
 
 func runClusterOperation(cmd *cobra.Command, connectionName, operation string) error {
 	var (
-		err        error
-		response   string
-		proc       *os.Process
-		processIDs []string
+		err            error
+		proc           *os.Process
+		processIDs     []int
+		serverDelta    int32
+		scaleType      string
+		dataFetcher    fetcher.Fetcher
+		confirmMessage string
 	)
 
 	// validate the Java and Maven executable are present and in the path
 	if err = checkCreateRequirements(); err != nil {
+		return err
+	}
+
+	// validate metrics port
+	if metricsStartPortParam > 0 {
+		if err = utils.ValidatePort(metricsStartPortParam); err != nil {
+			return err
+		}
+	}
+
+	// validate profile
+	if err = validateProfile(); err != nil {
 		return err
 	}
 
@@ -1241,32 +1250,60 @@ func runClusterOperation(cmd *cobra.Command, connectionName, operation string) e
 		return err
 	}
 
-	numProcesses := len(connection.ProcessIDs)
+	dataFetcher, err = GetDataFetcher(connectionName)
+	if err != nil {
+		return err
+	}
 
-	if operation == stopClusterCommand && numProcesses == 0 {
+	// retrieve the slice of running PIDS
+	processIDs = getRunningProcesses(dataFetcher)
+
+	numProcesses := int32(len(processIDs))
+
+	if (operation == stopClusterCommand || operation == scaleClusterCommand) && numProcesses == 0 {
 		return fmt.Errorf("the cluster %s does not appear to be started", connection.Name)
 	}
 	if operation == startClusterCommand && numProcesses > 0 {
-		return fmt.Errorf("the cluster %s appears to be already started with process ids: %v", connection.Name, connection.ProcessIDs)
+		return fmt.Errorf("the cluster %s appears to be already started with process ids: %v", connection.Name, processIDs)
 	}
 
-	if !automaticallyConfirm {
-		if operation == startClusterCommand {
-			cmd.Printf("Are you sure you want to start %d members for cluster %s? (y/n) ", serverCountParam, connection.Name)
+	if operation == scaleClusterCommand {
+		if replicaCountParam < 1 {
+			return errors.New("replicas must be a positive value")
+		} else if replicaCountParam == numProcesses {
+			return fmt.Errorf("the cluster already running %d members. Please privde a different replica value", numProcesses)
+		}
+		if replicaCountParam <= numProcesses {
+			return errors.New("scaling down a cluster is not yet supported")
+		}
+		serverDelta = replicaCountParam - numProcesses
+		if serverDelta > 0 {
+			scaleType = "up"
 		} else {
-			cmd.Printf("Are you sure you want to stop %d members for the cluster %s? (y/n) ", numProcesses, connection.Name)
+			scaleType = "down"
 		}
 
-		_, err = fmt.Scanln(&response)
-		if response != "y" || err != nil {
-			cmd.Println(constants.NoOperation)
-			return nil
+		confirmMessage = fmt.Sprintf("Are you sure you want to scale the cluster %s %s by %d member(s) to %d members? (y/n) ",
+			connection.Name, scaleType, serverDelta, replicaCountParam)
+		replicaCountParam = serverDelta
+	} else if operation == startClusterCommand {
+		if replicaCountParam < 1 {
+			return errors.New("replica count must be 1 or more")
 		}
+
+		confirmMessage = fmt.Sprintf("Are you sure you want to start %d members for cluster %s? (y/n) ", replicaCountParam, connection.Name)
+	} else {
+		confirmMessage = fmt.Sprintf("Are you sure you want to stop %d members for the cluster %s? (y/n) ", numProcesses, connection.Name)
+	}
+
+	// confirm the operation
+	if !confirmOperation(cmd, confirmMessage) {
+		return nil
 	}
 
 	if operation == stopClusterCommand {
 		count := 0
-		for _, v := range connection.ProcessIDs {
+		for _, v := range processIDs {
 			proc, err = os.FindProcess(v)
 			if err != nil {
 				// silently ignore as it may have gone already
@@ -1282,24 +1319,19 @@ func runClusterOperation(cmd *cobra.Command, connectionName, operation string) e
 			}
 		}
 
-		// reset the process Ids
-		if err = updateConnectionPIDS(connection.Name, make([]int, 0)); err != nil {
-			return err
-		}
-
 		cmd.Printf("%d processes were stopped for cluster %s\n", count, connection.Name)
 	} else {
-		processIDs, err = startCluster(cmd, connection, serverCountParam)
+		var message = "started"
+		if operation == scaleClusterCommand {
+			message = "scaled"
+		}
+
+		err = startCluster(cmd, connection, replicaCountParam, numProcesses)
 		if err != nil {
 			return err
 		}
 
-		ProcessIDs := convertProcessIDs(processIDs)
-		cmd.Printf("Cluster %s and started with process ids: %v\n", connection.Name, ProcessIDs)
-
-		if err = updateConnectionPIDS(connection.Name, ProcessIDs); err != nil {
-			return err
-		}
+		cmd.Printf("Cluster %s %s\n", connection.Name, message)
 	}
 
 	return nil
@@ -1320,24 +1352,29 @@ func init() {
 	removeClusterCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
 
 	createClusterCmd.Flags().StringVarP(&clusterVersionParam, "version", "v", defaultCoherenceVersion, "cluster version")
-	createClusterCmd.Flags().StringVarP(&persistenceModeParam, "persistence-mode", "P", "on-demand",
+	createClusterCmd.Flags().StringVarP(&persistenceModeParam, "persistence-mode", "s", "on-demand",
 		fmt.Sprintf("persistence mode %v", validPersistenceModes))
 	createClusterCmd.Flags().Int32VarP(&httpPortParam, "http-port", "H", 30000, "http management port")
 	createClusterCmd.Flags().Int32VarP(&clusterPortParam, "cluster-port", "p", 7574, "cluster port")
+	createClusterCmd.Flags().StringVarP(&wkaParam, "wka", "W", "127.0.0.1", "well known address")
 	createClusterCmd.Flags().Int32VarP(&logLevelParam, logLevelArg, "l", 5, logLevelMessage)
 	createClusterCmd.Flags().Int32VarP(&startupDelayParam, startupDelayArg, "D", 1, startupDelayMessage)
-	createClusterCmd.Flags().Int32VarP(&serverCountParam, "server-count", "s", 3, serverCountMessage)
+	createClusterCmd.Flags().Int32VarP(&replicaCountParam, "replicas", "r", 3, serverCountMessage)
 	createClusterCmd.Flags().StringVarP(&heapMemoryParam, heapMemoryArg, "M", defaultHeap, heapMemoryMessage)
 	createClusterCmd.Flags().StringVarP(&additionalArtifactsParam, "additional", "a", "", "additional comma separated Coherence artifacts or others in G:A:V format")
 	createClusterCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
 	createClusterCmd.Flags().BoolVarP(&useCommercialParam, "commercial", "C", false, "use commercial Coherence groupID (default is CE)")
 	createClusterCmd.Flags().BoolVarP(&skipMavenDepsParam, "skip-deps", "S", false, "skip pulling Maven artifacts")
+	createClusterCmd.Flags().Int32VarP(&metricsStartPortParam, metricsPortArg, "t", 0, metricsPortMessage)
+	createClusterCmd.Flags().StringVarP(&profileValueParam, profileArg, "P", "", profileMessage)
 
 	stopClusterCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
 
 	startClusterCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
-	startClusterCmd.Flags().Int32VarP(&serverCountParam, "server-count", "s", 3, serverCountMessage)
+	startClusterCmd.Flags().Int32VarP(&replicaCountParam, "replicas", "r", 3, serverCountMessage)
+	startClusterCmd.Flags().Int32VarP(&metricsStartPortParam, metricsPortArg, "t", 0, metricsPortMessage)
 	startClusterCmd.Flags().StringVarP(&heapMemoryParam, heapMemoryArg, "M", defaultHeap, heapMemoryMessage)
+	startClusterCmd.Flags().StringVarP(&profileValueParam, profileArg, "P", "", profileMessage)
 	startClusterCmd.Flags().Int32VarP(&logLevelParam, logLevelArg, "l", 5, logLevelMessage)
 	startClusterCmd.Flags().Int32VarP(&startupDelayParam, startupDelayArg, "D", 1, startupDelayMessage)
 
@@ -1345,8 +1382,22 @@ func init() {
 	startConsoleCmd.Flags().Int32VarP(&logLevelParam, logLevelArg, "l", 5, logLevelMessage)
 
 	startCohQLCmd.Flags().StringVarP(&heapMemoryParam, heapMemoryArg, "M", defaultHeap, heapMemoryMessage)
+	startCohQLCmd.Flags().StringVarP(&fileNameParam, "file", "f", "", "file name to read CohQL commands from")
+	startCohQLCmd.Flags().StringVarP(&statementParam, "statement", "S", "", "statement to execute enclosed in double quotes")
 	startCohQLCmd.Flags().Int32VarP(&logLevelParam, logLevelArg, "l", 5, logLevelMessage)
 	startCohQLCmd.Flags().BoolVarP(&extendClientParam, "extend", "X", false, "start CohQL as Extend client. Only works for default cache config")
+
+	startClassCmd.Flags().StringVarP(&heapMemoryParam, heapMemoryArg, "M", defaultHeap, heapMemoryMessage)
+	startClassCmd.Flags().Int32VarP(&logLevelParam, logLevelArg, "l", 5, logLevelMessage)
+	startClassCmd.Flags().BoolVarP(&extendClientParam, "extend", "X", false, "start CohQL as Extend client. Only works for default cache config")
+
+	scaleClusterCmd.Flags().Int32VarP(&replicaCountParam, "replicas", "r", 3, serverCountMessage)
+	scaleClusterCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
+	scaleClusterCmd.Flags().StringVarP(&heapMemoryParam, heapMemoryArg, "M", defaultHeap, heapMemoryMessage)
+	scaleClusterCmd.Flags().Int32VarP(&logLevelParam, logLevelArg, "l", 5, logLevelMessage)
+	scaleClusterCmd.Flags().Int32VarP(&startupDelayParam, startupDelayArg, "D", 1, startupDelayMessage)
+	scaleClusterCmd.Flags().Int32VarP(&metricsStartPortParam, metricsPortArg, "t", 0, metricsPortMessage)
+	scaleClusterCmd.Flags().StringVarP(&profileValueParam, profileArg, "P", "", profileMessage)
 }
 
 // sanitizeConnectionName sanitizes a cluster connection
@@ -1449,6 +1500,16 @@ func ensureUniqueCluster(connection string) error {
 	if found {
 		return fmt.Errorf("A connection for cluster named %s already exists with url=%s and type=%s",
 			connection, clusterConn.ConnectionURL, clusterConn.ConnectionType)
+	}
+
+	return nil
+}
+
+// validateProfile validates the given profile param
+func validateProfile() error {
+	startupProfile := getProfileValue(profileValueParam)
+	if profileValueParam != "" && startupProfile == "" {
+		return fmt.Errorf("a profile with the name %s does not exist", profileValueParam)
 	}
 
 	return nil

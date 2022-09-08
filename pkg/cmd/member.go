@@ -326,7 +326,6 @@ or loggingFormat.`,
 			nodeIds        []string
 			nodeIDArray    []string
 			confirmMessage string
-			response       string
 			errorSink      = createErrorSink()
 			wg             sync.WaitGroup
 			loggingNodeIds = args[0]
@@ -388,14 +387,10 @@ or loggingFormat.`,
 			confirmMessage = fmt.Sprintf("%d node(s)", len(nodeIds))
 		}
 
-		if !automaticallyConfirm {
-			cmd.Printf("Are you sure you want to set the value of attribute %s to %s for %s? (y/n) ",
-				attributeName, attributeValue, confirmMessage)
-			_, err = fmt.Scanln(&response)
-			if response != "y" || err != nil {
-				cmd.Println(constants.NoOperation)
-				return nil
-			}
+		// confirm the operation
+		if !confirmOperation(cmd, fmt.Sprintf("Are you sure you want to set the value of attribute %s to %s for %s? (y/n) ",
+			attributeName, attributeValue, confirmMessage)) {
+			return nil
 		}
 
 		nodeCount := len(nodeIds)
@@ -538,7 +533,6 @@ DefaultCacheServer, then they will be restarted.`,
 			dataFetcher fetcher.Fetcher
 			connection  string
 			err         error
-			response    string
 			nodeIDArray []string
 			nodeID      = args[0]
 		)
@@ -564,14 +558,9 @@ DefaultCacheServer, then they will be restarted.`,
 			return fmt.Errorf(noNodeID, nodeID)
 		}
 
-		// confirmation
-		if !automaticallyConfirm {
-			cmd.Printf("Are you sure you want to shutdown member %s? (y/n) ", nodeID)
-			_, err = fmt.Scanln(&response)
-			if response != "y" || err != nil {
-				cmd.Println(constants.NoOperation)
-				return nil
-			}
+		// confirm the operation
+		if !confirmOperation(cmd, fmt.Sprintf("Are you sure you want to shutdown member %s? (y/n) ", nodeID)) {
+			return nil
 		}
 
 		_, err = dataFetcher.ShutdownMember(nodeID)
@@ -594,7 +583,6 @@ func issueClusterCommand(cmd *cobra.Command, command string) error {
 		members       = config.Members{}
 		roleCount     = 0
 		message       string
-		response      string
 		tracing       = ""
 		role          = dumpRoleName
 	)
@@ -642,14 +630,9 @@ func issueClusterCommand(cmd *cobra.Command, command string) error {
 		message = fmt.Sprintf("all %d members", len(members.Members))
 	}
 
-	// confirmation
-	if !automaticallyConfirm {
-		cmd.Printf("Are you sure you want to %s%s for %s? (y/n) ", command, tracing, message)
-		_, err = fmt.Scanln(&response)
-		if response != "y" || err != nil {
-			cmd.Println(constants.NoOperation)
-			return nil
-		}
+	// confirm the operation
+	if !confirmOperation(cmd, fmt.Sprintf("Are you sure you want to %s%s for %s? (y/n) ", command, tracing, message)) {
+		return nil
 	}
 
 	if command == dumpClusterHeap {
@@ -687,7 +670,6 @@ a role to retrieve thread dumps for.`,
 			connection    string
 			err           error
 			nodeIds       []string
-			response      string
 			nodesToDump   string
 			wg            sync.WaitGroup
 			errorSink     = createErrorSink()
@@ -770,14 +752,11 @@ a role to retrieve thread dumps for.`,
 		}
 
 		cmd.Printf("This operation will take at least %d seconds.\n", (numThreadDumps-1)*delayBetweenDumps)
-		if !automaticallyConfirm {
-			cmd.Printf("Are you sure you want to retrieve %d thread dumps, each %d seconds apart for %d node(s)? (y/n) ",
-				numThreadDumps, delayBetweenDumps, len(nodeIds))
-			_, err = fmt.Scanln(&response)
-			if response != "y" || err != nil {
-				cmd.Println(constants.NoOperation)
-				return nil
-			}
+
+		// confirm the operation
+		if !confirmOperation(cmd, fmt.Sprintf("Are you sure you want to retrieve %d thread dumps, each %d seconds apart for %d node(s)? (y/n) ",
+			numThreadDumps, delayBetweenDumps, len(nodeIds))) {
+			return nil
 		}
 
 		// run the thread dump captures in parallel for each node

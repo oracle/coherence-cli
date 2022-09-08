@@ -48,10 +48,15 @@ create_doc $DOCS_DIR/discover_clusters "${COHCTL} discover clusters --help"
 
 # Create Cluster
 create_doc $DOCS_DIR/create_cluster "${COHCTL} create cluster --help"
+create_doc $DOCS_DIR/scale_cluster "${COHCTL} scale cluster --help"
 create_doc $DOCS_DIR/start_cluster "${COHCTL} start cluster --help"
 create_doc $DOCS_DIR/stop_cluster "${COHCTL} stop cluster --help"
 create_doc $DOCS_DIR/start_console "${COHCTL} start console --help"
 create_doc $DOCS_DIR/start_cohql "${COHCTL} start cohql --help"
+create_doc $DOCS_DIR/start_class "${COHCTL} start class --help"
+create_doc $DOCS_DIR/get_profiles "${COHCTL} get profiles --help"
+create_doc $DOCS_DIR/set_profile "${COHCTL} set profile --help"
+create_doc $DOCS_DIR/remove_profile "${COHCTL} remove profile --help"
 
 # Context
 create_doc $DOCS_DIR/set_context "${COHCTL} set context --help"
@@ -166,6 +171,11 @@ create_doc $DOCS_DIR/set_bytes_format "${COHCTL} set bytes-format --help"
 create_doc $DOCS_DIR/get_bytes_format "${COHCTL} get bytes-format --help"
 create_doc $DOCS_DIR/clear_bytes_format "${COHCTL} clear bytes-format --help"
 
+# Default Heap
+create_doc $DOCS_DIR/set_default_heap "${COHCTL} set default-heap --help"
+create_doc $DOCS_DIR/get_default_heap "${COHCTL} get default-heap --help"
+create_doc $DOCS_DIR/clear_default_heap "${COHCTL} clear default-heap --help"
+
 # Ignore Certs
 create_doc $DOCS_DIR/set_ignore_certs "${COHCTL} set ignore-certs --help"
 create_doc $DOCS_DIR/get_ignore_certs "${COHCTL} get ignore-certs --help"
@@ -178,6 +188,16 @@ create_doc $DOCS_DIR/get_logs "${COHCTL} get logs --help"
 
 # Thread Dump
 create_doc $DOCS_DIR/retrieve_thread_dumps "${COHCTL} retrieve thread-dumps --help"
+
+# Reset Stats
+create_doc $DOCS_DIR/reset_cache_stats "${COHCTL} reset cache-stats --help"
+create_doc $DOCS_DIR/reset_executor_stats "${COHCTL} reset executor-stats --help"
+create_doc $DOCS_DIR/reset_federation_stats "${COHCTL} reset federation-stats --help"
+create_doc $DOCS_DIR/reset_flashjournal_stats "${COHCTL} reset flashjournal-stats --help"
+create_doc $DOCS_DIR/reset_ramjournal_stats "${COHCTL} reset ramjournal-stats --help"
+create_doc $DOCS_DIR/reset_member_stats "${COHCTL} reset member-stats --help"
+create_doc $DOCS_DIR/reset_reporter_stats "${COHCTL} reset reporter-stats --help"
+create_doc $DOCS_DIR/reset_service_stats "${COHCTL} reset service-stats --help"
 
 # Persistence
 create_doc $DOCS_DIR/get_persistence "${COHCTL} get persistence --help"

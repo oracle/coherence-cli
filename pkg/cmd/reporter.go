@@ -208,7 +208,6 @@ configFile, currentBatch, intervalSeconds or outputPath.`,
 			nodeIds         []string
 			nodeIDArray     []string
 			confirmMessage  string
-			response        string
 			errorSink       = createErrorSink()
 			wg              sync.WaitGroup
 			reporterNodeIds = args[0]
@@ -267,14 +266,10 @@ configFile, currentBatch, intervalSeconds or outputPath.`,
 			confirmMessage = fmt.Sprintf("%d node(s)", len(nodeIds))
 		}
 
-		if !automaticallyConfirm {
-			cmd.Printf("Are you sure you want to set the value of attribute %s to %s for %s? (y/n) ",
-				reporterAttributeName, reporterAttributeValue, confirmMessage)
-			_, err = fmt.Scanln(&response)
-			if response != "y" || err != nil {
-				cmd.Println(constants.NoOperation)
-				return nil
-			}
+		// confirm the operation
+		if !confirmOperation(cmd, fmt.Sprintf("Are you sure you want to set the value of attribute %s to %s for %s? (y/n) ",
+			reporterAttributeName, reporterAttributeValue, confirmMessage)) {
+			return nil
 		}
 
 		nodeCount := len(nodeIds)

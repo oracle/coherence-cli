@@ -7,11 +7,13 @@
 package cmd
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/oracle/coherence-cli/pkg/config"
+	"github.com/oracle/coherence-cli/pkg/fetcher"
 	"github.com/oracle/coherence-cli/pkg/utils"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
+	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -24,6 +26,8 @@ import (
 const consoleClass = "com.tangosol.net.CacheFactory"
 const cohQLClass = "com.tangosol.coherence.dslquery.QueryPlus"
 const ceGroupID = "com.oracle.cohrence.ce"
+const fileTypeJar = "jar"
+const fileTypePom = "pom"
 
 // default Jars to use
 var (
@@ -36,7 +40,7 @@ var (
 	// list of additional coherence artifacts
 	validCoherenceArtifacts = []string{"coherence-cdi-server", "coherence-cdi", "coherence-concurrent", "coherence-grpc-proxy",
 		"coherence-grpc", "coherence-helidon-client", "coherence-helidon-grpc-proxy", "coherence-http-netty", "coherence-java-client",
-		"coherence-jcache", "coherence-jpa", "coherence-management", "coherence-micrometer", "coherence-mp-config",
+		"coherence-jcache", "coherence-jpa", "coherence-management", "coherence-micrometer", "coherence-mp-config", "coherence-metrics",
 		"coherence-mp-metrics", "coherence-rest"}
 )
 
@@ -118,26 +122,46 @@ func updateDefaultJars() {
 	}
 }
 
-// startCluster starts a cluster
-func startCluster(cmd *cobra.Command, connection ClusterConnection, serverCount int32) ([]string, error) {
+// startCluster starts a cluster. If existingCount > 1 then this means we are
+// scaling a cluster, otherwise we are starting one
+func startCluster(cmd *cobra.Command, connection ClusterConnection, serverCount, existingCount int32) error {
 	var (
-		err        error
-		processIDs = make([]string, 0)
-		mgmtPort   = connection.ManagementPort
-		counter    int32
+		err              error
+		mgmtPort         = connection.ManagementPort
+		counter          int32
+		metricsStartPort = metricsStartPortParam
+		startupProfile   = getProfileValue(profileValueParam)
+		profileArgs      = make([]string, 0)
 	)
 
-	if err = checkOperation(connection, startClusterCommand); err != nil {
-		return processIDs, err
+	// check if any profiles have been specified
+	if profileValueParam != "" {
+		// this profile param has already been validated
+		profileArgs = strings.Split(startupProfile, " ")
 	}
 
-	for counter = 0; counter < serverCount; counter++ {
+	// if we are scaling then set the http port to -1 so no more management servers are started
+	if existingCount > 0 {
+		mgmtPort = -1
+	}
+
+	if err = checkOperation(connection, startClusterCommand); err != nil {
+		return err
+	}
+
+	for counter = existingCount; counter < serverCount+existingCount; counter++ {
 		var (
 			member        = fmt.Sprintf("storage-%d", counter)
-			arguments     = getCommonArguments(connection)
+			arguments     = append(profileArgs, getCommonArguments(connection)...)
 			memberLogFile string
-			PID           string
 		)
+
+		// check if metrics start port specified
+		if metricsStartPort > 0 {
+			metricsArgs := []string{"-Dcoherence.metrics.http.enabled=true", fmt.Sprintf("-Dcoherence.metrics.http.port=%d", metricsStartPort)}
+			metricsStartPort++
+			arguments = append(arguments, metricsArgs...)
+		}
 
 		arguments = append(arguments, getCacheServerArgs(member, mgmtPort)...)
 
@@ -146,20 +170,19 @@ func startCluster(cmd *cobra.Command, connection ClusterConnection, serverCount 
 
 		memberLogFile, err = getLogFile(connection.Name, member)
 		if err != nil {
-			return processIDs, err
+			return err
 		}
 
 		cmd.Printf("Starting cluster member %s...\n", member)
-		PID, err = runCommandAsync(getJavaExec(), memberLogFile, arguments)
+		_, err = runCommandAsync(getJavaExec(), memberLogFile, arguments)
 		if err != nil {
-			return processIDs, utils.GetError(fmt.Sprintf("unable to start member %s", member), err)
+			return utils.GetError(fmt.Sprintf("unable to start member %s", member), err)
 		}
-		processIDs = append(processIDs, PID)
 
 		time.Sleep(time.Duration(startupDelayParam) * time.Second)
 	}
 
-	return processIDs, nil
+	return nil
 }
 
 // getCommonArguments returns arguments that are common to clients and servers
@@ -187,20 +210,31 @@ func startClient(cmd *cobra.Command, connection ClusterConnection, class string)
 	if err != nil {
 		return utils.GetError(fmt.Sprintf("unable to start %s: %v", class, result), err)
 	}
-
-	// handle CTRL-C
-	//handleCTRLC()
+	//
+	//// handle CTRL-C
+	//handleCTRLC(process.Process)
 
 	return process.Wait()
 }
 
 func getCacheServerArgs(member string, httpPort int32) []string {
-	baseArgs := make([]string, 0)
+	var (
+		baseArgs = make([]string, 0)
+		heap     string
+	)
 	if httpPort != -1 {
 		baseArgs = append(baseArgs, "-Dcoherence.management.http=all", fmt.Sprintf("-Dcoherence.management.http.port=%d", httpPort),
 			"-Dcoherence.management=all")
 	}
-	baseArgs = append(baseArgs, "-Xms"+heapMemoryParam, "-Xmx"+heapMemoryParam)
+
+	// if the default-heap is set in config then use this
+	if Config.DefaultHeap != "" {
+		heap = Config.DefaultHeap
+	} else {
+		heap = heapMemoryParam
+	}
+
+	baseArgs = append(baseArgs, "-Xms"+heap, "-Xmx"+heap)
 
 	return append(baseArgs, getMemberProperty(member), "-Dcoherence.log.level=6", "com.tangosol.net.Coherence")
 }
@@ -216,8 +250,19 @@ func getClientArgs(member, class string) []string {
 		baseArgs = append(baseArgs, "-Dcoherence.client=remote")
 	}
 
-	return append(baseArgs, getMemberProperty("client"), "-Dcoherence.log.level=5",
-		"-Dcoherence.distributed.localstorage=false", class)
+	baseArgs = append(baseArgs, getMemberProperty("client"), "-Dcoherence.log.level=5",
+		"-Dcoherence.distributed.localstorage=false", "-Dcoherence.shutdownhook=force", class)
+
+	// check -f option to CohQL
+	if fileNameParam != "" {
+		baseArgs = append(baseArgs, "-f", fileNameParam, "-c")
+	}
+
+	if statementParam != "" {
+		baseArgs = append(baseArgs, "-l", statementParam, "-c")
+	}
+
+	return baseArgs
 }
 
 func getMemberProperty(member string) string {
@@ -232,11 +277,29 @@ func getLogLevelProperty(logLevel int32) string {
 	return fmt.Sprintf("-Dcoherence.log.level=%d", logLevel)
 }
 
-// convertProcessIDs converts an array of string processes to int array
-func convertProcessIDs(processIDs []string) []int {
-	PIDS := make([]int, 0)
-	for _, v := range processIDs {
-		pid, _ := strconv.Atoi(v)
+// getRunningProcesses returns the running process ID's for a cluster
+// connection from a dataFetcher. Returns an empty slice if none are running
+func getRunningProcesses(dataFetcher fetcher.Fetcher) []int {
+	var (
+		PIDS          = make([]int, 0)
+		err           error
+		membersResult []byte
+		members       = config.Members{}
+	)
+
+	membersResult, err = dataFetcher.GetMemberDetailsJSON(false)
+	if err != nil {
+		return PIDS
+	}
+
+	// unmarshall and assume any errors means no PIDS are running
+	err = json.Unmarshal(membersResult, &members)
+	if err != nil {
+		return PIDS
+	}
+
+	for _, v := range members.Members {
+		pid, _ := strconv.Atoi(v.ProcessName)
 		PIDS = append(PIDS, pid)
 	}
 
@@ -250,8 +313,55 @@ func checkOperation(connection ClusterConnection, operation string) error {
 	return fmt.Errorf("cluster %s was not manually created, unable to perform operation %s", connection.Name, operation)
 }
 
+// getTransitiveClasspath returns the transitive classpath by using mvn dependency:build-classpath,
+// outputting to temp file and reading in
+func getTransitiveClasspath(groupID, artifact, version string) (string, error) {
+	var (
+		err       error
+		pomFile   string
+		file      *os.File
+		classpath string
+		output    string
+		data      []byte
+		mvnExec   = getMvnExec()
+		arguments = []string{"dependency:build-classpath", "-DincludeScope=runtime", "-f"}
+	)
+
+	pomFile, err = getMavenClasspath(groupID, artifact, version, fileTypePom)
+	if err != nil {
+		return classpath, err
+	}
+
+	file, err = os.CreateTemp("", "classpath")
+	if err != nil {
+		return classpath, utils.GetError("unable to create temporary file", err)
+	}
+
+	defer os.Remove(file.Name())
+
+	// execute the build-classpath command
+	output, err = runCommand(mvnExec, append(arguments, pomFile, fmt.Sprintf("-Dmdep.outputFile=%s", file.Name())))
+
+	if err != nil {
+		return output, utils.GetError("unable to run dependency:build-classpath", err)
+	}
+
+	// no we have a valid file, read it in
+	data, err = ioutil.ReadFile(file.Name())
+	if err != nil {
+		return output, utils.GetError("unable to read from temp file", err)
+	}
+
+	return string(data), nil
+}
+
 func getDependencyArgs(groupID, artifact, version string) []string {
-	return []string{"-DgroupId=" + groupID, "-DartifactId=" + artifact, "-Dversion=" + version, "dependency:get"}
+	gavArgs := getGAVArgs(groupID, artifact, version)
+	return append(gavArgs, "dependency:get", "-Dtransitive=true")
+}
+
+func getGAVArgs(groupID, artifact, version string) []string {
+	return []string{"-DgroupId=" + groupID, "-DartifactId=" + artifact, "-Dversion=" + version}
 }
 
 func getCoherenceGroupID() string {
@@ -261,7 +371,8 @@ func getCoherenceGroupID() string {
 	return "com.oracle.coherence.ce"
 }
 
-func getMavenClasspath(groupID, artifact, version string) (string, error) {
+// getMavenClasspath returns the maven classpath for the given GAV and fileType
+func getMavenClasspath(groupID, artifact, version, fileType string) (string, error) {
 	home, err := os.UserHomeDir()
 	if err != nil {
 		return "", utils.GetError("unable to get user home directory", err)
@@ -273,7 +384,7 @@ func getMavenClasspath(groupID, artifact, version string) (string, error) {
 	for _, v := range groupIDSplit {
 		baseDir = filepath.Join(baseDir, v)
 	}
-	return filepath.Join(baseDir, artifact, version, fmt.Sprintf("%s-%s.jar", artifact, version)), nil
+	return filepath.Join(baseDir, artifact, version, fmt.Sprintf("%s-%s.%s", artifact, version, fileType)), nil
 }
 
 func runCommand(command string, arguments []string) (string, error) {
@@ -337,22 +448,6 @@ func getClasspathSeparator() string {
 	return ":"
 }
 
-// updateConnectionPIDS updates PIDS for a given connection
-func updateConnectionPIDS(connectionName string, PIDs []int) error {
-	clusters := Config.Clusters
-
-	for i, cluster := range clusters {
-		if cluster.Name == connectionName {
-			Config.Clusters[i].ProcessIDs = PIDs
-		}
-	}
-
-	viper.Set("clusters", Config.Clusters)
-	err := WriteConfig()
-
-	return err
-}
-
 // getConnection returns a ClusterConnection
 func getConnection(connectionName string) (bool, ClusterConnection) {
 	for _, cluster := range Config.Clusters {
@@ -361,46 +456,4 @@ func getConnection(connectionName string) (bool, ClusterConnection) {
 		}
 	}
 	return false, ClusterConnection{}
-}
-
-func getProcesses(PIDS []int, members config.Members) config.Processes {
-	var (
-		proc        *os.Process
-		processList = make([]config.Process, 0)
-		err         error
-		running     bool
-	)
-
-	for _, v := range PIDS {
-		running = false
-		member := config.Member{}
-
-		proc, err = os.FindProcess(v)
-		if err == nil {
-			// signal the process as FindProcess always returns true on POSIX
-			if err = signalProcess(proc); err == nil {
-				running = true
-
-				// as the member is running, try to find the member with the same process name
-				var procID = fmt.Sprintf("%v", v)
-
-				for _, m := range members.Members {
-					if procID == m.ProcessName {
-						member = m
-						break
-					}
-				}
-			}
-		}
-
-		processList = append(processList, config.Process{
-			ProcessID:  v,
-			Running:    running,
-			NodeID:     member.NodeID,
-			RoleName:   member.RoleName,
-			MemberName: member.MemberName,
-		})
-	}
-
-	return config.Processes{ProcessList: processList}
 }

@@ -235,7 +235,6 @@ func IssueReporterCommand(nodeID, command string, cmd *cobra.Command) error {
 		action          string
 		reportersResult []byte
 		reporters       = config.Reporters{}
-		response        string
 	)
 
 	if !utils.IsValidInt(nodeID) {
@@ -276,14 +275,10 @@ func IssueReporterCommand(nodeID, command string, cmd *cobra.Command) error {
 
 	cmd.Println(FormatCurrentCluster(connection))
 
-	if !automaticallyConfirm {
-		cmd.Printf("Are you sure you want to %s the reporter on node %s? (y/n) ",
-			command, nodeID)
-		_, err = fmt.Scanln(&response)
-		if response != "y" || err != nil {
-			cmd.Println(constants.NoOperation)
-			return nil
-		}
+	// confirm the operation
+	if !confirmOperation(cmd, fmt.Sprintf("Are you sure you want to %s the reporter on node %s? (y/n) ",
+		command, nodeID)) {
+		return nil
 	}
 
 	if command == "start" {
@@ -315,7 +310,6 @@ func IssueFederationCommand(cmd *cobra.Command, serviceName, command, participan
 		federatedServices          []string
 		finalSummariesDestinations []config.FederationSummary
 		participants               = make([]string, 0)
-		response                   string
 		description                string
 	)
 
@@ -367,14 +361,10 @@ func IssueFederationCommand(cmd *cobra.Command, serviceName, command, participan
 		}
 	}
 
-	if !automaticallyConfirm {
-		cmd.Printf("Are you sure you want to %s federation for service %s for participants %v ? (y/n) ",
-			description, serviceName, participants)
-		_, err = fmt.Scanln(&response)
-		if response != "y" || err != nil {
-			cmd.Println(constants.NoOperation)
-			return nil
-		}
+	// confirm the operation
+	if !confirmOperation(cmd, fmt.Sprintf("Are you sure you want to %s federation for service %s for participants %v ? (y/n) ",
+		description, serviceName, participants)) {
+		return nil
 	}
 
 	_, err = dataFetcher.InvokeFederationOperation(serviceName, command, participant, startMode)

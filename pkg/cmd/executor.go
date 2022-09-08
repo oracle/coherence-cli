@@ -26,6 +26,9 @@ var (
 	executorValidAttributes = []string{"traceLogging"}
 )
 
+const provideExecutorName = "you must provide an executor name"
+const cannotFindExecutors = "unable to find any executors in this cluster"
+
 // getExecutorsCmd represents the get executors command
 var getExecutorsCmd = &cobra.Command{
 	Use:   "executors",
@@ -101,7 +104,7 @@ var describeExecutorCmd = &cobra.Command{
 	Long:  `The 'describe executor' command shows information related to a specific executor.`,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
-			displayErrorAndExit(cmd, "you must provide an executor name")
+			displayErrorAndExit(cmd, provideExecutorName)
 		}
 		return nil
 	},
@@ -129,7 +132,7 @@ var describeExecutorCmd = &cobra.Command{
 		}
 
 		if len(executors.Executors) == 0 {
-			return errors.New("unable to find any executors in this cluster")
+			return errors.New(cannotFindExecutors)
 		}
 
 		// filter out any executors without the name
@@ -198,7 +201,6 @@ all nodes. The following attribute names are allowed: traceLogging.`,
 			executors      = config.Executors{}
 			finalExecutors = config.Executors{}
 			executor       = args[0]
-			response       string
 			actualValue    interface{}
 		)
 
@@ -240,14 +242,10 @@ all nodes. The following attribute names are allowed: traceLogging.`,
 			return fmt.Errorf("unable to find executor with name %s", executor)
 		}
 
-		if !automaticallyConfirm {
-			cmd.Printf("Are you sure you want to set the value of attribute %s to %s for %s? (y/n) ",
-				executorAttributeName, executorAttributeValue, executor)
-			_, err = fmt.Scanln(&response)
-			if response != "y" || err != nil {
-				cmd.Println(constants.NoOperation)
-				return nil
-			}
+		// confirm the operation
+		if !confirmOperation(cmd, fmt.Sprintf("Are you sure you want to set the value of attribute %s to %s for %s? (y/n) ",
+			executorAttributeName, executorAttributeValue, executor)) {
+			return nil
 		}
 
 		_, err = dataFetcher.SetExecutorAttribute(executor, executorAttributeName, actualValue)

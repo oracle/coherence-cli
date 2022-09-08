@@ -11,7 +11,6 @@ import (
 	"errors"
 	"fmt"
 	"github.com/oracle/coherence-cli/pkg/config"
-	"github.com/oracle/coherence-cli/pkg/constants"
 	"github.com/oracle/coherence-cli/pkg/fetcher"
 	"github.com/oracle/coherence-cli/pkg/utils"
 	"github.com/spf13/cobra"
@@ -102,7 +101,6 @@ of 0 to make the recording continuous.`,
 			connection  string
 			err         error
 			nodeIds     []string
-			response    string
 			jfrName     = args[0]
 			jfrType     string
 			jfrMessage  string
@@ -153,14 +151,10 @@ of 0 to make the recording continuous.`,
 			jfrMessage = fmt.Sprintf("all %d members", len(nodeIds))
 		}
 
-		if !automaticallyConfirm {
-			cmd.Printf("Are you sure you want to start a JFR named %s for %s of duration: %d seconds? (y/n) ",
-				jfrName, jfrMessage, duration)
-			_, err = fmt.Scanln(&response)
-			if response != "y" || err != nil {
-				cmd.Println(constants.NoOperation)
-				return nil
-			}
+		// confirm the operation
+		if !confirmOperation(cmd, fmt.Sprintf("Are you sure you want to start a JFR named %s for %s of duration: %d seconds? (y/n) ",
+			jfrName, jfrMessage, duration)) {
+			return nil
 		}
 
 		data, err = dataFetcher.StartJFR(jfrName, outputDirectory, jfrType, target, duration)
@@ -243,7 +237,6 @@ func executeJFROperation(cmd *cobra.Command, jfrName, operation string, dataFetc
 	var (
 		err         error
 		NodeIds     []string
-		response    string
 		jfrType     string
 		jfrMessage  string
 		target      = ""
@@ -279,10 +272,8 @@ func executeJFROperation(cmd *cobra.Command, jfrName, operation string, dataFetc
 	}
 
 	if operation != fetcher.CheckJFR && !automaticallyConfirm {
-		cmd.Printf("Are you sure you want to run %s on a JFR named %s for %s ? (y/n) ", operation, jfrName, jfrMessage)
-		_, err = fmt.Scanln(&response)
-		if response != "y" || err != nil {
-			cmd.Println(constants.NoOperation)
+		// confirm the operation
+		if !confirmOperation(cmd, fmt.Sprintf("Are you sure you want to run %s on a JFR named %s for %s ? (y/n) ", operation, jfrName, jfrMessage)) {
 			return nil
 		}
 	}

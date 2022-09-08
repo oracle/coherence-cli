@@ -19,14 +19,27 @@ Commercial 14.1.1.2206.x versions and above.
 Once you create a local cluster, you can manage and monitor them in the same way as you can with discovered
 or manually added clusters.
 
+When you create a cluster, the first node started will always have management over REST enabled.
+
+You may also specify a profile when you start a cluster using the `-P` option. The value of the profile
+, which is a string containing "-Dkey=value" pairs, will be included in the cache servers started.
+
 NOTE: These commands are experimental only and may be changed or removed in the future. It is *not supported* to use
 these commands to create production clusters.
 
 * <<create-cluster, `cohctl create cluster`>> - creates a local cluster and adds to the cohctl.yaml file
+* <<scale-cluster, `cohctl scale cluster`>> - scales a cluster that was manually created
 * <<stop-cluster, `cohctl stop cluster`>> - stops a cluster that was manually created or started
 * <<start-cluster, `cohctl start cluster`>> - starts a cluster that was manually created
 * <<start-console, `cohctl start console`>> - starts a console client against a cluster that was manually created
 * <<start-cohql, `cohctl start cohql`>> - starts a CohQL client against a cluster that was manually created
+* <<start-class, `cohctl start class`>> - starts a specific Java class against the local Coherence cluster
+* <<set-default-heap, `cohctl set default-heap`>> - sets default heap for creating and starting clusters
+* <<get-default-heap, `cohctl get default-heap`>> - gets default heap for creating and starting clusters
+* <<clear-default-heap, `cohctl clear default-heap`>> - clears default heap for creating and starting clusters
+* <<set-profile, `cohctl set profile`>> - set a profile value for creating and starting clusters
+* <<remove-profile, `cohctl remove profile`>> - removes a profile value from the list of profile
+* <<get-profils, `cohctl get profiles`>> - displays the profiles that have been created
 
 [#create-cluster]
 ==== Create
@@ -41,14 +54,14 @@ Add and start a cluster using all default values.
 ----
 $ cohctl create cluster local
 
-Cluster name:         local
-Cluster version:      {coherence-version}
-Cluster port:         7574
-Management port:      30000
-Server count:         3
-Initial memory:       512m
-Persistence mode:     on-demand
-Group ID:             com.oracle.coherence.ce
+Cluster name:           local
+Cluster version:        {coherence-version}
+Cluster port:           7574
+Management port:        30000
+Server count:           3
+Initial memory:         256m
+Persistence mode:       on-demand
+Group ID:               com.oracle.coherence.ce
 Additional artifacts:
 Are you sure you want to create the cluster with the above details? (y/n) y
 
@@ -60,7 +73,7 @@ Starting 3 cluster members for cluster local
 Starting cluster member storage-0...
 Starting cluster member storage-1...
 Starting cluster member storage-2...
-Cluster added and started with process ids: [46188 46189 46190]
+Cluster added and started
 
 $ cohctl get members -c local
 
@@ -100,7 +113,7 @@ Starting 3 cluster members for cluster local
 Starting cluster member storage-0...
 Starting cluster member storage-1...
 Starting cluster member storage-2...
-Cluster added and started with process ids: [47190 47191 47192]
+Cluster added and started
 ----
 
 NOTE: In this example we are using the `-S` option to skip downloading maven artifacts as we know they are already installed locally.
@@ -111,15 +124,15 @@ Add and start a cluster using all default values but include additional `coheren
 ----
 $ cohctl create cluster local -a coherence-rest,io.opentracing:opentracing-api:0.33.0,io.opentracing:opentracing-util:0.33.0
 
-Cluster name:         local
-Cluster version:      {coherence-version}
-Cluster port:         7574
-Management port:      30000
-Server count:         3
-Initial memory:       512m
-Persistence mode:     on-demand
-Group ID:             com.oracle.coherence.ce
-Additional artifacts: coherence-rest,io.opentracing:opentracing-api:0.33.0,io.opentracing:opentracing-util:0.33.0
+Cluster name:           local
+Cluster version:        {coherence-version}
+Cluster port:           7574
+Management port:        30000
+Server count:           3
+Initial memory:         256m
+Persistence mode:       on-demand
+Group ID:               com.oracle.coherence.ce
+Additional artifacts:   coherence-rest,io.opentracing:opentracing-api:0.33.0,io.opentracing:opentracing-util:0.33.0
 Are you sure you want to create the cluster with the above details? (y/n) y
 
 Checking 6 Maven dependencies...
@@ -136,6 +149,22 @@ Starting cluster member storage-2...
 Cluster added and started with process ids: [3324 3330 3331]
 ----
 
+[#scale-cluster]
+==== Scale Cluster
+
+include::../../build/_output/docs-gen/scale_cluster.adoc[tag=text]
+
+[source,bash]
+----
+$ cohctl scale cluster local -r 4
+
+Are you sure you want to scale the cluster local up by 1 member(s) to 4 members? (y/n) y
+Starting cluster member storage-3...
+Cluster local scaled
+----
+
+NOTE: It is not yet supported to scale down a cluster.
+
 [#stop-cluster]
 ==== Stop Cluster
 
@@ -144,6 +173,7 @@ include::../../build/_output/docs-gen/stop_cluster.adoc[tag=text]
 [source,bash]
 ----
 $ cohctl stop cluster local
+
 Are you sure you want to stop 3 members for the cluster local? (y/n) y
 killed process 47760
 killed process 47761
@@ -156,16 +186,33 @@ killed process 47762
 
 include::../../build/_output/docs-gen/start_cluster.adoc[tag=text]
 
-Start a cluster and specify heap size of `1g`. (default is 512m)
+*Examples*
+
+Start a cluster and specify heap size of `1g`. (default is 256m)
 
 [source,bash]
 ----
 $ cohctl start cluster local -M 1g
+
 Are you sure you want to start 3 members for cluster local? (y/n) y
 Starting cluster member storage-0...
 Starting cluster member storage-1...
 Starting cluster member storage-2...
-Cluster local and started with process ids: [48066 48067 48068]
+Cluster local and started
+----
+
+Start a cluster and specify heap size of `1g` with 4 replicas/members.
+
+[source,bash]
+----
+$ cohctl start cluster local -M 1g -r 4
+
+Are you sure you want to start 4 members for cluster local? (y/n) y
+Starting cluster member storage-0...
+Starting cluster member storage-1...
+Starting cluster member storage-2...
+Starting cluster member storage-3...
+Cluster local and started
 ----
 
 [#start-console]
@@ -178,6 +225,7 @@ Start a Coherence console.
 [source,bash]
 ----
 $ cohctl start console -c local
+
 Starting client com.tangosol.net.CacheFactory...
 2022-08-29 16:00:01.346/0.620 Oracle Coherence 22.06.1 <Info> (thread=main, member=n/a): Loaded operational configuration from "jar:file:/Users/timmiddleton/.m2/repository/com/oracle/coherence/ce/coherence/22.06.1/coherence-22.06.1.jar!/tangosol-coherence.xml"
 ...
@@ -192,7 +240,7 @@ NOTE: Use `bye` to quit the console.
 
 include::../../build/_output/docs-gen/start_cohql.adoc[tag=text]
 
-Start a Coherence CohQL session.
+Start a CohQL session.
 
 [source,bash]
 ----
@@ -205,6 +253,113 @@ CohQL>
 ----
 
 NOTE: Use `bye` to quit the console.
+
+Start a CohQL Session and execute a statement
+
+[source,bash]
+----
+$ cohctl start cohql -c local -S "insert into test key(1) value(1)"
+
+...
+----
+
+Start a CohQL Session and execute statements from a file.
+
+[source,bash]
+----
+$ cohctl start cohql -c local -f /tmp/run.cohql
+
+...
+----
+
+[#start-class]
+==== Start Class
+
+include::../../build/_output/docs-gen/start_class.adoc[tag=text]
+
+[source,bash]
+----
+$ cohctl start class com.my.company.Class -c local
+
+Starting client com.my.company.Class...
+----
+
+[#set-default-heap]
+==== Set Default Heap
+
+include::../../build/_output/docs-gen/set_default_heap.adoc[tag=text]
+
+Set default heap to 512m.
+
+[source,bash]
+----
+$ cohctl set default-heap 512m
+Default heap is now set to 512m
+----
+
+[#get-default-heap]
+==== Get Default Heap
+
+include::../../build/_output/docs-gen/get_default_heap.adoc[tag=text]
+
+[source,bash]
+----
+$ cohctl get default-heap
+Current default heap: 512m
+----
+
+[#clear-default-heap]
+==== Clear Default Heap
+
+include::../../build/_output/docs-gen/clear_default_heap.adoc[tag=text]
+
+[source,bash]
+----
+$ cohctl clear default-heap
+Default heap has been cleared
+----
+
+NOTE: If no default-heap is set, then the default of 256m is used.
+
+[#set-profile]
+==== Set Profile
+
+include::../../build/_output/docs-gen/set_profile.adoc[tag=text]
+
+[source,bash]
+----
+$ cohctl set profile debug-enabled -v "-Dmy.debug.enabled=true -Dmy.debug.level=10"
+Are you sure you want to set the profile debug-enabled to a value of [-Dmy.debug.enabled=true -Dmy.debug.level=10]? (y/n) y
+profile debug-enabled was set to value [-Dmy.debug.enabled=true -Dmy.debug.level=10]
+----
+
+When you have set the profile you can startup or create a cluster using that profile by
+specifying `-P profile-name` for the `cohctl start cluster` or `cohctl create cluster` commands.
+
+[#remove-profile]
+==== Remove Profile
+
+include::../../build/_output/docs-gen/remove_profile.adoc[tag=text]
+
+[source,bash]
+----
+$ cohctl remove profile debug-enabled
+Are you sure you want to remove the profile debug-enabled? (y/n) y
+profile debug-enabled was removed
+----
+
+[#get-profiles]
+==== Get Profiles
+
+include::../../build/_output/docs-gen/get_profiles.adoc[tag=text]
+
+[source,bash]
+----
+$ cohctl get profiles
+PROFILE    VALUE
+profile1   -Dproperty1.value=2
+profile2   -Dproperty2.value=2 -Dproperty3.value=4
+----
 
 === See Also
 

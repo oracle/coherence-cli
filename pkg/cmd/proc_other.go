@@ -9,7 +9,6 @@
 package cmd
 
 import (
-	"os"
 	"os/exec"
 	"syscall"
 )
@@ -21,11 +20,7 @@ func setForkProcess(process *exec.Cmd) {
 	}
 }
 
-func signalProcess(proc *os.Process) error {
-	return proc.Signal(syscall.SIGCONT)
-}
-
-//func handleCTRLC() {
+//func handleCTRLC(proc *os.Process) {
 //	chanSignal := make(chan os.Signal, 1)
 //	chanDone := make(chan struct{})
 //	signal.Notify(chanSignal, os.Interrupt)
@@ -35,4 +30,7 @@ func signalProcess(proc *os.Process) error {
 //		close(chanDone)
 //	}()
 //	<-chanDone
+//
+//	_ = proc.Kill()
+//	os.Exit(1)
 //}

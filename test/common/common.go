@@ -57,8 +57,17 @@ func RunTestClusterCommands(t *testing.T) {
 	// set default format to "m"
 	test_utils.EnsureCommandContains(g, t, cliCmd, "Bytes format is now set to m", configArg, file, "set", "bytes-format", "m")
 
-	// clear defaut format
+	// clear default format
 	test_utils.EnsureCommandContains(g, t, cliCmd, "Default bytes format has been cleared", configArg, file, "clear", "bytes-format")
+
+	// set default heap to 512m
+	test_utils.EnsureCommandContains(g, t, cliCmd, "Default heap is now set to 512m", configArg, file, "set", "default-heap", "512m")
+
+	// get default heap
+	test_utils.EnsureCommandContains(g, t, cliCmd, "Current default heap: 512m", configArg, file, "get", "default-heap")
+
+	// clear default heap
+	test_utils.EnsureCommandContains(g, t, cliCmd, "Default heap has been cleared", configArg, file, "clear", "default-heap")
 
 	// get clusters should return nothing
 	test_utils.EnsureCommandContains(g, t, cliCmd, "", configArg, file, "get", "clusters")
@@ -538,6 +547,10 @@ func RunTestSetMemberCommands(t *testing.T) {
 	test_utils.EnsureCommandContains(g, t, cliCmd, addedCluster, configArg, file, "add", "cluster",
 		context.ClusterName, "-u", context.Url)
 
+	// Set management expiry to 100 ms
+	test_utils.EnsureCommandContains(g, t, cliCmd, cmd.OperationCompleted, configArg, file, "set", "management",
+		"-a", "expiryDelay", "-v", "100", "-y", "-c", "cluster1")
+
 	// should be able to set the log level to 1 for all members
 	test_utils.EnsureCommandContains(g, t, cliCmd, cmd.OperationCompleted, configArg, file, "set", "member",
 		"all", "-a", "loggingLevel", "-v", "1", "-y", "-c", "cluster1")
@@ -553,7 +566,7 @@ func RunTestSetMemberCommands(t *testing.T) {
 	test_utils.EnsureCommandContains(g, t, cliCmd, cmd.OperationCompleted, configArg, file, "set", "member",
 		"1", "-a", "loggingLevel", "-v", "6", "-y", "-c", "cluster1")
 
-	test_utils.Sleep(5)
+	test_utils.Sleep(10)
 
 	// query the log level - should have log level 9 and 6
 	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "\"loggingLevel\":1,\"loggingLevel\":6", configArg,
@@ -1388,17 +1401,13 @@ func RunTestPersistenceCommands(t *testing.T) {
 // RunTestHealthCommands tests various health commands
 func RunTestHealthCommands(t *testing.T) {
 	var (
-		g             = NewGomegaWithT(t)
-		context       = test_utils.GetTestContext()
-		versionString string
-		err           error
+		g       = NewGomegaWithT(t)
+		context = test_utils.GetTestContext()
+		err     error
 	)
 
-	versionString, err = getVersion(context.RestUrl)
-	g.Expect(err).To(BeNil())
-
 	// ignore test if health is not enabled in this version
-	if !isHealthEnabled(versionString) {
+	if !isHealthEnabled(context.RestUrl) {
 		return
 	}
 
@@ -1784,6 +1793,14 @@ func RunTestFederationCommands(t *testing.T) {
 	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "AVG BACKLOG DELAY,AVG APPLY,cluster2", configArg, file,
 		"describe", "federation", "FederatedService", "-p", "cluster2", "-T", "destinations", "-o", "wide", "-c", context.ClusterName)
 
+	// test reset federation-stats
+	test_utils.EnsureCommandContains(g, t, cliCmd, "completed", configArg, file, "reset", "federation-stats",
+		"FederatedService", "-p", "cluster2", "-T", "outgoing", "-y", "-n", "1", "-c", context.ClusterName)
+
+	// test reset federation-stats
+	test_utils.EnsureCommandContains(g, t, cliCmd, "completed", configArg, file, "reset", "federation-stats",
+		"FederatedService", "-p", "cluster2", "-T", "outgoing", "-y", "-c", context.ClusterName)
+
 	// remove the cluster entry
 	test_utils.EnsureCommandContains(g, t, cliCmd, context.ClusterName, configArg, file, "remove", "cluster", "cluster1", "-y")
 
@@ -1803,17 +1820,14 @@ func GetDataFetcher(g *WithT, clusterName string) fetcher.Fetcher {
 }
 
 // isHealthEnabled returns true if health API is enabled, which is 14.1.1.2206 and 22.06+
-func isHealthEnabled(version string) bool {
-	return strings.Contains(version, "22") || strings.Contains(version, "23")
+func isHealthEnabled(restUrl string) bool {
+	result, err := test_utils.IssueGetRequest(restUrl + "/healthPresent")
+	return err != nil && string(result) == "true"
 }
 
-// RunTestCreateCommands tests various create cluster commands
-// Expiremntal only
-func RunTestCreateCommands(t *testing.T) {
-	var (
-		g           = NewGomegaWithT(t)
-		clusterName = "tim"
-	)
+// RunTestProfileCommands tests profile commands
+func RunTestProfileCommands(t *testing.T) {
+	g := NewGomegaWithT(t)
 
 	file, err := test_utils.CreateNewConfigYaml(configYaml)
 	if err != nil {
@@ -1824,39 +1838,140 @@ func RunTestCreateCommands(t *testing.T) {
 
 	cliCmd := cmd.Initialize(nil)
 
-	// should be able to create a new cluster and start it using the defaults
-	test_utils.EnsureCommandContains(g, t, cliCmd, "Cluster added and started with process ids", configArg, file, "create", "cluster",
-		clusterName, "-y")
+	// set the debug to true
+	test_utils.EnsureCommandContains(g, t, cliCmd, "on", configArg, file, "set", "debug", "on")
 
-	// sleep to wait to cluster startup
-	test_utils.Sleep(20)
+	// get profiles
+	test_utils.EnsureCommandContains(g, t, cliCmd, "", configArg, file, "get", "profiles")
 
-	// test get members
-	test_utils.EnsureCommandContainsAll(g, t, cliCmd, nodeID, configArg, file, "get", "members",
-		"-c", clusterName)
+	// set a profile
+	test_utils.EnsureCommandContains(g, t, cliCmd, "profile profile1", configArg, file, "set", "profile",
+		"profile1", "-v", "-Dtim.property=value", "-y")
 
-	// shutdown the cluster
-	test_utils.EnsureCommandContains(g, t, cliCmd, "3 processes were stopped for cluster tim", configArg, file, "stop", "cluster",
-		clusterName, "-y")
+	// get profiles
+	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "PROFILE,VALUE,profile1,tim.property", configArg, file, "get", "profiles")
 
-	test_utils.Sleep(10)
+	// set a second profile
+	test_utils.EnsureCommandContains(g, t, cliCmd, "profile profile2", configArg, file, "set", "profile",
+		"profile2", "-v", "-Dnew.property=value", "-y")
 
-	// re-start the cluster
-	test_utils.EnsureCommandContains(g, t, cliCmd, "Cluster tim and started with process ids", configArg, file, "start", "cluster",
-		clusterName, "-y", "-s", "4")
+	// get profiles
+	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "PROFILE,VALUE,profile1,tim.property,profile2,new.property", configArg, file, "get", "profiles")
 
-	// sleep to wait to cluster startup
-	test_utils.Sleep(20)
+	// update the profile
+	test_utils.EnsureCommandContains(g, t, cliCmd, "profile profile2", configArg, file, "set", "profile",
+		"profile2", "-v", "-Dupdated", "-y")
 
-	// test get members
-	test_utils.EnsureCommandContainsAll(g, t, cliCmd, nodeID, configArg, file, "get", "members",
-		"-c", clusterName)
+	// get profiles
+	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "PROFILE,VALUE,profile1,tim.property,profile2,updated", configArg, file, "get", "profiles")
 
-	// shutdown the cluster
-	test_utils.EnsureCommandContains(g, t, cliCmd, "4 processes were stopped for cluster tim", configArg, file, "stop", "cluster",
-		clusterName, "-y")
+	// remove the profile
+	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "profile profile2 was removed", configArg, file, "remove", "profile",
+		"profile2", "-y")
+}
 
-	// shutdown the cluster
-	test_utils.EnsureCommandContains(g, t, cliCmd, "Removed connection for cluster tim", configArg, file, "remove", "cluster",
-		clusterName, "-y")
+// RunTestResetCommands tests various reset commands
+func RunTestResetCommands(t *testing.T) {
+	var (
+		g       = NewGomegaWithT(t)
+		err     error
+		edition []byte
+		context = test_utils.GetTestContext()
+		restUrl = context.RestUrl
+		result  []byte
+	)
+
+	// only continue if the cluster is Grid Edition
+	edition, err = test_utils.IssueGetRequest(restUrl + "/edition")
+	g.Expect(err).To(BeNil())
+	editionString := string(edition)
+
+	file, err := test_utils.CreateNewConfigYaml(configYaml)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	fullSupport := isHealthEnabled(context.RestUrl)
+
+	test_utils.CleanupConfigFileAfterTest(t, file)
+
+	cliCmd := cmd.Initialize(nil)
+
+	_, err = test_utils.IssueGetRequest(restUrl + "/populate")
+	g.Expect(err).To(BeNil())
+
+	// should be able to add new cluster
+	test_utils.EnsureCommandContains(g, t, cliCmd, addedCluster, configArg, file, "add", "cluster",
+		context.ClusterName, "-u", context.Url)
+
+	// ========= CACHES ================
+
+	// test node specific
+	test_utils.EnsureCommandContains(g, t, cliCmd, "completed", configArg, file, "reset", "cache-stats",
+		"cache-1", "-s", "PartitionedCache", "-y", "-n", "1", "-c", context.ClusterName)
+
+	if fullSupport {
+		// we can run a reset statistics against all members
+		test_utils.EnsureCommandContains(g, t, cliCmd, "completed", configArg, file, "reset", "cache-stats",
+			"cache-1", "-s", "PartitionedCache", "-y", "-c", context.ClusterName)
+	}
+
+	// ========= EXECUTOR ============
+
+	result, err = test_utils.IssueGetRequest(restUrl + "/executorPresent")
+	g.Expect(err).To(BeNil())
+
+	if string(result) == "true" {
+		// executor is present
+		test_utils.EnsureCommandContains(g, t, cliCmd, "completed", configArg, file, "reset", "executor-stats",
+			"coherence-concurrent-default-executor", "-y", "-c", context.ClusterName)
+	}
+
+	// ========= ELASTIC DATA ============
+
+	if editionString == "GE" {
+		_, err = test_utils.IssueGetRequest(restUrl + "/populateFlash")
+		g.Expect(err).To(BeNil())
+		_, err = test_utils.IssueGetRequest(restUrl + "/populateRam")
+		g.Expect(err).To(BeNil())
+
+		if fullSupport {
+			test_utils.EnsureCommandContains(g, t, cliCmd, "completed", configArg, file, "reset", "flashjournal-stats",
+				"-c", context.ClusterName, "-y")
+			test_utils.EnsureCommandContains(g, t, cliCmd, "completed", configArg, file, "reset", "ramjournal-stats",
+				"-c", context.ClusterName, "-y")
+		}
+	}
+
+	// ========= MEMBERS ============
+
+	test_utils.EnsureCommandContains(g, t, cliCmd, "completed", configArg, file, "reset", "member-stats",
+		"-y", "-n", "1", "-c", context.ClusterName)
+
+	if fullSupport {
+		// test for all members
+		test_utils.EnsureCommandContains(g, t, cliCmd, "completed", configArg, file, "reset", "member-stats",
+			"-y", "-c", context.ClusterName)
+	}
+
+	// ========= REPORTERS ============
+
+	test_utils.EnsureCommandContains(g, t, cliCmd, "completed", configArg, file, "reset", "reporter-stats",
+		"-y", "-n", "1", "-c", context.ClusterName)
+
+	test_utils.EnsureCommandContains(g, t, cliCmd, "completed", configArg, file, "reset", "reporter-stats",
+		"-y", "-c", context.ClusterName)
+
+	// ========= SERVICES ============
+
+	test_utils.EnsureCommandContains(g, t, cliCmd, "completed", configArg, file, "reset", "service-stats",
+		"PartitionedCache", "-y", "-n", "1", "-c", context.ClusterName)
+
+	if fullSupport {
+		test_utils.EnsureCommandContains(g, t, cliCmd, "completed", configArg, file, "reset", "service-stats",
+			"PartitionedCache", "-y", "-c", context.ClusterName)
+	}
+
+	// remove the cluster entries
+	test_utils.EnsureCommandContains(g, t, cliCmd, context.ClusterName, configArg, file, "remove", "cluster", "cluster1")
 }

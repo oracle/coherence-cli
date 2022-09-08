@@ -141,6 +141,13 @@ Look up various Name Service endpoints for a cluster.
 --
 
 [CARD]
+.Reset MBean Statistics
+[link=docs/reference/92_reset.adoc]
+--
+Reset MBean Statistics for various resources.
+--
+
+[CARD]
 .Miscellaneous
 [link=docs/reference/95_misc.adoc]
 --

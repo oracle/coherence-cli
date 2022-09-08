@@ -139,3 +139,13 @@ func TestClusterServicesRequest(t *testing.T) {
 func TestCachesRequests(t *testing.T) {
 	common.RunTestCachesRequests(t)
 }
+
+// TestProfileCommands tests profile command
+func TestProfileCommands(t *testing.T) {
+	common.RunTestProfileCommands(t)
+}
+
+// TestResetCommands tests reset commands
+func TestResetCommands(t *testing.T) {
+	common.RunTestResetCommands(t)
+}

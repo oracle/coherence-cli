@@ -736,6 +736,26 @@ func FormatDiscoveredClusters(clusters []discovery.DiscoveredCluster) string {
 	return formatLinesAllStringsWithAlignment([]string{L, L, L, R, L}, stringValues)
 }
 
+// FormatProfiles returns the profiles in a column formatted output
+func FormatProfiles(profiles []ProfileValue) string {
+	var (
+		profileCount = len(profiles)
+	)
+	if profileCount == 0 {
+		return ""
+	}
+
+	var stringValues = make([]string, profileCount+1)
+
+	stringValues[0] = getColumns("PROFILE", "VALUE")
+
+	for i, value := range profiles {
+		stringValues[i+1] = getColumns(value.Name, value.Value)
+	}
+
+	return formatLinesAllStrings(stringValues)
+}
+
 // FormatClusterConnections returns the cluster information in a column formatted output
 func FormatClusterConnections(clusters []ClusterConnection) string {
 	var (
@@ -758,6 +778,8 @@ func FormatClusterConnections(clusters []ClusterConnection) string {
 		}
 		if value.ManuallyCreated {
 			manualCluster = "Y"
+		} else {
+			manualCluster = "N"
 		}
 		stringValues[i+1] = getColumns(value.Name, value.ConnectionType, value.ConnectionURL,
 			value.ClusterVersion, value.ClusterName, value.ClusterType, currentContext, manualCluster)
@@ -1225,7 +1247,7 @@ func FormatMachines(machines []config.Machine) string {
 	})
 
 	var (
-		load        float32
+		load        string
 		percentFree float64
 	)
 
@@ -1234,15 +1256,15 @@ func FormatMachines(machines []config.Machine) string {
 
 	for i, value := range machines {
 		if value.SystemLoadAverage >= 0 {
-			load = value.SystemLoadAverage
+			load = fmt.Sprintf("%v", value.SystemLoadAverage)
 		} else {
-			load = value.SystemCPULoad
+			load = fmt.Sprintf("%v", value.SystemCPULoad)
 		}
 
 		percentFree = float64(value.FreePhysicalMemorySize) / float64(value.TotalPhysicalMemorySize)
 
 		stringValues[i+1] = getColumns(value.MachineName, formatSmallInteger(value.AvailableProcessors),
-			formatFloat(load), formattingFunction(value.TotalPhysicalMemorySize),
+			load, formattingFunction(value.TotalPhysicalMemorySize),
 			formattingFunction(value.FreePhysicalMemorySize),
 			formatPercent(percentFree), value.Name, value.Arch, value.Version)
 	}

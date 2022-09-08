@@ -277,7 +277,6 @@ func invokePersistenceOperation(cmd *cobra.Command, operation, snapshotName stri
 		snapshotList   []string
 		localSnapshots []string
 		dataFetcher    fetcher.Fetcher
-		response       string
 		msg            = operation
 		prefix         = "a"
 		servicesResult []string
@@ -348,15 +347,10 @@ func invokePersistenceOperation(cmd *cobra.Command, operation, snapshotName stri
 
 	cmd.Println(FormatCurrentCluster(connection))
 
-	// confirmation
-	if !automaticallyConfirm {
-		cmd.Printf("Are you sure you want to perform %s for snapshot %s and service %s? (y/n) ",
-			msg, snapshotName, serviceName)
-		_, err = fmt.Scanln(&response)
-		if response != "y" || err != nil {
-			cmd.Println(constants.NoOperation)
-			return nil
-		}
+	// confirm the operation
+	if !confirmOperation(cmd, fmt.Sprintf("Are you sure you want to perform %s for snapshot %s and service %s? (y/n) ",
+		msg, snapshotName, serviceName)) {
+		return nil
 	}
 
 	result, err = dataFetcher.InvokeSnapshotOperation(serviceName, snapshotName, operation, ArchivedSnapshots)

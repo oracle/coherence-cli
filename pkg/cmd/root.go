@@ -61,16 +61,23 @@ const debugContextKey = "debug"
 const ignoreCertsContextKey = "ignoreInvalidCerts"
 const requestTimeoutKey = "requestTimeout"
 const defaultBytesFormatKey = "defaultBytesFormat"
+const defaultHeapKey = "defaultHeap"
+const profilesKey = "profiles"
 
 const confirmOptionMessage = "automatically confirm the operation"
 const timeoutMessage = "timeout in seconds for NS Lookup requests"
-const heapMemoryMessage = "heap memory to allocate for JVM"
+const heapMemoryMessage = "heap memory to allocate for JVM if default-heap not set"
 const startupDelayMessage = "startup delay in seconds for each server"
 const heapMemoryArg = "heap-memory"
+const profileArg = "profile"
 const logLevelArg = "log-level"
 const startupDelayArg = "startup-delay"
-const serverCountMessage = "server count"
+const serverCountMessage = "number of replicas"
+const metricsPortMessage = "starting port for metrics"
+const metricsPortArg = "metrics-port"
 const logLevelMessage = "coherence log level"
+const profileMessage = "profile to add to cluster startup command line"
+const commaSeparatedIDMessage = "comma separated node ids to target"
 
 const outputFormats = "table, wide, json or jsonpath=\"...\""
 
@@ -125,6 +132,14 @@ type CoherenceCLIConfig struct {
 	RequestTimeout     int32               `json:"requestTimeout"`
 	IgnoreInvalidCerts bool                `json:"ignoreInvalidCerts"`
 	DefaultBytesFormat string              `json:"defaultBytesFormat"`
+	DefaultHeap        string              `json:"defaultHeap"`
+	Profiles           []ProfileValue      `mapstructure:"profiles"`
+}
+
+// ProfileValue describes a profile to be used for creating and starting clusters
+type ProfileValue struct {
+	Name  string `json:"name"`
+	Value string `json:"value"`
 }
 
 // ClusterConnection describes an individual connection to a cluster
@@ -144,7 +159,6 @@ type ClusterConnection struct {
 	AdditionalClasspath string `json:"additionalClasspath"` // additional classpath provided by the user
 	Arguments           string `json:"arguments"`           // arguments to start cluster with including cluster name, etc
 	ManagementPort      int32  `json:"managementPort"`      // arguments to start cluster with including cluster name, etc
-	ProcessIDs          []int  `json:"processIDs"`          // process id's of started members
 	PersistenceMode     string `json:"persistenceMode"`
 }
 
@@ -442,8 +456,9 @@ func Initialize(command *cobra.Command) *cobra.Command {
 	getCmd.AddCommand(getBytesFormatCmd)
 	getCmd.AddCommand(getHealthCmd)
 	getCmd.AddCommand(getEnvironmentCmd)
-	getCmd.AddCommand(getProcsCmd)
 	getCmd.AddCommand(getServiceMembersCmd)
+	getCmd.AddCommand(getDefaultHeapCmd)
+	getCmd.AddCommand(getProfilesCmd)
 
 	// set command
 	command.AddCommand(setCmd)
@@ -458,11 +473,14 @@ func Initialize(command *cobra.Command) *cobra.Command {
 	setCmd.AddCommand(setReporterCmd)
 	setCmd.AddCommand(setBytesFormatCmd)
 	setCmd.AddCommand(setExecutorCmd)
+	setCmd.AddCommand(setDefaultHeapCmd)
+	setCmd.AddCommand(setProfileCmd)
 
 	// clear
 	command.AddCommand(clearCmd)
 	clearCmd.AddCommand(clearContextCmd)
 	clearCmd.AddCommand(clearBytesFormatCmd)
+	clearCmd.AddCommand(clearDefaultHeapCmd)
 
 	// add
 	command.AddCommand(addCmd)
@@ -485,6 +503,7 @@ func Initialize(command *cobra.Command) *cobra.Command {
 	startCmd.AddCommand(startClusterCmd)
 	startCmd.AddCommand(startConsoleCmd)
 	startCmd.AddCommand(startCohQLCmd)
+	startCmd.AddCommand(startClassCmd)
 
 	// stop
 	command.AddCommand(stopCmd)
@@ -511,6 +530,7 @@ func Initialize(command *cobra.Command) *cobra.Command {
 	command.AddCommand(removeCmd)
 	removeCmd.AddCommand(removeClusterCmd)
 	removeCmd.AddCommand(removeSnapshotCmd)
+	removeCmd.AddCommand(removeProfileCmd)
 
 	// describe
 	command.AddCommand(describeCmd)
@@ -565,6 +585,21 @@ func Initialize(command *cobra.Command) *cobra.Command {
 	command.AddCommand(shutdownCmd)
 	shutdownCmd.AddCommand(shutdownServiceCmd)
 	shutdownCmd.AddCommand(shutdownMemberCmd)
+
+	// scale
+	command.AddCommand(scaleCmd)
+	scaleCmd.AddCommand(scaleClusterCmd)
+
+	// reset-statistics
+	command.AddCommand(resetCmd)
+	resetCmd.AddCommand(resetMemberStatsCmd)
+	resetCmd.AddCommand(resetReporterStatsCmd)
+	resetCmd.AddCommand(resetRAMJournalStatsCmd)
+	resetCmd.AddCommand(resetFlashJournalStatsCmd)
+	resetCmd.AddCommand(resetServiceStatsCmd)
+	resetCmd.AddCommand(resetCacheStatsCmd)
+	resetCmd.AddCommand(resetFederationStatsCmd)
+	resetCmd.AddCommand(resetExecutorStatsCmd)
 
 	return command
 }
@@ -678,4 +713,26 @@ func initLogging(homeDir string) (*zap.Logger, error) {
 // isWindows returns true if the OS is Windows
 func isWindows() bool {
 	return runtime.GOOS == "windows"
+}
+
+// confirmOperation displays a confirmation message and will return true if
+// the operation is confirmed to continue via either the -y option or the
+// user answers "y"
+func confirmOperation(cmd *cobra.Command, message string) bool {
+	var (
+		response string
+		err      error
+	)
+
+	if automaticallyConfirm {
+		return true
+	}
+
+	cmd.Printf(message)
+	_, err = fmt.Scanln(&response)
+	if response != "y" || err != nil {
+		cmd.Println(constants.NoOperation)
+		return false
+	}
+	return true
 }

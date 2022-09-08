@@ -39,8 +39,13 @@ const links = "?links="
 const jsonStringFormat = "{\"%s\": %s}"
 const servicesPath = "/services/"
 const membersPath = "/members/"
+const cachesPath = "/caches/"
+const executorsPath = "/executors/"
+const federationStatsPath = "/federation/statistics/"
 const reportersPath = "/reporters/"
+const journalPath = "/journal/"
 const rolePrefix = "{\"role\": \""
+const resetStatistics = "resetStatistics"
 
 // HTTPFetcher is an implementation of a Fetcher to retrieve data from Management over REST
 type HTTPFetcher struct {
@@ -246,7 +251,7 @@ func (h HTTPFetcher) SetExecutorAttribute(executor, attribute string, value inte
 	var valueString = getJSONValueString(value)
 
 	payload := []byte(fmt.Sprintf(jsonStringFormat, attribute, valueString))
-	result, err := httpPostRequest(h, "/executors/"+executor, payload)
+	result, err := httpPostRequest(h, executorsPath+url.PathEscape(executor), payload)
 	if err != nil {
 		return constants.EmptyByte, utils.GetError(
 			fmt.Sprintf("cannot set executor value %vfor attribute %s ", value, attribute), err)
@@ -286,7 +291,7 @@ func (h HTTPFetcher) SetCacheAttribute(memberID, serviceName, cacheName, tier, a
 	payload := []byte(fmt.Sprintf(jsonStringFormat, attribute, valueString))
 
 	result, err := httpPostRequest(h, servicesPath+getSafeServiceName(h, serviceName)+
-		"/caches/"+url.PathEscape(cacheName)+membersPath+memberID+"?tier="+tier, payload)
+		cachesPath+url.PathEscape(cacheName)+membersPath+memberID+"?tier="+tier, payload)
 	if err != nil {
 		return constants.EmptyByte, utils.GetError(
 			fmt.Sprintf("cannot set value %v for attribute %s for cache %s/%s and member %s", value, attribute,
@@ -552,7 +557,7 @@ func (h HTTPFetcher) GetElasticDataDetails(journalType string) ([]byte, error) {
 	if journalType != "ram" && journalType != "flash" {
 		return constants.EmptyByte, errors.New("journal type must be flash or ram")
 	}
-	result, err := httpGetRequest(h, "/journal/"+journalType+"/members?links=")
+	result, err := httpGetRequest(h, journalPath+journalType+"/members?links=")
 	if err != nil && !strings.Contains(err.Error(), "404") {
 		return constants.EmptyByte, utils.GetError("cannot get Journal details for type "+journalType, err)
 	}
@@ -618,6 +623,61 @@ func (h HTTPFetcher) InvokeServiceOperation(serviceName, operation string) ([]by
 	} else {
 		return constants.EmptyByte, errors.New("invalid operation " + operation)
 	}
+	_, err = httpPostRequest(h, finalURL, constants.EmptyByte)
+	if err != nil {
+		return constants.EmptyByte, fmt.Errorf("unable to %s. %v", operation, err)
+	}
+
+	return constants.EmptyByte, nil
+}
+
+// InvokeResetStatistics invokes a reset statistics operation
+// nodeID is either "all" for all members or a specific nodeID
+// args[] are specific to various commands
+func (h HTTPFetcher) InvokeResetStatistics(operation string, nodeID string, args []string) ([]byte, error) {
+	var (
+		err      error
+		finalURL string
+	)
+	if operation == ResetMembers {
+		if nodeID == "all" {
+			finalURL = "/" + resetStatistics
+		} else {
+			finalURL = membersPath + nodeID + "/" + resetStatistics
+		}
+	} else if operation == ResetReporters {
+		if nodeID == "all" {
+			finalURL = reportersPath + resetStatistics
+		} else {
+			finalURL = reportersPath + nodeID + "/" + resetStatistics
+		}
+	} else if operation == ResetRAMJournal {
+		finalURL = journalPath + "ram/" + resetStatistics
+	} else if operation == ResetFlashJournal {
+		finalURL = journalPath + "flash/" + resetStatistics
+	} else if operation == ResetService {
+		finalURL = servicesPath + getSafeServiceName(h, args[0])
+		if nodeID == "all" {
+			finalURL += "/" + resetStatistics
+		} else {
+			finalURL += membersPath + nodeID + "/" + resetStatistics
+		}
+	} else if operation == ResetCache {
+		finalURL = servicesPath + getSafeServiceName(h, args[1]) + cachesPath + url.PathEscape(args[0])
+		if nodeID == "all" {
+			finalURL += "/" + resetStatistics
+		} else {
+			finalURL += membersPath + nodeID + "/" + resetStatistics
+		}
+	} else if operation == ResetFederation {
+		finalURL = servicesPath + getSafeServiceName(h, args[0]) + membersPath + nodeID + federationStatsPath +
+			args[2] + "/participants/" + url.QueryEscape(args[1]) + "/" + resetStatistics
+	} else if operation == ResetExecutor {
+		finalURL = executorsPath + url.PathEscape(args[0]) + "/" + resetStatistics
+	} else {
+		return constants.EmptyByte, errors.New("invalid operation " + operation)
+	}
+
 	_, err = httpPostRequest(h, finalURL, constants.EmptyByte)
 	if err != nil {
 		return constants.EmptyByte, fmt.Errorf("unable to %s. %v", operation, err)
@@ -720,7 +780,7 @@ func (h HTTPFetcher) CheckJFR(jfrName, jfrType, target string) ([]byte, error) {
 // GetFederationStatistics returns federation statistics for a service and type
 func (h HTTPFetcher) GetFederationStatistics(serviceName, federationType string) ([]byte, error) {
 	result, err := httpGetRequest(h, servicesPath+getSafeServiceName(h, serviceName)+
-		"/federation/statistics/"+federationType+"/participants"+links)
+		federationStatsPath+federationType+"/participants"+links)
 	// workaround bug with incoming returning 500 if no federation, ignore 404 as this means no incoming
 	if err != nil && !strings.Contains(err.Error(), "500") && !strings.Contains(err.Error(), "404") {
 		return constants.EmptyByte, utils.GetError("cannot get federation statistics for "+serviceName+" and "+federationType, err)
@@ -734,7 +794,7 @@ func (h HTTPFetcher) GetFederationStatistics(serviceName, federationType string)
 // GetFederationDetails returns federation statistics for a service and type and participant
 func (h HTTPFetcher) GetFederationDetails(serviceName, federationType, nodeID, participant string) ([]byte, error) {
 	result, err := httpGetRequest(h, servicesPath+getSafeServiceName(h, serviceName)+membersPath+nodeID+
-		"/federation/statistics/"+federationType+"/participants/"+participant+links)
+		federationStatsPath+federationType+"/participants/"+participant+links)
 	if err != nil && !strings.Contains(err.Error(), "500") && !strings.Contains(err.Error(), "404") {
 		return constants.EmptyByte, utils.GetError("cannot get federation details for "+serviceName+" and "+federationType, err)
 	}

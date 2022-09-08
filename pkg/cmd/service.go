@@ -152,7 +152,7 @@ can also specify '-o wide' to display addition information.`,
 
 // getServiceMembersCmd represents the get service-members command
 var getServiceMembersCmd = &cobra.Command{
-	Use:   "service-members",
+	Use:   "service-members service-name",
 	Short: "display service members for a cluster",
 	Long:  `The 'get service-members' command displays service members for a cluster.`,
 	Args: func(cmd *cobra.Command, args []string) error {
@@ -537,7 +537,6 @@ taskHungThresholdMillis or requestTimeoutMillis.`,
 			nodeIDArray     []string
 			nodeIds         []string
 			confirmMessage  string
-			response        string
 			intValue        int
 			errorSink       = createErrorSink()
 			wg              sync.WaitGroup
@@ -610,19 +609,14 @@ taskHungThresholdMillis or requestTimeoutMillis.`,
 
 		cmd.Println(FormatCurrentCluster(connection))
 
-		if !automaticallyConfirm {
-			cmd.Printf("Selected service: %s\n", serviceName)
-			cmd.Printf("Are you sure you want to set the value of attribute %s to %s for %s? (y/n) ",
-				attributeNameService, attributeValueService, confirmMessage)
-			_, err = fmt.Scanln(&response)
-			if response != "y" || err != nil {
-				cmd.Println(constants.NoOperation)
-				return nil
-			}
+		cmd.Printf("Selected service: %s\n", serviceName)
+		// confirm the operation
+		if !confirmOperation(cmd, fmt.Sprintf("Are you sure you want to set the value of attribute %s to %s for %s? (y/n) ",
+			attributeNameService, attributeValueService, confirmMessage)) {
+			return nil
 		}
 
-		nodeCount := len(nodeIds)
-		wg.Add(nodeCount)
+		wg.Add(len(nodeIds))
 
 		for _, value := range nodeIds {
 			go func(nodeId string) {
@@ -735,7 +729,6 @@ func issueServiceNodeCommand(cmd *cobra.Command, serviceName, operation string) 
 		dataFetcher     fetcher.Fetcher
 		connection      string
 		err             error
-		response        string
 		serviceResult   []byte
 		servicesSummary = config.ServicesSummaries{}
 		nodeIDArray     []string
@@ -778,15 +771,10 @@ func issueServiceNodeCommand(cmd *cobra.Command, serviceName, operation string) 
 		return fmt.Errorf("no node with node id %s exists in this cluster", nodeIDServiceOperation)
 	}
 
-	// confirmation
-	if !automaticallyConfirm {
-		cmd.Printf("Are you sure you want to perform %s for service %s on node %s? (y/n) ",
-			operation, serviceName, nodeIDServiceOperation)
-		_, err = fmt.Scanln(&response)
-		if response != "y" || err != nil {
-			cmd.Println(constants.NoOperation)
-			return nil
-		}
+	// confirm the operation
+	if !confirmOperation(cmd, fmt.Sprintf("Are you sure you want to perform %s for service %s on node %s? (y/n) ",
+		operation, serviceName, nodeIDServiceOperation)) {
+		return nil
 	}
 
 	_, err = dataFetcher.InvokeServiceMemberOperation(serviceName, nodeIDServiceOperation, operation)
@@ -805,7 +793,6 @@ func issueServiceCommand(cmd *cobra.Command, serviceName, operation string) erro
 		connection     string
 		servicesResult []string
 		err            error
-		response       string
 	)
 	connection, dataFetcher, err = GetConnectionAndDataFetcher()
 	if err != nil {
@@ -825,14 +812,9 @@ func issueServiceCommand(cmd *cobra.Command, serviceName, operation string) erro
 		return fmt.Errorf("cannot find persistence service named %s", serviceName)
 	}
 
-	// confirmation
-	if !automaticallyConfirm {
-		cmd.Printf("Are you sure you want to perform %s for service %s? (y/n) ", operation, serviceName)
-		_, err = fmt.Scanln(&response)
-		if response != "y" || err != nil {
-			cmd.Println(constants.NoOperation)
-			return nil
-		}
+	// confirm the operation
+	if !confirmOperation(cmd, fmt.Sprintf("Are you sure you want to perform %s for service %s? (y/n) ", operation, serviceName)) {
+		return nil
 	}
 
 	_, err = dataFetcher.InvokeServiceOperation(serviceName, operation)
@@ -906,7 +888,7 @@ Invocation, Proxy, RemoteCache or ReplicatedCache`)
 	_ = setServiceCmd.MarkFlagRequired("attribute")
 	setServiceCmd.Flags().StringVarP(&attributeValueService, "value", "v", "", "attribute value to set")
 	_ = setServiceCmd.MarkFlagRequired("value")
-	setServiceCmd.Flags().StringVarP(&nodeIDService, "node", "n", "all", "comma separated node ids to target")
+	setServiceCmd.Flags().StringVarP(&nodeIDService, "node", "n", "all", commaSeparatedIDMessage)
 
 	suspendServiceCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
 	resumeServiceCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)

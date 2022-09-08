@@ -349,15 +349,15 @@ type PersistenceCoordinator struct {
 
 // Machine contains machine details
 type Machine struct {
-	MachineName             string  `json:"operationStatus"`
-	AvailableProcessors     int32   `json:"availableProcessors"`
-	SystemLoadAverage       float32 `json:"systemLoadAverage"` // check first
-	SystemCPULoad           float32 `json:"systemCpuLoad"`     // check second
-	TotalPhysicalMemorySize int64   `json:"totalPhysicalMemorySize"`
-	FreePhysicalMemorySize  int64   `json:"freePhysicalMemorySize"`
-	Arch                    string  `json:"arch"`
-	Name                    string  `json:"name"`
-	Version                 string  `json:"version"`
+	MachineName             string      `json:"operationStatus"`
+	AvailableProcessors     int32       `json:"availableProcessors"`
+	SystemLoadAverage       float32     `json:"systemLoadAverage"` // check first
+	SystemCPULoad           interface{} `json:"systemCpuLoad"`     // check second
+	TotalPhysicalMemorySize int64       `json:"totalPhysicalMemorySize"`
+	FreePhysicalMemorySize  int64       `json:"freePhysicalMemorySize"`
+	Arch                    string      `json:"arch"`
+	Name                    string      `json:"name"`
+	Version                 string      `json:"version"`
 }
 
 // Reporters contains reporter details
