@@ -1793,13 +1793,16 @@ func RunTestFederationCommands(t *testing.T) {
 	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "AVG BACKLOG DELAY,AVG APPLY,cluster2", configArg, file,
 		"describe", "federation", "FederatedService", "-p", "cluster2", "-T", "destinations", "-o", "wide", "-c", context.ClusterName)
 
-	// test reset federation-stats
-	test_utils.EnsureCommandContains(g, t, cliCmd, "completed", configArg, file, "reset", "federation-stats",
-		"FederatedService", "-p", "cluster2", "-T", "outgoing", "-y", "-n", "1", "-c", context.ClusterName)
+	// these commands are only available in the latest coherence versions - 14.1.1.2206.x and above
+	if isHealthEnabled(restUrl) {
+		// test reset federation-stats
+		test_utils.EnsureCommandContains(g, t, cliCmd, "completed", configArg, file, "reset", "federation-stats",
+			"FederatedService", "-p", "cluster2", "-T", "outgoing", "-y", "-n", "1", "-c", context.ClusterName)
 
-	// test reset federation-stats
-	test_utils.EnsureCommandContains(g, t, cliCmd, "completed", configArg, file, "reset", "federation-stats",
-		"FederatedService", "-p", "cluster2", "-T", "outgoing", "-y", "-c", context.ClusterName)
+		// test reset federation-stats
+		test_utils.EnsureCommandContains(g, t, cliCmd, "completed", configArg, file, "reset", "federation-stats",
+			"FederatedService", "-p", "cluster2", "-T", "outgoing", "-y", "-c", context.ClusterName)
+	}
 
 	// remove the cluster entry
 	test_utils.EnsureCommandContains(g, t, cliCmd, context.ClusterName, configArg, file, "remove", "cluster", "cluster1", "-y")

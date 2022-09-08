@@ -112,6 +112,8 @@ Are you sure you want to reset federation statistics for service FederatedServic
 operation completed
 ----
 
+NOTE: The above federation command is only available in 14.1.1.2206.x and above.
+
 [#reset-ramjournal-stats]
 ==== Reset RAM Journal Statistics
 
