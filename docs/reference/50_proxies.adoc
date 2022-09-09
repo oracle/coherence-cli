@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 
-    Copyright (c) 2021, Oracle and/or its affiliates.
+    Copyright (c) 2021, 2022 Oracle and/or its affiliates.
     Licensed under the Universal Permissive License v 1.0 as shown at
     https://oss.oracle.com/licenses/upl.
 
@@ -14,6 +14,7 @@
 There are various commands that allow you to work with and manage proxy servers.
 
 * <<get-proxies, `cohctl get proxies`>> - displays the proxy servers for a cluster
+* <<get-proxy-connections, `cohctl get proxy-connections`>> - displays proxy server connections for a specific proxy server
 * <<describe-proxy, `cohctl describe proxy`>> - shows information related to a specific proxy server
 
 [#get-proxies]
@@ -36,6 +37,35 @@ NODE ID  HOST IP              SERVICE NAME  CONNECTIONS  BYTES SENT  BYTES REC
 
 NOTE: You can also use `-o wide` to display more columns.
 
+[#get-proxy-connections]
+==== Get Proxy Connections
+
+include::../../build/_output/docs-gen/get_proxy_connections.adoc[tag=text]
+
+*Examples*
+
+[source,bash]
+----
+$ cohctl get proxy-connections Proxy -c local
+
+NODE ID    CONN MS  CONN TIME  REMOTE ADDR/PORT  BYTES SENT  BYTES REC  BACKLOG  CLIENT PROCESS
+      1    236,916    03m 56s   127.0.0.1:58819        0 MB       0 MB        0           55414
+      1    538,395    08m 58s   127.0.0.1:58666        0 MB       0 MB        0           54769
+      2  1,177,423    19m 37s   127.0.0.1:58075        1 MB       0 MB        0           45646
+----
+
+You can use `-o wide` to display more columns as described below.
+
+[source,bash]
+----
+$ cohctl get proxy-connections Proxy -o wide -c local
+
+NODE ID    CONN MS  CONN TIME  REMOTE ADDR/PORT  BYTES SENT  BYTES REC  BACKLOG  CLIENT PROCESS  CLIENT ROLE                         UUID             TIMESTAMP
+      1    275,256    04m 35s   127.0.0.1:58819        0 MB       0 MB        0           55414  TangosolCoherenceDslqueryQueryPlus  0x000001...B052  2022-09-09T13:24:36.898+08:00
+      1    576,736    09m 36s   127.0.0.1:58666        0 MB       0 MB        0           54769  TangosolCoherenceDslqueryQueryPlus  0x000001...B050  2022-09-09T13:19:35.418+08:00
+      2  1,215,764    20m 15s   127.0.0.1:58075        1 MB       0 MB        0           45646  TangosolCoherenceDslqueryQueryPlus  0x000001...636D  2022-09-09T13:08:55.777+08:00
+----
+
 [#describe-proxy]
 ==== Describe Proxy
 
@@ -46,7 +76,39 @@ include::../../build/_output/docs-gen/describe_proxy.adoc[tag=text]
 [source,bash]
 ----
 $ cohctl describe proxy Proxy -c local
+
+PROXY SERVICE DETAILS
+---------------------
+Name                                :  Proxy
+Type                                :  [Proxy]
+...
+Transport Backlogged Connection List:  [[] []]
+
+PROXY MEMBER DETAILS
+--------------------
+NODE ID  HOST IP              SERVICE NAME  CONNECTIONS  BYTES SENT  BYTES REC
+1        0.0.0.0:53962.47748  Proxy                   2       1,394      2,471
+2        0.0.0.0:53966.60421  Proxy                   1   1,049,157        703
+
+PROXY CONNECTIONS
+-----------------
+Node Id                 :  2
+Remote Address          :  127.0.0.1
+...
+UUID                    :  0x0000018320A6A563C0A80189867534FD64D606EA44860A00C7DBDE274D31636D
+
+Node Id                 :  1
+Remote Address          :  127.0.0.1
+...
+UUID                    :  0x0000018320B067FDC0A80189C594C09E90166E1F48D3806BC52F4FFE8097B050
+
+Node Id                 :  1
+Remote Address          :  127.0.0.1
+...
+UUID                    :  0x0000018320B501A5C0A8018931AE66ADAC4A887A2E21D5A6C51F69858097B052
 ----
+
+NOTE: The above output has been truncated for brevity.
 
 === See Also
 

@@ -459,6 +459,7 @@ func Initialize(command *cobra.Command) *cobra.Command {
 	getCmd.AddCommand(getServiceMembersCmd)
 	getCmd.AddCommand(getDefaultHeapCmd)
 	getCmd.AddCommand(getProfilesCmd)
+	getCmd.AddCommand(getProxyConnectionsCmd)
 
 	// set command
 	command.AddCommand(setCmd)

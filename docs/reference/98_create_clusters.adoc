@@ -17,7 +17,7 @@ These commands allow you to create local only development based clusters (scoped
 Commercial 14.1.1.2206.x versions and above.
 
 Once you create a local cluster, you can manage and monitor them in the same way as you can with discovered
-or manually added clusters.
+or manually added clusters. You can also run the Coherence console and CohQL (Query client) against these clusters.
 
 When you create a cluster, the first node started will always have management over REST enabled.
 
@@ -27,6 +27,8 @@ You may also specify a profile when you start a cluster using the `-P` option. T
 NOTE: These commands are experimental only and may be changed or removed in the future. It is *not supported* to use
 these commands to create production clusters.
 
+*Creating and controlling clusters*
+
 * <<create-cluster, `cohctl create cluster`>> - creates a local cluster and adds to the cohctl.yaml file
 * <<scale-cluster, `cohctl scale cluster`>> - scales a cluster that was manually created
 * <<stop-cluster, `cohctl stop cluster`>> - stops a cluster that was manually created or started
@@ -34,15 +36,21 @@ these commands to create production clusters.
 * <<start-console, `cohctl start console`>> - starts a console client against a cluster that was manually created
 * <<start-cohql, `cohctl start cohql`>> - starts a CohQL client against a cluster that was manually created
 * <<start-class, `cohctl start class`>> - starts a specific Java class against the local Coherence cluster
+
+*Setting default heap sizes*
+
 * <<set-default-heap, `cohctl set default-heap`>> - sets default heap for creating and starting clusters
 * <<get-default-heap, `cohctl get default-heap`>> - gets default heap for creating and starting clusters
 * <<clear-default-heap, `cohctl clear default-heap`>> - clears default heap for creating and starting clusters
+
+*Creating and managing profiles*
+
 * <<set-profile, `cohctl set profile`>> - set a profile value for creating and starting clusters
 * <<remove-profile, `cohctl remove profile`>> - removes a profile value from the list of profile
-* <<get-profils, `cohctl get profiles`>> - displays the profiles that have been created
+* <<get-profiles, `cohctl get profiles`>> - displays the profiles that have been created
 
 [#create-cluster]
-==== Create
+==== Create Cluster
 
 include::../../build/_output/docs-gen/create_cluster.adoc[tag=text]
 

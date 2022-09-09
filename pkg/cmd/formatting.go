@@ -1444,6 +1444,47 @@ func FormatSnapshots(serviceSnapshots []config.Snapshots, archived bool) string 
 	return formatLinesAllStrings(stringValues)
 }
 
+// FormatProxyConnections returns the proxy connections in a column formatted output
+func FormatProxyConnections(connections []config.ProxyConnection) string {
+	// get the number of proxies matching the protocol
+	var (
+		connectionCount    = len(connections)
+		formattingFunction = getFormattingFunction()
+		alignment          = []string{R, R, R, R, R, R, R, R}
+	)
+
+	if connectionCount == 0 {
+		return ""
+	}
+
+	var stringValues = make([]string, connectionCount+1)
+
+	sort.Slice(connections, func(p, q int) bool {
+		return connections[p].ConnectionTimeMillis < connections[q].ConnectionTimeMillis
+	})
+
+	stringValues[0] = getColumns(NodeIDColumn, "CONN MS", "CONN TIME", "REMOTE ADDR/PORT",
+		"BYTES SENT", "BYTES REC", "BACKLOG", "CLIENT PROCESS")
+
+	if OutputFormat == constants.WIDE {
+		alignment = append(alignment, []string{"L", "L", "L"}...)
+		stringValues[0] = getColumns(stringValues[0], "CLIENT ROLE", "UUID", "TIMESTAMP")
+	}
+
+	for i, value := range connections {
+		stringValues[i+1] = getColumns(value.NodeID, formatLargeInteger(value.ConnectionTimeMillis),
+			formatConnectionMillis(value.ConnectionTimeMillis),
+			value.RemoteAddress+":"+formatPort(value.RemotePort),
+			formattingFunction(value.TotalBytesSent), formattingFunction(value.TotalBytesReceived),
+			formatLargeInteger(value.OutgoingByteBacklog), value.ClientProcessName)
+		if OutputFormat == constants.WIDE {
+			stringValues[i+1] = getColumns(stringValues[i+1], value.ClientRole, value.UUID, value.TimeStamp)
+		}
+	}
+
+	return formatLinesAllStringsWithAlignment(alignment, stringValues)
+}
+
 // FormatProxyServers returns the proxy servers' information in a column formatted output
 // protocol is either tcp or http and will display a different format based upon this
 func FormatProxyServers(services []config.ProxySummary, protocol string) string {
@@ -1693,6 +1734,26 @@ func formatBool(boolValue bool) string {
 
 func formatProcessID(PID int) string {
 	return fmt.Sprintf("%d", PID)
+}
+
+func formatConnectionMillis(millis int64) string {
+	ms := millis % 1000
+	seconds := millis / 1000
+	mins := seconds / 60
+	hours := mins / 60
+	days := hours / 24
+
+	if days > 0 {
+		return fmt.Sprintf("%dd %02dh %02dm %02ds", days, hours%24, mins%60, seconds%60)
+	}
+	if hours > 0 {
+		return fmt.Sprintf("%02dh %02dm %02ds", hours, mins%60, seconds%60)
+	}
+	if mins > 0 {
+		return fmt.Sprintf("%02dm %02ds", mins, seconds%60)
+	}
+
+	return fmt.Sprintf("%d.%.1ds", seconds, ms/100)
 }
 
 // getMaxColumnLengths returns an array representing the max lengths of columns

@@ -71,7 +71,7 @@ function message() {
 
 function save_logs() {
     mkdir -p build/_output/test-logs
-    cp ${CONFIG_DIR}/logs/local/*.log build/_output/test-logs
+    cp ${CONFIG_DIR}/logs/local/*.log build/_output/test-logs || true
 }
 
 function runCommand() {
