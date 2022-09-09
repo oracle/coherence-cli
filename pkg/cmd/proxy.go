@@ -163,10 +163,9 @@ var getProxyConnectionsCmd = &cobra.Command{
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var (
-			proxiesSummary = config.ProxiesSummary{}
-			err            error
-			dataFetcher    fetcher.Fetcher
-			connection     string
+			err         error
+			dataFetcher fetcher.Fetcher
+			connection  string
 		)
 		serviceName := args[0]
 
@@ -176,36 +175,37 @@ var getProxyConnectionsCmd = &cobra.Command{
 			return err
 		}
 
-		proxyResults, err := dataFetcher.GetProxySummaryJSON()
-		if err != nil {
-			return err
-		}
-
-		if len(proxyResults) == 0 {
-			return fmt.Errorf("%s '%s'", proxyErrorMsg, serviceName)
-		}
-
-		err = json.Unmarshal(proxyResults, &proxiesSummary)
-		if err != nil {
-			return err
-		}
-
 		for {
-			// get a list of node Id's while we search for the service name
 			var (
-				nodeIds                = getProxyNodeIDs(serviceName, proxiesSummary)
+				proxiesSummary         = config.ProxiesSummary{}
 				connectionDetailsFinal = make([]config.ProxyConnection, 0)
-				connectionDetails      = config.ProxyConnections{}
 				connectionsResult      []byte
+				proxyResults           []byte
 			)
+
+			proxyResults, err = dataFetcher.GetProxySummaryJSON()
+			if err != nil {
+				return err
+			}
+
+			if len(proxyResults) == 0 {
+				return fmt.Errorf("%s '%s'", proxyErrorMsg, serviceName)
+			}
+
+			err = json.Unmarshal(proxyResults, &proxiesSummary)
+			if err != nil {
+				return err
+			}
+
+			nodeIds := getProxyNodeIDs(serviceName, proxiesSummary)
 
 			if len(nodeIds) == 0 {
 				return fmt.Errorf("%s '%s'", proxyErrorMsg, serviceName)
 			}
 
 			// retrieve all connection details from JSON
-
 			for i := range nodeIds {
+				connectionDetails := config.ProxyConnections{}
 				data, err := dataFetcher.GetProxyConnectionsJSON(serviceName, nodeIds[i])
 				if err != nil {
 					return err
@@ -238,7 +238,6 @@ var getProxyConnectionsCmd = &cobra.Command{
 				}
 
 				cmd.Println(FormatCurrentCluster(connection))
-
 				cmd.Println(FormatProxyConnections(connectionDetailsFinal))
 			}
 
