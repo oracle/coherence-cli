@@ -18,6 +18,9 @@ import (
 	"time"
 )
 
+const provideProxyService = "you must provide a proxy service name"
+const proxyErrorMsg = "unable to find proxy service with service name"
+
 // var getProxiesCmd = &cobra.Command{ represents the getProxies command
 var getProxiesCmd = &cobra.Command{
 	Use:   "proxies",
@@ -57,7 +60,7 @@ var describeProxyCmd = &cobra.Command{
 all nodes running the proxy service as well as detailed connection information.`,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
-			displayErrorAndExit(cmd, "you must provide a service name")
+			displayErrorAndExit(cmd, provideProxyService)
 		}
 		return nil
 	},
@@ -68,7 +71,6 @@ all nodes running the proxy service as well as detailed connection information.`
 			err            error
 			dataFetcher    fetcher.Fetcher
 			connection     string
-			errorMsg       = "unable to find Proxy service with service name"
 		)
 		serviceName := args[0]
 
@@ -84,7 +86,7 @@ all nodes running the proxy service as well as detailed connection information.`
 		}
 
 		if len(proxyResults) == 0 {
-			return fmt.Errorf("%s '%s'", errorMsg, serviceName)
+			return fmt.Errorf("%s '%s'", proxyErrorMsg, serviceName)
 		}
 
 		err = json.Unmarshal(proxyResults, &proxiesSummary)
@@ -93,16 +95,10 @@ all nodes running the proxy service as well as detailed connection information.`
 		}
 
 		// get a list of node Id's while we search for the service name
-		nodeIds := make([]string, 0)
-		proxyCount := 0
-		for _, value := range proxiesSummary.Proxies {
-			if value.ServiceName == serviceName && value.Protocol == "tcp" {
-				proxyCount++
-				nodeIds = append(nodeIds, value.NodeID)
-			}
-		}
-		if proxyCount == 0 {
-			return fmt.Errorf("%s '%s'", errorMsg, serviceName)
+		nodeIds := getProxyNodeIDs(serviceName, proxiesSummary)
+
+		if len(nodeIds) == 0 {
+			return fmt.Errorf("%s '%s'", proxyErrorMsg, serviceName)
 		}
 
 		// we have valid service name so issue queries
@@ -152,6 +148,121 @@ all nodes running the proxy service as well as detailed connection information.`
 
 		return nil
 	},
+}
+
+// getProxyConnectionsCmd represents the get proxy-connections command
+var getProxyConnectionsCmd = &cobra.Command{
+	Use:   "proxy-connections service-name",
+	Short: "displays proxy server connections for a specific proxy server",
+	Long:  `The 'get proxy-connections' command displays proxy server connections for a specific proxy server.`,
+	Args: func(cmd *cobra.Command, args []string) error {
+		if len(args) != 1 {
+			displayErrorAndExit(cmd, provideProxyService)
+		}
+		return nil
+	},
+	RunE: func(cmd *cobra.Command, args []string) error {
+		var (
+			proxiesSummary = config.ProxiesSummary{}
+			err            error
+			dataFetcher    fetcher.Fetcher
+			connection     string
+		)
+		serviceName := args[0]
+
+		// retrieve the current context or the value from "-c"
+		connection, dataFetcher, err = GetConnectionAndDataFetcher()
+		if err != nil {
+			return err
+		}
+
+		proxyResults, err := dataFetcher.GetProxySummaryJSON()
+		if err != nil {
+			return err
+		}
+
+		if len(proxyResults) == 0 {
+			return fmt.Errorf("%s '%s'", proxyErrorMsg, serviceName)
+		}
+
+		err = json.Unmarshal(proxyResults, &proxiesSummary)
+		if err != nil {
+			return err
+		}
+
+		for {
+			// get a list of node Id's while we search for the service name
+			var (
+				nodeIds                = getProxyNodeIDs(serviceName, proxiesSummary)
+				connectionDetailsFinal = make([]config.ProxyConnection, 0)
+				connectionDetails      = config.ProxyConnections{}
+				connectionsResult      []byte
+			)
+
+			if len(nodeIds) == 0 {
+				return fmt.Errorf("%s '%s'", proxyErrorMsg, serviceName)
+			}
+
+			// retrieve all connection details from JSON
+
+			for i := range nodeIds {
+				data, err := dataFetcher.GetProxyConnectionsJSON(serviceName, nodeIds[i])
+				if err != nil {
+					return err
+				}
+				err = json.Unmarshal(data, &connectionDetails)
+				if err != nil {
+					return err
+				}
+
+				connectionDetailsFinal = append(connectionDetailsFinal, connectionDetails.Proxies...)
+			}
+
+			if strings.Contains(OutputFormat, constants.JSONPATH) || OutputFormat == constants.JSON {
+				connectionsResult, err = json.Marshal(connectionDetailsFinal)
+				if err != nil {
+					return err
+				}
+				if strings.Contains(OutputFormat, constants.JSONPATH) {
+					result, err := utils.GetJSONPathResults(connectionsResult, OutputFormat)
+					if err != nil {
+						return err
+					}
+					cmd.Println(result)
+				} else if OutputFormat == constants.JSON {
+					cmd.Println(string(connectionsResult))
+				}
+			} else {
+				if watchEnabled {
+					cmd.Println("\n" + time.Now().String())
+				}
+
+				cmd.Println(FormatCurrentCluster(connection))
+
+				cmd.Println(FormatProxyConnections(connectionDetailsFinal))
+			}
+
+			// check to see if we should exit if we are not watching
+			if !watchEnabled {
+				break
+			}
+			// we are watching so sleep and then repeat until CTRL-C
+			time.Sleep(time.Duration(watchDelay) * time.Second)
+		}
+
+		return nil
+	},
+}
+
+func getProxyNodeIDs(selectedService string, proxiesSummary config.ProxiesSummary) []string {
+	// get a list of node Id's while we search for the service name
+	nodeIDs := make([]string, 0)
+	for _, value := range proxiesSummary.Proxies {
+		if value.ServiceName == selectedService && value.Protocol == "tcp" {
+			nodeIDs = append(nodeIDs, value.NodeID)
+		}
+	}
+	return nodeIDs
 }
 
 func displayProxyDetails(cmd *cobra.Command, dataFetcher fetcher.Fetcher, connection, protocol string, serviceResult, proxyResults []byte) error {

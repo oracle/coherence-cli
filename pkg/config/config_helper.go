@@ -106,6 +106,24 @@ type ProxySummary struct {
 	ResponseCount5xx  int64  `json:"responseCount5xx"`
 }
 
+type ProxyConnections struct {
+	Proxies []ProxyConnection `json:"items"`
+}
+
+type ProxyConnection struct {
+	NodeID               string `json:"nodeId"`
+	RemoteAddress        string `json:"remoteAddress"`
+	RemotePort           int32  `json:"remotePort"`
+	TimeStamp            string `json:"timeStamp"`
+	ConnectionTimeMillis int64  `json:"connectionTimeMillis"`
+	ClientProcessName    string `json:"clientProcessName"`
+	TotalBytesReceived   int64  `json:"totalBytesReceived"`
+	TotalBytesSent       int64  `json:"totalBytesSent"`
+	OutgoingByteBacklog  int64  `json:"outgoingByteBacklog"`
+	UUID                 string `json:"UUID"`
+	ClientRole           string `json:"clientRole"`
+}
+
 // HTTPSessionSummaries contains an array of Coherence*Web Sessions
 type HTTPSessionSummaries struct {
 	HTTPSessions []HTTPSessionSummary `json:"items"`

@@ -109,6 +109,7 @@ create_doc $DOCS_DIR/nslookup "${COHCTL} nslookup --help"
 
 # Proxies
 create_doc $DOCS_DIR/get_proxies "${COHCTL} get proxies --help"
+create_doc $DOCS_DIR/get_proxy_connections "${COHCTL} get proxy-connections --help"
 create_doc $DOCS_DIR/describe_proxy "${COHCTL} describe proxy --help"
 
 # Http Servers

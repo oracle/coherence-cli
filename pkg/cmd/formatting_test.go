@@ -176,3 +176,22 @@ func TestFormattingAllStringsWithAlignmentMax3(t *testing.T) {
 2this i...  2this m...  2wow ho...
 `))
 }
+
+// TestFormatConnectionMillis tests formatting connection millis
+func TestFormatConnectionMillis(t *testing.T) {
+	var (
+		second int64 = 1000
+		minute       = second * 60
+		hour         = minute * 60
+		day          = hour * 24
+		g            = NewGomegaWithT(t)
+	)
+
+	g.Expect(formatConnectionMillis(999)).To(Equal("0.9s"))
+	g.Expect(formatConnectionMillis(10993)).To(Equal("10.9s"))
+	g.Expect(formatConnectionMillis(25 * minute)).To(Equal("25m 00s"))
+	g.Expect(formatConnectionMillis(25*minute + second)).To(Equal("25m 01s"))
+	g.Expect(formatConnectionMillis(12 * hour)).To(Equal("12h 00m 00s"))
+	g.Expect(formatConnectionMillis(12*hour + 2*minute + 1*second)).To(Equal("12h 02m 01s"))
+	g.Expect(formatConnectionMillis(3*day + hour)).To(Equal("3d 01h 00m 00s"))
+}
