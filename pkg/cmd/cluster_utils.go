@@ -376,10 +376,9 @@ func getDependencyArgs(groupID, artifact, version string) []string {
 	gavArgs := getGAVArgs(groupID, artifact, version)
 	if artifact != "coherence" {
 		return append(gavArgs, "dependency:get", "-Dtransitive=true")
-	} else {
-		// don't bring any additional deps in
-		return append(gavArgs, "dependency:get")
 	}
+	// don't bring any additional deps in
+	return append(gavArgs, "dependency:get")
 }
 
 func getGAVArgs(groupID, artifact, version string) []string {
@@ -434,6 +433,7 @@ func runCommandBase(command, logFileName string, arguments []string) (string, er
 		Logger.Info("Run command", fields...)
 	}
 
+	start := time.Now()
 	process := exec.Command(command, arguments...)
 	if len(logFileName) > 0 {
 		// a log file was supplied, so we are assuming this command will be async and
@@ -453,6 +453,13 @@ func runCommandBase(command, logFileName string, arguments []string) (string, er
 	}
 	// wait for result
 	result, err = process.CombinedOutput()
+
+	if Config.Debug {
+		fields := []zapcore.Field{
+			zap.String("time", fmt.Sprintf("%v", time.Since(start))),
+		}
+		Logger.Info("Duration", fields...)
+	}
 
 	if err != nil {
 		return "", utils.GetError(fmt.Sprintf("unable to start process %s, %v\n%s", command, process, string(result)), err)
