@@ -373,12 +373,16 @@ func getTransitiveClasspath(groupID, artifact, version string) (string, error) {
 }
 
 func getDependencyArgs(groupID, artifact, version string) []string {
-	gavArgs := getGAVArgs(groupID, artifact, version)
-	if artifact != "coherence" {
-		return append(gavArgs, "dependency:get", "-Dtransitive=true")
+	var (
+		gavArgs    = getGAVArgs(groupID, artifact, version)
+		transitive = "true"
+	)
+
+	if artifact == "coherence" {
+		transitive = "false"
 	}
 	// don't bring any additional deps in
-	return append(gavArgs, "dependency:get")
+	return append(gavArgs, "dependency:get", "-Dtransitive="+transitive)
 }
 
 func getGAVArgs(groupID, artifact, version string) []string {
