@@ -13,6 +13,8 @@ import (
 	"github.com/oracle/coherence-cli/pkg/fetcher"
 	"github.com/oracle/coherence-cli/pkg/utils"
 	"github.com/spf13/cobra"
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -194,14 +196,32 @@ func getCommonArguments(connection ClusterConnection) []string {
 
 func startClient(cmd *cobra.Command, connection ClusterConnection, class string) error {
 	var (
-		err       error
-		result    string
-		arguments = getCommonArguments(connection)
+		err            error
+		result         string
+		startupProfile = getProfileValue(profileValueParam)
+		profileArgs    []string
+		arguments      = getCommonArguments(connection)
 	)
+
+	// check if any profiles have been specified
+	if profileValueParam != "" {
+		// this profile param has already been validated
+		profileArgs = strings.Split(startupProfile, " ")
+		arguments = append(arguments, profileArgs...)
+	}
 
 	arguments = append(arguments, getClientArgs(class, class)...)
 
 	cmd.Printf("Starting client %s...\n", class)
+	if Config.Debug {
+		fields := []zapcore.Field{
+			zap.String("type", getJavaExec()),
+			zap.String("class", class),
+			zap.String("arguments", fmt.Sprintf("%v", arguments)),
+		}
+		Logger.Info("Starting Client", fields...)
+	}
+
 	process := exec.Command(getJavaExec(), arguments...) // #nosec G204
 	process.Stdout = cmd.OutOrStdout()
 	process.Stdin = cmd.InOrStdin()
@@ -210,9 +230,6 @@ func startClient(cmd *cobra.Command, connection ClusterConnection, class string)
 	if err != nil {
 		return utils.GetError(fmt.Sprintf("unable to start %s: %v", class, result), err)
 	}
-	//
-	//// handle CTRL-C
-	//handleCTRLC(process.Process)
 
 	return process.Wait()
 }
@@ -356,8 +373,16 @@ func getTransitiveClasspath(groupID, artifact, version string) (string, error) {
 }
 
 func getDependencyArgs(groupID, artifact, version string) []string {
-	gavArgs := getGAVArgs(groupID, artifact, version)
-	return append(gavArgs, "dependency:get", "-Dtransitive=true")
+	var (
+		gavArgs    = getGAVArgs(groupID, artifact, version)
+		transitive = "true"
+	)
+
+	if artifact == "coherence" {
+		transitive = "false"
+	}
+	// don't bring any additional deps in
+	return append(gavArgs, "dependency:get", "-Dtransitive="+transitive)
 }
 
 func getGAVArgs(groupID, artifact, version string) []string {
@@ -404,6 +429,15 @@ func runCommandBase(command, logFileName string, arguments []string) (string, er
 		processLogFile *os.File
 	)
 
+	if Config.Debug {
+		fields := []zapcore.Field{
+			zap.String("command", command),
+			zap.String("arguments", strings.Join(arguments, " ")),
+		}
+		Logger.Info("Run command", fields...)
+	}
+
+	start := time.Now()
 	process := exec.Command(command, arguments...)
 	if len(logFileName) > 0 {
 		// a log file was supplied, so we are assuming this command will be async and
@@ -423,6 +457,13 @@ func runCommandBase(command, logFileName string, arguments []string) (string, er
 	}
 	// wait for result
 	result, err = process.CombinedOutput()
+
+	if Config.Debug {
+		fields := []zapcore.Field{
+			zap.String("time", fmt.Sprintf("%v", time.Since(start))),
+		}
+		Logger.Info("Duration", fields...)
+	}
 
 	if err != nil {
 		return "", utils.GetError(fmt.Sprintf("unable to start process %s, %v\n%s", command, process, string(result)), err)

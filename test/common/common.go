@@ -543,6 +543,9 @@ func RunTestSetMemberCommands(t *testing.T) {
 
 	cliCmd := cmd.Initialize(nil)
 
+	// set the debug to true
+	test_utils.EnsureCommandContains(g, t, cliCmd, "on", configArg, file, "set", "debug", "on")
+
 	// should be able to add new cluster
 	test_utils.EnsureCommandContains(g, t, cliCmd, addedCluster, configArg, file, "add", "cluster",
 		context.ClusterName, "-u", context.Url)
@@ -556,7 +559,7 @@ func RunTestSetMemberCommands(t *testing.T) {
 		"all", "-a", "loggingLevel", "-v", "1", "-y", "-c", "cluster1")
 
 	// sleep tp ensure management refresh is reached
-	test_utils.Sleep(10)
+	test_utils.Sleep(30)
 
 	// query the log level
 	test_utils.EnsureCommandContains(g, t, cliCmd, "\"loggingLevel\":1", configArg, file, "get", "members",
@@ -566,7 +569,7 @@ func RunTestSetMemberCommands(t *testing.T) {
 	test_utils.EnsureCommandContains(g, t, cliCmd, cmd.OperationCompleted, configArg, file, "set", "member",
 		"1", "-a", "loggingLevel", "-v", "6", "-y", "-c", "cluster1")
 
-	test_utils.Sleep(10)
+	test_utils.Sleep(30)
 
 	// query the log level - should have log level 9 and 6
 	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "\"loggingLevel\":1,\"loggingLevel\":6", configArg,
@@ -576,7 +579,7 @@ func RunTestSetMemberCommands(t *testing.T) {
 	test_utils.EnsureCommandContains(g, t, cliCmd, cmd.OperationCompleted, configArg, file, "set", "member",
 		"all", "-a", "loggingLevel", "-v", "3", "-y", "-c", "cluster1")
 
-	test_utils.Sleep(5)
+	test_utils.Sleep(30)
 
 	// query the log level - should have log level 3
 	test_utils.EnsureCommandContains(g, t, cliCmd, "\"loggingLevel\":3", configArg, file, "get", "members",
@@ -587,7 +590,7 @@ func RunTestSetMemberCommands(t *testing.T) {
 	test_utils.EnsureCommandContains(g, t, cliCmd, cmd.OperationCompleted, configArg, file, "set", "member",
 		"all", "-a", "loggingFormat", "-v", loggingFormat, "-y", "-c", "cluster1")
 
-	test_utils.Sleep(5)
+	test_utils.Sleep(15)
 
 	// query the logging format
 	test_utils.EnsureCommandContains(g, t, cliCmd, loggingFormat, configArg, file, "get", "members",
