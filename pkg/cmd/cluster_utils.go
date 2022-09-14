@@ -176,14 +176,6 @@ func startCluster(cmd *cobra.Command, connection ClusterConnection, serverCount,
 		}
 
 		cmd.Printf("Starting cluster member %s...\n", member)
-		if Config.Debug {
-			fields := []zapcore.Field{
-				zap.String("type", getJavaExec()),
-				zap.String("logfile", memberLogFile),
-				zap.String("commandline", fmt.Sprintf("%v", arguments)),
-			}
-			Logger.Info("Starting Server", fields...)
-		}
 		_, err = runCommandAsync(getJavaExec(), memberLogFile, arguments)
 		if err != nil {
 			return utils.GetError(fmt.Sprintf("unable to start member %s", member), err)
@@ -225,7 +217,7 @@ func startClient(cmd *cobra.Command, connection ClusterConnection, class string)
 		fields := []zapcore.Field{
 			zap.String("type", getJavaExec()),
 			zap.String("class", class),
-			zap.String("command-line", fmt.Sprintf("%v", arguments)),
+			zap.String("arguments", fmt.Sprintf("%v", arguments)),
 		}
 		Logger.Info("Starting Client", fields...)
 	}
@@ -382,7 +374,12 @@ func getTransitiveClasspath(groupID, artifact, version string) (string, error) {
 
 func getDependencyArgs(groupID, artifact, version string) []string {
 	gavArgs := getGAVArgs(groupID, artifact, version)
-	return append(gavArgs, "dependency:get", "-Dtransitive=true")
+	if artifact != "coherence" {
+		return append(gavArgs, "dependency:get", "-Dtransitive=true")
+	} else {
+		// don't bring any additional deps in
+		return append(gavArgs, "dependency:get")
+	}
 }
 
 func getGAVArgs(groupID, artifact, version string) []string {
@@ -428,6 +425,14 @@ func runCommandBase(command, logFileName string, arguments []string) (string, er
 		result         []byte
 		processLogFile *os.File
 	)
+
+	if Config.Debug {
+		fields := []zapcore.Field{
+			zap.String("command", command),
+			zap.String("arguments", fmt.Sprintf("%v", arguments)),
+		}
+		Logger.Info("Run command", fields...)
+	}
 
 	process := exec.Command(command, arguments...)
 	if len(logFileName) > 0 {
