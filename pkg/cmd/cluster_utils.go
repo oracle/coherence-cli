@@ -428,7 +428,7 @@ func runCommandBase(command, logFileName string, arguments []string) (string, er
 	if Config.Debug {
 		fields := []zapcore.Field{
 			zap.String("command", command),
-			zap.String("arguments", fmt.Sprintf("%v", arguments)),
+			zap.String("arguments", strings.Join(arguments, " ")),
 		}
 		Logger.Info("Run command", fields...)
 	}
