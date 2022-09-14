@@ -44,7 +44,7 @@ and be space delimited. If you set a profile that exists, it will be overwritten
 		)
 
 		// validate profile name
-		if err = validProfileName(profileName); err != nil {
+		if err = validateProfileName(profileName); err != nil {
 			return err
 		}
 
@@ -148,7 +148,7 @@ func init() {
 	removeProfileCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
 }
 
-func validProfileName(profileName string) error {
+func validateProfileName(profileName string) error {
 	if !isValid(profileName) {
 		return fmt.Errorf("profile name %s must only contain letters, numbers and '", profileName)
 	}

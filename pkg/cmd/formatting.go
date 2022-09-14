@@ -1490,9 +1490,11 @@ func FormatProxyConnections(connections []config.ProxyConnection) string {
 func FormatProxyServers(services []config.ProxySummary, protocol string) string {
 	// get the number of proxies matching the protocol
 	var (
-		serviceCount = 0
-		alignment    []string
+		serviceCount       = 0
+		alignment          []string
+		formattingFunction = getFormattingFunction()
 	)
+
 	for _, value := range services {
 		if protocol == value.Protocol {
 			serviceCount++
@@ -1518,7 +1520,7 @@ func FormatProxyServers(services []config.ProxySummary, protocol string) string 
 	stringValues[0] = getColumns(NodeIDColumn, "HOST IP", ServiceNameColumn)
 
 	if protocol == "tcp" {
-		stringValues[0] = getColumns(stringValues[0], "CONNECTIONS", "BYTES SENT", "BYTES REC")
+		stringValues[0] = getColumns(stringValues[0], "CONNECTIONS", "DATA SENT", "DATA REC")
 		if OutputFormat == constants.WIDE {
 			stringValues[0] = getColumns(stringValues[0],
 				"MSG SENT", "MSG RCV", "BYTES BACKLOG", "MSG BACKLOG", "UNAUTH")
@@ -1547,7 +1549,7 @@ func FormatProxyServers(services []config.ProxySummary, protocol string) string 
 
 		if protocol == "tcp" {
 			stringValues[i+1] = getColumns(stringValues[i+1], formatLargeInteger(value.ConnectionCount),
-				formatLargeInteger(value.TotalBytesSent), formatLargeInteger(value.TotalBytesReceived))
+				formattingFunction(value.TotalBytesSent), formattingFunction(value.TotalBytesReceived))
 			if OutputFormat == constants.WIDE {
 				stringValues[i+1] = getColumns(stringValues[i+1], formatLargeInteger(value.TotalMessagesSent),
 					formatLargeInteger(value.TotalMessagesReceived), formatLargeInteger(value.OutgoingByteBacklog),

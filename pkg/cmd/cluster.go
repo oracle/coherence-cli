@@ -1197,6 +1197,11 @@ func runStartClientOperation(cmd *cobra.Command, class string) error {
 		return err
 	}
 
+	// validate profile
+	if err = validateProfile(); err != nil {
+		return err
+	}
+
 	connection, _, err = GetConnectionAndDataFetcher()
 	if err != nil {
 		return err
@@ -1380,16 +1385,19 @@ func init() {
 
 	startConsoleCmd.Flags().StringVarP(&heapMemoryParam, heapMemoryArg, "M", defaultHeap, heapMemoryMessage)
 	startConsoleCmd.Flags().Int32VarP(&logLevelParam, logLevelArg, "l", 5, logLevelMessage)
+	startConsoleCmd.Flags().StringVarP(&profileValueParam, profileArg, "P", "", profileMessage)
 
 	startCohQLCmd.Flags().StringVarP(&heapMemoryParam, heapMemoryArg, "M", defaultHeap, heapMemoryMessage)
 	startCohQLCmd.Flags().StringVarP(&fileNameParam, "file", "f", "", "file name to read CohQL commands from")
 	startCohQLCmd.Flags().StringVarP(&statementParam, "statement", "S", "", "statement to execute enclosed in double quotes")
 	startCohQLCmd.Flags().Int32VarP(&logLevelParam, logLevelArg, "l", 5, logLevelMessage)
 	startCohQLCmd.Flags().BoolVarP(&extendClientParam, "extend", "X", false, "start CohQL as Extend client. Only works for default cache config")
+	startCohQLCmd.Flags().StringVarP(&profileValueParam, profileArg, "P", "", profileMessage)
 
 	startClassCmd.Flags().StringVarP(&heapMemoryParam, heapMemoryArg, "M", defaultHeap, heapMemoryMessage)
 	startClassCmd.Flags().Int32VarP(&logLevelParam, logLevelArg, "l", 5, logLevelMessage)
 	startClassCmd.Flags().BoolVarP(&extendClientParam, "extend", "X", false, "start CohQL as Extend client. Only works for default cache config")
+	startClassCmd.Flags().StringVarP(&profileValueParam, profileArg, "P", "", profileMessage)
 
 	scaleClusterCmd.Flags().Int32VarP(&replicaCountParam, "replicas", "r", 3, serverCountMessage)
 	scaleClusterCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
