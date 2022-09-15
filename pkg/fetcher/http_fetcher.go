@@ -352,7 +352,7 @@ func (h HTTPFetcher) GetServicePartitionsJSON(serviceName string) ([]byte, error
 	result, err := httpGetRequest(h, servicesPath+getSafeServiceName(h, serviceName)+
 		"/partition/?links=")
 	if err != nil {
-		return constants.EmptyByte, utils.GetError("cannot get scheduled distributions for service "+serviceName, err)
+		return constants.EmptyByte, utils.GetError("cannot get partitions for service "+serviceName, err)
 	}
 	return result, nil
 }
