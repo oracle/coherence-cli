@@ -60,16 +60,18 @@ jobs:
       with:
         go-version: 1.17.x
 
-    - name: Setup Gradle
-      uses: gradle/gradle-build-action@v2
-
     - name: Build cohctl
       shell: bash
       run: make cohctl
 
-    - name: Create Cluster Tests
+    - name: Setup Gradle and Run Create Cluster Tests
       shell: bash
-      run: COHERENCE_VERSION=${{ matrix.coherenceVersion }} make test-create-cluster
+      run: |
+        wget get -c https://services.gradle.org/distributions/gradle-7.4.2-bin.zip -P /tmp
+        sudo unzip -d /opt/gradle /tmp/gradle-7.4.2-bin.zip
+        export GRADLE_HOME=/opt/gradle/gradle-7.4.2
+        export PATH=$GRADLE_HOME/bin:$PATH
+        COHERENCE_VERSION=${{ matrix.coherenceVersion }} make test-create-cluster
 
     - uses: actions/upload-artifact@v1
       if: failure()
