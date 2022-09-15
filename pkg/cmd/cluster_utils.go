@@ -18,8 +18,8 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
+	"path"
 	"path/filepath"
-	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -30,6 +30,39 @@ const cohQLClass = "com.tangosol.coherence.dslquery.QueryPlus"
 const ceGroupID = "com.oracle.cohrence.ce"
 const fileTypeJar = "jar"
 const fileTypePom = "pom"
+
+const javaExec = "java"
+const mvnExec = "mvn"
+const gradleExec = "gradle"
+
+// a build template for saving the runtime classpath to a file by running
+//
+// gradle --no-daemon -b build.gradle -q buildClasspath -PfileName=/tmp/file.out
+//
+const buildGradleFilePart1 = `
+plugins {
+    id 'java'
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+`
+
+const buildGradleFilePart2 = `
+}
+
+tasks.register("buildClasspath") {
+    dependsOn build
+    group = "Execution"
+    def fileName = findProperty('fileName') ?: "file.out"
+    new File(fileName).text = sourceSets.test.runtimeClasspath.getAsPath()
+}
+`
+
+const gradleDirName = "gradle-dir-name-cohctl-cli"
 
 // default Jars to use
 var (
@@ -49,11 +82,9 @@ var (
 // checkCreateRequirements validates that all the necessary requirements are fulfilled
 // for creating a cluster. This includes mvn and java executables. Nil is returned to
 // indicate everything is ok, otherwise an error is returned
-func checkCreateRequirements() error {
+func checkRuntimeRequirements() error {
 	var (
-		javaExec = getJavaExec()
-		mvnExec  = getMvnExec()
-		err      error
+		err error
 	)
 
 	processJava := exec.Command(javaExec, "-v")
@@ -61,38 +92,111 @@ func checkCreateRequirements() error {
 		return utils.GetError(fmt.Sprintf("unable to get Java version using %s -v: %v", javaExec, processJava), err)
 	}
 
-	processMaven := exec.Command(mvnExec, "-v")
-	if err = processMaven.Start(); err != nil {
-		return utils.GetError(fmt.Sprintf("unable to get Maven version using %s -v, %v", mvnExec, processMaven), err)
+	return nil
+}
+
+// checkDepsRequirements checks for either mvn or gradle depending upon the
+// setting of Config.useGradle
+func checkDepsRequirements() error {
+	var (
+		err      error
+		execName = getExecType()
+	)
+
+	proc := exec.Command(execName, "-v")
+	if err = proc.Start(); err != nil {
+		return utils.GetError(fmt.Sprintf("unable to get depdencies tool using %s -v, %v", execName, proc), err)
 	}
 
 	return nil
 }
 
-func getJavaExec() string {
-	return "java"
+func getExecType() string {
+	if Config.UseGradle {
+		return gradleExec
+	}
+
+	return mvnExec
 }
 
-func getMvnExec() string {
-	return "mvn"
-}
-
-// getCoherenceDependencies runs the mvn dependency:get command to download coherence.jar and coherence-json.jar
-// which are the minimum requirements to create a cluster with management over rest enabled
-func getCoherenceDependencies(cmd *cobra.Command) error {
+// buildGradleClasspath builds a classpath using gradle by creating a temporary
+// build.gradle file and running a custom task.
+// this is experimental and if we can find a better way to do this then we can change this
+func buildGradleClasspath() ([]string, error) {
 	var (
-		mvnExec = getMvnExec()
-		err     error
-		result  string
+		err           error
+		classpath     = make([]string, 0)
+		gradleTempDir string
+		gradleFile    string
+		outputFile    *os.File
+		data          []byte
+		output        string
+		arguments     = []string{"--no-daemon", "-q", "buildClasspath", "-b"}
+		sb            strings.Builder
 	)
 
-	// sort the defaultJars
-	sort.Slice(defaultJars, func(p, q int) bool {
-		if defaultJars[p].GroupID == defaultJars[q].GroupID {
-			return strings.Compare(defaultJars[p].Artifact, defaultJars[q].Artifact) < 0
+	// create a temporary directory for gradle file
+	gradleTempDir, err = os.MkdirTemp("", gradleDirName)
+	if err != nil {
+		return classpath, utils.GetError("unable to create temporary directory", err)
+	}
+
+	gradleFile = path.Join(gradleTempDir, "build.gradle")
+
+	outputFile, err = os.CreateTemp("", "classpath")
+	if err != nil {
+		return classpath, utils.GetError("unable to create temporary file", err)
+	}
+
+	defer os.Remove(gradleFile)
+	defer os.Remove(gradleTempDir)
+	defer os.Remove(outputFile.Name())
+
+	// build the gradle dependencies
+	for _, v := range defaultJars {
+		sb.WriteString(fmt.Sprintf("implementation '%s:%s:%s'\n", v.GroupID, v.Artifact, v.Version))
+	}
+
+	finalGradleFile := buildGradleFilePart1 + sb.String() + buildGradleFilePart2
+
+	// write the gradle file
+	err = ioutil.WriteFile(gradleFile, []byte(finalGradleFile), 0600)
+	if err != nil {
+		return classpath, utils.GetError("unable to write to temporary file", err)
+	}
+
+	// now we have the build.gradle file, run it to get the classpath in the outputFle
+	output, err = runCommand(gradleExec, append(arguments, gradleFile, fmt.Sprintf("-PfileName=%s", outputFile.Name())))
+
+	if err != nil {
+		return classpath, utils.GetError(fmt.Sprintf("unable to run gradle command.\n%s", output), err)
+	}
+
+	// now we have a valid file, read it in
+	data, err = ioutil.ReadFile(outputFile.Name())
+	if err != nil {
+		return classpath, utils.GetError("unable to read from temp file", err)
+	}
+
+	// go through the generated classpath and remove any entry that contains
+	// gradleDirName as these are added by gradle in the temporary directory created
+	for _, v := range strings.Split(string(data), getClasspathSeparator()) {
+		if !strings.Contains(v, gradleTempDir) {
+			classpath = append(classpath, v)
 		}
-		return strings.Compare(defaultJars[p].GroupID, defaultJars[q].GroupID) < 0
-	})
+	}
+
+	// convert the full path to a slice
+	return classpath, nil
+}
+
+// getCoherenceMavenDependencies runs the mvn dependency:get command to download coherence.jar and coherence-json.jar
+// which are the minimum requirements to create a cluster with management over rest enabled
+func getCoherenceMavenDependencies(cmd *cobra.Command) error {
+	var (
+		err    error
+		result string
+	)
 
 	for _, entry := range defaultJars {
 		cmd.Printf("- %s:%s:%s\n", entry.GroupID, entry.Artifact, entry.Version)
@@ -176,7 +280,7 @@ func startCluster(cmd *cobra.Command, connection ClusterConnection, serverCount,
 		}
 
 		cmd.Printf("Starting cluster member %s...\n", member)
-		_, err = runCommandAsync(getJavaExec(), memberLogFile, arguments)
+		_, err = runCommandAsync(javaExec, memberLogFile, arguments)
 		if err != nil {
 			return utils.GetError(fmt.Sprintf("unable to start member %s", member), err)
 		}
@@ -215,14 +319,14 @@ func startClient(cmd *cobra.Command, connection ClusterConnection, class string)
 	cmd.Printf("Starting client %s...\n", class)
 	if Config.Debug {
 		fields := []zapcore.Field{
-			zap.String("type", getJavaExec()),
+			zap.String("type", javaExec),
 			zap.String("class", class),
 			zap.String("arguments", fmt.Sprintf("%v", arguments)),
 		}
 		Logger.Info("Starting Client", fields...)
 	}
 
-	process := exec.Command(getJavaExec(), arguments...) // #nosec G204
+	process := exec.Command(javaExec, arguments...) // #nosec G204
 	process.Stdout = cmd.OutOrStdout()
 	process.Stdin = cmd.InOrStdin()
 	process.Stderr = cmd.ErrOrStderr()
@@ -340,7 +444,6 @@ func getTransitiveClasspath(groupID, artifact, version string) (string, error) {
 		classpath string
 		output    string
 		data      []byte
-		mvnExec   = getMvnExec()
 		arguments = []string{"dependency:build-classpath", "-DincludeScope=runtime", "-f"}
 	)
 
@@ -363,7 +466,7 @@ func getTransitiveClasspath(groupID, artifact, version string) (string, error) {
 		return output, utils.GetError("unable to run dependency:build-classpath", err)
 	}
 
-	// no we have a valid file, read it in
+	// now we have a valid file, read it in
 	data, err = ioutil.ReadFile(file.Name())
 	if err != nil {
 		return output, utils.GetError("unable to read from temp file", err)

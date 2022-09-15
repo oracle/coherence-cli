@@ -167,6 +167,10 @@ create_doc $DOCS_DIR/get_environment "${COHCTL} get environment --help"
 create_doc $DOCS_DIR/set_debug "${COHCTL} set debug --help"
 create_doc $DOCS_DIR/get_debug "${COHCTL} get debug --help"
 
+# Use Gradle
+create_doc $DOCS_DIR/set_use_gradle "${COHCTL} set use-gradle --help"
+create_doc $DOCS_DIR/get_use_gradle "${COHCTL} get use-gradle --help"
+
 # Bytes Display
 create_doc $DOCS_DIR/set_bytes_format "${COHCTL} set bytes-format --help"
 create_doc $DOCS_DIR/get_bytes_format "${COHCTL} get bytes-format --help"

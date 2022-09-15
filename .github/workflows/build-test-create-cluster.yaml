@@ -60,6 +60,9 @@ jobs:
       with:
         go-version: 1.17.x
 
+    - name: Setup Gradle
+      uses: gradle/gradle-build-action@v2
+
     - name: Build cohctl
       shell: bash
       run: make cohctl

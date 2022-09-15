@@ -85,7 +85,7 @@ and be space delimited. If you set a profile that exists, it will be overwritten
 // removeProfileCmd represents the remove profile command
 var removeProfileCmd = &cobra.Command{
 	Use:   "profile profile-name",
-	Short: "removes a profile value from the list of profiles",
+	Short: "remove a profile value from the list of profiles",
 	Long:  `The 'remove profile' command removes a profile value from the list of profiles.`,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
@@ -131,7 +131,7 @@ var removeProfileCmd = &cobra.Command{
 // getProfilesCmd represents the get profiles command
 var getProfilesCmd = &cobra.Command{
 	Use:   "profiles",
-	Short: "displays the profiles that have been created",
+	Short: "display the profiles that have been created",
 	Long:  `The 'get profiles' displays the profiles that have been created.`,
 	Args:  cobra.ExactArgs(0),
 	RunE: func(cmd *cobra.Command, args []string) error {

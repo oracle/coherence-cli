@@ -18,6 +18,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"os"
+	"sort"
 	"strconv"
 	"strings"
 	"sync"
@@ -931,8 +932,12 @@ NOTE: This is an experimental feature and my be altered or removed in the future
 			splitArtifacts []string
 		)
 
-		// validate the Java and Maven executable are present and in the path
-		if err = checkCreateRequirements(); err != nil {
+		// validate the Java and Maven/Gradle executable are present and in the path
+		if err = checkRuntimeRequirements(); err != nil {
+			return err
+		}
+
+		if err = checkDepsRequirements(); err != nil {
 			return err
 		}
 
@@ -1008,6 +1013,7 @@ NOTE: This is an experimental feature and my be altered or removed in the future
 		cmd.Printf("Group ID:             %s\n", groupID)
 		cmd.Printf("Additional artifacts: %v\n", additionalArtifactsParam)
 		cmd.Printf("Startup Profile:      %v\n", profileValueParam)
+		cmd.Printf("Dependency Tool:      %v\n", getExecType())
 
 		// confirm the operation
 		if !confirmOperation(cmd, "Are you sure you want to create the cluster with the above details? (y/n) ") {
@@ -1030,39 +1036,60 @@ NOTE: This is an experimental feature and my be altered or removed in the future
 			}
 		}
 
-		if skipMavenDepsParam {
-			cmd.Println("\nSkipping downloading Maven artifacts")
-		} else {
-			cmd.Printf("\nChecking %d Maven dependencies...\n", len(defaultJars))
-
-			// download the coherence dependencies
-			if err = getCoherenceDependencies(cmd); err != nil {
-				return fmt.Errorf("unable to get some depdencies: %v", err)
+		// sort the defaultJars depdencies
+		sort.Slice(defaultJars, func(p, q int) bool {
+			if defaultJars[p].GroupID == defaultJars[q].GroupID {
+				return strings.Compare(defaultJars[p].Artifact, defaultJars[q].Artifact) < 0
 			}
-		}
+			return strings.Compare(defaultJars[p].GroupID, defaultJars[q].GroupID) < 0
+		})
 
-		// generate classpath
 		classpath := make([]string, 0)
-		for _, entry := range defaultJars {
-			// get the maven repository classpath for the jar
-			cpEntry, err = getMavenClasspath(entry.GroupID, entry.Artifact, entry.Version, fileTypeJar)
 
+		if Config.UseGradle {
+			cmd.Printf("\nUsing gradle to generate classpath for %d dependencies...\n", len(defaultJars))
+			for _, entry := range defaultJars {
+				cmd.Printf("- %s:%s:%s\n", entry.GroupID, entry.Artifact, entry.Version)
+			}
+			classpath, err = buildGradleClasspath()
 			if err != nil {
 				return err
 			}
-			classpath = append(classpath, cpEntry)
+		} else {
+			// use maven dependencies
+			if skipMavenDepsParam {
+				cmd.Println("\nSkipping downloading Maven artifacts")
+			} else {
+				cmd.Printf("\nChecking %d Maven dependencies...\n", len(defaultJars))
 
-			// get transitive deps
-			if entry.Artifact != "jline" && entry.Artifact != "coherence" {
-				// if we have specified to get transitive dependencies, then we need to use the downloaded pom
-				// file for the dependency and get the classpath. Ignore coherence and jline as this will
-				// bring in many dependencies due to me not uet figuring out how to not bring in optional deps
-				cpEntry, err = getTransitiveClasspath(entry.GroupID, entry.Artifact, entry.Version)
+				// download the coherence dependencies
+				if err = getCoherenceMavenDependencies(cmd); err != nil {
+					return fmt.Errorf("unable to get some depdencies: %v", err)
+				}
+			}
+
+			// generate classpath
+			for _, entry := range defaultJars {
+				// get the maven repository classpath for the jar
+				cpEntry, err = getMavenClasspath(entry.GroupID, entry.Artifact, entry.Version, fileTypeJar)
 
 				if err != nil {
 					return err
 				}
 				classpath = append(classpath, cpEntry)
+
+				// get transitive deps
+				if entry.Artifact != "jline" && entry.Artifact != "coherence" {
+					// if we have specified to get transitive dependencies, then we need to use the downloaded pom
+					// file for the dependency and get the classpath. Ignore coherence and jline as this will
+					// bring in many dependencies due to me not uet figuring out how to not bring in optional deps
+					cpEntry, err = getTransitiveClasspath(entry.GroupID, entry.Artifact, entry.Version)
+
+					if err != nil {
+						return err
+					}
+					classpath = append(classpath, cpEntry)
+				}
 			}
 		}
 
@@ -1229,8 +1256,8 @@ func runClusterOperation(cmd *cobra.Command, connectionName, operation string) e
 		confirmMessage string
 	)
 
-	// validate the Java and Maven executable are present and in the path
-	if err = checkCreateRequirements(); err != nil {
+	// validate the Java executable are present and in the path
+	if err = checkRuntimeRequirements(); err != nil {
 		return err
 	}
 
