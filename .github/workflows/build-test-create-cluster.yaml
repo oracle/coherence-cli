@@ -67,10 +67,12 @@ jobs:
     - name: Setup Gradle and Run Create Cluster Tests
       shell: bash
       run: |
-        wget get -c https://services.gradle.org/distributions/gradle-7.4.2-bin.zip -P /tmp
         DIR=`pwd`
-        mkdir -p ${DIR}/gradle-home
-        unzip -d ${DIR}/gradle-home /tmp/gradle-7.4.2-bin.zip
+        INSTALL=${DIR}/gradle-install
+        mkdir -p ${DIR}/gradle-home ${INSTALL}
+        wget -c https://services.gradle.org/distributions/gradle-7.4.2-bin.zip -P ${INSTALL}
+        ls -l ${INSTALL}
+        unzip -d ${DIR}/gradle-home ${INSTALL}/gradle-7.4.2-bin.zip
         export GRADLE_HOME=${DIR}/gradle-home/gradle-7.4.2
         export PATH=$GRADLE_HOME/bin:$PATH
         COHERENCE_VERSION=${{ matrix.coherenceVersion }} make test-create-cluster
