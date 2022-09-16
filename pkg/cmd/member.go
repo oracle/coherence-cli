@@ -350,7 +350,7 @@ or loggingFormat.`,
 
 			actualValue = intValue
 			// carry out some basic validation
-			if attributeName == "loggingLevel" && intValue < 1 || intValue > 9 {
+			if attributeName == "loggingLevel" && (intValue < 1 || intValue > 9) {
 				return fmt.Errorf("log level must be betweeen 1 and 9")
 			} else if intValue <= 0 {
 				return fmt.Errorf("value for attribute %s must be greater than zero", attributeName)
