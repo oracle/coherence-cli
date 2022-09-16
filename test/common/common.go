@@ -1159,6 +1159,14 @@ func RunTestElasticDataCommands(t *testing.T) {
 	test_utils.EnsureCommandErrorContains(g, t, cliCmd, cmd.ElasticDataMessage, configArg, file, "describe", elasticData,
 		"not-valid", "-c", context.ClusterName)
 
+	// compact Flash Journal
+	test_utils.EnsureCommandContainsAll(g, t, cliCmd, cmd.OperationCompleted, configArg, file, "compact", elasticData,
+		"FlashJournalRM", "-y", "-c", context.ClusterName)
+
+	// compact Ram Journal
+	test_utils.EnsureCommandContainsAll(g, t, cliCmd, cmd.OperationCompleted, configArg, file, "compact", elasticData,
+		"RamJournalRM", "-y", "-c", context.ClusterName)
+
 	// remove the cluster entries
 	test_utils.EnsureCommandContains(g, t, cliCmd, context.ClusterName, configArg, file, "remove", "cluster", "cluster1", "-y")
 }

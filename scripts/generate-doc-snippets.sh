@@ -147,6 +147,7 @@ create_doc $DOCS_DIR/get_timeout "${COHCTL} get timeout --help"
 # Elastic Data
 create_doc $DOCS_DIR/get_elastic_data "${COHCTL} get elastic-data --help"
 create_doc $DOCS_DIR/describe_elastic_data "${COHCTL} describe elastic-data --help"
+create_doc $DOCS_DIR/compact_elastic_data "${COHCTL} compact elastic-data --help"
 
 # Executors
 create_doc $DOCS_DIR/get_executors "${COHCTL} get executors --help"

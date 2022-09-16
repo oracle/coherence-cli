@@ -606,6 +606,10 @@ func Initialize(command *cobra.Command) *cobra.Command {
 	resetCmd.AddCommand(resetFederationStatsCmd)
 	resetCmd.AddCommand(resetExecutorStatsCmd)
 
+	// compact
+	command.AddCommand(compactCmd)
+	compactCmd.AddCommand(compactElasticDataCmd)
+
 	return command
 }
 

@@ -374,15 +374,8 @@ or loggingFormat.`,
 			nodeIds = append(nodeIds, nodeIDArray...)
 			confirmMessage = fmt.Sprintf("all %d nodes", len(nodeIds))
 		} else {
-			nodeIds = strings.Split(loggingNodeIds, ",")
-			for _, value := range nodeIds {
-				if !utils.IsValidInt(value) {
-					return fmt.Errorf(invalidNodeID, value)
-				}
-
-				if !utils.SliceContains(nodeIDArray, value) {
-					return fmt.Errorf(noNodeID, value)
-				}
+			if nodeIds, err = getNodeIDs(loggingNodeIds, nodeIDArray); err != nil {
+				return err
 			}
 			confirmMessage = fmt.Sprintf("%d node(s)", len(nodeIds))
 		}

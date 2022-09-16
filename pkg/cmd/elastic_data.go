@@ -9,6 +9,7 @@ package cmd
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"github.com/oracle/coherence-cli/pkg/config"
 	"github.com/oracle/coherence-cli/pkg/constants"
 	"github.com/oracle/coherence-cli/pkg/fetcher"
@@ -19,9 +20,14 @@ import (
 	"time"
 )
 
+const ram = "RamJournalRM"
+const flash = "FlashJournalRM"
+const noElasticData = "elastic data is not configured"
+
 var (
-	ElasticDataMessage = "name must be FlashJournalRM or RamJournalRM"
+	ElasticDataMessage = fmt.Sprintf("name must be %s or %s", ram, flash)
 	errorInvalidType   = errors.New(ElasticDataMessage)
+	nodeIDsED          string
 )
 
 // getElasticDataCmd represents the get elastic-data command
@@ -111,7 +117,7 @@ Journal details for the cluster.`,
 			if !watchEnabled {
 				break
 			}
-			// we are watching services so sleep and then repeat until CTRL-C
+			// we are watching so sleep and then repeat until CTRL-C
 			time.Sleep(time.Duration(watchDelay) * time.Second)
 		}
 
@@ -121,13 +127,13 @@ Journal details for the cluster.`,
 
 // describeElasticDataCmd represents the describe elastic-data command
 var describeElasticDataCmd = &cobra.Command{
-	Use:   "elastic-data {FlashJournalRM|RamJournalRM}",
+	Use:   "elastic-data {" + flash + "|" + ram + "}",
 	Short: "describe a flash or ram journal",
 	Long: `The 'describe elastic-data' command shows information related to a specific journal type.
-The allowable values are RamJournalRM or FlashJournalRM.`,
+The allowable values are ` + ram + ` or ` + flash + `.`,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
-			displayErrorAndExit(cmd, "you must provide either FlashJournalRM or RamJournalRM")
+			displayErrorAndExit(cmd, ElasticDataMessage)
 		}
 		return nil
 	},
@@ -148,10 +154,10 @@ The allowable values are RamJournalRM or FlashJournalRM.`,
 			return err
 		}
 
-		if journalType == "RamJournalRM" {
+		if journalType == ram {
 			queryType = "ram"
 			header = "RAM JOURNAL DETAILS"
-		} else if journalType == "FlashJournalRM" {
+		} else if journalType == flash {
 			queryType = "flash"
 			header = "FLASH JOURNAL DETAILS"
 		} else {
@@ -161,6 +167,10 @@ The allowable values are RamJournalRM or FlashJournalRM.`,
 		result, err = dataFetcher.GetElasticDataDetails(queryType)
 		if err != nil {
 			return err
+		}
+
+		if len(result) == 0 {
+			return errors.New(noElasticData)
 		}
 
 		if strings.Contains(OutputFormat, constants.JSONPATH) {
@@ -193,6 +203,105 @@ The allowable values are RamJournalRM or FlashJournalRM.`,
 
 			cmd.Println(FormatElasticData(edValues.ElasticData, false))
 		}
+
+		return nil
+	},
+}
+
+// compactElasticDataCmd represents the compact elastic-data command
+var compactElasticDataCmd = &cobra.Command{
+	Use:   "elastic-data {" + flash + "|" + ram + "}",
+	Short: "compact a flash or ram journal",
+	Long: `The 'compact elastic-data' command compacts (garbage collects) a specific journal type 
+for all or specific nodes. ` + `The allowable values are ` + ram + ` or ` + flash + `.`,
+	Args: func(cmd *cobra.Command, args []string) error {
+		if len(args) != 1 {
+			displayErrorAndExit(cmd, ElasticDataMessage)
+		}
+		return nil
+	},
+	RunE: func(cmd *cobra.Command, args []string) error {
+		var (
+			queryType      string
+			err            error
+			dataFetcher    fetcher.Fetcher
+			connection     string
+			journalType    = args[0]
+			nodeIDArray    []string
+			nodeIds        []string
+			confirmMessage string
+			errorSink      = createErrorSink()
+			wg             sync.WaitGroup
+			result         []byte
+		)
+
+		connection, dataFetcher, err = GetConnectionAndDataFetcher()
+		if err != nil {
+			return err
+		}
+
+		if journalType == ram {
+			queryType = "ram"
+		} else if journalType == flash {
+			queryType = "flash"
+		} else {
+			return errorInvalidType
+		}
+
+		result, err = dataFetcher.GetElasticDataDetails(queryType)
+		if err != nil {
+			return err
+		}
+
+		if len(result) == 0 {
+			return errors.New(noElasticData)
+		}
+
+		// validate the nodes
+		nodeIDArray, err = GetNodeIds(dataFetcher)
+		if err != nil {
+			return err
+		}
+
+		if nodeIDsED == "all" {
+			nodeIds = append(nodeIds, nodeIDArray...)
+			confirmMessage = fmt.Sprintf("all %d nodes", len(nodeIds))
+		} else {
+			if nodeIds, err = getNodeIDs(nodeIDsED, nodeIDArray); err != nil {
+				return err
+			}
+
+			confirmMessage = fmt.Sprintf("%d node(s)", len(nodeIds))
+		}
+
+		cmd.Println(FormatCurrentCluster(connection))
+
+		// confirm the operation
+		if !confirmOperation(cmd, fmt.Sprintf("Are you sure you want to compact %s for %s? (y/n) ",
+			queryType, confirmMessage)) {
+			return nil
+		}
+
+		wg.Add(len(nodeIds))
+
+		for _, value := range nodeIds {
+			go func(nodeId string) {
+				var err1 error
+				defer wg.Done()
+				_, err1 = dataFetcher.CompactElasticData(queryType, nodeId)
+				if err1 != nil {
+					errorSink.AppendError(err1)
+				}
+			}(value)
+		}
+
+		wg.Wait()
+		errorList := errorSink.GetErrors()
+
+		if len(errorList) > 0 {
+			return utils.GetErrors(errorList)
+		}
+		cmd.Println(OperationCompleted)
 
 		return nil
 	},
@@ -275,4 +384,9 @@ func combineElasticData(elasticData config.ElasticDataValues) []config.ElasticDa
 	}
 
 	return finalData
+}
+
+func init() {
+	compactElasticDataCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
+	compactElasticDataCmd.Flags().StringVarP(&nodeIDsED, "node", "n", "all", commaSeparatedIDMessage)
 }

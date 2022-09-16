@@ -15,6 +15,7 @@ There are various commands that allow you to work with and manage Elastic Data.
 
 * <<get-elastic-data, `cohctl get elastic-data`>> - displays the elastic data details
 * <<describe-elastic-data, `cohctl describe elastic-data`>> - shows information related to a specific journal type
+* <<compact-elastic-data, `cohctl compact elastic-data`>> - compacts a flash or ram journal
 
 NOTE: This is a Coherence Grid Edition feature only and is not available with Community Edition.
 
@@ -46,6 +47,33 @@ include::../../build/_output/docs-gen/describe_elastic_data.adoc[tag=text]
 [source,bash]
 ----
 $ cohctl describe elastic-data RamJournalRM -c local
+----
+
+[#compact-elastic-data]
+==== Compact Elastic Data
+
+include::../../build/_output/docs-gen/compact_elastic_data.adoc[tag=text]
+
+*Examples*
+
+Compact flash journal for all nodes.
+
+[source,bash]
+----
+$ cohctl compact elastic-data FlashJournalRM -c local
+
+Are you sure you want to compact flash for all 2 nodes? (y/n) y
+operation completed
+----
+
+Compact ram journal for 1 node.
+
+[source,bash]
+----
+$ cohctl compact elastic-data RamJournalRM -n 1 -c local
+
+Are you sure you want to compact ram for 1 node(s)? (y/n) y
+operation completed
 ----
 
 

@@ -552,6 +552,22 @@ func (h HTTPFetcher) StopReporter(nodeID string) error {
 	return err
 }
 
+// CompactElasticData compacts elastic data for a journal type and node
+func (h HTTPFetcher) CompactElasticData(journalType, nodeID string) ([]byte, error) {
+	var (
+		err      error
+		finalURL = journalPath + journalType + membersPath + nodeID + "/compact"
+	)
+
+	_, err = httpPostRequest(h, finalURL, constants.EmptyByte)
+	if err != nil {
+		return constants.EmptyByte, fmt.Errorf("unable to compact %s against node %s. %v",
+			journalType, nodeID, err)
+	}
+
+	return constants.EmptyByte, nil
+}
+
 // GetElasticDataDetails retrieves elastic data details for the type of flash or ram
 func (h HTTPFetcher) GetElasticDataDetails(journalType string) ([]byte, error) {
 	if journalType != "ram" && journalType != "flash" {
@@ -700,7 +716,6 @@ func (h HTTPFetcher) InvokeServiceMemberOperation(serviceName, nodeID, operation
 	}
 
 	return constants.EmptyByte, nil
-
 }
 
 // InvokeSnapshotOperation invokes a snapshot operation against a service
