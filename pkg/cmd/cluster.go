@@ -905,7 +905,7 @@ const defaultCoherenceVersion = "22.06.1"
 const startClusterCommand = "start cluster"
 const scaleClusterCommand = "scale cluster"
 const stopClusterCommand = "stop cluster"
-const defaultHeap = "265m"
+const defaultHeap = "512m"
 
 // createClusterCmd represents the create cluster command
 var createClusterCmd = &cobra.Command{
