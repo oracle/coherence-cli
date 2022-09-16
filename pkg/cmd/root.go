@@ -58,6 +58,7 @@ const usernameShort = "U"
 const clusterKey = "clusters"
 const currentContextKey = "currentContext"
 const debugContextKey = "debug"
+const useGradleContextKey = "useGradle"
 const ignoreCertsContextKey = "ignoreInvalidCerts"
 const requestTimeoutKey = "requestTimeout"
 const defaultBytesFormatKey = "defaultBytesFormat"
@@ -133,6 +134,7 @@ type CoherenceCLIConfig struct {
 	IgnoreInvalidCerts bool                `json:"ignoreInvalidCerts"`
 	DefaultBytesFormat string              `json:"defaultBytesFormat"`
 	DefaultHeap        string              `json:"defaultHeap"`
+	UseGradle          bool                `json:"useGradle"`
 	Profiles           []ProfileValue      `mapstructure:"profiles"`
 }
 
@@ -460,6 +462,7 @@ func Initialize(command *cobra.Command) *cobra.Command {
 	getCmd.AddCommand(getDefaultHeapCmd)
 	getCmd.AddCommand(getProfilesCmd)
 	getCmd.AddCommand(getProxyConnectionsCmd)
+	getCmd.AddCommand(getUseGradleCmd)
 
 	// set command
 	command.AddCommand(setCmd)
@@ -476,6 +479,7 @@ func Initialize(command *cobra.Command) *cobra.Command {
 	setCmd.AddCommand(setExecutorCmd)
 	setCmd.AddCommand(setDefaultHeapCmd)
 	setCmd.AddCommand(setProfileCmd)
+	setCmd.AddCommand(setUseGradleCmd)
 
 	// clear
 	command.AddCommand(clearCmd)
@@ -601,6 +605,10 @@ func Initialize(command *cobra.Command) *cobra.Command {
 	resetCmd.AddCommand(resetCacheStatsCmd)
 	resetCmd.AddCommand(resetFederationStatsCmd)
 	resetCmd.AddCommand(resetExecutorStatsCmd)
+
+	// compact
+	command.AddCommand(compactCmd)
+	compactCmd.AddCommand(compactElasticDataCmd)
 
 	return command
 }

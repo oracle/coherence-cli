@@ -64,9 +64,18 @@ jobs:
       shell: bash
       run: make cohctl
 
-    - name: Create Cluster Tests
+    - name: Setup Gradle and Run Create Cluster Tests
       shell: bash
-      run: COHERENCE_VERSION=${{ matrix.coherenceVersion }} make test-create-cluster
+      run: |
+        DIR=`pwd`
+        INSTALL=${DIR}/gradle-install
+        mkdir -p ${DIR}/gradle-home ${INSTALL}
+        wget -c https://services.gradle.org/distributions/gradle-7.4.2-bin.zip -P ${INSTALL}
+        ls -l ${INSTALL}
+        unzip -d ${DIR}/gradle-home ${INSTALL}/gradle-7.4.2-bin.zip
+        export GRADLE_HOME=${DIR}/gradle-home/gradle-7.4.2
+        export PATH=$GRADLE_HOME/bin:$PATH
+        COHERENCE_VERSION=${{ matrix.coherenceVersion }} make test-create-cluster
 
     - uses: actions/upload-artifact@v1
       if: failure()

@@ -187,6 +187,27 @@ if [ -z "$COM" ] ; then
   runCommand remove cluster local -y
 fi
 
+# Setup to create a cluster using gradle
+
+pause
+
+runCommand set use-gradle true
+runCommand get use-gradle
+
+message "Create Cluster Using Gradle"
+gradle -v
+runCommand create cluster local -y -v $VERSION $COM
+runCommand set context local
+
+wait_for_ready
+
+runCommand get clusters
+runCommand get members
+
+runCommand stop cluster local -y
+pause
+runCommand remove cluster local -y
+
 
 
 

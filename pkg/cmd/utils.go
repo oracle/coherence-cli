@@ -507,3 +507,18 @@ func GetURLContents(resourceURL string) ([]byte, error) {
 	body = buffer.Bytes()
 	return body, nil
 }
+
+// validateNodeIDs gets the node id list from the nodeIDArray and validates
+func getNodeIDs(nodeIDs string, nodeIDArray []string) ([]string, error) {
+	nodeIDList := strings.Split(nodeIDs, ",")
+	for _, value := range nodeIDList {
+		if !utils.IsValidInt(value) {
+			return nodeIDList, fmt.Errorf("invalid value for node id of %s", value)
+		}
+
+		if !utils.SliceContains(nodeIDArray, value) {
+			return nodeIDList, fmt.Errorf("no node with node id %s exists in this cluster", value)
+		}
+	}
+	return nodeIDList, nil
+}

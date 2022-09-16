@@ -175,6 +175,9 @@ type Fetcher interface {
 	// GetElasticDataDetails retrieves elastic data details for the type of flash or ram
 	GetElasticDataDetails(journalType string) ([]byte, error)
 
+	// CompactElasticData compacts elastic data for a journal type and node
+	CompactElasticData(journalType, nodeID string) ([]byte, error)
+
 	// InvokeSnapshotOperation invokes a snapshot operation against a service
 	InvokeSnapshotOperation(serviceName, snapshotName, operation string, archived bool) ([]byte, error)
 

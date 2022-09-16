@@ -153,7 +153,7 @@ all nodes running the proxy service as well as detailed connection information.`
 // getProxyConnectionsCmd represents the get proxy-connections command
 var getProxyConnectionsCmd = &cobra.Command{
 	Use:   "proxy-connections service-name",
-	Short: "displays proxy server connections for a specific proxy server",
+	Short: "display proxy server connections for a specific proxy server",
 	Long:  `The 'get proxy-connections' command displays proxy server connections for a specific proxy server.`,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {

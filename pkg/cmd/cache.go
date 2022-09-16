@@ -325,15 +325,8 @@ batchFactor, refreshFactor or requeueThreshold.`,
 			nodeIds = append(nodeIds, nodeIDArray...)
 			confirmMessage = fmt.Sprintf("all %d nodes", len(nodeIds))
 		} else {
-			nodeIds = strings.Split(nodeIDCache, ",")
-			for _, value := range nodeIds {
-				if !utils.IsValidInt(value) {
-					return fmt.Errorf("invalid value for node id of %s", value)
-				}
-
-				if !utils.SliceContains(nodeIDArray, value) {
-					return fmt.Errorf("no node with node id %s exists in this cluster", value)
-				}
+			if nodeIds, err = getNodeIDs(nodeIDCache, nodeIDArray); err != nil {
+				return err
 			}
 			confirmMessage = fmt.Sprintf("%d node(s)", len(nodeIds))
 		}

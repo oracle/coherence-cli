@@ -350,7 +350,7 @@ or loggingFormat.`,
 
 			actualValue = intValue
 			// carry out some basic validation
-			if attributeName == "loggingLevel" && intValue < 1 || intValue > 9 {
+			if attributeName == "loggingLevel" && (intValue < 1 || intValue > 9) {
 				return fmt.Errorf("log level must be betweeen 1 and 9")
 			} else if intValue <= 0 {
 				return fmt.Errorf("value for attribute %s must be greater than zero", attributeName)
@@ -374,15 +374,8 @@ or loggingFormat.`,
 			nodeIds = append(nodeIds, nodeIDArray...)
 			confirmMessage = fmt.Sprintf("all %d nodes", len(nodeIds))
 		} else {
-			nodeIds = strings.Split(loggingNodeIds, ",")
-			for _, value := range nodeIds {
-				if !utils.IsValidInt(value) {
-					return fmt.Errorf(invalidNodeID, value)
-				}
-
-				if !utils.SliceContains(nodeIDArray, value) {
-					return fmt.Errorf(noNodeID, value)
-				}
+			if nodeIds, err = getNodeIDs(loggingNodeIds, nodeIDArray); err != nil {
+				return err
 			}
 			confirmMessage = fmt.Sprintf("%d node(s)", len(nodeIds))
 		}

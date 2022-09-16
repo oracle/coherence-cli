@@ -14,9 +14,15 @@
 There are various cluster commands that allow you to create and work with local development based clusters.
 
 These commands allow you to create local only development based clusters (scoped to localhost) for Coherence CE 22.06.x and
-Commercial 14.1.1.2206.x versions and above.
+Commercial 14.1.1.2206.x versions and above. You must have the following setup for this to work:
 
-Once you create a local cluster, you can manage and monitor them in the same way as you can with discovered
+1. Java 11+ executable on the classpath, or Java 17+ if you are using Coherence CE 22.09 or above.
+2. Maven 3.6+ or Gradle 7.+ executable on the classpath.
+
+NOTE: Maven is used by default for dependency resolution and classpath generation, but if you prefer Gradle, then use the
+following: `cohctl set use-grade true`. You can revert to Maven by using `cohctl set use-gradle false`.
+
+Once you create a local cluster, you can manage and monitor these clusters in the same way as you can with discovered
 or manually added clusters. You can also run the Coherence console and CohQL (Query client) against these clusters.
 
 When you create a cluster, the first node started will always have management over REST enabled.
@@ -24,7 +30,7 @@ When you create a cluster, the first node started will always have management ov
 You may also specify a profile when you start a cluster using the `-P` option. The value of the profile
 , which is a string containing "-Dkey=value" pairs, will be included in the cache servers started.
 
-On first creation of a Coherence cluster, if your Maven repository is empty, it may take a short while to download the minimal depdencies.
+On first creation of a Coherence cluster, if your Maven or Gradle repository is empty, it may take a short while to download the minimal depdencies.
 
 NOTE: These commands are experimental only and may be changed or removed in the future. It is *not supported* to use
 these commands to create production clusters.
@@ -38,6 +44,11 @@ these commands to create production clusters.
 * <<start-console, `cohctl start console`>> - starts a console client against a cluster that was manually created
 * <<start-cohql, `cohctl start cohql`>> - starts a CohQL client against a cluster that was manually created
 * <<start-class, `cohctl start class`>> - starts a specific Java class against the local Coherence cluster
+
+*Setting dependency tool*
+
+* <<set-use-gradle, `cohctl set use-gradle`>> - sets whether to use gradle for dependency management
+* <<get-use-gradle, `cohctl get use-gradle`>> - displays the current setting for using gradle for dependency management
 
 *Setting default heap sizes*
 
@@ -293,6 +304,29 @@ $ cohctl start class com.my.company.Class -c local
 
 Starting client com.my.company.Class...
 ----
+
+[#set-use-gradle]
+==== Set Use Gradle
+
+include::../../build/_output/docs-gen/set_use_gradle.adoc[tag=text]
+
+[source,bash]
+----
+$ cohctl set use-gradle true
+Use Gradle is now set to true
+----
+
+[#get-use-gradle]
+==== Get Use Gradle
+
+include::../../build/_output/docs-gen/get_use_gradle.adoc[tag=text]
+
+[source,bash]
+----
+$ cohctl get use-gradle
+Use Gradle: true
+----
+
 
 [#set-default-heap]
 ==== Set Default Heap
