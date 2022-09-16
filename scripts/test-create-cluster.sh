@@ -187,27 +187,29 @@ if [ -z "$COM" ] ; then
   runCommand remove cluster local -y
 fi
 
-# Setup to create a cluster using gradle
-
 pause
 
-runCommand set use-gradle true
-runCommand get use-gradle
+# Don't run gradle tests on commercial until we figure out gradle proxy
+if [ -z "$COM" ] ; then
+  # Setup to create a cluster using gradle
 
-message "Create Cluster Using Gradle"
-gradle -v
-runCommand create cluster local -y -v $VERSION $COM
-runCommand set context local
+  runCommand set use-gradle true
+  runCommand get use-gradle
 
-wait_for_ready
+  message "Create Cluster Using Gradle"
+  gradle -v
+  runCommand create cluster local -y -v $VERSION $COM
+  runCommand set context local
 
-runCommand get clusters
-runCommand get members
+  wait_for_ready
 
-runCommand stop cluster local -y
-pause
-runCommand remove cluster local -y
+  runCommand get clusters
+  runCommand get members
 
+  runCommand stop cluster local -y
+  pause
+  runCommand remove cluster local -y
+fi
 
 
 
