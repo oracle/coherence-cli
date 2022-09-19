@@ -620,7 +620,7 @@ func (h HTTPFetcher) InvokeFederationOperation(serviceName, command, participant
 
 	_, err = httpPostRequest(h, url, constants.EmptyByte)
 	if err != nil {
-		return constants.EmptyByte, fmt.Errorf("unable to perforam %s for service %s", command, serviceName)
+		return constants.EmptyByte, utils.GetError(fmt.Sprintf("unable to perform %s for service %s", command, serviceName), err)
 	}
 
 	return constants.EmptyByte, nil
