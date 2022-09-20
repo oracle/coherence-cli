@@ -241,7 +241,7 @@ func (h HTTPFetcher) SetMemberAttribute(memberID, attribute string, value interf
 	result, err := httpPostRequest(h, membersPath+memberID, payload)
 	if err != nil {
 		return constants.EmptyByte, utils.GetError(
-			fmt.Sprintf("cannot set member value %vfor attribute %s ", value, attribute), err)
+			fmt.Sprintf("cannot set member value %v for attribute %s ", value, attribute), err)
 	}
 	return result, nil
 }
@@ -254,7 +254,7 @@ func (h HTTPFetcher) SetExecutorAttribute(executor, attribute string, value inte
 	result, err := httpPostRequest(h, executorsPath+url.PathEscape(executor), payload)
 	if err != nil {
 		return constants.EmptyByte, utils.GetError(
-			fmt.Sprintf("cannot set executor value %vfor attribute %s ", value, attribute), err)
+			fmt.Sprintf("cannot set executor value %v for attribute %s ", value, attribute), err)
 	}
 	return result, nil
 }
