@@ -909,7 +909,7 @@ const defaultHeap = "512m"
 
 // createClusterCmd represents the create cluster command
 var createClusterCmd = &cobra.Command{
-	Use:   "cluster",
+	Use:   "cluster cluster-name",
 	Short: "create a local Coherence cluster",
 	Long: `The 'create cluster' command creates a local cluster, adds to the cohctl.yaml file 
 and starts it. You must have the 'mvn' executable and 'java' 11+ executable in your PATH for 

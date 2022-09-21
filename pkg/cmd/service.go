@@ -516,7 +516,7 @@ service is a cache service.`,
 
 // setServiceCmd represents the set service command
 var setServiceCmd = &cobra.Command{
-	Use:   "service <service-name>",
+	Use:   "service service-name",
 	Short: "set a service attribute across one or more members",
 	Long: `The 'set service' command sets an attribute for a service across one or member nodes.
 The following attribute names are allowed: threadCount, threadCountMin, threadCountMax or
