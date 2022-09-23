@@ -123,15 +123,15 @@ include::../../build/_output/docs-gen/get_clusters.adoc[tag=text]
 ----
 $ cohctl get clusters
 
-CONNECTION  TYPE  URL                                                  VERSION  CLUSTER NAME  CLUSTER TYPE  CTX CREATED
-local       http  http://localhost:30000/management/coherence/cluster  21.06.1  my-cluster    Standalone        N
+CONNECTION  TYPE  URL                                                  VERSION  CLUSTER NAME  CLUSTER TYPE  CTX LOCAL
+local       http  http://localhost:30000/management/coherence/cluster  21.06.1  my-cluster    Standalone        false
 ----
 
 Notes:
 
 1. An asterix will show in the `CTX` column if the cluster has been set using the `cohctl set context` command.
 
-2. The `CREATED` column indicates if the cluster was a cluster manually created via the `cohctl create cluster` command.
+2. The `LOCAL` column indicates if the cluster was a local cluster manually created via the `cohctl create cluster` command.
 
 NOTE: If you use the `-o wide` option, an additional column is displayed showing if the management endpoint is running. This
 doesn't mean the cluster if fully up, but that at least the management is. With this option, each cluster connection is checked
@@ -141,8 +141,8 @@ and may take a while if you have a large number of connections. See below
 ----
 $ cohctl get clusters -o wide
 
-CONNECTION  TYPE  URL                                                  VERSION  CLUSTER NAME  CLUSTER TYPE  CTX CREATED RUNNING
-local       http  http://localhost:30000/management/coherence/cluster  21.06.1  my-cluster    Standalone        N       Y
+CONNECTION  TYPE  URL                                                  VERSION  CLUSTER NAME  CLUSTER TYPE  CTX LOCAL RUNNING
+local       http  http://localhost:30000/management/coherence/cluster  21.06.1  my-cluster    Standalone        false true
 ----
 
 [#describe-cluster]

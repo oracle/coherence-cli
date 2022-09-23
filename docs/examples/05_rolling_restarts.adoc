@@ -50,8 +50,8 @@ Read on below for the example.
 [source,bash]
 ----
 $ cohctl get clusters
-CONNECTION  TYPE  URL                                                  VERSION  CLUSTER NAME  CLUSTER TYPE
-local       http  http://localhost:30000/management/coherence/cluster  21.12    my-cluster    Standalone
+CONNECTION  TYPE  URL                                                  VERSION  CLUSTER NAME  CLUSTER TYPE  LOCAL
+local       http  http://localhost:30000/management/coherence/cluster  21.12    my-cluster    Standalone    false
 
 $ cohctl set context local
 Current context is now local

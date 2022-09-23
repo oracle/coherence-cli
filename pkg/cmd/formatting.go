@@ -770,7 +770,7 @@ func FormatClusterConnections(clusters []ClusterConnection) string {
 
 	var stringValues = make([]string, clusterCount+1)
 
-	stringValues[0] = getColumns("CONNECTION", "TYPE", "URL", "VERSION", "CLUSTER NAME", "TYPE", "CTX", "CREATED")
+	stringValues[0] = getColumns("CONNECTION", "TYPE", "URL", "VERSION", "CLUSTER NAME", "TYPE", "CTX", "LOCAL")
 	if OutputFormat == constants.WIDE {
 		stringValues[0] = getColumns(stringValues[0], "RUNNING")
 	}
@@ -781,16 +781,16 @@ func FormatClusterConnections(clusters []ClusterConnection) string {
 			currentContext = "*"
 		}
 		if value.ManuallyCreated {
-			manualCluster = "Y"
+			manualCluster = "true"
 		} else {
-			manualCluster = "N"
+			manualCluster = "false"
 		}
 		stringValues[i+1] = getColumns(value.Name, value.ConnectionType, value.ConnectionURL,
 			value.ClusterVersion, value.ClusterName, value.ClusterType, currentContext, manualCluster)
 		if OutputFormat == constants.WIDE {
-			running = "N"
+			running = "false"
 			if value.ManagementAvailable {
-				running = "Y"
+				running = "true"
 			}
 			stringValues[i+1] = getColumns(stringValues[i+1], running)
 		}

@@ -96,8 +96,8 @@ $ cohctl add cluster local -u http://localhost:30000/management/coherence/cluste
 Added cluster local with type http and URL http://localhost:30000/management/coherence/cluster
 
 $ cohctl get clusters
-CONNECTION  TYPE  URL                                                  VERSION  CLUSTER NAME  CLUSTER TYPE  CTX
-local       http  http://localhost:30000/management/coherence/cluster  21.12    my-cluster    Standalone
+CONNECTION  TYPE  URL                                                  VERSION  CLUSTER NAME  CLUSTER TYPE  CTX  LOCAL
+local       http  http://localhost:30000/management/coherence/cluster  21.12    my-cluster    Standalone         false
 ----
 
 NOTE: If you are not using a Docker container, you can also use the `cohctl discover clusters` command to automatically discover clusters using the Name Service.
