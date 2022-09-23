@@ -612,5 +612,7 @@ func isPortUsed(managementPort int32) bool {
 	}
 	defer conn.Close()
 
+	// if err was nil it means we were successful in connecting to the port
+	// as there was something running on it and listening
 	return err == nil
 }
