@@ -28,7 +28,7 @@ or manually added clusters. You can also run the Coherence console and CohQL (Qu
 When you create a cluster, the first node started will always have management over REST enabled.
 
 You may also specify a profile when you start a cluster using the `-P` option. The value of the profile
-, which is a string containing "-Dkey=value" pairs, will be included in the cache servers started.
+, which is a string containing `-Dkey=value` pairs, will be included in the cache servers started.
 
 On first creation of a Coherence cluster, if your Maven or Gradle repository is empty, it may take a short while to download the minimal depdencies.
 

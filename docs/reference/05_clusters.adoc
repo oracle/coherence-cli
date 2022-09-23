@@ -86,8 +86,8 @@ Are you sure you want to add the above 1 cluster(s)? (y/n) y
 Added cluster my-cluster with type http and URL http://127.0.0.1:30000/management/coherence/cluster
 
 coherence-cli$ (master)$ cohctl get clusters
-CONNECTION  TYPE  URL                                                  VERSION     CLUSTER NAME  TYPE        CTX
-my-cluster  http  http://127.0.0.1:30000/management/coherence/cluster  14.1.2.0.0  my-cluster    Standalone
+CONNECTION  TYPE  URL                                                  VERSION     CLUSTER NAME  TYPE        CTX  CREATED
+my-cluster  http  http://127.0.0.1:30000/management/coherence/cluster  14.1.2.0.0  my-cluster    Standalone       N
 ----
 
 NOTE: The cluster connection is automatically generated from the cluster name. If it already exists you will
@@ -121,13 +121,29 @@ include::../../build/_output/docs-gen/get_clusters.adoc[tag=text]
 
 [source,bash]
 ----
-cohctl get clusters
+$ cohctl get clusters
 
-CONNECTION  TYPE  URL                                                  VERSION  CLUSTER NAME  CLUSTER TYPE  CTX
-local       http  http://localhost:30000/management/coherence/cluster  21.06.1  my-cluster    Standalone
+CONNECTION  TYPE  URL                                                  VERSION  CLUSTER NAME  CLUSTER TYPE  CTX CREATED
+local       http  http://localhost:30000/management/coherence/cluster  21.06.1  my-cluster    Standalone        N
 ----
 
-NOTE: An asterix will show in the `CTX` column if the cluster has been set using the `cohctl set context` command.
+Notes:
+
+1. An asterix will show in the `CTX` column if the cluster has been set using the `cohctl set context` command.
+
+2. The `CREATED` column indicates if the cluster was a cluster manually created via the `cohctl create cluster` command.
+
+NOTE: If you use the `-o wide` option, an additional column is displayed showing if the management endpoint is running. This
+doesn't mean the cluster if fully up, but that at least the management is. With this option, each cluster connection is checked
+and may take a while if you have a large number of connections. See below
+
+[source,bash]
+----
+$ cohctl get clusters -o wide
+
+CONNECTION  TYPE  URL                                                  VERSION  CLUSTER NAME  CLUSTER TYPE  CTX CREATED RUNNING
+local       http  http://localhost:30000/management/coherence/cluster  21.06.1  my-cluster    Standalone        N       Y
+----
 
 [#describe-cluster]
 ==== Describe Cluster

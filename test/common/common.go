@@ -83,6 +83,9 @@ func RunTestClusterCommands(t *testing.T) {
 	// get clusters should return 1 cluster
 	test_utils.EnsureCommandContains(g, t, cliCmd, context.ClusterName, configArg, file, "get", "clusters")
 
+	// use wide option to check cluster connection
+	test_utils.EnsureCommandContains(g, t, cliCmd, "RUNNING", configArg, file, "get", "clusters", "-o", "wide")
+
 	// should NOT be able to add new cluster with the same name
 	test_utils.EnsureCommandErrorContains(g, t, cliCmd, "A connection for cluster named", configArg, file, "add", "cluster",
 		context.ClusterName, "-u", context.Url)

@@ -131,15 +131,20 @@ var removeClusterCmd = &cobra.Command{
 // getClustersCmd represents the get clusters command
 var getClustersCmd = &cobra.Command{
 	Use:   "clusters",
-	Short: "display the list of discovered or manually added clusters",
-	Long:  `The 'get clusters' command displays the list of cluster connections.`,
-	Args:  cobra.ExactArgs(0),
+	Short: "display the list of discovered, manually added or created clusters",
+	Long: `The 'get clusters' command displays the list of cluster connections.
+The 'CREATED' column is set to 'Y' if the cluster has been created using the
+'cohctl create cluster' command. You can also use the '-o wide' option to see if the
+cluster is running.`,
+	Args: cobra.ExactArgs(0),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var (
-			err          error
-			result       []byte
-			jsonResult   []byte
-			stringResult string
+			err           error
+			result        []byte
+			jsonResult    []byte
+			clusterResult []byte
+			stringResult  string
+			dataFetcher   fetcher.Fetcher
 		)
 		outputFormat, _ := cmd.Flags().GetString("output")
 
@@ -166,6 +171,29 @@ var getClustersCmd = &cobra.Command{
 			}
 			cmd.Println(string(result))
 		} else {
+			if outputFormat == constants.WIDE {
+				// go through each of the connections and see if the management URL responds with
+				// a http 200, which would at least indicating the management node is up.
+				// it is not a true test of if the cluster is actually fully functional, but just an indicator
+
+				for i, v := range Config.Clusters {
+					// see if we can contact the management node
+					var running = false
+					dataFetcher, err = GetDataFetcher(v.Name)
+					if err == nil {
+						var cluster = config.Cluster{}
+						// must be a valid connection
+						clusterResult, err = dataFetcher.GetClusterDetailsJSON()
+						if err == nil && len(clusterResult) > 0 {
+							// unmarshall and only set true if the cluster names match
+							err = json.Unmarshal(clusterResult, &cluster)
+							running = err == nil && cluster.ClusterName == v.ClusterName
+						}
+					}
+
+					Config.Clusters[i].ManagementAvailable = running
+				}
+			}
 			cmd.Println(FormatClusterConnections(clusters))
 		}
 		return nil
@@ -971,7 +999,7 @@ NOTE: This is an experimental feature and my be altered or removed in the future
 
 		// ensure the http port is not already used by a running cluster
 		if isPortUsed(httpPortParam) {
-			return fmt.Errorf("the port %d is already used, please choose another", httpPortParam)
+			return fmt.Errorf("the management port %d is already used, please choose another", httpPortParam)
 		}
 
 		// validate any additional artifacts

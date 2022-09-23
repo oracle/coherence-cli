@@ -162,6 +162,7 @@ type ClusterConnection struct {
 	Arguments           string `json:"arguments"`           // arguments to start cluster with including cluster name, etc
 	ManagementPort      int32  `json:"managementPort"`      // arguments to start cluster with including cluster name, etc
 	PersistenceMode     string `json:"persistenceMode"`
+	ManagementAvailable bool   // only used when using -o wide option
 }
 
 // rootCmd represents the base command when called without any subcommands
