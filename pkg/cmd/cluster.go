@@ -906,6 +906,7 @@ const startClusterCommand = "start cluster"
 const scaleClusterCommand = "scale cluster"
 const stopClusterCommand = "stop cluster"
 const defaultHeap = "512m"
+const localHost = "127.0.0.1"
 
 // createClusterCmd represents the create cluster command
 var createClusterCmd = &cobra.Command{
@@ -966,6 +967,11 @@ NOTE: This is an experimental feature and my be altered or removed in the future
 			if err = utils.ValidatePort(metricsStartPortParam); err != nil {
 				return err
 			}
+		}
+
+		// ensure the http port is not already used by a running cluster
+		if isPortUsed(httpPortParam) {
+			return fmt.Errorf("the port %d is already used, please choose another", httpPortParam)
 		}
 
 		// validate any additional artifacts
@@ -1254,6 +1260,8 @@ func runClusterOperation(cmd *cobra.Command, connectionName, operation string) e
 		scaleType      string
 		dataFetcher    fetcher.Fetcher
 		confirmMessage string
+		cluster        = config.Cluster{}
+		clusterResult  []byte
 	)
 
 	// validate the Java executable are present and in the path
@@ -1296,6 +1304,23 @@ func runClusterOperation(cmd *cobra.Command, connectionName, operation string) e
 		return fmt.Errorf("the cluster %s does not appear to be started", connection.Name)
 	}
 	if operation == startClusterCommand && numProcesses > 0 {
+		// Retrieve the cluster details to see if the cluster name matches as
+		// a different cluster could already be running on this http management port
+		clusterResult, err = dataFetcher.GetClusterDetailsJSON()
+		if err != nil {
+			return err
+		}
+
+		err = json.Unmarshal(clusterResult, &cluster)
+		if err != nil {
+			return utils.GetError("unable to decode cluster details", err)
+		}
+
+		// We now have the cluster which is running based upon the management port
+		if connection.ClusterName != cluster.ClusterName {
+			return fmt.Errorf("A different cluster %s is running on this management port with process id: %v, please stop this cluster first", cluster.ClusterName, processIDs)
+		}
+
 		return fmt.Errorf("the cluster %s appears to be already started with process ids: %v", connection.Name, processIDs)
 	}
 
@@ -1388,7 +1413,7 @@ func init() {
 		fmt.Sprintf("persistence mode %v", validPersistenceModes))
 	createClusterCmd.Flags().Int32VarP(&httpPortParam, "http-port", "H", 30000, "http management port")
 	createClusterCmd.Flags().Int32VarP(&clusterPortParam, "cluster-port", "p", 7574, "cluster port")
-	createClusterCmd.Flags().StringVarP(&wkaParam, "wka", "W", "127.0.0.1", "well known address")
+	createClusterCmd.Flags().StringVarP(&wkaParam, "wka", "W", localHost, "well known address")
 	createClusterCmd.Flags().Int32VarP(&logLevelParam, logLevelArg, "l", 5, logLevelMessage)
 	createClusterCmd.Flags().Int32VarP(&startupDelayParam, startupDelayArg, "D", 1, startupDelayMessage)
 	createClusterCmd.Flags().Int32VarP(&replicaCountParam, "replicas", "r", 3, serverCountMessage)

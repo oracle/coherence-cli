@@ -16,6 +16,7 @@ import (
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"io/ioutil"
+	"net"
 	"os"
 	"os/exec"
 	"path"
@@ -600,4 +601,16 @@ func getConnection(connectionName string) (bool, ClusterConnection) {
 		}
 	}
 	return false, ClusterConnection{}
+}
+
+// isPortUsed checks to see if a port on localhost can be connected to
+func isPortUsed(managementPort int32) bool {
+	conn, err := net.DialTimeout("tcp", fmt.Sprintf("%s:%d", localHost, managementPort), time.Duration(fetcher.RequestTimeout)*time.Second)
+	if err != nil {
+		fmt.Println(err)
+		return false
+	}
+	defer conn.Close()
+
+	return err == nil
 }
