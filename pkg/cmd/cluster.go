@@ -175,6 +175,10 @@ cluster is running.`,
 				// go through each of the connections and see if the management URL responds with
 				// a http 200, which would at least indicating the management node is up.
 				// it is not a true test of if the cluster is actually fully functional, but just an indicator
+				// Manually set request timeout for this operation, so we don't wait for too long if endpoints cannot be reached
+				if Config.RequestTimeout > 5 {
+					fetcher.RequestTimeout = 5
+				}
 
 				for i, v := range Config.Clusters {
 					// see if we can contact the management node

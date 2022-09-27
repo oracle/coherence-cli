@@ -770,6 +770,10 @@ func FormatClusterConnections(clusters []ClusterConnection) string {
 
 	var stringValues = make([]string, clusterCount+1)
 
+	sort.Slice(clusters, func(p, q int) bool {
+		return strings.Compare(clusters[p].Name, clusters[q].Name) < 0
+	})
+
 	stringValues[0] = getColumns("CONNECTION", "TYPE", "URL", "VERSION", "CLUSTER NAME", "TYPE", "CTX", "LOCAL")
 	if OutputFormat == constants.WIDE {
 		stringValues[0] = getColumns(stringValues[0], "RUNNING")
@@ -869,7 +873,7 @@ func FormatHealthSummary(health []config.HealthSummaryShort) string {
 	var stringValues = make([]string, healthCount+1)
 
 	sort.Slice(health, func(p, q int) bool {
-		return strings.Compare(health[p].Name, health[q].Name) > 0
+		return strings.Compare(health[p].Name, health[q].Name) < 0
 	})
 
 	stringValues[0] = getColumns("NAME", "SUB TYPE", "MEMBERS", "STARTED", "LIVE", "READY", "SAFE")
@@ -917,7 +921,7 @@ func FormatMemberHealth(health []config.HealthSummary) string {
 		nodeID2, _ := strconv.Atoi(health[q].NodeID)
 
 		if nodeID1 == nodeID2 {
-			return strings.Compare(health[p].Name, health[q].Name) > 0
+			return strings.Compare(health[p].Name, health[q].Name) < 0
 		}
 		return nodeID1 < nodeID2
 	})
@@ -1058,7 +1062,7 @@ func FormatExecutors(executors []config.Executor, summary bool) string {
 	var stringValues = make([]string, executorCount+1)
 
 	sort.Slice(executors, func(p, q int) bool {
-		return strings.Compare(executors[p].Name, executors[q].Name) > 0
+		return strings.Compare(executors[p].Name, executors[q].Name) < 0
 	})
 
 	stringValues[0] = getColumns(NameColumn, header, "IN PROGRESS", "COMPLETED", "REJECTED", "DESCRIPTION")
@@ -1191,7 +1195,7 @@ func FormatServices(services []config.ServiceSummary) string {
 	var stringValues = make([]string, serviceCount+1)
 
 	sort.Slice(services, func(p, q int) bool {
-		return strings.Compare(services[p].ServiceName, services[q].ServiceName) > 0
+		return strings.Compare(services[p].ServiceName, services[q].ServiceName) < 0
 	})
 
 	stringValues[0] = getColumns(ServiceNameColumn, "TYPE", "MEMBERS", "STATUS HA", "STORAGE", "PARTITIONS")
@@ -1254,7 +1258,7 @@ func FormatMachines(machines []config.Machine) string {
 	var stringValues = make([]string, serviceCount+1)
 
 	sort.Slice(machines, func(p, q int) bool {
-		return strings.Compare(machines[p].MachineName, machines[q].MachineName) > 0
+		return strings.Compare(machines[p].MachineName, machines[q].MachineName) < 0
 	})
 
 	var (
@@ -1355,7 +1359,7 @@ func FormatPersistenceServices(services []config.ServiceSummary, isSummary bool)
 			nodeID2, _ := strconv.Atoi(services[q].NodeID)
 			return nodeID1 < nodeID2
 		}
-		return strings.Compare(services[p].ServiceName, services[q].ServiceName) > 0
+		return strings.Compare(services[p].ServiceName, services[q].ServiceName) < 0
 	})
 
 	var (
@@ -1432,7 +1436,7 @@ func FormatSnapshots(serviceSnapshots []config.Snapshots, archived bool) string 
 	}
 
 	sort.Slice(serviceSnapshots, func(p, q int) bool {
-		return strings.Compare(serviceSnapshots[p].ServiceName, serviceSnapshots[q].ServiceName) > 0
+		return strings.Compare(serviceSnapshots[p].ServiceName, serviceSnapshots[q].ServiceName) < 0
 	})
 
 	var stringValues = make([]string, 0)
@@ -1445,7 +1449,7 @@ func FormatSnapshots(serviceSnapshots []config.Snapshots, archived bool) string 
 	for _, service := range serviceSnapshots {
 		snapshots := service.Snapshots
 		sort.Slice(snapshots, func(p, q int) bool {
-			return strings.Compare(snapshots[p], snapshots[q]) > 0
+			return strings.Compare(snapshots[p], snapshots[q]) < 0
 		})
 		for _, value := range snapshots {
 			stringValues = append(stringValues, getColumns(service.ServiceName, value))
@@ -1524,7 +1528,7 @@ func FormatProxyServers(services []config.ProxySummary, protocol string) string 
 			nodeID2, _ := strconv.Atoi(services[q].NodeID)
 			return nodeID1 < nodeID2
 		}
-		return strings.Compare(services[p].ServiceName, services[q].ServiceName) > 0
+		return strings.Compare(services[p].ServiceName, services[q].ServiceName) < 0
 	})
 
 	// common header
