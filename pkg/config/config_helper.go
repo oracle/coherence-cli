@@ -330,6 +330,8 @@ type CacheDetail struct {
 	NodeID        string `json:"nodeId"`
 	Tier          string `json:"tier"`
 	UnitsBytes    int64  `json:"unitsBytes"`
+	Units         int64  `json:"units"`
+	UnitFactor    int64  `json:"unitFactor"`
 	CacheSize     int32  `json:"size"`
 	TotalPuts     int64  `json:"totalPuts"`
 	TotalGets     int64  `json:"totalGets"`

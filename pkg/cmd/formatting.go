@@ -609,8 +609,9 @@ func FormatCacheDetailsSizeAndAccess(cacheDetails []config.CacheDetail) (string,
 
 	for i, value := range cacheDetails {
 		var (
-			nodeID, _ = strconv.Atoi(value.NodeID)
-			hitProb   = 0.0
+			nodeID, _  = strconv.Atoi(value.NodeID)
+			hitProb    = 0.0
+			unitsBytes = value.Units * value.UnitFactor
 		)
 		totalGets := value.TotalGets
 		totalHits := value.CacheHits
@@ -619,7 +620,7 @@ func FormatCacheDetailsSizeAndAccess(cacheDetails []config.CacheDetail) (string,
 		}
 
 		stringValues[i+1] = getColumns(formatSmallInteger(int32(nodeID)), value.Tier,
-			formatSmallInteger(value.CacheSize), formattingFunction(value.UnitsBytes),
+			formatSmallInteger(value.CacheSize), formattingFunction(unitsBytes),
 			formatLargeInteger(value.TotalPuts),
 			formatLargeInteger(totalGets), formatLargeInteger(value.TotalRemoves))
 		if OutputFormat == constants.WIDE {
