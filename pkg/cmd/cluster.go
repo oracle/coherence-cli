@@ -933,7 +933,7 @@ var (
 	statementParam           string
 )
 
-const defaultCoherenceVersion = "22.06.1"
+const defaultCoherenceVersion = "22.09"
 const startClusterCommand = "start cluster"
 const scaleClusterCommand = "scale cluster"
 const stopClusterCommand = "stop cluster"

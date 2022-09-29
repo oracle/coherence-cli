@@ -16,8 +16,8 @@ There are various cluster commands that allow you to create and work with local 
 These commands allow you to create local only development based clusters (scoped to localhost) for Coherence CE 22.06.x and
 Commercial 14.1.1.2206.x versions and above. You must have the following setup for this to work:
 
-1. Java 11+ executable on the classpath, or Java 17+ if you are using Coherence CE 22.09 or above.
-2. Maven 3.6+ or Gradle 7.+ executable on the classpath.
+1. Java 17+ executable on the classpath, if you are using the default Coherence CE 22.09 or above.
+2. Maven 3.6+ or JDK compatible Gradle version 7.+ executable on the classpath.
 
 NOTE: Maven is used by default for dependency resolution and classpath generation, but if you prefer Gradle, then use the
 following: `cohctl set use-grade true`. You can revert to Maven by using `cohctl set use-gradle false`.
