@@ -945,10 +945,10 @@ var createClusterCmd = &cobra.Command{
 	Use:   "cluster cluster-name",
 	Short: "create a local Coherence cluster",
 	Long: `The 'create cluster' command creates a local cluster, adds to the cohctl.yaml file 
-and starts it. You must have the 'mvn' executable and 'java' 11+ executable in your PATH for 
+and starts it. You must have the 'mvn' executable and 'java' 17+ executable in your PATH for 
 this to work. This cluster is only for development/testing purposes and should not be used, 
 and is not supported in a production capacity. Supported versions are: CE 22.06 and above and 
-commercial 14.1.1.2206.1 and above.
+commercial 14.1.1.2206.1 and above. Default version is currently CE 22.09.
 NOTE: This is an experimental feature and my be altered or removed in the future.`,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
