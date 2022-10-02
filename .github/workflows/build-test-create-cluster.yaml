@@ -22,10 +22,9 @@ jobs:
       fail-fast: false
       matrix:
         coherenceVersion:
-          - 22.06
-          - 22.06.1
+          - 22.06.2
+          - 22.09
         javaVersion:
-          - 11
           - 17
 
 #   Checkout the source, we need a depth of zero to fetch all of the history otherwise

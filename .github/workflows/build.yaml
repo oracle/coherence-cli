@@ -49,12 +49,12 @@ jobs:
     - name: Get Docker Images
       shell: bash
       run: |
-        docker pull gcr.io/distroless/java:11
+        docker pull gcr.io/distroless/java17
 
     - name: Set up JDK
       uses: actions/setup-java@v1
       with:
-        java-version: '11'
+        java-version: '17'
 
     - name: Cache Go Modules
       uses: actions/cache@v1
@@ -93,7 +93,7 @@ jobs:
     - name: E2E Local Tests
       shell: bash
       run: |
-        PROFILES=,executor COHERENCE_VERSION=22.06.2 make clean build-test-images test-e2e-standalone
+        COHERENCE_BASE_IMAGE=gcr.io/distroless/java17 PROFILES=,executor COHERENCE_VERSION=22.09 make clean build-test-images test-e2e-standalone
 
     - name: Discovery Tests
       shell: bash

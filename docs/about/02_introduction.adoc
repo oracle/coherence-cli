@@ -26,6 +26,11 @@ NOTE: The CLI does not replace current management and monitoring tools such as t
 https://docs.oracle.com/cd/E24628_01/install.121/e24215/coherence_getstarted.htm#GSSOA10121[Enterprise Manager], or https://oracle.github.io/coherence-operator/docs/latest/#/docs/metrics/040_dashboards[Grafana Dashboards], but complements and
 provides a lightweight and scriptable alternative.
 
+*Experimental Features*
+
+This version introduces an *experimental* set of commands to allow you to create and scale local only, development based clusters.
+See <<docs/reference/98_create_clusters.adoc,Creating Clusters>> section for more details.
+
 == Why use the Coherence CLI?
 
 The CLI complements your existing Coherence management tools and allows you to:
