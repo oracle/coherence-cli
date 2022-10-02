@@ -22,7 +22,7 @@ MILESTONE ?=
 MVN_VERSION ?= 1.0.0
 
 # Coherence CE version to run base tests against
-COHERENCE_VERSION ?= 22.06.1
+COHERENCE_VERSION ?= 22.09
 COHERENCE_GROUP_ID ?= com.oracle.coherence.ce
 COHERENCE_WKA1 ?= server1
 COHERENCE_WKA2 ?= server1
