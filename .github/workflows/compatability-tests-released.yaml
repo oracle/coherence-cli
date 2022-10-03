@@ -39,13 +39,12 @@ jobs:
     - name: Get Docker Images
       shell: bash
       run: |
-        docker pull gcr.io/distroless/java:11
         docker pull gcr.io/distroless/java17
 
     - name: Set up JDK
       uses: actions/setup-java@v1
       with:
-        java-version: '11'
+        java-version: '17'
 
     - name: Cache Go Modules
       uses: actions/cache@v1
