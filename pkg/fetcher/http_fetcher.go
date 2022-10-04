@@ -341,7 +341,7 @@ func (h HTTPFetcher) GetSingleServiceDetailsJSON(serviceName string) ([]byte, er
 func (h HTTPFetcher) GetScheduledDistributionsJSON(serviceName string) ([]byte, error) {
 	result, err := httpGetRequest(h, servicesPath+getSafeServiceName(h, serviceName)+
 		"/partition/scheduledDistributions?links=")
-	if err != nil {
+	if err != nil && !strings.Contains(err.Error(), "404") {
 		return constants.EmptyByte, utils.GetError("cannot get scheduled distributions for service "+serviceName, err)
 	}
 	return result, nil
