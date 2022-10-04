@@ -857,15 +857,13 @@ func DeduplicateServices(servicesSummary config.ServicesSummaries, serviceType s
 
 // serviceExists returns true if the service exists in the services summary
 func serviceExists(serviceName string, servicesSummary config.ServicesSummaries) bool {
-	found := false
 	for _, v := range servicesSummary.Services {
 		if v.ServiceName == serviceName {
-			found = true
-			break
+			return true
 		}
 	}
 
-	return found
+	return false
 }
 
 func init() {

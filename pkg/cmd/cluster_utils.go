@@ -367,13 +367,13 @@ func getClientArgs(member, class string) []string {
 	baseArgs := make([]string, 0)
 	baseArgs = append(baseArgs, "-Xms"+heapMemoryParam, "-Xmx"+heapMemoryParam)
 
-	if class == cohQLClass && extendClientParam {
+	if extendClientParam {
 		// only works with default Cache config
 		baseArgs = append(baseArgs, "-Dcoherence.client=remote")
 	}
 
-	baseArgs = append(baseArgs, getMemberProperty("client"), "-Dcoherence.log.level=5",
-		"-Dcoherence.distributed.localstorage=false", "-Dcoherence.shutdownhook=force", class)
+	baseArgs = append(baseArgs, getMemberProperty(member), "-Dcoherence.log.level=5",
+		"-Dcoherence.distributed.localstorage=false", class)
 
 	// check -f option to CohQL
 	if fileNameParam != "" {

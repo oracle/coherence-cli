@@ -1074,7 +1074,7 @@ NOTE: This is an experimental feature and my be altered or removed in the future
 			}
 		}
 
-		// sort the defaultJars depdencies
+		// sort the defaultJars dependencies
 		sort.Slice(defaultJars, func(p, q int) bool {
 			if defaultJars[p].GroupID == defaultJars[q].GroupID {
 				return strings.Compare(defaultJars[p].Artifact, defaultJars[q].Artifact) < 0
@@ -1480,7 +1480,7 @@ func init() {
 
 	startClassCmd.Flags().StringVarP(&heapMemoryParam, heapMemoryArg, "M", defaultHeap, heapMemoryMessage)
 	startClassCmd.Flags().Int32VarP(&logLevelParam, logLevelArg, "l", 5, logLevelMessage)
-	startClassCmd.Flags().BoolVarP(&extendClientParam, "extend", "X", false, "start CohQL as Extend client. Only works for default cache config")
+	startClassCmd.Flags().BoolVarP(&extendClientParam, "extend", "X", false, "start a class as Extend client. Only works for default cache config")
 	startClassCmd.Flags().StringVarP(&profileValueParam, profileArg, "P", "", profileMessage)
 
 	scaleClusterCmd.Flags().Int32VarP(&replicaCountParam, "replicas", "r", 3, serverCountMessage)
