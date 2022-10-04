@@ -9,14 +9,11 @@
 # Run compatability tests
 set -e
 
-echo "Coherence CE 22.09-SNAPSHOT"
+echo "Coherence CE 22.09"
 COHERENCE_BASE_IMAGE=gcr.io/distroless/java17 COHERENCE_VERSION=22.09-SNAPSHOT make clean build-test-images test-e2e-standalone
 
-echo "Coherence CE 22.06.2"
-COHERENCE_VERSION=22.06.2 make clean build-test-images test-e2e-standalone
-
-echo "Coherence CE 22.06.2 with Executor"
-PROFILES=,executor COHERENCE_VERSION=22.06.2 make clean build-test-images test-e2e-standalone
+echo "Coherence CE 22.09 with Executor"
+COHERENCE_BASE_IMAGE=gcr.io/distroless/java17 PROFILES=,executor COHERENCE_VERSION=22.09 make clean build-test-images test-e2e-standalone
 
 echo "Coherence CE 14.1.1-0-10"
 COHERENCE_VERSION=14.1.1-0-10 make clean build-test-images test-e2e-standalone
