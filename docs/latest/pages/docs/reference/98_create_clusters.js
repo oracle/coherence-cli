@@ -12,11 +12,11 @@ Commercial 14.1.1.2206.x versions and above. You must have the following setup f
 
 <ol style="margin-left: 15px;">
 <li>
-Java 17+ executable on the classpath, if you are using the default Coherence CE 22.09 or above.
+Java 17+ executable on the PATH, if you are using the default Coherence CE 22.09 or above.
 
 </li>
 <li>
-Maven 3.6+ or JDK compatible Gradle version 7.+ executable on the classpath.
+Maven 3.6+ or JDK compatible Gradle version 7.+ executable on the PATH.
 
 </li>
 </ol>
