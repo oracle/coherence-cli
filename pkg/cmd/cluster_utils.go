@@ -358,7 +358,7 @@ func getCacheServerArgs(member string, httpPort int32) []string {
 
 	baseArgs = append(baseArgs, "-Xms"+heap, "-Xmx"+heap)
 
-	return append(baseArgs, getMemberProperty(member), "-Dcoherence.log.level=6", "com.tangosol.net.Coherence")
+	return append(baseArgs, getMemberProperty(member), "com.tangosol.net.Coherence")
 }
 
 // getClientArgs returns the arguments for starting a Coherence process such as

@@ -1215,9 +1215,10 @@ var stopClusterCmd = &cobra.Command{
 // startConsoleCmd represents the start console command
 var startConsoleCmd = &cobra.Command{
 	Use:   "console",
-	Short: "start a console client against the local Coherence cluster",
-	Long:  `The 'start console' command starts a console client against a cluster that was manually created.`,
-	Args:  cobra.ExactArgs(0),
+	Short: "start a console client and connect to a local Coherence cluster",
+	Long: `The 'start console' command starts a console client which connects to a
+cluster using the current context or a cluster specified by using '-c'.`,
+	Args: cobra.ExactArgs(0),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		return runStartClientOperation(cmd, consoleClass)
 	},
@@ -1226,9 +1227,10 @@ var startConsoleCmd = &cobra.Command{
 // startCohQL represents the start cohql command
 var startCohQLCmd = &cobra.Command{
 	Use:   "cohql",
-	Short: "start a CohQL client against the local Coherence cluster",
-	Long:  `The 'start cohql' command starts a CohQL client against a cluster that was manually created.`,
-	Args:  cobra.ExactArgs(0),
+	Short: "start a CohQL client and connect to a local Coherence cluster",
+	Long: `The 'start cohql' command starts a CohQL client which connects to a
+cluster using the current context or a cluster specified by using '-c'..`,
+	Args: cobra.ExactArgs(0),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		return runStartClientOperation(cmd, cohQLClass)
 	},
@@ -1237,9 +1239,11 @@ var startCohQLCmd = &cobra.Command{
 // startClassCmd represents the start class command
 var startClassCmd = &cobra.Command{
 	Use:   "class",
-	Short: "start a specific Java class against the local Coherence cluster",
-	Long: `The 'start class' command starts a specific Java class against the local Coherence cluster.
-The class name must include the full package and class name.`,
+	Short: "start a specific Java class and connect to a local Coherence cluster",
+	Long: `The 'start class' command starts a specific Java class which connects to a
+cluster using the current context or a cluster specified by using '-c'.
+The class name must include the full package and class name and must be included in
+an artefact included in the initial cluster creation.`,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
 			displayErrorAndExit(cmd, "you must provide a class to run")
