@@ -34,14 +34,19 @@ var setContextCmd = &cobra.Command{
 		if !found {
 			return errors.New(UnableToFindClusterMsg + cluster)
 		}
-		viper.Set(currentContextKey, cluster)
-		err := WriteConfig()
-		if err != nil {
-			return err
-		}
-		cmd.Println(setContextMsg + cluster)
-		return nil
+		return setContext(cmd, args[0])
 	},
+}
+
+// setContext sets the context
+func setContext(cmd *cobra.Command, cluster string) error {
+	viper.Set(currentContextKey, cluster)
+	err := WriteConfig()
+	if err != nil {
+		return err
+	}
+	cmd.Println(setContextMsg + cluster)
+	return nil
 }
 
 // getContextCmd represents the get context command
@@ -51,8 +56,7 @@ var getContextCmd = &cobra.Command{
 	Long:  `The 'get context' command displays the current context.`,
 	Args:  cobra.ExactArgs(0),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		contextConfig := Config
-		cmd.Println(getContextMsg + contextConfig.CurrentContext)
+		cmd.Println(getContextMsg + Config.CurrentContext)
 		return nil
 	},
 }
@@ -64,12 +68,16 @@ var clearContextCmd = &cobra.Command{
 	Long:  `The 'clear context' command clears the current context for running commands in.`,
 	Args:  cobra.ExactArgs(0),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		viper.Set(currentContextKey, "")
-		err := WriteConfig()
-		if err != nil {
-			return err
-		}
-		cmd.Println(clearContextMessage)
-		return nil
+		return clearContext(cmd)
 	},
+}
+
+// clearContext clears the current context
+func clearContext(cmd *cobra.Command) error {
+	viper.Set(currentContextKey, "")
+	if err := WriteConfig(); err != nil {
+		return err
+	}
+	cmd.Println(clearContextMessage)
+	return nil
 }

@@ -124,6 +124,13 @@ var removeClusterCmd = &cobra.Command{
 
 		cmd.Printf("Removed connection for cluster %s\n", clusterName)
 
+		// if the cluster that was removed was in the current context, then reset it
+		if Config.CurrentContext == clusterName {
+			if err = clearContext(cmd); err != nil {
+				return err
+			}
+		}
+
 		return nil
 	},
 }
@@ -1154,6 +1161,11 @@ NOTE: This is an experimental feature and my be altered or removed in the future
 
 		viper.Set(clusterKey, Config.Clusters)
 		err = WriteConfig()
+		if err != nil {
+			return err
+		}
+
+		err = setContext(cmd, clusterName)
 		if err != nil {
 			return err
 		}
