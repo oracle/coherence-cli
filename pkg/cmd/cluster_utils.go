@@ -372,8 +372,7 @@ func getClientArgs(member, class string) []string {
 		baseArgs = append(baseArgs, "-Dcoherence.client=remote")
 	}
 
-	baseArgs = append(baseArgs, getMemberProperty(member), "-Dcoherence.log.level=5",
-		"-Dcoherence.distributed.localstorage=false", class)
+	baseArgs = append(baseArgs, getMemberProperty(member), "-Dcoherence.distributed.localstorage=false", class)
 
 	// check -f option to CohQL
 	if fileNameParam != "" {
