@@ -140,7 +140,7 @@ var getClustersCmd = &cobra.Command{
 	Use:   "clusters",
 	Short: "display the list of discovered, manually added or created clusters",
 	Long: `The 'get clusters' command displays the list of cluster connections.
-The 'CREATED' column is set to 'Y' if the cluster has been created using the
+The 'LOCAL' column is set to 'true' if the cluster has been created using the
 'cohctl create cluster' command. You can also use the '-o wide' option to see if the
 cluster is running.`,
 	Args: cobra.ExactArgs(0),
