@@ -71,6 +71,8 @@ include::../../build/_output/docs-gen/create_cluster.adoc[tag=text]
 
 Add and start a cluster using all default values.
 
+NOTE: After the cluster has been created, the current context is automatically set to the new cluster.
+
 [source,bash,subs="attributes"]]
 ----
 $ cohctl create cluster local
@@ -95,6 +97,7 @@ Starting cluster member storage-0...
 Starting cluster member storage-1...
 Starting cluster member storage-2...
 Cluster added and started
+Current context is now local
 
 $ cohctl get members -c local
 

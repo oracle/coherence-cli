@@ -124,6 +124,13 @@ var removeClusterCmd = &cobra.Command{
 
 		cmd.Printf("Removed connection for cluster %s\n", clusterName)
 
+		// if the cluster that was removed was in the current context, then reset it
+		if Config.CurrentContext == clusterName {
+			if err = clearContext(cmd); err != nil {
+				return err
+			}
+		}
+
 		return nil
 	},
 }
@@ -133,7 +140,7 @@ var getClustersCmd = &cobra.Command{
 	Use:   "clusters",
 	Short: "display the list of discovered, manually added or created clusters",
 	Long: `The 'get clusters' command displays the list of cluster connections.
-The 'CREATED' column is set to 'Y' if the cluster has been created using the
+The 'LOCAL' column is set to 'true' if the cluster has been created using the
 'cohctl create cluster' command. You can also use the '-o wide' option to see if the
 cluster is running.`,
 	Args: cobra.ExactArgs(0),
@@ -1025,9 +1032,8 @@ NOTE: This is an experimental feature and my be altered or removed in the future
 			return errors.New("replica count must be 1 or more")
 		}
 
-		// validate ensure
-		err = ensureUniqueCluster(clusterName)
-		if err != nil {
+		// validate ensure unique cluster name
+		if err = ensureUniqueCluster(clusterName); err != nil {
 			return err
 		}
 
@@ -1153,8 +1159,11 @@ NOTE: This is an experimental feature and my be altered or removed in the future
 		Config.Clusters = append(Config.Clusters, newCluster)
 
 		viper.Set(clusterKey, Config.Clusters)
-		err = WriteConfig()
-		if err != nil {
+		if err = WriteConfig(); err != nil {
+			return err
+		}
+
+		if err = setContext(cmd, clusterName); err != nil {
 			return err
 		}
 
