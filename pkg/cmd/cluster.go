@@ -1032,9 +1032,8 @@ NOTE: This is an experimental feature and my be altered or removed in the future
 			return errors.New("replica count must be 1 or more")
 		}
 
-		// validate ensure
-		err = ensureUniqueCluster(clusterName)
-		if err != nil {
+		// validate ensure unique cluster name
+		if err = ensureUniqueCluster(clusterName); err != nil {
 			return err
 		}
 
@@ -1160,13 +1159,11 @@ NOTE: This is an experimental feature and my be altered or removed in the future
 		Config.Clusters = append(Config.Clusters, newCluster)
 
 		viper.Set(clusterKey, Config.Clusters)
-		err = WriteConfig()
-		if err != nil {
+		if err = WriteConfig(); err != nil {
 			return err
 		}
 
-		err = setContext(cmd, clusterName)
-		if err != nil {
+		if err = setContext(cmd, clusterName); err != nil {
 			return err
 		}
 
