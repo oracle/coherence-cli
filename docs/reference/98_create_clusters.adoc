@@ -163,9 +163,9 @@ Additional artifacts:   coherence-rest,io.opentracing:opentracing-api:0.33.0,io.
 Are you sure you want to create the cluster with the above details? (y/n) y
 
 Checking 6 Maven dependencies...
-- com.oracle.coherence.ce:coherence:{coherence-version}
-- com.oracle.coherence.ce:coherence-json:{coherence-version}
-- com.oracle.coherence.ce:coherence-rest:{coherence-version}
+- com.oracle.coherence.ce:coherence:22.06.2
+- com.oracle.coherence.ce:coherence-json:22.06.2
+- com.oracle.coherence.ce:coherence-rest:22.06.2
 - io.opentracing:opentracing-api:0.33.0
 - io.opentracing:opentracing-util:0.33.0
 - org.jline:jline:3.20.0
