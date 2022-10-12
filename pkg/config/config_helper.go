@@ -121,6 +121,7 @@ type ProxyConnection struct {
 	TotalBytesSent       int64  `json:"totalBytesSent"`
 	OutgoingByteBacklog  int64  `json:"outgoingByteBacklog"`
 	UUID                 string `json:"UUID"`
+	Member               string `json:"member"`
 	ClientRole           string `json:"clientRole"`
 }
 

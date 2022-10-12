@@ -95,7 +95,6 @@ runCommand set debug on
 # Create a cluster
 message "Create Cluster"
 runCommand create cluster local -y -v $VERSION $COM
-runCommand set context local
 
 wait_for_ready
 
@@ -131,10 +130,10 @@ grep "[5,5,5,]" $OUTPUT
 
 runCommand stop cluster local -y
 runCommand remove cluster local -y
-pause
+pause && pause && pause
 
 message "Start cluster using different HTTP port"
-runCommand create cluster local -H 30001 -l 9 $COM -v $VERSION
+runCommand create cluster local -H 30001 -l 9 $COM -v $VERSION -y
 wait_for_ready 30001
 
 message "Add a cluster to point to newly created cluster on port 30001"
@@ -161,7 +160,7 @@ pause
 runCommand remove cluster local -y
 
 message "Run CohQL"
-runCommand create cluster local -y -M 512m -S $COM -v $VERSION
+runCommand create cluster local -y -M 512m -K $COM -v $VERSION
 wait_for_ready
 
 echo "insert into test key(1) value(1);" > /tmp/file.cohql
@@ -199,7 +198,6 @@ if [ -z "$COM" ] ; then
   message "Create Cluster Using Gradle"
   gradle -v
   runCommand create cluster local -y -v $VERSION $COM
-  runCommand set context local
 
   wait_for_ready
 
