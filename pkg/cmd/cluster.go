@@ -1481,7 +1481,7 @@ func init() {
 	createClusterCmd.Flags().StringVarP(&additionalArtifactsParam, "additional", "a", "", "additional comma separated Coherence artifacts or others in G:A:V format")
 	createClusterCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
 	createClusterCmd.Flags().BoolVarP(&useCommercialParam, "commercial", "C", false, "use commercial Coherence groupID (default CE)")
-	createClusterCmd.Flags().BoolVarP(&skipMavenDepsParam, "skip-deps", "K", false, "skip pulling Maven artifacts")
+	createClusterCmd.Flags().BoolVarP(&skipMavenDepsParam, "skip-deps", "K", false, "skip pulling artifacts")
 	createClusterCmd.Flags().Int32VarP(&metricsStartPortParam, metricsPortArg, "t", 0, metricsPortMessage)
 	createClusterCmd.Flags().StringVarP(&profileValueParam, profileArg, "P", "", profileMessage)
 	createClusterCmd.Flags().StringVarP(&serverStartClassParam, startClassArg, "S", "", startClassMessage)

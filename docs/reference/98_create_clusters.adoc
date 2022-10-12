@@ -152,11 +152,11 @@ Add and start a cluster using all default values but include additional `coheren
 $ cohctl create cluster local -a coherence-rest,io.opentracing:opentracing-api:0.33.0,io.opentracing:opentracing-util:0.33.0
 
 Cluster name:           local
-Cluster version:        {coherence-version}
+Cluster version:        22.06.2
 Cluster port:           7574
 Management port:        30000
 Server count:           3
-Initial memory:         512m
+Initial memory:         128m
 Persistence mode:       on-demand
 Group ID:               com.oracle.coherence.ce
 Additional artifacts:   coherence-rest,io.opentracing:opentracing-api:0.33.0,io.opentracing:opentracing-util:0.33.0
@@ -215,7 +215,7 @@ include::../../build/_output/docs-gen/start_cluster.adoc[tag=text]
 
 *Examples*
 
-Start a cluster and specify heap size of `1g`. (default is 512m)
+Start a cluster and specify heap size of `1g`. (default is 128m)
 
 [source,bash]
 ----
@@ -369,7 +369,7 @@ $ cohctl clear default-heap
 Default heap has been cleared
 ----
 
-NOTE: If no default-heap is set, then the default of 512m is used unless a value for `-M` is specified.
+NOTE: If no default-heap is set, then the default of 128m is used unless a value for `-M` is specified.
 
 [#set-profile]
 ==== Set Profile
