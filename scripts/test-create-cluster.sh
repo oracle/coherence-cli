@@ -150,6 +150,7 @@ runCommand start cluster local -r 4 -M 1g
 runCommand set bytes-format m
 wait_for_ready 30001
 
+runCommand set context local2
 runCommand get members
 grep "1,024 MB" $OUTPUT > /dev/null 2>&1
 echo "Pausing for a bit"
