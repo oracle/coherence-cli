@@ -933,18 +933,19 @@ var (
 	skipMavenDepsParam       bool
 	validPersistenceModes    = []string{"on-demand", "active", "active-backup", "active-async"}
 	persistenceModeParam     string
-	startupDelayParam        int32
+	serverStartClassParam    string
+	startupDelayParam        string
 	additionalArtifactsParam string
 	profileValueParam        string
 	fileNameParam            string
 	statementParam           string
 )
 
-const defaultCoherenceVersion = "22.09"
+const defaultCoherenceVersion = "22.06.2"
 const startClusterCommand = "start cluster"
 const scaleClusterCommand = "scale cluster"
 const stopClusterCommand = "stop cluster"
-const defaultHeap = "512m"
+const defaultHeap = "128m"
 const localHost = "127.0.0.1"
 
 // createClusterCmd represents the create cluster command
@@ -1008,9 +1009,20 @@ NOTE: This is an experimental feature and my be altered or removed in the future
 			}
 		}
 
+		// validate the server start class
+		if err = utils.ValidateStartClass(serverStartClassParam); err != nil {
+			return err
+		}
+
 		// ensure the http port is not already used by a running cluster
 		if isPortUsed(httpPortParam) {
 			return fmt.Errorf("the management port %d is already used, please choose another", httpPortParam)
+		}
+
+		// validate startup delay
+		_, err = utils.GetStartupDelayInMillis(startupDelayParam)
+		if err != nil {
+			return err
 		}
 
 		// validate any additional artifacts
@@ -1185,6 +1197,9 @@ var startClusterCmd = &cobra.Command{
 		return nil
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
+		if err := utils.ValidateStartClass(serverStartClassParam); err != nil {
+			return err
+		}
 		return runClusterOperation(cmd, args[0], startClusterCommand)
 	},
 }
@@ -1385,21 +1400,21 @@ func runClusterOperation(cmd *cobra.Command, connectionName, operation string) e
 			scaleType = "down"
 		}
 
-		confirmMessage = fmt.Sprintf("Are you sure you want to scale the cluster %s %s by %d member(s) to %d members? (y/n) ",
-			connection.Name, scaleType, serverDelta, replicaCountParam)
+		confirmMessage = ""
+		cmd.Printf("Scaling the cluster %s %s by %d member(s) to %d members\n", connection.Name, scaleType, serverDelta, replicaCountParam)
 		replicaCountParam = serverDelta
 	} else if operation == startClusterCommand {
 		if replicaCountParam < 1 {
 			return errors.New("replica count must be 1 or more")
 		}
 
-		confirmMessage = fmt.Sprintf("Are you sure you want to start %d members for cluster %s? (y/n) ", replicaCountParam, connection.Name)
+		confirmMessage = ""
 	} else {
 		confirmMessage = fmt.Sprintf("Are you sure you want to stop %d members for the cluster %s? (y/n) ", numProcesses, connection.Name)
 	}
 
 	// confirm the operation
-	if !confirmOperation(cmd, confirmMessage) {
+	if confirmMessage != "" && !confirmOperation(cmd, confirmMessage) {
 		return nil
 	}
 
@@ -1460,25 +1475,26 @@ func init() {
 	createClusterCmd.Flags().Int32VarP(&clusterPortParam, "cluster-port", "p", 7574, "cluster port")
 	createClusterCmd.Flags().StringVarP(&wkaParam, "wka", "W", localHost, "well known address")
 	createClusterCmd.Flags().Int32VarP(&logLevelParam, logLevelArg, "l", 5, logLevelMessage)
-	createClusterCmd.Flags().Int32VarP(&startupDelayParam, startupDelayArg, "D", 1, startupDelayMessage)
+	createClusterCmd.Flags().StringVarP(&startupDelayParam, startupDelayArg, "D", "0ms", startupDelayMessage)
 	createClusterCmd.Flags().Int32VarP(&replicaCountParam, "replicas", "r", 3, serverCountMessage)
 	createClusterCmd.Flags().StringVarP(&heapMemoryParam, heapMemoryArg, "M", defaultHeap, heapMemoryMessage)
 	createClusterCmd.Flags().StringVarP(&additionalArtifactsParam, "additional", "a", "", "additional comma separated Coherence artifacts or others in G:A:V format")
 	createClusterCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
-	createClusterCmd.Flags().BoolVarP(&useCommercialParam, "commercial", "C", false, "use commercial Coherence groupID (default is CE)")
-	createClusterCmd.Flags().BoolVarP(&skipMavenDepsParam, "skip-deps", "S", false, "skip pulling Maven artifacts")
+	createClusterCmd.Flags().BoolVarP(&useCommercialParam, "commercial", "C", false, "use commercial Coherence groupID (default CE)")
+	createClusterCmd.Flags().BoolVarP(&skipMavenDepsParam, "skip-deps", "K", false, "skip pulling Maven artifacts")
 	createClusterCmd.Flags().Int32VarP(&metricsStartPortParam, metricsPortArg, "t", 0, metricsPortMessage)
 	createClusterCmd.Flags().StringVarP(&profileValueParam, profileArg, "P", "", profileMessage)
+	createClusterCmd.Flags().StringVarP(&serverStartClassParam, startClassArg, "S", "", startClassMessage)
 
 	stopClusterCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
 
-	startClusterCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
 	startClusterCmd.Flags().Int32VarP(&replicaCountParam, "replicas", "r", 3, serverCountMessage)
 	startClusterCmd.Flags().Int32VarP(&metricsStartPortParam, metricsPortArg, "t", 0, metricsPortMessage)
 	startClusterCmd.Flags().StringVarP(&heapMemoryParam, heapMemoryArg, "M", defaultHeap, heapMemoryMessage)
 	startClusterCmd.Flags().StringVarP(&profileValueParam, profileArg, "P", "", profileMessage)
 	startClusterCmd.Flags().Int32VarP(&logLevelParam, logLevelArg, "l", 5, logLevelMessage)
-	startClusterCmd.Flags().Int32VarP(&startupDelayParam, startupDelayArg, "D", 1, startupDelayMessage)
+	startClusterCmd.Flags().StringVarP(&startupDelayParam, startupDelayArg, "D", "0ms", startupDelayMessage)
+	startClusterCmd.Flags().StringVarP(&serverStartClassParam, startClassArg, "S", "", startClassMessage)
 
 	startConsoleCmd.Flags().StringVarP(&heapMemoryParam, heapMemoryArg, "M", defaultHeap, heapMemoryMessage)
 	startConsoleCmd.Flags().Int32VarP(&logLevelParam, logLevelArg, "l", 5, logLevelMessage)
@@ -1497,12 +1513,12 @@ func init() {
 	startClassCmd.Flags().StringVarP(&profileValueParam, profileArg, "P", "", profileMessage)
 
 	scaleClusterCmd.Flags().Int32VarP(&replicaCountParam, "replicas", "r", 3, serverCountMessage)
-	scaleClusterCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
 	scaleClusterCmd.Flags().StringVarP(&heapMemoryParam, heapMemoryArg, "M", defaultHeap, heapMemoryMessage)
 	scaleClusterCmd.Flags().Int32VarP(&logLevelParam, logLevelArg, "l", 5, logLevelMessage)
-	scaleClusterCmd.Flags().Int32VarP(&startupDelayParam, startupDelayArg, "D", 1, startupDelayMessage)
+	scaleClusterCmd.Flags().StringVarP(&startupDelayParam, startupDelayArg, "D", "0ms", startupDelayMessage)
 	scaleClusterCmd.Flags().Int32VarP(&metricsStartPortParam, metricsPortArg, "t", 0, metricsPortMessage)
 	scaleClusterCmd.Flags().StringVarP(&profileValueParam, profileArg, "P", "", profileMessage)
+	scaleClusterCmd.Flags().StringVarP(&serverStartClassParam, startClassArg, "S", "", startClassMessage)
 }
 
 // sanitizeConnectionName sanitizes a cluster connection

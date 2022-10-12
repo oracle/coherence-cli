@@ -201,3 +201,57 @@ func TestPortValidation(t *testing.T) {
 	g.Expect(ValidatePort(65535)).ShouldNot(HaveOccurred())
 	g.Expect(ValidatePort(12345)).ShouldNot(HaveOccurred())
 }
+
+func TestCoherenceStartupClass(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	g.Expect(GetCoherenceMainClass("15.1.1")).Should(Equal(coherenceMain))
+	g.Expect(GetCoherenceMainClass("14.1.1-2206")).Should(Equal(coherenceMain))
+	g.Expect(GetCoherenceMainClass("22.06")).Should(Equal(coherenceMain))
+	g.Expect(GetCoherenceMainClass("22.06.2")).Should(Equal(coherenceMain))
+	g.Expect(GetCoherenceMainClass("21.12.4")).Should(Equal(coherenceMain))
+	g.Expect(GetCoherenceMainClass("21.06.1")).Should(Equal(coherenceMain))
+	g.Expect(GetCoherenceMainClass("20.12")).Should(Equal(coherenceMain))
+	g.Expect(GetCoherenceMainClass("14.1.1.")).Should(Equal(coherenceDCS))
+	g.Expect(GetCoherenceMainClass("12.2.1.")).Should(Equal(coherenceDCS))
+}
+
+func TestGetStartupDelayInMillis(t *testing.T) {
+	var (
+		g      = NewGomegaWithT(t)
+		result int64
+		err    error
+	)
+
+	result, err = GetStartupDelayInMillis("0ms")
+	g.Expect(err).To(Not(HaveOccurred()))
+	g.Expect(result).Should(Equal(int64(0)))
+
+	result, err = GetStartupDelayInMillis("123")
+	g.Expect(err).To(Not(HaveOccurred()))
+	g.Expect(result).Should(Equal(int64(123)))
+
+	result, err = GetStartupDelayInMillis("10ms")
+	g.Expect(err).To(Not(HaveOccurred()))
+	g.Expect(result).Should(Equal(int64(10)))
+
+	result, err = GetStartupDelayInMillis("1s")
+	g.Expect(err).To(Not(HaveOccurred()))
+	g.Expect(result).Should(Equal(int64(1000)))
+
+	result, err = GetStartupDelayInMillis("23s")
+	g.Expect(err).To(Not(HaveOccurred()))
+	g.Expect(result).Should(Equal(int64(23000)))
+
+	_, err = GetStartupDelayInMillis("233123123123123123s")
+	g.Expect(err).To(HaveOccurred())
+
+	_, err = GetStartupDelayInMillis("23xs")
+	g.Expect(err).To(HaveOccurred())
+
+	_, err = GetStartupDelayInMillis("s")
+	g.Expect(err).To(HaveOccurred())
+
+	_, err = GetStartupDelayInMillis("ms")
+	g.Expect(err).To(HaveOccurred())
+}

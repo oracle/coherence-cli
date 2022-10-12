@@ -239,7 +239,13 @@ func startCluster(cmd *cobra.Command, connection ClusterConnection, serverCount,
 		metricsStartPort = metricsStartPortParam
 		startupProfile   = getProfileValue(profileValueParam)
 		profileArgs      = make([]string, 0)
+		startupDelay     int64
 	)
+
+	startupDelay, err = utils.GetStartupDelayInMillis(startupDelayParam)
+	if err != nil {
+		return err
+	}
 
 	// check if any profiles have been specified
 	if profileValueParam != "" {
@@ -270,7 +276,7 @@ func startCluster(cmd *cobra.Command, connection ClusterConnection, serverCount,
 			arguments = append(arguments, metricsArgs...)
 		}
 
-		arguments = append(arguments, getCacheServerArgs(member, mgmtPort)...)
+		arguments = append(arguments, getCacheServerArgs(member, mgmtPort, connection.ClusterVersion)...)
 
 		// reset so only first member has management enabled
 		mgmtPort = -1
@@ -286,7 +292,9 @@ func startCluster(cmd *cobra.Command, connection ClusterConnection, serverCount,
 			return utils.GetError(fmt.Sprintf("unable to start member %s", member), err)
 		}
 
-		time.Sleep(time.Duration(startupDelayParam) * time.Second)
+		if startupDelay > 0 {
+			time.Sleep(time.Duration(startupDelay) * time.Millisecond)
+		}
 	}
 
 	return nil
@@ -339,10 +347,11 @@ func startClient(cmd *cobra.Command, connection ClusterConnection, class string)
 	return process.Wait()
 }
 
-func getCacheServerArgs(member string, httpPort int32) []string {
+func getCacheServerArgs(member string, httpPort int32, version string) []string {
 	var (
-		baseArgs = make([]string, 0)
-		heap     string
+		baseArgs  = make([]string, 0)
+		heap      string
+		mainClass = serverStartClassParam
 	)
 	if httpPort != -1 {
 		baseArgs = append(baseArgs, "-Dcoherence.management.http=all", fmt.Sprintf("-Dcoherence.management.http.port=%d", httpPort),
@@ -358,7 +367,12 @@ func getCacheServerArgs(member string, httpPort int32) []string {
 
 	baseArgs = append(baseArgs, "-Xms"+heap, "-Xmx"+heap)
 
-	return append(baseArgs, getMemberProperty(member), "com.tangosol.net.Coherence")
+	// default the main class if not specified
+	if mainClass == "" {
+		mainClass = utils.GetCoherenceMainClass(Version)
+	}
+
+	return append(baseArgs, getMemberProperty(member), mainClass)
 }
 
 // getClientArgs returns the arguments for starting a Coherence process such as
@@ -369,7 +383,7 @@ func getClientArgs(member, class string) []string {
 
 	if extendClientParam {
 		// only works with default Cache config
-		baseArgs = append(baseArgs, "-Dcoherence.client=remote")
+		baseArgs = append(baseArgs, "-Dcoherence.client=remote", "-Dcoherence.tcmp.enabled=false")
 	}
 
 	baseArgs = append(baseArgs, getMemberProperty(member), "-Dcoherence.distributed.localstorage=false", class)
