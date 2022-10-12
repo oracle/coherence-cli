@@ -62,7 +62,15 @@ populated constructed.`,
 			return errors.New("you must supply a connection url")
 		}
 
-		return addCluster(cmd, connection, connectionURL, "manual", "")
+		if err = addCluster(cmd, connection, connectionURL, "manual", ""); err != nil {
+			return err
+		}
+
+		if err = setContext(cmd, connection); err != nil {
+			return err
+		}
+
+		return nil
 	},
 }
 
@@ -845,6 +853,8 @@ you can confirm if you wish to add the discovered clusters.`,
 			return nil
 		}
 
+		var contextClusterName = ""
+
 		// add the clusters
 		for _, cluster := range discoveredClusters {
 			if cluster.SelectedURL != "" {
@@ -854,6 +864,14 @@ you can confirm if you wish to add the discovered clusters.`,
 				if err != nil {
 					return err
 				}
+				contextClusterName = cluster.ConnectionName
+			}
+		}
+
+		// set the context only if one cluster was discovered
+		if len(discoveredClusters) == 1 {
+			if err = setContext(cmd, contextClusterName); err != nil {
+				return err
 			}
 		}
 
