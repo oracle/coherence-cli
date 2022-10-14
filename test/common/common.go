@@ -436,14 +436,14 @@ func RunTestProxyCommands(t *testing.T) {
 	test_utils.EnsureCommandContains(g, t, cliCmd, addedCluster, configArg, file, "add", "cluster",
 		context.ClusterName, "-u", context.Url)
 
+	// set the current context and ensure the commands still succeeds
+	test_utils.EnsureCommandContains(g, t, cliCmd, "cluster1\n", configArg, file, "set", "context", "cluster1")
+
 	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "SERVICE NAME,CONNECTIONS", configArg, file, "get", "proxies",
 		"-c", context.ClusterName)
 
 	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "PROXY SERVICE DETAILS,PROXY MEMBER DETAILS,PROXY CONNECTIONS", configArg, file,
 		"describe", "proxy", "Proxy", "-c", context.ClusterName)
-
-	// set the current context and ensure the commands still succeeds
-	test_utils.EnsureCommandContains(g, t, cliCmd, "cluster1\n", configArg, file, "set", "context", "cluster1")
 
 	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "PROXY SERVICE DETAILS,PROXY MEMBER DETAILS,PROXY CONNECTIONS", configArg, file,
 		"describe", "proxy", "Proxy")

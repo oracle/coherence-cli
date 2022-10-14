@@ -1466,7 +1466,7 @@ func FormatProxyConnections(connections []config.ProxyConnection) string {
 	var (
 		connectionCount    = len(connections)
 		formattingFunction = getFormattingFunction()
-		alignment          = []string{R, R, R, R, R, R, R, R}
+		alignment          = []string{R, R, R, L, R, R, R, R, L}
 	)
 
 	if connectionCount == 0 {
@@ -1480,11 +1480,11 @@ func FormatProxyConnections(connections []config.ProxyConnection) string {
 	})
 
 	stringValues[0] = getColumns(NodeIDColumn, "CONN MS", "CONN TIME", "REMOTE ADDR/PORT",
-		"BYTES SENT", "BYTES REC", "BACKLOG", "CLIENT PROCESS")
+		"BYTES SENT", "BYTES REC", "BACKLOG", "CLIENT PROCESS", "CLIENT ROLE")
 
 	if OutputFormat == constants.WIDE {
-		alignment = append(alignment, []string{"L", "L", "L"}...)
-		stringValues[0] = getColumns(stringValues[0], "CLIENT ROLE", "UUID", "TIMESTAMP")
+		alignment = append(alignment, []string{"L"}...)
+		stringValues[0] = getColumns(stringValues[0], "REMOTE MEMBER")
 	}
 
 	for i, value := range connections {
@@ -1492,9 +1492,9 @@ func FormatProxyConnections(connections []config.ProxyConnection) string {
 			formatConnectionMillis(value.ConnectionTimeMillis),
 			value.RemoteAddress+":"+formatPort(value.RemotePort),
 			formattingFunction(value.TotalBytesSent), formattingFunction(value.TotalBytesReceived),
-			formatLargeInteger(value.OutgoingByteBacklog), value.ClientProcessName)
+			formatLargeInteger(value.OutgoingByteBacklog), value.ClientProcessName, value.ClientRole)
 		if OutputFormat == constants.WIDE {
-			stringValues[i+1] = getColumns(stringValues[i+1], value.ClientRole, value.UUID, value.TimeStamp)
+			stringValues[i+1] = getColumns(stringValues[i+1], value.Member)
 		}
 	}
 

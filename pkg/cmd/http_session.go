@@ -47,10 +47,6 @@ var getHTTPSessionsCmd = &cobra.Command{
 				return err
 			}
 
-			if len(results) == 0 {
-				return nil
-			}
-
 			if strings.Contains(OutputFormat, constants.JSONPATH) {
 				jsonResult, err = utils.GetJSONPathResults(results, OutputFormat)
 				if err != nil {
@@ -61,7 +57,10 @@ var getHTTPSessionsCmd = &cobra.Command{
 				cmd.Println(string(results))
 			} else {
 				cmd.Println(FormatCurrentCluster(connection))
-				err = json.Unmarshal(results, &httpSessions)
+
+				if len(results) > 0 {
+					err = json.Unmarshal(results, &httpSessions)
+				}
 				if err != nil {
 					return utils.GetError("unable to decode Coherence*Web details", err)
 				}

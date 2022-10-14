@@ -15,6 +15,7 @@ import (
 	"github.com/oracle/coherence-cli/pkg/utils"
 	"github.com/spf13/cobra"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -181,6 +182,9 @@ var getProxyConnectionsCmd = &cobra.Command{
 				connectionDetailsFinal = make([]config.ProxyConnection, 0)
 				connectionsResult      []byte
 				proxyResults           []byte
+				wg                     sync.WaitGroup
+				errorSink              = createErrorSink()
+				m                      = sync.RWMutex{}
 			)
 
 			proxyResults, err = dataFetcher.GetProxySummaryJSON()
@@ -198,24 +202,41 @@ var getProxyConnectionsCmd = &cobra.Command{
 			}
 
 			nodeIds := getProxyNodeIDs(serviceName, proxiesSummary)
+			nodeIdsLen := len(nodeIds)
 
-			if len(nodeIds) == 0 {
+			if nodeIdsLen == 0 {
 				return fmt.Errorf("%s '%s'", proxyErrorMsg, serviceName)
 			}
 
+			wg.Add(nodeIdsLen)
+
 			// retrieve all connection details from JSON
 			for i := range nodeIds {
-				connectionDetails := config.ProxyConnections{}
-				data, err := dataFetcher.GetProxyConnectionsJSON(serviceName, nodeIds[i])
-				if err != nil {
-					return err
-				}
-				err = json.Unmarshal(data, &connectionDetails)
-				if err != nil {
-					return err
-				}
+				go func(nodeID string) {
+					defer wg.Done()
+					connectionDetails := config.ProxyConnections{}
+					data, err1 := dataFetcher.GetProxyConnectionsJSON(serviceName, nodeID)
+					if err1 != nil {
+						errorSink.AppendError(err1)
+						return
+					}
+					err1 = json.Unmarshal(data, &connectionDetails)
+					if err1 != nil {
+						errorSink.AppendError(err1)
+						return
+					}
+					// protect the slice for update
+					m.Lock()
+					defer m.Unlock()
+					connectionDetailsFinal = append(connectionDetailsFinal, connectionDetails.Proxies...)
+				}(nodeIds[i])
+			}
 
-				connectionDetailsFinal = append(connectionDetailsFinal, connectionDetails.Proxies...)
+			// wait for the results
+			wg.Wait()
+			errorList := errorSink.GetErrors()
+			if len(errorList) > 0 {
+				return utils.GetErrors(errorList)
 			}
 
 			if strings.Contains(OutputFormat, constants.JSONPATH) || OutputFormat == constants.JSON {

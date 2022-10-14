@@ -16,8 +16,10 @@ There are various cluster commands that allow you to create and work with local 
 These commands allow you to create local only development based clusters (scoped to localhost) for Coherence CE 22.06.x and
 Commercial 14.1.1.2206.x versions and above. You must have the following setup for this to work:
 
-1. Java 17+ executable on the PATH, if you are using the default Coherence CE 22.09 or above.
+1. Java 17+ executable on the PATH, if you are using the default Coherence CE {coherence-default-version} version.
 2. Maven 3.6+ or JDK compatible Gradle version 7.+ executable on the PATH.
+
+NOTE: If you wish to use an earlier version of Coherence such as CE 22.06, you can use JDK11+.
 
 NOTE: Maven is used by default for dependency resolution and classpath generation, but if you prefer Gradle, then use the
 following: `cohctl set use-grade true`. You can revert to Maven by using `cohctl set use-gradle false`.
@@ -78,19 +80,19 @@ NOTE: After the cluster has been created, the current context is automatically s
 $ cohctl create cluster local
 
 Cluster name:           local
-Cluster version:        {coherence-version}
+Cluster version:        {coherence-default-version}
 Cluster port:           7574
 Management port:        30000
 Server count:           3
-Initial memory:         512m
+Initial memory:         128m
 Persistence mode:       on-demand
 Group ID:               com.oracle.coherence.ce
 Additional artifacts:
 Are you sure you want to create the cluster with the above details? (y/n) y
 
 Checking 3 Maven dependencies...
-- com.oracle.coherence.ce:coherence:{coherence-version}
-- com.oracle.coherence.ce:coherence-json:{coherence-version}
+- com.oracle.coherence.ce:coherence:{coherence-default-version}
+- com.oracle.coherence.ce:coherence-json:{coherence-default-version}
 - org.jline:jline:3.20.0
 Starting 3 cluster members for cluster local
 Starting cluster member storage-0...
@@ -99,19 +101,20 @@ Starting cluster member storage-2...
 Cluster added and started
 Current context is now local
 
-$ cohctl get members -c local
+$ cohctl get members
+Using cluster connection 'local' from current context.
 
 Total cluster members: 3
-Cluster Heap - Total: 1,536 MB Used: 243 MB Available: 1,293 MB (84.2%)
-Storage Heap - Total: 1,536 MB Used: 243 MB Available: 1,293 MB (84.2%)
+Cluster Heap - Total: 384 MB Used: 123 MB Available: 261 MB (68.0%)
+Storage Heap - Total: 384 MB Used: 123 MB Available: 261 MB (68.0%)
 
 NODE ID  ADDRESS     PORT   PROCESS  MEMBER     ROLE             STORAGE  MAX HEAP  USED HEAP  AVAIL HEAP
-      1  /127.0.0.1  49249    56173  storage-0  CoherenceServer  true       512 MB      97 MB      415 MB
-      2  /127.0.0.1  49255    56179  storage-2  CoherenceServer  true       512 MB      76 MB      436 MB
-      3  /127.0.0.1  49254    56174  storage-1  CoherenceServer  true       512 MB      70 MB      442 MB
+      1  /127.0.0.1  61565    63754  storage-1  CoherenceServer  true       128 MB      28 MB      100 MB
+      2  /127.0.0.1  61566    63753  storage-0  CoherenceServer  true       128 MB      25 MB      103 MB
+      3  /127.0.0.1  61567    63755  storage-2  CoherenceServer  true       128 MB      70 MB       58 MB
 ----
 
-NOTE: By default, Coherence CE groupId is used and the version is {coherence-version}. You can change this via using `-C` for commercial and `-v` to change the Coherence version.
+NOTE: By default, Coherence CE groupId is used and the version is {coherence-default-version}. You can change this via using `-C` for commercial and `-v` to change the Coherence version.
 
 NOTE: Additional dependencies `coherence-json` is included to enable Management over REST and `jline` is included for `CohQL` history support.
 
@@ -149,20 +152,20 @@ Add and start a cluster using all default values but include additional `coheren
 $ cohctl create cluster local -a coherence-rest,io.opentracing:opentracing-api:0.33.0,io.opentracing:opentracing-util:0.33.0
 
 Cluster name:           local
-Cluster version:        {coherence-version}
+Cluster version:        {coherence-default-version}
 Cluster port:           7574
 Management port:        30000
 Server count:           3
-Initial memory:         512m
+Initial memory:         128m
 Persistence mode:       on-demand
 Group ID:               com.oracle.coherence.ce
 Additional artifacts:   coherence-rest,io.opentracing:opentracing-api:0.33.0,io.opentracing:opentracing-util:0.33.0
 Are you sure you want to create the cluster with the above details? (y/n) y
 
 Checking 6 Maven dependencies...
-- com.oracle.coherence.ce:coherence:{coherence-version}
-- com.oracle.coherence.ce:coherence-json:{coherence-version}
-- com.oracle.coherence.ce:coherence-rest:{coherence-version}
+- com.oracle.coherence.ce:coherence:{coherence-default-version}
+- com.oracle.coherence.ce:coherence-json:{coherence-default-version}
+- com.oracle.coherence.ce:coherence-rest:{coherence-default-version}
 - io.opentracing:opentracing-api:0.33.0
 - io.opentracing:opentracing-util:0.33.0
 - org.jline:jline:3.20.0
@@ -212,7 +215,7 @@ include::../../build/_output/docs-gen/start_cluster.adoc[tag=text]
 
 *Examples*
 
-Start a cluster and specify heap size of `1g`. (default is 512m)
+Start a cluster and specify heap size of `1g`. (default is 128m)
 
 [source,bash]
 ----
@@ -246,12 +249,12 @@ include::../../build/_output/docs-gen/start_console.adoc[tag=text]
 
 Start a Coherence console.
 
-[source,bash]
+[source,bash,subs="attributes"]
 ----
 $ cohctl start console -c local
 
 Starting client com.tangosol.net.CacheFactory...
-2022-08-29 16:00:01.346/0.620 Oracle Coherence 22.06.1 <Info> (thread=main, member=n/a): Loaded operational configuration from "jar:file:/Users/timmiddleton/.m2/repository/com/oracle/coherence/ce/coherence/22.06.1/coherence-22.06.1.jar!/tangosol-coherence.xml"
+2022-08-29 16:00:01.346/0.620 Oracle Coherence {coherence-default-version} <Info> (thread=main, member=n/a): Loaded operational configuration from "jar:file:/Users/user/.m2/repository/com/oracle/coherence/ce/coherence/{coherence-default-version}/coherence-{coherence-default-version}.jar!/tangosol-coherence.xml"
 ...
 
 Map (?):
@@ -366,7 +369,7 @@ $ cohctl clear default-heap
 Default heap has been cleared
 ----
 
-NOTE: If no default-heap is set, then the default of 512m is used unless a value for `-M` is specified.
+NOTE: If no default-heap is set, then the default of 128m is used unless a value for `-M` is specified.
 
 [#set-profile]
 ==== Set Profile

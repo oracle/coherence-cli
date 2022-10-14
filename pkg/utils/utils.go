@@ -242,3 +242,60 @@ func ValidatePort(port int32) error {
 
 	return nil
 }
+
+// bootstrapVersions defines the Coherence versions which use com.oracle.net.Coherence class
+var bootstrapVersions = []string{"21.12", "21.06", "20.12", "22.06", "22.09", "23.", "15.1.1", "14.1.2", "2206"}
+
+const coherenceMain = "com.tangosol.net.Coherence"
+const coherenceDCS = "com.tangosol.net.DefaultCacheServer"
+
+// GetCoherenceMainClass returns the default startup class for the specified Coherence version
+func GetCoherenceMainClass(version string) string {
+	for _, v := range bootstrapVersions {
+		if strings.Contains(version, v) {
+			return coherenceMain
+		}
+	}
+
+	return coherenceDCS
+}
+
+// ValidateStartClass validates that the server start class is and empty string, and therefore
+// use the default, or a valid option
+func ValidateStartClass(startClass string) error {
+	if startClass == "" || startClass == coherenceMain || startClass == coherenceDCS {
+		return nil
+	}
+
+	return fmt.Errorf("if start server class is specified it should be %s or %s", coherenceMain, coherenceDCS)
+}
+
+// GetStartupDelayInMillis returns the startup delay in millis converted from the following suffixes:
+// ms = millis - eg. 10ms
+// s = seconds ed 5s
+// no suffix is millis
+func GetStartupDelayInMillis(startupDelay string) (int64, error) {
+	var (
+		err    error
+		millis int
+		value  string
+	)
+
+	if startupDelay == "s" || startupDelay == "ms" {
+		return 0, fmt.Errorf("your must provide a value")
+	}
+	if strings.Contains(startupDelay, "ms") {
+		value = strings.Replace(startupDelay, "ms", "", 1)
+	} else if strings.Contains(startupDelay, "s") {
+		// seconds, so convert to millis
+		value = strings.Replace(startupDelay, "s", "", 1) + "000"
+	} else {
+		value = startupDelay
+	}
+
+	millis, err = strconv.Atoi(value)
+	if err != nil {
+		return 0, fmt.Errorf("invalid startup delay value of %s", startupDelay)
+	}
+	return int64(millis), nil
+}

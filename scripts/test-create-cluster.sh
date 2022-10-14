@@ -95,7 +95,6 @@ runCommand set debug on
 # Create a cluster
 message "Create Cluster"
 runCommand create cluster local -y -v $VERSION $COM
-runCommand set context local
 
 wait_for_ready
 
@@ -109,8 +108,8 @@ runCommand get services -o jsonpath="$.items[?(@.name=='PartitionedCache')].memb
 grep "[3,3,3]" $OUTPUT
 
 # Scale the cluster to 6 members
-message "Scale Cluster to 6 members"
-runCommand scale cluster local -y -r 6
+message "Scale Cluster to 6 members and delay each by 5 seconds"
+runCommand scale cluster local -r 6 -D 5s
 pause && pause && pause
 
 # Check the members of PartitionedCache
@@ -123,7 +122,7 @@ grep "[6,6,6]" $OUTPUT
 runCommand stop cluster local -y
 
 message "Startup cluster with 5 members"
-runCommand start cluster local -y -r 5
+runCommand start cluster local -r 5
 wait_for_ready
 
 runCommand get services -o jsonpath="$.items[?(@.name=='PartitionedCache')].memberCount"
@@ -131,10 +130,10 @@ grep "[5,5,5,]" $OUTPUT
 
 runCommand stop cluster local -y
 runCommand remove cluster local -y
-pause
+pause && pause && pause
 
 message "Start cluster using different HTTP port"
-runCommand create cluster local -H 30001 -l 9 -y $COM -v $VERSION
+runCommand create cluster local -H 30001 -l 9 $COM -v $VERSION -y
 wait_for_ready 30001
 
 message "Add a cluster to point to newly created cluster on port 30001"
@@ -147,10 +146,11 @@ pause
 
 message "Startup cluster using different memory setting"
 runCommand clear default-heap
-runCommand start cluster local -r 4 -M 1g -y
+runCommand start cluster local -r 4 -M 1g
 runCommand set bytes-format m
 wait_for_ready 30001
 
+runCommand set context local
 runCommand get members
 grep "1,024 MB" $OUTPUT > /dev/null 2>&1
 echo "Pausing for a bit"
@@ -161,7 +161,7 @@ pause
 runCommand remove cluster local -y
 
 message "Run CohQL"
-runCommand create cluster local -y -M 512m -S $COM -v $VERSION
+runCommand create cluster local -y -M 512m -K $COM -v $VERSION
 wait_for_ready
 
 echo "insert into test key(1) value(1);" > /tmp/file.cohql
@@ -199,7 +199,6 @@ if [ -z "$COM" ] ; then
   message "Create Cluster Using Gradle"
   gradle -v
   runCommand create cluster local -y -v $VERSION $COM
-  runCommand set context local
 
   wait_for_ready
 

@@ -54,13 +54,6 @@ var getExecutorsCmd = &cobra.Command{
 				return err
 			}
 
-			if len(executors.Executors) == 0 {
-				if !watchEnabled {
-					return nil
-				}
-				continue
-			}
-
 			if strings.Contains(OutputFormat, constants.JSONPATH) || OutputFormat == constants.JSON {
 				// encode the struct so we get the updated fields
 				executorsResult, err = json.Marshal(executors)

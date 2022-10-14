@@ -79,10 +79,6 @@ can also specify '-o wide' to display addition information.`,
 			return err
 		}
 
-		if len(federatedServices) == 0 {
-			return nil
-		}
-
 		for {
 			var (
 				finalSummariesDestinations []config.FederationSummary
