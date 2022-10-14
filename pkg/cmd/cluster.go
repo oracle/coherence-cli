@@ -271,7 +271,7 @@ addition information as well as '-v' to displayed additional information.`,
 			jsonPathOrJSON             = strings.Contains(OutputFormat, constants.JSONPATH) || OutputFormat == constants.JSON
 		)
 
-		const waitGroupCount = 12
+		const waitGroupCount = 13
 
 		connection := args[0]
 
@@ -410,6 +410,15 @@ addition information as well as '-v' to displayed additional information.`,
 			defer wg.Done()
 			var err1 error
 			flashResult, err1 = dataFetcher.GetElasticDataDetails("flash")
+			if err1 != nil {
+				errorSink.AppendError(err1)
+			}
+		}()
+
+		go func() {
+			defer wg.Done()
+			var err1 error
+			ramResult, err1 = dataFetcher.GetElasticDataDetails("ram")
 			if err1 != nil {
 				errorSink.AppendError(err1)
 			}
@@ -567,6 +576,7 @@ addition information as well as '-v' to displayed additional information.`,
 				if len(finalSummariesDestinations) > 0 {
 					sb.WriteString(FormatFederationSummary(finalSummariesDestinations, destinations))
 				}
+				sb.WriteString("\n")
 				if len(finalSummariesOrigins) > 0 {
 					sb.WriteString(FormatFederationSummary(finalSummariesOrigins, origins))
 				}
