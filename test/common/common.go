@@ -186,6 +186,9 @@ func RunTestDiscoverClustersCommands(t *testing.T) {
 
 	cliCmd := cmd.Initialize(nil)
 
+	// sleep to ensure the clusters are ready
+	test_utils.Sleep(30)
+
 	// get clusters should return nothing
 	test_utils.EnsureCommandContains(g, t, cliCmd, "", configArg, file, "get", "clusters")
 
