@@ -303,9 +303,7 @@ service is a cache service.`,
 			return err
 		}
 
-		found := serviceExists(serviceName, servicesSummary)
-
-		if !found {
+		if found := serviceExists(serviceName, servicesSummary); !found {
 			return fmt.Errorf(unableToFindService, serviceName)
 		}
 

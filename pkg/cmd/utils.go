@@ -52,15 +52,13 @@ func ServiceExists(dataFetcher fetcher.Fetcher, serviceName string) (bool, error
 		return false, err
 	}
 
-	found := false
 	for _, v := range servicesSummary.Services {
 		if v.ServiceName == serviceName {
-			found = true
-			break
+			return true, nil
 		}
 	}
 
-	return found, nil
+	return false, nil
 }
 
 // GetListOfCacheServices returns a list of cache services

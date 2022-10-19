@@ -183,8 +183,7 @@ func StartCoherenceCluster(fileName, url string) error {
 		return errors.New(output + ": " + err.Error())
 	} else {
 		// wait for ready
-		err = WaitForHttpReady(url, 120)
-		if err != nil {
+		if err = WaitForHttpReady(url, 120); err != nil {
 			return errors.New("Unable to start cluster: " + err.Error())
 		}
 	}
@@ -374,6 +373,32 @@ func WaitForHttpReady(url string, timeout int) error {
 		} else {
 			fmt.Println("HTTP endpoint ready")
 			return nil
+		}
+	}
+
+	return fmt.Errorf("Unable to connect to url %s after %d seconds\n", url, timeout)
+}
+
+// WaitForHttpBalancedServices waits for all services to be balanced
+func WaitForHttpBalancedServices(url string, timeout int) error {
+	var duration = 0
+	fmt.Println("Waiting for services to be balanced...")
+	for duration < timeout {
+		content, err := IssueGetRequest(url)
+		if err != nil {
+			// unable to connect, so wait 5 seconds
+			fmt.Println("Waiting for services" + url + ", sleeping 5")
+			Sleep(5)
+			duration += 5
+		} else {
+			var contentString = string(content)
+			if contentString == "OK" {
+				fmt.Println("All services balanced")
+				return nil
+			}
+			fmt.Println(contentString)
+			Sleep(5)
+			duration += 5
 		}
 	}
 

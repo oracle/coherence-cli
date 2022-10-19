@@ -57,6 +57,9 @@ func RunTestClusterCommands(t *testing.T) {
 	// set default format to "m"
 	test_utils.EnsureCommandContains(g, t, cliCmd, "Bytes format is now set to m", configArg, file, "set", "bytes-format", "m")
 
+	// get bytes format
+	test_utils.EnsureCommandContains(g, t, cliCmd, "Current bytes format: m", configArg, file, "get", "bytes-format")
+
 	// clear default format
 	test_utils.EnsureCommandContains(g, t, cliCmd, "Default bytes format has been cleared", configArg, file, "clear", "bytes-format")
 
@@ -185,6 +188,9 @@ func RunTestDiscoverClustersCommands(t *testing.T) {
 	test_utils.CleanupConfigFileAfterTest(t, file)
 
 	cliCmd := cmd.Initialize(nil)
+
+	// sleep to ensure the clusters are ready
+	test_utils.Sleep(30)
 
 	// get clusters should return nothing
 	test_utils.EnsureCommandContains(g, t, cliCmd, "", configArg, file, "get", "clusters")

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Oracle and/or its affiliates.
+ * Copyright (c) 2021, 2022 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -33,6 +33,8 @@ func TestMain(m *testing.M) {
 		fmt.Println(err)
 		exitCode = 1
 	} else {
+		// don't check for balanced federation services as there is only 1 member per cluster
+		test_utils.Sleep(10)
 		exitCode = m.Run()
 	}
 

@@ -13,8 +13,11 @@ import java.lang.reflect.Method;
 
 import java.net.InetSocketAddress;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.tangosol.net.CacheFactory;
@@ -24,6 +27,7 @@ import com.tangosol.net.NamedCache;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
+import com.tangosol.net.management.MBeanServerProxy;
 
 /**
  * A simple Http server that is deployed into a Coherence cluster
@@ -63,6 +67,7 @@ public class RestServer {
             server.createContext("/registerMBeans", RestServer::registerMBeans);
             server.createContext("/executorPresent", RestServer::isExecutorPresent);
             server.createContext("/healthPresent", RestServer::isHealthCheckPresent);
+            server.createContext("/balanced", RestServer::balanced);
 
             server.setExecutor(null); // creates a default executor
             server.start();
@@ -100,6 +105,48 @@ public class RestServer {
 
     private static void ready(HttpExchange t) throws IOException {
         send(t, 200, "OK");
+    }
+
+    private static void balanced(HttpExchange t) throws IOException {
+        boolean     isCommercial = !CacheFactory.getEdition().equalsIgnoreCase("CE");
+
+        // always add Base services
+        Set<String> setServices  = BASE_SERVICES;
+
+        if (isCommercial) {
+            if (isFederationConfigured()) {
+                setServices.add(FEDERATED_SERVICE);
+            }
+            setServices.addAll(COMMERCIAL_SERVICES);
+        }
+
+        CacheFactory.log("Checking for the following balanced services: " + setServices, CacheFactory.LOG_INFO);
+
+        // check the status of each of the services and ensure they are not ENDANGERED
+        MBeanServerProxy proxy = CacheFactory.ensureCluster().getManagement().getMBeanServerProxy();
+        if (proxy == null) {
+            send(t, 200, "MBeanServerProxy not ready");
+        }
+
+        for (String s : setServices) {
+            String statusHA = (String) proxy.getAttribute("Coherence:type=Service,name=" + s + ",nodeId=1", "StatusHA");
+            if (ENDANGERED.equals(statusHA)) {
+                // fail fast
+                send(t, 200, "Service " + s + " is still " + ENDANGERED + ".\nFull list is: " + setServices);
+            }
+        }
+
+        CacheFactory.log("All services balanced", CacheFactory.LOG_INFO);
+        // all ok, then success
+        send(t, 200, "OK");
+    }
+
+    private static boolean isFederationConfigured() {
+        try {
+            return CacheFactory.ensureCluster().getService(FEDERATED_SERVICE) != null;
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     private static void env(HttpExchange t) throws IOException {
@@ -226,4 +273,12 @@ public class RestServer {
             cache.putAll(map);
         }
     }
+
+    private static final String FEDERATED_SERVICE = "FederatedService";
+    private static final String ENDANGERED = "ENDANGERED";
+
+    private static final Set<String> BASE_SERVICES =
+            new HashSet<>(Arrays.asList("PartitionedCache", "PartitionedCache2", "CanaryService"));
+    private static final Set<String> COMMERCIAL_SERVICES =
+           new HashSet<>(Arrays.asList("PartitionedCacheFlash", "PartitionedCacheRAM"));
 }
