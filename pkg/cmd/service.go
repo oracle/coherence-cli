@@ -303,13 +303,7 @@ service is a cache service.`,
 			return err
 		}
 
-		found := serviceExists(serviceName, servicesSummary)
-
-		if !found {
-			cmd.Println("DEBUG: Dumping list of services before failure")
-			for _, v := range servicesSummary.Services {
-				cmd.Println("DEBUG:", v)
-			}
+		if found := serviceExists(serviceName, servicesSummary); !found {
 			return fmt.Errorf(unableToFindService, serviceName)
 		}
 
