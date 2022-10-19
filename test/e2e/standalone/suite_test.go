@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Oracle and/or its affiliates.
+ * Copyright (c) 2021, 2022 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -33,7 +33,13 @@ func TestMain(m *testing.M) {
 		fmt.Println(err)
 		exitCode = 1
 	} else {
-		exitCode = m.Run()
+		// wait for balanced services
+		if err = test_utils.WaitForHttpBalancedServices(context.RestUrl+"/balanced", 120); err != nil {
+			fmt.Printf("Unable to wait for balanced services: %s\n" + err.Error())
+			exitCode = 1
+		} else {
+			exitCode = m.Run()
+		}
 	}
 
 	fmt.Printf("Tests completed with return code %d\n", exitCode)
