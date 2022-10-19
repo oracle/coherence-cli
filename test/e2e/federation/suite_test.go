@@ -34,7 +34,7 @@ func TestMain(m *testing.M) {
 		exitCode = 1
 	} else {
 		// don't check for balanced federation services as there is only 1 member per cluster
-		test_utils.Sleep(10000)
+		test_utils.Sleep(10)
 		exitCode = m.Run()
 	}
 
