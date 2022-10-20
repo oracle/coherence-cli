@@ -21,6 +21,7 @@ This page will be updated and maintained over time to include common issues we s
 * <<services, Cannot find services with quotes in their names>>
 * <<wls, Issues adding correct cluster when WebLogic Server has multiple Coherence clusters>>
 * <<windows, Issues setting reporter path on Windows>>
+* <<create, Issues creating or starting clusters using `cohctl create cluster`>>
 
 [#bad]
 === Bad CPU type in executable on macOS
@@ -224,3 +225,33 @@ c:\> cohctl -y set reporter 1 -a outputPath -v D:\\Temp\\my_path
 
 operation completed
 ----
+
+[#create]
+=== Issues creating or starting clusters
+
+If you have used the `cohctl create cluster` or `cohctl start cluster` and you cannot
+show the cluster information using a command such as `cohctl get members`, then you can do
+the following to check if there are any issues.
+
+NOTE: The main reasons for clusters not starting up are that you have not used the correct JDK version.
+For example for 22.09 and above clusters you must have JDK 17+.
+
+==== Check the logfile for the cluster
+
+The logfiles for a created cluster are in the following location `$HOME/.cohctl/logs/<cluster>` and
+you should check these if you cluster is not starting up.
+
+[source,bash]
+----
+cat ~/.cohctl/logs/local/storage-0.log
+----
+
+If you see the following message, this indicates that you are not using a compatible JDK for the Coherence version.
+
+[source,bash]
+----
+Error: LinkageError occurred while loading main class com.tangosol.net.Coherence
+java.lang.UnsupportedClassVersionError: com/tangosol/net/Coherence has been compiled by a more recent version of the Java Runtime
+   (class file version 61.0), this version of the Java Runtime only recognizes class file versions up to 55.0
+----
+
