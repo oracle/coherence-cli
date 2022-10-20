@@ -369,7 +369,7 @@ func getCacheServerArgs(member string, httpPort int32, version string) []string 
 
 	// default the main class if not specified
 	if mainClass == "" {
-		mainClass = utils.GetCoherenceMainClass(Version)
+		mainClass = utils.GetCoherenceMainClass(version)
 	}
 
 	return append(baseArgs, getMemberProperty(member), mainClass)
