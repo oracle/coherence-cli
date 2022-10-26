@@ -472,7 +472,7 @@ $(TOOLS_BIN)/golangci-lint:
 .PHONY: gotestsum
 GOTESTSUM = gotestsum
 gotestsum: ## Download gotestsum locally if necessary.
-	$(call go-get-tool,$(GOTESTSUM),gotest.tools/gotestsum@v1.8.1)
+	GOBIN=`pwd`/build/tools/bin go install gotest.tools/gotestsum@v1.8.1
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Find or download copyright
