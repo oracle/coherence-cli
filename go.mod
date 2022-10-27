@@ -4,7 +4,7 @@
 //
 module github.com/oracle/coherence-cli
 
-go 1.17
+go 1.18
 
 require (
 	github.com/ohler55/ojg v1.12.8

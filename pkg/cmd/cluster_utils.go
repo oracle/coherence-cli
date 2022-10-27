@@ -383,7 +383,7 @@ func getClientArgs(member, class string) []string {
 
 	if extendClientParam {
 		// only works with default Cache config
-		baseArgs = append(baseArgs, "-Dcoherence.client=remote", "-Dcoherence.tcmp.enabled=false")
+		baseArgs = append(baseArgs, "-Dcoherence.client=remote", "-Dcoherence.tcmpenabled=false")
 	}
 
 	baseArgs = append(baseArgs, getMemberProperty(member), "-Dcoherence.distributed.localstorage=false", class)
