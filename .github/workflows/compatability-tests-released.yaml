@@ -75,6 +75,7 @@ jobs:
         git checkout $LATEST
         export COHERENCE_BASE_IMAGE=${{ matrix.javaImage }}
         export COHERENCE_VERSION=${{ matrix.coherenceVersion }}
+        GOBIN=`pwd`/build/tools/bin go install gotest.tools/gotestsum@v1.8.1
         make clean build-test-images test-e2e-standalone
         make test-clean test-discovery
 
