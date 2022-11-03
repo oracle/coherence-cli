@@ -161,7 +161,7 @@ pause
 runCommand remove cluster local -y
 
 message "Run CohQL"
-runCommand create cluster local -y -M 512m -K $COM -v $VERSION
+runCommand create cluster local -y -M 512m -I $COM -v $VERSION
 wait_for_ready
 
 echo "insert into test key(1) value(1);" > /tmp/file.cohql
