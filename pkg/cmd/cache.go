@@ -79,12 +79,6 @@ used by Federation.`,
 					cmd.Println(string(data))
 				}
 			} else {
-				if watchEnabled {
-					cmd.Println("\n" + time.Now().String())
-				}
-
-				cmd.Println(FormatCurrentCluster(connection))
-
 				err = json.Unmarshal(servicesResult, &servicesSummary)
 				if err != nil {
 					return err
@@ -106,12 +100,15 @@ used by Federation.`,
 				if err != nil {
 					return err
 				}
-				cmd.Println(value)
 
+				printWatchHeader(cmd)
+				cmd.Println(FormatCurrentCluster(connection))
+
+				cmd.Println(value)
 			}
 
 			// check to see if we should exit if we are not watching
-			if !watchEnabled {
+			if !isWatchEnabled() {
 				break
 			}
 			// we are watching so sleep and then repeat until CTRL-C

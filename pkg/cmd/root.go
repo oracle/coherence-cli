@@ -33,6 +33,7 @@ var (
 	clusterConnection string
 	serviceName       string
 	watchEnabled      bool
+	watchClearEnabled bool
 	watchDelay        int32
 	readPassStdin     bool
 
@@ -199,6 +200,7 @@ func SetRootCommandFlags(command *cobra.Command) {
 	command.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.cohctl/cohctl.yaml)")
 	command.PersistentFlags().StringVarP(&OutputFormat, "output", "o", constants.TABLE, "output format: "+outputFormats)
 	command.PersistentFlags().BoolVarP(&watchEnabled, "watch", "w", false, "watch output (only available for get commands)")
+	command.PersistentFlags().BoolVarP(&watchClearEnabled, "watch-clear", "W", false, "watch output with clear")
 	command.PersistentFlags().BoolVarP(&readPassStdin, "stdin", "i", false, "read password from stdin")
 	command.PersistentFlags().Int32VarP(&watchDelay, "delay", "d", 5, "delay for watching in seconds")
 	command.PersistentFlags().StringVarP(&Username, usernameOption, usernameShort, "", userNameDescription)

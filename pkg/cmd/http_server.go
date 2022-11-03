@@ -37,7 +37,7 @@ var getHTTPProxiesCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		if !watchEnabled {
+		if !isWatchEnabled() {
 			// don't display the value if watch was enabled as it was already output
 			cmd.Println(details)
 		}

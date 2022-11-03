@@ -157,18 +157,15 @@ local snapshots are shown, but you can use the -a option to show archived snapsh
 				}
 				cmd.Println(string(data))
 			} else {
-				if watchEnabled {
-					cmd.Println("\n" + time.Now().String())
-				}
+				printWatchHeader(cmd)
 
 				cmd.Println(FormatCurrentCluster(connection))
-
 				cmd.Println(FormatSnapshots(snapshots, ArchivedSnapshots))
 
 			}
 
 			// check to see if we should exit if we are not watching
-			if !watchEnabled {
+			if !isWatchEnabled() {
 				break
 			}
 			// we are watching so sleep and then repeat until CTRL-C

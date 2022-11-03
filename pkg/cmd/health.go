@@ -71,9 +71,7 @@ var getHealthCmd = &cobra.Command{
 					}
 				}
 
-				if watchEnabled {
-					cmd.Println("\n" + time.Now().String())
-				}
+				printWatchHeader(cmd)
 
 				cmd.Println(FormatCurrentCluster(connection))
 
@@ -96,7 +94,7 @@ var getHealthCmd = &cobra.Command{
 			}
 
 			// check to see if we should exit if we are not watching
-			if !watchEnabled {
+			if !isWatchEnabled() {
 				break
 			}
 			// we are watching so sleep and then repeat until CTRL-C

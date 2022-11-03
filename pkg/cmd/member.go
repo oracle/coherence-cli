@@ -97,9 +97,7 @@ can specify '-o wide' to display addition information.`,
 			} else if OutputFormat == constants.JSON {
 				cmd.Println(string(membersResult))
 			} else {
-				if watchEnabled {
-					cmd.Println("\n" + time.Now().String())
-				}
+				printWatchHeader(cmd)
 
 				cmd.Println(FormatCurrentCluster(connection))
 				err = json.Unmarshal(membersResult, &members)
@@ -132,7 +130,7 @@ can specify '-o wide' to display addition information.`,
 			}
 
 			// check to see if we should exit if we are not watching
-			if !watchEnabled {
+			if !isWatchEnabled() {
 				break
 			}
 			// we are watching services so sleep and then repeat until CTRL-C
@@ -457,9 +455,7 @@ var getTracingCmd = &cobra.Command{
 		}
 
 		for {
-			if watchEnabled {
-				cmd.Println("\n" + time.Now().String())
-			}
+			printWatchHeader(cmd)
 
 			membersResult, err := dataFetcher.GetMemberDetailsJSON(OutputFormat != constants.TABLE && OutputFormat != constants.WIDE)
 			if err != nil {
@@ -485,7 +481,7 @@ var getTracingCmd = &cobra.Command{
 			}
 
 			// check to see if we should exit if we are not watching
-			if !watchEnabled {
+			if !isWatchEnabled() {
 				break
 			}
 			// we are watching services so sleep and then repeat until CTRL-C

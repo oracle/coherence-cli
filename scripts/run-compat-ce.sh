@@ -10,7 +10,7 @@
 set -e
 
 echo "Coherence CE 22.09"
-COHERENCE_BASE_IMAGE=gcr.io/distroless/java17 COHERENCE_VERSION=22.09-SNAPSHOT make clean build-test-images test-e2e-standalone
+COHERENCE_BASE_IMAGE=gcr.io/distroless/java17 COHERENCE_VERSION=22.09 make clean build-test-images test-e2e-standalone
 
 echo "Coherence CE 22.09 with Executor"
 COHERENCE_BASE_IMAGE=gcr.io/distroless/java17 PROFILES=,executor COHERENCE_VERSION=22.09 make clean build-test-images test-e2e-standalone

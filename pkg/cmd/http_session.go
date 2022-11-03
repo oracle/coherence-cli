@@ -39,9 +39,8 @@ var getHTTPSessionsCmd = &cobra.Command{
 		}
 
 		for {
-			if watchEnabled {
-				cmd.Println("\n" + time.Now().String())
-			}
+			printWatchHeader(cmd)
+
 			results, err := dataFetcher.GetHTTPSessionDetailsJSON()
 			if err != nil {
 				return err
@@ -69,7 +68,7 @@ var getHTTPSessionsCmd = &cobra.Command{
 			}
 
 			// check to see if we should exit if we are not watching
-			if !watchEnabled {
+			if !isWatchEnabled() {
 				break
 			}
 			// we are watching services so sleep and then repeat until CTRL-C
@@ -202,9 +201,7 @@ var describeHTTPSessionCmd = &cobra.Command{
 			} else if OutputFormat == constants.JSON {
 				cmd.Println(string(results))
 			} else {
-				if watchEnabled {
-					cmd.Println("\n" + time.Now().String())
-				}
+				printWatchHeader(cmd)
 
 				cmd.Println(FormatCurrentCluster(connection))
 				cmd.Println("HTTP SESSION DETAILS")
@@ -219,7 +216,7 @@ var describeHTTPSessionCmd = &cobra.Command{
 			}
 
 			// check to see if we should exit if we are not watching
-			if !watchEnabled {
+			if !isWatchEnabled() {
 				break
 			}
 			// we are watching services so sleep and then repeat until CTRL-C

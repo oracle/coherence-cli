@@ -19,7 +19,3 @@ func setForkProcess(cmd *exec.Cmd) {
 		CreationFlags: syscall.CREATE_NEW_PROCESS_GROUP,
 	}
 }
-
-//func handleCTRLC() {
-//	// no-op
-//}

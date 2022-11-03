@@ -22,6 +22,8 @@ import (
 	"net/http/cookiejar"
 	"net/url"
 	"os"
+	"os/exec"
+	"runtime"
 	"strings"
 	"sync"
 	"time"
@@ -65,11 +67,11 @@ func ServiceExists(dataFetcher fetcher.Fetcher, serviceName string) (bool, error
 func GetListOfCacheServices(servicesSummary config.ServicesSummaries) []string {
 	var cacheServices = make([]string, 0)
 	for _, value := range servicesSummary.Services {
-		var serviceName = value.ServiceName
+		var service = value.ServiceName
 		if (utils.IsDistributedCache(value.ServiceType) ||
-			value.ServiceType == "ReplicatedCache") && !utils.SliceContains(cacheServices, serviceName) {
+			value.ServiceType == "ReplicatedCache") && !utils.SliceContains(cacheServices, service) {
 
-			cacheServices = append(cacheServices, serviceName)
+			cacheServices = append(cacheServices, service)
 		}
 	}
 
@@ -519,4 +521,38 @@ func getNodeIDs(nodeIDs string, nodeIDArray []string) ([]string, error) {
 		}
 	}
 	return nodeIDList, nil
+}
+
+func isWatchEnabled() bool {
+	return watchEnabled || watchClearEnabled
+}
+
+// printWatchHeader prints the header and optionally clears the screen
+func printWatchHeader(cmd *cobra.Command) {
+	if isWatchEnabled() {
+		if watchClearEnabled {
+			// clear the screen before printing the output
+			clearScreen(cmd)
+		}
+		cmd.Println("\n" + time.Now().String())
+	}
+}
+
+func clearScreen(cmd *cobra.Command) {
+	switch runtime.GOOS {
+	case "darwin":
+		cmd.Print("\033[H\033[2J")
+	case "windows":
+		runClearCommand(cmd, "cmd", "/c", "cls")
+	case "linux":
+		runClearCommand(cmd, "clear")
+	default:
+		runClearCommand(cmd, "clear")
+	}
+}
+
+func runClearCommand(cmd *cobra.Command, command string, args ...string) {
+	process := exec.Command(command, args...)
+	process.Stdout = cmd.OutOrStdout()
+	_ = process.Run()
 }
