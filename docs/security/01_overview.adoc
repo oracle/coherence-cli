@@ -11,7 +11,7 @@
 == Securing CLI Access
 
 The Coherence CLI accesses cluster information using the Management over REST endpoint for the cluster as described in the
-https://docs.oracle.com/en/middleware/standalone/coherence/14.1.1.0/rest-reference/quick-start.html[Coherence documentation].
+{commercial-docs-base-url}/rest-reference/quick-start.html[Coherence documentation].
 
 Coherence HTTP Management server authentication and authorization are disabled by
 default. We recommend that this is enabled as outlined in the sections below.

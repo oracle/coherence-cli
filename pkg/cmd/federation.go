@@ -117,9 +117,7 @@ can also specify '-o wide' to display addition information.`,
 					cmd.Println(string(finalData))
 				}
 			} else {
-				if watchEnabled {
-					cmd.Println("\n" + time.Now().String())
-				}
+				printWatchHeader(cmd)
 
 				cmd.Println(FormatCurrentCluster(connection))
 
@@ -132,7 +130,7 @@ can also specify '-o wide' to display addition information.`,
 			}
 
 			// check to see if we should exit if we are not watching
-			if !watchEnabled {
+			if !isWatchEnabled() {
 				break
 			}
 			// we are watching services so sleep and then repeat until CTRL-C

@@ -59,7 +59,7 @@ can also specify '-o wide' to display addition information.`,
 		)
 
 		if statusHAType != "none" {
-			if !watchEnabled {
+			if !isWatchEnabled() {
 				return errors.New("if you have specified a status-ha value then you must enable watch option")
 			}
 			if !utils.SliceContains(validStatusHA, statusHAType) {
@@ -96,9 +96,7 @@ can also specify '-o wide' to display addition information.`,
 			} else if OutputFormat == constants.JSON {
 				cmd.Println(string(servicesResult))
 			} else {
-				if watchEnabled {
-					cmd.Println("\n" + time.Now().String())
-				}
+				printWatchHeader(cmd)
 
 				cmd.Println(FormatCurrentCluster(connection))
 				err = json.Unmarshal(servicesResult, &servicesSummary)
@@ -120,7 +118,7 @@ can also specify '-o wide' to display addition information.`,
 			}
 
 			// check to see if we should exit if we are not watching
-			if !watchEnabled {
+			if !isWatchEnabled() {
 				break
 			}
 
@@ -241,7 +239,7 @@ var getServiceMembersCmd = &cobra.Command{
 			}
 
 			// check to see if we should exit if we are not watching
-			if !watchEnabled {
+			if !isWatchEnabled() {
 				break
 			}
 			// we are watching services so sleep and then repeat until CTRL-C

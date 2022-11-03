@@ -19,18 +19,3 @@ func setForkProcess(process *exec.Cmd) {
 		Setsid: true,
 	}
 }
-
-//func handleCTRLC(proc *os.Process) {
-//	chanSignal := make(chan os.Signal, 1)
-//	chanDone := make(chan struct{})
-//	signal.Notify(chanSignal, os.Interrupt)
-//	go func() {
-//		<-chanSignal
-//		fmt.Println("CTRL-C Received")
-//		close(chanDone)
-//	}()
-//	<-chanDone
-//
-//	_ = proc.Kill()
-//	os.Exit(1)
-//}

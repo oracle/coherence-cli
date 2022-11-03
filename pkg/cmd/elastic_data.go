@@ -55,9 +55,7 @@ Journal details for the cluster.`,
 		}
 
 		for {
-			if watchEnabled {
-				cmd.Println("\n" + time.Now().String())
-			}
+			printWatchHeader(cmd)
 
 			errorSink = createErrorSink()
 			wg.Add(2)
@@ -114,7 +112,7 @@ Journal details for the cluster.`,
 			}
 
 			// check to see if we should exit if we are not watching
-			if !watchEnabled {
+			if !isWatchEnabled() {
 				break
 			}
 			// we are watching so sleep and then repeat until CTRL-C

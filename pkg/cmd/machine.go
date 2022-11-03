@@ -63,9 +63,7 @@ var getMachinesCmd = &cobra.Command{
 			} else if OutputFormat == constants.JSON {
 				cmd.Println(string(jsonData))
 			} else {
-				if watchEnabled {
-					cmd.Println("\n" + time.Now().String())
-				}
+				printWatchHeader(cmd)
 
 				cmd.Println(FormatCurrentCluster(connection))
 
@@ -78,7 +76,7 @@ var getMachinesCmd = &cobra.Command{
 			}
 
 			// check to see if we should exit if we are not watching
-			if !watchEnabled {
+			if !isWatchEnabled() {
 				break
 			}
 			// we are watching services so sleep and then repeat until CTRL-C

@@ -279,14 +279,12 @@ func executeJFROperation(cmd *cobra.Command, jfrName, operation string, dataFetc
 	}
 
 	// ensure watch enabled cannot be set for anything other than fetcher.GetJFRs
-	if operation != fetcher.GetJFRs && watchEnabled {
+	if operation != fetcher.GetJFRs && isWatchEnabled() {
 		watchEnabled = false
 	}
 
 	for {
-		if watchEnabled {
-			cmd.Println("\n" + time.Now().String())
-		}
+		printWatchHeader(cmd)
 
 		if operation == fetcher.StopJFR {
 			data, err = dataFetcher.StopJFR(jfrName, jfrType, target)
@@ -310,7 +308,7 @@ func executeJFROperation(cmd *cobra.Command, jfrName, operation string, dataFetc
 		cmd.Println(formatJFROutput(finalResult))
 
 		// check to see if we should exit if we are not watching
-		if !watchEnabled {
+		if !isWatchEnabled() {
 			break
 		}
 		// we are watching so sleep and then repeat until CTRL-C

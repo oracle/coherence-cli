@@ -45,7 +45,7 @@ servers for a cluster. You can specify '-o wide' to display addition information
 		if err != nil {
 			return err
 		}
-		if !watchEnabled {
+		if !isWatchEnabled() {
 			// don't display the value if watch was enabled as it was already output
 			cmd.Println(details)
 		}
@@ -254,16 +254,14 @@ var getProxyConnectionsCmd = &cobra.Command{
 					cmd.Println(string(connectionsResult))
 				}
 			} else {
-				if watchEnabled {
-					cmd.Println("\n" + time.Now().String())
-				}
+				printWatchHeader(cmd)
 
 				cmd.Println(FormatCurrentCluster(connection))
 				cmd.Println(FormatProxyConnections(connectionDetailsFinal))
 			}
 
 			// check to see if we should exit if we are not watching
-			if !watchEnabled {
+			if !isWatchEnabled() {
 				break
 			}
 			// we are watching so sleep and then repeat until CTRL-C
@@ -363,9 +361,7 @@ func returnGetProxiesDetails(cmd *cobra.Command, protocol string, dataFetcher fe
 		} else if OutputFormat == constants.JSON {
 			sb.WriteString(string(proxyResults))
 		} else {
-			if watchEnabled {
-				sb.WriteString("\n" + time.Now().String() + "\n")
-			}
+			printWatchHeader(cmd)
 
 			sb.WriteString(FormatCurrentCluster(connection) + "\n")
 
@@ -377,7 +373,7 @@ func returnGetProxiesDetails(cmd *cobra.Command, protocol string, dataFetcher fe
 		}
 
 		// check to see if we should exit if we are not watching
-		if !watchEnabled {
+		if !isWatchEnabled() {
 			break
 		}
 

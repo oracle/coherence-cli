@@ -53,9 +53,7 @@ var getPersistenceCmd = &cobra.Command{
 			} else if OutputFormat == constants.JSON {
 				cmd.Println(string(servicesResult))
 			} else {
-				if watchEnabled {
-					cmd.Println("\n" + time.Now().String())
-				}
+				printWatchHeader(cmd)
 
 				cmd.Println(FormatCurrentCluster(connection))
 				err = json.Unmarshal(servicesResult, &servicesSummary)
@@ -74,7 +72,7 @@ var getPersistenceCmd = &cobra.Command{
 			}
 
 			// check to see if we should exit if we are not watching
-			if !watchEnabled {
+			if !isWatchEnabled() {
 				break
 			}
 
