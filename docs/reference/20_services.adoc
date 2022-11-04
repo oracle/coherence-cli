@@ -72,7 +72,7 @@ $ cohctl describe service PartitionedCache -c local
 ----
 
 [#get-services-storage]
-==== Get Services storage
+==== Get Services Storage
 
 include::../../build/_output/docs-gen/get_services_storage.adoc[tag=text]
 
