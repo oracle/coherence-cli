@@ -25,9 +25,10 @@ var (
 	serviceType       string
 	statusHATimeout   int32
 	statusHAType      string
-	validServiceTypes = []string{constants.DistributedService, constants.FederatedService, constants.PagedTopic, "Invocation", "Proxy", "RemoteCache", "ReplicatedCache", "all", "PagedTopic"}
-	validStatusHA     = []string{"NODE-SAFE", "MACHINE-SAFE", "RACK-SAFE", "SITE-SAFE"}
-	allStatusHA       = []string{"ENDANGERED", "NODE-SAFE", "MACHINE-SAFE", "RACK-SAFE", "SITE-SAFE"}
+	validServiceTypes = []string{constants.DistributedService, constants.FederatedService, constants.PagedTopic,
+		"Invocation", "Proxy", "RemoteCache", "ReplicatedCache", "OptimisticCache", "LocalCache", "RemoteGrpcCache", "all"}
+	validStatusHA = []string{"NODE-SAFE", "MACHINE-SAFE", "RACK-SAFE", "SITE-SAFE"}
+	allStatusHA   = []string{"ENDANGERED", "NODE-SAFE", "MACHINE-SAFE", "RACK-SAFE", "SITE-SAFE"}
 
 	attributeNameService   string
 	attributeValueService  string
