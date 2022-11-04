@@ -185,6 +185,25 @@ type ServiceSummary struct {
 	Idle                           bool
 }
 
+// ServicesStorageSummaries contains an array of ServiceStorageSummary
+type ServicesStorageSummaries struct {
+	Services []ServiceStorageSummary `json:"items"`
+}
+
+// ServiceStorageSummary contains a storage summary for individual services
+type ServiceStorageSummary struct {
+	ServiceName            string `json:"service"`
+	AveragePartitionSizeKB int64  `json:"averagePartitionSizeKB"`
+	MaxPartitionSizeKB     int64  `json:"maxPartitionSizeKB"`
+	AverageStorageSizeKB   int64  `json:"averageStorageSizeKB"`
+	MaxStorageSizeKB       int64  `json:"maxStorageSizeKB"`
+	MaxLoadNodeID          int32  `json:"maxLoadNodeId"`
+	FairSharePrimary       int32  `json:"fairSharePrimary"`
+	FairShareBackup        int32  `json:"fairShareBackup"`
+	PartitionCount         int32  `json:"partitionCount"`
+	ServiceNodeCount       int32  `json:"serviceNodeCount"`
+}
+
 // HealthSummaries contains and array of HealthSummary
 type HealthSummaries struct {
 	Summaries []HealthSummary `json:"items"`

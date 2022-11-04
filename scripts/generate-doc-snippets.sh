@@ -84,6 +84,7 @@ create_doc $DOCS_DIR/replicate_all "${COHCTL} replicate all --help"
 # Services
 create_doc $DOCS_DIR/get_services "${COHCTL} get services --help"
 create_doc $DOCS_DIR/get_service_members "${COHCTL} get service-members --help"
+create_doc $DOCS_DIR/get_services_storage "${COHCTL} get services-storage --help"
 create_doc $DOCS_DIR/describe_service "${COHCTL} describe service --help"
 create_doc $DOCS_DIR/set_service "${COHCTL} set service --help"
 create_doc $DOCS_DIR/start_service "${COHCTL} start service --help"

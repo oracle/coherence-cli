@@ -15,6 +15,7 @@ There are various commands that allow you to work with and manage cluster servic
 
 * <<get-services, `cohctl get services`>> - displays the services for a cluster
 * <<describe-service, `cohctl describe service`>> - shows information related to a specific service
+* <<get-services-storage, `cohctl get services-storage`>> - displays partitioned services storage information for a cluster
 * <<get-service-members, `cohctl get service-members`>> - displays service members
 * <<start-service, `cohctl start service`>> - starts a specific service on a cluster member
 * <<stop-service, `cohctl stop service`>> - forces a specific service to stop on a cluster member
@@ -68,6 +69,23 @@ include::../../build/_output/docs-gen/describe_service.adoc[tag=text]
 [source,bash]
 ----
 $ cohctl describe service PartitionedCache -c local
+----
+
+[#get-services-storage]
+==== Get Services storage
+
+include::../../build/_output/docs-gen/get_services_storage.adoc[tag=text]
+
+*Examples*
+
+[source,bash]
+----
+$ cohctl get services-storage -c local
+
+SERVICE NAME      PARTITIONS  NODES  AVG PARTITION  MAX PARTITION  AVG STORAGE  MAX STORAGE NODE  MAX NODE
+"$SYS:Config"            257      6           0 MB           0 MB         0 MB              0 MB         -
+PartitionedCache         257      6           0 MB           0 MB        18 MB             18 MB         2
+PartitionedTopic         257      6           0 MB           0 MB         0 MB              0 MB         -
 ----
 
 [#get-service-members]

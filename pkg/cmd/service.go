@@ -25,7 +25,7 @@ var (
 	serviceType       string
 	statusHATimeout   int32
 	statusHAType      string
-	validServiceTypes = []string{"DistributedCache", "FederatedCache", "Invocation", "Proxy", "RemoteCache", "ReplicatedCache", "all", "PagedTopic"}
+	validServiceTypes = []string{constants.DistributedService, constants.FederatedService, constants.PagedTopic, "Invocation", "Proxy", "RemoteCache", "ReplicatedCache", "all", "PagedTopic"}
 	validStatusHA     = []string{"NODE-SAFE", "MACHINE-SAFE", "RACK-SAFE", "SITE-SAFE"}
 	allStatusHA       = []string{"ENDANGERED", "NODE-SAFE", "MACHINE-SAFE", "RACK-SAFE", "SITE-SAFE"}
 
@@ -148,6 +148,129 @@ can also specify '-o wide' to display addition information.`,
 	},
 }
 
+// getServicesStorageCmd represents the get services-storage command
+var getServicesStorageCmd = &cobra.Command{
+	Use:   "services-storage",
+	Short: "display partitioned services storage information for a cluster",
+	Long: `The 'get services-storage' command displays partitioned services storage for a cluster including
+information regarding partition sizes.`,
+	Args: cobra.ExactArgs(0),
+	RunE: func(cmd *cobra.Command, args []string) error {
+		var (
+			err         error
+			dataFetcher fetcher.Fetcher
+			connection  string
+			errorSink   = createErrorSink()
+			wg          sync.WaitGroup
+			m           = sync.RWMutex{}
+			jsonData    []byte
+		)
+
+		connection, dataFetcher, err = GetConnectionAndDataFetcher()
+		if err != nil {
+			return err
+		}
+
+		for {
+			var (
+				servicesSummary = config.ServicesSummaries{}
+				serviceList     = make([]string, 0)
+			)
+
+			// get the list of services
+			servicesResult, err := dataFetcher.GetServiceDetailsJSON()
+			if err != nil {
+				return err
+			}
+
+			err = json.Unmarshal(servicesResult, &servicesSummary)
+			if err != nil {
+				return err
+			}
+
+			// get the list of partitioned services
+			for _, v := range servicesSummary.Services {
+				if utils.IsDistributedCache(v.ServiceType) {
+					if !utils.SliceContains(serviceList, v.ServiceName) {
+						serviceList = append(serviceList, v.ServiceName)
+					}
+				}
+			}
+
+			if len(serviceList) == 0 {
+				return errors.New("unable to find any partitioned services")
+			}
+
+			// now we have partitioned services, retrieve the data for each service
+			wg.Add(len(serviceList))
+
+			storageSummary := make([]config.ServiceStorageSummary, 0)
+
+			for _, service := range serviceList {
+				go func(serviceName string) {
+					var data = config.ServiceStorageSummary{}
+					defer wg.Done()
+					partitionsData, err1 := dataFetcher.GetServicePartitionsJSON(serviceName)
+					if err1 != nil {
+						errorSink.AppendError(err1)
+					}
+					err1 = json.Unmarshal(partitionsData, &data)
+					if err1 != nil {
+						errorSink.AppendError(utils.GetError("unable to unmarshall storage data", err1))
+						return
+					}
+
+					// protect the slice for update
+					m.Lock()
+					defer m.Unlock()
+					storageSummary = append(storageSummary, data)
+				}(service)
+			}
+
+			wg.Wait()
+
+			errorList := errorSink.GetErrors()
+			if len(errorList) != 0 {
+				return utils.GetErrors(errorList)
+			}
+
+			if strings.Contains(OutputFormat, constants.JSONPATH) || OutputFormat == constants.JSON {
+				// serialize the data to JSON
+				jsonData, err = json.Marshal(storageSummary)
+				if err != nil {
+					return err
+				}
+
+				if strings.Contains(OutputFormat, constants.JSONPATH) {
+					result, err := utils.GetJSONPathResults(jsonData, OutputFormat)
+					if err != nil {
+						return err
+					}
+					cmd.Println(result)
+				} else {
+					cmd.Println(string(jsonData))
+				}
+			} else {
+				printWatchHeader(cmd)
+
+				cmd.Println(FormatCurrentCluster(connection))
+
+				cmd.Println(FormatServicesStorage(storageSummary))
+			}
+
+			// check to see if we should exit if we are not watching
+			if !isWatchEnabled() {
+				break
+			}
+
+			// we are watching so sleep and then repeat until CTRL-C
+			time.Sleep(time.Duration(watchDelay) * time.Second)
+		}
+
+		return nil
+	},
+}
+
 // getServiceMembersCmd represents the get service-members command
 var getServiceMembersCmd = &cobra.Command{
 	Use:   "service-members service-name",
@@ -212,6 +335,7 @@ var getServiceMembersCmd = &cobra.Command{
 				}
 				cmd.Println(string(membersResult))
 			} else {
+				printWatchHeader(cmd)
 				cmd.Println(FormatCurrentCluster(connection))
 
 				err = json.Unmarshal(membersResult, &membersDetails)
@@ -864,7 +988,7 @@ func serviceExists(serviceName string, servicesSummary config.ServicesSummaries)
 
 func init() {
 	getServicesCmd.Flags().StringVarP(&serviceType, "type", "t", "all",
-		`service types to show. E.g. DistributedCache, FederatedCache,
+		`service types to show. E.g. DistributedCache, FederatedCache, PagedTopic,
 Invocation, Proxy, RemoteCache or ReplicatedCache`)
 	getServicesCmd.Flags().StringVarP(&statusHAType, "status-ha", "a", "none",
 		"statusHA to wait for. Used in conjunction with -T option")
