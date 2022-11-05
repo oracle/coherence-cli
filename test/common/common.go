@@ -303,6 +303,7 @@ func RunTestServicesCommands(t *testing.T) {
 	// should be able to add new cluster
 	test_utils.EnsureCommandContains(g, t, cliCmd, addedCluster, configArg, file, "add", "cluster",
 		context.ClusterName, "-u", context.Url)
+
 	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "SERVICE NAME", configArg, file, "get", "services",
 		"-c", context.ClusterName)
 
@@ -318,6 +319,12 @@ func RunTestServicesCommands(t *testing.T) {
 	// test service list does not contain a DistributedCache when we request Proxy service type
 	test_utils.EnsureCommandNotContains(g, t, cliCmd, "DistributedCache", configArg, file, "get", "services",
 		"-t", "Proxy")
+
+	// test get service-members
+	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "NODE ID,PartitionedCache", configArg, file, "get", "service-members", "PartitionedCache")
+
+	// test get services-storage
+	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "NODES,AVG PARTITION", configArg, file, "get", "services-storage")
 
 	if strings.Contains(versionString, version1221) || strings.Contains(versionString, version1411) {
 		t.Log("workaround Coh Bug in test as version is " + versionString)

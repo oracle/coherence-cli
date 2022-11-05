@@ -43,6 +43,7 @@ const NameColumn = "NAME"
 const avgSize = "AVG SIZE"
 const avgApply = "AVG APPLY"
 const avgBacklogDelay = "AVG BACKLOG DELAY"
+const partitions = "PARTITIONS"
 
 var (
 	KB int64 = 1024
@@ -189,7 +190,7 @@ func FormatFederationDetails(federationDetails []config.FederationDescription, t
 	if OutputFormat == constants.WIDE {
 		if target == destinations {
 			stringValues[0] = getColumns(stringValues[0], avgApply, "AVG ROUND TRIP", avgBacklogDelay, "REPLICATE",
-				"PARTITIONS", "ERRORS", "UNACKED")
+				partitions, "ERRORS", "UNACKED")
 		} else {
 			stringValues[0] = getColumns(stringValues[0], avgApply, avgBacklogDelay)
 		}
@@ -310,7 +311,7 @@ func FormatFederationSummary(federationSummaries []config.FederationSummary, tar
 	if OutputFormat == constants.WIDE {
 		if target == destinations {
 			stringValues[0] = getColumns(stringValues[0], avgApply, "AVG ROUND TRIP", avgBacklogDelay, "REPLICATE",
-				"PARTITIONS", "ERRORS", "UNACKED")
+				partitions, "ERRORS", "UNACKED")
 		} else {
 			stringValues[0] = getColumns(stringValues[0], avgApply, avgBacklogDelay)
 		}
@@ -1199,7 +1200,7 @@ func FormatServices(services []config.ServiceSummary) string {
 		return strings.Compare(services[p].ServiceName, services[q].ServiceName) < 0
 	})
 
-	stringValues[0] = getColumns(ServiceNameColumn, "TYPE", "MEMBERS", "STATUS HA", "STORAGE", "PARTITIONS")
+	stringValues[0] = getColumns(ServiceNameColumn, "TYPE", "MEMBERS", "STATUS HA", "STORAGE", partitions)
 	if OutputFormat == constants.WIDE {
 		finalAlignment = alignmentWide
 		stringValues[0] = getColumns(stringValues[0], "ENDANGERED", "VULNERABLE", "UNBALANCED", "STATUS", "SUSPENDED")
@@ -1244,6 +1245,40 @@ func FormatServices(services []config.ServiceSummary) string {
 	}
 
 	return formatLinesAllStringsWithAlignment(finalAlignment, stringValues)
+}
+
+// FormatServicesStorage returns the services' storage information in a column formatted output
+func FormatServicesStorage(services []config.ServiceStorageSummary) string {
+	var (
+		serviceCount       = len(services)
+		alignment          = []string{L, R, R, R, R, R, R, R}
+		formattingFunction = getFormattingFunction()
+	)
+	if serviceCount == 0 {
+		return ""
+	}
+
+	var stringValues = make([]string, serviceCount+1)
+
+	sort.Slice(services, func(p, q int) bool {
+		return strings.Compare(services[p].ServiceName, services[q].ServiceName) < 0
+	})
+
+	stringValues[0] = getColumns(ServiceNameColumn, partitions, "NODES", "AVG PARTITION", "MAX PARTITION", "AVG STORAGE", "MAX STORAGE NODE",
+		"MAX NODE")
+
+	for i, value := range services {
+		var maxNode = "-"
+		if value.MaxLoadNodeID > 0 {
+			maxNode = fmt.Sprintf("%v", value.MaxLoadNodeID)
+		}
+		stringValues[i+1] = getColumns(value.ServiceName, formatSmallInteger(value.PartitionCount),
+			formatSmallInteger(value.ServiceNodeCount), formattingFunction(value.AveragePartitionSizeKB*KB),
+			formattingFunction(value.MaxPartitionSizeKB*KB), formattingFunction(value.AverageStorageSizeKB*KB),
+			formattingFunction(value.MaxStorageSizeKB*KB), maxNode)
+	}
+
+	return formatLinesAllStringsWithAlignment(alignment, stringValues)
 }
 
 // FormatMachines returns the machine's information in a column formatted output
