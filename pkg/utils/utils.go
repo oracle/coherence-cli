@@ -44,12 +44,21 @@ func GetError(message string, err error) error {
 	if ok {
 		caller = fmt.Sprintf("%s#%d", filepath.Base(sourceFile), lineNo)
 	}
-	fields := []zapcore.Field{
-		zap.String("location", caller),
-		zap.String("message", message),
-		zap.String("cause", errorDetails),
+
+	if Logger != nil {
+		fields := []zapcore.Field{
+			zap.String("location", caller),
+			zap.String("message", message),
+			zap.String("cause", errorDetails),
+		}
+		Logger.Error("Error", fields...)
+	} else {
+		// Logger is nil as we are at the stage of creating the original directory,
+		// but cannot due to permissions error. so just display the error and not log as
+		// the logger has not been initialized
+		fmt.Printf("%s: %s", message, errorDetails)
 	}
-	Logger.Error("Error", fields...)
+
 	return fmt.Errorf("%s: %s", message, errorDetails)
 }
 

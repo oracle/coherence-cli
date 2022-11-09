@@ -8,8 +8,12 @@ package utils
 
 import (
 	"encoding/json"
+	"fmt"
 	. "github.com/onsi/gomega"
 	"github.com/oracle/coherence-cli/pkg/config"
+	"io/ioutil"
+	"os"
+	"path/filepath"
 	"testing"
 )
 
@@ -254,4 +258,25 @@ func TestGetStartupDelayInMillis(t *testing.T) {
 
 	_, err = GetStartupDelayInMillis("ms")
 	g.Expect(err).To(HaveOccurred())
+}
+
+func TestNoWritableHomeDir(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	dir, err := ioutil.TempDir("", "")
+	g.Expect(err).To(Not(HaveOccurred()))
+
+	defer os.RemoveAll(dir)
+
+	// change the directory to be not readable
+	err = os.Chmod(dir, 0555)
+
+	g.Expect(err).To(Not(HaveOccurred()))
+
+	// try and ensure a file
+	err = EnsureDirectory(filepath.Join(dir, "my-file"))
+	g.Expect(err).Should(HaveOccurred())
+
+	// required
+	fmt.Println("")
 }
