@@ -176,11 +176,10 @@ Total Queue Size:     8,670,848
 Total Store Failures: 0
 Total Store Failures: 0
 
-NODE ID     Q SIZE  WRITES  AVG BATCH  AVG WRITE  TOTAL WRITE  FAILURES  READS  AVG READ  TOTAL READ
-      1  2,195,743   8,553        127      266ms      38m 00s         0      0       0ms        0.0s
-      2  2,157,542   8,476        127      266ms      37m 38s         0      0       0ms        0.0s
-      3  2,159,550   8,448        127      266ms      37m 34s         0      0       0ms        0.0s
-      4  2,158,013   8,456        127      266ms      37m 36s         0      0       0ms        0.0s
+NODE ID  QUEUE SIZE  WRITES  AVG BATCH  AVG WRITE  TOTAL WRITE  FAILURES  READS  AVG READ  TOTAL READ
+      1   2,261,151   8,042        127      266ms      35m 43s         0      0       0ms        0.0s
+      2   2,222,822   7,966        127      266ms      35m 21s         0      0       0ms        0.0s
+      3   2,224,958   7,937        127      266ms      35m 18s         0      0       0ms        0.0s
 ----
 
 NOTE: If you do not use the `-o wide` option, then you will only see service, cache name, count and size.
