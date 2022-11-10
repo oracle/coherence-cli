@@ -766,7 +766,6 @@ func FormatCacheStoreDetails(cacheDetails []config.CacheStoreDetail, cache, serv
 				fmt.Sprintf("Cache Store Type:     %s\n", cacheStoreType)
 	}
 	header += fmt.Sprintf("Total Queue Size:     %s\n", formatLargeInteger(totalQueueSize)) +
-		fmt.Sprintf("Total Store Failures: %s\n", formatLargeInteger(totalFailures)) +
 		fmt.Sprintf("Total Store Failures: %s\n", formatLargeInteger(totalFailures)) + "\n"
 
 	return header + formatLinesAllStringsWithAlignment(alignment, stringValues)
