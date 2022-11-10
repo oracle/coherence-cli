@@ -99,6 +99,7 @@ create_doc $DOCS_DIR/set_management "${COHCTL} set management --help"
 
 # Caches
 create_doc $DOCS_DIR/get_caches "${COHCTL} get caches --help"
+create_doc $DOCS_DIR/get_cache_stores "${COHCTL} get cache-stores --help"
 create_doc $DOCS_DIR/describe_cache "${COHCTL} describe cache --help"
 create_doc $DOCS_DIR/set_cache "${COHCTL} set cache --help"
 

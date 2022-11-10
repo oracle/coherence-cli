@@ -374,6 +374,27 @@ type CacheDetail struct {
 	IndexInfo                      []string `json:"indexInfo"`
 }
 
+// CacheStoreDetails contains cache details
+type CacheStoreDetails struct {
+	Details []CacheStoreDetail `json:"items"`
+}
+
+// CacheStoreDetail contains the cache store information
+type CacheStoreDetail struct {
+	NodeID                  string `json:"nodeId"`
+	Tier                    string `json:"tier"`
+	QueueSize               int64  `json:"queueSize"`
+	StoreAverageBatchSize   int64  `json:"storeAverageBatchSize"`
+	StoreWrites             int64  `json:"storeWrites"`
+	StoreAverageWriteMillis int64  `json:"storeAverageWriteMillis"`
+	StoreWriteMillis        int64  `json:"storeWriteMillis"`
+	StoreFailures           int64  `json:"storeFailures"`
+	StoreReads              int64  `json:"storeReads"`
+	StoreAverageReadMillis  int64  `json:"storeAverageReadMillis"`
+	StoreReadMillis         int64  `json:"storeReadMillis"`
+	PersistenceType         string `json:"persistenceType"`
+}
+
 // GenericDetails contains a slice of generic Json structures
 type GenericDetails struct {
 	Details []interface{} `json:"items"`
@@ -437,20 +458,6 @@ type ElasticData struct {
 	ExhaustiveCompactionCount  int64   `json:"exhaustiveCompactionCount"`
 	MaxFileSize                int64   `json:"maxFileSize"`
 	TotalDataSize              int64   `json:"totalDataSize"`
-}
-
-// Process contains process information
-type Process struct {
-	ProcessID  int    `json:"processId"`
-	Running    bool   `json:"running"`
-	NodeID     string `json:"nodeId"`
-	RoleName   string `json:"roleName"`
-	MemberName string `json:"memberName"`
-}
-
-// Processes contains a list of processes
-type Processes struct {
-	ProcessList []Process `json:"items"`
 }
 
 // DefaultDependency holds the default dependencies for starting a Cache server

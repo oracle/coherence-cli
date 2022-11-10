@@ -469,6 +469,7 @@ func Initialize(command *cobra.Command) *cobra.Command {
 	getCmd.AddCommand(getProxyConnectionsCmd)
 	getCmd.AddCommand(getUseGradleCmd)
 	getCmd.AddCommand(getServicesStorageCmd)
+	getCmd.AddCommand(getCacheStoresCmd)
 
 	// set command
 	command.AddCommand(setCmd)

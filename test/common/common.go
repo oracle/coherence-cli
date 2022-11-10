@@ -1213,8 +1213,16 @@ func RunTestCachesCommands(t *testing.T) {
 	_, err = test_utils.IssueGetRequest(restUrl + "/populate")
 	g.Expect(err).To(BeNil())
 
+	// populate the cache store
+	_, err = test_utils.IssueGetRequest(restUrl + "/populateCacheStore")
+	g.Expect(err).To(BeNil())
+
 	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "SERVICE,COUNT,SIZE,cache-1,cache-2", configArg, file,
 		"get", "caches", "-c", context.ClusterName)
+
+	// test write-behind
+	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "PartitionedCacheWriteBehind,QUEUE SIZE,cache-store-1", configArg, file,
+		"get", "cache-stores", "cache-store-1", "-s", "PartitionedCacheWriteBehind", "-c", context.ClusterName)
 
 	// test wide output
 	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "TOTAL PUTS", configArg, file,
