@@ -291,29 +291,29 @@ You can specify '-o wide' to display addition information.`,
 
 		for {
 			var (
-				cacheResult       []byte
+				cacheStoreResult  []byte
 				cacheStoreDetails = config.CacheStoreDetails{}
 			)
 
-			cacheResult, err = dataFetcher.GetCacheMembers(serviceName, cacheName)
+			cacheStoreResult, err = dataFetcher.GetCacheMembers(serviceName, cacheName)
 			if err != nil {
 				return err
 			}
 
-			if string(cacheResult) == "{}" || len(cacheResult) == 0 {
+			if string(cacheStoreResult) == "{}" || len(cacheStoreResult) == 0 {
 				return fmt.Errorf("no cache named %s exists for service %s", cacheName, serviceName)
 			}
 
 			if strings.Contains(OutputFormat, constants.JSONPATH) {
-				result, err := utils.GetJSONPathResults(cacheResult, OutputFormat)
+				result, err := utils.GetJSONPathResults(cacheStoreResult, OutputFormat)
 				if err != nil {
 					return err
 				}
 				cmd.Println(result)
 			} else if OutputFormat == constants.JSON {
-				cmd.Println(string(cacheResult))
+				cmd.Println(string(cacheStoreResult))
 			} else {
-				if err = json.Unmarshal(cacheResult, &cacheStoreDetails); err != nil {
+				if err = json.Unmarshal(cacheStoreResult, &cacheStoreDetails); err != nil {
 					return utils.GetError("unable to unmarshall storage result", err)
 				}
 
