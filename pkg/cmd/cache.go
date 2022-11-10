@@ -31,6 +31,7 @@ var (
 	tier              string
 	InvalidTierMsg    = "tier must be back or front"
 	cannotFindService = "unable to find service with service name '%s'"
+	cannotFindCache   = "no cache named %s exists for service %s"
 )
 
 const provideCacheMessage = "you must provide a cache name"
@@ -164,7 +165,7 @@ You can specify '-o wide' to display addition information.`,
 		}
 
 		if string(cacheResult) == "{}" || len(cacheResult) == 0 {
-			return fmt.Errorf("no cache named %s exists for service %s", cacheName, serviceName)
+			return fmt.Errorf(cannotFindCache, cacheName, serviceName)
 		}
 
 		if strings.Contains(OutputFormat, constants.JSONPATH) {
@@ -301,7 +302,7 @@ You can specify '-o wide' to display addition information.`,
 			}
 
 			if string(cacheStoreResult) == "{}" || len(cacheStoreResult) == 0 {
-				return fmt.Errorf("no cache named %s exists for service %s", cacheName, serviceName)
+				return fmt.Errorf(cannotFindCache, cacheName, serviceName)
 			}
 
 			if strings.Contains(OutputFormat, constants.JSONPATH) {
@@ -430,7 +431,7 @@ batchFactor, refreshFactor or requeueThreshold.`,
 		}
 
 		if string(cacheResult) == "{}" {
-			return fmt.Errorf("no cache named %s exists for service %s", cacheName, serviceName)
+			return fmt.Errorf(cannotFindCache, cacheName, serviceName)
 		}
 
 		// validate the nodes
