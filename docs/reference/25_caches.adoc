@@ -15,6 +15,7 @@ There are various commands that allow you to work with and manage cluster caches
 
 * <<get-caches, `cohctl get caches`>> - displays the caches for a cluster
 * <<describe-cache, `cohctl describe cache`>> - shows information related to a specific cache and service
+* <<get-cache-stores, `cohctl get cache-stores`>> - displays the cache stores for a cache and service
 * <<set-cache, `cohctl set cache`>> - sets an attribute for a cache across one or more members
 
 [#get-caches]
@@ -94,6 +95,17 @@ Node:1:   SimpleMapIndex: Extractor=.toString(), Ordered=true, Footprint=784KB, 
           SimpleMapIndex: Extractor=.hashCode(), Ordered=true, Footprint=549KB, Content=5022
 Node:2:   SimpleMapIndex: Extractor=.toString(), Ordered=true, Footprint=777KB, Content=4978
           SimpleMapIndex: Extractor=.hashCode(), Ordered=true, Footprint=544KB, Content=4978
+
+CACHE STORE DETAILS
+-------------------
+Total Queue Size:     6,708,931
+Total Store Failures: 0
+Total Store Failures: 0
+
+NODE ID  QUEUE SIZE  WRITES  AVG BATCH  AVG WRITE  TOTAL WRITE  FAILURES  READS  AVG READ  TOTAL READ
+      1   2,261,151   8,042        127      266ms      35m 43s         0      0       0ms        0.0s
+      2   2,222,822   7,966        127      266ms      35m 21s         0      0       0ms        0.0s
+      3   2,224,958   7,937        127      266ms      35m 18s         0      0       0ms        0.0s
 ----
 
 NOTE: You can also use the `-o wide` option to display more detailed information.
@@ -136,7 +148,55 @@ Node:1:   SimpleMapIndex: Extractor=.toString(), Ordered=true, Footprint=784KB, 
           SimpleMapIndex: Extractor=.hashCode(), Ordered=true, Footprint=549KB, Content=5022
 Node:2:   SimpleMapIndex: Extractor=.toString(), Ordered=true, Footprint=777KB, Content=4978
           SimpleMapIndex: Extractor=.hashCode(), Ordered=true, Footprint=544KB, Content=4978
+
+CACHE STORE DETAILS
+-------------------
+Total Queue Size:     6,708,931
+Total Store Failures: 0
+Total Store Failures: 0
+
+NODE ID  QUEUE SIZE  WRITES  AVG BATCH  AVG WRITE  TOTAL WRITE  FAILURES  READS  AVG READ  TOTAL READ
+      1   2,261,151   8,042        127      266ms      35m 43s         0      0       0ms        0.0s
+      2   2,222,822   7,966        127      266ms      35m 21s         0      0       0ms        0.0s
+      3   2,224,958   7,937        127      266ms      35m 18s         0      0       0ms        0.0s
 ----
+
+[#get-cache-stores]
+==== Get Cache Stores
+
+include::../../build/_output/docs-gen/get_cache_stores.adoc[tag=text]
+
+[source,bash]
+----
+$ cohctl get cache-stores -c local
+
+Service/Cache:        DistributedCache/test
+Cache Store Type:     WRITE-BEHIND
+Total Queue Size:     8,670,848
+Total Store Failures: 0
+Total Store Failures: 0
+
+NODE ID  QUEUE SIZE  WRITES  AVG BATCH  AVG WRITE  TOTAL WRITE  FAILURES  READS  AVG READ  TOTAL READ
+      1   2,261,151   8,042        127      266ms      35m 43s         0      0       0ms        0.0s
+      2   2,222,822   7,966        127      266ms      35m 21s         0      0       0ms        0.0s
+      3   2,224,958   7,937        127      266ms      35m 18s         0      0       0ms        0.0s
+----
+
+NOTE: If you do not use the `-o wide` option, then you will only see service, cache name, count and size.
+
+Display all caches for a particular service.
+
+[source,bash]
+----
+$ cohctl get caches -c local -s PartitionedCache -o wide -m
+
+Total Caches: 2, Total primary storage: 36 MB
+
+SERVICE           CACHE        COUNT   SIZE  AVG SIZE  TOTAL PUTS  TOTAL GETS  TOTAL REMOVES  TOTAL HITS  TOTAL MISSES  HIT PROB
+PartitionedCache  customers  100,000  25 MB       262     200,000           0              0           0             0     0.00%
+PartitionedCache  orders      10,000  11 MB     1,160      20,000      20,000              0      20,000             0   100.00%
+----
+
 
 [#set-cache]
 ==== Set Cache

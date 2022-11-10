@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <!--
-  ~ Copyright (c) 2021 Oracle and/or its affiliates.
+  ~ Copyright (c) 2021, 2022 Oracle and/or its affiliates.
   ~ Licensed under the Universal Permissive License v 1.0 as shown at
   ~ https://oss.oracle.com/licenses/upl.
   -->
@@ -34,6 +34,10 @@
     <cache-mapping>
       <cache-name>ram-*</cache-name>
       <scheme-name>distributed-scheme-ram</scheme-name>
+    </cache-mapping>
+    <cache-mapping>
+      <cache-name>cache-store-*</cache-name>
+      <scheme-name>simple-cache-store</scheme-name>
     </cache-mapping>
   </caching-scheme-mapping>
 
@@ -109,6 +113,38 @@
       <partition-count>31</partition-count>
       <backing-map-scheme>
         <local-scheme/>
+      </backing-map-scheme>
+      <autostart>true</autostart>
+    </distributed-scheme>
+
+    <distributed-scheme>
+      <scheme-name>simple-cache-store</scheme-name>
+      <service-name>PartitionedCacheWriteBehind</service-name>
+      <thread-count-min>10</thread-count-min>
+      <backing-map-scheme>
+        <read-write-backing-map-scheme>
+          <internal-cache-scheme>
+            <local-scheme>
+              <unit-calculator>BINARY</unit-calculator>
+              <expiry-delay>5m</expiry-delay>
+            </local-scheme>
+          </internal-cache-scheme>
+          <write-max-batch-size>128</write-max-batch-size>
+          <cachestore-scheme>
+            <class-scheme>
+              <class-name>com.oracle.coherence.cli.testing.SimpleCacheStore</class-name>
+              <init-params>
+                <init-param>
+                  <param-type>java.lang.String</param-type>
+                  <param-value>{cache-name}</param-value>
+                </init-param>
+              </init-params>
+            </class-scheme>
+          </cachestore-scheme>
+          <write-delay>10s</write-delay>
+          <write-batch-factor>0</write-batch-factor>
+          <write-requeue-threshold>0</write-requeue-threshold>
+        </read-write-backing-map-scheme>
       </backing-map-scheme>
       <autostart>true</autostart>
     </distributed-scheme>

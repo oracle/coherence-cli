@@ -715,6 +715,62 @@ func FormatCacheDetailsStorage(cacheDetails []config.CacheDetail) (string, error
 	return formatLinesAllStringsWithAlignmentMax(alignment, stringValues, 40), err
 }
 
+// FormatCacheStoreDetails returns the cache store details in column formatted output
+func FormatCacheStoreDetails(cacheDetails []config.CacheStoreDetail, cache, service string, includeHeader bool) string {
+	var (
+		detailsCount         = len(cacheDetails)
+		alignment            = []string{R, R, R, R, R, R, R, R, R, R}
+		totalQueueSize int64 = 0
+		totalFailures  int64 = 0
+		cacheStoreType       = ""
+		header               = ""
+	)
+	if detailsCount == 0 {
+		return ""
+	}
+
+	var stringValues = make([]string, detailsCount+1)
+
+	sort.Slice(cacheDetails, func(p, q int) bool {
+		nodeID1, _ := strconv.Atoi(cacheDetails[p].NodeID)
+		nodeID2, _ := strconv.Atoi(cacheDetails[q].NodeID)
+		return nodeID1 < nodeID2
+	})
+
+	stringValues[0] = getColumns(NodeIDColumn, "QUEUE SIZE", "WRITES", "AVG BATCH", "AVG WRITE", "TOTAL WRITE", "FAILURES",
+		"READS", "AVG READ", "TOTAL READ")
+
+	for i, value := range cacheDetails {
+		var nodeID, _ = strconv.Atoi(value.NodeID)
+
+		if cacheStoreType == "" {
+			cacheStoreType = value.PersistenceType
+		}
+
+		totalQueueSize += value.QueueSize
+		totalFailures += value.StoreFailures
+
+		stringValues[i+1] = getColumns(formatSmallInteger(int32(nodeID)),
+			formatLargeInteger(value.QueueSize), formatLargeInteger(value.StoreWrites),
+			formatLargeInteger(value.StoreAverageBatchSize), formatLargeInteger(value.StoreAverageWriteMillis)+"ms",
+			formatConnectionMillis(value.StoreWriteMillis),
+			formatLargeInteger(value.StoreFailures),
+			formatLargeInteger(value.StoreReads), formatLargeInteger(value.StoreAverageReadMillis)+"ms",
+			formatConnectionMillis(value.StoreReadMillis))
+	}
+
+	if includeHeader {
+		// create the header
+		header =
+			fmt.Sprintf("Service/Cache:        %s/%s\n", service, cache) +
+				fmt.Sprintf("Cache Store Type:     %s\n", cacheStoreType)
+	}
+	header += fmt.Sprintf("Total Queue Size:     %s\n", formatLargeInteger(totalQueueSize)) +
+		fmt.Sprintf("Total Store Failures: %s\n", formatLargeInteger(totalFailures)) + "\n"
+
+	return header + formatLinesAllStringsWithAlignment(alignment, stringValues)
+}
+
 // FormatDiscoveredClusters returns the discovered clusters in the column formatted output
 func FormatDiscoveredClusters(clusters []discovery.DiscoveredCluster) string {
 	var (
@@ -803,28 +859,6 @@ func FormatClusterConnections(clusters []ClusterConnection) string {
 	}
 
 	return formatLinesAllStrings(stringValues)
-}
-
-// FormatProcesses returns the processes in a column formatted output
-func FormatProcesses(processes []config.Process) string {
-	var (
-		procCount = len(processes)
-	)
-	if procCount == 0 {
-		return ""
-	}
-
-	var stringValues = make([]string, procCount+1)
-
-	stringValues[0] = getColumns("PROCESS ID", "RUNNING", NodeIDColumn, MemberColumn, RoleColumn)
-
-	for i, value := range processes {
-		var nodeID, _ = strconv.Atoi(value.NodeID)
-		stringValues[i+1] = getColumns(formatProcessID(value.ProcessID), formatBool(value.Running),
-			formatSmallInteger(int32(nodeID)), value.MemberName, value.RoleName)
-	}
-
-	return formatLinesAllStringsWithAlignment([]string{R, L, R, L, L}, stringValues)
 }
 
 // FormatTracing returns the member's tracing details in a column formatted output
@@ -1783,10 +1817,6 @@ func formatGBOnly(bytesValue int64) string {
 
 func formatBool(boolValue bool) string {
 	return printer.Sprintf("%v", boolValue)
-}
-
-func formatProcessID(PID int) string {
-	return fmt.Sprintf("%d", PID)
 }
 
 func formatConnectionMillis(millis int64) string {

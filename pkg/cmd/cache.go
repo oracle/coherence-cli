@@ -27,9 +27,11 @@ var (
 	ignoreSpecialCaches  bool
 	validAttributesCache = []string{"expiryDelay", "highUnits", "lowUnits", "batchFactor", "refreshFactor",
 		"requeueThreshold"}
-	nodeIDCache    string
-	tier           string
-	InvalidTierMsg = "tier must be back or front"
+	nodeIDCache       string
+	tier              string
+	InvalidTierMsg    = "tier must be back or front"
+	cannotFindService = "unable to find service with service name '%s'"
+	cannotFindCache   = "no cache named %s exists for service %s"
 )
 
 const provideCacheMessage = "you must provide a cache name"
@@ -140,6 +142,7 @@ You can specify '-o wide' to display addition information.`,
 			jsonData            []byte
 			cacheDetails        = config.CacheDetails{}
 			cacheDetailsGeneric = config.GenericDetails{}
+			cacheStoreDetails   = config.CacheStoreDetails{}
 			found               bool
 			connection          string
 		)
@@ -153,7 +156,7 @@ You can specify '-o wide' to display addition information.`,
 
 		found, err = ServiceExists(dataFetcher, serviceName)
 		if !found || err != nil {
-			return fmt.Errorf("unable to find service with service name '%s'", serviceName)
+			return fmt.Errorf(cannotFindService, serviceName)
 		}
 
 		cacheResult, err = dataFetcher.GetCacheMembers(serviceName, cacheName)
@@ -162,7 +165,7 @@ You can specify '-o wide' to display addition information.`,
 		}
 
 		if string(cacheResult) == "{}" || len(cacheResult) == 0 {
-			return fmt.Errorf("no cache named %s exists for service %s", cacheName, serviceName)
+			return fmt.Errorf(cannotFindCache, cacheName, serviceName)
 		}
 
 		if strings.Contains(OutputFormat, constants.JSONPATH) {
@@ -233,14 +236,133 @@ You can specify '-o wide' to display addition information.`,
 
 			sb.WriteString("\nINDEX DETAILS\n")
 			sb.WriteString("-------------\n")
-
 			sb.WriteString(FormatCacheIndexDetails(cacheDetails.Details))
+
+			if err = json.Unmarshal(cacheResult, &cacheStoreDetails); err != nil {
+				return utils.GetError("unable to unmarshall storage result", err)
+			}
+
+			if hasCacheStores(cacheStoreDetails.Details) {
+				sb.WriteString("\nCACHE STORE DETAILS\n")
+				sb.WriteString("-------------------\n")
+
+				// remove any values where tier != "back"
+				finalDetails := ensureTierBack(cacheStoreDetails.Details)
+				sb.WriteString(FormatCacheStoreDetails(finalDetails, cacheName, serviceName, false))
+			}
 
 			cmd.Println(sb.String())
 		}
 
 		return nil
 	},
+}
+
+// getCacheStoresCmd represents the get cache-stores command
+var getCacheStoresCmd = &cobra.Command{
+	Use:   "cache-stores cache-name",
+	Short: "display cache stores for a cache and service",
+	Long: `The 'get cache-stores' command displays cache store information related to a specific cache.
+You can specify '-o wide' to display addition information.`,
+	Args: func(cmd *cobra.Command, args []string) error {
+		if len(args) != 1 {
+			displayErrorAndExit(cmd, provideCacheMessage)
+		}
+		return nil
+	},
+	RunE: func(cmd *cobra.Command, args []string) error {
+		var (
+			err         error
+			dataFetcher fetcher.Fetcher
+			found       bool
+			connection  string
+		)
+
+		cacheName := args[0]
+
+		connection, dataFetcher, err = GetConnectionAndDataFetcher()
+		if err != nil {
+			return err
+		}
+
+		found, err = ServiceExists(dataFetcher, serviceName)
+		if !found || err != nil {
+			return fmt.Errorf(cannotFindService, serviceName)
+		}
+
+		for {
+			var (
+				cacheStoreResult  []byte
+				cacheStoreDetails = config.CacheStoreDetails{}
+			)
+
+			cacheStoreResult, err = dataFetcher.GetCacheMembers(serviceName, cacheName)
+			if err != nil {
+				return err
+			}
+
+			if string(cacheStoreResult) == "{}" || len(cacheStoreResult) == 0 {
+				return fmt.Errorf(cannotFindCache, cacheName, serviceName)
+			}
+
+			if strings.Contains(OutputFormat, constants.JSONPATH) {
+				result, err := utils.GetJSONPathResults(cacheStoreResult, OutputFormat)
+				if err != nil {
+					return err
+				}
+				cmd.Println(result)
+			} else if OutputFormat == constants.JSON {
+				cmd.Println(string(cacheStoreResult))
+			} else {
+				if err = json.Unmarshal(cacheStoreResult, &cacheStoreDetails); err != nil {
+					return utils.GetError("unable to unmarshall storage result", err)
+				}
+
+				// remove any values where tier != "back"
+				finalDetails := ensureTierBack(cacheStoreDetails.Details)
+
+				printWatchHeader(cmd)
+				cmd.Println(FormatCurrentCluster(connection))
+
+				if hasCacheStores(finalDetails) {
+					cmd.Println(FormatCacheStoreDetails(finalDetails, cacheName, serviceName, true))
+				}
+			}
+
+			// check to see if we should exit if we are not watching
+			if !isWatchEnabled() {
+				break
+			}
+			// we are watching so sleep and then repeat until CTRL-C
+			time.Sleep(time.Duration(watchDelay) * time.Second)
+		}
+
+		return nil
+	},
+}
+
+// ensureTierBack ensures that only back tier are included
+func ensureTierBack(cacheStoreDetails []config.CacheStoreDetail) []config.CacheStoreDetail {
+	finalDetails := make([]config.CacheStoreDetail, 0)
+	for _, v := range cacheStoreDetails {
+		if v.Tier == "back" {
+			finalDetails = append(finalDetails, v)
+		}
+	}
+
+	return finalDetails
+}
+
+// hasCacheStores returns true of the collected cache store detail contains cache stores
+// by checking the QueueSize. A value of -1 means no cache store configured.
+func hasCacheStores(cacheStoreDetails []config.CacheStoreDetail) bool {
+	for _, v := range cacheStoreDetails {
+		if v.QueueSize == -1 {
+			return false
+		}
+	}
+
+	return true
 }
 
 // setCacheCmd represents the set cache command
@@ -300,7 +422,7 @@ batchFactor, refreshFactor or requeueThreshold.`,
 
 		found, err = ServiceExists(dataFetcher, serviceName)
 		if !found || err != nil {
-			return fmt.Errorf("unable to find service with service name '%s'", serviceName)
+			return fmt.Errorf(cannotFindService, serviceName)
 		}
 
 		cacheResult, err = dataFetcher.GetCacheMembers(serviceName, cacheName)
@@ -309,7 +431,7 @@ batchFactor, refreshFactor or requeueThreshold.`,
 		}
 
 		if string(cacheResult) == "{}" {
-			return fmt.Errorf("no cache named %s exists for service %s", cacheName, serviceName)
+			return fmt.Errorf(cannotFindCache, cacheName, serviceName)
 		}
 
 		// validate the nodes
@@ -454,6 +576,9 @@ func init() {
 
 	describeCacheCmd.Flags().StringVarP(&serviceName, serviceNameOption, serviceNameOptionShort, "", serviceNameDescription)
 	_ = describeCacheCmd.MarkFlagRequired(serviceNameOption)
+
+	getCacheStoresCmd.Flags().StringVarP(&serviceName, serviceNameOption, serviceNameOptionShort, "", serviceNameDescription)
+	_ = getCacheStoresCmd.MarkFlagRequired(serviceNameOption)
 
 	setCacheCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
 	setCacheCmd.Flags().StringVarP(&attributeNameCache, "attribute", "a", "", "attribute name to set")

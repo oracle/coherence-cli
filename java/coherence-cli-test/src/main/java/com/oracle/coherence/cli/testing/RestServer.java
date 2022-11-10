@@ -62,6 +62,7 @@ public class RestServer {
             server.createContext("/populateFlash", RestServer::populateFlash);
             server.createContext("/populateRam", RestServer::populateRam);
             server.createContext("/populateFederation", RestServer::populateFederation);
+            server.createContext("/populateCacheStore", RestServer::populateCacheStore);
             server.createContext("/edition", RestServer::edition);
             server.createContext("/version", RestServer::version);
             server.createContext("/registerMBeans", RestServer::registerMBeans);
@@ -199,6 +200,12 @@ public class RestServer {
         send(t, 200, "OK");
     }
 
+    private static void populateCacheStore(HttpExchange t) throws IOException {
+        populateCache(CacheFactory.getCache("cache-store-1"), 1000);
+        populateCache(CacheFactory.getCache("cache-store-2"), 1000);
+        send(t, 200, "OK");
+    }
+
     private static void populateFederation(HttpExchange t) throws IOException {
         populateCache(CacheFactory.getCache("federated-1"), 10000);
         populateCache(CacheFactory.getCache("federated-2"), 10000);
@@ -278,7 +285,7 @@ public class RestServer {
     private static final String ENDANGERED = "ENDANGERED";
 
     private static final Set<String> BASE_SERVICES =
-            new HashSet<>(Arrays.asList("PartitionedCache", "PartitionedCache2", "CanaryService"));
+            new HashSet<>(Arrays.asList("PartitionedCache", "PartitionedCache2", "CanaryService", "PartitionedCacheWriteBehind"));
     private static final Set<String> COMMERCIAL_SERVICES =
            new HashSet<>(Arrays.asList("PartitionedCacheFlash", "PartitionedCacheRAM"));
 }
