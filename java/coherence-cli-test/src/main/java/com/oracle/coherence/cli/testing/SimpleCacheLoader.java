@@ -6,8 +6,10 @@
 
 package com.oracle.coherence.cli.testing;
 
-import com.oracle.coherence.common.base.Logger;
+import com.tangosol.net.CacheFactory;
 import com.tangosol.net.cache.CacheLoader;
+import java.util.Collection;
+import java.util.Map;
 
 /**
  * A simple {@link CacheLoader} implementation to demonstrate basic functionality.
@@ -26,7 +28,7 @@ public class SimpleCacheLoader
      */
     public SimpleCacheLoader(String cacheName) {
         this.cacheName = cacheName;
-        Logger.info("SimpleCacheLoader constructed for cache " + this.cacheName);
+        CacheFactory.log("SimpleCacheLoader constructed for cache " + this.cacheName, CacheFactory.LOG_INFO);
     }
 
     /**
@@ -37,7 +39,12 @@ public class SimpleCacheLoader
      */
     @Override
     public String load(Integer key) {
-        Logger.info("load called for key " + key);
+        CacheFactory.log("load called for key " + key, CacheFactory.LOG_INFO);
         return "Number " + key;
+    }
+
+    // required for 14.1.1.0 compatability
+    public Map<Integer, String> loadAll(Collection<? extends Integer> colKeys) {
+        return null;
     }
 }
