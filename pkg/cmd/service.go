@@ -149,11 +149,11 @@ can also specify '-o wide' to display addition information.`,
 	},
 }
 
-// getServicesStorageCmd represents the get services-storage command
-var getServicesStorageCmd = &cobra.Command{
-	Use:   "services-storage",
+// getServiceStorageCmd represents the get service-storage command
+var getServiceStorageCmd = &cobra.Command{
+	Use:   "service-storage",
 	Short: "display partitioned services storage information for a cluster",
-	Long: `The 'get services-storage' command displays partitioned services storage for a cluster including
+	Long: `The 'get service-storage' command displays partitioned services storage for a cluster including
 information regarding partition sizes.`,
 	Args: cobra.ExactArgs(0),
 	RunE: func(cmd *cobra.Command, args []string) error {
@@ -255,7 +255,6 @@ information regarding partition sizes.`,
 				printWatchHeader(cmd)
 
 				cmd.Println(FormatCurrentCluster(connection))
-
 				cmd.Println(FormatServicesStorage(storageSummary))
 			}
 
