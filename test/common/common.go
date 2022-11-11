@@ -324,7 +324,7 @@ func RunTestServicesCommands(t *testing.T) {
 	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "NODE ID,PartitionedCache", configArg, file, "get", "service-members", "PartitionedCache")
 
 	// test get services-storage
-	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "NODES,AVG PARTITION", configArg, file, "get", "services-storage")
+	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "NODES,AVG PARTITION", configArg, file, "get", "service-storage")
 
 	if strings.Contains(versionString, version1221) || strings.Contains(versionString, version1411) {
 		t.Log("workaround Coh Bug in test as version is " + versionString)
