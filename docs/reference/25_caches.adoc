@@ -155,10 +155,10 @@ Total Queue Size:     6,708,931
 Total Store Failures: 0
 Total Store Failures: 0
 
-NODE ID  QUEUE SIZE  WRITES  AVG BATCH  AVG WRITE  TOTAL WRITE  FAILURES  READS  AVG READ  TOTAL READ
-      1   2,261,151   8,042        127      266ms      35m 43s         0      0       0ms        0.0s
-      2   2,222,822   7,966        127      266ms      35m 21s         0      0       0ms        0.0s
-      3   2,224,958   7,937        127      266ms      35m 18s         0      0       0ms        0.0s
+NODE ID  QUEUE SIZE  WRITES  AVG BATCH  AVG WRITE  FAILURES  READS  AVG READ  TOTAL READ
+      1   2,261,151   8,042        127      266ms         0      0       0ms        0.0s
+      2   2,222,822   7,966        127      266ms         0      0       0ms        0.0s
+      3   2,224,958   7,937        127      266ms         0      0       0ms        0.0s
 ----
 
 [#get-cache-stores]
@@ -172,14 +172,14 @@ $ cohctl get cache-stores -c local
 
 Service/Cache:        DistributedCache/test
 Cache Store Type:     WRITE-BEHIND
-Total Queue Size:     8,670,848
+Total Queue Size:     6,708,931
 Total Store Failures: 0
 Total Store Failures: 0
 
-NODE ID  QUEUE SIZE  WRITES  AVG BATCH  AVG WRITE  TOTAL WRITE  FAILURES  READS  AVG READ  TOTAL READ
-      1   2,261,151   8,042        127      266ms      35m 43s         0      0       0ms        0.0s
-      2   2,222,822   7,966        127      266ms      35m 21s         0      0       0ms        0.0s
-      3   2,224,958   7,937        127      266ms      35m 18s         0      0       0ms        0.0s
+NODE ID  QUEUE SIZE  WRITES  AVG BATCH  AVG WRITE  FAILURES  READS  AVG READ  TOTAL READ
+      1   2,261,151   8,042        127      266ms         0      0       0ms        0.0s
+      2   2,222,822   7,966        127      266ms         0      0       0ms        0.0s
+      3   2,224,958   7,937        127      266ms         0      0       0ms        0.0s
 ----
 
 NOTE: If you do not use the `-o wide` option, then you will only see service, cache name, count and size.
