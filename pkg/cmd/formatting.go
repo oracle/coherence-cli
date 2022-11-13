@@ -719,7 +719,7 @@ func FormatCacheDetailsStorage(cacheDetails []config.CacheDetail) (string, error
 func FormatCacheStoreDetails(cacheDetails []config.CacheStoreDetail, cache, service string, includeHeader bool) string {
 	var (
 		detailsCount         = len(cacheDetails)
-		alignment            = []string{R, R, R, R, R, R, R, R, R, R}
+		alignment            = []string{R, R, R, R, R, R, R, R, R}
 		totalQueueSize int64 = 0
 		totalFailures  int64 = 0
 		cacheStoreType       = ""
@@ -737,7 +737,7 @@ func FormatCacheStoreDetails(cacheDetails []config.CacheStoreDetail, cache, serv
 		return nodeID1 < nodeID2
 	})
 
-	stringValues[0] = getColumns(NodeIDColumn, "QUEUE SIZE", "WRITES", "AVG BATCH", "AVG WRITE", "TOTAL WRITE", "FAILURES",
+	stringValues[0] = getColumns(NodeIDColumn, "QUEUE SIZE", "WRITES", "AVG BATCH", "AVG WRITE", "FAILURES",
 		"READS", "AVG READ", "TOTAL READ")
 
 	for i, value := range cacheDetails {
@@ -753,7 +753,6 @@ func FormatCacheStoreDetails(cacheDetails []config.CacheStoreDetail, cache, serv
 		stringValues[i+1] = getColumns(formatSmallInteger(int32(nodeID)),
 			formatLargeInteger(value.QueueSize), formatLargeInteger(value.StoreWrites),
 			formatLargeInteger(value.StoreAverageBatchSize), formatLargeInteger(value.StoreAverageWriteMillis)+"ms",
-			formatConnectionMillis(value.StoreWriteMillis),
 			formatLargeInteger(value.StoreFailures),
 			formatLargeInteger(value.StoreReads), formatLargeInteger(value.StoreAverageReadMillis)+"ms",
 			formatConnectionMillis(value.StoreReadMillis))
