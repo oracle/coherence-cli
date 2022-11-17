@@ -83,7 +83,7 @@ OS Version:  amd64</markup>
 
 <div class="admonition note">
 <p class="admonition-inline">You can also use the <code>-u</code> option to check for updates. If you are behind a proxy server, you must also
-set the environment variable HTTP_PROXY=http://proxy-host:proxy-port/ so that the update set may be contacted.</p>
+set the environment variable HTTP_PROXY=http://proxy-host:proxy-port/ so that the update site may be contacted.</p>
 </div>
 </div>
 
