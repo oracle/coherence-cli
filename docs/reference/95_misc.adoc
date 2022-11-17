@@ -43,7 +43,7 @@ OS Version:  amd64
 ----
 
 NOTE: You can also use the `-u` option to check for updates. If you are behind a proxy server, you must also
-set the environment variable HTTP_PROXY=http://proxy-host:proxy-port/ so that the update set may be contacted.
+set the environment variable HTTP_PROXY=http://proxy-host:proxy-port/ so that the update site may be contacted.
 
 [#get-ingore-certs]
 ==== Get Ignore Certs
