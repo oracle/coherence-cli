@@ -1547,7 +1547,7 @@ func FormatProxyConnections(connections []config.ProxyConnection) string {
 	})
 
 	stringValues[0] = getColumns(NodeIDColumn, "CONN MS", "CONN TIME", "REMOTE ADDR/PORT",
-		"BYTES SENT", "BYTES REC", "BACKLOG", "CLIENT PROCESS", "CLIENT ROLE")
+		"DATA SENT", "DATA REC", "BACKLOG", "CLIENT PROCESS", "CLIENT ROLE")
 
 	if OutputFormat == constants.WIDE {
 		alignment = append(alignment, []string{"L"}...)
