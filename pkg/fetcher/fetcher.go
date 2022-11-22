@@ -216,6 +216,9 @@ type Fetcher interface {
 
 	// InvokeFederationOperation invokes a federation operation against a service and participant
 	InvokeFederationOperation(serviceName, command, participant, mode string) ([]byte, error)
+
+	// SetFederationAttribute sets the given attribute for a federated service
+	SetFederationAttribute(serviceName, attribute string, value interface{}) ([]byte, error)
 }
 
 // GetFetcherOrError returns a fetcher and error

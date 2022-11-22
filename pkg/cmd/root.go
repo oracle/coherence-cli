@@ -487,6 +487,7 @@ func Initialize(command *cobra.Command) *cobra.Command {
 	setCmd.AddCommand(setDefaultHeapCmd)
 	setCmd.AddCommand(setProfileCmd)
 	setCmd.AddCommand(setUseGradleCmd)
+	setCmd.AddCommand(setFederationCmd)
 
 	// clear
 	command.AddCommand(clearCmd)

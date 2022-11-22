@@ -29,7 +29,10 @@ import (
 	"time"
 )
 
-const federationServiceMsg = "service %s does not exist or is not a federated service"
+const (
+	federationServiceMsg = "service %s does not exist or is not a federated service"
+	traceLogging         = "traceLogging"
+)
 
 func displayErrorAndExit(cmd *cobra.Command, message string) {
 	_, _ = fmt.Fprintln(os.Stderr, "Error: "+message)
@@ -360,18 +363,39 @@ func IssueFederationCommand(cmd *cobra.Command, serviceName, command, participan
 			description += " (" + startMode + ")"
 		}
 	}
+	if command == "set" {
+		if federationAttributeName != traceLogging {
+			return fmt.Errorf("%s is the only attribute that can be set", traceLogging)
+		}
 
-	// confirm the operation
-	if !confirmOperation(cmd, fmt.Sprintf("Are you sure you want to %s federation for service %s for participants %v ? (y/n) ",
-		description, serviceName, participants)) {
-		return nil
+		if federationAttributeValue != "true" && federationAttributeValue != "false" {
+			return fmt.Errorf("value for %s must be true or false", federationAttributeName)
+		}
+
+		// confirm the operation
+		if !confirmOperation(cmd, fmt.Sprintf("Are you sure you want to set the value of attribute %s to %s for service %s? (y/n) ",
+			federationAttributeName, federationAttributeValue, serviceName)) {
+			return nil
+		}
+
+		// carry out the operation
+		_, err = dataFetcher.SetFederationAttribute(serviceName, federationAttributeName, federationAttributeValue == "true")
+		if err != nil {
+			return err
+		}
+
+	} else {
+		// confirm the operation
+		if !confirmOperation(cmd, fmt.Sprintf("Are you sure you want to %s federation for service %s for participants %v ? (y/n) ",
+			description, serviceName, participants)) {
+			return nil
+		}
+
+		_, err = dataFetcher.InvokeFederationOperation(serviceName, command, participant, startMode)
+		if err != nil {
+			return err
+		}
 	}
-
-	_, err = dataFetcher.InvokeFederationOperation(serviceName, command, participant, startMode)
-	if err != nil {
-		return err
-	}
-
 	cmd.Println(OperationCompleted)
 
 	return nil

@@ -246,6 +246,24 @@ func (h HTTPFetcher) SetMemberAttribute(memberID, attribute string, value interf
 	return result, nil
 }
 
+// SetFederationAttribute sets the given attribute for a federated service
+func (h HTTPFetcher) SetFederationAttribute(serviceName, attribute string, value interface{}) ([]byte, error) {
+	var (
+		err         error
+		url         = servicesPath + getSafeServiceName(h, serviceName) + "/federation/"
+		valueString = getJSONValueString(value)
+	)
+
+	payload := []byte(fmt.Sprintf(jsonStringFormat, attribute, valueString))
+
+	result, err := httpPostRequest(h, url, payload)
+	if err != nil {
+		return constants.EmptyByte, utils.GetError(
+			fmt.Sprintf("cannot set federation value %v for attribute %s ", value, attribute), err)
+	}
+	return result, nil
+}
+
 // SetExecutorAttribute sets the given attribute for an executor
 func (h HTTPFetcher) SetExecutorAttribute(executor, attribute string, value interface{}) ([]byte, error) {
 	var valueString = getJSONValueString(value)

@@ -29,10 +29,12 @@ const supplyService = "you must provide a service name"
 const federationUse = "federation service-name"
 
 var (
-	participant             string
-	startMode               string
-	replicateAllParticipant string
-	describeFederationType  string
+	participant              string
+	startMode                string
+	replicateAllParticipant  string
+	describeFederationType   string
+	federationAttributeName  string
+	federationAttributeValue string
 )
 
 // getFederationCmd represents the get federation command
@@ -158,6 +160,23 @@ You may also specify a participant otherwise the command will apply to all parti
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
 		return IssueFederationCommand(cmd, args[0], "start", participant, startMode)
+	},
+}
+
+// setFederationCmd represents the set federation command
+var setFederationCmd = &cobra.Command{
+	Use:   federationUse,
+	Short: "set an attribute for a federated service",
+	Long: `The 'set federation' command sets an attribute for a federated service. The
+following attribute names are allowed: traceLogging.`,
+	Args: func(cmd *cobra.Command, args []string) error {
+		if len(args) != 1 {
+			displayErrorAndExit(cmd, supplyService)
+		}
+		return nil
+	},
+	RunE: func(cmd *cobra.Command, args []string) error {
+		return IssueFederationCommand(cmd, args[0], "set", participant, "")
 	},
 }
 
@@ -439,6 +458,12 @@ func init() {
 
 	stopFederationCmd.Flags().StringVarP(&participant, "participant", "p", "all", participantMessage)
 	stopFederationCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
+
+	setFederationCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
+	setFederationCmd.Flags().StringVarP(&federationAttributeName, "attribute", "a", "", "attribute name to set")
+	_ = setFederationCmd.MarkFlagRequired("attribute")
+	setFederationCmd.Flags().StringVarP(&federationAttributeValue, "value", "v", "", "attribute value to set")
+	_ = setFederationCmd.MarkFlagRequired("value")
 
 	replicateAllCmd.Flags().StringVarP(&replicateAllParticipant, "participant", "p", "", participantMessage)
 	_ = replicateAllCmd.MarkFlagRequired("participant")
