@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Oracle and/or its affiliates.
+ * Copyright (c) 2021, 2022 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -19,10 +19,9 @@ import (
 
 //
 // Implementation of Coherence NSLookup.
-// Return pointer to the structure, let caller restrict use through interface.
 //
 
-// DiscoveredCluster is a discovered cluster
+// DiscoveredCluster defines a discovered cluster.
 type DiscoveredCluster struct {
 	ClusterName    string
 	ConnectionName string
@@ -34,6 +33,7 @@ type DiscoveredCluster struct {
 	JMXURLs        []string
 }
 
+// NSLookup defines a structure to hold NSLookup connections.
 type NSLookup struct {
 	Host    string
 	Port    int
@@ -41,7 +41,7 @@ type NSLookup struct {
 	conn    *tcpconn
 }
 
-// ClusterNSPort defines the cluster Name and local NS lookup ports
+// ClusterNSPort defines the cluster Name and local NS lookup ports.
 type ClusterNSPort struct {
 	HostName    string
 	ClusterName string
@@ -81,15 +81,18 @@ var (
 	}
 )
 
-const DefaultPort = 7574
-const ClusterNameLookup = "Cluster/name"
-const ClusterInfoLookup = "Cluster/info"
-const ClusterForeignLookup = "Cluster/foreign"
-const ManagementLookup = "management/HTTPManagementURL"
-const JMXLookup = "management/JMXServiceURL"
-const MetricsLookup = "metrics/HTTPMetricsURL"
-const NSPrefix = "NameService/string/"
-const NSLocalPort = "/NameService/localPort"
+const (
+	DefaultPort          = 7574
+	ClusterNameLookup    = "Cluster/name"
+	ClusterInfoLookup    = "Cluster/info"
+	ClusterForeignLookup = "Cluster/foreign"
+	ManagementLookup     = "management/HTTPManagementURL"
+	JMXLookup            = "management/JMXServiceURL"
+	MetricsLookup        = "metrics/HTTPMetricsURL"
+	GrpcProxyLookup      = "$GRPC:GrpcProxy"
+	NSPrefix             = "NameService/string/"
+	NSLocalPort          = "/NameService/localPort"
+)
 
 // internal net.TCPConn wrapper
 type tcpconn struct {
@@ -97,7 +100,7 @@ type tcpconn struct {
 }
 
 // Open returns a NSLookup instance which represents a connection to the NameService of a Coherence
-// cluster, identified by an internal Channel ID
+// cluster, identified by an internal Channel ID.
 func Open(hostPort string, timeout int32) (*NSLookup, error) {
 	var (
 		nsLookup = NSLookup{}
@@ -145,19 +148,19 @@ func Open(hostPort string, timeout int32) (*NSLookup, error) {
 	return &nsLookup, nil
 }
 
-// GetHost returns the host
+// GetHost returns the host.
 func (n *NSLookup) GetHost() string {
 	return n.Host
 }
 
-// GetPort returns the host
+// GetPort returns the port.
 func (n *NSLookup) GetPort() int {
 	return n.Port
 }
 
 // DiscoverClusterInfo discovers cluster information for the specific NS
 // this method assumes that we are only interested in the local information as
-// foreign clusters will have already had their ephemeral NS port retrieved
+// foreign clusters will have already had their ephemeral NS port retrieved.
 func (n *NSLookup) DiscoverClusterInfo() (DiscoveredCluster, error) {
 	var (
 		err     error
@@ -202,7 +205,7 @@ func (n *NSLookup) DiscoverClusterInfo() (DiscoveredCluster, error) {
 }
 
 // DiscoverNameServicePorts discovers any clusters bound to the NS port and returns a struct
-// containing each of the ports and the clusters
+// containing each of the ports and the clusters.
 func (n *NSLookup) DiscoverNameServicePorts() ([]ClusterNSPort, error) {
 	var (
 		clusterNames  = make([]string, 0)
@@ -257,7 +260,7 @@ func (n *NSLookup) DiscoverNameServicePorts() ([]ClusterNSPort, error) {
 	return listClusters, nil
 }
 
-// Lookup looks up a name
+// Lookup looks up a name.
 func (n *NSLookup) Lookup(name string) (string, error) {
 	bName, err := n.lookupInternal(name)
 	if err != nil {
@@ -271,7 +274,7 @@ func (n *NSLookup) Lookup(name string) (string, error) {
 	return n.conn.readString(bName), nil
 }
 
-// lookupInternal raw lookup (returns byte array) on a string
+// lookupInternal raw lookup (returns byte array) on a string.
 func (n *NSLookup) lookupInternal(name string) ([]byte, error) {
 	request := make([]byte, 0)
 	request = append(request, n.channel...)
@@ -305,13 +308,13 @@ func (n *NSLookup) lookupInternal(name string) ([]byte, error) {
 	return response[len(n.channel)+1:], nil // strip channel id and request id from the response
 }
 
-// Close closes the connection
+// Close closes the connection.
 func (n *NSLookup) Close() error {
 	return n.conn.Close()
 }
 
-// connect establishes a TCP connection with the cluster's port and subport,
-// and opens a connection and channel
+// connect establishes a TCP connection with the cluster's port and sub-port,
+// and opens a connection and channel.
 func (n *NSLookup) connect(address string, timeout int32) error {
 	tcpAddr, err := net.ResolveTCPAddr("tcp", address)
 	if err != nil {
@@ -387,7 +390,7 @@ func (n *NSLookup) connect(address string, timeout int32) error {
 	return nil
 }
 
-// writePackedInt writes packed int on specified writer
+// writePackedInt writes packed int on specified writer.
 func writePackedInt(w io.Writer, n int) error {
 	var (
 		b   = 0
@@ -417,7 +420,7 @@ func writePackedInt(w io.Writer, n int) error {
 	return err
 }
 
-// read reads and processes response
+// read reads and processes response.
 func (conn *tcpconn) read() ([]byte, error) {
 	c, _, err := conn.readPackedInt(conn)
 	if err != nil {
@@ -438,7 +441,7 @@ func (conn *tcpconn) read() ([]byte, error) {
 	}
 }
 
-// readPackedInt reads a packed int
+// readPackedInt reads a packed int.
 func (conn *tcpconn) readPackedInt(r io.Reader) (int, int, error) {
 	var (
 		msg      = "unable to read packed int"
@@ -484,19 +487,19 @@ func (conn *tcpconn) readPackedInt(r io.Reader) (int, int, error) {
 	return n, pos, nil
 }
 
-// readString strips channel Id / response number and converts to string
+// readString strips channel Id / response number and converts to string.
 func (conn *tcpconn) readString(b []byte) string {
 	resultLen, pos, _ := conn.readPackedInt(bytes.NewReader(b[6:]))
 
 	return string(b[7+pos : resultLen+7+pos])
 }
 
-// getAddress returns the host:port address
+// getAddress returns the host:port address.
 func (n *NSLookup) getAddress() string {
 	return fmt.Sprintf("%s:%d", n.Host, n.Port)
 }
 
-// parseResults parses a string in the format "[value, value, value]" and returns as an array
+// parseResults parses a string in the format "[value, value, value]" and returns as an array.
 func parseResults(results string) []string {
 	result := strings.ReplaceAll(results, "[", "")
 	result = strings.ReplaceAll(result, "]", "")
