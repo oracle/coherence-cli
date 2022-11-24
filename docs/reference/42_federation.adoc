@@ -14,6 +14,7 @@
 There are various commands that allow you to work with and issue Federation commands.
 
 * <<get-federation, `cohctl get federation`>> - displays federation details for a cluster
+* <<set-federation, `cohctl set federation`>> - sets an attribute for a federated service
 * <<describe-federation, `cohctl describe federation`>> - displays federation details for a given service and participant
 * <<start-federation, `cohctl start federation`>> - starts federation for a service
 * <<stop-federation, `cohctl stop federation`>> - stops federation for a service
@@ -85,6 +86,21 @@ $ cohctl get federation origins -c local -o wide -m
 
 SERVICE         ORIGIN             REMOTE CONNECTIONS  DATA REC  MSG REC  REC REC  AVG APPLY  AVG BACKLOG DELAY
 FederatedCache  secondary-cluster                   2     20 MB      755    2,577    1,456ms              248ms
+----
+
+[#set-federation]
+==== Set Federation
+
+include::../../build/_output/docs-gen/set_federation.adoc[tag=text]
+
+Set `traceLogging` to true for a federated service.
+
+[source,bash]
+----
+$ cohctl set federation FederatedPartitionedPofCache -a traceLogging -v true -c local
+
+Are you sure you want to set the value of attribute traceLogging to true for service FederatedPartitionedPofCache? (y/n) y
+operation completed
 ----
 
 [#describe-federation]

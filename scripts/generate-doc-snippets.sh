@@ -75,6 +75,7 @@ create_doc $DOCS_DIR/describe_machine "${COHCTL} describe machine --help"
 
 # Federation
 create_doc $DOCS_DIR/get_federation "${COHCTL} get federation --help"
+create_doc $DOCS_DIR/set_federation "${COHCTL} set federation --help"
 create_doc $DOCS_DIR/describe_federation "${COHCTL} describe federation --help"
 create_doc $DOCS_DIR/start_federation "${COHCTL} start federation --help"
 create_doc $DOCS_DIR/stop_federation "${COHCTL} stop federation --help"
