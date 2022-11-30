@@ -71,14 +71,8 @@ used by Federation.`,
 				if err != nil {
 					return err
 				}
-				if strings.Contains(OutputFormat, constants.JSONPATH) {
-					result, err := utils.GetJSONPathResults(data, OutputFormat)
-					if err != nil {
-						return err
-					}
-					cmd.Println(result)
-				} else {
-					cmd.Println(string(data))
+				if err = processJSONOutput(cmd, data); err != nil {
+					return err
 				}
 			} else {
 				err = json.Unmarshal(servicesResult, &servicesSummary)

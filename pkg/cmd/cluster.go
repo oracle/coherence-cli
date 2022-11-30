@@ -599,15 +599,31 @@ addition information as well as '-v' to displayed additional information.`,
 				cachesData = "\nCACHES\n------\n" + cachesData
 			}()
 
-			//go func() {
-			//	defer wg.Done()
-			//	var err1 error
-			//	topicsData, err1 = formatTopicsSummary(cacheServices, dataFetcher)
-			//	if err1 != nil {
-			//		errorSink.AppendError(err1)
-			//	}
-			//	topicsData = "\nTOPICS\n------\n" + topicsData
-			//}()
+			go func() {
+				defer wg.Done()
+
+				topicsDetails, err1 := getTopics(dataFetcher, serviceName)
+				if err1 != nil {
+					errorSink.AppendError(err1)
+					return
+				}
+
+				topicsMemberDetails, err1 := getTopicsMembers(dataFetcher, topicsDetails)
+				if err1 != nil {
+					errorSink.AppendError(err1)
+					return
+				}
+
+				topicsSubscriberDetails, err1 := getTopicsSubscribers(dataFetcher, topicsDetails)
+				if err1 != nil {
+					errorSink.AppendError(err1)
+					return
+				}
+
+				enrichTopicsSummary(&topicsDetails, topicsMemberDetails, topicsSubscriberDetails)
+
+				topicsData = "\nTOPICS\n------\n" + FormatTopicsSummary(topicsDetails.Details)
+			}()
 
 			wg.Wait()
 			errorList = errorSink.GetErrors()

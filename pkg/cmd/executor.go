@@ -54,20 +54,14 @@ var getExecutorsCmd = &cobra.Command{
 				return err
 			}
 
-			if strings.Contains(OutputFormat, constants.JSONPATH) || OutputFormat == constants.JSON {
+			if isJSONPathOrJSON() {
 				// encode the struct so we get the updated fields
 				executorsResult, err = json.Marshal(executors)
 				if err != nil {
 					return err
 				}
-				if strings.Contains(OutputFormat, constants.JSONPATH) {
-					result, err := utils.GetJSONPathResults(executorsResult, OutputFormat)
-					if err != nil {
-						return err
-					}
-					cmd.Println(result)
-				} else if OutputFormat == constants.JSON {
-					cmd.Println(string(executorsResult))
+				if err = processJSONOutput(cmd, executorsResult); err != nil {
+					return err
 				}
 			} else {
 				printWatchHeader(cmd)
