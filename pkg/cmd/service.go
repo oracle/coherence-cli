@@ -486,22 +486,16 @@ service is a cache service.`,
 			return utils.GetErrors(errorList)
 		}
 
-		if strings.Contains(OutputFormat, constants.JSONPATH) || OutputFormat == constants.JSON {
+		if isJSONPathOrJSON() {
 			finalResult, err := utils.CombineByteArraysForJSON([][]byte{serviceResult, proxyResults,
 				membersResult, proxyResults, distributionsData},
 				[]string{"services", "proxies", "members", "partitions", "distribution"})
 			if err != nil {
 				return err
 			}
-			if strings.Contains(OutputFormat, constants.JSONPATH) {
-				result, err := utils.GetJSONPathResults(finalResult, OutputFormat)
-				if err != nil {
-					return err
-				}
-				cmd.Println(result)
-				return nil
+			if err = processJSONOutput(cmd, finalResult); err != nil {
+				return err
 			}
-			cmd.Println(string(finalResult))
 		} else {
 			var sb strings.Builder
 			sb.WriteString(FormatCurrentCluster(connection))

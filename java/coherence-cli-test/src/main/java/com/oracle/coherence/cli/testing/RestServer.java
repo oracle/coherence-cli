@@ -66,6 +66,8 @@ public class RestServer {
             server.createContext("/edition", RestServer::edition);
             server.createContext("/version", RestServer::version);
             server.createContext("/registerMBeans", RestServer::registerMBeans);
+            server.createContext("/startTopics", RestServer::startTopics);
+            server.createContext("/stopTopics", RestServer::stopTopics);
             server.createContext("/executorPresent", RestServer::isExecutorPresent);
             server.createContext("/healthPresent", RestServer::isHealthCheckPresent);
             server.createContext("/balanced", RestServer::balanced);
@@ -109,10 +111,14 @@ public class RestServer {
     }
 
     private static void balanced(HttpExchange t) throws IOException {
-        boolean     isCommercial = !CacheFactory.getEdition().equalsIgnoreCase("CE");
+        boolean isCommercial = !CacheFactory.getEdition().equalsIgnoreCase("CE");
 
         // always add Base services
         Set<String> setServices  = BASE_SERVICES;
+
+        if (isTopicsConfigured()) {
+            setServices.add(TOPICS_SERVICE);
+        }
 
         if (isCommercial) {
             if (isFederationConfigured()) {
@@ -145,6 +151,14 @@ public class RestServer {
     private static boolean isFederationConfigured() {
         try {
             return CacheFactory.ensureCluster().getService(FEDERATED_SERVICE) != null;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    private static boolean isTopicsConfigured() {
+        try {
+            return CacheFactory.ensureCluster().getService(TOPICS_SERVICE) != null;
         } catch (Exception e) {
             return false;
         }
@@ -265,6 +279,40 @@ public class RestServer {
         send(t, 200, "OK");
     }
 
+    /**
+     * Starts up topics.
+     */
+    private static void startTopics(HttpExchange t) throws IOException {
+        try {
+            Class<?> clazz          = Class.forName("com.oracle.coherence.cli.testing.topics.RunTopics");
+            Object   inst           = clazz.getDeclaredConstructor().newInstance();
+            Method   registerMethod = clazz.getMethod("startTopics");
+            registerMethod.invoke(inst);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            send(t, 404, "Error: " + e.getMessage());
+        }
+        send(t, 200, "OK");
+    }
+
+    /**
+     * Stops topics.
+     */
+    private static void stopTopics(HttpExchange t) throws IOException {
+        try {
+            Class<?> clazz          = Class.forName("com.oracle.coherence.cli.testing.topics.RunTopics");
+            Object   inst           = clazz.getDeclaredConstructor().newInstance();
+            Method   registerMethod = clazz.getMethod("stopTopics");
+            registerMethod.invoke(inst);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            send(t, 404, "Error: " + e.getMessage());
+        }
+        send(t, 200, "OK");
+    }
+
     private static void populateCache(NamedCache<Integer, String> cache, int count) {
         cache.clear();
         Map<Integer, String> map = new HashMap<>();
@@ -283,6 +331,7 @@ public class RestServer {
 
     private static final String FEDERATED_SERVICE = "FederatedService";
     private static final String ENDANGERED = "ENDANGERED";
+    private static final String TOPICS_SERVICE = "PartitionedTopic";
 
     private static final Set<String> BASE_SERVICES =
             new HashSet<>(Arrays.asList("PartitionedCache", "PartitionedCache2", "CanaryService", "PartitionedCacheWriteBehind"));

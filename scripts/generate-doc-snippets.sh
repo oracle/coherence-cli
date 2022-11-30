@@ -106,6 +106,13 @@ create_doc $DOCS_DIR/set_cache "${COHCTL} set cache --help"
 
 # Topics
 create_doc $DOCS_DIR/get_topics "${COHCTL} get topics --help"
+create_doc $DOCS_DIR/describe_topic "${COHCTL} describe topic --help"
+create_doc $DOCS_DIR/get_topic_members "${COHCTL} get topic-members --help"
+create_doc $DOCS_DIR/get_member_channels "${COHCTL} get member-channels --help"
+create_doc $DOCS_DIR/get_subscribers "${COHCTL} get subscribers --help"
+create_doc $DOCS_DIR/get_subscriber_channels "${COHCTL} get subscriber-channels --help"
+create_doc $DOCS_DIR/get_subscriber_groups "${COHCTL} get subscriber-groups --help"
+create_doc $DOCS_DIR/get_sub_grp_channels "${COHCTL} get sub-grp-channels --help"
 
 # nslookup
 create_doc $DOCS_DIR/nslookup "${COHCTL} nslookup --help"

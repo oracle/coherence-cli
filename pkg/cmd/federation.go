@@ -381,7 +381,7 @@ service, type and participant. Specify -T to set type outgoing or incoming and -
 			return fmt.Errorf("unable to find participant %s for service %s and type %s", participant, service, describeFederationType)
 		}
 
-		if strings.Contains(OutputFormat, constants.JSONPATH) || OutputFormat == constants.JSON {
+		if isJSONPathOrJSON() {
 			// encode for json output
 			finalData := make([]byte, 0)
 			finalData = append(finalData, []byte("{ \"items\": [")...)
@@ -394,15 +394,8 @@ service, type and participant. Specify -T to set type outgoing or incoming and -
 				}
 			}
 
-			finalData = append(finalData, []byte("] }")...)
-			if strings.Contains(OutputFormat, constants.JSONPATH) {
-				result, err := utils.GetJSONPathResults(finalData, OutputFormat)
-				if err != nil {
-					return err
-				}
-				cmd.Println(result)
-			} else {
-				cmd.Println(string(finalData))
+			if err = processJSONOutput(cmd, finalData); err != nil {
+				return err
 			}
 		} else {
 			var sb strings.Builder

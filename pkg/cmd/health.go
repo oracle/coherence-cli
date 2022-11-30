@@ -10,11 +10,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/oracle/coherence-cli/pkg/config"
-	"github.com/oracle/coherence-cli/pkg/constants"
 	"github.com/oracle/coherence-cli/pkg/fetcher"
-	"github.com/oracle/coherence-cli/pkg/utils"
 	"github.com/spf13/cobra"
-	"strings"
 	"time"
 )
 
@@ -53,15 +50,9 @@ var getHealthCmd = &cobra.Command{
 				return err
 			}
 
-			if strings.Contains(OutputFormat, constants.JSONPATH) || OutputFormat == constants.JSON {
-				if strings.Contains(OutputFormat, constants.JSONPATH) {
-					result, err := utils.GetJSONPathResults(healthData, OutputFormat)
-					if err != nil {
-						return err
-					}
-					cmd.Println(result)
-				} else {
-					cmd.Println(string(healthData))
+			if isJSONPathOrJSON() {
+				if err = processJSONOutput(cmd, healthData); err != nil {
+					return err
 				}
 			} else {
 				if len(healthData) > 0 {

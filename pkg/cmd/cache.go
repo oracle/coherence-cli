@@ -71,14 +71,8 @@ used by Federation.`,
 				if err != nil {
 					return err
 				}
-				if strings.Contains(OutputFormat, constants.JSONPATH) {
-					result, err := utils.GetJSONPathResults(data, OutputFormat)
-					if err != nil {
-						return err
-					}
-					cmd.Println(result)
-				} else {
-					cmd.Println(string(data))
+				if err = processJSONOutput(cmd, data); err != nil {
+					return err
 				}
 			} else {
 				err = json.Unmarshal(servicesResult, &servicesSummary)
@@ -491,7 +485,7 @@ batchFactor, refreshFactor or requeueThreshold.`,
 
 // formatCachesSummary returns the formatted caches for the service list
 func formatCachesSummary(serviceList []string, dataFetcher fetcher.Fetcher) (string, error) {
-	allCachesSummary, err := getCaches(serviceList, dataFetcher, false)
+	allCachesSummary, err := getCaches(serviceList, dataFetcher)
 	if err != nil {
 		return "", err
 	}
@@ -503,7 +497,7 @@ func formatCachesSummary(serviceList []string, dataFetcher fetcher.Fetcher) (str
 }
 
 // getCaches returns a list of caches given a slice of services
-func getCaches(serviceList []string, dataFetcher fetcher.Fetcher, topicsOnly bool) ([]config.CacheSummaryDetail, error) {
+func getCaches(serviceList []string, dataFetcher fetcher.Fetcher) ([]config.CacheSummaryDetail, error) {
 	var (
 		wg               sync.WaitGroup
 		allCachesSummary = make([]config.CacheSummaryDetail, 0)
@@ -538,11 +532,6 @@ func getCaches(serviceList []string, dataFetcher fetcher.Fetcher, topicsOnly boo
 			finalCaches := make([]config.CacheSummaryDetail, 0)
 
 			for i := range cachesSummary.Caches {
-				if (topicsOnly && !strings.Contains(cachesSummary.Caches[i].CacheName, "$topic$")) ||
-					ignoreSpecialCaches && strings.Contains(cachesSummary.Caches[i].CacheName, "$") {
-					continue
-				}
-
 				// WebLogic Server doesn't return service attribute, so we need to fix it
 				if cachesSummary.Caches[i].ServiceName == "" {
 					cachesSummary.Caches[i].ServiceName = serviceNameValue

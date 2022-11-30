@@ -181,6 +181,28 @@
     </profile>
 
     <profile>
+      <id>topics</id>
+      <properties>
+        <coherence.cache.config>test-cache-config-topics.xml</coherence.cache.config>
+      </properties>
+      <modules>
+        <!-- module with Topics -->
+        <module>coherence-cli-test-topics</module>
+      </modules>
+    </profile>
+
+    <profile>
+      <id>topics-commercial</id>
+      <properties>
+        <coherence.cache.config>test-cache-config-topics-commercial.xml</coherence.cache.config>
+      </properties>
+      <modules>
+        <!-- module with Topics -->
+        <module>coherence-cli-test-topics</module>
+      </modules>
+    </profile>
+
+    <profile>
       <id>federation</id>
       <properties>
         <coherence.cache.config>test-cache-config-federation.xml</coherence.cache.config>

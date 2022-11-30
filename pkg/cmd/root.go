@@ -454,6 +454,12 @@ func Initialize(command *cobra.Command) *cobra.Command {
 	getCmd.AddCommand(getSnapshotsCmd)
 	getCmd.AddCommand(getHTTPSessionsCmd)
 	getCmd.AddCommand(getTopicsCmd)
+	getCmd.AddCommand(getTopicMembersCmd)
+	getCmd.AddCommand(getSubscribersCmd)
+	getCmd.AddCommand(getMemberChannelsCmd)
+	getCmd.AddCommand(getSubscriberChannelsCmd)
+	getCmd.AddCommand(getSubscriberGroupsCmd)
+	getCmd.AddCommand(getSubscriberGroupChannelsCmd)
 	getCmd.AddCommand(getJfrsCmd)
 	getCmd.AddCommand(getIgnoreCertsCmd)
 	getCmd.AddCommand(getExecutorsCmd)
@@ -560,6 +566,7 @@ func Initialize(command *cobra.Command) *cobra.Command {
 	describeCmd.AddCommand(describeJfrCmd)
 	describeCmd.AddCommand(describeExecutorCmd)
 	describeCmd.AddCommand(describeFederationCmd)
+	describeCmd.AddCommand(describeTopicCmd)
 
 	// create
 	command.AddCommand(createCmd)
@@ -752,4 +759,27 @@ func confirmOperation(cmd *cobra.Command, message string) bool {
 		return false
 	}
 	return true
+}
+
+// processJSONOutput processes JSON output and either outputs the JSONPath or JSON results.
+func processJSONOutput(cmd *cobra.Command, jsonData []byte) error {
+	var (
+		err    error
+		result string
+	)
+	if OutputFormat == constants.JSONPATH {
+		result, err = utils.GetJSONPathResults(jsonData, OutputFormat)
+		if err != nil {
+			return err
+		}
+		cmd.Println(result)
+		return nil
+	}
+	cmd.Println(string(jsonData))
+	return nil
+}
+
+// isJSONPathOrJSON returns true of the output is JSONPath or JSON
+func isJSONPathOrJSON() bool {
+	return strings.Contains(OutputFormat, constants.JSONPATH) || OutputFormat == constants.JSON
 }

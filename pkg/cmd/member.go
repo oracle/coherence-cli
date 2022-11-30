@@ -175,7 +175,6 @@ Full list of options are JVM dependant, but can include the full values or part 
 			connection       string
 			finalResult      []byte
 			finalExtended    []byte
-			jsonPathOrJSON   = strings.Contains(OutputFormat, constants.JSONPATH) || OutputFormat == constants.JSON
 			extendedInfoList []string
 		)
 
@@ -230,7 +229,7 @@ Full list of options are JVM dependant, but can include the full values or part 
 			}
 		}
 
-		if jsonPathOrJSON {
+		if isJSONPathOrJSON() {
 			if len(extendedData) > 0 {
 				finalExtended, err = utils.CombineByteArraysForJSON(extendedData, extendedInfoList)
 				if err != nil {
@@ -242,16 +241,9 @@ Full list of options are JVM dependant, but can include the full values or part 
 				return err
 			}
 
-			if strings.Contains(OutputFormat, constants.JSONPATH) {
-				jsonPathResult, err := utils.GetJSONPathResults(finalResult, OutputFormat)
-				if err != nil {
-					return err
-				}
-				cmd.Println(jsonPathResult)
-				return nil
+			if err = processJSONOutput(cmd, finalResult); err != nil {
+				return err
 			}
-			// JSON
-			cmd.Println(string(finalResult))
 		} else {
 			cmd.Println(FormatCurrentCluster(connection))
 			cmd.Println("MEMBER DETAILS")

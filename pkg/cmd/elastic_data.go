@@ -90,14 +90,8 @@ Journal details for the cluster.`,
 				if err != nil {
 					return err
 				}
-				if strings.Contains(OutputFormat, constants.JSONPATH) {
-					result, err := utils.GetJSONPathResults(finalResult, OutputFormat)
-					if err != nil {
-						return err
-					}
-					cmd.Println(result)
-				} else {
-					cmd.Println(string(finalResult))
+				if err = processJSONOutput(cmd, finalResult); err != nil {
+					return err
 				}
 			} else {
 				cmd.Println(FormatCurrentCluster(connection))

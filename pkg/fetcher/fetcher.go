@@ -103,6 +103,18 @@ type Fetcher interface {
 	// GetCachesSummaryJSONAllServices returns summary caches details for all services
 	GetCachesSummaryJSONAllServices() ([]byte, error)
 
+	// GetTopicsJSON returns the topics in a cluster
+	GetTopicsJSON() ([]byte, error)
+
+	// GetTopicsMembersJSON returns the topics member details in a cluster
+	GetTopicsMembersJSON(serviceName, topicName string) ([]byte, error)
+
+	// GetTopicsSubscribersJSON returns the topics subscriber details in a cluster
+	GetTopicsSubscribersJSON(serviceName, topicName string) ([]byte, error)
+
+	// GetTopicsSubscriberGroupsJSON returns the topics subscriber group details in a cluster
+	GetTopicsSubscriberGroupsJSON(serviceName, topicName string) ([]byte, error)
+
 	// GetProxySummaryJSON returns proxy server summary
 	GetProxySummaryJSON() ([]byte, error)
 

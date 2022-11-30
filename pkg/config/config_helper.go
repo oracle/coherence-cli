@@ -340,6 +340,141 @@ type CacheSummaryDetail struct {
 	CacheMisses  int64  `json:"cacheMisses"`
 }
 
+// TopicDetails contains topics details
+type TopicDetails struct {
+	Details []TopicDetail `json:"items"`
+}
+
+// TopicDetail contains individual topic details
+type TopicDetail struct {
+	ServiceName string `json:"service"`
+	TopicName   string `json:"name"`
+	Members     int64  `json:"members"`
+	Channels    int64  `json:"channels"`
+	Subscribers int64  `json:"subscribers"`
+
+	PublishedCount int64 `json:"publishedCount"`
+}
+
+// TopicsMemberDetails contains topics member details
+type TopicsMemberDetails struct {
+	Details []TopicsMemberDetail `json:"items"`
+}
+
+// TopicsMemberDetail contains individual detailed member information for a topic
+type TopicsMemberDetail struct {
+	ServiceName         string                 `json:"service"`
+	TopicName           string                 `json:"name"`
+	NodeID              string                 `json:"nodeId"`
+	ChannelCount        int64                  `json:"channelCount"`
+	ReconnectRetry      int64                  `json:"reconnectRetry"`
+	RetainConsumed      bool                   `json:"retainConsumed"`
+	AllowUnownedCommits bool                   `json:"allowUnownedCommits"`
+	SubscriberTimeout   int64                  `json:"subscriberTimeout"`
+	ReconnectTimeout    int64                  `json:"reconnectTimeout"`
+	ReconnectWait       int64                  `json:"reconnectWait"`
+	PageCapacity        int64                  `json:"pageCapacity"`
+	ElementCalculator   string                 `json:"elementCalculator"`
+	Member              string                 `json:"member"`
+	Cluster             string                 `json:"cluster"`
+	Channels            map[string]interface{} `json:"channels"`
+
+	PublishedCount             int64   `json:"publishedCount"`
+	PublishedMeanRate          float64 `json:"publishedMeanRate"`
+	PublishedOneMinuteRate     float64 `json:"publishedOneMinuteRate"`
+	PublishedFiveMinuteRate    float64 `json:"publishedFiveMinuteRate"`
+	PublishedFifteenMinuteRate float64 `json:"publishedFifteenMinuteRate"`
+}
+
+// TopicsSubscriberDetails contains topics subscriber details
+type TopicsSubscriberDetails struct {
+	Details []TopicsSubscriberDetail `json:"items"`
+}
+
+// TopicsSubscriberDetail contains individual detailed subscriber information for a topic
+type TopicsSubscriberDetail struct {
+	ServiceName        string                 `json:"service"`
+	TopicName          string                 `json:"topic"`
+	NodeID             string                 `json:"nodeId"`
+	ID                 int64                  `json:"id"`
+	ChannelCount       int64                  `json:"channelCount"`
+	StateName          string                 `json:"stateName"`
+	SubscriberGroup    string                 `json:"subscriberGroup"`
+	ReceiveCompletions int64                  `json:"receiveCompletions"`
+	Waits              int64                  `json:"waits"`
+	ReceiveErrors      int64                  `json:"receiveErrors"`
+	ReceivedCount      int64                  `json:"receivedCount"`
+	Disconnections     int64                  `json:"disconnections"`
+	Notifications      int64                  `json:"notifications"`
+	Backlog            int64                  `json:"backlog"`
+	Member             string                 `json:"member"`
+	Cluster            string                 `json:"cluster"`
+	Channels           map[string]interface{} `json:"channels"`
+}
+
+type TopicsSubscriberGroups struct {
+	Details []TopicsSubscriberGroupDetail `json:"items"`
+}
+
+type TopicsSubscriberGroupDetail struct {
+	ServiceName             string                 `json:"service"`
+	TopicName               string                 `json:"topic"`
+	NodeID                  string                 `json:"nodeId"`
+	SubscriberGroup         string                 `json:"name"`
+	ChannelCount            int64                  `json:"channelCount"`
+	PolledCount             int64                  `json:"polledCount"`
+	PolledMeanRate          float64                `json:"polledMeanRate"`
+	PolledOneMinuteRate     float64                `json:"polledOneMinuteRate"`
+	PolledFiveMinuteRate    float64                `json:"polledFiveMinuteRate"`
+	PolledFifteenMinuteRate float64                `json:"polledFifteenMinuteRate"`
+	Channels                map[string]interface{} `json:"channels"`
+}
+
+// ChannelDetails contains all channels details
+type ChannelDetails struct {
+	Details map[string]interface{} `json:"channels"`
+}
+
+// ChannelStats contains statistics summaries for Channels
+type ChannelStats struct {
+	Channel                    int64   `json:"channel"`
+	PublishedCount             int64   `json:"publishedCount"`
+	PublishedFifteenMinuteRate float64 `json:"publishedFifteenMinuteRate"`
+	PublishedFiveMinuteRate    float64 `json:"publishedFiveMinuteRate"`
+	PublishedMeanRate          float64 `json:"publishedMeanRate"`
+	PublishedOneMinuteRate     float64 `json:"publishedOneMinuteRate"`
+	Tail                       string  `json:"tail"`
+}
+
+// SubscriberChannelStats contains statistics summaries for channel subscribers
+type SubscriberChannelStats struct {
+	Channel      int64  `json:"channel"`
+	Empty        bool   `json:"empty"`
+	Owned        bool   `json:"owned"`
+	Head         string `json:"head"`
+	LastCommit   string `json:"lastCommit"`
+	LastReceived string `json:"lastReceived"`
+}
+
+// SubscriberGroupChannelStats contains statistics summaries for channel subscriber groups
+type SubscriberGroupChannelStats struct {
+	Channel                              int64   `json:"channel"`
+	Head                                 string  `json:"head"`
+	LastCommittedPosition                string  `json:"lastCommittedPosition"`
+	LastCommittedTimestamp               string  `json:"lastCommittedTimestamp"`
+	LastPolledTimestamp                  string  `json:"lastPolledTimestamp"`
+	OwningSubscriberID                   int64   `json:"owningSubscriberId"`
+	OwningSubscriberMemberID             int64   `json:"owningSubscriberMemberId"`
+	OwningSubscriberMemberNotificationID int64   `json:"owningSubscriberMemberNotificationId"`
+	OwningSubscriberMemberUUID           string  `json:"owningSubscriberMemberUuid"`
+	PolledCount                          int64   `json:"polledCount"`
+	PolledMeanRate                       float64 `json:"polledMeanRate"`
+	PolledOneMinuteRate                  float64 `json:"polledOneMinuteRate"`
+	PolledFiveMinuteRate                 float64 `json:"polledFiveMinuteRate"`
+	PolledFifteenMinuteRate              float64 `json:"polledFifteenMinuteRate"`
+	RemainingUnpolledMessages            int64   `json:"remainingUnpolledMessages"`
+}
+
 // CacheDetails contains cache details
 type CacheDetails struct {
 	Details []CacheDetail `json:"items"`

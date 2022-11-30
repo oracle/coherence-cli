@@ -22,7 +22,7 @@ var nsLookupCmd = &cobra.Command{
 	Long: `The 'nslookup' command looks up various Name Service endpoints for a cluster host/port.
 The various options to pass via -q option include: Cluster/name, Cluster/info, NameService/string/Cluster/foreign,
 NameService/string/management/HTTPManagementURL, NameService/string/management/JMXServiceURL, and
-NameService/string/metrics/HTTPMetricsURL, 
+NameService/string/metrics/HTTPMetricsURL, NameService/string/$GRPC:GrpcProxy,
 NameService/string/Cluster/foreign/<clustername>/NameService/localPort`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var (

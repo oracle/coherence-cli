@@ -44,6 +44,7 @@ const executorsPath = "/executors/"
 const federationStatsPath = "/federation/statistics/"
 const reportersPath = "/reporters/"
 const journalPath = "/journal/"
+const topicsPath = "/topics/"
 const rolePrefix = "{\"role\": \""
 const resetStatistics = "resetStatistics"
 
@@ -398,6 +399,45 @@ func (h HTTPFetcher) GetCachesSummaryJSONAllServices() ([]byte, error) {
 	result, err := httpGetRequest(h, "/caches?links=")
 	if err != nil {
 		return constants.EmptyByte, utils.GetError("cannot get caches summary information", err)
+	}
+	return result, nil
+}
+
+// GetTopicsJSON returns the topics in a cluster
+func (h HTTPFetcher) GetTopicsJSON() ([]byte, error) {
+	result, err := httpGetRequest(h, topicsPath+links)
+	if err != nil && !strings.Contains(err.Error(), "404") {
+		return constants.EmptyByte, utils.GetError("cannot get topics information", err)
+	}
+	return result, nil
+}
+
+// GetTopicsMembersJSON returns the topics member details in a cluster
+func (h HTTPFetcher) GetTopicsMembersJSON(serviceName, topicName string) ([]byte, error) {
+	result, err := httpGetRequest(h, servicesPath+getSafeServiceName(h, serviceName)+topicsPath+getSafeServiceName(h, topicName)+
+		membersPath+links)
+	if err != nil && !strings.Contains(err.Error(), "404") {
+		return constants.EmptyByte, utils.GetError("cannot get topics member information", err)
+	}
+	return result, nil
+}
+
+// GetTopicsSubscribersJSON returns the topics subscriber details in a cluster
+func (h HTTPFetcher) GetTopicsSubscribersJSON(serviceName, topicName string) ([]byte, error) {
+	result, err := httpGetRequest(h, servicesPath+getSafeServiceName(h, serviceName)+topicsPath+getSafeServiceName(h, topicName)+
+		"/subscribers"+links)
+	if err != nil && !strings.Contains(err.Error(), "404") {
+		return constants.EmptyByte, utils.GetError("cannot get topics subscriber information", err)
+	}
+	return result, nil
+}
+
+// GetTopicsSubscriberGroupsJSON returns the topics subscriber group details in a cluster
+func (h HTTPFetcher) GetTopicsSubscriberGroupsJSON(serviceName, topicName string) ([]byte, error) {
+	result, err := httpGetRequest(h, servicesPath+getSafeServiceName(h, serviceName)+topicsPath+getSafeServiceName(h, topicName)+
+		"/subscriberGroups"+links)
+	if err != nil && !strings.Contains(err.Error(), "404") {
+		return constants.EmptyByte, utils.GetError("cannot get topics subscriber information", err)
 	}
 	return result, nil
 }

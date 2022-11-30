@@ -28,12 +28,24 @@ const R = "R"
 const L = "L"
 
 const NodeIDColumn = "NODE ID"
+const SubscriberIDColumn = "SUBSCRIBER ID"
 const ServiceColumn = "SERVICE"
 const CacheColumn = "CACHE"
+const PolledColumn = "POLLED"
+const HeadColumn = "HEAD"
+const ChannelsColumn = "CHANNELS"
+const ChannelColumn = "CHANNEL"
+const SubscriberGroupColumn = "SUBSCRIBER GROUP"
+const PublishedColumn = "PUBLISHED"
+const MeanColumn = "MEAN"
+const OneMinuteColumn = "1 MIN"
+const FiveMinuteColumn = "5 MIN"
+const FifteenMinuteColumn = "15 MIN"
 const ServiceNameColumn = "SERVICE NAME"
 const AddressColumn = "ADDRESS"
 const PortColumn = "PORT"
 const MemberColumn = "MEMBER"
+const MembersColumn = "MEMBERS"
 const RoleColumn = "ROLE"
 const ProcessColumn = "PROCESS"
 const MaxHeapColumn = "MAX HEAP"
@@ -259,7 +271,7 @@ func FormatFederationSummary(federationSummaries []config.FederationSummary, tar
 		finalAlignment     []string
 		suffix             = "SENT"
 		participantCol     = "DESTINATION"
-		memberCol          = "MEMBERS"
+		memberCol          = MembersColumn
 		formattingFunction = getFormattingFunction()
 	)
 
@@ -450,11 +462,10 @@ func FormatCacheSummary(cacheSummaries []config.CacheSummaryDetail) string {
 }
 
 // FormatTopicsSummary returns the topics summary in column formatted output
-func FormatTopicsSummary(cacheSummaries []config.CacheSummaryDetail) string {
+func FormatTopicsSummary(topicDetails []config.TopicDetail) string {
 	var (
-		cacheCount         = len(cacheSummaries)
-		alignment          = []string{L, L, R, R, R, R, R, R}
-		formattingFunction = getFormattingFunction()
+		cacheCount = len(topicDetails)
+		alignment  = []string{L, L, R, R, R, R}
 	)
 	if cacheCount == 0 {
 		return ""
@@ -462,41 +473,240 @@ func FormatTopicsSummary(cacheSummaries []config.CacheSummaryDetail) string {
 
 	var stringValues = make([]string, cacheCount+1)
 
-	sort.Slice(cacheSummaries, func(p, q int) bool {
-		if cacheSummaries[p].ServiceName < cacheSummaries[q].ServiceName {
+	sort.Slice(topicDetails, func(p, q int) bool {
+		if topicDetails[p].ServiceName < topicDetails[q].ServiceName {
 			return true
-		} else if cacheSummaries[p].ServiceName > cacheSummaries[q].ServiceName {
+		} else if topicDetails[p].ServiceName > topicDetails[q].ServiceName {
 			return false
 		} else {
-			return cacheSummaries[p].CacheName < cacheSummaries[q].CacheName
+			return topicDetails[p].TopicName < topicDetails[q].TopicName
 		}
 	})
 
-	// get summary details
-	var totalTopics = len(cacheSummaries)
-	var totalUnits int64 = 0
+	stringValues[0] = getColumns(ServiceColumn, "TOPIC", MembersColumn, ChannelsColumn, "SUBSCRIBERS", PublishedColumn)
 
-	stringValues[0] = getColumns(ServiceColumn, "TOPIC", "UNCONSUMED MSG", "MEMORY", avgSize,
-		"PUBLISHER SENDS", "SUBSCRIBER RECEIVES")
-
-	for i, value := range cacheSummaries {
-		var avgSize int64 = 0
-
-		totalUnits += value.UnitsBytes
-
-		if value.CacheSize != 0 {
-			avgSize = value.UnitsBytes / int64(value.CacheSize)
-		}
-
-		stringValues[i+1] = getColumns(value.ServiceName, strings.ReplaceAll(value.CacheName, "$topic$", ""),
-			formatSmallInteger(value.CacheSize),
-			formattingFunction(value.UnitsBytes),
-			formatLargeInteger(avgSize), formatLargeInteger(value.TotalPuts), formatLargeInteger(value.TotalGets))
+	for i, value := range topicDetails {
+		stringValues[i+1] = getColumns(value.ServiceName, value.TopicName, formatLargeInteger(value.Members),
+			formatLargeInteger(value.Channels), formatLargeInteger(value.Subscribers), formatLargeInteger(value.PublishedCount))
 	}
 
-	return fmt.Sprintf("Total Topics: %d, Total primary storage: %s\n\n", totalTopics,
-		strings.TrimSpace(formattingFunction(totalUnits))) +
-		formatLinesAllStringsWithAlignment(alignment, stringValues)
+	return formatLinesAllStringsWithAlignment(alignment, stringValues)
+}
+
+// FormatTopicsSubscribers returns the topics subscriber details in column formatted output
+func FormatTopicsSubscribers(topicsSubscribers []config.TopicsSubscriberDetail) string {
+	var (
+		memberCount    = len(topicsSubscribers)
+		alignmentWide  = []string{R, R, L, R, L, R, R, R, L}
+		alignment      = []string{R, R, L, R, L, R, R, R}
+		finalAlignment []string
+	)
+	if memberCount == 0 {
+		return ""
+	}
+
+	var stringValues = make([]string, memberCount+1)
+
+	sort.Slice(topicsSubscribers, func(p, q int) bool {
+		nodeID1, _ := strconv.Atoi(topicsSubscribers[p].NodeID)
+		nodeID2, _ := strconv.Atoi(topicsSubscribers[q].NodeID)
+		if nodeID1 == nodeID2 {
+			return topicsSubscribers[p].ID < topicsSubscribers[q].ID
+		}
+		return nodeID1 < nodeID2
+	})
+
+	stringValues[0] = getColumns(NodeIDColumn, SubscriberIDColumn, "STATE", ChannelsColumn, SubscriberGroupColumn,
+		"RECEIVED", "ERRORS", "BACKLOG")
+	if OutputFormat == constants.WIDE {
+		finalAlignment = alignmentWide
+		stringValues[0] = getColumns(stringValues[0], MemberColumn)
+	} else {
+		finalAlignment = alignment
+	}
+
+	for i, value := range topicsSubscribers {
+		var nodeID, _ = strconv.Atoi(value.NodeID)
+
+		stringValues[i+1] = getColumns(formatSmallInteger(int32(nodeID)), fmt.Sprintf("%v", value.ID),
+			value.StateName, formatLargeInteger(value.ChannelCount), value.SubscriberGroup, formatLargeInteger(value.ReceivedCount),
+			formatLargeInteger(value.ReceiveErrors), formatLargeInteger(value.Backlog))
+		if OutputFormat == constants.WIDE {
+			stringValues[i+1] = getColumns(stringValues[i+1], value.Member)
+		}
+	}
+
+	return formatLinesAllStringsWithAlignment(finalAlignment, stringValues)
+}
+
+// FormatTopicsSubscriberGroups returns the topics subscriber groups details in column formatted output
+func FormatTopicsSubscriberGroups(subscriberGroups []config.TopicsSubscriberGroupDetail) string {
+	var (
+		count          = len(subscriberGroups)
+		alignment      = []string{L, R, R, R, R, R, R, R}
+		alignmentWide  = []string{L, R}
+		finalAlignment []string
+	)
+	if count == 0 {
+		return ""
+	}
+
+	var stringValues = make([]string, count+1)
+
+	sort.Slice(subscriberGroups, func(p, q int) bool {
+		nodeID1, _ := strconv.Atoi(subscriberGroups[p].NodeID)
+		nodeID2, _ := strconv.Atoi(subscriberGroups[q].NodeID)
+		if subscriberGroups[p].SubscriberGroup == subscriberGroups[q].SubscriberGroup {
+			return nodeID1 < nodeID2
+		}
+		return strings.Compare(subscriberGroups[p].SubscriberGroup, subscriberGroups[q].SubscriberGroup) < 0
+	})
+
+	stringValues[0] = getColumns(SubscriberGroupColumn, NodeIDColumn, ChannelsColumn, PolledColumn, MeanColumn,
+		OneMinuteColumn, FiveMinuteColumn, FifteenMinuteColumn)
+	if OutputFormat == constants.WIDE {
+		finalAlignment = alignmentWide
+		stringValues[0] = getColumns(stringValues[0], MemberColumn)
+	} else {
+		finalAlignment = alignment
+	}
+
+	for i, value := range subscriberGroups {
+		var nodeID, _ = strconv.Atoi(value.NodeID)
+
+		stringValues[i+1] = getColumns(value.SubscriberGroup, formatSmallInteger(int32(nodeID)),
+			formatLargeInteger(value.ChannelCount), formatLargeInteger(value.PolledCount),
+			formatLargeFloat(value.PolledMeanRate), formatLargeFloat(value.PolledOneMinuteRate),
+			formatLargeFloat(value.PolledFiveMinuteRate), formatLargeFloat(value.PolledFifteenMinuteRate))
+	}
+
+	return formatLinesAllStringsWithAlignment(finalAlignment, stringValues)
+}
+
+// FormatTopicsMembers returns the topics member details in column formatted output
+func FormatTopicsMembers(topicsMembers []config.TopicsMemberDetail) string {
+	var (
+		memberCount    = len(topicsMembers)
+		alignment      = []string{R, R, R, R, R, R, R}
+		alignmentWide  = []string{R, R, R, R, R, R, R, R, R, R, R}
+		finalAlignment []string
+	)
+	if memberCount == 0 {
+		return ""
+	}
+
+	var stringValues = make([]string, memberCount+1)
+
+	sort.Slice(topicsMembers, func(p, q int) bool {
+		nodeID1, _ := strconv.Atoi(topicsMembers[p].NodeID)
+		nodeID2, _ := strconv.Atoi(topicsMembers[q].NodeID)
+		return nodeID1 < nodeID2
+	})
+
+	stringValues[0] = getColumns(NodeIDColumn, ChannelsColumn, PublishedColumn, MeanColumn, OneMinuteColumn,
+		FiveMinuteColumn, FifteenMinuteColumn)
+	if OutputFormat == constants.WIDE {
+		finalAlignment = alignmentWide
+		stringValues[0] = getColumns(stringValues[0], "SUB TIMEOUT", "RECON TIMEOUT", "WAIT", "PAGE CAPACITY")
+	} else {
+		finalAlignment = alignment
+	}
+
+	for i, value := range topicsMembers {
+		var nodeID, _ = strconv.Atoi(value.NodeID)
+
+		stringValues[i+1] = getColumns(formatSmallInteger(int32(nodeID)), formatLargeInteger(value.ChannelCount),
+			formatLargeInteger(value.PublishedCount), formatLargeFloat(value.PublishedMeanRate),
+			formatLargeFloat(value.PublishedOneMinuteRate), formatLargeFloat(value.PublishedFiveMinuteRate),
+			formatLargeFloat(value.PublishedFifteenMinuteRate))
+		if OutputFormat == constants.WIDE {
+			stringValues[i+1] = getColumns(stringValues[i+1], formatLargeInteger(value.SubscriberTimeout)+"ms",
+				formatLargeInteger(value.ReconnectTimeout)+"ms", formatLargeInteger(value.ReconnectWait)+"ms",
+				formatLargeInteger(value.PageCapacity))
+		}
+	}
+
+	return formatLinesAllStringsWithAlignment(finalAlignment, stringValues)
+}
+
+// FormatChannelStats returns the channel stats in column formatted output
+func FormatChannelStats(channelStats []config.ChannelStats) string {
+	var memberCount = len(channelStats)
+
+	if memberCount == 0 {
+		return ""
+	}
+
+	var stringValues = make([]string, memberCount+1)
+
+	sort.Slice(channelStats, func(p, q int) bool {
+		return channelStats[p].Channel < channelStats[q].Channel
+	})
+
+	stringValues[0] = getColumns(ChannelColumn, PublishedColumn, MeanColumn, OneMinuteColumn,
+		FiveMinuteColumn, FifteenMinuteColumn, "TAIL")
+
+	for i, value := range channelStats {
+		stringValues[i+1] = getColumns(formatLargeInteger(value.Channel),
+			formatLargeInteger(value.PublishedCount), formatLargeFloat(value.PublishedMeanRate),
+			formatLargeFloat(value.PublishedOneMinuteRate), formatLargeFloat(value.PublishedFiveMinuteRate),
+			formatLargeFloat(value.PublishedFifteenMinuteRate), value.Tail)
+	}
+
+	return formatLinesAllStringsWithAlignment([]string{R, R, R, R, R, R, L}, stringValues)
+}
+
+// FormatSubscriberChannelStats returns the subscriber channel stats in column formatted output
+func FormatSubscriberChannelStats(channelStats []config.SubscriberChannelStats) string {
+	var memberCount = len(channelStats)
+
+	if memberCount == 0 {
+		return ""
+	}
+
+	var stringValues = make([]string, memberCount+1)
+
+	sort.Slice(channelStats, func(p, q int) bool {
+		return channelStats[p].Channel < channelStats[q].Channel
+	})
+
+	stringValues[0] = getColumns(ChannelColumn, "EMPTY", "LAST COMMIT",
+		"LAST REC", "OWNED", HeadColumn)
+
+	for i, value := range channelStats {
+		stringValues[i+1] = getColumns(formatLargeInteger(value.Channel),
+			formatBool(value.Empty), value.LastCommit, value.LastReceived, formatBool(value.Owned), value.Head)
+	}
+
+	return formatLinesAllStringsWithAlignment([]string{R, L, L, L, L, L}, stringValues)
+}
+
+// FormatSubscriberGroupChannelStats returns the subscriber channel stats in column formatted output
+func FormatSubscriberGroupChannelStats(channelStats []config.SubscriberGroupChannelStats) string {
+	var memberCount = len(channelStats)
+
+	if memberCount == 0 {
+		return ""
+	}
+
+	var stringValues = make([]string, memberCount+1)
+
+	sort.Slice(channelStats, func(p, q int) bool {
+		return channelStats[p].Channel < channelStats[q].Channel
+	})
+
+	stringValues[0] = getColumns(ChannelColumn, "OWNING SUB", MemberColumn, PolledColumn, MeanColumn,
+		OneMinuteColumn, FiveMinuteColumn, FifteenMinuteColumn, HeadColumn)
+
+	for i, value := range channelStats {
+		stringValues[i+1] = getColumns(formatLargeInteger(value.Channel),
+			fmt.Sprintf("%v", value.OwningSubscriberID), formatLargeInteger(value.OwningSubscriberMemberID),
+			formatLargeInteger(value.PolledCount), formatLargeFloat(value.PolledMeanRate),
+			formatLargeFloat(value.PolledOneMinuteRate), formatLargeFloat(value.PolledFiveMinuteRate),
+			formatLargeFloat(value.PolledFifteenMinuteRate), value.Head)
+	}
+
+	return formatLinesAllStringsWithAlignment([]string{R, R, R, R, R, R, R, R, L}, stringValues)
 }
 
 // FormatServiceMembers returns the service member details in column formatted output
@@ -910,7 +1120,7 @@ func FormatHealthSummary(health []config.HealthSummaryShort) string {
 		return strings.Compare(health[p].Name, health[q].Name) < 0
 	})
 
-	stringValues[0] = getColumns("NAME", "SUB TYPE", "MEMBERS", "STARTED", "LIVE", "READY", "SAFE")
+	stringValues[0] = getColumns("NAME", "SUB TYPE", MembersColumn, "STARTED", "LIVE", "READY", "SAFE")
 
 	for i, value := range health {
 		stringValues[i+1] = getColumns(value.Name, value.SubType, formatSmallInteger(value.TotalCount),
@@ -1232,7 +1442,7 @@ func FormatServices(services []config.ServiceSummary) string {
 		return strings.Compare(services[p].ServiceName, services[q].ServiceName) < 0
 	})
 
-	stringValues[0] = getColumns(ServiceNameColumn, "TYPE", "MEMBERS", "STATUS HA", "STORAGE", partitions)
+	stringValues[0] = getColumns(ServiceNameColumn, "TYPE", MembersColumn, "STATUS HA", "STORAGE", partitions)
 	if OutputFormat == constants.WIDE {
 		finalAlignment = alignmentWide
 		stringValues[0] = getColumns(stringValues[0], "ENDANGERED", "VULNERABLE", "UNBALANCED", "STATUS", "SUSPENDED")
