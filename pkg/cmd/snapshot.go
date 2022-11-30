@@ -116,8 +116,7 @@ local snapshots are shown, but you can use the -a option to show archived snapsh
 							return
 						}
 
-						err = json.Unmarshal(coordData, &coordinator)
-						if err != nil {
+						if err = json.Unmarshal(coordData, &coordinator); err != nil {
 							errorSink.AppendError(err)
 							return
 						}
