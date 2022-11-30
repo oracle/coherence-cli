@@ -104,6 +104,7 @@ BUILD_USER             := $(shell whoami)
 
 LDFLAGS          = -X main.Version=$(VERSION)$(MILESTONE) -X main.Commit=$(GITCOMMIT) -X main.Date=$(BUILD_DATE) -X main.Author=$(BUILD_USER)
 GOS              = $(shell find . -type f -name "*.go" ! -name "*_test.go")
+GO_TEST_FLAGS   ?= -timeout 20m
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Release build options

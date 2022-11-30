@@ -131,11 +131,11 @@ var getSubscribersCmd = &cobra.Command{
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var (
-			err             error
-			connection      string
-			dataFetcher     fetcher.Fetcher
-			topicName       = args[0]
-			selectedDetails config.TopicDetails
+			err                 error
+			connection          string
+			dataFetcher         fetcher.Fetcher
+			subscriberTopicName = args[0]
+			selectedDetails     config.TopicDetails
 		)
 
 		connection, dataFetcher, err = GetConnectionAndDataFetcher()
@@ -143,7 +143,7 @@ var getSubscribersCmd = &cobra.Command{
 			return err
 		}
 
-		selectedDetails, err = getTopicsDetails(dataFetcher, serviceName, topicName)
+		selectedDetails, err = getTopicsDetails(dataFetcher, serviceName, subscriberTopicName)
 		if err != nil {
 			return err
 		}
@@ -157,21 +157,12 @@ var getSubscribersCmd = &cobra.Command{
 			}
 
 			if strings.Contains(OutputFormat, constants.JSON) {
-				topicsResult, err := dataFetcher.GetTopicsSubscribersJSON(serviceName, topicName)
+				topicsResult, err := dataFetcher.GetTopicsSubscribersJSON(serviceName, subscriberTopicName)
 				if err != nil {
 					return err
 				}
-				if OutputFormat == constants.JSONPATH {
-					result, err := utils.GetJSONPathResults(topicsResult, OutputFormat)
-					if err != nil {
-						return err
-					}
-					cmd.Println(result)
-				} else {
-					if err != nil {
-						return err
-					}
-					cmd.Println(string(topicsResult))
+				if err = processJSONOutput(cmd, topicsResult); err != nil {
+					return err
 				}
 			} else {
 				printWatchHeader(cmd)
@@ -179,7 +170,7 @@ var getSubscribersCmd = &cobra.Command{
 
 				cmd.Println(FormatCurrentCluster(connection))
 
-				sb.WriteString(getTopicsHeader(serviceName, topicName) + "\n")
+				sb.WriteString(getTopicsHeader(serviceName, subscriberTopicName) + "\n")
 				sb.WriteString(FormatTopicsSubscribers(topicsSubscriberDetails))
 
 				cmd.Println(sb.String())
@@ -475,17 +466,8 @@ var getTopicMembersCmd = &cobra.Command{
 				if err != nil {
 					return err
 				}
-				if OutputFormat == constants.JSONPATH {
-					result, err := utils.GetJSONPathResults(topicsResult, OutputFormat)
-					if err != nil {
-						return err
-					}
-					cmd.Println(result)
-				} else {
-					if err != nil {
-						return err
-					}
-					cmd.Println(string(topicsResult))
+				if err = processJSONOutput(cmd, topicsResult); err != nil {
+					return err
 				}
 			} else {
 				printWatchHeader(cmd)
@@ -568,17 +550,8 @@ var getMemberChannelsCmd = &cobra.Command{
 				if err != nil {
 					return err
 				}
-				if OutputFormat == constants.JSONPATH {
-					result, err := utils.GetJSONPathResults(topicsResult, OutputFormat)
-					if err != nil {
-						return err
-					}
-					cmd.Println(result)
-				} else {
-					if err != nil {
-						return err
-					}
-					cmd.Println(string(topicsResult))
+				if err = processJSONOutput(cmd, topicsResult); err != nil {
+					return err
 				}
 			} else {
 				// retrieve the topics member information for summarising
@@ -672,17 +645,8 @@ var getSubscriberChannelsCmd = &cobra.Command{
 				if err != nil {
 					return err
 				}
-				if OutputFormat == constants.JSONPATH {
-					result, err := utils.GetJSONPathResults(topicsResult, OutputFormat)
-					if err != nil {
-						return err
-					}
-					cmd.Println(result)
-				} else {
-					if err != nil {
-						return err
-					}
-					cmd.Println(string(topicsResult))
+				if err = processJSONOutput(cmd, topicsResult); err != nil {
+					return err
 				}
 			} else {
 				topicsSubscriberDetails, err = getTopicsSubscribers(dataFetcher, selectedDetails)
@@ -776,17 +740,8 @@ var getSubscriberGroupChannelsCmd = &cobra.Command{
 				if err != nil {
 					return err
 				}
-				if OutputFormat == constants.JSONPATH {
-					result, err := utils.GetJSONPathResults(topicsResult, OutputFormat)
-					if err != nil {
-						return err
-					}
-					cmd.Println(result)
-				} else {
-					if err != nil {
-						return err
-					}
-					cmd.Println(string(topicsResult))
+				if err = processJSONOutput(cmd, topicsResult); err != nil {
+					return err
 				}
 			} else {
 				topicsSubscriberGroupDetails, err = getTopicsSubscriberGroups(dataFetcher, selectedDetails)
@@ -1133,6 +1088,24 @@ func getTopicsSubscriberGroups(dataFetcher fetcher.Fetcher, topics config.TopicD
 	}
 
 	return allSubscriberGroupSummary, nil
+}
+
+// processJSONOutput processes JSON output and either outputs the JSONPath or JSON results.
+func processJSONOutput(cmd *cobra.Command, jsonData []byte) error {
+	var (
+		err    error
+		result string
+	)
+	if OutputFormat == constants.JSONPATH {
+		result, err = utils.GetJSONPathResults(jsonData, OutputFormat)
+		if err != nil {
+			return err
+		}
+		cmd.Println(result)
+		return nil
+	}
+	cmd.Println(string(jsonData))
+	return nil
 }
 
 func init() {
