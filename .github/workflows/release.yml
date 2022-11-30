@@ -26,6 +26,7 @@ jobs:
       uses: actions/setup-java@v3
       with:
         java-version: '17'
+        distribution: OpenJDK
 
     - name: Set up Go
       uses: actions/setup-go@v3
