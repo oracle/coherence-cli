@@ -81,6 +81,19 @@ func GetListOfCacheServices(servicesSummary config.ServicesSummaries) []string {
 	return cacheServices
 }
 
+// GetListOfTopicsServices returns a list of topics services
+func GetListOfTopicsServices(servicesSummary config.ServicesSummaries) []string {
+	var topicsServices = make([]string, 0)
+	for _, value := range servicesSummary.Services {
+		var service = value.ServiceName
+		if value.ServiceType == constants.PagedTopic && !utils.SliceContains(topicsServices, service) {
+			topicsServices = append(topicsServices, service)
+		}
+	}
+
+	return topicsServices
+}
+
 // GetPersistenceServices returns a list of persistence services
 func GetPersistenceServices(dataFetcher fetcher.Fetcher) ([]string, error) {
 	servicesSummary, err := GetServices(dataFetcher)

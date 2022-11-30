@@ -1846,6 +1846,105 @@ func RunTestFederationCommands(t *testing.T) {
 	test_utils.EnsureCommandContains(g, t, cliCmd, "", configArg, file, "get", "clusters")
 }
 
+// RunTestTopicsCommands tests federation commands
+func RunTestTopicsCommands(t *testing.T) {
+	const noTopics = "there are no topics for service"
+	var (
+		context = test_utils.GetTestContext()
+		restUrl = context.RestUrl
+		g       = NewGomegaWithT(t)
+	)
+
+	file, err := test_utils.CreateNewConfigYaml(configYaml)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	test_utils.CleanupConfigFileAfterTest(t, file)
+
+	cliCmd := cmd.Initialize(nil)
+
+	// add a new cluster
+	test_utils.EnsureCommandContains(g, t, cliCmd, addedCluster, configArg, file, "add", "cluster",
+		context.ClusterName, "-u", context.Url)
+
+	dataFetcher := GetDataFetcher(g, context.ClusterName)
+
+	// get cluster details
+	_, err = dataFetcher.GetServiceDetailsJSON()
+	g.Expect(err).To(BeNil())
+
+	// Start Topics
+	_, err = test_utils.IssueGetRequest(restUrl + "/startTopics")
+	g.Expect(err).To(BeNil())
+
+	// sleep to ensure the clusters are ready
+	test_utils.Sleep(20)
+
+	// validate get topics
+	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "TOPIC,SUBSCRIBERS,PartitionedTopic,private-messages,public-messages", configArg, file,
+		"get", "topics", "-c", context.ClusterName)
+
+	// ensure no topics returned for invalid service
+	test_utils.EnsureCommandErrorContains(g, t, cliCmd, "there are no topics for service invalid-service", configArg, file,
+		"get", "topics", "-s", "invalid-service", "-c", context.ClusterName)
+
+	// describe a topic
+	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "TOPIC DETAILS,MEMBERS,SUBSCRIBERS,SUBSCRIBER GROUPS,private-messages,17", configArg, file,
+		"describe", "topic", "private-messages", "-s", "PartitionedTopic", "-c", context.ClusterName)
+
+	// describe a non-existent topic
+	test_utils.EnsureCommandErrorContains(g, t, cliCmd, "a topic named", configArg, file,
+		"describe", "topic", "private-messagesxxx", "-s", "PartitionedTopic", "-c", context.ClusterName)
+
+	// get topic-members
+	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "PartitionedTopic,17,private-messages,PUBLISHED,NODE ID", configArg, file,
+		"get", "topic-members", "private-messages", "-s", "PartitionedTopic", "-c", context.ClusterName)
+
+	// test get topic-members with invalid service
+	test_utils.EnsureCommandErrorContains(g, t, cliCmd, noTopics, configArg, file,
+		"get", "topic-members", "private-messages", "-s", "PartitionedTopicx", "-c", context.ClusterName)
+
+	// get member-channels
+	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "PartitionedTopic,17,private-messages,PUBLISHED,MEAN,PagedPosition", configArg, file,
+		"get", "member-channels", "private-messages", "-s", "PartitionedTopic", "-n", "1", "-c", context.ClusterName)
+
+	// get subscribers
+	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "PartitionedTopic,17,public-messages,SUBSCRIBER ID,NODE ID,SUBSCRIBER GROUP", configArg, file,
+		"get", "subscribers", "public-messages", "-s", "PartitionedTopic", "-c", context.ClusterName)
+
+	// test get subscribers with invalid service
+	test_utils.EnsureCommandErrorContains(g, t, cliCmd, noTopics, configArg, file,
+		"get", "subscribers", "public-messages", "-s", "PartitionedTopicxx", "-c", context.ClusterName)
+
+	// get subscriber channels - need to use the datafetcher to find a valid subscriber
+	topicsResult, err := dataFetcher.GetTopicsSubscribersJSON("PartitionedTopic", "public-messages")
+	g.Expect(err).To(Not(HaveOccurred()))
+
+	topicsSummary := config.TopicsSubscriberDetails{}
+	err = json.Unmarshal(topicsResult, &topicsSummary)
+	g.Expect(err).To(Not(HaveOccurred()))
+	g.Expect(len(topicsSummary.Details)).To(BeNumerically(">", 0))
+
+	// retrieve the subscriber
+	ID := topicsSummary.Details[0].NodeID
+	subscriber := topicsSummary.Details[0].ID
+
+	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "PartitionedTopic,17,public-messages,EMPTY,LAST COMMIT,HEAD", configArg, file,
+		"get", "subscriber-channels", "public-messages", "-s", "PartitionedTopic", "-n", fmt.Sprintf("%v", ID),
+		"-S", fmt.Sprintf("%v", subscriber), "-c", context.ClusterName)
+
+	// test sub-grp-channels
+	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "PartitionedTopic,17,public-messages,MEMBER,MEAN,OWNING SUB", configArg, file,
+		"get", "sub-grp-channels", "public-messages", "-s", "PartitionedTopic", "-n", "1", "-G", "1", "-c", context.ClusterName)
+
+	// remove the cluster entry
+	test_utils.EnsureCommandContains(g, t, cliCmd, context.ClusterName, configArg, file, "remove", "cluster", "cluster1", "-y")
+
+	// get clusters should return nothing
+	test_utils.EnsureCommandContains(g, t, cliCmd, "", configArg, file, "get", "clusters")
+}
+
 // GetDataFetcher returns a Fetcher instance or throws an assertion if not found
 func GetDataFetcher(g *WithT, clusterName string) fetcher.Fetcher {
 	found, connection := cmd.GetClusterConnection(clusterName)

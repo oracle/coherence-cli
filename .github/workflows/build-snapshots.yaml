@@ -92,6 +92,7 @@ jobs:
 
         echo "Running verify against $COH_VERSION"
         COHERENCE_BASE_IMAGE=gcr.io/distroless/java17 COHERENCE_VERSION=$COH_VERSION make clean build-test-images test-e2e-standalone
+        PROFILES=,topics COHERENCE_BASE_IMAGE=gcr.io/distroless/java17 COHERENCE_VERSION=$COH_VERSION make clean build-test-images test-e2e-topics
         COHERENCE_VERSION=$COH_VERSION make test-clean test-discovery
 
     - uses: actions/upload-artifact@v1

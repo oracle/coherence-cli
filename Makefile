@@ -139,6 +139,10 @@ ifeq ($(PROFILES),,commercial)
 	mvn -B -f java $(MAVEN_BUILD_OPTS) clean install -DskipTests -P commercial
 else ifeq ($(PROFILES),,federation)
 	mvn -B -f java $(MAVEN_BUILD_OPTS) clean install -DskipTests -P federation
+else ifeq ($(PROFILES),,topics)
+	mvn -B -f java $(MAVEN_BUILD_OPTS) clean install -DskipTests -P topics
+else ifeq ($(PROFILES),,topics-commercial)
+	mvn -B -f java $(MAVEN_BUILD_OPTS) clean install -DskipTests -P topics-commercial
 else
 	mvn -B -f java $(MAVEN_BUILD_OPTS) clean install -DskipTests
 endif
@@ -154,6 +158,12 @@ clean: ## Cleans the build
 	-rm -rf $(BUILD_SHARED)
 ifeq ($(PROFILES),,commercial)
 	mvn -B -f java clean -DskipTests $(MAVEN_BUILD_OPTS) -P commercial
+else ifeq ($(PROFILES),,federation)
+	mvn -B -f java $(MAVEN_BUILD_OPTS) clean install -DskipTests -P federation
+else ifeq ($(PROFILES),,topics)
+	mvn -B -f java $(MAVEN_BUILD_OPTS) clean install -DskipTests -P topics
+else ifeq ($(PROFILES),,topics-commercial)
+	mvn -B -f java $(MAVEN_BUILD_OPTS) clean install -DskipTests -P topics-commercial
 else
 	mvn -B -f java clean install -DskipTests $(MAVEN_BUILD_OPTS)
 endif
@@ -396,6 +406,14 @@ test-cohctl: test-clean gotestsum $(BUILD_PROPS) ## Run the CLI unit tests
 test-e2e-standalone: test-clean gotestsum $(BUILD_PROPS) ## Run e2e tests with Coherence
 	CGO_ENABLED=0 $(GOTESTSUM) --format testname --junitfile $(TEST_LOGS_DIR)/cohctl-test-e2e-standalone.xml \
 	  -- $(GO_TEST_FLAGS) -v ./test/e2e/standalone/...
+
+# ----------------------------------------------------------------------------------------------------------------------
+# Executes the Go end to end tests for Topics
+# ----------------------------------------------------------------------------------------------------------------------
+.PHONY: test-e2e-topics
+test-e2e-topics: test-clean gotestsum $(BUILD_PROPS) ## Run e2e tests with Coherence against topics
+	CGO_ENABLED=0 $(GOTESTSUM) --format testname --junitfile $(TEST_LOGS_DIR)/cohctl-test-e2e-topics.xml \
+	  -- $(GO_TEST_FLAGS) -v ./test/e2e/topics/...
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Executes tests against an already running WebLogic Server
