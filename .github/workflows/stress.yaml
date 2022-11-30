@@ -3,7 +3,7 @@
 # https://oss.oracle.com/licenses/upl.
 
 # ---------------------------------------------------------------------------
-# Coherence CLI GitHub Actions Stress build.
+# Coherence CLI GitHub Actions Stress build
 # ---------------------------------------------------------------------------
 name: Stress
 
