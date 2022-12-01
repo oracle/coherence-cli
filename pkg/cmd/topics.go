@@ -66,17 +66,12 @@ var getTopicsCmd = &cobra.Command{
 				return fmt.Errorf(NoTopicForService, serviceName)
 			}
 
-			topicsMemberDetails, err = getTopicsMembers(dataFetcher, topicsDetails)
+			topicsMemberDetails, topicsSubscriberDetails, err = getMemberAndSubscribers(dataFetcher, topicsDetails)
 			if err != nil {
 				return err
 			}
 
-			topicsSubscriberDetails, err = getTopicsSubscribers(dataFetcher, topicsDetails)
-			if err != nil {
-				return err
-			}
-
-			if strings.Contains(OutputFormat, constants.JSON) {
+			if isJSONPathOrJSON() {
 				json, err := json.Marshal(topicsDetails)
 				if err != nil {
 					return err
@@ -89,11 +84,8 @@ var getTopicsCmd = &cobra.Command{
 				var sb strings.Builder
 
 				cmd.Println(FormatCurrentCluster(connection))
-
 				enrichTopicsSummary(&topicsDetails, topicsMemberDetails, topicsSubscriberDetails)
-
 				sb.WriteString(FormatTopicsSummary(topicsDetails.Details))
-
 				cmd.Println(sb.String())
 			}
 
@@ -331,18 +323,7 @@ var describeTopicCmd = &cobra.Command{
 		selectedDetails := config.TopicDetails{Details: make([]config.TopicDetail, 1)}
 		selectedDetails.Details[0] = topicsDetails.Details[index]
 
-		// retrieve the topics member information for summarising
-		topicsMemberDetails, err = getTopicsMembers(dataFetcher, selectedDetails)
-		if err != nil {
-			return err
-		}
-
-		topicsSubscriberDetails, err = getTopicsSubscribers(dataFetcher, selectedDetails)
-		if err != nil {
-			return err
-		}
-
-		subscriberGroupDetails, err = getTopicsSubscriberGroups(dataFetcher, selectedDetails)
+		topicsMemberDetails, topicsSubscriberDetails, err = getMemberAndSubscribers(dataFetcher, topicsDetails)
 		if err != nil {
 			return err
 		}
@@ -1079,6 +1060,44 @@ func getTopicsSubscriberGroups(dataFetcher fetcher.Fetcher, topics config.TopicD
 	}
 
 	return allSubscriberGroupSummary, nil
+}
+
+// getMemberAndSubscribers returns topic and member details concurrently
+func getMemberAndSubscribers(dataFetcher fetcher.Fetcher, topicsDetails config.TopicDetails) (topicsMemberDetails []config.TopicsMemberDetail,
+	topicsSubscriberDetails []config.TopicsSubscriberDetail, err error) {
+	var (
+		errorSink = createErrorSink()
+		wg        sync.WaitGroup
+	)
+
+	wg.Add(2)
+
+	go func() {
+		defer wg.Done()
+		var err1 error
+		topicsMemberDetails, err1 = getTopicsMembers(dataFetcher, topicsDetails)
+		if err1 != nil {
+			errorSink.AppendError(err1)
+		}
+	}()
+
+	go func() {
+		defer wg.Done()
+		var err1 error
+		topicsSubscriberDetails, err1 = getTopicsSubscribers(dataFetcher, topicsDetails)
+		if err1 != nil {
+			errorSink.AppendError(err1)
+		}
+	}()
+
+	wg.Wait()
+	errorList := errorSink.GetErrors()
+
+	if len(errorList) > 0 {
+		return nil, nil, utils.GetErrors(errorList)
+	}
+
+	return topicsMemberDetails, topicsSubscriberDetails, nil
 }
 
 func init() {

@@ -347,13 +347,12 @@ type TopicDetails struct {
 
 // TopicDetail contains individual topic details
 type TopicDetail struct {
-	ServiceName string `json:"service"`
-	TopicName   string `json:"name"`
-	Members     int64  `json:"members"`
-	Channels    int64  `json:"channels"`
-	Subscribers int64  `json:"subscribers"`
-
-	PublishedCount int64 `json:"publishedCount"`
+	ServiceName    string `json:"service"`
+	TopicName      string `json:"name"`
+	Members        int64  `json:"members"`
+	Channels       int64  `json:"-"`
+	Subscribers    int64  `json:"-"`
+	PublishedCount int64  `json:"-"`
 }
 
 // TopicsMemberDetails contains topics member details
