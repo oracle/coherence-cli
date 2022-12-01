@@ -71,7 +71,7 @@ var getTopicsCmd = &cobra.Command{
 				return err
 			}
 
-			if strings.Contains(OutputFormat, constants.JSON) {
+			if isJSONPathOrJSON() {
 				json, err := json.Marshal(topicsDetails)
 				if err != nil {
 					return err
