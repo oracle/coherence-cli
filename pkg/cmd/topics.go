@@ -42,6 +42,8 @@ var getTopicsCmd = &cobra.Command{
 			err         error
 			connection  string
 			dataFetcher fetcher.Fetcher
+			errorSink   = createErrorSink()
+			wg          sync.WaitGroup
 		)
 
 		connection, dataFetcher, err = GetConnectionAndDataFetcher()
@@ -66,14 +68,31 @@ var getTopicsCmd = &cobra.Command{
 				return fmt.Errorf(NoTopicForService, serviceName)
 			}
 
-			topicsMemberDetails, err = getTopicsMembers(dataFetcher, topicsDetails)
-			if err != nil {
-				return err
-			}
+			wg.Add(2)
 
-			topicsSubscriberDetails, err = getTopicsSubscribers(dataFetcher, topicsDetails)
-			if err != nil {
-				return err
+			go func() {
+				defer wg.Done()
+				var err1 error
+				topicsMemberDetails, err1 = getTopicsMembers(dataFetcher, topicsDetails)
+				if err1 != nil {
+					errorSink.AppendError(err1)
+				}
+			}()
+
+			go func() {
+				defer wg.Done()
+				var err1 error
+				topicsSubscriberDetails, err1 = getTopicsSubscribers(dataFetcher, topicsDetails)
+				if err1 != nil {
+					errorSink.AppendError(err1)
+				}
+			}()
+
+			wg.Wait()
+			errorList := errorSink.GetErrors()
+
+			if len(errorList) > 0 {
+				return utils.GetErrors(errorList)
 			}
 
 			if strings.Contains(OutputFormat, constants.JSON) {
@@ -89,11 +108,8 @@ var getTopicsCmd = &cobra.Command{
 				var sb strings.Builder
 
 				cmd.Println(FormatCurrentCluster(connection))
-
 				enrichTopicsSummary(&topicsDetails, topicsMemberDetails, topicsSubscriberDetails)
-
 				sb.WriteString(FormatTopicsSummary(topicsDetails.Details))
-
 				cmd.Println(sb.String())
 			}
 
@@ -305,6 +321,8 @@ var describeTopicCmd = &cobra.Command{
 			topicsMemberDetails     []config.TopicsMemberDetail
 			subscriberGroupDetails  []config.TopicsSubscriberGroupDetail
 			jsonResult              []byte
+			errorSink               = createErrorSink()
+			wg                      sync.WaitGroup
 		)
 
 		connection, dataFetcher, err = GetConnectionAndDataFetcher()
@@ -332,19 +350,31 @@ var describeTopicCmd = &cobra.Command{
 		selectedDetails.Details[0] = topicsDetails.Details[index]
 
 		// retrieve the topics member information for summarising
-		topicsMemberDetails, err = getTopicsMembers(dataFetcher, selectedDetails)
-		if err != nil {
-			return err
-		}
+		wg.Add(2)
 
-		topicsSubscriberDetails, err = getTopicsSubscribers(dataFetcher, selectedDetails)
-		if err != nil {
-			return err
-		}
+		go func() {
+			defer wg.Done()
+			var err1 error
+			topicsMemberDetails, err1 = getTopicsMembers(dataFetcher, topicsDetails)
+			if err1 != nil {
+				errorSink.AppendError(err1)
+			}
+		}()
 
-		subscriberGroupDetails, err = getTopicsSubscriberGroups(dataFetcher, selectedDetails)
-		if err != nil {
-			return err
+		go func() {
+			defer wg.Done()
+			var err1 error
+			topicsSubscriberDetails, err1 = getTopicsSubscribers(dataFetcher, topicsDetails)
+			if err1 != nil {
+				errorSink.AppendError(err1)
+			}
+		}()
+
+		wg.Wait()
+		errorList := errorSink.GetErrors()
+
+		if len(errorList) > 0 {
+			return utils.GetErrors(errorList)
 		}
 
 		enrichTopicsSummary(&topicsDetails, topicsMemberDetails, topicsSubscriberDetails)

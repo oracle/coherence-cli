@@ -21,7 +21,7 @@ import static com.tangosol.net.topic.Subscriber.Name.inGroup;
 import static com.tangosol.util.Base.log;
 
 /**
- * Starts topics processes.
+ * Starts topics processes for tests.
  *
  * @author tam 2022.11.31
  *
@@ -34,6 +34,7 @@ public class RunTopics {
     private static Subscriber<String> subscriberPrivate;
 
     private static Thread thread = null;
+
     public RunTopics() {
     }
 
@@ -47,7 +48,6 @@ public class RunTopics {
 
     public void stopTopics() {
         System.out.println("Stop topics");
-
         thread.stop();
     }
 
@@ -70,10 +70,8 @@ public class RunTopics {
 
         public Runner() {
             Session session = Session.create();
-            publisherPublic = session.createPublisher("public-messages");
-            subscriberPublic = session.createSubscriber("public-messages");
-            // create a subscriber to receive private messages
-
+            publisherPublic   = session.createPublisher("public-messages");
+            subscriberPublic  = session.createSubscriber("public-messages");
             subscriberPrivate = session.createSubscriber("private-messages", inGroup("1"));
 
             subscriberPublic.receive().handle((v, err)->receive(v, err, subscriberPublic));
@@ -87,7 +85,6 @@ public class RunTopics {
             Random random = new Random();
 
             while (true) {
-
                 publisherPublic.publish(UUID.randomUUID().toString()).join();
                 System.out.println("Publish");
                 Base.sleep((long) random.nextInt(1000));
