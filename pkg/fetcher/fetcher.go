@@ -47,6 +47,12 @@ const GetJFRs = "jfrCheck"
 const WithSync = "with-sync"
 const NoBacklog = "no-backlog"
 
+const DisconnectSubscriber = "disconnect"
+const ConnectSubscriber = "connect"
+const NotifyPopulated = "notify populated"
+const RetrieveHeads = "retrieve current heads"
+const RemainingMessages = "retrieve remaining messages"
+
 var (
 	DebugEnabled           bool
 	IgnoreInvalidCerts     bool
@@ -231,6 +237,9 @@ type Fetcher interface {
 
 	// SetFederationAttribute sets the given attribute for a federated service
 	SetFederationAttribute(serviceName, attribute string, value interface{}) ([]byte, error)
+
+	// InvokeSubscriberOperation invokes a subscriber operation against a topic subscriber
+	InvokeSubscriberOperation(topicName, topicService string, subscriber int64, operation string, args ...interface{}) ([]byte, error)
 }
 
 // GetFetcherOrError returns a fetcher and error

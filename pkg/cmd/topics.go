@@ -24,11 +24,13 @@ const SupplyTopicMessage = "you must provide a topic"
 const NoTopicForService = "there are no topics for service %s"
 const TopicDoesNotExist = "a topic named %s does not exist for service %s"
 const nodeIDMessage = "node id to show channels for"
+const subscriberMessage = "unable to find node %d for topic %s, service %s and subscriber id %d"
 
 var (
 	topicsNodeID    int32
 	subscriber      int64
 	subscriberGroup string
+	notifyChannel   int32
 )
 
 // getTopicsCmd represents the get topics command
@@ -563,8 +565,8 @@ var getMemberChannelsCmd = &cobra.Command{
 // getSubscriberChannelsCmd represents the get subscriber-channels command
 var getSubscriberChannelsCmd = &cobra.Command{
 	Use:   "subscriber-channels topic-name",
-	Short: "display channel details for a topic, service, node and subscriber id",
-	Long:  `The 'get subscriber-channels' command displays channel details for a topic, service, node and subscriber id.`,
+	Short: "display channel details for a topic, service and subscriber",
+	Long:  `The 'get subscriber-channels' command displays channel details for a topic, service and subscriber.`,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
 			displayErrorAndExit(cmd, SupplyTopicMessage)
@@ -597,17 +599,10 @@ var getSubscriberChannelsCmd = &cobra.Command{
 		}
 
 		// validate the node
-		nodeIndex := -1
-		for i, v := range topicsSubscriberDetails {
-			nodeID, _ := strconv.ParseInt(v.NodeID, 10, 64)
-			if int32(nodeID) == topicsNodeID && v.ID == subscriber {
-				nodeIndex = i
-				break
-			}
-		}
+		nodeIndex := getSubscriberNodeIndex(topicsSubscriberDetails)
 
 		if nodeIndex == -1 {
-			return fmt.Errorf("unable to find node %d for topic %s and service %s and subscriber id %d",
+			return fmt.Errorf(subscriberMessage,
 				topicsNodeID, topicName, serviceName, subscriber)
 		}
 
@@ -655,7 +650,169 @@ var getSubscriberChannelsCmd = &cobra.Command{
 	},
 }
 
-// getSubscriberGroupChannelsCmd represents the get subscriber-channels command
+func issueSubscriberOperation(cmd *cobra.Command, operation string, args []string) error {
+	var (
+		err                     error
+		connection              string
+		dataFetcher             fetcher.Fetcher
+		topicName               = args[0]
+		selectedDetails         config.TopicDetails
+		topicsSubscriberDetails []config.TopicsSubscriberDetail
+		confirmMessage          string
+	)
+
+	connection, dataFetcher, err = GetConnectionAndDataFetcher()
+	if err != nil {
+		return err
+	}
+
+	selectedDetails, err = getTopicsDetails(dataFetcher, serviceName, topicName)
+	if err != nil {
+		return err
+	}
+
+	topicsSubscriberDetails, err = getTopicsSubscribers(dataFetcher, selectedDetails)
+	if err != nil {
+		return err
+	}
+
+	index := getSubscriberNodeIndex(topicsSubscriberDetails)
+	if index == -1 {
+		return fmt.Errorf(subscriberMessage,
+			topicsNodeID, topicName, serviceName, subscriber)
+	}
+
+	if index == -1 {
+		return fmt.Errorf(subscriberMessage,
+			topicsNodeID, topicName, serviceName, subscriber)
+	}
+
+	if operation == fetcher.NotifyPopulated {
+		// need to validate the channel id
+		channelCount := topicsSubscriberDetails[index].ChannelCount
+		if notifyChannel < 0 || int64(notifyChannel) > channelCount-1 {
+			return fmt.Errorf("channel must be between 0 and %d", channelCount-1)
+		}
+		confirmMessage = fmt.Sprintf("Are you sure you want to issue '%s' for topic %s, service %s, subscriber %d and channel %d? (y/n) ",
+			operation, topicName, serviceName, subscriber, notifyChannel)
+	} else {
+		confirmMessage = fmt.Sprintf("Are you sure you want to issue '%s' for topic %s, service %s and subscriber %d? (y/n) ",
+			operation, topicName, serviceName, subscriber)
+	}
+
+	// confirmation
+	cmd.Println(FormatCurrentCluster(connection))
+
+	// confirm the operation
+	if !confirmOperation(cmd, confirmMessage) {
+		return nil
+	}
+
+	_, err = dataFetcher.InvokeSubscriberOperation(topicName, serviceName, subscriber, operation, notifyChannel)
+	if err != nil {
+		return err
+	}
+
+	cmd.Println(OperationCompleted)
+	return nil
+}
+
+// getSubscriberNodeIndex returns the index for the subscriber. Ignore the node as a subscriber is always unique
+func getSubscriberNodeIndex(topicsSubscriberDetails []config.TopicsSubscriberDetail) int {
+	for i, v := range topicsSubscriberDetails {
+		if v.ID == subscriber {
+			return i
+		}
+	}
+	return -1
+}
+
+// disconnectSubscriberCmd represents the disconnect subscriber command
+var disconnectSubscriberCmd = &cobra.Command{
+	Use:   "subscriber topic-name",
+	Short: "instruct a subscriber to disconnect and reset itself",
+	Long: `The 'disconnect subscriber' command instructs a subscriber to disconnect and reset
+itself given a topic, service and subscriber id.`,
+	Args: func(cmd *cobra.Command, args []string) error {
+		if len(args) != 1 {
+			displayErrorAndExit(cmd, SupplyTopicMessage)
+		}
+		return nil
+	},
+	RunE: func(cmd *cobra.Command, args []string) error {
+		return issueSubscriberOperation(cmd, fetcher.DisconnectSubscriber, args)
+	},
+}
+
+// connectSubscriberCmd represents the connect subscriber command
+var connectSubscriberCmd = &cobra.Command{
+	Use:   "subscriber topic-name",
+	Short: "instruct a subscriber to ensure it is connected",
+	Long: `The 'connect subscriber' command instructs a subscriber to ensure it is connected
+given a topic, service and subscriber id.`,
+	Args: func(cmd *cobra.Command, args []string) error {
+		if len(args) != 1 {
+			displayErrorAndExit(cmd, SupplyTopicMessage)
+		}
+		return nil
+	},
+	RunE: func(cmd *cobra.Command, args []string) error {
+		return issueSubscriberOperation(cmd, fetcher.ConnectSubscriber, args)
+	},
+}
+
+// retrieveHeadsCmd represents the retrieve heads command
+var retrieveHeadsCmd = &cobra.Command{
+	Use:   "heads topic-name",
+	Short: "instruct a subscriber to retrieve the current head positions for each channel",
+	Long: `The 'retrieve heads' command instructs a subscriber to retrieve the current head 
+positions for each channel given a topic, service and subscriber id.`,
+	Args: func(cmd *cobra.Command, args []string) error {
+		if len(args) != 1 {
+			displayErrorAndExit(cmd, SupplyTopicMessage)
+		}
+		return nil
+	},
+	RunE: func(cmd *cobra.Command, args []string) error {
+		return issueSubscriberOperation(cmd, fetcher.RetrieveHeads, args)
+	},
+}
+
+// retrieveRemainingCmd represents the retrieve remaining command
+var retrieveRemainingCmd = &cobra.Command{
+	Use:   "remaining topic-name",
+	Short: "instruct a subscriber to retrieve the count of remaining messages for each channel",
+	Long: `The 'retrieve header' command instructs a subscriber to retrieve the the count of 
+remaining messages for each channel given a topic, service and subscriber id.`,
+	Args: func(cmd *cobra.Command, args []string) error {
+		if len(args) != 1 {
+			displayErrorAndExit(cmd, SupplyTopicMessage)
+		}
+		return nil
+	},
+	RunE: func(cmd *cobra.Command, args []string) error {
+		return issueSubscriberOperation(cmd, fetcher.RemainingMessages, args)
+	},
+}
+
+// notifyPopulatedCmd represents the notify populated command
+var notifyPopulatedCmd = &cobra.Command{
+	Use:   "populated topic-name",
+	Short: "instruct a subscriber to send a channel populated notification to this subscriber and channel",
+	Long: `The 'notify populated' command instructs a subscriber to send a channel populated notification to 
+this subscriber and channel given a topic, service, subscriber id and channel.`,
+	Args: func(cmd *cobra.Command, args []string) error {
+		if len(args) != 1 {
+			displayErrorAndExit(cmd, SupplyTopicMessage)
+		}
+		return nil
+	},
+	RunE: func(cmd *cobra.Command, args []string) error {
+		return issueSubscriberOperation(cmd, fetcher.NotifyPopulated, args)
+	},
+}
+
+// getSubscriberGroupChannelsCmd represents the get sub-grp-channels command
 var getSubscriberGroupChannelsCmd = &cobra.Command{
 	Use:   "sub-grp-channels topic-name",
 	Short: "display channel details for a topic, service, node and subscriber group",
@@ -691,7 +848,7 @@ var getSubscriberGroupChannelsCmd = &cobra.Command{
 			return err
 		}
 
-		// validate the node
+		// validate the subscriber group
 		nodeIndex := -1
 		for i, v := range topicsSubscriberGroupDetails {
 			nodeID, _ := strconv.ParseInt(v.NodeID, 10, 64)
@@ -847,9 +1004,9 @@ func enrichTopicsSummary(topicsDetails *config.TopicDetails, topicsMembers []con
 		}
 
 		// look at topics subscribers
-		for _, subscriber := range topicsSubscribers {
+		for _, value := range topicsSubscribers {
 			var subscriberCount int64 = 0
-			if subscriber.TopicName == topic.TopicName && subscriber.ServiceName == topic.ServiceName {
+			if value.TopicName == topic.TopicName && value.ServiceName == topic.ServiceName {
 				subscriberCount++
 			}
 			topicsDetails.Details[i].Subscribers += subscriberCount
@@ -1101,6 +1258,8 @@ func getMemberAndSubscribers(dataFetcher fetcher.Fetcher, topicsDetails config.T
 }
 
 func init() {
+	const subscriberID = "subscriber id"
+
 	getTopicsCmd.Flags().StringVarP(&serviceName, serviceNameOption, serviceNameOptionShort, "", serviceNameDescription)
 
 	getSubscribersCmd.Flags().StringVarP(&serviceName, serviceNameOption, serviceNameOptionShort, "", serviceNameDescription)
@@ -1120,11 +1279,9 @@ func init() {
 	getMemberChannelsCmd.Flags().StringVarP(&serviceName, serviceNameOption, serviceNameOptionShort, "", serviceNameDescription)
 	_ = getMemberChannelsCmd.MarkFlagRequired(serviceNameOption)
 
-	getSubscriberChannelsCmd.Flags().Int32VarP(&topicsNodeID, "node", "n", 0, nodeIDMessage)
-	_ = getSubscriberChannelsCmd.MarkFlagRequired("node")
 	getSubscriberChannelsCmd.Flags().StringVarP(&serviceName, serviceNameOption, serviceNameOptionShort, "", serviceNameDescription)
 	_ = getSubscriberChannelsCmd.MarkFlagRequired(serviceNameOption)
-	getSubscriberChannelsCmd.Flags().Int64VarP(&subscriber, "subscriber", "S", 0, "subscriber id")
+	getSubscriberChannelsCmd.Flags().Int64VarP(&subscriber, "subscriber", "S", 0, subscriberID)
 	_ = getSubscriberChannelsCmd.MarkFlagRequired("subscriber")
 
 	getSubscriberGroupChannelsCmd.Flags().StringVarP(&serviceName, serviceNameOption, serviceNameOptionShort, "", serviceNameDescription)
@@ -1133,4 +1290,36 @@ func init() {
 	_ = getSubscriberGroupChannelsCmd.MarkFlagRequired("subscriber-group")
 	getSubscriberGroupChannelsCmd.Flags().Int32VarP(&topicsNodeID, "node", "n", 0, nodeIDMessage)
 	_ = getSubscriberGroupChannelsCmd.MarkFlagRequired("node")
+
+	disconnectSubscriberCmd.Flags().StringVarP(&serviceName, serviceNameOption, serviceNameOptionShort, "", serviceNameDescription)
+	_ = disconnectSubscriberCmd.MarkFlagRequired(serviceNameOption)
+	disconnectSubscriberCmd.Flags().Int64VarP(&subscriber, "subscriber", "S", 0, subscriberID)
+	_ = disconnectSubscriberCmd.MarkFlagRequired("subscriber")
+	disconnectSubscriberCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
+
+	connectSubscriberCmd.Flags().StringVarP(&serviceName, serviceNameOption, serviceNameOptionShort, "", serviceNameDescription)
+	_ = connectSubscriberCmd.MarkFlagRequired(serviceNameOption)
+	connectSubscriberCmd.Flags().Int64VarP(&subscriber, "subscriber", "S", 0, subscriberID)
+	_ = connectSubscriberCmd.MarkFlagRequired("subscriber")
+	connectSubscriberCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
+
+	retrieveHeadsCmd.Flags().StringVarP(&serviceName, serviceNameOption, serviceNameOptionShort, "", serviceNameDescription)
+	_ = retrieveHeadsCmd.MarkFlagRequired(serviceNameOption)
+	retrieveHeadsCmd.Flags().Int64VarP(&subscriber, "subscriber", "S", 0, subscriberID)
+	_ = retrieveHeadsCmd.MarkFlagRequired("subscriber")
+	retrieveHeadsCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
+
+	retrieveRemainingCmd.Flags().StringVarP(&serviceName, serviceNameOption, serviceNameOptionShort, "", serviceNameDescription)
+	_ = retrieveRemainingCmd.MarkFlagRequired(serviceNameOption)
+	retrieveRemainingCmd.Flags().Int64VarP(&subscriber, "subscriber", "S", 0, subscriberID)
+	_ = retrieveRemainingCmd.MarkFlagRequired("subscriber")
+	retrieveRemainingCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
+
+	notifyPopulatedCmd.Flags().StringVarP(&serviceName, serviceNameOption, serviceNameOptionShort, "", serviceNameDescription)
+	_ = notifyPopulatedCmd.MarkFlagRequired(serviceNameOption)
+	notifyPopulatedCmd.Flags().Int64VarP(&subscriber, "subscriber", "S", 0, subscriberID)
+	_ = notifyPopulatedCmd.MarkFlagRequired("subscriber")
+	notifyPopulatedCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
+	notifyPopulatedCmd.Flags().Int32VarP(&notifyChannel, "channel", "C", 0, "channel to notify")
+	_ = notifyPopulatedCmd.MarkFlagRequired("channel")
 }

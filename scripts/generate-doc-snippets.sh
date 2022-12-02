@@ -113,6 +113,12 @@ create_doc $DOCS_DIR/get_subscribers "${COHCTL} get subscribers --help"
 create_doc $DOCS_DIR/get_subscriber_channels "${COHCTL} get subscriber-channels --help"
 create_doc $DOCS_DIR/get_subscriber_groups "${COHCTL} get subscriber-groups --help"
 create_doc $DOCS_DIR/get_sub_grp_channels "${COHCTL} get sub-grp-channels --help"
+create_doc $DOCS_DIR/get_sub_grp_channels "${COHCTL} get sub-grp-channels --help"
+create_doc $DOCS_DIR/disconnect_subscriber "${COHCTL} disconnect subscriber --help"
+create_doc $DOCS_DIR/connect_subscriber "${COHCTL} connect subscriber --help"
+create_doc $DOCS_DIR/retrieve_heads "${COHCTL} retrieve heads --help"
+create_doc $DOCS_DIR/retrieve_remaining "${COHCTL} retrieve remaining --help"
+create_doc $DOCS_DIR/notify_populated "${COHCTL} notify populated --help"
 
 # nslookup
 create_doc $DOCS_DIR/nslookup "${COHCTL} nslookup --help"

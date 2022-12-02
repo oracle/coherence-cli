@@ -683,7 +683,11 @@ func FormatSubscriberChannelStats(channelStats []config.SubscriberChannelStats) 
 
 // FormatSubscriberGroupChannelStats returns the subscriber channel stats in column formatted output
 func FormatSubscriberGroupChannelStats(channelStats []config.SubscriberGroupChannelStats) string {
-	var memberCount = len(channelStats)
+	var (
+		memberCount   = len(channelStats)
+		alignment     = []string{R, R, R, R, R, R, R, R, L}
+		alignmentWide = []string{R, R, R, R, R, R, R, R, L, L, L, L}
+	)
 
 	if memberCount == 0 {
 		return ""
@@ -697,6 +701,10 @@ func FormatSubscriberGroupChannelStats(channelStats []config.SubscriberGroupChan
 
 	stringValues[0] = getColumns(ChannelColumn, "OWNING SUB", MemberColumn, PolledColumn, MeanColumn,
 		OneMinuteColumn, FiveMinuteColumn, FifteenMinuteColumn, HeadColumn)
+	if OutputFormat == constants.WIDE {
+		alignment = alignmentWide
+		stringValues[0] = getColumns(stringValues[0], "LAST COMMIT", "LAST TIMESTAMP", "LAST POLLED")
+	}
 
 	for i, value := range channelStats {
 		stringValues[i+1] = getColumns(formatLargeInteger(value.Channel),
@@ -704,9 +712,13 @@ func FormatSubscriberGroupChannelStats(channelStats []config.SubscriberGroupChan
 			formatLargeInteger(value.PolledCount), formatLargeFloat(value.PolledMeanRate),
 			formatLargeFloat(value.PolledOneMinuteRate), formatLargeFloat(value.PolledFiveMinuteRate),
 			formatLargeFloat(value.PolledFifteenMinuteRate), value.Head)
+		if OutputFormat == constants.WIDE {
+			stringValues[i+1] = getColumns(stringValues[i+1], value.LastCommittedPosition, value.LastCommittedTimestamp,
+				value.LastPolledTimestamp)
+		}
 	}
 
-	return formatLinesAllStringsWithAlignment([]string{R, R, R, R, R, R, R, R, L}, stringValues)
+	return formatLinesAllStringsWithAlignment(alignment, stringValues)
 }
 
 // FormatServiceMembers returns the service member details in column formatted output

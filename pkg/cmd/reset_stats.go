@@ -360,7 +360,7 @@ func setResetFlags(cmd *cobra.Command) {
 	cmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
 }
 
-// isOperationSupported returns true if the operation is supported for teh given coherence
+// isOperationSupported returns true if the operation is supported for the given coherence
 // version prefix. Some operations were not introduced in 14.1.1.0 and 12.2.1.X releases
 func isOperationSupported(operation, resetNodeIDs string, dataFetcher fetcher.Fetcher) error {
 	var (
