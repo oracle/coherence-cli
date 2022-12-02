@@ -18,9 +18,17 @@ There are various commands that allow you to work with and manage cluster topics
 * <<get-topic-members, `cohctl get topic-members`>> - displays members for a topic
 * <<get-member-channels, `cohctl get member-channels`>> - displays channel details for a topic, service and node
 * <<get-subscribers, `cohctl get subscribers`>> - displays subscribers for a topic and service
-* <<get-subscriber-channels, `cohctl get subscriber-channels`>> - displays channel details for a topic, service, node and subscriber id
+* <<get-subscriber-channels, `cohctl get subscriber-channels`>> - displays channel details for a topic, service and subscriber
 * <<get-subscriber-groups, `cohctl get subscriber-groups`>> - displays subscriber-groups for a topic and service
 * <<get-sub-grp-channels, `cohctl get sub-grp-channels`>> - displays channel details for a topic, service, node and subscriber group
+
+Subscriber Specific Operations
+
+* <<connect-subscriber, `cohctl connect subscriber`>> - instructs a subscriber to ensure it is connected
+* <<disconnect-subscriber, `cohctl disconnect subscriber`>> - instructs a subscriber to disconnect and reset itself
+* <<retrieve-heads, `cohctl retrieve heads`>> - instructs a subscriber to retrieve the current head positions for each channel
+* <<retrieve-remaining, `cohctl retrieve remaining`>> - instructs a subscriber to retrieve the count of remaining messages for each channel
+* <<notify-populated, `cohctl notify populated`>> - instructs a subscriber to send a channel populated notification to this subscriber and channel
 
 
 NOTE: These topics commands are available to run against Coherence CE editions 22.06.3+, 22.09.1+ 23.03.+ as well as
@@ -180,7 +188,7 @@ include::../../build/_output/docs-gen/get_subscriber_channels.adoc[tag=text]
 
 *Examples*
 
-Display the subscribers channels for a topic, service, node and subscriber.
+Display the subscribers channels for a topic, service and subscriber.
 
 [source,bash]
 ----
@@ -194,7 +202,7 @@ NODE ID  SUBSCRIBER ID  STATE      CHANNELS  SUBSCRIBER GROUP  RECEIVED  ERRORS 
       5    23267662748  Connected        17  1                        0       0        0
       6    26845397584  Connected        17  1                        0       0        0
 
-$ cohctl get subscriber-channels  private-messages -s PartitionedTopic -n 4 -S 17663538530 -c local
+$ cohctl get subscriber-channels  private-messages -s PartitionedTopic -S 17663538530 -c local
 
 Service:          PartitionedTopic
 Topic:            private-messages
@@ -284,6 +292,79 @@ CHANNEL  OWNING SUB  MEMBER  POLLED    MEAN   1 MIN   5 MIN  15 MIN  HEAD
      14          -1      -1       0  0.0000  0.0000  0.0000  0.0000  PagedPosition(page=0, offset=0)
      15          -1      -1       0  0.0000  0.0000  0.0000  0.0000  PagedPosition(page=0, offset=0)
      16          -1      -1       0  0.0000  0.0000  0.0000  0.0000  PagedPosition(page=0, offset=0)
+----
+
+[#connect-subscriber]
+==== Connect Subscriber
+
+include::../../build/_output/docs-gen/connect_subscriber.adoc[tag=text]
+
+[source,bash]
+----
+$ cohctl get subscribers public-messages -s PartitionedTopic -c local
+
+Service:  PartitionedTopic
+Topic:    public-messages
+
+NODE ID  SUBSCRIBER ID  STATE      CHANNELS  SUBSCRIBER GROUP  RECEIVED  ERRORS  BACKLOG
+      4    17179869184  Connected        17  1                    7,406       0        0
+
+$ cohctl connect subscriber public-messages -s PartitionedTopic -S 17179869184 -c local
+
+Are you sure you want to issue 'connect' for topic public-messages, service PartitionedTopic and subscriber 17179869184? (y/n) y
+operation completed
+----
+
+[#disconnect-subscriber]
+==== Disconnects Subscriber
+
+include::../../build/_output/docs-gen/disconnect_subscriber.adoc[tag=text]
+
+[source,bash]
+----
+$ cohctl dicconnect subscriber public-messages -s PartitionedTopic -S 17179869184 -c local
+
+Are you sure you want to issue 'disconnect' for topic public-messages, service PartitionedTopic and subscriber 17179869184? (y/n) y
+operation completed
+----
+
+[#retrieve-heads]
+==== Retrieve Heads
+
+include::../../build/_output/docs-gen/retrieve_heads.adoc[tag=text]
+
+[source,bash]
+----
+$ cohctl retrieve heads public-messages -s PartitionedTopic -S 17179869184 -c local
+
+Are you sure you want to issue 'retrieve current heads' for topic public-messages, service PartitionedTopic and subscriber 17179869184? (y/n) y
+operation completed
+----
+
+[#retrieve-remaining]
+==== Retrieve Remaining
+
+include::../../build/_output/docs-gen/retrieve_remaining.adoc[tag=text]
+
+[source,bash]
+----
+$ cohctl retrieve remaining public-messages -s  PartitionedTopic -S 17179869184 -c local
+
+Are you sure you want to issue 'retrieve remaining messages' for topic public-messages, service PartitionedTopic and subscriber 17179869184? (y/n) y
+operation completed
+----
+
+[#notify-populated]
+==== Notify Populated
+
+include::../../build/_output/docs-gen/notify_populated.adoc[tag=text]
+
+[source,bash]
+----
+$ cohctl notify populated public-messages -s PartitionedTopic -S 17179869184 -C 16 -c local
+
+Are you sure you want to issue 'notify populated' for topic public-messages, service PartitionedTopic, subscriber 17179869184 and channel 16? (y/n) y
+operation completed
 ----
 
 === See Also

@@ -39,6 +39,7 @@ const links = "?links="
 const jsonStringFormat = "{\"%s\": %s}"
 const servicesPath = "/services/"
 const membersPath = "/members/"
+const subscribersPath = "/subscribers"
 const cachesPath = "/caches/"
 const executorsPath = "/executors/"
 const federationStatsPath = "/federation/statistics/"
@@ -425,7 +426,7 @@ func (h HTTPFetcher) GetTopicsMembersJSON(serviceName, topicName string) ([]byte
 // GetTopicsSubscribersJSON returns the topics subscriber details in a cluster
 func (h HTTPFetcher) GetTopicsSubscribersJSON(serviceName, topicName string) ([]byte, error) {
 	result, err := httpGetRequest(h, servicesPath+getSafeServiceName(h, serviceName)+topicsPath+getSafeServiceName(h, topicName)+
-		"/subscribers"+links)
+		subscribersPath+links)
 	if err != nil && !strings.Contains(err.Error(), "404") {
 		return constants.EmptyByte, utils.GetError("cannot get topics subscriber information", err)
 	}
@@ -877,6 +878,35 @@ func (h HTTPFetcher) GetFederationDetails(serviceName, federationType, nodeID, p
 	return result, nil
 }
 
+// InvokeSubscriberOperation invokes a subscriber operation against a topic subscriber
+func (h HTTPFetcher) InvokeSubscriberOperation(topicName, topicService string, subscriber int64, operation string, args ...interface{}) ([]byte, error) {
+	var (
+		err         error
+		result      []byte
+		payload     = constants.EmptyByte
+		queryParams = ""
+	)
+	if operation == NotifyPopulated {
+		queryParams = fmt.Sprintf("?channel=%v", args[0])
+		operation = "notifyPopulated"
+	}
+	if operation == RemainingMessages {
+		operation = "remainingMessages"
+	} else if operation == RetrieveHeads {
+		operation = "heads"
+	}
+
+	url := servicesPath + getSafeServiceName(h, topicService) + topicsPath + getSafeServiceName(h, topicName) + subscribersPath +
+		"/" + fmt.Sprintf("%v/%s", subscriber, operation) + queryParams
+
+	result, err = httpPostRequest(h, url, payload)
+	if err != nil {
+		return constants.EmptyByte, utils.GetError(
+			fmt.Sprintf("cannot invoke %s for topic %s, service %s and subscriber %d ", operation, topicName, topicService, subscriber), err)
+	}
+	return result, nil
+}
+
 // jfrOperation issues a jfrStop, jfrDump or jfrCheck. type is "cluster" or "node" and target is the node id if type "node"
 func jfrOperation(h HTTPFetcher, jfrName, operation, jfrType, target, filename string) ([]byte, error) {
 	var (
@@ -1134,7 +1164,7 @@ func httpRequest(h HTTPFetcher, requestType, urlAppend string, absolute bool, co
 	}
 
 	if resp.StatusCode != 200 {
-		return empty, fmt.Errorf("response=%s, url=%s", resp.Status, finalURL)
+		return empty, fmt.Errorf("response=%s, url=%s, response=%s", resp.Status, finalURL, buffer.String())
 	}
 
 	body = buffer.Bytes()

@@ -585,10 +585,24 @@ func Initialize(command *cobra.Command) *cobra.Command {
 	command.AddCommand(retrieveCmd)
 	retrieveCmd.AddCommand(retrieveSnapshotCmd)
 	retrieveCmd.AddCommand(retrieveThreadDumpsCmd)
+	retrieveCmd.AddCommand(retrieveHeadsCmd)
+	retrieveCmd.AddCommand(retrieveRemainingCmd)
 
 	// discover
 	command.AddCommand(discoverCmd)
 	discoverCmd.AddCommand(discoverClustersCmd)
+
+	// disconnect
+	command.AddCommand(disconnectCmd)
+	disconnectCmd.AddCommand(disconnectSubscriberCmd)
+
+	// connect
+	command.AddCommand(connectCmd)
+	connectCmd.AddCommand(connectSubscriberCmd)
+
+	// notify
+	command.AddCommand(notifyCmd)
+	notifyCmd.AddCommand(notifyPopulatedCmd)
 
 	// nslookup
 	command.AddCommand(nsLookupCmd)

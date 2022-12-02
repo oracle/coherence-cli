@@ -1927,12 +1927,29 @@ func RunTestTopicsCommands(t *testing.T) {
 	g.Expect(len(topicsSummary.Details)).To(BeNumerically(">", 0))
 
 	// retrieve the subscriber
-	ID := topicsSummary.Details[0].NodeID
-	subscriber := topicsSummary.Details[0].ID
+	subscriber := fmt.Sprintf("%v", topicsSummary.Details[0].ID)
 
 	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "PartitionedTopic,17,public-messages,EMPTY,LAST COMMIT,HEAD", configArg, file,
-		"get", "subscriber-channels", "public-messages", "-s", "PartitionedTopic", "-n", fmt.Sprintf("%v", ID),
-		"-S", fmt.Sprintf("%v", subscriber), "-c", context.ClusterName)
+		"get", "subscriber-channels", "public-messages", "-s", "PartitionedTopic", "-S", subscriber, "-c", context.ClusterName)
+
+	// test various topic subscriber operations
+	test_utils.EnsureCommandContainsAll(g, t, cliCmd, cmd.OperationCompleted, configArg, file,
+		"disconnect", "subscriber", "public-messages", "-s", "PartitionedTopic", "-S", subscriber, "-c", context.ClusterName, "-y")
+
+	test_utils.EnsureCommandContainsAll(g, t, cliCmd, cmd.OperationCompleted, configArg, file,
+		"connect", "subscriber", "public-messages", "-s", "PartitionedTopic", "-S", subscriber, "-c", context.ClusterName, "-y")
+
+	test_utils.EnsureCommandContainsAll(g, t, cliCmd, cmd.OperationCompleted, configArg, file,
+		"retrieve", "heads", "public-messages", "-s", "PartitionedTopic", "-S", subscriber, "-c", context.ClusterName, "-y")
+
+	test_utils.EnsureCommandContainsAll(g, t, cliCmd, cmd.OperationCompleted, configArg, file,
+		"retrieve", "remaining", "public-messages", "-s", "PartitionedTopic", "-S", subscriber, "-c", context.ClusterName, "-y")
+
+	test_utils.EnsureCommandContainsAll(g, t, cliCmd, cmd.OperationCompleted, configArg, file,
+		"notify", "populated", "public-messages", "-s", "PartitionedTopic", "-S", subscriber, "-C", "16", "-c", context.ClusterName, "-y")
+
+	test_utils.EnsureCommandErrorContains(g, t, cliCmd, "channel must be between 0 and 1", configArg, file,
+		"notify", "populated", "public-messages", "-s", "PartitionedTopic", "-S", subscriber, "-C", "17", "-c", context.ClusterName, "-y")
 
 	// test sub-grp-channels
 	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "PartitionedTopic,17,public-messages,MEMBER,MEAN,OWNING SUB", configArg, file,
