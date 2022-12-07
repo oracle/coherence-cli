@@ -425,7 +425,7 @@ var getTopicMembersCmd = &cobra.Command{
 			err                 error
 			connection          string
 			dataFetcher         fetcher.Fetcher
-			topicName           = args[0]
+			topicNameMembers    = args[0]
 			selectedDetails     config.TopicDetails
 			topicsMemberDetails []config.TopicsMemberDetail
 		)
@@ -435,11 +435,11 @@ var getTopicMembersCmd = &cobra.Command{
 			return err
 		}
 
-		if serviceName, err = findServiceForCacheOrTopic(dataFetcher, topicName, "topic"); err != nil {
+		if serviceName, err = findServiceForCacheOrTopic(dataFetcher, topicNameMembers, "topic"); err != nil {
 			return err
 		}
 
-		selectedDetails, err = getTopicsDetails(dataFetcher, serviceName, topicName)
+		selectedDetails, err = getTopicsDetails(dataFetcher, serviceName, topicNameMembers)
 		if err != nil {
 			return err
 		}
@@ -452,7 +452,7 @@ var getTopicMembersCmd = &cobra.Command{
 			}
 
 			if strings.Contains(OutputFormat, constants.JSON) {
-				topicsResult, err := dataFetcher.GetTopicsSubscribersJSON(serviceName, topicName)
+				topicsResult, err := dataFetcher.GetTopicsSubscribersJSON(serviceName, topicNameMembers)
 				if err != nil {
 					return err
 				}
@@ -464,7 +464,7 @@ var getTopicMembersCmd = &cobra.Command{
 				var sb strings.Builder
 				cmd.Println(FormatCurrentCluster(connection))
 
-				sb.WriteString(getTopicsHeader(serviceName, topicName) + "\n")
+				sb.WriteString(getTopicsHeader(serviceName, topicNameMembers) + "\n")
 
 				sb.WriteString(FormatTopicsMembers(topicsMemberDetails))
 
@@ -499,7 +499,7 @@ var getMemberChannelsCmd = &cobra.Command{
 			err                 error
 			connection          string
 			dataFetcher         fetcher.Fetcher
-			topicName           = args[0]
+			topicNameChannels   = args[0]
 			selectedDetails     config.TopicDetails
 			topicsMemberDetails []config.TopicsMemberDetail
 		)
@@ -509,11 +509,11 @@ var getMemberChannelsCmd = &cobra.Command{
 			return err
 		}
 
-		if serviceName, err = findServiceForCacheOrTopic(dataFetcher, topicName, "topic"); err != nil {
+		if serviceName, err = findServiceForCacheOrTopic(dataFetcher, topicNameChannels, "topic"); err != nil {
 			return err
 		}
 
-		selectedDetails, err = getTopicsDetails(dataFetcher, serviceName, topicName)
+		selectedDetails, err = getTopicsDetails(dataFetcher, serviceName, topicNameChannels)
 		if err != nil {
 			return err
 		}
@@ -535,12 +535,12 @@ var getMemberChannelsCmd = &cobra.Command{
 		}
 
 		if nodeIndex == -1 {
-			return fmt.Errorf("unable to find node %d for topic %s and service %s", topicsNodeID, topicName, serviceName)
+			return fmt.Errorf("unable to find node %d for topic %s and service %s", topicsNodeID, topicNameChannels, serviceName)
 		}
 
 		for {
 			if strings.Contains(OutputFormat, constants.JSON) {
-				topicsResult, err := dataFetcher.GetTopicsSubscribersJSON(serviceName, topicName)
+				topicsResult, err := dataFetcher.GetTopicsSubscribersJSON(serviceName, topicNameChannels)
 				if err != nil {
 					return err
 				}
@@ -561,7 +561,7 @@ var getMemberChannelsCmd = &cobra.Command{
 				numChannels := len(topicsMemberDetails[nodeIndex].Channels)
 
 				sb.WriteString(fmt.Sprintf("Service:      %s\n", serviceName))
-				sb.WriteString(fmt.Sprintf("Topic:        %s\n", topicName))
+				sb.WriteString(fmt.Sprintf("Topic:        %s\n", topicNameChannels))
 				sb.WriteString(fmt.Sprintf("Node ID:      %d\n", topicsNodeID))
 				sb.WriteString(fmt.Sprintf("ChannelCount: %d\n\n", numChannels))
 
