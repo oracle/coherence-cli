@@ -1224,13 +1224,13 @@ func RunTestCachesCommands(t *testing.T) {
 	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "PartitionedCacheWriteBehind,QUEUE SIZE,cache-store-1", configArg, file,
 		"get", "cache-stores", "cache-store-1", "-s", "PartitionedCacheWriteBehind", "-c", context.ClusterName)
 
+	// test write-behind without service
+	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "PartitionedCacheWriteBehind,QUEUE SIZE,cache-store-1", configArg, file,
+		"get", "cache-stores", "cache-store-1", "-s", "", "-c", context.ClusterName)
+
 	// test wide output
 	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "TOTAL PUTS", configArg, file,
 		"get", "caches", "-c", context.ClusterName, "-o", "wide")
-
-	// test describe cache without service
-	test_utils.EnsureCommandErrorContains(g, t, cliCmd, "\"service\" not set", configArg, file, "describe", "cache",
-		cacheName, "-c", context.ClusterName)
 
 	// test describe cache with invalid service
 	test_utils.EnsureCommandErrorContains(g, t, cliCmd, "unable to find service", configArg, file, "describe", "cache",
@@ -1239,6 +1239,10 @@ func RunTestCachesCommands(t *testing.T) {
 	// test describe cache without correct service
 	test_utils.EnsureCommandErrorContains(g, t, cliCmd, "no cache named cache-1", configArg, file, "describe", "cache",
 		cacheName, "-s", "PartitionedCache2", "-c", context.ClusterName)
+
+	// test describe cache-1 with no service
+	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "NODE ID,TIER,SIZE,LOCKS GRANTED,INDEX DETAILS", configArg, file, "describe", "cache",
+		cacheName, "-s", "", "-c", context.ClusterName)
 
 	// test describe cache-1
 	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "NODE ID,TIER,SIZE,LOCKS GRANTED,INDEX DETAILS", configArg, file, "describe", "cache",
@@ -1258,7 +1262,19 @@ func RunTestCachesCommands(t *testing.T) {
 		"set", "cache", cacheName, "-a", "expiryDelay", "-v", "30.fhfhfh", "-s", "PartitionedCache", "-y",
 		"-c", context.ClusterName, "-t", "back")
 
-	// test set expiry to 30 seconds
+	// test set expiry to 45 seconds with no service
+	test_utils.EnsureCommandContainsAll(g, t, cliCmd, cmd.OperationCompleted, configArg, file,
+		"set", "cache", cacheName, "-a", "expiryDelay", "-v", "45", "-s", "", "-y",
+		"-c", context.ClusterName)
+
+	test_utils.Sleep(15)
+
+	// test get caches to return 45
+	test_utils.EnsureCommandContains(g, t, cliCmd, "45", configArg, file,
+		"get", "caches", "-o", "jsonpath=$.items[?(@.name == 'cache-1')]..['name','expiryDelay','nodeId']",
+		"-c", context.ClusterName)
+
+	// test set expiry to 30 seconds with service
 	test_utils.EnsureCommandContainsAll(g, t, cliCmd, cmd.OperationCompleted, configArg, file,
 		"set", "cache", cacheName, "-a", "expiryDelay", "-v", "30", "-s", "PartitionedCache", "-y",
 		"-c", context.ClusterName)
@@ -1889,6 +1905,10 @@ func RunTestTopicsCommands(t *testing.T) {
 	test_utils.EnsureCommandErrorContains(g, t, cliCmd, "there are no topics for service invalid-service", configArg, file,
 		"get", "topics", "-s", "invalid-service", "-c", context.ClusterName)
 
+	// describe a topic without a service name
+	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "TOPIC DETAILS,MEMBERS,SUBSCRIBERS,SUBSCRIBER GROUPS,private-messages,17", configArg, file,
+		"describe", "topic", "private-messages", "-s", "", "-c", context.ClusterName)
+
 	// describe a topic
 	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "TOPIC DETAILS,MEMBERS,SUBSCRIBERS,SUBSCRIBER GROUPS,private-messages,17", configArg, file,
 		"describe", "topic", "private-messages", "-s", "PartitionedTopic", "-c", context.ClusterName)
@@ -1896,6 +1916,10 @@ func RunTestTopicsCommands(t *testing.T) {
 	// describe a non-existent topic
 	test_utils.EnsureCommandErrorContains(g, t, cliCmd, "a topic named", configArg, file,
 		"describe", "topic", "private-messagesxxx", "-s", "PartitionedTopic", "-c", context.ClusterName)
+
+	// get topic-members without a service name
+	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "PartitionedTopic,17,private-messages,PUBLISHED,NODE ID", configArg, file,
+		"get", "topic-members", "private-messages", "-s", "", "-c", context.ClusterName)
 
 	// get topic-members
 	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "PartitionedTopic,17,private-messages,PUBLISHED,NODE ID", configArg, file,
@@ -1909,9 +1933,17 @@ func RunTestTopicsCommands(t *testing.T) {
 	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "PartitionedTopic,17,private-messages,PUBLISHED,MEAN,PagedPosition", configArg, file,
 		"get", "member-channels", "private-messages", "-s", "PartitionedTopic", "-n", "1", "-c", context.ClusterName)
 
+	// get member-channels without a service
+	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "PartitionedTopic,17,private-messages,PUBLISHED,MEAN,PagedPosition", configArg, file,
+		"get", "member-channels", "private-messages", "-n", "1", "-c", context.ClusterName)
+
 	// get subscribers
 	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "PartitionedTopic,17,public-messages,SUBSCRIBER ID,NODE ID,SUBSCRIBER GROUP", configArg, file,
 		"get", "subscribers", "public-messages", "-s", "PartitionedTopic", "-c", context.ClusterName)
+
+	// get subscribers without a service
+	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "PartitionedTopic,17,public-messages,SUBSCRIBER ID,NODE ID,SUBSCRIBER GROUP", configArg, file,
+		"get", "subscribers", "public-messages", "-c", context.ClusterName)
 
 	// test get subscribers with invalid service
 	test_utils.EnsureCommandErrorContains(g, t, cliCmd, noTopics, configArg, file,
@@ -1929,27 +1961,43 @@ func RunTestTopicsCommands(t *testing.T) {
 	// retrieve the subscriber
 	subscriber := fmt.Sprintf("%v", topicsSummary.Details[0].ID)
 
+	// test subscriber channels
 	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "PartitionedTopic,17,public-messages,EMPTY,LAST COMMIT,HEAD", configArg, file,
 		"get", "subscriber-channels", "public-messages", "-s", "PartitionedTopic", "-S", subscriber, "-c", context.ClusterName)
 
+	// test subscriber channels without a service
+	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "PartitionedTopic,17,public-messages,EMPTY,LAST COMMIT,HEAD", configArg, file,
+		"get", "subscriber-channels", "public-messages", "-S", subscriber, "-c", context.ClusterName)
+
 	// test various topic subscriber operations
+
+	test_utils.EnsureCommandContainsAll(g, t, cliCmd, cmd.OperationCompleted, configArg, file,
+		"disconnect", "subscriber", "public-messages", "-s", "", "-S", subscriber, "-c", context.ClusterName, "-y")
+
 	test_utils.EnsureCommandContainsAll(g, t, cliCmd, cmd.OperationCompleted, configArg, file,
 		"disconnect", "subscriber", "public-messages", "-s", "PartitionedTopic", "-S", subscriber, "-c", context.ClusterName, "-y")
+
+	test_utils.EnsureCommandContainsAll(g, t, cliCmd, cmd.OperationCompleted, configArg, file,
+		"connect", "subscriber", "public-messages", "-s", "", "-S", subscriber, "-c", context.ClusterName, "-y")
 
 	test_utils.EnsureCommandContainsAll(g, t, cliCmd, cmd.OperationCompleted, configArg, file,
 		"connect", "subscriber", "public-messages", "-s", "PartitionedTopic", "-S", subscriber, "-c", context.ClusterName, "-y")
 
 	test_utils.EnsureCommandContainsAll(g, t, cliCmd, cmd.OperationCompleted, configArg, file,
-		"retrieve", "heads", "public-messages", "-s", "PartitionedTopic", "-S", subscriber, "-c", context.ClusterName, "-y")
+		"retrieve", "remaining", "public-messages", "-s", "", "-S", subscriber, "-c", context.ClusterName, "-y")
 
 	test_utils.EnsureCommandContainsAll(g, t, cliCmd, cmd.OperationCompleted, configArg, file,
-		"retrieve", "remaining", "public-messages", "-s", "PartitionedTopic", "-S", subscriber, "-c", context.ClusterName, "-y")
+		"notify", "populated", "public-messages", "-s", "", "-S", subscriber, "-C", "16", "-c", context.ClusterName, "-y")
 
 	test_utils.EnsureCommandContainsAll(g, t, cliCmd, cmd.OperationCompleted, configArg, file,
 		"notify", "populated", "public-messages", "-s", "PartitionedTopic", "-S", subscriber, "-C", "16", "-c", context.ClusterName, "-y")
 
 	test_utils.EnsureCommandErrorContains(g, t, cliCmd, "channel must be between 0 and 1", configArg, file,
 		"notify", "populated", "public-messages", "-s", "PartitionedTopic", "-S", subscriber, "-C", "17", "-c", context.ClusterName, "-y")
+
+	// test sub-grp-channels wiht no service
+	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "PartitionedTopic,17,public-messages,MEMBER,MEAN,OWNING SUB", configArg, file,
+		"get", "sub-grp-channels", "public-messages", "-s", "", "-n", "1", "-G", "1", "-c", context.ClusterName)
 
 	// test sub-grp-channels
 	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "PartitionedTopic,17,public-messages,MEMBER,MEAN,OWNING SUB", configArg, file,
