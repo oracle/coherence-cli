@@ -1097,6 +1097,7 @@ func RunTestCachesCommands(t *testing.T) {
 	context := test_utils.GetTestContext()
 
 	const cacheName = "cache-1"
+	const jsonPath = "jsonpath=$.items[?(@.name == 'cache-1')]..['name','expiryDelay','nodeId']"
 
 	file := initializeTestFile(t)
 
@@ -1163,39 +1164,30 @@ func RunTestCachesCommands(t *testing.T) {
 
 	// test set expiry to 45 seconds with no service
 	test_utils.EnsureCommandContainsAll(g, t, cliCmd, cmd.OperationCompleted, configArg, file,
-		"set", "cache", cacheName, "-a", "expiryDelay", "-v", "45", "-s", "", "-y",
-		"-c", context.ClusterName)
+		"set", "cache", cacheName, "-a", "expiryDelay", "-v", "45", "-s", "", "-y", "-c", context.ClusterName)
 
 	test_utils.Sleep(15)
 
 	// test get caches to return 45
-	test_utils.EnsureCommandContains(g, t, cliCmd, "45", configArg, file,
-		"get", "caches", "-o", "jsonpath=$.items[?(@.name == 'cache-1')]..['name','expiryDelay','nodeId']",
-		"-c", context.ClusterName)
+	test_utils.EnsureCommandContains(g, t, cliCmd, "45", configArg, file, "get", "caches", "-o", jsonPath, "-c", context.ClusterName)
 
 	// test set expiry to 30 seconds with service
 	test_utils.EnsureCommandContainsAll(g, t, cliCmd, cmd.OperationCompleted, configArg, file,
-		"set", "cache", cacheName, "-a", "expiryDelay", "-v", "30", "-s", "PartitionedCache", "-y",
-		"-c", context.ClusterName)
+		"set", "cache", cacheName, "-a", "expiryDelay", "-v", "30", "-s", "PartitionedCache", "-y", "-c", context.ClusterName)
 
 	test_utils.Sleep(15)
 
 	// test get caches to return 30
-	test_utils.EnsureCommandContains(g, t, cliCmd, "30", configArg, file,
-		"get", "caches", "-o", "jsonpath=$.items[?(@.name == 'cache-1')]..['name','expiryDelay','nodeId']",
-		"-c", context.ClusterName)
+	test_utils.EnsureCommandContains(g, t, cliCmd, "30", configArg, file, "get", "caches", "-o", jsonPath, "-c", context.ClusterName)
 
 	// test set expiry to 60 seconds
 	test_utils.EnsureCommandContainsAll(g, t, cliCmd, cmd.OperationCompleted, configArg, file,
-		"set", "cache", cacheName, "-a", "expiryDelay", "-v", "60", "-y", "-s", "PartitionedCache",
-		"-c", context.ClusterName)
+		"set", "cache", cacheName, "-a", "expiryDelay", "-v", "60", "-y", "-s", "PartitionedCache", "-c", context.ClusterName)
 
 	test_utils.Sleep(10)
 
 	// test get caches to return 60
-	test_utils.EnsureCommandContains(g, t, cliCmd, "60", configArg, file,
-		"get", "caches", "-o", "jsonpath=$.items[?(@.name == 'cache-1')]..['name','expiryDelay','nodeId']",
-		"-c", context.ClusterName)
+	test_utils.EnsureCommandContains(g, t, cliCmd, "60", configArg, file, "get", "caches", "-o", jsonPath, "-c", context.ClusterName)
 
 	// test set invalid attribute
 	test_utils.EnsureCommandErrorContains(g, t, cliCmd, "attribute name expiryDelayd is invalid", configArg, file,
