@@ -39,16 +39,9 @@ const doesNotExist = "does not exist"
 // RunTestClusterCommands tests add/remove/get/describe cluster commands
 func RunTestClusterCommands(t *testing.T) {
 	context := test_utils.GetTestContext()
-
 	g := NewGomegaWithT(t)
 
-	file, err := test_utils.CreateNewConfigYaml(configYaml)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	test_utils.CleanupConfigFileAfterTest(t, file)
-
+	file := initializeTestFile(t)
 	cliCmd := cmd.Initialize(nil)
 
 	// set the debug to true
@@ -151,12 +144,7 @@ func RunTestClusterCommands(t *testing.T) {
 func RunTestNSLookupCommands(t *testing.T) {
 	g := NewGomegaWithT(t)
 
-	file, err := test_utils.CreateNewConfigYaml(configYaml)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	test_utils.CleanupConfigFileAfterTest(t, file)
+	file := initializeTestFile(t)
 
 	cliCmd := cmd.Initialize(nil)
 
@@ -180,12 +168,7 @@ func RunTestNSLookupCommands(t *testing.T) {
 func RunTestDiscoverClustersCommands(t *testing.T) {
 	g := NewGomegaWithT(t)
 
-	file, err := test_utils.CreateNewConfigYaml(configYaml)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	test_utils.CleanupConfigFileAfterTest(t, file)
+	file := initializeTestFile(t)
 
 	cliCmd := cmd.Initialize(nil)
 
@@ -210,12 +193,7 @@ func RunTestMemberCommands(t *testing.T) {
 	g := NewGomegaWithT(t)
 	context := test_utils.GetTestContext()
 
-	file, err := test_utils.CreateNewConfigYaml(configYaml)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	test_utils.CleanupConfigFileAfterTest(t, file)
+	file := initializeTestFile(t)
 
 	cliCmd := cmd.Initialize(nil)
 
@@ -291,12 +269,7 @@ func RunTestServicesCommands(t *testing.T) {
 	versionString, err = getVersion(restUrl)
 	g.Expect(err).To(BeNil())
 
-	file, err := test_utils.CreateNewConfigYaml(configYaml)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	test_utils.CleanupConfigFileAfterTest(t, file)
+	file := initializeTestFile(t)
 
 	cliCmd := cmd.Initialize(nil)
 
@@ -363,16 +336,10 @@ func RunTestServicesCommands(t *testing.T) {
 func RunTestServiceOperations(t *testing.T) {
 	var (
 		g       = NewGomegaWithT(t)
-		err     error
 		context = test_utils.GetTestContext()
 	)
 
-	file, err := test_utils.CreateNewConfigYaml(configYaml)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	test_utils.CleanupConfigFileAfterTest(t, file)
+	file := initializeTestFile(t)
 
 	cliCmd := cmd.Initialize(nil)
 
@@ -408,6 +375,8 @@ func RunTestServiceOperations(t *testing.T) {
 	//test_utils.EnsureCommandNotContains(g, t, cliCmd, "Suspended", configArg, file, "describe", "service",
 	//	"PartitionedCache", "-c", context.ClusterName)
 
+	test_utils.EnsureCommandContains(g, t, cliCmd, "60", configArg, file, "set", "timeout", "60")
+
 	// test stop service on invalid member
 	test_utils.EnsureCommandErrorContains(g, t, cliCmd, "no node with node id", configArg, file, "stop", "service",
 		"PartitionedCache", "-n", "100", "-y", "-c", context.ClusterName)
@@ -436,12 +405,7 @@ func RunTestProxyCommands(t *testing.T) {
 	g := NewGomegaWithT(t)
 	context := test_utils.GetTestContext()
 
-	file, err := test_utils.CreateNewConfigYaml(configYaml)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	test_utils.CleanupConfigFileAfterTest(t, file)
+	file := initializeTestFile(t)
 
 	cliCmd := cmd.Initialize(nil)
 
@@ -478,12 +442,7 @@ func RunTestManagementCommands(t *testing.T) {
 	g := NewGomegaWithT(t)
 	context := test_utils.GetTestContext()
 
-	file, err := test_utils.CreateNewConfigYaml(configYaml)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	test_utils.CleanupConfigFileAfterTest(t, file)
+	file := initializeTestFile(t)
 
 	cliCmd := cmd.Initialize(nil)
 
@@ -550,12 +509,7 @@ func RunTestSetMemberCommands(t *testing.T) {
 		return
 	}
 
-	file, err := test_utils.CreateNewConfigYaml(configYaml)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	test_utils.CleanupConfigFileAfterTest(t, file)
+	file := initializeTestFile(t)
 
 	cliCmd := cmd.Initialize(nil)
 
@@ -621,12 +575,7 @@ func RunTestMachinesCommands(t *testing.T) {
 	g := NewGomegaWithT(t)
 	context := test_utils.GetTestContext()
 
-	file, err := test_utils.CreateNewConfigYaml(configYaml)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	test_utils.CleanupConfigFileAfterTest(t, file)
+	file := initializeTestFile(t)
 
 	cliCmd := cmd.Initialize(nil)
 
@@ -669,12 +618,7 @@ func RunTestReporterCommands(t *testing.T) {
 
 	const outputPath = "/tmp/output/path"
 
-	file, err := test_utils.CreateNewConfigYaml(configYaml)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	test_utils.CleanupConfigFileAfterTest(t, file)
+	file := initializeTestFile(t)
 
 	cliCmd := cmd.Initialize(nil)
 
@@ -748,16 +692,12 @@ func RunTestThreadDumpsCommands(t *testing.T) {
 		allThreadDumps = "All thread dumps completed"
 	)
 
-	file, err := test_utils.CreateNewConfigYaml(configYaml)
-	if err != nil {
-		t.Fatal(err)
-	}
+	file := initializeTestFile(t)
 
 	// create a temp directory
 	threadDumpDir := test_utils.CreateTempDirectory("temp")
-	err = os.Mkdir(threadDumpDir, 0755)
+	err := os.Mkdir(threadDumpDir, 0755)
 	g.Expect(err).To(BeNil())
-	test_utils.CleanupConfigFileAfterTest(t, file)
 
 	cliCmd := cmd.Initialize(nil)
 
@@ -821,12 +761,7 @@ func RunTestExecutorCommands(t *testing.T) {
 		return
 	}
 
-	file, err := test_utils.CreateNewConfigYaml(configYaml)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	test_utils.CleanupConfigFileAfterTest(t, file)
+	file := initializeTestFile(t)
 
 	cliCmd := cmd.Initialize(nil)
 
@@ -854,10 +789,7 @@ func RunTestJFRCommands(t *testing.T) {
 
 	const jfrName = "test-1"
 
-	file, err := test_utils.CreateNewConfigYaml(configYaml)
-	if err != nil {
-		t.Fatal(err)
-	}
+	file := initializeTestFile(t)
 
 	// Skip if the cluster version is 14.1.1.X or 12.2.1.4.X as we are running the test with JDK 11
 	// as JFR was only in open JDK since 11
@@ -869,8 +801,6 @@ func RunTestJFRCommands(t *testing.T) {
 		t.Log("Ignoring test as version is " + versionString)
 		return
 	}
-
-	test_utils.CleanupConfigFileAfterTest(t, file)
 
 	cliCmd := cmd.Initialize(nil)
 
@@ -938,18 +868,12 @@ func RunTestDumpClusterHeapCommands(t *testing.T) {
 	var (
 		g       = NewGomegaWithT(t)
 		context = test_utils.GetTestContext()
-		err     error
 	)
 
 	const clusterHeap = "cluster-heap"
 	const dump = "dump"
 
-	file, err := test_utils.CreateNewConfigYaml(configYaml)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	test_utils.CleanupConfigFileAfterTest(t, file)
+	file := initializeTestFile(t)
 
 	cliCmd := cmd.Initialize(nil)
 
@@ -985,12 +909,7 @@ func RunTestConfigureTracingCommands(t *testing.T) {
 		restUrl       = context.RestUrl
 	)
 
-	file, err := test_utils.CreateNewConfigYaml(configYaml)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	test_utils.CleanupConfigFileAfterTest(t, file)
+	file := initializeTestFile(t)
 
 	versionString, err = getVersion(restUrl)
 	g.Expect(err).To(BeNil())
@@ -1033,17 +952,11 @@ func RunTestLogClusterStateCommands(t *testing.T) {
 	var (
 		g       = NewGomegaWithT(t)
 		context = test_utils.GetTestContext()
-		err     error
 	)
 
 	const clusterState = "cluster-state"
 
-	file, err := test_utils.CreateNewConfigYaml(configYaml)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	test_utils.CleanupConfigFileAfterTest(t, file)
+	file := initializeTestFile(t)
 
 	cliCmd := cmd.Initialize(nil)
 
@@ -1077,12 +990,7 @@ func RunTestHttpSessionCommands(t *testing.T) {
 		restUrl = context.RestUrl
 	)
 
-	file, err := test_utils.CreateNewConfigYaml(configYaml)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	test_utils.CleanupConfigFileAfterTest(t, file)
+	file := initializeTestFile(t)
 
 	cliCmd := cmd.Initialize(nil)
 
@@ -1131,12 +1039,7 @@ func RunTestElasticDataCommands(t *testing.T) {
 
 	const elasticData = "elastic-data"
 
-	file, err := test_utils.CreateNewConfigYaml(configYaml)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	test_utils.CleanupConfigFileAfterTest(t, file)
+	file := initializeTestFile(t)
 
 	cliCmd := cmd.Initialize(nil)
 
@@ -1189,17 +1092,13 @@ func RunTestElasticDataCommands(t *testing.T) {
 
 // RunTestCachesCommands tests various caches commands
 func RunTestCachesCommands(t *testing.T) {
+	var err error
 	g := NewGomegaWithT(t)
 	context := test_utils.GetTestContext()
 
 	const cacheName = "cache-1"
 
-	file, err := test_utils.CreateNewConfigYaml(configYaml)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	test_utils.CleanupConfigFileAfterTest(t, file)
+	file := initializeTestFile(t)
 
 	cliCmd := cmd.Initialize(nil)
 
@@ -1315,14 +1214,10 @@ func RunTestPersistenceCommands(t *testing.T) {
 		snapshotName = "snapshot-1"
 		context      = test_utils.GetTestContext()
 		services     []string
+		err          error
 	)
 
-	file, err := test_utils.CreateNewConfigYaml(configYaml)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	test_utils.CleanupConfigFileAfterTest(t, file)
+	file := initializeTestFile(t)
 
 	cliCmd := cmd.Initialize(nil)
 
@@ -1454,7 +1349,6 @@ func RunTestHealthCommands(t *testing.T) {
 	var (
 		g       = NewGomegaWithT(t)
 		context = test_utils.GetTestContext()
-		err     error
 	)
 
 	// ignore test if health is not enabled in this version
@@ -1462,12 +1356,7 @@ func RunTestHealthCommands(t *testing.T) {
 		return
 	}
 
-	file, err := test_utils.CreateNewConfigYaml(configYaml)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	test_utils.CleanupConfigFileAfterTest(t, file)
+	file := initializeTestFile(t)
 
 	cliCmd := cmd.Initialize(nil)
 
@@ -1490,12 +1379,7 @@ func RunTestHttpProxyCommands(t *testing.T) {
 	g := NewGomegaWithT(t)
 	context := test_utils.GetTestContext()
 
-	file, err := test_utils.CreateNewConfigYaml(configYaml)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	test_utils.CleanupConfigFileAfterTest(t, file)
+	file := initializeTestFile(t)
 
 	cliCmd := cmd.Initialize(nil)
 
@@ -1536,12 +1420,7 @@ func RunTestClusterGetClusterRequest(t *testing.T) {
 	context := test_utils.GetTestContext()
 	var cluster = config.Cluster{}
 
-	file, err := test_utils.CreateNewConfigYaml(configYaml)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	test_utils.CleanupConfigFileAfterTest(t, file)
+	file := initializeTestFile(t)
 
 	cliCmd := cmd.Initialize(nil)
 
@@ -1575,12 +1454,7 @@ func RunTestClusterGetMembersRequest(t *testing.T) {
 	context := test_utils.GetTestContext()
 	var members = config.Members{}
 
-	file, err := test_utils.CreateNewConfigYaml(configYaml)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	test_utils.CleanupConfigFileAfterTest(t, file)
+	file := initializeTestFile(t)
 
 	cliCmd := cmd.Initialize(nil)
 
@@ -1622,12 +1496,7 @@ func RunTestClusterServicesRequest(t *testing.T) {
 		data     []byte
 	)
 
-	file, err := test_utils.CreateNewConfigYaml(configYaml)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	test_utils.CleanupConfigFileAfterTest(t, file)
+	file := initializeTestFile(t)
 
 	cliCmd := cmd.Initialize(nil)
 
@@ -1674,12 +1543,7 @@ func RunTestCachesRequests(t *testing.T) {
 	context := test_utils.GetTestContext()
 	var caches = config.CacheDetails{}
 
-	file, err := test_utils.CreateNewConfigYaml(configYaml)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	test_utils.CleanupConfigFileAfterTest(t, file)
+	file := initializeTestFile(t)
 
 	cliCmd := cmd.Initialize(nil)
 
@@ -1692,7 +1556,7 @@ func RunTestCachesRequests(t *testing.T) {
 	// add some data
 	restUrl := context.RestUrl
 
-	_, err = test_utils.IssueGetRequest(restUrl + "/populate")
+	_, err := test_utils.IssueGetRequest(restUrl + "/populate")
 	g.Expect(err).To(BeNil())
 
 	data, err := dataFetcher.GetCacheMembers("PartitionedCache", "cache-1")
@@ -1723,12 +1587,7 @@ func RunTestFederationCommands(t *testing.T) {
 		g       = NewGomegaWithT(t)
 	)
 
-	file, err := test_utils.CreateNewConfigYaml(configYaml)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	test_utils.CleanupConfigFileAfterTest(t, file)
+	file := initializeTestFile(t)
 
 	cliCmd := cmd.Initialize(nil)
 
@@ -1759,7 +1618,7 @@ func RunTestFederationCommands(t *testing.T) {
 	test_utils.Sleep(10)
 
 	// populate data
-	_, err = test_utils.IssueGetRequest(restUrl + "/populateFederation")
+	_, err := test_utils.IssueGetRequest(restUrl + "/populateFederation")
 	g.Expect(err).To(BeNil())
 
 	// Get federation and ensure it is idle or paused
@@ -1871,12 +1730,7 @@ func RunTestTopicsCommands(t *testing.T) {
 		g       = NewGomegaWithT(t)
 	)
 
-	file, err := test_utils.CreateNewConfigYaml(configYaml)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	test_utils.CleanupConfigFileAfterTest(t, file)
+	file := initializeTestFile(t)
 
 	cliCmd := cmd.Initialize(nil)
 
@@ -1887,7 +1741,7 @@ func RunTestTopicsCommands(t *testing.T) {
 	dataFetcher := GetDataFetcher(g, context.ClusterName)
 
 	// get cluster details
-	_, err = dataFetcher.GetServiceDetailsJSON()
+	_, err := dataFetcher.GetServiceDetailsJSON()
 	g.Expect(err).To(BeNil())
 
 	// Start Topics
@@ -2031,12 +1885,7 @@ func isHealthEnabled(restUrl string) bool {
 func RunTestProfileCommands(t *testing.T) {
 	g := NewGomegaWithT(t)
 
-	file, err := test_utils.CreateNewConfigYaml(configYaml)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	test_utils.CleanupConfigFileAfterTest(t, file)
+	file := initializeTestFile(t)
 
 	cliCmd := cmd.Initialize(nil)
 
@@ -2088,14 +1937,9 @@ func RunTestResetCommands(t *testing.T) {
 	g.Expect(err).To(BeNil())
 	editionString := string(edition)
 
-	file, err := test_utils.CreateNewConfigYaml(configYaml)
-	if err != nil {
-		t.Fatal(err)
-	}
+	file := initializeTestFile(t)
 
 	fullSupport := isHealthEnabled(context.RestUrl)
-
-	test_utils.CleanupConfigFileAfterTest(t, file)
 
 	cliCmd := cmd.Initialize(nil)
 
@@ -2176,4 +2020,14 @@ func RunTestResetCommands(t *testing.T) {
 
 	// remove the cluster entries
 	test_utils.EnsureCommandContains(g, t, cliCmd, context.ClusterName, configArg, file, "remove", "cluster", "cluster1")
+}
+
+func initializeTestFile(t *testing.T) string {
+	file, err := test_utils.CreateNewConfigYaml(configYaml)
+	if err != nil {
+		t.Fatal(err)
+	}
+	test_utils.CleanupConfigFileAfterTest(t, file)
+
+	return file
 }
