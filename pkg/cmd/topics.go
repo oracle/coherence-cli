@@ -128,11 +128,8 @@ var getSubscribersCmd = &cobra.Command{
 			return err
 		}
 
-		if serviceName == "" {
-			serviceName, err = findServiceForCacheOrTopic(dataFetcher, subscriberTopicName, "topic")
-			if err != nil {
-				return err
-			}
+		if serviceName, err = findServiceForCacheOrTopic(dataFetcher, subscriberTopicName, "topic"); err != nil {
+			return err
 		}
 
 		selectedDetails, err = getTopicsDetails(dataFetcher, serviceName, subscriberTopicName)
@@ -205,11 +202,8 @@ var getSubscriberGroupsCmd = &cobra.Command{
 			return err
 		}
 
-		if serviceName == "" {
-			serviceName, err = findServiceForCacheOrTopic(dataFetcher, topicName, "topic")
-			if err != nil {
-				return err
-			}
+		if serviceName, err = findServiceForCacheOrTopic(dataFetcher, topicName, "topic"); err != nil {
+			return err
 		}
 
 		selectedDetails, err = getTopicsDetails(dataFetcher, serviceName, topicName)
@@ -320,11 +314,8 @@ var describeTopicCmd = &cobra.Command{
 			return err
 		}
 
-		if serviceName == "" {
-			serviceName, err = findServiceForCacheOrTopic(dataFetcher, topicName, "topic")
-			if err != nil {
-				return err
-			}
+		if serviceName, err = findServiceForCacheOrTopic(dataFetcher, topicName, "topic"); err != nil {
+			return err
 		}
 
 		// get the topics and services
@@ -444,11 +435,8 @@ var getTopicMembersCmd = &cobra.Command{
 			return err
 		}
 
-		if serviceName == "" {
-			serviceName, err = findServiceForCacheOrTopic(dataFetcher, topicName, "topic")
-			if err != nil {
-				return err
-			}
+		if serviceName, err = findServiceForCacheOrTopic(dataFetcher, topicName, "topic"); err != nil {
+			return err
 		}
 
 		selectedDetails, err = getTopicsDetails(dataFetcher, serviceName, topicName)
@@ -521,11 +509,8 @@ var getMemberChannelsCmd = &cobra.Command{
 			return err
 		}
 
-		if serviceName == "" {
-			serviceName, err = findServiceForCacheOrTopic(dataFetcher, topicName, "topic")
-			if err != nil {
-				return err
-			}
+		if serviceName, err = findServiceForCacheOrTopic(dataFetcher, topicName, "topic"); err != nil {
+			return err
 		}
 
 		selectedDetails, err = getTopicsDetails(dataFetcher, serviceName, topicName)
@@ -623,11 +608,8 @@ var getSubscriberChannelsCmd = &cobra.Command{
 			return err
 		}
 
-		if serviceName == "" {
-			serviceName, err = findServiceForCacheOrTopic(dataFetcher, topicName, "topic")
-			if err != nil {
-				return err
-			}
+		if serviceName, err = findServiceForCacheOrTopic(dataFetcher, topicName, "topic"); err != nil {
+			return err
 		}
 
 		selectedDetails, err = getTopicsDetails(dataFetcher, serviceName, topicName)
@@ -708,11 +690,8 @@ func issueSubscriberOperation(cmd *cobra.Command, operation string, args []strin
 		return err
 	}
 
-	if serviceName == "" {
-		serviceName, err = findServiceForCacheOrTopic(dataFetcher, topicName, "topic")
-		if err != nil {
-			return err
-		}
+	if serviceName, err = findServiceForCacheOrTopic(dataFetcher, topicName, "topic"); err != nil {
+		return err
 	}
 
 	selectedDetails, err = getTopicsDetails(dataFetcher, serviceName, topicName)
@@ -887,11 +866,8 @@ var getSubscriberGroupChannelsCmd = &cobra.Command{
 			return err
 		}
 
-		if serviceName == "" {
-			serviceName, err = findServiceForCacheOrTopic(dataFetcher, topicName, "topic")
-			if err != nil {
-				return err
-			}
+		if serviceName, err = findServiceForCacheOrTopic(dataFetcher, topicName, "topic"); err != nil {
+			return err
 		}
 
 		selectedDetails, err = getTopicsDetails(dataFetcher, serviceName, topicName)

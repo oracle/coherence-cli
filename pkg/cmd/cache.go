@@ -148,11 +148,8 @@ You can specify '-o wide' to display addition information.`,
 			return err
 		}
 
-		if serviceName == "" {
-			serviceName, err = findServiceForCacheOrTopic(dataFetcher, cacheName, "cache")
-			if err != nil {
-				return err
-			}
+		if serviceName, err = findServiceForCacheOrTopic(dataFetcher, cacheName, "cache"); err != nil {
+			return err
 		}
 
 		found, err = ServiceExists(dataFetcher, serviceName)
@@ -286,11 +283,8 @@ You can specify '-o wide' to display addition information.`,
 			return err
 		}
 
-		if serviceName == "" {
-			serviceName, err = findServiceForCacheOrTopic(dataFetcher, cacheName, "cache")
-			if err != nil {
-				return err
-			}
+		if serviceName, err = findServiceForCacheOrTopic(dataFetcher, cacheName, "cache"); err != nil {
+			return err
 		}
 
 		found, err = ServiceExists(dataFetcher, serviceName)
@@ -428,12 +422,8 @@ batchFactor, refreshFactor or requeueThreshold.`,
 			return err
 		}
 
-		if serviceName == "" {
-			e
-			serviceName, err = findServiceForCacheOrTopic(dataFetcher, cacheName, "cache")
-			if err != nil {
-				return err
-			}
+		if serviceName, err = findServiceForCacheOrTopic(dataFetcher, cacheName, "cache"); err != nil {
+			return err
 		}
 
 		found, err = ServiceExists(dataFetcher, serviceName)
@@ -584,6 +574,11 @@ func getCaches(serviceList []string, dataFetcher fetcher.Fetcher) ([]config.Cach
 // findServiceForCacheOrTopic attempts to find the service name for a cache or topic and will return
 // the service name or an error indicating that the service and cache name is not unique
 func findServiceForCacheOrTopic(dataFetcher fetcher.Fetcher, cacheName, serviceType string) (string, error) {
+	// if the serviceName is not blank then return it as the user has specified on command line
+	if serviceName != "" {
+		return serviceName, nil
+	}
+
 	var (
 		err     error
 		data    []byte
