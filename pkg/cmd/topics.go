@@ -129,7 +129,6 @@ var getSubscribersCmd = &cobra.Command{
 		}
 
 		if serviceName == "" {
-			// if the service name is not specified, try to find a unique cache name and return the service
 			serviceName, err = findServiceForCacheOrTopic(dataFetcher, subscriberTopicName, "topic")
 			if err != nil {
 				return err
@@ -207,7 +206,6 @@ var getSubscriberGroupsCmd = &cobra.Command{
 		}
 
 		if serviceName == "" {
-			// if the service name is not specified, try to find a unique cache name and return the service
 			serviceName, err = findServiceForCacheOrTopic(dataFetcher, topicName, "topic")
 			if err != nil {
 				return err
@@ -323,7 +321,6 @@ var describeTopicCmd = &cobra.Command{
 		}
 
 		if serviceName == "" {
-			// if the service name is not specified, try to find a unique cache name and return the service
 			serviceName, err = findServiceForCacheOrTopic(dataFetcher, topicName, "topic")
 			if err != nil {
 				return err
@@ -448,7 +445,6 @@ var getTopicMembersCmd = &cobra.Command{
 		}
 
 		if serviceName == "" {
-			// if the service name is not specified, try to find a unique cache name and return the service
 			serviceName, err = findServiceForCacheOrTopic(dataFetcher, topicName, "topic")
 			if err != nil {
 				return err
@@ -526,7 +522,6 @@ var getMemberChannelsCmd = &cobra.Command{
 		}
 
 		if serviceName == "" {
-			// if the service name is not specified, try to find a unique cache name and return the service
 			serviceName, err = findServiceForCacheOrTopic(dataFetcher, topicName, "topic")
 			if err != nil {
 				return err
@@ -629,7 +624,6 @@ var getSubscriberChannelsCmd = &cobra.Command{
 		}
 
 		if serviceName == "" {
-			// if the service name is not specified, try to find a unique cache name and return the service
 			serviceName, err = findServiceForCacheOrTopic(dataFetcher, topicName, "topic")
 			if err != nil {
 				return err
@@ -715,7 +709,6 @@ func issueSubscriberOperation(cmd *cobra.Command, operation string, args []strin
 	}
 
 	if serviceName == "" {
-		// if the service name is not specified, try to find a unique cache name and return the service
 		serviceName, err = findServiceForCacheOrTopic(dataFetcher, topicName, "topic")
 		if err != nil {
 			return err
@@ -895,7 +888,6 @@ var getSubscriberGroupChannelsCmd = &cobra.Command{
 		}
 
 		if serviceName == "" {
-			// if the service name is not specified, try to find a unique cache name and return the service
 			serviceName, err = findServiceForCacheOrTopic(dataFetcher, topicName, "topic")
 			if err != nil {
 				return err

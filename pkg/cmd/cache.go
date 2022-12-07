@@ -149,7 +149,6 @@ You can specify '-o wide' to display addition information.`,
 		}
 
 		if serviceName == "" {
-			// if the service name is not specified, try to find a unique cache name and return the service
 			serviceName, err = findServiceForCacheOrTopic(dataFetcher, cacheName, "cache")
 			if err != nil {
 				return err
@@ -288,7 +287,6 @@ You can specify '-o wide' to display addition information.`,
 		}
 
 		if serviceName == "" {
-			// if the service name is not specified, try to find a unique cache name and return the service
 			serviceName, err = findServiceForCacheOrTopic(dataFetcher, cacheName, "cache")
 			if err != nil {
 				return err
@@ -431,7 +429,7 @@ batchFactor, refreshFactor or requeueThreshold.`,
 		}
 
 		if serviceName == "" {
-			// if the service name is not specified, try to find a unique cache name and return the service
+			e
 			serviceName, err = findServiceForCacheOrTopic(dataFetcher, cacheName, "cache")
 			if err != nil {
 				return err
