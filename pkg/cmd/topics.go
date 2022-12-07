@@ -128,6 +128,10 @@ var getSubscribersCmd = &cobra.Command{
 			return err
 		}
 
+		if serviceName, err = findServiceForCacheOrTopic(dataFetcher, subscriberTopicName, "topic"); err != nil {
+			return err
+		}
+
 		selectedDetails, err = getTopicsDetails(dataFetcher, serviceName, subscriberTopicName)
 		if err != nil {
 			return err
@@ -195,6 +199,10 @@ var getSubscriberGroupsCmd = &cobra.Command{
 
 		connection, dataFetcher, err = GetConnectionAndDataFetcher()
 		if err != nil {
+			return err
+		}
+
+		if serviceName, err = findServiceForCacheOrTopic(dataFetcher, topicName, "topic"); err != nil {
 			return err
 		}
 
@@ -306,6 +314,10 @@ var describeTopicCmd = &cobra.Command{
 			return err
 		}
 
+		if serviceName, err = findServiceForCacheOrTopic(dataFetcher, topicName, "topic"); err != nil {
+			return err
+		}
+
 		// get the topics and services
 		topicsDetails, err = getTopics(dataFetcher, serviceName)
 		if err != nil {
@@ -413,7 +425,7 @@ var getTopicMembersCmd = &cobra.Command{
 			err                 error
 			connection          string
 			dataFetcher         fetcher.Fetcher
-			topicName           = args[0]
+			topicNameMembers    = args[0]
 			selectedDetails     config.TopicDetails
 			topicsMemberDetails []config.TopicsMemberDetail
 		)
@@ -423,7 +435,11 @@ var getTopicMembersCmd = &cobra.Command{
 			return err
 		}
 
-		selectedDetails, err = getTopicsDetails(dataFetcher, serviceName, topicName)
+		if serviceName, err = findServiceForCacheOrTopic(dataFetcher, topicNameMembers, "topic"); err != nil {
+			return err
+		}
+
+		selectedDetails, err = getTopicsDetails(dataFetcher, serviceName, topicNameMembers)
 		if err != nil {
 			return err
 		}
@@ -436,7 +452,7 @@ var getTopicMembersCmd = &cobra.Command{
 			}
 
 			if strings.Contains(OutputFormat, constants.JSON) {
-				topicsResult, err := dataFetcher.GetTopicsSubscribersJSON(serviceName, topicName)
+				topicsResult, err := dataFetcher.GetTopicsSubscribersJSON(serviceName, topicNameMembers)
 				if err != nil {
 					return err
 				}
@@ -448,7 +464,7 @@ var getTopicMembersCmd = &cobra.Command{
 				var sb strings.Builder
 				cmd.Println(FormatCurrentCluster(connection))
 
-				sb.WriteString(getTopicsHeader(serviceName, topicName) + "\n")
+				sb.WriteString(getTopicsHeader(serviceName, topicNameMembers) + "\n")
 
 				sb.WriteString(FormatTopicsMembers(topicsMemberDetails))
 
@@ -483,7 +499,7 @@ var getMemberChannelsCmd = &cobra.Command{
 			err                 error
 			connection          string
 			dataFetcher         fetcher.Fetcher
-			topicName           = args[0]
+			topicNameChannels   = args[0]
 			selectedDetails     config.TopicDetails
 			topicsMemberDetails []config.TopicsMemberDetail
 		)
@@ -493,7 +509,11 @@ var getMemberChannelsCmd = &cobra.Command{
 			return err
 		}
 
-		selectedDetails, err = getTopicsDetails(dataFetcher, serviceName, topicName)
+		if serviceName, err = findServiceForCacheOrTopic(dataFetcher, topicNameChannels, "topic"); err != nil {
+			return err
+		}
+
+		selectedDetails, err = getTopicsDetails(dataFetcher, serviceName, topicNameChannels)
 		if err != nil {
 			return err
 		}
@@ -515,12 +535,12 @@ var getMemberChannelsCmd = &cobra.Command{
 		}
 
 		if nodeIndex == -1 {
-			return fmt.Errorf("unable to find node %d for topic %s and service %s", topicsNodeID, topicName, serviceName)
+			return fmt.Errorf("unable to find node %d for topic %s and service %s", topicsNodeID, topicNameChannels, serviceName)
 		}
 
 		for {
 			if strings.Contains(OutputFormat, constants.JSON) {
-				topicsResult, err := dataFetcher.GetTopicsSubscribersJSON(serviceName, topicName)
+				topicsResult, err := dataFetcher.GetTopicsSubscribersJSON(serviceName, topicNameChannels)
 				if err != nil {
 					return err
 				}
@@ -541,7 +561,7 @@ var getMemberChannelsCmd = &cobra.Command{
 				numChannels := len(topicsMemberDetails[nodeIndex].Channels)
 
 				sb.WriteString(fmt.Sprintf("Service:      %s\n", serviceName))
-				sb.WriteString(fmt.Sprintf("Topic:        %s\n", topicName))
+				sb.WriteString(fmt.Sprintf("Topic:        %s\n", topicNameChannels))
 				sb.WriteString(fmt.Sprintf("Node ID:      %d\n", topicsNodeID))
 				sb.WriteString(fmt.Sprintf("ChannelCount: %d\n\n", numChannels))
 
@@ -585,6 +605,10 @@ var getSubscriberChannelsCmd = &cobra.Command{
 
 		connection, dataFetcher, err = GetConnectionAndDataFetcher()
 		if err != nil {
+			return err
+		}
+
+		if serviceName, err = findServiceForCacheOrTopic(dataFetcher, topicName, "topic"); err != nil {
 			return err
 		}
 
@@ -663,6 +687,10 @@ func issueSubscriberOperation(cmd *cobra.Command, operation string, args []strin
 
 	connection, dataFetcher, err = GetConnectionAndDataFetcher()
 	if err != nil {
+		return err
+	}
+
+	if serviceName, err = findServiceForCacheOrTopic(dataFetcher, topicName, "topic"); err != nil {
 		return err
 	}
 
@@ -835,6 +863,10 @@ var getSubscriberGroupChannelsCmd = &cobra.Command{
 
 		connection, dataFetcher, err = GetConnectionAndDataFetcher()
 		if err != nil {
+			return err
+		}
+
+		if serviceName, err = findServiceForCacheOrTopic(dataFetcher, topicName, "topic"); err != nil {
 			return err
 		}
 
@@ -1263,60 +1295,48 @@ func init() {
 	getTopicsCmd.Flags().StringVarP(&serviceName, serviceNameOption, serviceNameOptionShort, "", serviceNameDescription)
 
 	getSubscribersCmd.Flags().StringVarP(&serviceName, serviceNameOption, serviceNameOptionShort, "", serviceNameDescription)
-	_ = getSubscribersCmd.MarkFlagRequired(serviceNameOption)
 
 	getSubscriberGroupsCmd.Flags().StringVarP(&serviceName, serviceNameOption, serviceNameOptionShort, "", serviceNameDescription)
-	_ = getSubscriberGroupsCmd.MarkFlagRequired(serviceNameOption)
 
 	describeTopicCmd.Flags().StringVarP(&serviceName, serviceNameOption, serviceNameOptionShort, "", serviceNameDescription)
-	_ = describeTopicCmd.MarkFlagRequired(serviceNameOption)
 
 	getTopicMembersCmd.Flags().StringVarP(&serviceName, serviceNameOption, serviceNameOptionShort, "", serviceNameDescription)
-	_ = getTopicMembersCmd.MarkFlagRequired(serviceNameOption)
 
 	getMemberChannelsCmd.Flags().Int32VarP(&topicsNodeID, "node", "n", 0, nodeIDMessage)
 	_ = getMemberChannelsCmd.MarkFlagRequired("node")
 	getMemberChannelsCmd.Flags().StringVarP(&serviceName, serviceNameOption, serviceNameOptionShort, "", serviceNameDescription)
-	_ = getMemberChannelsCmd.MarkFlagRequired(serviceNameOption)
 
 	getSubscriberChannelsCmd.Flags().StringVarP(&serviceName, serviceNameOption, serviceNameOptionShort, "", serviceNameDescription)
-	_ = getSubscriberChannelsCmd.MarkFlagRequired(serviceNameOption)
 	getSubscriberChannelsCmd.Flags().Int64VarP(&subscriber, "subscriber", "S", 0, subscriberID)
 	_ = getSubscriberChannelsCmd.MarkFlagRequired("subscriber")
 
 	getSubscriberGroupChannelsCmd.Flags().StringVarP(&serviceName, serviceNameOption, serviceNameOptionShort, "", serviceNameDescription)
-	_ = getSubscriberGroupChannelsCmd.MarkFlagRequired(serviceNameOption)
 	getSubscriberGroupChannelsCmd.Flags().StringVarP(&subscriberGroup, "subscriber-group", "G", "", "subscriber group")
 	_ = getSubscriberGroupChannelsCmd.MarkFlagRequired("subscriber-group")
 	getSubscriberGroupChannelsCmd.Flags().Int32VarP(&topicsNodeID, "node", "n", 0, nodeIDMessage)
 	_ = getSubscriberGroupChannelsCmd.MarkFlagRequired("node")
 
 	disconnectSubscriberCmd.Flags().StringVarP(&serviceName, serviceNameOption, serviceNameOptionShort, "", serviceNameDescription)
-	_ = disconnectSubscriberCmd.MarkFlagRequired(serviceNameOption)
 	disconnectSubscriberCmd.Flags().Int64VarP(&subscriber, "subscriber", "S", 0, subscriberID)
 	_ = disconnectSubscriberCmd.MarkFlagRequired("subscriber")
 	disconnectSubscriberCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
 
 	connectSubscriberCmd.Flags().StringVarP(&serviceName, serviceNameOption, serviceNameOptionShort, "", serviceNameDescription)
-	_ = connectSubscriberCmd.MarkFlagRequired(serviceNameOption)
 	connectSubscriberCmd.Flags().Int64VarP(&subscriber, "subscriber", "S", 0, subscriberID)
 	_ = connectSubscriberCmd.MarkFlagRequired("subscriber")
 	connectSubscriberCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
 
 	retrieveHeadsCmd.Flags().StringVarP(&serviceName, serviceNameOption, serviceNameOptionShort, "", serviceNameDescription)
-	_ = retrieveHeadsCmd.MarkFlagRequired(serviceNameOption)
 	retrieveHeadsCmd.Flags().Int64VarP(&subscriber, "subscriber", "S", 0, subscriberID)
 	_ = retrieveHeadsCmd.MarkFlagRequired("subscriber")
 	retrieveHeadsCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
 
 	retrieveRemainingCmd.Flags().StringVarP(&serviceName, serviceNameOption, serviceNameOptionShort, "", serviceNameDescription)
-	_ = retrieveRemainingCmd.MarkFlagRequired(serviceNameOption)
 	retrieveRemainingCmd.Flags().Int64VarP(&subscriber, "subscriber", "S", 0, subscriberID)
 	_ = retrieveRemainingCmd.MarkFlagRequired("subscriber")
 	retrieveRemainingCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
 
 	notifyPopulatedCmd.Flags().StringVarP(&serviceName, serviceNameOption, serviceNameOptionShort, "", serviceNameDescription)
-	_ = notifyPopulatedCmd.MarkFlagRequired(serviceNameOption)
 	notifyPopulatedCmd.Flags().Int64VarP(&subscriber, "subscriber", "S", 0, subscriberID)
 	_ = notifyPopulatedCmd.MarkFlagRequired("subscriber")
 	notifyPopulatedCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)

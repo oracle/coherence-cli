@@ -508,6 +508,17 @@ type CacheDetail struct {
 	IndexInfo                      []string `json:"indexInfo"`
 }
 
+// ServiceCaches contains a list of service caches
+type ServiceCaches struct {
+	Details []ServiceCache `json:"items"`
+}
+
+// ServiceCache contains an individual service cache mapping
+type ServiceCache struct {
+	ServiceName string `json:"service"`
+	Name        string `json:"name"`
+}
+
 // CacheStoreDetails contains cache details
 type CacheStoreDetails struct {
 	Details []CacheStoreDetail `json:"items"`

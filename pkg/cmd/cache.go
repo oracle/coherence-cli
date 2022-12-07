@@ -148,6 +148,10 @@ You can specify '-o wide' to display addition information.`,
 			return err
 		}
 
+		if serviceName, err = findServiceForCacheOrTopic(dataFetcher, cacheName, "cache"); err != nil {
+			return err
+		}
+
 		found, err = ServiceExists(dataFetcher, serviceName)
 		if !found || err != nil {
 			return fmt.Errorf(cannotFindService, serviceName)
@@ -276,6 +280,10 @@ You can specify '-o wide' to display addition information.`,
 
 		connection, dataFetcher, err = GetConnectionAndDataFetcher()
 		if err != nil {
+			return err
+		}
+
+		if serviceName, err = findServiceForCacheOrTopic(dataFetcher, cacheName, "cache"); err != nil {
 			return err
 		}
 
@@ -411,6 +419,10 @@ batchFactor, refreshFactor or requeueThreshold.`,
 		// validate the cache and service
 		connection, dataFetcher, err = GetConnectionAndDataFetcher()
 		if err != nil {
+			return err
+		}
+
+		if serviceName, err = findServiceForCacheOrTopic(dataFetcher, cacheName, "cache"); err != nil {
 			return err
 		}
 
@@ -559,15 +571,62 @@ func getCaches(serviceList []string, dataFetcher fetcher.Fetcher) ([]config.Cach
 	return allCachesSummary, nil
 }
 
+// findServiceForCacheOrTopic attempts to find the service name for a cache or topic and will return
+// the service name or an error indicating that the service and cache name is not unique
+func findServiceForCacheOrTopic(dataFetcher fetcher.Fetcher, cacheName, serviceType string) (string, error) {
+	// if the serviceName is not blank then return it as the user has specified on command line
+	if serviceName != "" {
+		return serviceName, nil
+	}
+
+	var (
+		err     error
+		data    []byte
+		caches  config.ServiceCaches
+		service string
+	)
+
+	if serviceType == "cache" {
+		data, err = dataFetcher.GetCachesSummaryJSONAllServices()
+	} else {
+		data, err = dataFetcher.GetTopicsJSON()
+	}
+
+	if err != nil {
+		return "", err
+	}
+
+	if err = json.Unmarshal(data, &caches); err != nil {
+		return "", err
+	}
+
+	serviceCount := 0
+
+	// look through the details and see if there is only a single cache
+	for _, value := range caches.Details {
+		if value.Name == cacheName {
+			serviceCount++
+			service = value.ServiceName
+		}
+	}
+
+	if serviceCount > 1 {
+		return "", fmt.Errorf("there are multiple %ss named %s, please specify the service name", serviceType, cacheName)
+	}
+	if serviceCount == 0 {
+		return "", fmt.Errorf("there are no %ss named %s for any services", serviceType, cacheName)
+	}
+
+	return service, nil
+}
+
 func init() {
 	getCachesCmd.Flags().StringVarP(&serviceName, serviceNameOption, serviceNameOptionShort, "", serviceNameDescription)
 	getCachesCmd.Flags().BoolVarP(&ignoreSpecialCaches, "ignore-special", "I", false, "ignore caches with $ in name")
 
 	describeCacheCmd.Flags().StringVarP(&serviceName, serviceNameOption, serviceNameOptionShort, "", serviceNameDescription)
-	_ = describeCacheCmd.MarkFlagRequired(serviceNameOption)
 
 	getCacheStoresCmd.Flags().StringVarP(&serviceName, serviceNameOption, serviceNameOptionShort, "", serviceNameDescription)
-	_ = getCacheStoresCmd.MarkFlagRequired(serviceNameOption)
 
 	setCacheCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
 	setCacheCmd.Flags().StringVarP(&attributeNameCache, "attribute", "a", "", "attribute name to set")
@@ -575,7 +634,6 @@ func init() {
 	setCacheCmd.Flags().StringVarP(&attributeValueCache, "value", "v", "", "attribute value to set")
 	_ = setCacheCmd.MarkFlagRequired("value")
 	setCacheCmd.Flags().StringVarP(&serviceName, serviceNameOption, serviceNameOptionShort, "", serviceNameDescription)
-	_ = setCacheCmd.MarkFlagRequired(serviceNameOption)
 	setCacheCmd.Flags().StringVarP(&nodeIDCache, "node", "n", "all", "comma separated node ids to target")
 	setCacheCmd.Flags().StringVarP(&tier, "tier", "t", "back", "tier to apply to, back or front")
 }
