@@ -55,8 +55,6 @@ Journal details for the cluster.`,
 		}
 
 		for {
-			printWatchHeader(cmd)
-
 			errorSink = createErrorSink()
 			wg.Add(2)
 
@@ -94,6 +92,7 @@ Journal details for the cluster.`,
 					return err
 				}
 			} else {
+				printWatchHeader(cmd)
 				cmd.Println(FormatCurrentCluster(connection))
 				finalResult, err = getElasticDataResult(flashResult, ramResult)
 				if err != nil {
