@@ -284,8 +284,6 @@ func executeJFROperation(cmd *cobra.Command, jfrName, operation string, dataFetc
 	}
 
 	for {
-		printWatchHeader(cmd)
-
 		if operation == fetcher.StopJFR {
 			data, err = dataFetcher.StopJFR(jfrName, jfrType, target)
 		} else if operation == fetcher.DumpJFR {
@@ -305,6 +303,7 @@ func executeJFROperation(cmd *cobra.Command, jfrName, operation string, dataFetc
 		}
 
 		// format the result
+		printWatchHeader(cmd)
 		cmd.Println(formatJFROutput(finalResult))
 
 		// check to see if we should exit if we are not watching

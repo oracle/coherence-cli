@@ -53,9 +53,6 @@ var getPersistenceCmd = &cobra.Command{
 			} else if OutputFormat == constants.JSON {
 				cmd.Println(string(servicesResult))
 			} else {
-				printWatchHeader(cmd)
-
-				cmd.Println(FormatCurrentCluster(connection))
 				err = json.Unmarshal(servicesResult, &servicesSummary)
 				if err != nil {
 					return utils.GetError("unable to unmarshall service result", err)
@@ -68,6 +65,8 @@ var getPersistenceCmd = &cobra.Command{
 					return err
 				}
 
+				printWatchHeader(cmd)
+				cmd.Println(FormatCurrentCluster(connection))
 				cmd.Println(FormatPersistenceServices(deDuplicatedServices, true))
 			}
 

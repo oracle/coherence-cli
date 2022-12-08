@@ -97,15 +97,16 @@ can also specify '-o wide' to display addition information.`,
 			} else if OutputFormat == constants.JSON {
 				cmd.Println(string(servicesResult))
 			} else {
-				printWatchHeader(cmd)
-
-				cmd.Println(FormatCurrentCluster(connection))
 				err = json.Unmarshal(servicesResult, &servicesSummary)
 				if err != nil {
 					return utils.GetError("unable to unmarshall service result", err)
 				}
 
 				deDuplicatedServices := DeduplicateServices(servicesSummary, serviceType)
+
+				printWatchHeader(cmd)
+
+				cmd.Println(FormatCurrentCluster(connection))
 				cmd.Println(FormatServices(deDuplicatedServices))
 
 				// collect all the statusHA values
