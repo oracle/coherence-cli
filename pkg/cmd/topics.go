@@ -64,7 +64,7 @@ var getTopicsCmd = &cobra.Command{
 				return err
 			}
 
-			if len(topicsDetails.Details) == 0 {
+			if len(topicsDetails.Details) == 0 && serviceName != "" {
 				return fmt.Errorf(NoTopicForService, serviceName)
 			}
 
