@@ -1841,13 +1841,9 @@ func RunTestTopicsCommands(t *testing.T) {
 	test_utils.EnsureCommandErrorContains(g, t, cliCmd, "channel must be between 0 and 1", configArg, file,
 		"notify", "populated", "public-messages", "-s", "PartitionedTopic", "-S", subscriber, "-C", "17", "-c", context.ClusterName, "-y")
 
-	// test sub-grp-channels wiht no service
-	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "PartitionedTopic,17,public-messages,MEMBER,MEAN,OWNING SUB", configArg, file,
-		"get", "sub-grp-channels", "public-messages", "-s", "", "-n", "1", "-G", "1", "-c", context.ClusterName)
-
 	// test sub-grp-channels
-	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "PartitionedTopic,17,public-messages,MEMBER,MEAN,OWNING SUB", configArg, file,
-		"get", "sub-grp-channels", "public-messages", "-s", "PartitionedTopic", "-n", "1", "-G", "1", "-c", context.ClusterName)
+	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "PartitionedTopic,17,private-messages,MEMBER,MEAN,OWNING SUB", configArg, file,
+		"get", "sub-grp-channels", "private-messages", "-s", "PartitionedTopic", "-n", "1", "-G", "admin", "-c", context.ClusterName)
 
 	// remove the cluster entry
 	test_utils.EnsureCommandContains(g, t, cliCmd, context.ClusterName, configArg, file, "remove", "cluster", "cluster1", "-y")

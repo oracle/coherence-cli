@@ -894,6 +894,7 @@ func (h HTTPFetcher) InvokeSubscriberOperation(topicName, topicService string, s
 		operation = "remainingMessages"
 	} else if operation == RetrieveHeads {
 		operation = "heads"
+		queryParams = "?links="
 	}
 
 	url := servicesPath + getSafeServiceName(h, topicService) + topicsPath + getSafeServiceName(h, topicName) + subscribersPath +

@@ -497,8 +497,8 @@ func FormatTopicsSummary(topicDetails []config.TopicDetail) string {
 func FormatTopicsSubscribers(topicsSubscribers []config.TopicsSubscriberDetail) string {
 	var (
 		memberCount    = len(topicsSubscribers)
-		alignmentWide  = []string{R, R, L, R, L, R, R, R, L}
-		alignment      = []string{R, R, L, R, L, R, R, R}
+		alignmentWide  = []string{R, R, L, R, L, R, R, R, L, L}
+		alignment      = []string{R, R, L, R, L, R, R, R, L}
 		finalAlignment []string
 	)
 	if memberCount == 0 {
@@ -517,7 +517,7 @@ func FormatTopicsSubscribers(topicsSubscribers []config.TopicsSubscriberDetail) 
 	})
 
 	stringValues[0] = getColumns(NodeIDColumn, SubscriberIDColumn, "STATE", ChannelsColumn, SubscriberGroupColumn,
-		"RECEIVED", "ERRORS", "BACKLOG")
+		"RECEIVED", "ERRORS", "BACKLOG", "TYPE")
 	if OutputFormat == constants.WIDE {
 		finalAlignment = alignmentWide
 		stringValues[0] = getColumns(stringValues[0], MemberColumn)
@@ -530,7 +530,7 @@ func FormatTopicsSubscribers(topicsSubscribers []config.TopicsSubscriberDetail) 
 
 		stringValues[i+1] = getColumns(formatSmallInteger(int32(nodeID)), fmt.Sprintf("%v", value.ID),
 			value.StateName, formatLargeInteger(value.ChannelCount), value.SubscriberGroup, formatLargeInteger(value.ReceivedCount),
-			formatLargeInteger(value.ReceiveErrors), formatLargeInteger(value.Backlog))
+			formatLargeInteger(value.ReceiveErrors), formatLargeInteger(value.Backlog), value.SubType)
 		if OutputFormat == constants.WIDE {
 			stringValues[i+1] = getColumns(stringValues[i+1], value.Member)
 		}
@@ -542,10 +542,7 @@ func FormatTopicsSubscribers(topicsSubscribers []config.TopicsSubscriberDetail) 
 // FormatTopicsSubscriberGroups returns the topics subscriber groups details in column formatted output
 func FormatTopicsSubscriberGroups(subscriberGroups []config.TopicsSubscriberGroupDetail) string {
 	var (
-		count          = len(subscriberGroups)
-		alignment      = []string{L, R, R, R, R, R, R, R}
-		alignmentWide  = []string{L, R}
-		finalAlignment []string
+		count = len(subscriberGroups)
 	)
 	if count == 0 {
 		return ""
@@ -564,12 +561,6 @@ func FormatTopicsSubscriberGroups(subscriberGroups []config.TopicsSubscriberGrou
 
 	stringValues[0] = getColumns(SubscriberGroupColumn, NodeIDColumn, ChannelsColumn, PolledColumn, MeanColumn,
 		OneMinuteColumn, FiveMinuteColumn, FifteenMinuteColumn)
-	if OutputFormat == constants.WIDE {
-		finalAlignment = alignmentWide
-		stringValues[0] = getColumns(stringValues[0], MemberColumn)
-	} else {
-		finalAlignment = alignment
-	}
 
 	for i, value := range subscriberGroups {
 		var nodeID, _ = strconv.Atoi(value.NodeID)
@@ -580,7 +571,7 @@ func FormatTopicsSubscriberGroups(subscriberGroups []config.TopicsSubscriberGrou
 			formatLargeFloat(value.PolledFiveMinuteRate), formatLargeFloat(value.PolledFifteenMinuteRate))
 	}
 
-	return formatLinesAllStringsWithAlignment(finalAlignment, stringValues)
+	return formatLinesAllStringsWithAlignment([]string{L, R, R, R, R, R, R, R}, stringValues)
 }
 
 // FormatTopicsMembers returns the topics member details in column formatted output
@@ -679,6 +670,29 @@ func FormatSubscriberChannelStats(channelStats []config.SubscriberChannelStats) 
 	}
 
 	return formatLinesAllStringsWithAlignment([]string{R, L, L, L, L, L}, stringValues)
+}
+
+// FormatHeadsStats returns the subscriber heads stats in column formatted output
+func FormatHeadsStats(channelStats []config.HeadStats) string {
+	var memberCount = len(channelStats)
+
+	if memberCount == 0 {
+		return ""
+	}
+
+	var stringValues = make([]string, memberCount+1)
+
+	sort.Slice(channelStats, func(p, q int) bool {
+		return channelStats[p].Channel < channelStats[q].Channel
+	})
+
+	stringValues[0] = getColumns(ChannelColumn, "POSITION")
+
+	for i, value := range channelStats {
+		stringValues[i+1] = getColumns(formatLargeInteger(value.Channel), value.Position)
+	}
+
+	return formatLinesAllStringsWithAlignment([]string{R, L}, stringValues)
 }
 
 // FormatSubscriberGroupChannelStats returns the subscriber channel stats in column formatted output
