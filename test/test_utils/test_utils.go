@@ -387,7 +387,7 @@ func WaitForHttpBalancedServices(url string, timeout int) error {
 		content, err := IssueGetRequest(url)
 		if err != nil {
 			// unable to connect, so wait 5 seconds
-			fmt.Println("Waiting for services" + url + ", sleeping 5")
+			fmt.Println("Waiting for services " + url + ", sleeping 5")
 			Sleep(5)
 			duration += 5
 		} else {

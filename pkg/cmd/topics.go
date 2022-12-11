@@ -64,7 +64,7 @@ var getTopicsCmd = &cobra.Command{
 				return err
 			}
 
-			if len(topicsDetails.Details) == 0 {
+			if len(topicsDetails.Details) == 0 && serviceName != "" {
 				return fmt.Errorf(NoTopicForService, serviceName)
 			}
 
@@ -683,6 +683,7 @@ func issueSubscriberOperation(cmd *cobra.Command, operation string, args []strin
 		selectedDetails         config.TopicDetails
 		topicsSubscriberDetails []config.TopicsSubscriberDetail
 		confirmMessage          string
+		result                  []byte
 	)
 
 	connection, dataFetcher, err = GetConnectionAndDataFetcher()
@@ -736,12 +737,23 @@ func issueSubscriberOperation(cmd *cobra.Command, operation string, args []strin
 		return nil
 	}
 
-	_, err = dataFetcher.InvokeSubscriberOperation(topicName, serviceName, subscriber, operation, notifyChannel)
+	result, err = dataFetcher.InvokeSubscriberOperation(topicName, serviceName, subscriber, operation, notifyChannel)
 	if err != nil {
 		return err
 	}
 
-	cmd.Println(OperationCompleted)
+	if operation == fetcher.RetrieveHeads {
+		var headsResult config.HeadsResult
+		if err = json.Unmarshal(result, &headsResult); err != nil {
+			return err
+		}
+
+		// display the result of the heads
+		cmd.Println(getTopicsHeader(serviceName, topicName) + fmt.Sprintf("Subscriber: %d\n", subscriber))
+		cmd.Println(FormatHeadsStats(generateHeadsStats(headsResult.Channels)))
+	} else {
+		cmd.Println(OperationCompleted)
+	}
 	return nil
 }
 
@@ -981,6 +993,19 @@ func generateSubscriberChannelStats(stats map[string]interface{}) []config.Subsc
 	return result
 }
 
+func generateHeadsStats(stats map[string]interface{}) []config.HeadStats {
+	result := make([]config.HeadStats, 0)
+	for _, value := range stats {
+		myMap := value.(map[string]interface{})
+		stat := config.HeadStats{
+			Channel:  int64(myMap["Channel"].(float64)),
+			Position: myMap["Position"].(string),
+		}
+		result = append(result, stat)
+	}
+	return result
+}
+
 func generateSubscriberGroupChannelStats(stats map[string]interface{}) []config.SubscriberGroupChannelStats {
 	result := make([]config.SubscriberGroupChannelStats, 0)
 
@@ -1010,7 +1035,7 @@ func generateSubscriberGroupChannelStats(stats map[string]interface{}) []config.
 }
 
 func getTopicsHeader(topicServiceName, topicName string) string {
-	return "Service:  " + topicServiceName + "\n" + "Topic:    " + topicName + "\n"
+	return "Service:    " + topicServiceName + "\n" + "Topic:      " + topicName + "\n"
 }
 
 // getTopicDetailIndex returns the index of the current topic detail in the array or -1 if not found

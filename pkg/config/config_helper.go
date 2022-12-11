@@ -409,12 +409,26 @@ type TopicsSubscriberDetail struct {
 	Member             string                 `json:"member"`
 	Cluster            string                 `json:"cluster"`
 	Channels           map[string]interface{} `json:"channels"`
+	SubType            string                 `json:"subType"`
 }
 
+// HeadsResult contains raw results from retrieve heads
+type HeadsResult struct {
+	Channels map[string]interface{} `json:"heads"`
+}
+
+// HeadStats contains retrieved heads details
+type HeadStats struct {
+	Channel  int64  `json:"channel"`
+	Position string `json:"position"`
+}
+
+// TopicsSubscriberGroups contains details about subscriber groups
 type TopicsSubscriberGroups struct {
 	Details []TopicsSubscriberGroupDetail `json:"items"`
 }
 
+// TopicsSubscriberGroupDetail contains detail about subscriber groups
 type TopicsSubscriberGroupDetail struct {
 	ServiceName             string                 `json:"service"`
 	TopicName               string                 `json:"topic"`

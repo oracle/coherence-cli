@@ -175,10 +175,10 @@ $ cohctl get subscribers private-messages -s PartitionedTopic -c local
 Service:  PartitionedTopic
 Topic:    private-messages
 
-NODE ID  SUBSCRIBER ID  STATE      CHANNELS  SUBSCRIBER GROUP  RECEIVED  ERRORS  BACKLOG
-      4    17663538530  Connected        17  1                        0       0        0
-      5    23267662748  Connected        17  1                        0       0        0
-      6    26845397584  Connected        17  1                        0       0        0
+NODE ID  SUBSCRIBER ID  STATE      CHANNELS  SUBSCRIBER GROUP  RECEIVED  ERRORS  BACKLOG  TYPE
+      4    17663538530  Connected        17  1                        0       0        0  Anonymous
+      5    23267662748  Connected        17  1                        0       0        0  Anonymous
+      6    26845397584  Connected        17  1                        0       0        0  Anonymous
 ----
 
 
@@ -339,7 +339,30 @@ include::../../build/_output/docs-gen/retrieve_heads.adoc[tag=text]
 $ cohctl retrieve heads public-messages -s PartitionedTopic -S 17179869184 -c local
 
 Are you sure you want to issue 'retrieve current heads' for topic public-messages, service PartitionedTopic and subscriber 17179869184? (y/n) y
-operation completed
+
+
+Service:    PartitionedTopic
+Topic:      public-messages
+Subscriber: 17179869184
+
+CHANNEL  POSITION
+      0  PagedPosition(page=96, offset=3082)
+      1  PagedPosition(page=96, offset=3411)
+      2  PagedPosition(page=97, offset=0)
+      3  PagedPosition(page=97, offset=0)
+      4  PagedPosition(page=97, offset=0)
+      5  PagedPosition(page=97, offset=0)
+      6  PagedPosition(page=97, offset=0)
+      7  PagedPosition(page=97, offset=0)
+      8  PagedPosition(page=97, offset=0)
+      9  PagedPosition(page=97, offset=0)
+     10  PagedPosition(page=97, offset=0)
+     11  PagedPosition(page=97, offset=0)
+     12  PagedPosition(page=97, offset=0)
+     13  PagedPosition(page=96, offset=1953)
+     14  PagedPosition(page=96, offset=2037)
+     15  PagedPosition(page=96, offset=2405)
+     16  PagedPosition(page=96, offset=2625)
 ----
 
 [#retrieve-remaining]
