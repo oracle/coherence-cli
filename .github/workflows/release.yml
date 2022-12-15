@@ -31,7 +31,7 @@ jobs:
     - name: Set up Go
       uses: actions/setup-go@v3
       with:
-        go-version: 1.18
+        go-version: 1.19
 
     - name: Code Review
       shell: bash
@@ -144,7 +144,7 @@ jobs:
         asset_name: cohctl-${{ steps.version.outputs.version }}-windows-arm.exe
         asset_content_type: application/x-dosexec
 
-    - uses: actions/upload-artifact@v1
+    - uses: actions/upload-artifact@v3
       if: failure()
       with:
         name: test-output

@@ -15,6 +15,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
+const httpString = "http"
+
 // getHTTPProxiesCmd represents the get http-servers command
 var getHTTPProxiesCmd = &cobra.Command{
 	Use:   "http-servers",
@@ -33,7 +35,7 @@ var getHTTPProxiesCmd = &cobra.Command{
 			return err
 		}
 
-		details, err := returnGetProxiesDetails(cmd, "http", dataFetcher, connection)
+		details, err := returnGetProxiesDetails(cmd, httpString, dataFetcher, connection)
 		if err != nil {
 			return err
 		}
@@ -82,7 +84,7 @@ var describeHTTPProxyCmd = &cobra.Command{
 
 		found := false
 		for _, value := range proxiesSummary.Proxies {
-			if value.ServiceName == serviceName && value.Protocol == "http" {
+			if value.ServiceName == serviceName && value.Protocol == httpString {
 				found = true
 			}
 		}
@@ -96,7 +98,7 @@ var describeHTTPProxyCmd = &cobra.Command{
 			return err
 		}
 
-		err = displayProxyDetails(cmd, dataFetcher, connection, "http", serviceResult, proxyResults)
+		err = displayProxyDetails(cmd, dataFetcher, connection, httpString, serviceResult, proxyResults)
 		if err != nil {
 			return err
 		}

@@ -9,16 +9,15 @@ linters:
     - govet
     - ineffassign
     - gofmt
-    - golint
+    - revive
     - gosimple
-    - deadcode
     - gosec
     - errcheck
+    - errname
+    - goconst
     - staticcheck
-    - structcheck
     - typecheck
     - unused
-    - varcheck
   disable-all: true
   fast: true
 

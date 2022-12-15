@@ -49,6 +49,7 @@ const configureTracing = "configure tracing"
 const unableToDecode = "unable to decode member details"
 const noNodeID = "no node with node id %s exists in this cluster"
 const invalidNodeID = "invalid value for node id of %s"
+const none = "none"
 
 // getMembersCmd represents the get members command
 var getMembersCmd = &cobra.Command{
@@ -115,7 +116,7 @@ can specify '-o wide' to display addition information.`,
 				var filteredMembers []config.Member
 
 				// apply any filtering by role
-				if roleName != "all" {
+				if roleName != all {
 					filteredMembers = make([]config.Member, 0)
 					for _, value := range members.Members {
 						if value.RoleName == roleName {
@@ -220,7 +221,7 @@ Full list of options are JVM dependant, but can include the full values or part 
 		}
 
 		// retrieve the links for the extended info
-		if extendedInfo != "none" {
+		if extendedInfo != none {
 			// retrieve the extended data
 			extendedInfoList = strings.Split(extendedInfo, ",")
 			extendedData, err = dataFetcher.GetExtendedMemberInfoJSON(result, nodeID, extendedInfoList)
@@ -270,7 +271,7 @@ Full list of options are JVM dependant, but can include the full values or part 
 				cmd.Println(threadDump)
 			}
 
-			if extendedInfo != "none" {
+			if extendedInfo != none {
 				var extendedValue string
 				cmd.Println("\nEXTENDED INFORMATION")
 				cmd.Println("--------------------")
@@ -360,7 +361,7 @@ or loggingFormat.`,
 			return err
 		}
 
-		if loggingNodeIds == "all" {
+		if loggingNodeIds == all {
 			nodeIds = append(nodeIds, nodeIDArray...)
 			confirmMessage = fmt.Sprintf("all %d nodes", len(nodeIds))
 		} else {
@@ -596,7 +597,7 @@ func issueClusterCommand(cmd *cobra.Command, command string) error {
 		tracing = fmt.Sprintf(" to tracing ratio %v", tracingRatio)
 	}
 
-	if role != "all" && role != "" {
+	if role != all && role != "" {
 		// validate the role
 		for _, value := range members.Members {
 			if value.RoleName == role {
@@ -640,7 +641,7 @@ var retrieveThreadDumpsCmd = &cobra.Command{
 members and places them in the specified output directory. You are also able to specify 
 a role to retrieve thread dumps for.`,
 	Args: func(cmd *cobra.Command, args []string) error {
-		if threadDumpRole == "all" && len(args) != 1 {
+		if threadDumpRole == all && len(args) != 1 {
 			displayErrorAndExit(cmd, "you must provide a comma separated list of node id's, 'all' for all nodes, or specify a role")
 		}
 		return nil
@@ -687,10 +688,10 @@ a role to retrieve thread dumps for.`,
 		}
 
 		// retrieve and validate the members
-		if nodesToDump == "all" {
+		if nodesToDump == all {
 			nodeIds = append(nodeIds, nodeIDArray...)
 		} else {
-			if threadDumpRole != "all" {
+			if threadDumpRole != all {
 				// a role other than "all" has been specified so get all the nodes
 				// that match the role
 				membersResult, err = dataFetcher.GetMemberDetailsJSON(false)
@@ -841,10 +842,10 @@ func GetFileName(nodeID string, iteration int32) string {
 func init() {
 	var roleDescription = "role name to run for"
 
-	getMembersCmd.Flags().StringVarP(&roleName, "role", "r", "all", "role name to display")
+	getMembersCmd.Flags().StringVarP(&roleName, "role", "r", all, "role name to display")
 
 	describeMemberCmd.Flags().BoolVarP(&threadDump, "thread-dump", "D", false, "include a thread dump")
-	describeMemberCmd.Flags().StringVarP(&extendedInfo, "extended", "X", "none", "include extended information such as g1OldGen, etc. See --help")
+	describeMemberCmd.Flags().StringVarP(&extendedInfo, "extended", "X", none, "include extended information such as g1OldGen, etc. See --help")
 
 	setMemberCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
 	setMemberCmd.Flags().StringVarP(&attributeName, "attribute", "a", "", "attribute name to set")
@@ -853,15 +854,15 @@ func init() {
 	_ = setMemberCmd.MarkFlagRequired("value")
 
 	dumpClusterHeapCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
-	dumpClusterHeapCmd.Flags().StringVarP(&dumpRoleName, "role", "r", "all", roleDescription)
+	dumpClusterHeapCmd.Flags().StringVarP(&dumpRoleName, "role", "r", all, roleDescription)
 
 	logClusterStateCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
-	logClusterStateCmd.Flags().StringVarP(&dumpRoleName, "role", "r", "all", roleDescription)
+	logClusterStateCmd.Flags().StringVarP(&dumpRoleName, "role", "r", all, roleDescription)
 
 	retrieveThreadDumpsCmd.Flags().Int32VarP(&numThreadDumps, "number", "n", 5, "number of thread dumps to retrieve")
 	retrieveThreadDumpsCmd.Flags().Int32VarP(&delayBetweenDumps, "dump-delay", "D", 10, "delay between each thread dump")
 	retrieveThreadDumpsCmd.Flags().StringVarP(&outputDirectory, "output-dir", "O", "", "existing directory to output thread dumps to")
-	retrieveThreadDumpsCmd.Flags().StringVarP(&threadDumpRole, "role", "r", "all", roleDescription)
+	retrieveThreadDumpsCmd.Flags().StringVarP(&threadDumpRole, "role", "r", all, roleDescription)
 	_ = retrieveThreadDumpsCmd.MarkFlagRequired("output-dir")
 	retrieveThreadDumpsCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
 	retrieveThreadDumpsCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "produces verbose output")

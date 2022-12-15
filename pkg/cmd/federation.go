@@ -63,8 +63,8 @@ can also specify '-o wide' to display addition information.`,
 			target = outgoing
 		} else if args[0] == origins {
 			target = incoming
-		} else if args[0] == "all" {
-			target = "all"
+		} else if args[0] == all {
+			target = all
 		} else {
 			return fmt.Errorf("you must specify either %s, %s or all", destinations, origins)
 		}
@@ -87,13 +87,13 @@ can also specify '-o wide' to display addition information.`,
 				finalSummariesOrigins      []config.FederationSummary
 			)
 
-			if target == outgoing || target == "all" {
+			if target == outgoing || target == all {
 				finalSummariesDestinations, err = getFederationSummaries(federatedServices, outgoing, dataFetcher)
 				if err != nil {
 					return err
 				}
 			}
-			if target == incoming || target == "all" {
+			if target == incoming || target == all {
 				finalSummariesOrigins, err = getFederationSummaries(federatedServices, incoming, dataFetcher)
 				if err != nil {
 					return err
@@ -290,7 +290,7 @@ service, type and participant. Specify -T to set type outgoing or incoming and -
 			target            string
 		)
 
-		if participant == "all" {
+		if participant == all {
 			return errors.New("please provide a participant")
 		}
 
@@ -444,12 +444,12 @@ service, type and participant. Specify -T to set type outgoing or incoming and -
 }
 
 func init() {
-	startFederationCmd.Flags().StringVarP(&participant, "participant", "p", "all", participantMessage)
+	startFederationCmd.Flags().StringVarP(&participant, "participant", "p", all, participantMessage)
 	startFederationCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
 	startFederationCmd.Flags().StringVarP(&startMode, "start-mode", "M", "",
 		"the start mode. Leave blank for normal or specify "+fetcher.WithSync+" or "+fetcher.NoBacklog)
 
-	stopFederationCmd.Flags().StringVarP(&participant, "participant", "p", "all", participantMessage)
+	stopFederationCmd.Flags().StringVarP(&participant, "participant", "p", all, participantMessage)
 	stopFederationCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
 
 	setFederationCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
@@ -462,10 +462,10 @@ func init() {
 	_ = replicateAllCmd.MarkFlagRequired("participant")
 	replicateAllCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
 
-	pauseFederationCmd.Flags().StringVarP(&participant, "participant", "p", "all", participantMessage)
+	pauseFederationCmd.Flags().StringVarP(&participant, "participant", "p", all, participantMessage)
 	pauseFederationCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
 
-	describeFederationCmd.Flags().StringVarP(&participant, "participant", "p", "all", participantMessage)
+	describeFederationCmd.Flags().StringVarP(&participant, "participant", "p", all, participantMessage)
 	describeFederationCmd.Flags().StringVarP(&describeFederationType, "type", "T", outgoing, "type to describe "+outgoing+" or "+incoming)
 	describeFederationCmd.Flags().BoolVarP(&verboseOutput, "verbose", "v", false,
 		"include verbose output including all attributes")

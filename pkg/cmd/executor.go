@@ -28,6 +28,8 @@ var (
 
 const provideExecutorName = "you must provide an executor name"
 const cannotFindExecutors = "unable to find any executors in this cluster"
+const stringTrue = "true"
+const stringFalse = "false"
 
 // getExecutorsCmd represents the get executors command
 var getExecutorsCmd = &cobra.Command{
@@ -195,7 +197,7 @@ all nodes. The following attribute names are allowed: traceLogging.`,
 		}
 
 		if executorAttributeName == executorValidAttributes[0] {
-			if executorAttributeValue != "true" && executorAttributeValue != "false" {
+			if executorAttributeValue != stringTrue && executorAttributeValue != stringFalse {
 				return fmt.Errorf("value for %s should be true or false", executorAttributeName)
 			}
 			actualValue, _ = strconv.ParseBool(executorAttributeValue)

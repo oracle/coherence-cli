@@ -78,7 +78,7 @@ jobs:
     - name: Set up Go
       uses: actions/setup-go@v3
       with:
-        go-version: 1.18
+        go-version: 1.19
 
     - name: Verify Coherence CLI
       env:
@@ -97,7 +97,7 @@ jobs:
         COHERENCE_VERSION=$COH_VERSION make clean build-test-images test-e2e-standalone
         COHERENCE_VERSION=$COH_VERSION make test-clean test-discovery
 
-    - uses: actions/upload-artifact@v1
+    - uses: actions/upload-artifact@v3
       if: failure()
       with:
         name: test-output

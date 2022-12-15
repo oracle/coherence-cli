@@ -58,7 +58,7 @@ jobs:
     - name: Set up Go
       uses: actions/setup-go@v3
       with:
-        go-version: 1.18
+        go-version: 1.19
 
     - name: Build cohctl
       shell: bash
@@ -77,7 +77,7 @@ jobs:
         export PATH=$GRADLE_HOME/bin:$PATH
         COHERENCE_VERSION=${{ matrix.coherenceVersion }} make test-create-cluster
 
-    - uses: actions/upload-artifact@v1
+    - uses: actions/upload-artifact@v3
       if: failure()
       with:
         name: test-output

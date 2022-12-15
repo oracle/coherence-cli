@@ -22,7 +22,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
-#   Checkout the source, we need a depth of zero to fetch all of the history otherwise
+#   Checkout the source, we need a depth of zero to fetch all the history otherwise
 #   the copyright check cannot work out the date of the files from Git.
     steps:
     - uses: actions/checkout@v3
@@ -58,7 +58,7 @@ jobs:
     - name: Set up Go
       uses: actions/setup-go@v3
       with:
-        go-version: 1.18
+        go-version: 1.19
 
     - name: Build Test Images
       shell: bash
@@ -80,7 +80,7 @@ jobs:
         make test-cluster-shutdown
         exit $ret
 
-    - uses: actions/upload-artifact@v1
+    - uses: actions/upload-artifact@v3
       if: failure()
       with:
         name: test-output

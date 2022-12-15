@@ -31,9 +31,9 @@ This setting only affects when you create a cluster. If set to false, the defaul
 	RunE: func(cmd *cobra.Command, args []string) error {
 		value := args[0]
 		var useGradle bool
-		if value == "true" {
+		if value == stringTrue {
 			useGradle = true
-		} else if value == "false" {
+		} else if value == stringFalse {
 			useGradle = false
 		} else {
 			return errors.New(setSetGradleError)

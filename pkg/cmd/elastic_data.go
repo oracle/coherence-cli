@@ -23,10 +23,11 @@ import (
 const ram = "RamJournalRM"
 const flash = "FlashJournalRM"
 const noElasticData = "elastic data is not configured"
+const flashString = "flash"
 
 var (
 	ElasticDataMessage = fmt.Sprintf("name must be %s or %s", ram, flash)
-	errorInvalidType   = errors.New(ElasticDataMessage)
+	ErrInvalidType     = errors.New(ElasticDataMessage)
 	nodeIDsED          string
 )
 
@@ -70,7 +71,7 @@ Journal details for the cluster.`,
 			go func() {
 				defer wg.Done()
 				var err1 error
-				flashResult, err1 = dataFetcher.GetElasticDataDetails("flash")
+				flashResult, err1 = dataFetcher.GetElasticDataDetails(flashString)
 				if err1 != nil {
 					errorSink.AppendError(err1)
 				}
@@ -149,10 +150,10 @@ The allowable values are ` + ram + ` or ` + flash + `.`,
 			queryType = "ram"
 			header = "RAM JOURNAL DETAILS"
 		} else if journalType == flash {
-			queryType = "flash"
+			queryType = flashString
 			header = "FLASH JOURNAL DETAILS"
 		} else {
-			return errorInvalidType
+			return ErrInvalidType
 		}
 
 		result, err = dataFetcher.GetElasticDataDetails(queryType)
@@ -234,9 +235,9 @@ for all or specific nodes. ` + `The allowable values are ` + ram + ` or ` + flas
 		if journalType == ram {
 			queryType = "ram"
 		} else if journalType == flash {
-			queryType = "flash"
+			queryType = flashString
 		} else {
-			return errorInvalidType
+			return ErrInvalidType
 		}
 
 		result, err = dataFetcher.GetElasticDataDetails(queryType)
@@ -254,7 +255,7 @@ for all or specific nodes. ` + `The allowable values are ` + ram + ` or ` + flas
 			return err
 		}
 
-		if nodeIDsED == "all" {
+		if nodeIDsED == all {
 			nodeIds = append(nodeIds, nodeIDArray...)
 			confirmMessage = fmt.Sprintf("all %d nodes", len(nodeIds))
 		} else {
@@ -379,5 +380,5 @@ func combineElasticData(elasticData config.ElasticDataValues) []config.ElasticDa
 
 func init() {
 	compactElasticDataCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
-	compactElasticDataCmd.Flags().StringVarP(&nodeIDsED, "node", "n", "all", commaSeparatedIDMessage)
+	compactElasticDataCmd.Flags().StringVarP(&nodeIDsED, "node", "n", all, commaSeparatedIDMessage)
 }

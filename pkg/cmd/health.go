@@ -101,10 +101,10 @@ func filterHealth(health config.HealthSummaries) []config.HealthSummary {
 	)
 
 	for _, value := range health.Summaries {
-		if healthSubType != "all" && value.SubType != healthSubType {
+		if healthSubType != all && value.SubType != healthSubType {
 			continue
 		}
-		if healthName != "all" && value.Name != healthName {
+		if healthName != all && value.Name != healthName {
 			continue
 		}
 
@@ -168,7 +168,7 @@ func findIndex(health []config.HealthSummaryShort, name, subType string) int32 {
 }
 
 func init() {
-	getHealthCmd.Flags().StringVarP(&healthSubType, "sub-type", "s", "all", "health sub-type")
-	getHealthCmd.Flags().StringVarP(&healthName, "name", "n", "all", "health name")
+	getHealthCmd.Flags().StringVarP(&healthSubType, "sub-type", "s", all, "health sub-type")
+	getHealthCmd.Flags().StringVarP(&healthName, "name", "n", all, "health name")
 	getHealthCmd.Flags().BoolVarP(&healthSummary, "summary", "S", false, "if true, returns a summary across nodes")
 }
