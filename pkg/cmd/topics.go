@@ -350,6 +350,11 @@ var describeTopicCmd = &cobra.Command{
 			return err
 		}
 
+		subscriberGroupDetails, err = getTopicsSubscriberGroups(dataFetcher, selectedDetails)
+		if err != nil {
+			return err
+		}
+
 		if strings.Contains(OutputFormat, constants.JSON) {
 			topicsSubscribers, err := dataFetcher.GetTopicsSubscribersJSON(serviceName, topicName)
 			if err != nil {
