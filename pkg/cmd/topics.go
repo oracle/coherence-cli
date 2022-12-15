@@ -1067,7 +1067,7 @@ func enrichTopicsSummary(topicsDetails *config.TopicDetails, topicsMembers []con
 
 		// look at topics subscribers
 		for _, value := range topicsSubscribers {
-			var subscriberCount int64 = 0
+			var subscriberCount int64
 			if value.TopicName == topic.TopicName && value.ServiceName == topic.ServiceName {
 				subscriberCount++
 			}

@@ -247,7 +247,7 @@ configFile, currentBatch, intervalSeconds or outputPath.`,
 			return err
 		}
 
-		if reporterNodeIds == "all" {
+		if reporterNodeIds == all {
 			nodeIds = append(nodeIds, nodeIDArray...)
 			confirmMessage = fmt.Sprintf("all %d reporter nodes", len(nodeIds))
 		} else {

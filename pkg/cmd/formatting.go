@@ -56,6 +56,8 @@ const avgSize = "AVG SIZE"
 const avgApply = "AVG APPLY"
 const avgBacklogDelay = "AVG BACKLOG DELAY"
 const partitions = "PARTITIONS"
+const tcp = "tcp"
+const na = "n/a"
 
 var (
 	KB int64 = 1024
@@ -228,7 +230,7 @@ func FormatFederationDetails(federationDetails []config.FederationDescription, t
 			bytes = value.TotalBytesReceived
 			messages = value.TotalMsgReceived
 			records = value.TotalRecordsReceived
-			bandwidth = "n/a"
+			bandwidth = na
 		}
 
 		if target == destinations {
@@ -349,7 +351,7 @@ func FormatFederationSummary(federationSummaries []config.FederationSummary, tar
 			messages = value.TotalMsgReceived.Sum
 			records = value.TotalRecordsReceived.Sum
 			members = int32(len(value.Member))
-			bandwidth = "n/a"
+			bandwidth = na
 		}
 
 		if target == destinations {
@@ -420,7 +422,7 @@ func FormatCacheSummary(cacheSummaries []config.CacheSummaryDetail) string {
 
 	// get summary details
 	var totalCaches = len(cacheSummaries)
-	var totalUnits int64 = 0
+	var totalUnits int64
 
 	stringValues[0] = getColumns(ServiceColumn, CacheColumn, "COUNT", "SIZE")
 
@@ -431,8 +433,8 @@ func FormatCacheSummary(cacheSummaries []config.CacheSummaryDetail) string {
 
 	for i, value := range cacheSummaries {
 		var (
-			hitProb       = 0.0
-			avgSize int64 = 0
+			hitProb     = 0.0
+			averageSize int64
 		)
 		totalGets := value.TotalGets
 		totalHits := value.CacheHits
@@ -442,14 +444,14 @@ func FormatCacheSummary(cacheSummaries []config.CacheSummaryDetail) string {
 		totalUnits += value.UnitsBytes
 
 		if value.CacheSize != 0 {
-			avgSize = value.UnitsBytes / int64(value.CacheSize)
+			averageSize = value.UnitsBytes / int64(value.CacheSize)
 		}
 
 		stringValues[i+1] = getColumns(value.ServiceName, value.CacheName, formatSmallInteger(value.CacheSize),
 			formattingFunction(value.UnitsBytes))
 
 		if OutputFormat == constants.WIDE {
-			stringValues[i+1] = getColumns(stringValues[i+1], formatLargeInteger(avgSize),
+			stringValues[i+1] = getColumns(stringValues[i+1], formatLargeInteger(averageSize),
 				formatLargeInteger(value.TotalPuts), formatLargeInteger(totalGets),
 				formatLargeInteger(value.TotalRemoves), formatLargeInteger(totalHits),
 				formatLargeInteger(value.CacheMisses), formatPercent(hitProb))
@@ -874,10 +876,10 @@ func FormatCacheDetailsSizeAndAccess(cacheDetails []config.CacheDetail) (string,
 // FormatCacheIndexDetails returns the cache index details
 func FormatCacheIndexDetails(cacheDetails []config.CacheDetail) string {
 	var (
-		sb                        = strings.Builder{}
-		totalIndexUnits     int64 = 0
-		totalIndexingMillis int64 = 0
-		formattingFunction        = getFormattingFunction()
+		sb                  = strings.Builder{}
+		totalIndexUnits     int64
+		totalIndexingMillis int64
+		formattingFunction  = getFormattingFunction()
 	)
 
 	for _, value := range cacheDetails {
@@ -954,12 +956,12 @@ func FormatCacheDetailsStorage(cacheDetails []config.CacheDetail) (string, error
 // FormatCacheStoreDetails returns the cache store details in column formatted output
 func FormatCacheStoreDetails(cacheDetails []config.CacheStoreDetail, cache, service string, includeHeader bool) string {
 	var (
-		detailsCount         = len(cacheDetails)
-		alignment            = []string{R, R, R, R, R, R, R, R}
-		totalQueueSize int64 = 0
-		totalFailures  int64 = 0
-		cacheStoreType       = ""
-		header               = ""
+		detailsCount   = len(cacheDetails)
+		alignment      = []string{R, R, R, R, R, R, R, R}
+		totalQueueSize int64
+		totalFailures  int64
+		cacheStoreType = ""
+		header         = ""
 	)
 	if detailsCount == 0 {
 		return ""
@@ -1077,16 +1079,16 @@ func FormatClusterConnections(clusters []ClusterConnection) string {
 			currentContext = "*"
 		}
 		if value.ManuallyCreated {
-			manualCluster = "true"
+			manualCluster = stringTrue
 		} else {
-			manualCluster = "false"
+			manualCluster = stringFalse
 		}
 		stringValues[i+1] = getColumns(value.Name, value.ConnectionType, value.ConnectionURL,
 			value.ClusterVersion, value.ClusterName, value.ClusterType, currentContext, manualCluster)
 		if OutputFormat == constants.WIDE {
-			running = "false"
+			running = stringFalse
 			if value.ManagementAvailable {
-				running = "true"
+				running = stringTrue
 			}
 			stringValues[i+1] = getColumns(stringValues[i+1], running)
 		}
@@ -1117,12 +1119,12 @@ func FormatTracing(members []config.Member) string {
 	for i, value := range members {
 		var (
 			nodeID, _            = strconv.Atoi(value.NodeID)
-			tracingEnabled       = "false"
-			tracingSamplingRatio = "n/a"
+			tracingEnabled       = stringFalse
+			tracingSamplingRatio = na
 		)
 
 		if value.TracingSamplingRatio != -1 {
-			tracingEnabled = "true"
+			tracingEnabled = stringTrue
 			tracingSamplingRatio = formatPublisherReceiver(value.TracingSamplingRatio)
 		}
 
@@ -1479,10 +1481,10 @@ func FormatServices(services []config.ServiceSummary) string {
 	for i, value := range services {
 		var (
 			status    = "Safe"
-			suspended = "n/a"
+			suspended = na
 		)
-		if value.StorageEnabledCount == -1 || value.StatusHA == "n/a" {
-			status = "n/a"
+		if value.StorageEnabledCount == -1 || value.StatusHA == na {
+			status = na
 		} else if value.StatusHA == "ENDANGERED" {
 			status = "StatusHA is ENDANGERED"
 		} else if value.PartitionsEndangered > 0 {
@@ -1838,7 +1840,7 @@ func FormatProxyServers(services []config.ProxySummary, protocol string) string 
 	// common header
 	stringValues[0] = getColumns(NodeIDColumn, "HOST IP", ServiceNameColumn)
 
-	if protocol == "tcp" {
+	if protocol == tcp {
 		stringValues[0] = getColumns(stringValues[0], "CONNECTIONS", "DATA SENT", "DATA REC")
 		if OutputFormat == constants.WIDE {
 			stringValues[0] = getColumns(stringValues[0],
@@ -1866,7 +1868,7 @@ func FormatProxyServers(services []config.ProxySummary, protocol string) string 
 		// common values
 		stringValues[i+1] = getColumns(value.NodeID, value.HostIP, value.ServiceName)
 
-		if protocol == "tcp" {
+		if protocol == tcp {
 			stringValues[i+1] = getColumns(stringValues[i+1], formatLargeInteger(value.ConnectionCount),
 				formattingFunction(value.TotalBytesSent), formattingFunction(value.TotalBytesReceived))
 			if OutputFormat == constants.WIDE {
@@ -2028,7 +2030,7 @@ func formatPublisherReceiver(value float32) string {
 // formatPercent formats a percent value
 func formatPercent(value float64) string {
 	if value == -1 {
-		return "n/a"
+		return na
 	}
 	return strings.TrimSpace(printer.Sprintf("%6.2f%%", value*100))
 }

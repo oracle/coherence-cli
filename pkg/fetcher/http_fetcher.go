@@ -48,6 +48,7 @@ const journalPath = "/journal/"
 const topicsPath = "/topics/"
 const rolePrefix = "{\"role\": \""
 const resetStatistics = "resetStatistics"
+const all = "all"
 
 // HTTPFetcher is an implementation of a Fetcher to retrieve data from Management over REST
 type HTTPFetcher struct {
@@ -496,7 +497,7 @@ func (h HTTPFetcher) DumpClusterHeap(role string) ([]byte, error) {
 	var (
 		payload = constants.EmptyByte
 	)
-	if role != "all" {
+	if role != all {
 		payload = []byte(rolePrefix + role + "\"}")
 	}
 	result, err := httpPostRequest(h, "/dumpClusterHeap", payload)
@@ -511,7 +512,7 @@ func (h HTTPFetcher) ConfigureTracing(role string, tracingRatio float32) ([]byte
 	var (
 		payload []byte
 	)
-	if role == "all" {
+	if role == all {
 		role = ""
 	}
 
@@ -529,7 +530,7 @@ func (h HTTPFetcher) LogClusterState(role string) ([]byte, error) {
 	var (
 		payload = constants.EmptyByte
 	)
-	if role != "all" {
+	if role != all {
 		payload = []byte(rolePrefix + role + "\"}")
 	}
 	result, err := httpPostRequest(h, "/logClusterState", payload)
@@ -659,7 +660,7 @@ func (h HTTPFetcher) InvokeFederationOperation(serviceName, command, participant
 		url = servicesPath + getSafeServiceName(h, serviceName) + "/federation/"
 	)
 
-	if participant != "all" {
+	if participant != all {
 		url += "participants/" + getSafeServiceName(h, participant) + "/"
 	}
 
@@ -715,13 +716,13 @@ func (h HTTPFetcher) InvokeResetStatistics(operation string, nodeID string, args
 		finalURL string
 	)
 	if operation == ResetMembers {
-		if nodeID == "all" {
+		if nodeID == all {
 			finalURL = "/" + resetStatistics
 		} else {
 			finalURL = membersPath + nodeID + "/" + resetStatistics
 		}
 	} else if operation == ResetReporters {
-		if nodeID == "all" {
+		if nodeID == all {
 			finalURL = reportersPath + resetStatistics
 		} else {
 			finalURL = reportersPath + nodeID + "/" + resetStatistics
@@ -732,14 +733,14 @@ func (h HTTPFetcher) InvokeResetStatistics(operation string, nodeID string, args
 		finalURL = journalPath + "flash/" + resetStatistics
 	} else if operation == ResetService {
 		finalURL = servicesPath + getSafeServiceName(h, args[0])
-		if nodeID == "all" {
+		if nodeID == all {
 			finalURL += "/" + resetStatistics
 		} else {
 			finalURL += membersPath + nodeID + "/" + resetStatistics
 		}
 	} else if operation == ResetCache {
 		finalURL = servicesPath + getSafeServiceName(h, args[1]) + cachesPath + url.PathEscape(args[0])
-		if nodeID == "all" {
+		if nodeID == all {
 			finalURL += "/" + resetStatistics
 		} else {
 			finalURL += membersPath + nodeID + "/" + resetStatistics

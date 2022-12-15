@@ -137,7 +137,7 @@ of 0 to make the recording continuous.`,
 			}
 			jfrMessage = "node id " + NodeID
 			target = NodeID
-		} else if jfrRoleName != "all" {
+		} else if jfrRoleName != all {
 			jfrType = fetcher.JfrTypeRole
 			jfrMessage = "role " + jfrRoleName
 			target = jfrRoleName
@@ -373,7 +373,7 @@ func init() {
 	startJfrCmd.Flags().StringVarP(&outputDirectory, "output-dir", "O", "", "directory on servers to output JFR's to")
 	_ = startJfrCmd.MarkFlagRequired("output-dir")
 	startJfrCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
-	startJfrCmd.Flags().StringVarP(&jfrRoleName, "role", "r", "all", "role name to target")
+	startJfrCmd.Flags().StringVarP(&jfrRoleName, "role", "r", all, "role name to target")
 	startJfrCmd.Flags().StringVarP(&NodeID, "node", "n", "", nodeIDDesc)
 	startJfrCmd.Flags().Int32VarP(&duration, "duration", "D", 60, "duration for JFR in seconds. Use 0 for continuous")
 

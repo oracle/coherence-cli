@@ -30,9 +30,9 @@ You should only use this option when you are sure of the identify of the target 
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var value string
 		if Config.IgnoreInvalidCerts {
-			value = "true"
+			value = stringTrue
 		} else {
-			value = "false"
+			value = stringFalse
 		}
 		cmd.Printf("%s%v\n", getIgnoreCertsMsg, value)
 		return nil
@@ -55,9 +55,9 @@ You should only use this option when you are sure of the identify of the target 
 	RunE: func(cmd *cobra.Command, args []string) error {
 		value := args[0]
 		var setting bool
-		if value == "true" {
+		if value == stringTrue {
 			setting = true
-		} else if value == "false" {
+		} else if value == stringFalse {
 			setting = false
 		} else {
 			return errors.New(setIgnoreCertsError)

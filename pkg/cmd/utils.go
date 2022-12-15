@@ -32,6 +32,7 @@ import (
 const (
 	federationServiceMsg = "service %s does not exist or is not a federated service"
 	traceLogging         = "traceLogging"
+	start                = "start"
 )
 
 func displayErrorAndExit(cmd *cobra.Command, message string) {
@@ -280,7 +281,7 @@ func IssueReporterCommand(nodeID, command string, cmd *cobra.Command) error {
 			if value.State == "Error" {
 				// ignore
 			} else {
-				if command == "start" && value.State != "Stopped" {
+				if command == start && value.State != "Stopped" {
 					return fmt.Errorf("the reporter on node %s is already started", nodeID)
 				} else if command == "stop" && value.State == "Stopped" {
 					return fmt.Errorf("the reporter on node %s is already stopped", nodeID)
@@ -297,7 +298,7 @@ func IssueReporterCommand(nodeID, command string, cmd *cobra.Command) error {
 		return nil
 	}
 
-	if command == "start" {
+	if command == start {
 		action = "started"
 		err = dataFetcher.StartReporter(nodeID)
 	} else {
@@ -371,7 +372,7 @@ func IssueFederationCommand(cmd *cobra.Command, serviceName, command, participan
 	}
 
 	description = command
-	if command == "start" {
+	if command == start {
 		if startMode != "" {
 			description += " (" + startMode + ")"
 		}

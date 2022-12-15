@@ -494,7 +494,7 @@ func getDependencyArgs(groupID, artifact, version string) []string {
 	)
 
 	if artifact == "coherence" {
-		transitive = "false"
+		transitive = stringFalse
 	}
 	// don't bring any additional deps in
 	return append(gavArgs, "dependency:get", "-Dtransitive="+transitive)

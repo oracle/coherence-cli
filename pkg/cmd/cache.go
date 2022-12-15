@@ -35,6 +35,8 @@ var (
 )
 
 const provideCacheMessage = "you must provide a cache name"
+const back = "back"
+const all = "all"
 
 // getCachesCmd represents the get caches command
 var getCachesCmd = &cobra.Command{
@@ -191,7 +193,7 @@ You can specify '-o wide' to display addition information.`,
 			// retrieve a storage enabled back tier to retrieve header details from
 			for _, v := range cacheDetailsGeneric.Details {
 				vCast := v.(map[string]interface{})
-				if vCast["tier"] == "back" {
+				if vCast["tier"] == back {
 					jsonData, err = json.Marshal(vCast)
 					if err != nil {
 						return utils.GetError("unable tun unmarshall back tier", err)
@@ -347,7 +349,7 @@ You can specify '-o wide' to display addition information.`,
 func ensureTierBack(cacheStoreDetails []config.CacheStoreDetail) []config.CacheStoreDetail {
 	finalDetails := make([]config.CacheStoreDetail, 0)
 	for _, v := range cacheStoreDetails {
-		if v.Tier == "back" {
+		if v.Tier == back {
 			finalDetails = append(finalDetails, v)
 		}
 	}
@@ -396,7 +398,7 @@ batchFactor, refreshFactor or requeueThreshold.`,
 			cacheResult    []byte
 		)
 
-		if tier != "back" && tier != "front" {
+		if tier != back && tier != "front" {
 			return errors.New(InvalidTierMsg)
 		}
 
@@ -446,7 +448,7 @@ batchFactor, refreshFactor or requeueThreshold.`,
 			return err
 		}
 
-		if nodeIDCache == "all" {
+		if nodeIDCache == all {
 			nodeIds = append(nodeIds, nodeIDArray...)
 			confirmMessage = fmt.Sprintf("all %d nodes", len(nodeIds))
 		} else {
@@ -634,6 +636,6 @@ func init() {
 	setCacheCmd.Flags().StringVarP(&attributeValueCache, "value", "v", "", "attribute value to set")
 	_ = setCacheCmd.MarkFlagRequired("value")
 	setCacheCmd.Flags().StringVarP(&serviceName, serviceNameOption, serviceNameOptionShort, "", serviceNameDescription)
-	setCacheCmd.Flags().StringVarP(&nodeIDCache, "node", "n", "all", "comma separated node ids to target")
-	setCacheCmd.Flags().StringVarP(&tier, "tier", "t", "back", "tier to apply to, back or front")
+	setCacheCmd.Flags().StringVarP(&nodeIDCache, "node", "n", all, "comma separated node ids to target")
+	setCacheCmd.Flags().StringVarP(&tier, "tier", "t", back, "tier to apply to, back or front")
 }

@@ -26,7 +26,7 @@ var (
 	statusHATimeout   int32
 	statusHAType      string
 	validServiceTypes = []string{constants.DistributedService, constants.FederatedService, constants.PagedTopic,
-		"Invocation", "Proxy", "RemoteCache", "ReplicatedCache", "OptimisticCache", "LocalCache", "RemoteGrpcCache", "all"}
+		"Invocation", "Proxy", "RemoteCache", "ReplicatedCache", "OptimisticCache", "LocalCache", "RemoteGrpcCache", all}
 	validStatusHA = []string{"NODE-SAFE", "MACHINE-SAFE", "RACK-SAFE", "SITE-SAFE"}
 	allStatusHA   = []string{"ENDANGERED", "NODE-SAFE", "MACHINE-SAFE", "RACK-SAFE", "SITE-SAFE"}
 
@@ -705,7 +705,7 @@ taskHungThresholdMillis or requestTimeoutMillis.`,
 			return err
 		}
 
-		if nodeIDService == "all" {
+		if nodeIDService == all {
 			nodeIds = append(nodeIds, nodeIDArray...)
 			confirmMessage = fmt.Sprintf("all %d nodes", len(nodeIds))
 		} else {
@@ -947,7 +947,7 @@ func DeduplicateServices(servicesSummary config.ServicesSummaries, serviceType s
 	var finalServices = make([]config.ServiceSummary, 0)
 
 	for _, value := range servicesSummary.Services {
-		if serviceType != "all" && value.ServiceType != serviceType {
+		if serviceType != all && value.ServiceType != serviceType {
 			continue
 		}
 		// check to see if this service and member already exists in the finalServices
@@ -982,7 +982,7 @@ func serviceExists(serviceName string, servicesSummary config.ServicesSummaries)
 }
 
 func init() {
-	getServicesCmd.Flags().StringVarP(&serviceType, "type", "t", "all",
+	getServicesCmd.Flags().StringVarP(&serviceType, "type", "t", all,
 		`service types to show. E.g. DistributedCache, FederatedCache, PagedTopic,
 Invocation, Proxy, RemoteCache or ReplicatedCache`)
 	getServicesCmd.Flags().StringVarP(&statusHAType, "status-ha", "a", "none",
@@ -994,7 +994,7 @@ Invocation, Proxy, RemoteCache or ReplicatedCache`)
 	_ = setServiceCmd.MarkFlagRequired("attribute")
 	setServiceCmd.Flags().StringVarP(&attributeValueService, "value", "v", "", "attribute value to set")
 	_ = setServiceCmd.MarkFlagRequired("value")
-	setServiceCmd.Flags().StringVarP(&nodeIDService, "node", "n", "all", commaSeparatedIDMessage)
+	setServiceCmd.Flags().StringVarP(&nodeIDService, "node", "n", all, commaSeparatedIDMessage)
 
 	suspendServiceCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
 	resumeServiceCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)

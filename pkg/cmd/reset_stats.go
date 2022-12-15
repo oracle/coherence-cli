@@ -161,7 +161,7 @@ func issueResetStatsCommand(cmd *cobra.Command, args []string, operation string)
 		return err
 	}
 
-	if resetNodeIDs == "all" {
+	if resetNodeIDs == all {
 		nodeIds = append(nodeIds, nodeIDArray...)
 		confirmMessage = fmt.Sprintf("all %d nodes", len(nodeIds))
 	} else {
@@ -278,8 +278,8 @@ func issueResetStatsCommand(cmd *cobra.Command, args []string, operation string)
 
 		message = fmt.Sprintf("Are you sure you want to reset %s statistics for exeutor %s? (y/n) ", operation, args[0])
 
-		// force resetNodeID to "all"
-		resetNodeIDs = "all"
+		// force resetNodeID to all
+		resetNodeIDs = all
 	} else {
 		message = fmt.Sprintf("Are you sure you want to reset %s statistics for %s? (y/n) ", operation, confirmMessage)
 	}
@@ -291,8 +291,8 @@ func issueResetStatsCommand(cmd *cobra.Command, args []string, operation string)
 
 	// for operations for all members, these can be done using one operation and for others,
 	// they must be done in parallel. Reset federation can only be done via nodeID
-	if resetNodeIDs == "all" && operation != fetcher.ResetFederation {
-		_, err = dataFetcher.InvokeResetStatistics(operation, "all", args)
+	if resetNodeIDs == all && operation != fetcher.ResetFederation {
+		_, err = dataFetcher.InvokeResetStatistics(operation, all, args)
 		if err != nil {
 			return err
 		}
@@ -347,7 +347,7 @@ func init() {
 	resetCacheStatsCmd.Flags().StringVarP(&serviceName, serviceNameOption, serviceNameOptionShort, "", serviceNameDescription)
 	_ = resetCacheStatsCmd.MarkFlagRequired(serviceNameOption)
 
-	resetFederationStatsCmd.Flags().StringVarP(&participant, "participant", "p", "all", participantMessage)
+	resetFederationStatsCmd.Flags().StringVarP(&participant, "participant", "p", all, participantMessage)
 	resetFederationStatsCmd.Flags().StringVarP(&describeFederationType, "type", "T", outgoing, "type to describe "+outgoing+" or "+incoming)
 	_ = resetFederationStatsCmd.MarkFlagRequired("participant")
 	_ = resetFederationStatsCmd.MarkFlagRequired("type")
@@ -356,7 +356,7 @@ func init() {
 
 // setResetFlags sets common flags for reset operations
 func setResetFlags(cmd *cobra.Command) {
-	cmd.Flags().StringVarP(&resetNodeIDs, "node", "n", "all", commaSeparatedIDMessage)
+	cmd.Flags().StringVarP(&resetNodeIDs, "node", "n", all, commaSeparatedIDMessage)
 	cmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
 }
 
@@ -386,16 +386,16 @@ func isOperationSupported(operation, resetNodeIDs string, dataFetcher fetcher.Fe
 	// version 14.1.1.0.X and 12.2.1.x versions have limited support for resetStatistics
 	// all other versions are assumed to be supported
 	if strings.Contains(clusterVersion, "14.1.1"+".0") || strings.Contains(clusterVersion, "12.2.1.") {
-		if operation == fetcher.ResetMembers && resetNodeIDs == "all" {
+		if operation == fetcher.ResetMembers && resetNodeIDs == all {
 			return fmt.Errorf("you can only reset member statistics for an individual node in Coherence version %s", clusterVersion)
 		}
 		if operation == fetcher.ResetRAMJournal || operation == fetcher.ResetFlashJournal {
 			return fmt.Errorf("you cannot reset flash or ram journal in Coherence version %s", clusterVersion)
 		}
-		if operation == fetcher.ResetService && resetNodeIDs == "all" {
+		if operation == fetcher.ResetService && resetNodeIDs == all {
 			return fmt.Errorf("you can only reset service statistics for an individual node in Coherence version %s", clusterVersion)
 		}
-		if operation == fetcher.ResetCache && resetNodeIDs == "all" {
+		if operation == fetcher.ResetCache && resetNodeIDs == all {
 			return fmt.Errorf("you can only reset cache statistics for an individual node in Coherence version %s", clusterVersion)
 		}
 		if operation == fetcher.ResetExecutor {
