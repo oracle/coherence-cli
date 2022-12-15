@@ -11,7 +11,6 @@ import (
 	"fmt"
 	. "github.com/onsi/gomega"
 	"github.com/oracle/coherence-cli/pkg/config"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"testing"
@@ -263,7 +262,7 @@ func TestGetStartupDelayInMillis(t *testing.T) {
 func TestNoWritableHomeDir(t *testing.T) {
 	g := NewGomegaWithT(t)
 
-	dir, err := ioutil.TempDir("", "")
+	dir, err := os.MkdirTemp("", "")
 	g.Expect(err).To(Not(HaveOccurred()))
 
 	defer os.RemoveAll(dir)

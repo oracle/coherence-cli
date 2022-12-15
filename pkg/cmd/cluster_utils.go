@@ -15,7 +15,6 @@ import (
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
-	"io/ioutil"
 	"net"
 	"os"
 	"os/exec"
@@ -39,7 +38,6 @@ const gradleExec = "gradle"
 // a build template for saving the runtime classpath to a file by running
 //
 // gradle --no-daemon -b build.gradle -q buildClasspath -PfileName=/tmp/file.out
-//
 const buildGradleFilePart1 = `
 plugins {
     id 'java'
@@ -161,7 +159,7 @@ func buildGradleClasspath() ([]string, error) {
 	finalGradleFile := buildGradleFilePart1 + sb.String() + buildGradleFilePart2
 
 	// write the gradle file
-	err = ioutil.WriteFile(gradleFile, []byte(finalGradleFile), 0600)
+	err = os.WriteFile(gradleFile, []byte(finalGradleFile), 0600)
 	if err != nil {
 		return classpath, utils.GetError("unable to write to temporary file", err)
 	}
@@ -174,7 +172,7 @@ func buildGradleClasspath() ([]string, error) {
 	}
 
 	// now we have a valid file, read it in
-	data, err = ioutil.ReadFile(outputFile.Name())
+	data, err = os.ReadFile(outputFile.Name())
 	if err != nil {
 		return classpath, utils.GetError("unable to read from temp file", err)
 	}
@@ -481,7 +479,7 @@ func getTransitiveClasspath(groupID, artifact, version string) (string, error) {
 	}
 
 	// now we have a valid file, read it in
-	data, err = ioutil.ReadFile(file.Name())
+	data, err = os.ReadFile(file.Name())
 	if err != nil {
 		return output, utils.GetError("unable to read from temp file", err)
 	}

@@ -37,6 +37,5 @@ Example:
 	    log.Fatal(err)
 	}
 	fmt.Println("Foreign clusters are", clusterNames)
-
 */
 package discovery

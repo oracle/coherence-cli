@@ -1400,8 +1400,8 @@ func FormatElasticData(edData []config.ElasticData, summary bool) string {
 		if summary {
 			column1Value = data.Name
 		} else {
-			nodeID, _ := strconv.Atoi(data.NodeID) //nolint
-			column1Value = formatSmallInteger(int32(nodeID))
+			nodeID, _ := strconv.Atoi(data.NodeID)           //nolint
+			column1Value = formatSmallInteger(int32(nodeID)) // #nosec G109
 		}
 		stringValues[i+1] = getColumns(column1Value, formatSmallInteger(data.FileCount), formatSmallInteger(data.MaxJournalFilesNumber),
 			formatPercent(percentUsed), formattingFunction(data.MaxFileSize),
