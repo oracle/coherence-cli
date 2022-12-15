@@ -82,7 +82,7 @@ jobs:
         make clean build-test-images test-e2e-standalone
         make test-clean test-discovery
 
-    - uses: actions/upload-artifact@v1
+    - uses: actions/upload-artifact@v3
       if: failure()
       with:
         name: test-output
