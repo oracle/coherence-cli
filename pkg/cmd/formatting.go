@@ -499,8 +499,8 @@ func FormatTopicsSummary(topicDetails []config.TopicDetail) string {
 func FormatTopicsSubscribers(topicsSubscribers []config.TopicsSubscriberDetail) string {
 	var (
 		memberCount    = len(topicsSubscribers)
-		alignmentWide  = []string{R, R, L, R, L, R, R, R, L, L}
-		alignment      = []string{R, R, L, R, L, R, R, R, L}
+		alignmentWide  = []string{R, R, L, R, L, R, R, R, R, L, L}
+		alignment      = []string{R, R, L, R, L, R, R, R, R, L}
 		finalAlignment []string
 	)
 	if memberCount == 0 {
@@ -519,7 +519,7 @@ func FormatTopicsSubscribers(topicsSubscribers []config.TopicsSubscriberDetail) 
 	})
 
 	stringValues[0] = getColumns(NodeIDColumn, SubscriberIDColumn, "STATE", ChannelsColumn, SubscriberGroupColumn,
-		"RECEIVED", "ERRORS", "BACKLOG", "TYPE")
+		"RECEIVED", "ERRORS", "BACKLOG", "DISCONNECTS", "TYPE")
 	if OutputFormat == constants.WIDE {
 		finalAlignment = alignmentWide
 		stringValues[0] = getColumns(stringValues[0], MemberColumn)
@@ -532,7 +532,7 @@ func FormatTopicsSubscribers(topicsSubscribers []config.TopicsSubscriberDetail) 
 
 		stringValues[i+1] = getColumns(formatSmallInteger(int32(nodeID)), fmt.Sprintf("%v", value.ID),
 			value.StateName, formatLargeInteger(value.ChannelCount), value.SubscriberGroup, formatLargeInteger(value.ReceivedCount),
-			formatLargeInteger(value.ReceiveErrors), formatLargeInteger(value.Backlog), value.SubType)
+			formatLargeInteger(value.ReceiveErrors), formatLargeInteger(value.Backlog), formatLargeInteger(value.Disconnections), value.SubType)
 		if OutputFormat == constants.WIDE {
 			stringValues[i+1] = getColumns(stringValues[i+1], value.Member)
 		}
