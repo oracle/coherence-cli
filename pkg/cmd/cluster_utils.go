@@ -356,11 +356,16 @@ func getCacheServerArgs(member string, httpPort int32, version string) []string 
 			"-Dcoherence.management=all")
 	}
 
-	// if the default-heap is set in config then use this
-	if Config.DefaultHeap != "" {
-		heap = Config.DefaultHeap
-	} else {
+	// if default heap is overridden, then use this
+	if heapMemoryParam != defaultHeap {
 		heap = heapMemoryParam
+	} else {
+		// if the default-heap is set in config then use this
+		if Config.DefaultHeap != "" {
+			heap = Config.DefaultHeap
+		} else {
+			heap = heapMemoryParam
+		}
 	}
 
 	baseArgs = append(baseArgs, "-Xms"+heap, "-Xmx"+heap)
