@@ -44,6 +44,13 @@ MAVEN_BUILD_OPTS :=$(USE_MAVEN_SETTINGS) -Drevision=$(MVN_VERSION) -U -B -Dcoher
 
 CURRDIR := $(shell pwd)
 
+GH_TOKEN ?=
+ifeq ("$(GH_TOKEN)", "")
+  GH_AUTH := "Foo: Bar"
+else
+  GH_AUTH := "Authorization: Bearer $(GH_TOKEN)"
+endif
+
 USER_ID := $(shell echo "`id -u`:`id -g`")
 
 # ----------------------------------------------------------------------------------------------------------------------
