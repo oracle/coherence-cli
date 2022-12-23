@@ -372,7 +372,7 @@ func initConfig() {
 	if Config.IgnoreInvalidCerts {
 		msg := "WARNING: SSL Certificate validation has been explicitly disabled"
 		Logger.Info(msg)
-		fmt.Fprintln(os.Stderr, msg)
+		_, _ = fmt.Fprintln(os.Stderr, msg)
 	}
 }
 

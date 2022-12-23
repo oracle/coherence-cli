@@ -34,6 +34,11 @@ var (
 	ErrPort = errors.New("port must be between 1024 and 65535")
 )
 
+const (
+	coherenceMain = "com.tangosol.net.Coherence"
+	coherenceDCS  = "com.tangosol.net.DefaultCacheServer"
+)
+
 // GetError returns a formatted error and prints to log
 func GetError(message string, err error) error {
 	var (
@@ -252,21 +257,10 @@ func ValidatePort(port int32) error {
 	return nil
 }
 
-// bootstrapVersions defines the Coherence versions which use com.oracle.net.Coherence class
-var bootstrapVersions = []string{"21.12", "21.06", "20.12", "22.06", "22.09", "23.", "15.1.1", "14.1.2", "2206"}
-
-const coherenceMain = "com.tangosol.net.Coherence"
-const coherenceDCS = "com.tangosol.net.DefaultCacheServer"
-
-// GetCoherenceMainClass returns the default startup class for the specified Coherence version
+// GetCoherenceMainClass returns the default startup class for the specified Coherence version.
+// In the future this may be automatically determined but default to coherenceMain
 func GetCoherenceMainClass(version string) string {
-	for _, v := range bootstrapVersions {
-		if strings.Contains(version, v) {
-			return coherenceMain
-		}
-	}
-
-	return coherenceDCS
+	return coherenceMain
 }
 
 // ValidateStartClass validates that the server start class is and empty string, and therefore
