@@ -205,20 +205,6 @@ func TestPortValidation(t *testing.T) {
 	g.Expect(ValidatePort(12345)).ShouldNot(HaveOccurred())
 }
 
-func TestCoherenceStartupClass(t *testing.T) {
-	g := NewGomegaWithT(t)
-
-	g.Expect(GetCoherenceMainClass("15.1.1")).Should(Equal(coherenceMain))
-	g.Expect(GetCoherenceMainClass("14.1.1-2206")).Should(Equal(coherenceMain))
-	g.Expect(GetCoherenceMainClass("22.06")).Should(Equal(coherenceMain))
-	g.Expect(GetCoherenceMainClass("22.06.2")).Should(Equal(coherenceMain))
-	g.Expect(GetCoherenceMainClass("21.12.4")).Should(Equal(coherenceMain))
-	g.Expect(GetCoherenceMainClass("21.06.1")).Should(Equal(coherenceMain))
-	g.Expect(GetCoherenceMainClass("20.12")).Should(Equal(coherenceMain))
-	g.Expect(GetCoherenceMainClass("14.1.1.")).Should(Equal(coherenceDCS))
-	g.Expect(GetCoherenceMainClass("12.2.1.")).Should(Equal(coherenceDCS))
-}
-
 func TestGetStartupDelayInMillis(t *testing.T) {
 	var (
 		g      = NewGomegaWithT(t)
