@@ -1,4 +1,4 @@
-# Copyright 2021, 2022 Oracle Corporation and/or its affiliates.
+# Copyright 2021, 2023 Oracle Corporation and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at
 # https://oss.oracle.com/licenses/upl.
 
@@ -78,6 +78,10 @@ jobs:
     - name: Discovery Tests
       shell: bash
       run: make test-clean test-discovery
+
+    - name: Document Links tests
+      shell: bash
+      run: make test-docs
 
     - name: Build for all platforms
       shell: bash

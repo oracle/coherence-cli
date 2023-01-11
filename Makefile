@@ -1,5 +1,5 @@
 # ----------------------------------------------------------------------------------------------------------------------
-# Copyright (c) 2021, 2022 Oracle and/or its affiliates.
+# Copyright (c) 2021, 2023 Oracle and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at
 # https://oss.oracle.com/licenses/upl.
 #
@@ -462,6 +462,20 @@ test-coverage: test-clean gotestsum $(BUILD_PROPS) ## Run e2e tests with Coheren
 	go tool cover -func $(COVERAGE_DIR)/cover-full.out
 	make test-coherence-shutdown
 
+
+# ----------------------------------------------------------------------------------------------------------------------
+# Test the documentation.
+# ----------------------------------------------------------------------------------------------------------------------
+.PHONY: test-docs
+test-docs: docs ## Test doc links
+	go run ./utils/linkcheck/main.go --file $(BUILD_OUTPUT)/docs/pages/... \
+		--exclude 'http://proxyserver' \
+		--exclude 'https://&lt;host&gt;:&lt;management-port&gt;/management/coherence/cluster' \
+		--exclude 'http://&lt;pod-ip' \
+		--exclude 'http://elasticsearch-master' \
+		--exclude 'https://oracle.github.io/coherence-operator/docs/latest/' \
+		--exclude 'https://github.com/oracle/coherence-cli/releases/download/' \
+ 		2>&1 | tee $(TEST_LOGS_DIR)/doc-link-check.log
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Release the Coherence Operator to the gh-pages branch.
