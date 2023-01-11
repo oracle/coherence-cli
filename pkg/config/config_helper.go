@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, 2022 Oracle and/or its affiliates.
+ * Copyright (c) 2021, 2023 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -513,6 +513,8 @@ type CacheDetail struct {
 	LocksGranted                   int64    `json:"locksGranted"`
 	LocksPending                   int64    `json:"locksPending"`
 	ListenerRegistrations          int64    `json:"listenerRegistrations"`
+	ListenerKeyCount               int64    `json:"listenerKeyCount"`
+	ListenerFilterCount            int64    `json:"listenerFilterCount"`
 	MaxQueryDurationMillis         int64    `json:"maxQueryDurationMillis"`
 	MaxQueryDescription            string   `json:"maxQueryDescription"`
 	NonOptimizedQueryAverageMillis float64  `json:"nonOptimizedQueryAverageMillis"`
