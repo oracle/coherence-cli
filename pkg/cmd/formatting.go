@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, 2022 Oracle and/or its affiliates.
+ * Copyright (c) 2021, 2023 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -926,14 +926,14 @@ func FormatCacheDetailsStorage(cacheDetails []config.CacheDetail) (string, error
 		return nodeID1 < nodeID2
 	})
 
-	stringValues[0] = getColumns(NodeIDColumn, "TIER", "LOCKS GRANTED", "LOCKS PENDING", "LISTENERS",
-		"MAX QUERY MS", "MAX QUERY DESC")
+	stringValues[0] = getColumns(NodeIDColumn, "TIER", "LOCKS GRANTED", "LOCKS PENDING", "KEY LISTENERS",
+		"FILTER LISTENERS", "MAX QUERY MS", "MAX QUERY DESC")
 	if OutputFormat == constants.WIDE {
 		stringValues[0] = getColumns(stringValues[0], "NO OPT AVG", "OPT AVG",
 			"INDEX SIZE", "INDEXING MILLIS")
-		alignment = []string{R, L, R, R, R, R, L, R, R, R, R}
+		alignment = []string{R, L, R, R, R, R, R, L, R, R, R, R}
 	} else {
-		alignment = []string{R, L, R, R, R, R, L}
+		alignment = []string{R, L, R, R, R, R, R, L}
 	}
 
 	for i, value := range cacheDetails {
@@ -941,8 +941,8 @@ func FormatCacheDetailsStorage(cacheDetails []config.CacheDetail) (string, error
 
 		stringValues[i+1] = getColumns(formatSmallInteger(int32(nodeID)), value.Tier,
 			formatLargeInteger(value.LocksGranted), formatLargeInteger(value.LocksPending),
-			formatLargeInteger(value.ListenerRegistrations), formatLargeInteger(value.MaxQueryDurationMillis),
-			value.MaxQueryDescription)
+			formatLargeInteger(value.ListenerKeyCount), formatLargeInteger(value.ListenerFilterCount),
+			formatLargeInteger(value.MaxQueryDurationMillis), value.MaxQueryDescription)
 		if OutputFormat == constants.WIDE {
 			stringValues[i+1] = getColumns(stringValues[i+1], formatFloat(float32(value.NonOptimizedQueryAverageMillis)),
 				formatFloat(float32(value.OptimizedQueryAverageMillis)),
