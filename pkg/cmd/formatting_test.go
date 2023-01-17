@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, 2022 Oracle and/or its affiliates.
+ * Copyright (c) 2021, 2023 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -85,51 +85,37 @@ func TestFormattingPercent(t *testing.T) {
 func TestFormattingAllStringsWithAlignment(t *testing.T) {
 	g := NewGomegaWithT(t)
 
-	values := make([]string, 3)
+	table1 := newFormattedTable().WithAlignment(L, R, R).WithHeader("ONE", "TWO", "THREE")
+	table1.AddRow("string", "123,200", "100MB")
+	table1.AddRow("string", "123", "10MB")
+	fmt.Println(table1)
 
-	values[0] = getColumns("ONE", "TWO", "THREE")
-	values[1] = getColumns("string", "123,200", "100MB")
-	values[2] = getColumns("string", "123", "10MB")
+	// test incorrect alignment length which will turn it off
+	table2 := newFormattedTable().WithAlignment(L).WithHeader("ONE", "TWO", "THREE")
+	table2.AddRow("string", "123,200", "100MB")
+	table2.AddRow("string", "123", "10MB")
+	fmt.Println(table2)
 
-	var alignment1 = []string{L, R, R}
-	var alignment2 = []string{L} // test incorrect length which will turn it off
-
-	result := formatLinesAllStringsWithAlignment(alignment1, values)
-	g.Expect(result).To(Equal(`ONE         TWO  THREE
+	g.Expect(table1.String()).To(Equal(`ONE         TWO  THREE
 string  123,200  100MB
 string      123   10MB
 `))
 
-	result = formatLinesAllStringsWithAlignment(alignment2, values)
-	fmt.Println(result)
-	g.Expect(result).To(Equal(`ONE     TWO      THREE
+	g.Expect(table2.String()).To(Equal(`ONE     TWO      THREE
 string  123,200  100MB
 string  123      10MB 
 `))
-}
-
-func TestGetColumns(t *testing.T) {
-	g := NewGomegaWithT(t)
-	g.Expect(getColumns("A", "B")).To(Equal("A" + sep + "B"))
-	g.Expect(getColumns("A")).To(Equal("A"))
-	g.Expect(getColumns("A", "B", "C")).To(Equal("A" + sep + "B" + sep + "C"))
-	g.Expect(getColumns("A", "B", "C", "D")).To(Equal("A" + sep + "B" + sep + "C" + sep + "D"))
-	g.Expect(getColumns()).To(Equal(""))
 }
 
 // TestFormattingAllStringsWithAlignmentMax1 tests truncated 1st column
 func TestFormattingAllStringsWithAlignmentMax1(t *testing.T) {
 	g := NewGomegaWithT(t)
 
-	values := make([]string, 3)
+	table := newFormattedTable().WithAlignment(L, R, R).WithHeader("ONE", "TWO", "THREE").MaxLength(10)
+	table.AddRow("abcdefghijh", "123,200", "100MB")
+	table.AddRow("string", "123", "10MB")
 
-	values[0] = getColumns("ONE", "TWO", "THREE")
-	values[1] = getColumns("abcdefghijh", "123,200", "100MB")
-	values[2] = getColumns("string", "123", "10MB")
-
-	var alignment1 = []string{L, R, R}
-
-	result := formatLinesAllStringsWithAlignmentMax(alignment1, values, 10)
+	result := table.String()
 	fmt.Println(result)
 	g.Expect(result).To(Equal(`ONE             TWO  THREE
 abcdefg...  123,200  100MB
@@ -141,15 +127,11 @@ string          123   10MB
 func TestFormattingAllStringsWithAlignmentMax2(t *testing.T) {
 	g := NewGomegaWithT(t)
 
-	values := make([]string, 3)
+	table := newFormattedTable().WithAlignment(L, R, R).WithHeader("ONE", "TWO", "THREE").MaxLength(10)
+	table.AddRow("123", "123,200", "100MB")
+	table.AddRow("string", "123", "10MB")
 
-	values[0] = getColumns("ONE", "TWO", "THREE")
-	values[1] = getColumns("123", "123,200", "100MB")
-	values[2] = getColumns("string", "123", "10MB")
-
-	var alignment1 = []string{L, R, R}
-
-	result := formatLinesAllStringsWithAlignmentMax(alignment1, values, 10)
+	result := table.String()
 	fmt.Println(result)
 	g.Expect(result).To(Equal(`ONE         TWO  THREE
 123     123,200  100MB
@@ -161,15 +143,12 @@ string      123   10MB
 func TestFormattingAllStringsWithAlignmentMax3(t *testing.T) {
 	g := NewGomegaWithT(t)
 
-	values := make([]string, 3)
+	table := newFormattedTable().WithAlignment(L, L, L).WithHeader("ONE", "TWO", "THREE").MaxLength(10)
 
-	values[0] = getColumns("ONE", "TWO", "THREE")
-	values[1] = getColumns("1this is really long", "1this must be event longer", "1wow how long is this string")
-	values[2] = getColumns("2this is really long", "2this must be event longer", "2wow how long is this string")
+	table.AddRow("1this is really long", "1this must be event longer", "1wow how long is this string")
+	table.AddRow("2this is really long", "2this must be event longer", "2wow how long is this string")
 
-	var alignment1 = []string{L, L, L}
-
-	result := formatLinesAllStringsWithAlignmentMax(alignment1, values, 10)
+	result := table.String()
 	fmt.Println(result)
 	g.Expect(result).To(Equal(`ONE         TWO         THREE     
 1this i...  1this m...  1wow ho...
@@ -194,4 +173,20 @@ func TestFormatConnectionMillis(t *testing.T) {
 	g.Expect(formatConnectionMillis(12 * hour)).To(Equal("12h 00m 00s"))
 	g.Expect(formatConnectionMillis(12*hour + 2*minute + 1*second)).To(Equal("12h 02m 01s"))
 	g.Expect(formatConnectionMillis(3*day + hour)).To(Equal("3d 01h 00m 00s"))
+}
+
+func TestTableFormatting(t *testing.T) {
+	//g := NewGomegaWithT(t)
+	table := newFormattedTable().
+		WithHeader("ONE", "TWO", "THREE IS LONG").
+		WithAlignment(L, R, R)
+
+	table.AddRow("Hello", "123", "123")
+
+	fmt.Print(table)
+
+	table.AddHeaderColumns("NEW")
+	table.AddColumnsToRow("new")
+
+	fmt.Print(table)
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, 2022 Oracle and/or its affiliates.
+ * Copyright (c) 2021, 2023 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -216,19 +216,13 @@ You can specify '-o wide' to display addition information.`,
 				return utils.GetError("unable to unmarshall cache result", err)
 			}
 
-			value, err = FormatCacheDetailsSizeAndAccess(cacheDetails.Details)
-			if err != nil {
-				return err
-			}
+			value = FormatCacheDetailsSizeAndAccess(cacheDetails.Details)
 
 			sb.WriteString("\nCACHE SIZE AND ACCESS DETAILS\n")
 			sb.WriteString("-----------------------------\n")
 			sb.WriteString(value)
 
-			value, err = FormatCacheDetailsStorage(cacheDetails.Details)
-			if err != nil {
-				return err
-			}
+			value = FormatCacheDetailsStorage(cacheDetails.Details)
 
 			sb.WriteString("\nCACHE STORAGE DETAILS\n")
 			sb.WriteString("---------------------\n")
