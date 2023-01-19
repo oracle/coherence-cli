@@ -220,6 +220,7 @@ create_doc $DOCS_DIR/reset_ramjournal_stats "${COHCTL} reset ramjournal-stats --
 create_doc $DOCS_DIR/reset_member_stats "${COHCTL} reset member-stats --help"
 create_doc $DOCS_DIR/reset_reporter_stats "${COHCTL} reset reporter-stats --help"
 create_doc $DOCS_DIR/reset_service_stats "${COHCTL} reset service-stats --help"
+create_doc $DOCS_DIR/reset_proxy_stats "${COHCTL} reset proxy-stats --help"
 
 # Persistence
 create_doc $DOCS_DIR/get_persistence "${COHCTL} get persistence --help"
