@@ -1,4 +1,4 @@
-# Copyright 2022, Oracle Corporation and/or its affiliates.
+# Copyright 2022, 2023 Oracle Corporation and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at
 # https://oss.oracle.com/licenses/upl.
 
@@ -22,10 +22,10 @@ jobs:
       matrix:
         coherenceVersion:
           - 22.09
-          - 22.06.1
           - 22.06.2
-          - 14.1.1-0-10
+          - 22.06.3
           - 14.1.1-0-11
+          - 14.1.1-0-12
         javaImage:
           - gcr.io/distroless/java17
 
