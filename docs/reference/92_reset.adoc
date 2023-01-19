@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 
-    Copyright (c) 2022 Oracle and/or its affiliates.
+    Copyright (c) 2022, 2023 Oracle and/or its affiliates.
     Licensed under the Universal Permissive License v 1.0 as shown at
     https://oss.oracle.com/licenses/upl.
 
@@ -32,6 +32,7 @@ a message if the operation is no supported for your specific Coherence version.
 * <<reset-member-stats, `cohctl reset member-stats`>> - resets statistics for all or a specific member
 * <<reset-reporter-stats, `cohctl reset reporter-stats`>> - resets reporter statistics for all or a specific reporter
 * <<reset-service-stats, `cohctl reset service-stats`>> - resets services statistics for all service members or specific service members
+* <<reset-proxy-stats, `cohctl reset proxy-stats`>> - resets proxy connection manager statistics for all proxy members or specific proxy members
 
 [#reset-cache-stats]
 ==== Reset Cache Statistics
@@ -212,5 +213,24 @@ ManagementHttpProxy     Proxy                   1  n/a             -1          -
 $ cohctl reset service-stats PartitionedCache -c local
 
 Are you sure you want to reset service statistics for all 3 nodes? (y/n) y
+operation completed
+----
+
+[#reset-proxy-stats]
+==== Reset Proxy Connection Manager Statistics
+
+include::../../build/_output/docs-gen/reset_proxy_stats.adoc[tag=text]
+
+[source,bash]
+----
+$ cohctl get proxies -c local
+
+NODE ID  HOST IP              SERVICE NAME        CONNECTIONS  DATA SENT  DATA REC
+1        0.0.0.0:64073.58994  "$SYS:SystemProxy"            0       0 MB      0 MB
+1        0.0.0.0:64073.41509  Proxy                         0       0 MB      0 MB
+
+$ cohctl reset proxy-stats Proxy -c local
+
+Are you sure you want to reset connectionManager statics statistics for service Proxy for all 1 nodes? (y/n) y
 operation completed
 ----

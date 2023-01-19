@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Oracle and/or its affiliates.
+ * Copyright (c) 2022, 2023 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -21,6 +21,8 @@ import (
 var (
 	resetNodeIDs string
 )
+
+const serviceNotFound = "unable to find service with service name '%s'"
 
 // resetStatsCmd represents the reset command
 var resetCmd = &cobra.Command{
@@ -102,6 +104,22 @@ var resetServiceStatsCmd = &cobra.Command{
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
 		return issueResetStatsCommand(cmd, args, fetcher.ResetService)
+	},
+}
+
+// resetProxyStatsCmd represents the reset proxy-stats command
+var resetProxyStatsCmd = &cobra.Command{
+	Use:   "proxy-stats service-name",
+	Short: "reset proxy connection manager statistics for all proxy members or specific proxy members",
+	Long:  `The 'reset proxy-stats' command resets connection manager statistics for all proxy services or a comma separated list of member IDs.`,
+	Args: func(cmd *cobra.Command, args []string) error {
+		if len(args) != 1 {
+			displayErrorAndExit(cmd, provideServiceName)
+		}
+		return nil
+	},
+	RunE: func(cmd *cobra.Command, args []string) error {
+		return issueResetStatsCommand(cmd, args, fetcher.ResetConnectionManager)
 	},
 }
 
@@ -215,7 +233,7 @@ func issueResetStatsCommand(cmd *cobra.Command, args []string, operation string)
 		// validate service name
 		found, err = ServiceExists(dataFetcher, serviceName)
 		if !found || err != nil {
-			return fmt.Errorf("unable to find service with service name '%s'", serviceName)
+			return fmt.Errorf(serviceNotFound, serviceName)
 		}
 
 		// validate cache and service name
@@ -241,7 +259,7 @@ func issueResetStatsCommand(cmd *cobra.Command, args []string, operation string)
 		// validate service name
 		found, err = ServiceExists(dataFetcher, args[0])
 		if !found || err != nil {
-			return fmt.Errorf("unable to find service with service name '%s'", args[0])
+			return fmt.Errorf(serviceNotFound, args[0])
 		}
 
 		message = fmt.Sprintf("Are you sure you want to reset %s statistics for service %s, participant %s, type %s for %s? (y/n) ",
@@ -280,6 +298,16 @@ func issueResetStatsCommand(cmd *cobra.Command, args []string, operation string)
 
 		// force resetNodeID to all
 		resetNodeIDs = all
+	} else if operation == fetcher.ResetService || operation == fetcher.ResetConnectionManager {
+		var found bool
+
+		// validate service name
+		found, err = ServiceExists(dataFetcher, args[0])
+		if !found || err != nil {
+			return fmt.Errorf(serviceNotFound, args[0])
+		}
+
+		message = fmt.Sprintf("Are you sure you want to reset %s statistics for service %s for %s? (y/n) ", operation, args[0], confirmMessage)
 	} else {
 		message = fmt.Sprintf("Are you sure you want to reset %s statistics for %s? (y/n) ", operation, confirmMessage)
 	}
@@ -290,8 +318,8 @@ func issueResetStatsCommand(cmd *cobra.Command, args []string, operation string)
 	}
 
 	// for operations for all members, these can be done using one operation and for others,
-	// they must be done in parallel. Reset federation can only be done via nodeID
-	if resetNodeIDs == all && operation != fetcher.ResetFederation {
+	// they must be done in parallel. Reset federation and reset proxy can only be done via nodeID
+	if resetNodeIDs == all && operation != fetcher.ResetFederation && operation != fetcher.ResetConnectionManager {
 		_, err = dataFetcher.InvokeResetStatistics(operation, all, args)
 		if err != nil {
 			return err
@@ -339,6 +367,7 @@ func init() {
 	setResetFlags(resetServiceStatsCmd)
 	setResetFlags(resetCacheStatsCmd)
 	setResetFlags(resetFederationStatsCmd)
+	setResetFlags(resetProxyStatsCmd)
 
 	resetRAMJournalStatsCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
 	resetFlashJournalStatsCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)

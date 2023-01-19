@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, 2022 Oracle and/or its affiliates.
+ * Copyright (c) 2021, 2023 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -738,6 +738,8 @@ func (h HTTPFetcher) InvokeResetStatistics(operation string, nodeID string, args
 		} else {
 			finalURL += membersPath + nodeID + "/" + resetStatistics
 		}
+	} else if operation == ResetConnectionManager {
+		finalURL = servicesPath + getSafeServiceName(h, args[0]) + membersPath + nodeID + "/proxy/" + resetStatistics
 	} else if operation == ResetCache {
 		finalURL = servicesPath + getSafeServiceName(h, args[1]) + cachesPath + url.PathEscape(args[0])
 		if nodeID == all {
