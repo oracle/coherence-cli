@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, 2022 Oracle and/or its affiliates.
+ * Copyright (c) 2021, 2023 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -711,12 +711,7 @@ func issueSubscriberOperation(cmd *cobra.Command, operation string, args []strin
 	}
 
 	index := getSubscriberNodeIndex(topicsSubscriberDetails)
-	if index == -1 {
-		return fmt.Errorf(subscriberMessage,
-			topicsNodeID, topicName, serviceName, subscriber)
-	}
-
-	if index == -1 {
+	if index == -1 && operation != fetcher.DisconnectAll {
 		return fmt.Errorf(subscriberMessage,
 			topicsNodeID, topicName, serviceName, subscriber)
 	}
@@ -729,6 +724,27 @@ func issueSubscriberOperation(cmd *cobra.Command, operation string, args []strin
 		}
 		confirmMessage = fmt.Sprintf("Are you sure you want to issue '%s' for topic %s, service %s, subscriber %d and channel %d? (y/n) ",
 			operation, topicName, serviceName, subscriber, notifyChannel)
+	} else if operation == fetcher.DisconnectAll {
+		if subscriberGroup != "" {
+			// subscriber group specified, so we must validate it
+			found := false
+			for _, v := range topicsSubscriberDetails {
+				if v.ServiceName == serviceName && v.SubscriberGroup == subscriberGroup {
+					found = true
+					break
+				}
+			}
+			if !found {
+				return fmt.Errorf("unable to find subscriber group %s for topic %s and service %s",
+					subscriberGroup, topicName, serviceName)
+			}
+			confirmMessage = fmt.Sprintf("Are you sure you want to issue '%s' for topic %s, service %s and subscriber group %s? (y/n) ",
+				operation, topicName, serviceName, subscriberGroup)
+		} else {
+			// for topic only
+			confirmMessage = fmt.Sprintf("Are you sure you want to issue '%s' for topic %s and service %s? (y/n) ",
+				operation, topicName, serviceName)
+		}
 	} else {
 		confirmMessage = fmt.Sprintf("Are you sure you want to issue '%s' for topic %s, service %s and subscriber %d? (y/n) ",
 			operation, topicName, serviceName, subscriber)
@@ -742,7 +758,11 @@ func issueSubscriberOperation(cmd *cobra.Command, operation string, args []strin
 		return nil
 	}
 
-	result, err = dataFetcher.InvokeSubscriberOperation(topicName, serviceName, subscriber, operation, notifyChannel)
+	if operation == fetcher.DisconnectAll {
+		err = dataFetcher.InvokeDisconnectAll(topicName, serviceName, subscriberGroup)
+	} else {
+		result, err = dataFetcher.InvokeSubscriberOperation(topicName, serviceName, subscriber, operation, notifyChannel)
+	}
 	if err != nil {
 		return err
 	}
@@ -786,6 +806,23 @@ itself given a topic, service and subscriber id.`,
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
 		return issueSubscriberOperation(cmd, fetcher.DisconnectSubscriber, args)
+	},
+}
+
+// disconnectAllCmd represents the disconnect all command
+var disconnectAllCmd = &cobra.Command{
+	Use:   "all topic-name",
+	Short: "instruct a topic to disconnect all subscribers for a topic or subscriber group",
+	Long: `The 'disconnect all' command instructs a topic to disconnect all subscribers for a 
+specific subscriber topic or all subscribers for the specified subscriber group.`,
+	Args: func(cmd *cobra.Command, args []string) error {
+		if len(args) != 1 {
+			displayErrorAndExit(cmd, SupplyTopicMessage)
+		}
+		return nil
+	},
+	RunE: func(cmd *cobra.Command, args []string) error {
+		return issueSubscriberOperation(cmd, fetcher.DisconnectAll, args)
 	},
 }
 
@@ -1345,6 +1382,10 @@ func init() {
 	_ = getSubscriberGroupChannelsCmd.MarkFlagRequired("subscriber-group")
 	getSubscriberGroupChannelsCmd.Flags().Int32VarP(&topicsNodeID, "node", "n", 0, nodeIDMessage)
 	_ = getSubscriberGroupChannelsCmd.MarkFlagRequired("node")
+
+	disconnectAllCmd.Flags().StringVarP(&serviceName, serviceNameOption, serviceNameOptionShort, "", serviceNameDescription)
+	disconnectAllCmd.Flags().StringVarP(&subscriberGroup, "subscriber-group", "G", "", "subscriber group")
+	disconnectAllCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
 
 	disconnectSubscriberCmd.Flags().StringVarP(&serviceName, serviceNameOption, serviceNameOptionShort, "", serviceNameDescription)
 	disconnectSubscriberCmd.Flags().Int64VarP(&subscriber, "subscriber", "S", 0, subscriberID)

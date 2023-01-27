@@ -49,6 +49,7 @@ const WithSync = "with-sync"
 const NoBacklog = "no-backlog"
 
 const DisconnectSubscriber = "disconnect"
+const DisconnectAll = "disconnect all"
 const ConnectSubscriber = "connect"
 const NotifyPopulated = "notify populated"
 const RetrieveHeads = "retrieve current heads"
@@ -241,6 +242,9 @@ type Fetcher interface {
 
 	// InvokeSubscriberOperation invokes a subscriber operation against a topic subscriber
 	InvokeSubscriberOperation(topicName, topicService string, subscriber int64, operation string, args ...interface{}) ([]byte, error)
+
+	// InvokeDisconnectAll invokes a disconnect all operation against a topic
+	InvokeDisconnectAll(topicName, topicService, subscriberGroup string) error
 }
 
 // GetFetcherOrError returns a fetcher and error

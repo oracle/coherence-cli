@@ -595,6 +595,7 @@ func Initialize(command *cobra.Command) *cobra.Command {
 	// disconnect
 	command.AddCommand(disconnectCmd)
 	disconnectCmd.AddCommand(disconnectSubscriberCmd)
+	disconnectCmd.AddCommand(disconnectAllCmd)
 
 	// connect
 	command.AddCommand(connectCmd)

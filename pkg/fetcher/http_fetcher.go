@@ -45,10 +45,12 @@ const executorsPath = "/executors/"
 const federationStatsPath = "/federation/statistics/"
 const reportersPath = "/reporters/"
 const journalPath = "/journal/"
+const subscriberGroupsPath = "/subscriberGroups"
 const topicsPath = "/topics/"
 const rolePrefix = "{\"role\": \""
 const resetStatistics = "resetStatistics"
 const all = "all"
+const disconnectAll = "/disconnectAll"
 
 // HTTPFetcher is an implementation of a Fetcher to retrieve data from Management over REST
 type HTTPFetcher struct {
@@ -140,8 +142,8 @@ func (h HTTPFetcher) GetHTTPSessionDetailsJSON() ([]byte, error) {
 	}
 
 	// now process each web app and get the json for members
-	for _, url := range urls {
-		result, err = httpGetRequestAbsolute(h, url+"/members/?links=")
+	for _, httpURL := range urls {
+		result, err = httpGetRequestAbsolute(h, httpURL+"/members/?links=")
 		if err != nil {
 			return constants.EmptyByte, utils.GetError("unable to retrieve Coherence*Web result", err)
 		}
@@ -437,7 +439,7 @@ func (h HTTPFetcher) GetTopicsSubscribersJSON(serviceName, topicName string) ([]
 // GetTopicsSubscriberGroupsJSON returns the topics subscriber group details in a cluster
 func (h HTTPFetcher) GetTopicsSubscriberGroupsJSON(serviceName, topicName string) ([]byte, error) {
 	result, err := httpGetRequest(h, servicesPath+getSafeServiceName(h, serviceName)+topicsPath+getSafeServiceName(h, topicName)+
-		"/subscriberGroups"+links)
+		subscriberGroupsPath+links)
 	if err != nil && !strings.Contains(err.Error(), "404") {
 		return constants.EmptyByte, utils.GetError("cannot get topics subscriber information", err)
 	}
@@ -881,6 +883,25 @@ func (h HTTPFetcher) GetFederationDetails(serviceName, federationType, nodeID, p
 	return result, nil
 }
 
+// InvokeDisconnectAll invokes a disconnect all operation against a topic
+func (h HTTPFetcher) InvokeDisconnectAll(topicName, topicService, subscriberGroup string) error {
+	httpURL := servicesPath + getSafeServiceName(h, topicService) + topicsPath + getSafeServiceName(h, topicName)
+
+	if subscriberGroup != "" {
+		// specify the subscriber group
+		httpURL += subscriberGroupsPath + "/" + getSafeServiceName(h, subscriberGroup)
+	}
+
+	httpURL += disconnectAll
+
+	_, err := httpPostRequest(h, httpURL, constants.EmptyByte)
+	if err != nil {
+		return utils.GetError(
+			fmt.Sprintf("cannot invoke %s for topic %s, service %s and subscriber group %s", disconnectAll, topicName, topicService, subscriberGroup), err)
+	}
+	return nil
+}
+
 // InvokeSubscriberOperation invokes a subscriber operation against a topic subscriber
 func (h HTTPFetcher) InvokeSubscriberOperation(topicName, topicService string, subscriber int64, operation string, args ...interface{}) ([]byte, error) {
 	var (
@@ -900,10 +921,10 @@ func (h HTTPFetcher) InvokeSubscriberOperation(topicName, topicService string, s
 		queryParams = "?links="
 	}
 
-	url := servicesPath + getSafeServiceName(h, topicService) + topicsPath + getSafeServiceName(h, topicName) + subscribersPath +
+	httpURL := servicesPath + getSafeServiceName(h, topicService) + topicsPath + getSafeServiceName(h, topicName) + subscribersPath +
 		"/" + fmt.Sprintf("%v/%s", subscriber, operation) + queryParams
 
-	result, err = httpPostRequest(h, url, payload)
+	result, err = httpPostRequest(h, httpURL, payload)
 	if err != nil {
 		return constants.EmptyByte, utils.GetError(
 			fmt.Sprintf("cannot invoke %s for topic %s, service %s and subscriber %d ", operation, topicName, topicService, subscriber), err)

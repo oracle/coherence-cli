@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 
-    Copyright (c) 2021, 2022 Oracle and/or its affiliates.
+    Copyright (c) 2021, 2023 Oracle and/or its affiliates.
     Licensed under the Universal Permissive License v 1.0 as shown at
     https://oss.oracle.com/licenses/upl.
 
@@ -21,6 +21,7 @@ There are various commands that allow you to work with and manage cluster topics
 * <<get-subscriber-channels, `cohctl get subscriber-channels`>> - displays channel details for a topic, service and subscriber
 * <<get-subscriber-groups, `cohctl get subscriber-groups`>> - displays subscriber-groups for a topic and service
 * <<get-sub-grp-channels, `cohctl get sub-grp-channels`>> - displays channel details for a topic, service, node and subscriber group
+* <<disconnect-all, `cohctl disconnect all`>> - instructs a topic to disconnect all subscribers for a topic or subscriber group
 
 Subscriber Specific Operations
 
@@ -293,6 +294,33 @@ CHANNEL  OWNING SUB  MEMBER  POLLED    MEAN   1 MIN   5 MIN  15 MIN  HEAD
      14          -1      -1       0  0.0000  0.0000  0.0000  0.0000  PagedPosition(page=0, offset=0)
      15          -1      -1       0  0.0000  0.0000  0.0000  0.0000  PagedPosition(page=0, offset=0)
      16          -1      -1       0  0.0000  0.0000  0.0000  0.0000  PagedPosition(page=0, offset=0)
+----
+
+[#disconnect-all]
+==== Disconnect All
+
+include::../../build/_output/docs-gen/disconnect_all.adoc[tag=text]
+
+*Examples*
+
+Disconnect all subscribers for the topic 'sms-messages'.
+
+[source,bash]
+----
+$ cohctl disconnect all sms-messages -c local
+
+Are you sure you want to issue 'disconnect all' for topic sms-messages and service PartitionedTopic? (y/n) y
+operation completed
+----
+
+Disconnect all subscribers for the topic 'sms-messages' and subscriber group 'sms-processor'.
+
+[source,bash]
+----
+$ cohctl disconnect all sms-messages -G sms-processor -c local
+
+Are you sure you want to issue 'disconnect all' for topic sms-messages, service PartitionedTopic and subscriber group sms-processor? (y/n) y
+operation completed
 ----
 
 [#connect-subscriber]

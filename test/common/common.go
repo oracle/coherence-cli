@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, 2022 Oracle and/or its affiliates.
+ * Copyright (c) 2021, 2023 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -1795,7 +1795,7 @@ func RunTestTopicsCommands(t *testing.T) {
 	test_utils.EnsureCommandErrorContains(g, t, cliCmd, noTopics, configArg, file,
 		"get", "subscribers", "public-messages", "-s", "PartitionedTopicxx", "-c", context.ClusterName)
 
-	// get subscriber channels - need to use the datafetcher to find a valid subscriber
+	// get subscriber channels - need to use the dataFetcher to find a valid subscriber
 	topicsResult, err := dataFetcher.GetTopicsSubscribersJSON("PartitionedTopic", "public-messages")
 	g.Expect(err).To(Not(HaveOccurred()))
 
@@ -1816,7 +1816,6 @@ func RunTestTopicsCommands(t *testing.T) {
 		"get", "subscriber-channels", "public-messages", "-S", subscriber, "-c", context.ClusterName)
 
 	// test various topic subscriber operations
-
 	test_utils.EnsureCommandContainsAll(g, t, cliCmd, cmd.OperationCompleted, configArg, file,
 		"disconnect", "subscriber", "public-messages", "-s", "", "-S", subscriber, "-c", context.ClusterName, "-y")
 
@@ -1844,6 +1843,22 @@ func RunTestTopicsCommands(t *testing.T) {
 	// test sub-grp-channels
 	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "PartitionedTopic,17,private-messages,MEMBER,MEAN,OWNING SUB", configArg, file,
 		"get", "sub-grp-channels", "private-messages", "-s", "PartitionedTopic", "-n", "1", "-G", "admin", "-c", context.ClusterName)
+
+	// test disconnect all for a topic
+	test_utils.EnsureCommandContainsAll(g, t, cliCmd, cmd.OperationCompleted, configArg, file,
+		"disconnect", "all", "private-messages", "-s", "PartitionedTopic", "-c", context.ClusterName, "-y")
+
+	// test disconnect all for a topic and subscriber group admin
+	test_utils.EnsureCommandContainsAll(g, t, cliCmd, cmd.OperationCompleted, configArg, file,
+		"disconnect", "all", "private-messages", "-s", "PartitionedTopic", "-G", "admin", "-c", context.ClusterName, "-y")
+
+	// test invalid topic
+	test_utils.EnsureCommandErrorContains(g, t, cliCmd, "there are no topics", configArg, file,
+		"disconnect", "all", "private-messagesxxxx", "-s", "PartitionedTopicxx", "-c", context.ClusterName)
+
+	// test invalid topic
+	test_utils.EnsureCommandErrorContains(g, t, cliCmd, "unable to find subscriber group", configArg, file,
+		"disconnect", "all", "private-messages", "-s", "PartitionedTopic", "-G", "admind", "-c", context.ClusterName, "-y")
 
 	// remove the cluster entry
 	test_utils.EnsureCommandContains(g, t, cliCmd, context.ClusterName, configArg, file, "remove", "cluster", "cluster1", "-y")
