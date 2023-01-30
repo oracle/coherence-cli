@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #
-# Copyright (c) 2021, 2022 Oracle and/or its affiliates.
+# Copyright (c) 2021, 2023 Oracle and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at
 # https://oss.oracle.com/licenses/upl.
 #
@@ -119,6 +119,7 @@ create_doc $DOCS_DIR/connect_subscriber "${COHCTL} connect subscriber --help"
 create_doc $DOCS_DIR/retrieve_heads "${COHCTL} retrieve heads --help"
 create_doc $DOCS_DIR/retrieve_remaining "${COHCTL} retrieve remaining --help"
 create_doc $DOCS_DIR/notify_populated "${COHCTL} notify populated --help"
+create_doc $DOCS_DIR/disconnect_all "${COHCTL} disconnect all --help"
 
 # nslookup
 create_doc $DOCS_DIR/nslookup "${COHCTL} nslookup --help"
