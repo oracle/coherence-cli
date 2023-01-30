@@ -521,9 +521,13 @@ func FormatTopicsSubscribers(topicsSubscribers []config.TopicsSubscriberDetail) 
 
 	for _, value := range topicsSubscribers {
 		var nodeID, _ = strconv.Atoi(value.NodeID)
+		subGroup := value.SubscriberGroup
+		if value.SubType == "Anonymous" {
+			subGroup = "n/a"
+		}
 
 		table.AddRow(formatSmallInteger(int32(nodeID)), fmt.Sprintf("%v", value.ID),
-			value.StateName, formatLargeInteger(value.ChannelCount), value.SubscriberGroup, formatLargeInteger(value.ReceivedCount),
+			value.StateName, formatLargeInteger(value.ChannelCount), subGroup, formatLargeInteger(value.ReceivedCount),
 			formatLargeInteger(value.ReceiveErrors), formatLargeInteger(value.Backlog), formatLargeInteger(value.Disconnections), value.SubType)
 		if OutputFormat == constants.WIDE {
 			table.AddColumnsToRow(value.Member)
