@@ -185,6 +185,10 @@ create_doc $DOCS_DIR/get_environment "${COHCTL} get environment --help"
 create_doc $DOCS_DIR/set_debug "${COHCTL} set debug --help"
 create_doc $DOCS_DIR/get_debug "${COHCTL} get debug --help"
 
+# Colo
+create_doc $DOCS_DIR/set_color "${COHCTL} set color --help"
+create_doc $DOCS_DIR/get_color "${COHCTL} get color --help"
+
 # Use Gradle
 create_doc $DOCS_DIR/set_use_gradle "${COHCTL} set use-gradle --help"
 create_doc $DOCS_DIR/get_use_gradle "${COHCTL} get use-gradle --help"

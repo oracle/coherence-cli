@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 
-    Copyright (c) 2021, 2022 Oracle and/or its affiliates.
+    Copyright (c) 2021, 2023 Oracle and/or its affiliates.
     Licensed under the Universal Permissive License v 1.0 as shown at
     https://oss.oracle.com/licenses/upl.
 
@@ -23,6 +23,8 @@ This section contains miscellaneous commands for various settings.
 * <<set-management, `cohctl set management`>> - sets management information for a cluster
 * <<get-timeout, `cohctl get timeout`>> - displays the current request timeout (in seconds) for any HTTP requests
 * <<set-timeout, `cohctl set timeout`>> - sets the request timeout (in seconds) for any HTTP requests
+* <<set-color, `cohctl set color`>> - sets color formatting to be on or off
+* <<get-color, `cohctl get color`>> - displays the current color formatting setting
 
 [#version]
 ==== Version
@@ -221,4 +223,30 @@ Set the request timeout ot 15 seconds.
 ----
 $ cohctl set timeout 15 -c local
 Timeout is now set to 15
+----
+
+[#get-color]
+==== Get Color
+
+include::../../build/_output/docs-gen/get_color.adoc[tag=text]
+
+*Examples*
+
+[source,bash]
+----
+$ cohctl get color
+Color formatting is: off
+----
+
+[#set-color]
+==== Set Color
+
+include::../../build/_output/docs-gen/set_color.adoc[tag=text]
+
+*Examples*
+
+[source,bash]
+----
+$ cohctl set color on
+Color formatting is now set to on
 ----

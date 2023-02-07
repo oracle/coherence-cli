@@ -59,6 +59,7 @@ const usernameShort = "U"
 const clusterKey = "clusters"
 const currentContextKey = "currentContext"
 const debugContextKey = "debug"
+const colorContextKey = "color"
 const useGradleContextKey = "useGradle"
 const ignoreCertsContextKey = "ignoreInvalidCerts"
 const requestTimeoutKey = "requestTimeout"
@@ -133,6 +134,7 @@ type CoherenceCLIConfig struct {
 	CurrentContext     string              `json:"currentContext"`
 	Clusters           []ClusterConnection `mapstructure:"clusters"`
 	Debug              bool                `json:"debug"`
+	Color              bool                `json:"color"`
 	RequestTimeout     int32               `json:"requestTimeout"`
 	IgnoreInvalidCerts bool                `json:"ignoreInvalidCerts"`
 	DefaultBytesFormat string              `json:"defaultBytesFormat"`
@@ -305,11 +307,12 @@ func initConfig() {
 			}
 
 			// config file not found - create a default one
-			Config := CoherenceCLIConfig{Version: Version, Clusters: make([]ClusterConnection, 0),
-				Debug: false, RequestTimeout: 30, IgnoreInvalidCerts: false}
+			Config = CoherenceCLIConfig{Version: Version, Clusters: make([]ClusterConnection, 0),
+				Debug: false, RequestTimeout: 30, IgnoreInvalidCerts: false, Color: false}
 			viper.Set("version", Config.Version)
 			viper.Set(currentContextKey, Config.CurrentContext)
 			viper.Set(debugContextKey, Config.Debug)
+			viper.Set(colorContextKey, Config.Color)
 			viper.Set(ignoreCertsContextKey, Config.IgnoreInvalidCerts)
 			viper.Set(requestTimeoutKey, Config.RequestTimeout)
 
@@ -476,6 +479,7 @@ func Initialize(command *cobra.Command) *cobra.Command {
 	getCmd.AddCommand(getUseGradleCmd)
 	getCmd.AddCommand(getServiceStorageCmd)
 	getCmd.AddCommand(getCacheStoresCmd)
+	getCmd.AddCommand(getColorCmd)
 
 	// set command
 	command.AddCommand(setCmd)
@@ -494,6 +498,7 @@ func Initialize(command *cobra.Command) *cobra.Command {
 	setCmd.AddCommand(setProfileCmd)
 	setCmd.AddCommand(setUseGradleCmd)
 	setCmd.AddCommand(setFederationCmd)
+	setCmd.AddCommand(setColorCmd)
 
 	// clear
 	command.AddCommand(clearCmd)
