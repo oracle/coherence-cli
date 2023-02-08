@@ -83,6 +83,29 @@ var healthFormatter = func(s string) string {
 	return s
 }
 
+// healthSummaryFormatter formats a column value for a health summary.
+var healthSummaryFormatter = func(s string) string {
+	if !strings.Contains(s, "/") {
+		return s
+	}
+	// string contains something like "0/4"
+	result := strings.Split(s, "/")
+	if len(result) != 2 {
+		return s
+	}
+
+	value1, err := getInt64Value(result[0])
+
+	if err != nil {
+		return s
+	}
+
+	if value1 == 0 {
+		return red(s)
+	}
+	return yellow(s)
+}
+
 func getInt64Value(s string) (int64, error) {
 	return strconv.ParseInt(strings.TrimSpace(s), 10, 64)
 }

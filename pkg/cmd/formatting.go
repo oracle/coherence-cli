@@ -1087,6 +1087,9 @@ func FormatHealthSummary(health []config.HealthSummaryShort) string {
 
 	table := newFormattedTable().WithHeader("NAME", "SUB TYPE", MembersColumn, "STARTED", "LIVE", "READY", "SAFE").
 		WithAlignment(L, L, R, R, R, R, R)
+	for i := 3; i <= 6; i++ {
+		table.AddFormattingFunction(i, healthSummaryFormatter)
+	}
 
 	for _, value := range health {
 		table.AddRow(value.Name, value.SubType, formatSmallInteger(value.TotalCount),
