@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, 2022 Oracle and/or its affiliates.
+ * Copyright (c) 2021, 2023 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -118,6 +118,34 @@ func TestDebugCommands(t *testing.T) {
 
 	// set the debug to invalid value
 	test_utils.EnsureCommandErrorContains(g, t, cliCmd, setDebugError, configOption, file, "set", "debug", "dont-know")
+}
+
+// TestColoCommands tests the get and set colo commands
+func TestColoCommands(t *testing.T) {
+	cliCmd := Initialize(nil)
+	g := NewGomegaWithT(t)
+
+	file, err := test_utils.CreateNewConfigYaml(configYaml)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	t.Cleanup(func() {
+		_ = os.RemoveAll(file)
+	})
+
+	test_utils.EnsureCommandOutputEquals(g, t, cliCmd, getColorMsg+"off\n", configOption, file, "get", "color")
+
+	// set the debug to true
+	test_utils.EnsureCommandOutputEquals(g, t, cliCmd, setColorMsg+"on\n", configOption, file, "set", "color", "on")
+
+	test_utils.EnsureCommandOutputEquals(g, t, cliCmd, getColorMsg+"on\n", configOption, file, "get", "color")
+
+	// set the debug to false
+	test_utils.EnsureCommandOutputEquals(g, t, cliCmd, setColorMsg+"off\n", configOption, file, "set", "color", "off")
+
+	// set the debug to invalid value
+	test_utils.EnsureCommandErrorContains(g, t, cliCmd, setColorError, configOption, file, "set", "color", "dont-know")
 }
 
 // TestIgnoreCertsCommands tests the get and set ignore-certs commands

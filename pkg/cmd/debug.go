@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, 2022 Oracle and/or its affiliates.
+ * Copyright (c) 2021, 2023 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -15,6 +15,9 @@ import (
 const setDebugMsg = "Debug is now set to "
 const setDebugError = "you can only specify 'on' or 'off'"
 const getDebugMsg = "Current debug level: "
+const setError = "you must provide either on or off"
+const off = "off"
+const on = "on"
 
 // setDebugCmd represents the set debug command
 var setDebugCmd = &cobra.Command{
@@ -24,16 +27,16 @@ var setDebugCmd = &cobra.Command{
 information is logged in the log file (cohctl.log).`,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
-			displayErrorAndExit(cmd, "you must provide either on or off")
+			displayErrorAndExit(cmd, setError)
 		}
 		return nil
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
 		value := args[0]
 		var debug bool
-		if value == "on" {
+		if value == on {
 			debug = true
-		} else if value == "off" {
+		} else if value == off {
 			debug = false
 		} else {
 			return errors.New(setDebugError)
@@ -59,9 +62,9 @@ additional information is logged in the log file.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var debug string
 		if Config.Debug {
-			debug = "on"
+			debug = on
 		} else {
-			debug = "off"
+			debug = off
 		}
 		cmd.Printf("%s%v\n", getDebugMsg, debug)
 		return nil

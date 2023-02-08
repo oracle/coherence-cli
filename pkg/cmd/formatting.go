@@ -58,6 +58,7 @@ const avgBacklogDelay = "AVG BACKLOG DELAY"
 const partitions = "PARTITIONS"
 const tcp = "tcp"
 const na = "n/a"
+const endangered = "ENDANGERED"
 
 var (
 	KB int64 = 1024
@@ -328,6 +329,7 @@ func FormatFederationSummary(federationSummaries []config.FederationSummary, tar
 		if target == destinations {
 			table.AddHeaderColumns(avgApply, "AVG ROUND TRIP", avgBacklogDelay, "REPLICATE",
 				partitions, "ERRORS", "UNACKED")
+			table.AddFormattingFunction(13, errorFormatter)
 		} else {
 			table.AddHeaderColumns(avgApply, avgBacklogDelay)
 		}
@@ -429,6 +431,7 @@ func FormatCacheSummary(cacheSummaries []config.CacheSummaryDetail) string {
 	if OutputFormat == constants.WIDE {
 		table.AddHeaderColumns(avgSize,
 			"TOTAL PUTS", "TOTAL GETS", "TOTAL REMOVES", "TOTAL HITS", "TOTAL MISSES", "HIT PROB")
+		table.AddFormattingFunction(10, hitRateFormatter)
 	}
 
 	for _, value := range cacheSummaries {
@@ -518,6 +521,9 @@ func FormatTopicsSubscribers(topicsSubscribers []config.TopicsSubscriberDetail) 
 	} else {
 		table.WithAlignment(R, R, L, R, L, R, R, R, R, L)
 	}
+	table.AddFormattingFunction(6, errorFormatter)
+	table.AddFormattingFunction(7, errorFormatter)
+	table.AddFormattingFunction(8, errorFormatter)
 
 	for _, value := range topicsSubscribers {
 		var nodeID, _ = strconv.Atoi(value.NodeID)
@@ -1129,6 +1135,9 @@ func FormatMemberHealth(health []config.HealthSummary) string {
 
 	table := newFormattedTable().WithHeader(NodeIDColumn, "NAME", "SUB TYPE", "STARTED", "LIVE", "READY", "SAFE",
 		"MEMBER HEALTH", "DESCRIPTION").WithAlignment(finalAlignment...)
+	for i := 3; i <= 7; i++ {
+		table.AddFormattingFunction(i, healthFormatter)
+	}
 
 	if OutputFormat == constants.WIDE {
 		table.AddHeaderColumns("CLASS")
@@ -1259,6 +1268,7 @@ func FormatExecutors(executors []config.Executor, summary bool) string {
 
 	table := newFormattedTable().WithHeader(NameColumn, header, "IN PROGRESS", "COMPLETED", "REJECTED", "DESCRIPTION").
 		WithAlignment(L, R, R, R, R, L)
+	table.AddFormattingFunction(4, errorFormatter)
 
 	var (
 		totalRunningTasks   int64
@@ -1384,10 +1394,13 @@ func FormatServices(services []config.ServiceSummary) string {
 	table := newFormattedTable().WithHeader(ServiceNameColumn, "TYPE", MembersColumn, "STATUS HA", "STORAGE", partitions)
 	if OutputFormat == constants.WIDE {
 		table.WithAlignment(L, L, R, L, R, R, R, R, R, L, L)
-		table.AddHeaderColumns("ENDANGERED", "VULNERABLE", "UNBALANCED", "STATUS", "SUSPENDED")
+		table.AddHeaderColumns(endangered, "VULNERABLE", "UNBALANCED", "STATUS", "SUSPENDED")
+		table.AddFormattingFunction(9, statusHAFormatter)
 	} else {
 		table.WithAlignment(L, L, R, L, R, R)
 	}
+
+	table.AddFormattingFunction(3, statusHAFormatter)
 
 	for _, value := range services {
 		var (
@@ -1396,7 +1409,7 @@ func FormatServices(services []config.ServiceSummary) string {
 		)
 		if value.StorageEnabledCount == -1 || value.StatusHA == na {
 			status = na
-		} else if value.StatusHA == "ENDANGERED" {
+		} else if value.StatusHA == endangered {
 			status = "StatusHA is ENDANGERED"
 		} else if value.PartitionsEndangered > 0 {
 			status = fmt.Sprintf("%d partitions are endangered", value.PartitionsEndangered)
@@ -1472,6 +1485,7 @@ func FormatMachines(machines []config.Machine) string {
 
 	table := newFormattedTable().WithHeader("MACHINE", "PROCESSORS", "LOAD", "TOTAL MEMORY", "FREE MEMORY",
 		"% FREE", "OS", "ARCH", "VERSION").WithAlignment(L, R, R, R, R, R, L, L, L)
+	table.AddFormattingFunction(5, machineMemoryFormatting)
 
 	for _, value := range machines {
 		if value.SystemLoadAverage >= 0 {
@@ -1657,6 +1671,7 @@ func FormatProxyConnections(connections []config.ProxyConnection) string {
 
 	table := newFormattedTable().WithHeader(NodeIDColumn, "CONN MS", "CONN TIME", "REMOTE ADDR/PORT",
 		"DATA SENT", "DATA REC", "BACKLOG", "CLIENT PROCESS", "CLIENT ROLE")
+	table.AddFormattingFunction(6, errorFormatter)
 
 	if OutputFormat == constants.WIDE {
 		table.WithAlignment(R, R, R, L, R, R, R, R, L, L)
@@ -1715,14 +1730,19 @@ func FormatProxyServers(services []config.ProxySummary, protocol string) string 
 		if OutputFormat == constants.WIDE {
 			table.AddHeaderColumns("MSG SENT", "MSG RCV", "BYTES BACKLOG", "MSG BACKLOG", "UNAUTH")
 			table.WithAlignment(L, L, L, R, R, R, R, R, R, R, R)
+			table.AddFormattingFunction(9, errorFormatter)
+			table.AddFormattingFunction(10, errorFormatter)
 		} else {
 			table.WithAlignment(L, L, L, R, R, R)
 		}
 	} else {
 		table.AddHeaderColumns("SERVER TYPE", "REQUESTS", "ERRORS")
+		table.AddFormattingFunction(5, errorFormatter)
 		if OutputFormat == constants.WIDE {
 			table.AddHeaderColumns("1xx", "2xx", "3xx", "4xx", "5xx")
 			table.WithAlignment(L, L, L, L, R, R, R, R, R, R, R)
+			table.AddFormattingFunction(9, errorFormatter)
+			table.AddFormattingFunction(10, errorFormatter)
 		} else {
 			table.WithAlignment(L, L, L, L, R, R)
 		}
@@ -2006,6 +2026,8 @@ func appendColumnValue(v KeyValues, sb *strings.Builder, keyFormat string) {
 
 var _ FormattedTable = &formattedTable{}
 
+type formatter func(string) string
+
 // FormattedTable defines a formatted table of information.
 type FormattedTable interface {
 	WithAlignment(...string) FormattedTable
@@ -2014,21 +2036,24 @@ type FormattedTable interface {
 	AddColumnsToRow(...string)
 	AddHeaderColumns(...string)
 	AddRow(...string)
+	AddFormattingFunction(int, formatter)
 	String() string
 }
 
 // formattedTable is an implementation of a FormattedTable.
 type formattedTable struct {
-	header    []string
-	rows      [][]string
-	alignment []string
-	maxLen    int
+	header           []string
+	rows             [][]string
+	alignment        []string
+	maxLen           int
+	columnFormatters map[int]formatter
 }
 
 // newFormattedTable returns a new formatted table.
 func newFormattedTable() FormattedTable {
 	table := &formattedTable{}
 	table.rows = [][]string{}
+	table.columnFormatters = make(map[int]formatter, 0)
 	return table
 }
 
@@ -2053,6 +2078,11 @@ func (t *formattedTable) MaxLength(maxLen int) FormattedTable {
 // AddRow adds a row to the table.
 func (t *formattedTable) AddRow(newRow ...string) {
 	t.rows = append(t.rows, newRow)
+}
+
+// AddFormattingFunction adds a formatting function to a column.
+func (t *formattedTable) AddFormattingFunction(col int, f formatter) {
+	t.columnFormatters[col] = f
 }
 
 // AddColumnsToRow adds columns to the last row. Typically used for -o wide.
@@ -2111,10 +2141,18 @@ func (t *formattedTable) String() string {
 		stringFormats[i] = align
 	}
 
-	for _, row := range t.getCombined() {
+	for r, row := range t.getCombined() {
 		// format each individual column entry
 		for i, e := range row {
 			actualValue := fmt.Sprintf(stringFormats[i], e)
+
+			if r > 0 && Config.Color {
+				// check for formatting function after first row
+				if f, ok := t.columnFormatters[i]; ok {
+					actualValue = f(actualValue)
+				}
+			}
+
 			if truncate[i] && len(actualValue) > columnLengths[i] {
 				// truncate the value to max len -3 and append three ...
 				actualValue = actualValue[:t.maxLen-3] + "..."
