@@ -79,7 +79,9 @@ func (h HTTPFetcher) GetMemberDetailsJSON(verbose bool) ([]byte, error) {
 		// can be extremely large and cause performance issues
 		fields = "&fields=nodeId,unicastAddress,unicastPort,roleName,memberName,machineName," +
 			"rackName,siteName,processName,memoryMaxMB,memoryAvailableMB,receiverSuccessRate," +
-			"publisherSuccessRate,tracingSamplingRatio"
+			"publisherSuccessRate,tracingSamplingRatio,packetDeliveryEfficiency,packetsResent," +
+			"packetsSent,packetsReceived,sendQueueSize,transportReceivedBytes,transportSentBytes," +
+			"weakestChannel"
 	}
 	result, err := httpGetRequest(h, "/members/?links="+fields)
 	if err != nil {

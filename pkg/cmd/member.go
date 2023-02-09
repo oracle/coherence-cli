@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, 2022 Oracle and/or its affiliates.
+ * Copyright (c) 2021, 2023 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -50,6 +50,7 @@ const unableToDecode = "unable to decode member details"
 const noNodeID = "no node with node id %s exists in this cluster"
 const invalidNodeID = "invalid value for node id of %s"
 const none = "none"
+const roleNameDescription = "role name to display"
 
 // getMembersCmd represents the get members command
 var getMembersCmd = &cobra.Command{
@@ -59,86 +60,107 @@ var getMembersCmd = &cobra.Command{
 can specify '-o wide' to display addition information.`,
 	Args: cobra.ExactArgs(0),
 	RunE: func(cmd *cobra.Command, args []string) error {
+		return getMembers(cmd, false)
+	},
+}
+
+// getMembers returns the member or network stats depending upon the value of networkStats.
+func getMembers(cmd *cobra.Command, networkStats bool) error {
+	var (
+		dataFetcher fetcher.Fetcher
+		connection  string
+		result      string
+		err         error
+	)
+
+	connection, dataFetcher, err = GetConnectionAndDataFetcher()
+	if err != nil {
+		return err
+	}
+
+	for {
 		var (
-			dataFetcher   fetcher.Fetcher
-			connection    string
-			result        string
+			members       = config.Members{}
+			storage       = config.StorageDetails{}
 			membersResult []byte
 			storageResult []byte
-			err           error
 		)
 
-		connection, dataFetcher, err = GetConnectionAndDataFetcher()
+		membersResult, err = dataFetcher.GetMemberDetailsJSON(OutputFormat != constants.TABLE && OutputFormat != constants.WIDE)
 		if err != nil {
 			return err
 		}
 
-		for {
-			var (
-				members = config.Members{}
-				storage = config.StorageDetails{}
-			)
-
-			membersResult, err = dataFetcher.GetMemberDetailsJSON(OutputFormat != constants.TABLE && OutputFormat != constants.WIDE)
-			if err != nil {
-				return err
-			}
-
-			storageResult, err = dataFetcher.GetStorageDetailsJSON()
-			if err != nil {
-				return err
-			}
-
-			if strings.Contains(OutputFormat, constants.JSONPATH) {
-				result, err = utils.GetJSONPathResults(membersResult, OutputFormat)
-				if err != nil {
-					return err
-				}
-				cmd.Println(result)
-			} else if OutputFormat == constants.JSON {
-				cmd.Println(string(membersResult))
-			} else {
-				printWatchHeader(cmd)
-
-				cmd.Println(FormatCurrentCluster(connection))
-				err = json.Unmarshal(membersResult, &members)
-				if err != nil {
-					return utils.GetError(unableToDecode, err)
-				}
-
-				err = json.Unmarshal(storageResult, &storage)
-				if err != nil {
-					return utils.GetError("unable to decode storage details", err)
-				}
-
-				storageMap := utils.GetStorageMap(storage)
-
-				var filteredMembers []config.Member
-
-				// apply any filtering by role
-				if roleName != all {
-					filteredMembers = make([]config.Member, 0)
-					for _, value := range members.Members {
-						if value.RoleName == roleName {
-							filteredMembers = append(filteredMembers, value)
-						}
-					}
-				} else {
-					filteredMembers = make([]config.Member, len(members.Members))
-					copy(filteredMembers, members.Members)
-				}
-				cmd.Print(FormatMembers(filteredMembers, true, storageMap))
-			}
-
-			// check to see if we should exit if we are not watching
-			if !isWatchEnabled() {
-				break
-			}
-			// we are watching services so sleep and then repeat until CTRL-C
-			time.Sleep(time.Duration(watchDelay) * time.Second)
+		storageResult, err = dataFetcher.GetStorageDetailsJSON()
+		if err != nil {
+			return err
 		}
 
-		return nil
+		if strings.Contains(OutputFormat, constants.JSONPATH) {
+			result, err = utils.GetJSONPathResults(membersResult, OutputFormat)
+			if err != nil {
+				return err
+			}
+			cmd.Println(result)
+		} else if OutputFormat == constants.JSON {
+			cmd.Println(string(membersResult))
+		} else {
+			printWatchHeader(cmd)
+
+			cmd.Println(FormatCurrentCluster(connection))
+			err = json.Unmarshal(membersResult, &members)
+			if err != nil {
+				return utils.GetError(unableToDecode, err)
+			}
+
+			err = json.Unmarshal(storageResult, &storage)
+			if err != nil {
+				return utils.GetError("unable to decode storage details", err)
+			}
+
+			storageMap := utils.GetStorageMap(storage)
+
+			var filteredMembers []config.Member
+
+			// apply any filtering by role
+			if roleName != all {
+				filteredMembers = make([]config.Member, 0)
+				for _, value := range members.Members {
+					if value.RoleName == roleName {
+						filteredMembers = append(filteredMembers, value)
+					}
+				}
+			} else {
+				filteredMembers = make([]config.Member, len(members.Members))
+				copy(filteredMembers, members.Members)
+			}
+
+			if networkStats {
+				cmd.Println(FormatNetworkStatistics(filteredMembers))
+			} else {
+				cmd.Print(FormatMembers(filteredMembers, true, storageMap))
+			}
+		}
+
+		// check to see if we should exit if we are not watching
+		if !isWatchEnabled() {
+			break
+		}
+		// we are watching services so sleep and then repeat until CTRL-C
+		time.Sleep(time.Duration(watchDelay) * time.Second)
+	}
+
+	return nil
+}
+
+// getMemberStats represents the get network-stats command
+var getMemberStats = &cobra.Command{
+	Use:   "member-stats",
+	Short: "display member network statistics for a cluster",
+	Long:  `The 'get member-stats' command displays the member network statistic for a cluster.`,
+	Args:  cobra.ExactArgs(0),
+	RunE: func(cmd *cobra.Command, args []string) error {
+		return getMembers(cmd, true)
 	},
 }
 
@@ -842,7 +864,9 @@ func GetFileName(nodeID string, iteration int32) string {
 func init() {
 	var roleDescription = "role name to run for"
 
-	getMembersCmd.Flags().StringVarP(&roleName, "role", "r", all, "role name to display")
+	getMembersCmd.Flags().StringVarP(&roleName, "role", "r", all, roleNameDescription)
+
+	getMemberStats.Flags().StringVarP(&roleName, "role", "r", all, roleNameDescription)
 
 	describeMemberCmd.Flags().BoolVarP(&threadDump, "thread-dump", "D", false, "include a thread dump")
 	describeMemberCmd.Flags().StringVarP(&extendedInfo, "extended", "X", none, "include extended information such as g1OldGen, etc. See --help")

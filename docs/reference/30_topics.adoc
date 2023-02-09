@@ -16,7 +16,7 @@ There are various commands that allow you to work with and manage cluster topics
 * <<get-topics, `cohctl get topics`>> - displays topics for a cluster
 * <<describe-topic, `cohctl describe topic`>> - describe a topic
 * <<get-topic-members, `cohctl get topic-members`>> - displays members for a topic
-* <<get-member-channels, `cohctl get member-channels`>> - displays channel details for a topic, service and node
+* <<get-topic-channels, `cohctl get topic-channels`>> - displays channel details for a topic, service and node
 * <<get-subscribers, `cohctl get subscribers`>> - displays subscribers for a topic and service
 * <<get-subscriber-channels, `cohctl get subscriber-channels`>> - displays channel details for a topic, service and subscriber
 * <<get-subscriber-groups, `cohctl get subscriber-groups`>> - displays subscriber-groups for a topic and service
@@ -112,10 +112,10 @@ NODE ID  CHANNELS  PUBLISHED    MEAN   1 MIN   5 MIN  15 MIN  SUB TIMEOUT  RECON
       2        17          0  0.0000  0.0000  0.0000  0.0000    300,000ms      300,000ms  10,000ms      1,048,576
 ----
 
-[#get-member-channels]
-==== Get Member Channels
+[#get-topic-channels]
+==== Get Topic Channels
 
-include::../../build/_output/docs-gen/get_member_channels.adoc[tag=text]
+include::../../build/_output/docs-gen/get_topic_channels.adoc[tag=text]
 
 *Examples*
 
@@ -133,7 +133,7 @@ NODE ID  CHANNELS  PUBLISHED    MEAN   1 MIN   5 MIN  15 MIN
       5        17          0  0.0000  0.0000  0.0000  0.0000
       6        17          0  0.0000  0.0000  0.0000  0.0000
 
-$ cohctl get member-channels private-messages -s PartitionedTopic -n 4 -c local
+$ cohctl get topic-channels private-messages -s PartitionedTopic -n 4 -c local
 
 Service:      PartitionedTopic
 Topic:        private-messages

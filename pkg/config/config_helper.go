@@ -47,21 +47,29 @@ type Executors struct {
 
 // Member contains an individual members output
 type Member struct {
-	NodeID               string  `json:"nodeId"`
-	UnicastAddress       string  `json:"unicastAddress"`
-	UnicastPort          int32   `json:"unicastPort"`
-	RoleName             string  `json:"roleName"`
-	MemberName           string  `json:"memberName"`
-	MachineName          string  `json:"machineName"`
-	RackName             string  `json:"rackName"`
-	SiteName             string  `json:"siteName"`
-	ProcessName          string  `json:"processName"`
-	MemoryMaxMB          int32   `json:"memoryMaxMB"`
-	MemoryAvailableMB    int32   `json:"memoryAvailableMB"`
-	ReceiverSuccessRate  float32 `json:"receiverSuccessRate"`
-	PublisherSuccessRate float32 `json:"publisherSuccessRate"`
-	TracingSamplingRatio float32 `json:"tracingSamplingRatio"`
-	StorageEnabled       bool    `json:"storageEnabled"`
+	NodeID                   string  `json:"nodeId"`
+	UnicastAddress           string  `json:"unicastAddress"`
+	UnicastPort              int32   `json:"unicastPort"`
+	RoleName                 string  `json:"roleName"`
+	MemberName               string  `json:"memberName"`
+	MachineName              string  `json:"machineName"`
+	RackName                 string  `json:"rackName"`
+	SiteName                 string  `json:"siteName"`
+	ProcessName              string  `json:"processName"`
+	MemoryMaxMB              int32   `json:"memoryMaxMB"`
+	MemoryAvailableMB        int32   `json:"memoryAvailableMB"`
+	ReceiverSuccessRate      float32 `json:"receiverSuccessRate"`
+	PublisherSuccessRate     float32 `json:"publisherSuccessRate"`
+	TracingSamplingRatio     float32 `json:"tracingSamplingRatio"`
+	StorageEnabled           bool    `json:"storageEnabled"`
+	PacketDeliveryEfficiency float64 `json:"packetDeliveryEfficiency"`
+	PacketsResent            int64   `json:"packetsResent"`
+	PacketsSent              int64   `json:"packetsSent"`
+	PacketsReceived          int64   `json:"packetsReceived"`
+	SendQueueSize            int64   `json:"sendQueueSize"`
+	TransportReceivedBytes   int64   `json:"transportReceivedBytes"`
+	TransportSentBytes       int64   `json:"transportSentBytes"`
+	WeakestChannel           int32   `json:"weakestChannel"`
 }
 
 // StorageDetails contains a summary of storage member details

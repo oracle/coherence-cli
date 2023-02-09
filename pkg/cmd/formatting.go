@@ -59,6 +59,8 @@ const partitions = "PARTITIONS"
 const tcp = "tcp"
 const na = "n/a"
 const endangered = "ENDANGERED"
+const dataSent = "DATA SENT"
+const dataRec = "DATA REC"
 
 var (
 	KB int64 = 1024
@@ -198,6 +200,7 @@ func FormatFederationDetails(federationDetails []config.FederationDescription, t
 
 	if target == destinations {
 		table.WithHeader(NodeIDColumn, "STATE", "DATA "+suffix, "MSG "+suffix, "REC "+suffix, "CURR BWIDTH")
+		table.AddFormattingFunction(1, federationStateFormatter)
 	} else {
 		suffix = "REC"
 		table.WithHeader(NodeIDColumn, "CONNECTED", "DATA "+suffix, "MSG "+suffix, "REC "+suffix)
@@ -207,6 +210,8 @@ func FormatFederationDetails(federationDetails []config.FederationDescription, t
 		if target == destinations {
 			table.AddHeaderColumns(avgApply, "AVG ROUND TRIP", avgBacklogDelay, "REPLICATE",
 				partitions, "ERRORS", "UNACKED")
+			table.AddFormattingFunction(11, errorFormatter)
+			table.AddFormattingFunction(12, errorFormatter)
 		} else {
 			table.AddHeaderColumns(avgApply, avgBacklogDelay)
 		}
@@ -320,6 +325,7 @@ func FormatFederationSummary(federationSummaries []config.FederationSummary, tar
 	if target == destinations {
 		table.WithHeader(ServiceColumn, participantCol, memberCol, "STATES", "DATA "+suffix,
 			"MSG "+suffix, "REC "+suffix, "CURR AVG BWIDTH")
+		table.AddFormattingFunction(3, federationStateFormatter)
 	} else {
 		table.WithHeader(ServiceColumn, participantCol, memberCol, "DATA "+suffix,
 			"MSG "+suffix, "REC "+suffix)
@@ -330,6 +336,7 @@ func FormatFederationSummary(federationSummaries []config.FederationSummary, tar
 			table.AddHeaderColumns(avgApply, "AVG ROUND TRIP", avgBacklogDelay, "REPLICATE",
 				partitions, "ERRORS", "UNACKED")
 			table.AddFormattingFunction(13, errorFormatter)
+			table.AddFormattingFunction(14, errorFormatter)
 		} else {
 			table.AddHeaderColumns(avgApply, avgBacklogDelay)
 		}
@@ -1196,6 +1203,8 @@ func FormatMembers(members []config.Member, verbose bool, storageMap map[int]boo
 
 	if OutputFormat == constants.WIDE {
 		table.AddHeaderColumns("MACHINE", "RACK", "SITE", "PUBLISHER", "RECEIVER")
+		table.AddFormattingFunction(9, networkStatsFormatter)
+		table.AddFormattingFunction(10, networkStatsFormatter)
 	}
 	table.AddHeaderColumns("STORAGE", MaxHeapColumn, UsedHeapColumn, AvailHeapColumn)
 
@@ -1249,6 +1258,54 @@ func FormatMembers(members []config.Member, verbose bool, storageMap map[int]boo
 		result += table.String()
 	}
 	return result
+}
+
+// FormatNetworkStatistics returns the member's network statistics in a column formatted output
+func FormatNetworkStatistics(members []config.Member) string {
+	var (
+		alignmentWide      = []string{R, L, L, R, L, L, R, R, R, R, R, R, R, R}
+		alignment          = []string{R, L, L, R, L, L, R, R, R, R, R, R, R, R}
+		finalAlignment     []string
+		formattingFunction = getFormattingFunction()
+	)
+
+	if OutputFormat == constants.TABLE {
+		finalAlignment = alignment
+	} else {
+		finalAlignment = alignmentWide
+	}
+
+	sort.Slice(members, func(p, q int) bool {
+		nodeID1, _ := strconv.Atoi(members[p].NodeID)
+		nodeID2, _ := strconv.Atoi(members[q].NodeID)
+		return nodeID1 < nodeID2
+	})
+
+	table := newFormattedTable().WithHeader(NodeIDColumn, AddressColumn, PortColumn, ProcessColumn, MemberColumn, RoleColumn,
+		"PKT SENT", "PKT REC", "RESENT", "EFFICIENCY", "SEND Q", dataSent, dataRec, "WEAKEST").
+		WithAlignment(finalAlignment...)
+	table.AddFormattingFunction(9, networkStatsFormatter)
+	table.AddFormattingFunction(10, errorFormatter)
+
+	for _, value := range members {
+		var (
+			nodeID, _ = strconv.Atoi(value.NodeID)
+		)
+
+		table.AddRow(formatSmallInteger(int32(nodeID)), value.UnicastAddress,
+			formatPort(value.UnicastPort), value.ProcessName, value.MemberName, value.RoleName)
+
+		table.AddColumnsToRow(formatLargeInteger(value.PacketsSent), formatLargeInteger(value.PacketsReceived),
+			formatLargeInteger(value.PacketsResent), formatPercent(value.PacketDeliveryEfficiency),
+			formatLargeInteger(value.SendQueueSize), formattingFunction(value.TransportSentBytes),
+			formattingFunction(value.TransportReceivedBytes), formatSmallInteger(value.WeakestChannel))
+	}
+
+	//table.AddColumnsToRow(fmt.Sprintf("%v", storageEnabled), formattingFunction(int64(value.MemoryMaxMB)*MB),
+	//	formattingFunction(int64(value.MemoryMaxMB-value.MemoryAvailableMB)*MB),
+	//	formattingFunction(int64(value.MemoryAvailableMB)*MB))
+
+	return table.String()
 }
 
 // FormatExecutors returns the executor's information in a column formatted output
@@ -1673,7 +1730,7 @@ func FormatProxyConnections(connections []config.ProxyConnection) string {
 	})
 
 	table := newFormattedTable().WithHeader(NodeIDColumn, "CONN MS", "CONN TIME", "REMOTE ADDR/PORT",
-		"DATA SENT", "DATA REC", "BACKLOG", "CLIENT PROCESS", "CLIENT ROLE")
+		dataSent, dataRec, "BACKLOG", "CLIENT PROCESS", "CLIENT ROLE")
 	table.AddFormattingFunction(6, errorFormatter)
 
 	if OutputFormat == constants.WIDE {
@@ -1729,7 +1786,7 @@ func FormatProxyServers(services []config.ProxySummary, protocol string) string 
 	table := newFormattedTable().WithHeader(NodeIDColumn, "HOST IP", ServiceNameColumn)
 
 	if protocol == tcp {
-		table.AddHeaderColumns("CONNECTIONS", "DATA SENT", "DATA REC")
+		table.AddHeaderColumns("CONNECTIONS", dataSent, dataRec)
 		if OutputFormat == constants.WIDE {
 			table.AddHeaderColumns("MSG SENT", "MSG RCV", "BYTES BACKLOG", "MSG BACKLOG", "UNAUTH")
 			table.WithAlignment(L, L, L, R, R, R, R, R, R, R, R)
