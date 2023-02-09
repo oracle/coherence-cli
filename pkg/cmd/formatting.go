@@ -1201,6 +1201,8 @@ func FormatMembers(members []config.Member, verbose bool, storageMap map[int]boo
 
 	if OutputFormat == constants.WIDE {
 		table.AddHeaderColumns("MACHINE", "RACK", "SITE", "PUBLISHER", "RECEIVER")
+		table.AddFormattingFunction(9, networkStatsFormatter)
+		table.AddFormattingFunction(10, networkStatsFormatter)
 	}
 	table.AddHeaderColumns("STORAGE", MaxHeapColumn, UsedHeapColumn, AvailHeapColumn)
 

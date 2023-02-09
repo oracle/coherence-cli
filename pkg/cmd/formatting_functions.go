@@ -118,6 +118,22 @@ var federationStateFormatter = func(s string) string {
 	return s
 }
 
+// networkStatsFormatter formats a column value representing publisher or receiver rates.
+var networkStatsFormatter = func(s string) string {
+	floatValue, err := strconv.ParseFloat(trimPercent(s), 32)
+	if err != nil {
+		return s
+	}
+
+	if floatValue > 0.95 {
+		return s
+	}
+	if floatValue >= 0.9 {
+		return yellow(s)
+	}
+	return red(s)
+}
+
 func getInt64Value(s string) (int64, error) {
 	return strconv.ParseInt(strings.TrimSpace(s), 10, 64)
 }
