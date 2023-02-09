@@ -205,6 +205,10 @@ func RunTestMemberCommands(t *testing.T) {
 	test_utils.EnsureCommandContainsAll(g, t, cliCmd, nodeID, configArg, file, "get", "members",
 		"-c", context.ClusterName)
 
+	// test default output format
+	test_utils.EnsureCommandContainsAll(g, t, cliCmd, nodeID, configArg, file, "get", "member-stats",
+		"-c", context.ClusterName)
+
 	// test wide output format
 	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "PUBLISHER,RECEIVER", configArg, file, "get", "members",
 		"-o", "wide", "-c", context.ClusterName)
@@ -1775,13 +1779,13 @@ func RunTestTopicsCommands(t *testing.T) {
 	test_utils.EnsureCommandErrorContains(g, t, cliCmd, noTopics, configArg, file,
 		"get", "topic-members", "private-messages", "-s", "PartitionedTopicx", "-c", context.ClusterName)
 
-	// get member-channels
+	// get topic-channels
 	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "PartitionedTopic,17,private-messages,PUBLISHED,MEAN,PagedPosition", configArg, file,
-		"get", "member-channels", "private-messages", "-s", "PartitionedTopic", "-n", "1", "-c", context.ClusterName)
+		"get", "topic-channels", "private-messages", "-s", "PartitionedTopic", "-n", "1", "-c", context.ClusterName)
 
-	// get member-channels without a service
+	// get topic-channels without a service
 	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "PartitionedTopic,17,private-messages,PUBLISHED,MEAN,PagedPosition", configArg, file,
-		"get", "member-channels", "private-messages", "-n", "1", "-c", context.ClusterName)
+		"get", "topic-channels", "private-messages", "-n", "1", "-c", context.ClusterName)
 
 	// get subscribers
 	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "PartitionedTopic,17,public-messages,SUBSCRIBER ID,NODE ID,SUBSCRIBER GROUP", configArg, file,

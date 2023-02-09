@@ -459,7 +459,7 @@ func Initialize(command *cobra.Command) *cobra.Command {
 	getCmd.AddCommand(getTopicsCmd)
 	getCmd.AddCommand(getTopicMembersCmd)
 	getCmd.AddCommand(getSubscribersCmd)
-	getCmd.AddCommand(getMemberChannelsCmd)
+	getCmd.AddCommand(getTopicChannelsCmd)
 	getCmd.AddCommand(getSubscriberChannelsCmd)
 	getCmd.AddCommand(getSubscriberGroupsCmd)
 	getCmd.AddCommand(getSubscriberGroupChannelsCmd)
@@ -480,6 +480,7 @@ func Initialize(command *cobra.Command) *cobra.Command {
 	getCmd.AddCommand(getServiceStorageCmd)
 	getCmd.AddCommand(getCacheStoresCmd)
 	getCmd.AddCommand(getColorCmd)
+	getCmd.AddCommand(getMemberStats)
 
 	// set command
 	command.AddCommand(setCmd)

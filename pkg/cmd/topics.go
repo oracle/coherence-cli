@@ -488,11 +488,11 @@ var getTopicMembersCmd = &cobra.Command{
 	},
 }
 
-// getMemberChannelsCmd represents the get member-channels command
-var getMemberChannelsCmd = &cobra.Command{
-	Use:   "member-channels topic-name",
+// getTopicChannelsCmd represents the get topic-channels command
+var getTopicChannelsCmd = &cobra.Command{
+	Use:   "topic-channels topic-name",
 	Short: "display channel details for a topic, service and node",
-	Long:  `The 'get member-channels' command displays channel details for a topic, service and node.`,
+	Long:  `The 'get topic-channels' command displays channel details for a topic, service and node.`,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
 			displayErrorAndExit(cmd, SupplyTopicMessage)
@@ -1369,9 +1369,9 @@ func init() {
 
 	getTopicMembersCmd.Flags().StringVarP(&serviceName, serviceNameOption, serviceNameOptionShort, "", serviceNameDescription)
 
-	getMemberChannelsCmd.Flags().Int32VarP(&topicsNodeID, "node", "n", 0, nodeIDMessage)
-	_ = getMemberChannelsCmd.MarkFlagRequired("node")
-	getMemberChannelsCmd.Flags().StringVarP(&serviceName, serviceNameOption, serviceNameOptionShort, "", serviceNameDescription)
+	getTopicChannelsCmd.Flags().Int32VarP(&topicsNodeID, "node", "n", 0, nodeIDMessage)
+	_ = getTopicChannelsCmd.MarkFlagRequired("node")
+	getTopicChannelsCmd.Flags().StringVarP(&serviceName, serviceNameOption, serviceNameOptionShort, "", serviceNameDescription)
 
 	getSubscriberChannelsCmd.Flags().StringVarP(&serviceName, serviceNameOption, serviceNameOptionShort, "", serviceNameDescription)
 	getSubscriberChannelsCmd.Flags().Int64VarP(&subscriber, "subscriber", "S", 0, subscriberID)
