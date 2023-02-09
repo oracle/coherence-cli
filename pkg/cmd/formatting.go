@@ -198,6 +198,7 @@ func FormatFederationDetails(federationDetails []config.FederationDescription, t
 
 	if target == destinations {
 		table.WithHeader(NodeIDColumn, "STATE", "DATA "+suffix, "MSG "+suffix, "REC "+suffix, "CURR BWIDTH")
+		table.AddFormattingFunction(1, federationStateFormatter)
 	} else {
 		suffix = "REC"
 		table.WithHeader(NodeIDColumn, "CONNECTED", "DATA "+suffix, "MSG "+suffix, "REC "+suffix)
@@ -207,6 +208,8 @@ func FormatFederationDetails(federationDetails []config.FederationDescription, t
 		if target == destinations {
 			table.AddHeaderColumns(avgApply, "AVG ROUND TRIP", avgBacklogDelay, "REPLICATE",
 				partitions, "ERRORS", "UNACKED")
+			table.AddFormattingFunction(11, errorFormatter)
+			table.AddFormattingFunction(12, errorFormatter)
 		} else {
 			table.AddHeaderColumns(avgApply, avgBacklogDelay)
 		}
@@ -320,6 +323,7 @@ func FormatFederationSummary(federationSummaries []config.FederationSummary, tar
 	if target == destinations {
 		table.WithHeader(ServiceColumn, participantCol, memberCol, "STATES", "DATA "+suffix,
 			"MSG "+suffix, "REC "+suffix, "CURR AVG BWIDTH")
+		table.AddFormattingFunction(3, federationStateFormatter)
 	} else {
 		table.WithHeader(ServiceColumn, participantCol, memberCol, "DATA "+suffix,
 			"MSG "+suffix, "REC "+suffix)
@@ -330,6 +334,7 @@ func FormatFederationSummary(federationSummaries []config.FederationSummary, tar
 			table.AddHeaderColumns(avgApply, "AVG ROUND TRIP", avgBacklogDelay, "REPLICATE",
 				partitions, "ERRORS", "UNACKED")
 			table.AddFormattingFunction(13, errorFormatter)
+			table.AddFormattingFunction(14, errorFormatter)
 		} else {
 			table.AddHeaderColumns(avgApply, avgBacklogDelay)
 		}

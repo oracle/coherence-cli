@@ -106,6 +106,18 @@ var healthSummaryFormatter = func(s string) string {
 	return yellow(s)
 }
 
+// healthSummaryFormatter formats a column value for federation state.
+var federationStateFormatter = func(s string) string {
+	if strings.Contains(s, "ERROR") {
+		return red(s)
+	}
+	if strings.Contains(s, "PAUSED") || strings.Contains(s, "STOPPED") {
+		return yellow(s)
+	}
+
+	return s
+}
+
 func getInt64Value(s string) (int64, error) {
 	return strconv.ParseInt(strings.TrimSpace(s), 10, 64)
 }
