@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, 2022 Oracle and/or its affiliates.
+ * Copyright (c) 2021, 2023 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -985,7 +985,7 @@ var (
 	statementParam           string
 )
 
-const defaultCoherenceVersion = "22.09"
+const defaultCoherenceVersion = "22.06.3"
 const startClusterCommand = "start cluster"
 const scaleClusterCommand = "scale cluster"
 const stopClusterCommand = "stop cluster"
@@ -1000,7 +1000,7 @@ var createClusterCmd = &cobra.Command{
 and starts it. You must have the 'mvn' executable and 'java' 17+ executable in your PATH for 
 this to work. This cluster is only for development/testing purposes and should not be used, 
 and is not supported in a production capacity. Supported versions are: CE 22.06 and above and 
-commercial 14.1.1.2206.1 and above. Default version is currently CE 22.09.
+commercial 14.1.1.2206.1 and above. Default version is currently CE 22.06.3.
 NOTE: This is an experimental feature and my be altered or removed in the future.`,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
