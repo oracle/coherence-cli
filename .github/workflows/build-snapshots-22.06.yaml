@@ -1,11 +1,11 @@
-# Copyright 2021, 2023 Oracle Corporation and/or its affiliates.
+# Copyright 2023 Oracle Corporation and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at
 # https://oss.oracle.com/licenses/upl.
 
 # ---------------------------------------------------------------------------
-# Coherence CLI CI Snapshots
+# Coherence CLI CI Snapshots for CE 22.06
 # ---------------------------------------------------------------------------
-name: CI Snapshots
+name: CI Snapshots 22.06
 
 on:
   workflow_dispatch:
@@ -24,8 +24,7 @@ jobs:
       fail-fast: false
       matrix:
         branch:
-          - main
-          - v22.09
+          - v22.06
 
 #   Checkout the source, we need a depth of zero to fetch all of the history otherwise
 #   the copyright check cannot work out the date of the files from Git.
@@ -39,10 +38,10 @@ jobs:
       run: |
         docker pull gcr.io/distroless/java17
 
-    - name: Set up JDK 17 for Build
+    - name: Set up JDK 11 for Build
       uses: actions/setup-java@v3
       with:
-        java-version: '17'
+        java-version: '11'
         distribution: 'zulu'
 
     - name: Build Coherence Snapshot
@@ -96,8 +95,8 @@ jobs:
         COH_VERSION=`cat ${POM_FILE} | grep '<revision>' | sed -e 's,^.*<revision>,,' -e 's,</revision>.*$,,'`
 
         echo "Running verify against $COH_VERSION"
-        COHERENCE_BASE_IMAGE=gcr.io/distroless/java17 COHERENCE_VERSION=$COH_VERSION make clean build-test-images test-e2e-standalone
-        PROFILES=,topics COHERENCE_BASE_IMAGE=gcr.io/distroless/java17 COHERENCE_VERSION=$COH_VERSION make clean build-test-images test-e2e-topics
+        COHERENCE_VERSION=$COH_VERSION make clean build-test-images test-e2e-standalone
+        PROFILES=,topics COHERENCE_VERSION=$COH_VERSION make clean build-test-images test-e2e-topics
         COHERENCE_VERSION=$COH_VERSION make test-clean test-discovery
 
     - uses: actions/upload-artifact@v3
