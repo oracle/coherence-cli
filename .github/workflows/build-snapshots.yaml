@@ -1,4 +1,4 @@
-# Copyright 2021, 2022 Oracle Corporation and/or its affiliates.
+# Copyright 2021, 2023 Oracle Corporation and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at
 # https://oss.oracle.com/licenses/upl.
 
@@ -25,6 +25,8 @@ jobs:
       matrix:
         branch:
           - main
+          - v22.06
+          - v22.09
 
 #   Checkout the source, we need a depth of zero to fetch all of the history otherwise
 #   the copyright check cannot work out the date of the files from Git.
@@ -56,6 +58,9 @@ jobs:
         cd /tmp
         git clone https://github.com/oracle/coherence.git $CLONE_DIR
         cd $CLONE_DIR/prj
+        if [ "$COH_BRANCH" != main ] ; then
+           git checkout $COH_BRANCH
+        fi
         make all
         cd $DIR
 
