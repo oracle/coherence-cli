@@ -54,6 +54,7 @@ The CLI complements your existing Coherence management tools and allows you to:
 * Gather information that may be useful for Oracle Support to help diagnose issues
 * Connect to standalone or WebLogic Server based clusters from commercial versions 12.2.1.4 and above as well as the latest [Coherence Community Edition](https://github.com/oracle/coherence) (CE) versions
 * Retrieve thread dumps across members
+* Create, start and scale development clusters (experimental)
 
 ## Install the CLI
 
