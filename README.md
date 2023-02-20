@@ -54,12 +54,34 @@ The CLI complements your existing Coherence management tools and allows you to:
 * Gather information that may be useful for Oracle Support to help diagnose issues
 * Connect to standalone or WebLogic Server based clusters from commercial versions 12.2.1.4 and above as well as the latest [Coherence Community Edition](https://github.com/oracle/coherence) (CE) versions
 * Retrieve thread dumps across members
+* Create, start and scale development clusters (experimental)
 
 ## Install the CLI
 
-The Coherence CLI is available as a binary for most platforms and architectures. See the
-[Install guide](https://oracle.github.io/coherence-cli/docs/latest/#/docs/installation/01_installation) for
-information on downloading the CLI.
+The Coherence CLI is available for macOS, Linux and Windows for x86 and Arm based processors.
+
+### Mac / Linux
+
+For macOS and Linux platforms, use the following to install the latest version of the CLI:
+
+```bash
+curl -sL https://raw.githubusercontent.com/oracle/coherence-cli/main/install.sh | bash
+```
+
+> Note: On linux, `sudo` is required to copy `cohctl` to the destination directory `/usr/local/bin/`
+
+### Windows
+
+For Windows, use the curl command below, then copy `cohctl.exe` to a directory in your PATH:
+
+```cmd
+curl -sLo cohctl.exe "https://github.com/oracle/coherence-cli/releases/download/1.4.2/cohctl-1.4.2-windows-amd64.exe"
+```
+
+> Note: Change the **amd64** to **arm** for ARM based processor in the URL above.
+
+See the [Install guide](https://oracle.github.io/coherence-cli/docs/latest/#/docs/installation/01_installation) for
+more information on downloading and installing the CLI.
 
 ## Getting Started
 
@@ -76,8 +98,7 @@ The CLI supports and is certified against the following Community and Commercial
 * 22.09
 * 22.06.x
 * 21.12.x
-* 14.1.1-0-10
-* 14.1.1-0-9
+* 14.1.1-0-11+
 
 **Coherence Grid/ Enterprise Edition**
 * 12.2.1.4.x - minimum patch level of 12.2.1.4.10+ required
