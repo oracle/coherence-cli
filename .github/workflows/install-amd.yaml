@@ -3,9 +3,9 @@
 # https://oss.oracle.com/licenses/upl.
 
 # ---------------------------------------------------------------------------
-# Coherence CLI GitHub Actions CI build - Install
+# Coherence CLI GitHub Actions CI build - Install AMD
 # ---------------------------------------------------------------------------
-name: CI - Install
+name: CI - Install AMD
 
 on:
   workflow_dispatch:
@@ -23,7 +23,7 @@ jobs:
 
     steps:
 
-    - name: Test Installing CLI via curl
+    - name: Test Installing CLI via curl for Linux AMD
       shell: bash
       run: |
         curl -sL https://raw.githubusercontent.com/oracle/coherence-cli/main/install.sh | bash
