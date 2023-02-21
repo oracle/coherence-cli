@@ -26,4 +26,4 @@ jobs:
     - name: Test Installing CLI via curl for Linux ARM
       shell: bash
       run: |
-        docker run -it arm64v8/fedora:38 bash -c "curl -sLo /tmp/install.sh https://raw.githubusercontent.com/oracle/coherence-cli/main/install.sh && chmod u+x /tmp/install.sh && /tmp/install.sh && cohctl version"
+        docker run arm64v8/fedora:38 bash -c "curl -sLo /tmp/install.sh https://raw.githubusercontent.com/oracle/coherence-cli/main/install.sh && chmod u+x /tmp/install.sh && /tmp/install.sh && cohctl version"
