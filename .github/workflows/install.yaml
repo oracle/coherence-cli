@@ -13,6 +13,9 @@ on:
     branches: [ main ]
   pull_request:
     branches: [ main ]
+  schedule:
+    # Twice a day
+    - cron: '0 0,12 * * *'
 
 jobs:
   build:
@@ -23,6 +26,5 @@ jobs:
     - name: Test Installing CLI via curl
       shell: bash
       run: |
-        apt-get install -y sudo wget
         curl -sL https://raw.githubusercontent.com/oracle/coherence-cli/main/install.sh | bash
         cohctl version
