@@ -9,7 +9,7 @@
 # Usage:
 #  Run the following on Linux or Mac:
 #
-#   curl -L https://raw.githubusercontent.com/oracle/coherence-cli/main/install.sh | bash
+#   curl -L https://raw.githubusercontent.com/oracle/coherence-cli/main/scripts/install.sh | bash
 #
 VERSION=1.4.2
 OS=`uname`

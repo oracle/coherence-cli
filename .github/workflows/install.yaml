@@ -1,0 +1,28 @@
+# Copyright 2023 Oracle Corporation and/or its affiliates.
+# Licensed under the Universal Permissive License v 1.0 as shown at
+# https://oss.oracle.com/licenses/upl.
+
+# ---------------------------------------------------------------------------
+# Coherence CLI GitHub Actions CI build - Install
+# ---------------------------------------------------------------------------
+name: CI - Install
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+
+    - name: Test Installing CLI via curl
+      shell: bash
+      run: |
+        apt-get install -y sudo wget
+        curl -sL https://raw.githubusercontent.com/oracle/coherence-cli/main/install.sh | bash
+        cohctl version
