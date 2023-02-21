@@ -65,7 +65,7 @@ The Coherence CLI is available for macOS, Linux and Windows for x86 and Arm base
 For macOS and Linux platforms, use the following to install the latest version of the CLI:
 
 ```bash
-curl -sL https://raw.githubusercontent.com/oracle/coherence-cli/main/install.sh | bash
+curl -sL https://raw.githubusercontent.com/oracle/coherence-cli/main/scripts/install.sh | bash
 ```
 
 > Note: On linux, `sudo` is required to copy `cohctl` to the destination directory `/usr/local/bin/`

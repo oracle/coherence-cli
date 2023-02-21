@@ -1,0 +1,30 @@
+# Copyright 2023 Oracle Corporation and/or its affiliates.
+# Licensed under the Universal Permissive License v 1.0 as shown at
+# https://oss.oracle.com/licenses/upl.
+
+# ---------------------------------------------------------------------------
+# Coherence CLI GitHub Actions CI build - Install AMD
+# ---------------------------------------------------------------------------
+name: CI - Install AMD
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    # Twice a day
+    - cron: '0 0,12 * * *'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+
+    - name: Test Installing CLI via curl for Linux AMD
+      shell: bash
+      run: |
+        curl -sL https://raw.githubusercontent.com/oracle/coherence-cli/main/scripts/install.sh | bash
+        cohctl version
