@@ -26,5 +26,5 @@ jobs:
     - name: Test Installing CLI via curl for Linux AMD
       shell: bash
       run: |
-        curl -sL https://raw.githubusercontent.com/oracle/coherence-cli/main/install.sh | bash
+        curl -sL https://raw.githubusercontent.com/oracle/coherence-cli/main/scripts/install.sh | bash
         cohctl version
