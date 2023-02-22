@@ -19,9 +19,11 @@ import (
 	"testing"
 )
 
-const cliVersion = "CLI Version:"
-const configOption = "--config"
-const configYaml = "config.yaml"
+const (
+	cliVersion   = "CLI Version:"
+	configOption = "--config"
+	configYaml   = "config.yaml"
+)
 
 func TestVersionCommand(t *testing.T) {
 	g := NewGomegaWithT(t)

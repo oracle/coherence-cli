@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, 2022 Oracle and/or its affiliates.
+ * Copyright (c) 2021, 2023 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -20,10 +20,12 @@ import (
 	"time"
 )
 
-const ram = "RamJournalRM"
-const flash = "FlashJournalRM"
-const noElasticData = "elastic data is not configured"
-const flashString = "flash"
+const (
+	ram           = "RamJournalRM"
+	flash         = "FlashJournalRM"
+	noElasticData = "elastic data is not configured"
+	flashString   = "flash"
+)
 
 var (
 	ElasticDataMessage = fmt.Sprintf("name must be %s or %s", ram, flash)

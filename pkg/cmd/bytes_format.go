@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Oracle and/or its affiliates.
+ * Copyright (c) 2022, 2023 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -12,14 +12,15 @@ import (
 	"github.com/spf13/viper"
 )
 
-const setDefaultBytesMsg = "Bytes format is now set to "
-const getDefaultBytesMsg = "Current bytes format: "
-const clearDefaultBytesMsg = "Default bytes format has been cleared"
-const invalidBytesValue = "you must provide either 'k', 'm' or 'g'"
-
-const bytesFormatK = "k"
-const bytesFormatM = "m"
-const bytesFormatG = "g"
+const (
+	setDefaultBytesMsg   = "Bytes format is now set to "
+	getDefaultBytesMsg   = "Current bytes format: "
+	clearDefaultBytesMsg = "Default bytes format has been cleared"
+	invalidBytesValue    = "you must provide either 'k', 'm' or 'g'"
+	bytesFormatK         = "k"
+	bytesFormatM         = "m"
+	bytesFormatG         = "g"
+)
 
 // setBytesFormatCmd represents the set bytes-format command
 var setBytesFormatCmd = &cobra.Command{

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Oracle and/or its affiliates.
+ * Copyright (c) 2022, 2023 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -12,9 +12,11 @@ import (
 	"github.com/spf13/viper"
 )
 
-const setUseGradleMsg = "Use Gradle is now set to "
-const setSetGradleError = "you can only specify 'true' or 'false'"
-const getUseGradleMsg = "Use Gradle: "
+const (
+	setUseGradleMsg   = "Use Gradle is now set to "
+	setSetGradleError = "you can only specify 'true' or 'false'"
+	getUseGradleMsg   = "Use Gradle: "
+)
 
 // setUseGradleCmd represents the set use-gradle command
 var setUseGradleCmd = &cobra.Command{

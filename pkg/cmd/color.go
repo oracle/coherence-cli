@@ -12,9 +12,11 @@ import (
 	"github.com/spf13/viper"
 )
 
-const setColorMsg = "Color formatting is now set to "
-const setColorError = "you can only specify 'on' or 'off'"
-const getColorMsg = "Color formatting is: "
+const (
+	setColorMsg   = "Color formatting is now set to "
+	setColorError = "you can only specify 'on' or 'off'"
+	getColorMsg   = "Color formatting is: "
+)
 
 // setColorCmd represents the set color command
 var setColorCmd = &cobra.Command{

@@ -35,22 +35,24 @@ var (
 	password string
 )
 
-const links = "?links="
-const jsonStringFormat = "{\"%s\": %s}"
-const servicesPath = "/services/"
-const membersPath = "/members/"
-const subscribersPath = "/subscribers"
-const cachesPath = "/caches/"
-const executorsPath = "/executors/"
-const federationStatsPath = "/federation/statistics/"
-const reportersPath = "/reporters/"
-const journalPath = "/journal/"
-const subscriberGroupsPath = "/subscriberGroups"
-const topicsPath = "/topics/"
-const rolePrefix = "{\"role\": \""
-const resetStatistics = "resetStatistics"
-const all = "all"
-const disconnectAll = "/disconnectAll"
+const (
+	links                = "?links="
+	jsonStringFormat     = "{\"%s\": %s}"
+	servicesPath         = "/services/"
+	membersPath          = "/members/"
+	subscribersPath      = "/subscribers"
+	cachesPath           = "/caches/"
+	executorsPath        = "/executors/"
+	federationStatsPath  = "/federation/statistics/"
+	reportersPath        = "/reporters/"
+	journalPath          = "/journal/"
+	subscriberGroupsPath = "/subscriberGroups"
+	topicsPath           = "/topics/"
+	rolePrefix           = "{\"role\": \""
+	resetStatistics      = "resetStatistics"
+	all                  = "all"
+	disconnectAll        = "/disconnectAll"
+)
 
 // HTTPFetcher is an implementation of a Fetcher to retrieve data from Management over REST
 type HTTPFetcher struct {

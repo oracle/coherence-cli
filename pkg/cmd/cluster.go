@@ -32,9 +32,11 @@ var (
 	timeout        int32
 )
 
-const clusterMessage = "A cluster connection already exists with the name %s for %s\n"
-const ignoreErrorsMessage = "ignore errors from NS lookup"
-const youMustProviderClusterMessage = "you must provide a cluster name"
+const (
+	clusterMessage                = "A cluster connection already exists with the name %s for %s\n"
+	ignoreErrorsMessage           = "ignore errors from NS lookup"
+	youMustProviderClusterMessage = "you must provide a cluster name"
+)
 
 // addClusterCmd represents the add cluster command
 var addClusterCmd = &cobra.Command{

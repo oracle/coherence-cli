@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, 2022 Oracle and/or its affiliates.
+ * Copyright (c) 2021, 2023 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -39,9 +39,11 @@ var (
 	excludeStorageDisabled bool
 )
 
-const serviceUse = "service service-name"
-const provideServiceName = "you must provide a service name"
-const unableToFindService = "unable to find service with service name '%s'"
+const (
+	serviceUse          = "service service-name"
+	provideServiceName  = "you must provide a service name"
+	unableToFindService = "unable to find service with service name '%s'"
+)
 
 // getServicesCmd represents the get services command
 var getServicesCmd = &cobra.Command{

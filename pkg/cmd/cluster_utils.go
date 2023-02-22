@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Oracle and/or its affiliates.
+ * Copyright (c) 2022, 2023 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -25,15 +25,17 @@ import (
 	"time"
 )
 
-const consoleClass = "com.tangosol.net.CacheFactory"
-const cohQLClass = "com.tangosol.coherence.dslquery.QueryPlus"
-const ceGroupID = "com.oracle.cohrence.ce"
-const fileTypeJar = "jar"
-const fileTypePom = "pom"
-
-const javaExec = "java"
-const mvnExec = "mvn"
-const gradleExec = "gradle"
+const (
+	consoleClass  = "com.tangosol.net.CacheFactory"
+	cohQLClass    = "com.tangosol.coherence.dslquery.QueryPlus"
+	ceGroupID     = "com.oracle.cohrence.ce"
+	fileTypeJar   = "jar"
+	fileTypePom   = "pom"
+	javaExec      = "java"
+	mvnExec       = "mvn"
+	gradleExec    = "gradle"
+	gradleDirName = "gradle-dir-name-cohctl-cli"
+)
 
 // a build template for saving the runtime classpath to a file by running
 //
@@ -60,8 +62,6 @@ tasks.register("buildClasspath") {
     new File(fileName).text = sourceSets.test.runtimeClasspath.getAsPath()
 }
 `
-
-const gradleDirName = "gradle-dir-name-cohctl-cli"
 
 // default Jars to use
 var (

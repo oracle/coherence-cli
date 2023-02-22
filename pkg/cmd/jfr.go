@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, 2022 Oracle and/or its affiliates.
+ * Copyright (c) 2021, 2023 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -25,8 +25,10 @@ var (
 	jfrDumpFileName string
 )
 
-const jfrNameUse = "jfr name"
-const supplyJFR = "you must provide a JFR name"
+const (
+	jfrNameUse = "jfr name"
+	supplyJFR  = "you must provide a JFR name"
+)
 
 // getJfrsCmd represents the get jfrs command
 var getJfrsCmd = &cobra.Command{

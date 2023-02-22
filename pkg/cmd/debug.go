@@ -12,12 +12,14 @@ import (
 	"github.com/spf13/viper"
 )
 
-const setDebugMsg = "Debug is now set to "
-const setDebugError = "you can only specify 'on' or 'off'"
-const getDebugMsg = "Current debug level: "
-const setError = "you must provide either on or off"
-const off = "off"
-const on = "on"
+const (
+	setDebugMsg   = "Debug is now set to "
+	setDebugError = "you can only specify 'on' or 'off'"
+	getDebugMsg   = "Current debug level: "
+	setError      = "you must provide either on or off"
+	off           = "off"
+	on            = "on"
+)
 
 // setDebugCmd represents the set debug command
 var setDebugCmd = &cobra.Command{

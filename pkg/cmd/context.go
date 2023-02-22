@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, 2022 Oracle and/or its affiliates.
+ * Copyright (c) 2021, 2023 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -12,10 +12,12 @@ import (
 	"github.com/spf13/viper"
 )
 
-const setContextMsg = "Current context is now "
-const UnableToFindClusterMsg = "unable to find cluster with connection name "
-const getContextMsg = "Current context: "
-const clearContextMessage = "Current context was cleared"
+const (
+	setContextMsg          = "Current context is now "
+	UnableToFindClusterMsg = "unable to find cluster with connection name "
+	getContextMsg          = "Current context: "
+	clearContextMessage    = "Current context was cleared"
+)
 
 // setContextCmd represents the set context command
 var setContextCmd = &cobra.Command{

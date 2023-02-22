@@ -20,13 +20,15 @@ import (
 	"time"
 )
 
-const destinations = "destinations"
-const origins = "origins"
-const outgoing = "outgoing"
-const incoming = "incoming"
-const participantMessage = "participant to apply to"
-const supplyService = "you must provide a service name"
-const federationUse = "federation service-name"
+const (
+	destinations       = "destinations"
+	origins            = "origins"
+	outgoing           = "outgoing"
+	incoming           = "incoming"
+	participantMessage = "participant to apply to"
+	supplyService      = "you must provide a service name"
+	federationUse      = "federation service-name"
+)
 
 var (
 	participant              string
