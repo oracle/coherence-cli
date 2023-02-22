@@ -20,11 +20,13 @@ import (
 	"time"
 )
 
-const SupplyTopicMessage = "you must provide a topic"
-const NoTopicForService = "there are no topics for service %s"
-const TopicDoesNotExist = "a topic named %s does not exist for service %s"
-const nodeIDMessage = "node id to show channels for"
-const subscriberMessage = "unable to find node %d for topic %s, service %s and subscriber id %d"
+const (
+	SupplyTopicMessage = "you must provide a topic"
+	NoTopicForService  = "there are no topics for service %s"
+	TopicDoesNotExist  = "a topic named %s does not exist for service %s"
+	nodeIDMessage      = "node id to show channels for"
+	subscriberMessage  = "unable to find node %d for topic %s, service %s and subscriber id %d"
+)
 
 var (
 	topicsNodeID    int32

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, 2022 Oracle and/or its affiliates.
+ * Copyright (c) 2021, 2023 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -30,8 +30,10 @@ var (
 	archiveMessage = "if true, returns archived snapshots, otherwise local snapshots"
 )
 
-const provideSnapshot = "you must provide a snapshot name"
-const snapshotUse = "snapshot snapshot-name"
+const (
+	provideSnapshot = "you must provide a snapshot name"
+	snapshotUse     = "snapshot snapshot-name"
+)
 
 // createSnapshotCmd represents the create snapshot command
 var createSnapshotCmd = &cobra.Command{

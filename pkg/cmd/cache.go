@@ -34,9 +34,11 @@ var (
 	cannotFindCache   = "no cache named %s exists for service %s"
 )
 
-const provideCacheMessage = "you must provide a cache name"
-const back = "back"
-const all = "all"
+const (
+	provideCacheMessage = "you must provide a cache name"
+	back                = "back"
+	all                 = "all"
+)
 
 // getCachesCmd represents the get caches command
 var getCachesCmd = &cobra.Command{

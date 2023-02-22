@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Oracle and/or its affiliates.
+ * Copyright (c) 2022, 2023 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -11,10 +11,12 @@ import (
 	"github.com/spf13/viper"
 )
 
-const setDefaultHeapMsg = "Default heap is now set to "
-const getDefaultHeapMsg = "Current default heap: "
-const clearDefaultHeapMsg = "Default heap has been cleared"
-const invalidDefaultHeapValue = "you must provide a value"
+const (
+	setDefaultHeapMsg       = "Default heap is now set to "
+	getDefaultHeapMsg       = "Current default heap: "
+	clearDefaultHeapMsg     = "Default heap has been cleared"
+	invalidDefaultHeapValue = "you must provide a value"
+)
 
 // setDefaultHeapCmd represents the set default-heap command
 var setDefaultHeapCmd = &cobra.Command{

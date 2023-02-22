@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, 2022 Oracle and/or its affiliates.
+ * Copyright (c) 2021, 2023 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -19,8 +19,10 @@ import (
 	"time"
 )
 
-const provideProxyService = "you must provide a proxy service name"
-const proxyErrorMsg = "unable to find proxy service with service name"
+const (
+	provideProxyService = "you must provide a proxy service name"
+	proxyErrorMsg       = "unable to find proxy service with service name"
+)
 
 // var getProxiesCmd = &cobra.Command{ represents the getProxies command
 var getProxiesCmd = &cobra.Command{

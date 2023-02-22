@@ -18,9 +18,7 @@ import (
 	"sync"
 )
 
-var (
-	resetNodeIDs string
-)
+var resetNodeIDs string
 
 const serviceNotFound = "unable to find service with service name '%s'"
 

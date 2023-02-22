@@ -45,14 +45,16 @@ var (
 	tracingRatio float32
 )
 
-const dumpClusterHeap = "dump cluster heap"
-const logClusterState = "log cluster state"
-const configureTracing = "configure tracing"
-const unableToDecode = "unable to decode member details"
-const noNodeID = "no node with node id %s exists in this cluster"
-const invalidNodeID = "invalid value for node id of %s"
-const none = "none"
-const roleNameDescription = "role name to display"
+const (
+	dumpClusterHeap     = "dump cluster heap"
+	logClusterState     = "log cluster state"
+	configureTracing    = "configure tracing"
+	unableToDecode      = "unable to decode member details"
+	noNodeID            = "no node with node id %s exists in this cluster"
+	invalidNodeID       = "invalid value for node id of %s"
+	none                = "none"
+	roleNameDescription = "role name to display"
+)
 
 // getMembersCmd represents the get members command
 var getMembersCmd = &cobra.Command{

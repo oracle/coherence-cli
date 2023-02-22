@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, 2022 Oracle and/or its affiliates.
+ * Copyright (c) 2021, 2023 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -20,12 +20,14 @@ import (
 	"time"
 )
 
-const reporterConfigFile = "configFile"
-const reporterCurrentBatch = "currentBatch"
-const reporterIntervalSeconds = "intervalSeconds"
-const reporterOutputPath = "outputPath"
-const reporterUse = "reporter node-id"
-const provideNodeID = "you must provide a node id"
+const (
+	reporterConfigFile      = "configFile"
+	reporterCurrentBatch    = "currentBatch"
+	reporterIntervalSeconds = "intervalSeconds"
+	reporterOutputPath      = "outputPath"
+	reporterUse             = "reporter node-id"
+	provideNodeID           = "you must provide a node id"
+)
 
 var (
 	validReporterAttributes = []string{reporterConfigFile, reporterCurrentBatch, reporterIntervalSeconds, reporterOutputPath}
