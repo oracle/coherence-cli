@@ -554,7 +554,7 @@ addition information as well as '-v' to displayed additional information.`,
 
 			sb.WriteString("\nMEMBERS\n")
 			sb.WriteString("-------\n")
-			sb.WriteString(FormatMembers(members.Members, verboseOutput, storageMap))
+			sb.WriteString(FormatMembers(members.Members, verboseOutput, storageMap, false))
 
 			sb.WriteString("\nSERVICES\n")
 			sb.WriteString("--------\n")
