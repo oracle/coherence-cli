@@ -1169,13 +1169,15 @@ func FormatMemberHealth(health []config.HealthSummary) string {
 }
 
 // FormatMembers returns the member's information in a column formatted output
-func FormatMembers(members []config.Member, verbose bool, storageMap map[int]bool) string {
+func FormatMembers(members []config.Member, verbose bool, storageMap map[int]bool, summary bool) string {
 	var (
 		memberCount        = len(members)
 		alignmentWide      = []string{R, L, L, R, L, L, L, L, L, R, R, L, R, R, R}
 		alignment          = []string{R, L, L, R, L, L, L, R, R, R}
 		finalAlignment     []string
 		formattingFunction = getFormattingFunction()
+		roleMap            = make(map[string]int32)
+		storageCount       int
 	)
 
 	if OutputFormat == constants.TABLE {
@@ -1219,6 +1221,7 @@ func FormatMembers(members []config.Member, verbose bool, storageMap map[int]boo
 		if storageEnabled {
 			totalAvailStorageMemoryMB += value.MemoryAvailableMB
 			totalMaxStorageMemoryMB += value.MemoryMaxMB
+			storageCount++
 		}
 
 		table.AddRow(formatSmallInteger(int32(nodeID)), value.UnicastAddress,
@@ -1232,6 +1235,14 @@ func FormatMembers(members []config.Member, verbose bool, storageMap map[int]boo
 		table.AddColumnsToRow(fmt.Sprintf("%v", storageEnabled), formattingFunction(int64(value.MemoryMaxMB)*MB),
 			formattingFunction(int64(value.MemoryMaxMB-value.MemoryAvailableMB)*MB),
 			formattingFunction(int64(value.MemoryAvailableMB)*MB))
+
+		// summarise the roles
+		val, ok := roleMap[value.RoleName]
+		if !ok {
+			roleMap[value.RoleName] = 1
+		} else {
+			roleMap[value.RoleName] = val + 1
+		}
 	}
 
 	totalUsedMB := totalMaxMemoryMB - totalAvailMemoryMB
@@ -1245,6 +1256,7 @@ func FormatMembers(members []config.Member, verbose bool, storageMap map[int]boo
 
 	result :=
 		fmt.Sprintf("Total cluster members: %d\n", memberCount) +
+			fmt.Sprintf("Storage enabled count: %d\n", storageCount) +
 			fmt.Sprintf("Cluster Heap - Total: %s Used: %s Available: %s (%4.1f%%)\n",
 				strings.TrimSpace(formattingFunction(int64(totalMaxMemoryMB)*MB)),
 				strings.TrimSpace(formattingFunction(int64(totalUsedMB)*MB)),
@@ -1254,6 +1266,13 @@ func FormatMembers(members []config.Member, verbose bool, storageMap map[int]boo
 				strings.TrimSpace(formattingFunction(int64(totalUsedStorageMB)*MB)),
 				strings.TrimSpace(formattingFunction(int64(totalAvailStorageMemoryMB)*MB)), availableStoragePercent)
 
+	if summary {
+		tableSummary := newFormattedTable().WithHeader(RoleColumn, "COUNT").WithAlignment(L, R)
+		for k, v := range roleMap {
+			tableSummary.AddRow(k, formatSmallInteger(v))
+		}
+		return result + tableSummary.String()
+	}
 	if verbose {
 		result += table.String()
 	}

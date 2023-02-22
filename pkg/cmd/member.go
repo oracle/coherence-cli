@@ -40,6 +40,8 @@ var (
 	validAttributes = []string{"loggingLevel", "resendDelay", "sendAckDelay",
 		"trafficJamCount", "trafficJamDelay", "loggingLimit,", "loggingFormat"}
 
+	memberSummary bool
+
 	tracingRatio float32
 )
 
@@ -138,7 +140,7 @@ func getMembers(cmd *cobra.Command, networkStats bool) error {
 			if networkStats {
 				cmd.Println(FormatNetworkStatistics(filteredMembers))
 			} else {
-				cmd.Print(FormatMembers(filteredMembers, true, storageMap))
+				cmd.Print(FormatMembers(filteredMembers, true, storageMap, memberSummary))
 			}
 		}
 
@@ -865,6 +867,7 @@ func init() {
 	var roleDescription = "role name to run for"
 
 	getMembersCmd.Flags().StringVarP(&roleName, "role", "r", all, roleNameDescription)
+	getMembersCmd.Flags().BoolVarP(&memberSummary, "summary", "S", false, "show a member summary")
 
 	getMemberStats.Flags().StringVarP(&roleName, "role", "r", all, roleNameDescription)
 
