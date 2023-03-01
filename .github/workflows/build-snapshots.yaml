@@ -11,8 +11,6 @@ on:
   workflow_dispatch:
   push:
     branches: [ main ]
-  pull_request:
-    branches: [ main ]
   schedule:
     # Every day at midnight
     - cron: '0 0 * * *'
