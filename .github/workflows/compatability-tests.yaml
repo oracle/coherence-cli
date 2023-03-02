@@ -12,13 +12,6 @@ on:
   push:
     branches-ignore:
     - gh-pages
-  pull_request:
-    types:
-      - opened
-      - synchronize
-      - committed
-    branches-ignore:
-    - gh-pages
 
 jobs:
   build:
