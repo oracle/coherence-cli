@@ -9,8 +9,6 @@ name: CI - Install AMD
 
 on:
   workflow_dispatch:
-    branches:
-      - '*'
     branches-ignore:
       - gh-pages
   schedule:

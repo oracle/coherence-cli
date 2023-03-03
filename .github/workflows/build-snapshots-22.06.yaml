@@ -10,8 +10,6 @@ name: CI Snapshots 22.06
 on:
   workflow_dispatch:
   push:
-    branches:
-      - '*'
     branches-ignore:
       - gh-pages
   schedule:
