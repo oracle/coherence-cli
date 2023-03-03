@@ -10,7 +10,8 @@ name: CI Snapshots 22.06
 on:
   workflow_dispatch:
   push:
-    branches: [ main ]
+    branches-ignore:
+      - gh-pages
   schedule:
     # Every day at midnight
     - cron: '0 0 * * *'

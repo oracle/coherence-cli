@@ -9,8 +9,8 @@ name: CI - Install AMD
 
 on:
   workflow_dispatch:
-  push:
-    branches: [ main ]
+    branches-ignore:
+      - gh-pages
   schedule:
     # Twice a day
     - cron: '0 0,12 * * *'
