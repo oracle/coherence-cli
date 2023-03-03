@@ -10,7 +10,10 @@ name: CI Test Create Cluster
 on:
   workflow_dispatch:
   push:
-    branches: [ main ]
+    branches:
+      - '*'
+    branches-ignore:
+      - gh-pages
 
 jobs:
   build:
