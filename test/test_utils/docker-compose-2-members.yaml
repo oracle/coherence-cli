@@ -1,4 +1,4 @@
-# Copyright 2021, 2022 Oracle Corporation and/or its affiliates.
+# Copyright 2021, 2023 Oracle Corporation and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at
 # https://oss.oracle.com/licenses/upl.
 
@@ -17,6 +17,7 @@ services:
       - 30000:30000
       - 8080:8080
       - 7574:7574
+      - 9612:9612
     volumes:
       - ./shared:/shared
     user: ${CURRENT_UID}
@@ -33,6 +34,7 @@ services:
     ports:
       - 30001:30001
       - 8081:8080
+      - 9613:9613
     volumes:
       - ./shared:/shared
     user: ${CURRENT_UID}

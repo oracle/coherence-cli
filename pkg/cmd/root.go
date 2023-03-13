@@ -574,6 +574,7 @@ func Initialize(command *cobra.Command) *cobra.Command {
 	describeCmd.AddCommand(describeExecutorCmd)
 	describeCmd.AddCommand(describeFederationCmd)
 	describeCmd.AddCommand(describeTopicCmd)
+	describeCmd.AddCommand(describeConfigCmd)
 
 	// create
 	command.AddCommand(createCmd)
