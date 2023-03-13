@@ -2,7 +2,7 @@
 
 <!--
 
-    Copyright (c) 2021, 2022 Oracle and/or its affiliates.
+    Copyright (c) 2021, 2023 Oracle and/or its affiliates.
     Licensed under the Universal Permissive License v 1.0 as shown at
     https://oss.oracle.com/licenses/upl.
 
@@ -244,6 +244,8 @@
                   <jvmFlag>-Dcoherence.management=all</jvmFlag>
                   <jvmFlag>-Dcoherence.management.http=all</jvmFlag>
                   <jvmFlag>-Dcoherence.management.http.port=30000</jvmFlag>
+                  <jvmFlag>-Dcoherence.metrics.http.enabled=true</jvmFlag>
+                  <jvmFlag>-Dcoherence.metrics.http.port=9612</jvmFlag>
                   <jvmFlag>-Dcoherence.log.level=9</jvmFlag>
                   <jvmFlag>-Dcoherence.distributed.localstorage=true</jvmFlag>
                   <jvmFlag>-Dcoherence.management.refresh.expiry=1s</jvmFlag>
@@ -282,6 +284,8 @@
                   <jvmFlag>-Dcoherence.log.level=9</jvmFlag>
                   <jvmFlag>-Dcoherence.management.http=all</jvmFlag>
                   <jvmFlag>-Dcoherence.management.http.port=30000</jvmFlag>
+                  <jvmFlag>-Dcoherence.metrics.http.enabled=true</jvmFlag>
+                  <jvmFlag>-Dcoherence.metrics.http.port=9613</jvmFlag>
                   <jvmFlag>-Dcoherence.management.refresh.expiry=1s</jvmFlag>
                   <jvmFlag>-Dcoherence.distributed.localstorage=true</jvmFlag>
                   <jvmFlag>-Dcoherence.cacheconfig=${coherence.cache.config}</jvmFlag>
@@ -323,6 +327,8 @@
                   <jvmFlag>-Dcoherence.management=all</jvmFlag>
                   <jvmFlag>-Dcoherence.management.http=all</jvmFlag>
                   <jvmFlag>-Dcoherence.management.http.port=30000</jvmFlag>
+                  <jvmFlag>-Dcoherence.metrics.http.enabled=true</jvmFlag>
+                  <jvmFlag>-Dcoherence.metrics.http.port=9612</jvmFlag>
                   <jvmFlag>-Dcoherence.log.level=9</jvmFlag>
                   <jvmFlag>-Dcoherence.distributed.localstorage=true</jvmFlag>
                   <jvmFlag>-Dcoherence.management.refresh.expiry=1s</jvmFlag>
@@ -365,6 +371,8 @@
                   <jvmFlag>-Dcoherence.management=all</jvmFlag>
                   <jvmFlag>-Dcoherence.management.http=all</jvmFlag>
                   <jvmFlag>-Dcoherence.management.http.port=30001</jvmFlag>
+                  <jvmFlag>-Dcoherence.metrics.http.enabled=true</jvmFlag>
+                  <jvmFlag>-Dcoherence.metrics.http.port=9613</jvmFlag>
                   <jvmFlag>-Dcoherence.log.level=9</jvmFlag>
                   <jvmFlag>-Dcoherence.distributed.localstorage=true</jvmFlag>
                   <jvmFlag>-Dcoherence.management.refresh.expiry=1s</jvmFlag>
