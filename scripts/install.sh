@@ -11,7 +11,7 @@
 #
 #   curl -L https://raw.githubusercontent.com/oracle/coherence-cli/main/scripts/install.sh | bash
 #
-VERSION=1.4.2
+VERSION=$(curl -s https://oracle.github.io/coherence-cli/stable.txt)
 OS=`uname`
 ARCH=`uname -m`
 
