@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, 2022 Oracle and/or its affiliates.
+ * Copyright (c) 2021, 2023 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -21,9 +21,9 @@ var nsLookupCmd = &cobra.Command{
 	Short: "execute a Coherence Name Service lookup",
 	Long: `The 'nslookup' command looks up various Name Service endpoints for a cluster host/port.
 The various options to pass via -q option include: Cluster/name, Cluster/info, NameService/string/Cluster/foreign,
-NameService/string/management/HTTPManagementURL, NameService/string/management/JMXServiceURL, and
+NameService/string/management/HTTPManagementURL, NameService/string/management/JMXServiceURL,
 NameService/string/metrics/HTTPMetricsURL, NameService/string/$GRPC:GrpcProxy,
-NameService/string/Cluster/foreign/<clustername>/NameService/localPort`,
+NameService/string/health/HTTPHealthURL and NameService/string/Cluster/foreign/<clustername>/NameService/localPort`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var (
 			hostPorts []string
