@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, 2022 Oracle and/or its affiliates.
+ * Copyright (c) 2021, 2023 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -16,7 +16,7 @@ import (
 	"github.com/oracle/coherence-cli/pkg/config"
 	"github.com/oracle/coherence-cli/pkg/fetcher"
 	"github.com/spf13/cobra"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/http/cookiejar"
 	"os"
@@ -59,7 +59,7 @@ func GetTestContext() *TestContext {
 
 // CreateTempDirectory creates a temporary directory
 func CreateTempDirectory(pattern string) string {
-	dir, err := ioutil.TempDir("", pattern)
+	dir, err := os.MkdirTemp("", pattern)
 	if err != nil {
 		fmt.Println("Unable to create temporary directory " + err.Error())
 	}
@@ -70,7 +70,7 @@ func CreateTempDirectory(pattern string) string {
 
 // FileExistsInDirectory returns true if a file exists in a directory
 func FileExistsInDirectory(dir string, file string) bool {
-	files, err := ioutil.ReadDir(dir)
+	files, err := os.ReadDir(dir)
 
 	if err != nil {
 		return false
@@ -310,7 +310,7 @@ func IssueGetRequest(url string) ([]byte, error) {
 		return emptyByte, errors.New("Did not receive a 200 response code: " + resp.Status)
 	}
 
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return emptyByte, err
 	}
@@ -330,7 +330,7 @@ func IssuePostRequest(url string) ([]byte, error) {
 		return emptyByte, errors.New("Did not receive a 200 response code: " + resp.Status)
 	}
 
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return emptyByte, err
 	}

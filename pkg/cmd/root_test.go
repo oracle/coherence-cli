@@ -122,7 +122,7 @@ func TestDebugCommands(t *testing.T) {
 	test_utils.EnsureCommandErrorContains(g, t, cliCmd, setDebugError, configOption, file, "set", "debug", "dont-know")
 }
 
-// TestColoCommands tests the get and set colo commands
+// TestColoCommands tests the get and set color commands.
 func TestColoCommands(t *testing.T) {
 	cliCmd := Initialize(nil)
 	g := NewGomegaWithT(t)
@@ -136,12 +136,12 @@ func TestColoCommands(t *testing.T) {
 		_ = os.RemoveAll(file)
 	})
 
-	test_utils.EnsureCommandOutputEquals(g, t, cliCmd, getColorMsg+"off\n", configOption, file, "get", "color")
+	test_utils.EnsureCommandOutputEquals(g, t, cliCmd, getColorMsg+"on\n", configOption, file, "get", "color")
 
 	// set the debug to true
-	test_utils.EnsureCommandOutputEquals(g, t, cliCmd, setColorMsg+"on\n", configOption, file, "set", "color", "on")
+	test_utils.EnsureCommandOutputEquals(g, t, cliCmd, setColorMsg+"off\n", configOption, file, "set", "color", "off")
 
-	test_utils.EnsureCommandOutputEquals(g, t, cliCmd, getColorMsg+"on\n", configOption, file, "get", "color")
+	test_utils.EnsureCommandOutputEquals(g, t, cliCmd, getColorMsg+"off\n", configOption, file, "get", "color")
 
 	// set the debug to false
 	test_utils.EnsureCommandOutputEquals(g, t, cliCmd, setColorMsg+"off\n", configOption, file, "set", "color", "off")
