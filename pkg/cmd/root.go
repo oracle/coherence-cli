@@ -309,7 +309,7 @@ func initConfig() {
 
 			// config file not found - create a default one
 			Config = CoherenceCLIConfig{Version: Version, Clusters: make([]ClusterConnection, 0),
-				Debug: false, RequestTimeout: 30, IgnoreInvalidCerts: false, Color: false}
+				Debug: false, RequestTimeout: 30, IgnoreInvalidCerts: false, Color: true}
 			viper.Set("version", Config.Version)
 			viper.Set(currentContextKey, Config.CurrentContext)
 			viper.Set(debugContextKey, Config.Debug)
