@@ -132,11 +132,11 @@ func RunTestClusterCommands(t *testing.T) {
 	// reset output format to default of TABLE
 	cmd.OutputFormat = constants.TABLE
 
-	// test describe config
-	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "CONFIG", configArg, file, "describe", "config")
+	// test get config
+	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "CONFIG", configArg, file, "get", "config")
 
-	// test describe config with verbose option
-	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "CONFIG,CLUSTER CONNECTIONS", configArg, file, "describe", "config", "-v")
+	// test get config with verbose option
+	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "CONFIG,CLUSTER CONNECTIONS", configArg, file, "get", "config", "-v")
 
 	// remove the cluster entries
 	test_utils.EnsureCommandContains(g, t, cliCmd, context.ClusterName, configArg, file, "remove", "cluster", "cluster1")
