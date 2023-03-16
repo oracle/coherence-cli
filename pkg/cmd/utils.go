@@ -358,6 +358,10 @@ func IssueFederationCommand(cmd *cobra.Command, serviceName, command, participan
 		return fmt.Errorf("unable to find participant %s for federated service %s", participant, serviceName)
 	}
 
+	if command == replicateAll && participant == all {
+		return fmt.Errorf("you cannot specify all participants for replicate-all")
+	}
+
 	description = command
 	if command == start {
 		if startMode != "" {
