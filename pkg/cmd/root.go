@@ -338,7 +338,7 @@ func initConfig() {
 		}
 	}
 
-	if Config.Color == "" {
+	if Config.Color == "" || Config.Color == "1" {
 		// default to "on"
 		Config.Color = on
 		viper.Set(colorContextKey, on)
