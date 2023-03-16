@@ -11,11 +11,11 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// describeConfigCmd represents the describe comfig command
-var describeConfigCmd = &cobra.Command{
+// getConfigCmd represents the describe config command.
+var getConfigCmd = &cobra.Command{
 	Use:   "config",
-	Short: "describe the config in .cohctl.yaml",
-	Long: `The 'describe config' command describes the config stored in the '.cohctl.yaml' config file
+	Short: "display the config in .cohctl.yaml",
+	Long: `The 'get config' command displays the config stored in the '.cohctl.yaml' config file
 in a human readable format.`,
 	Args: cobra.ExactArgs(0),
 	RunE: func(cmd *cobra.Command, args []string) error {
@@ -58,6 +58,6 @@ in a human readable format.`,
 }
 
 func init() {
-	describeConfigCmd.Flags().BoolVarP(&verboseOutput, "verbose", "v", false,
+	getConfigCmd.Flags().BoolVarP(&verboseOutput, "verbose", "v", false,
 		"include verbose output including cluster connections and profiles")
 }

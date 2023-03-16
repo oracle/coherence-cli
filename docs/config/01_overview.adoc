@@ -43,10 +43,10 @@ Changing how bytes values are displayed.
 --
 
 [CARD]
-.Describe Config
-[link=docs/config/09_describe_config.adoc]
+.Get Config
+[link=docs/config/09_get_config.adoc]
 --
-Describe the Config in .cohctl.yaml.
+Display the Config in .cohctl.yaml in a human readible format.
 --
 
 ====

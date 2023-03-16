@@ -492,6 +492,7 @@ func Initialize(command *cobra.Command) *cobra.Command {
 	getCmd.AddCommand(getCacheStoresCmd)
 	getCmd.AddCommand(getColorCmd)
 	getCmd.AddCommand(getMemberStats)
+	getCmd.AddCommand(getConfigCmd)
 
 	// set command
 	command.AddCommand(setCmd)
@@ -584,7 +585,6 @@ func Initialize(command *cobra.Command) *cobra.Command {
 	describeCmd.AddCommand(describeExecutorCmd)
 	describeCmd.AddCommand(describeFederationCmd)
 	describeCmd.AddCommand(describeTopicCmd)
-	describeCmd.AddCommand(describeConfigCmd)
 
 	// create
 	command.AddCommand(createCmd)

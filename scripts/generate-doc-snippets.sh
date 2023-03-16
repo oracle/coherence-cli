@@ -238,7 +238,7 @@ create_doc $DOCS_DIR/archive_snapshot "${COHCTL} archive snapshot --help"
 create_doc $DOCS_DIR/retrieve_snapshot "${COHCTL} retrieve snapshot --help"
 
 # Config
-create_doc $DOCS_DIR/describe_config "${COHCTL} describe config --help"
+create_doc $DOCS_DIR/get_config "${COHCTL} get config --help"
 
 # General Help
 ( echo "// # tag::text[]" && \
