@@ -2226,7 +2226,7 @@ func (t *formattedTable) String() string {
 		for i, e := range row {
 			actualValue := fmt.Sprintf(stringFormats[i], e)
 
-			if r > 0 && Config.Color {
+			if r > 0 && Config.Color == on {
 				// check for formatting function after first row
 				if f, ok := t.columnFormatters[i]; ok {
 					actualValue = f(actualValue)

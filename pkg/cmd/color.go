@@ -18,7 +18,7 @@ const (
 	getColorMsg   = "Color formatting is: "
 )
 
-// setColorCmd represents the set color command
+// setColorCmd represents the set color command.
 var setColorCmd = &cobra.Command{
 	Use:   "color {on|off}}",
 	Short: "set color formatting to be on or off",
@@ -32,11 +32,11 @@ of output when using a terminal highlights columns requiring attention.`,
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
 		value := args[0]
-		var color bool
+		var color string
 		if value == on {
-			color = true
+			color = on
 		} else if value == off {
-			color = false
+			color = off
 		} else {
 			return errors.New(setColorError)
 		}
@@ -51,7 +51,7 @@ of output when using a terminal highlights columns requiring attention.`,
 	},
 }
 
-// getColorCmd represents the get color command
+// getColorCmd represents the get color command.
 var getColorCmd = &cobra.Command{
 	Use:   "color",
 	Short: "display the current color formatting setting",
@@ -60,7 +60,7 @@ of output when using a terminal highlights columns requiring attention.`,
 	Args: cobra.ExactArgs(0),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var color string
-		if Config.Color {
+		if Config.Color == "" || Config.Color == on {
 			color = on
 		} else {
 			color = off

@@ -135,7 +135,7 @@ type CoherenceCLIConfig struct {
 	CurrentContext     string              `json:"currentContext"`
 	Clusters           []ClusterConnection `mapstructure:"clusters"`
 	Debug              bool                `json:"debug"`
-	Color              bool                `json:"color"`
+	Color              string              `json:"color"`
 	RequestTimeout     int32               `json:"requestTimeout"`
 	IgnoreInvalidCerts bool                `json:"ignoreInvalidCerts"`
 	DefaultBytesFormat string              `json:"defaultBytesFormat"`
@@ -309,7 +309,7 @@ func initConfig() {
 
 			// config file not found - create a default one
 			Config = CoherenceCLIConfig{Version: Version, Clusters: make([]ClusterConnection, 0),
-				Debug: false, RequestTimeout: 30, IgnoreInvalidCerts: false, Color: true}
+				Debug: false, RequestTimeout: 30, IgnoreInvalidCerts: false, Color: "on"}
 			viper.Set("version", Config.Version)
 			viper.Set(currentContextKey, Config.CurrentContext)
 			viper.Set(debugContextKey, Config.Debug)
@@ -333,6 +333,16 @@ func initConfig() {
 	} else {
 		// load the config
 		if err := viper.Unmarshal(&Config); err != nil {
+			rootCmd.Println(err)
+			os.Exit(1)
+		}
+	}
+
+	if Config.Color == "" {
+		// default to "on"
+		Config.Color = on
+		viper.Set(colorContextKey, on)
+		if err = WriteConfig(); err != nil {
 			rootCmd.Println(err)
 			os.Exit(1)
 		}
