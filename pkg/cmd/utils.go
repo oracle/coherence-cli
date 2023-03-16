@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, 2022 Oracle and/or its affiliates.
+ * Copyright (c) 2021, 2023 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -358,6 +358,10 @@ func IssueFederationCommand(cmd *cobra.Command, serviceName, command, participan
 		return fmt.Errorf("unable to find participant %s for federated service %s", participant, serviceName)
 	}
 
+	if command == replicateAll && participant == all {
+		return fmt.Errorf("you cannot specify all participants for replicate-all")
+	}
+
 	description = command
 	if command == start {
 		if startMode != "" {
@@ -387,8 +391,14 @@ func IssueFederationCommand(cmd *cobra.Command, serviceName, command, participan
 
 	} else {
 		// confirm the operation
+		displayParticipant := participant
+		if displayParticipant == all {
+			displayParticipant = fmt.Sprintf("%v", participants)
+		} else {
+			displayParticipant = "[" + displayParticipant + "]"
+		}
 		if !confirmOperation(cmd, fmt.Sprintf("Are you sure you want to %s federation for service %s for participants %v ? (y/n) ",
-			description, serviceName, participants)) {
+			description, serviceName, displayParticipant)) {
 			return nil
 		}
 

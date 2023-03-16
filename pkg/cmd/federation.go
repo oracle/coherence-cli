@@ -28,6 +28,7 @@ const (
 	participantMessage = "participant to apply to"
 	supplyService      = "you must provide a service name"
 	federationUse      = "federation service-name"
+	replicateAll       = "replicateAll"
 )
 
 var (
@@ -212,7 +213,7 @@ You must specify a participant to replicate for.`,
 		return nil
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
-		return IssueFederationCommand(cmd, args[0], "replicateAll", replicateAllParticipant, "")
+		return IssueFederationCommand(cmd, args[0], replicateAll, replicateAllParticipant, "")
 	},
 }
 
