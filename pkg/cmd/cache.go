@@ -499,6 +499,17 @@ func formatCachesSummary(serviceList []string, dataFetcher fetcher.Fetcher) (str
 	if err != nil {
 		return "", err
 	}
+
+	// check for ignoring of special caches including '$'
+	if ignoreSpecialCaches {
+		finalList := make([]config.CacheSummaryDetail, 0)
+		for _, v := range allCachesSummary {
+			if !strings.Contains(v.CacheName, "$") {
+				finalList = append(finalList, v)
+			}
+		}
+		allCachesSummary = finalList
+	}
 	value := FormatCacheSummary(allCachesSummary)
 	if err != nil {
 		return "", err

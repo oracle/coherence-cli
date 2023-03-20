@@ -41,6 +41,7 @@ var (
 	kbFormat bool
 	mbFormat bool
 	gbFormat bool
+	tbFormat bool
 )
 
 // various command constants
@@ -212,6 +213,7 @@ func SetRootCommandFlags(command *cobra.Command) {
 	command.PersistentFlags().BoolVarP(&kbFormat, "kb", "k", false, "show sizes in kilobytes (default is bytes)")
 	command.PersistentFlags().BoolVarP(&mbFormat, "mb", "m", false, "show sizes in megabytes (default is bytes)")
 	command.PersistentFlags().BoolVarP(&gbFormat, "gb", "g", false, "show sizes in gigabytes (default is bytes)")
+	command.PersistentFlags().BoolVarP(&tbFormat, "tb", "", false, "show sizes in terabytes (default is bytes)")
 	command.PersistentFlags().BoolVarP(&bFormat, "bytes", "b", false, "show sizes in bytes")
 }
 

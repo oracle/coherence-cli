@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 
-    Copyright (c) 2022, Oracle and/or its affiliates.
+    Copyright (c) 2022, 2023 Oracle and/or its affiliates.
     Licensed under the Universal Permissive License v 1.0 as shown at
     https://oss.oracle.com/licenses/upl.
 
@@ -12,9 +12,10 @@
 
 By default, any memory or disk based size value is displayed in bytes. You can use the following options on any command to change the display format:
 
-* `-k` - display in kilobytes (KB)
-* `-m` - display in megabytes (MB)
-* `-g` - display in gigabytes (GB)
+* `-k` or `--kb` - display in kilobytes (KB)
+* `-m` or `--mb` - display in megabytes (MB)
+* `-g` or `--gb` - display in gigabytes (GB)
+* `--tb` - display in terabytes (TB)
 
 For the purposes of display, units of 1024 are used to calculate the appropriate value. E.g. 1 KB = 1024 bytes.
 
