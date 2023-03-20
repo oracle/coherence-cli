@@ -1868,6 +1868,9 @@ func getFormattingFunction() func(bytesValue int64) string {
 	if gbFormat {
 		return formatGBOnly
 	}
+	if tbFormat {
+		return formatTBOnly
+	}
 	if bFormat {
 		return formatBytesOnly
 	}
@@ -1881,6 +1884,9 @@ func getFormattingFunction() func(bytesValue int64) string {
 	}
 	if Config.DefaultBytesFormat == bytesFormatG {
 		return formatGBOnly
+	}
+	if Config.DefaultBytesFormat == bytesFormatT {
+		return formatTBOnly
 	}
 
 	return formatBytesOnly
@@ -1961,6 +1967,10 @@ func formatMBOnly(bytesValue int64) string {
 
 func formatGBOnly(bytesValue int64) string {
 	return printer.Sprintf("%-.1f GB", float64(bytesValue)/1024/1024/1024)
+}
+
+func formatTBOnly(bytesValue int64) string {
+	return printer.Sprintf("%-.2f TB", float64(bytesValue)/1024/1024/1024/1024)
 }
 
 func formatBool(boolValue bool) string {

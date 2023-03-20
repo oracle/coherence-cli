@@ -16,19 +16,20 @@ const (
 	setDefaultBytesMsg   = "Bytes format is now set to "
 	getDefaultBytesMsg   = "Current bytes format: "
 	clearDefaultBytesMsg = "Default bytes format has been cleared"
-	invalidBytesValue    = "you must provide either 'k', 'm' or 'g'"
+	invalidBytesValue    = "you must provide either 'k', 'm', 'g' or 't'"
 	bytesFormatK         = "k"
 	bytesFormatM         = "m"
 	bytesFormatG         = "g"
+	bytesFormatT         = "t"
 )
 
 // setBytesFormatCmd represents the set bytes-format command
 var setBytesFormatCmd = &cobra.Command{
-	Use:   "bytes-format {k|m|g}",
+	Use:   "bytes-format {k|m|g|t}",
 	Short: "set default bytes format for displaying memory or disk based sizes",
 	Long: `The 'set bytes-format' command sets the default format for displaying memory or disk based sizes.
-Valid values are k - kilobytes, m - megabytes or g - gigabytes. If not specified the default will be b - bytes.
-The default value set will be overridden if you specify the -k, -m or -g options.`,
+Valid values are k - kilobytes, m - megabytes, g - gigabytes or t - terabytes. If not specified the default will be b - bytes.
+The default value will be overridden if you specify the -k, -m, -g or --tb options.`,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
 			displayErrorAndExit(cmd, invalidBytesValue)
@@ -37,7 +38,7 @@ The default value set will be overridden if you specify the -k, -m or -g options
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
 		value := args[0]
-		if value != bytesFormatK && value != bytesFormatM && value != bytesFormatG {
+		if value != bytesFormatK && value != bytesFormatM && value != bytesFormatG && value != bytesFormatT {
 			return errors.New(invalidBytesValue)
 		}
 
