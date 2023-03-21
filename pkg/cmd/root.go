@@ -76,6 +76,7 @@ const (
 	heapMemoryArg           = "heap-memory"
 	profileArg              = "profile"
 	startClassArg           = "start-class"
+	logDestinationArg       = "log-destination"
 	logLevelArg             = "log-level"
 	startupDelayArg         = "startup-delay"
 	serverCountMessage      = "number of replicas"
@@ -84,6 +85,7 @@ const (
 	logLevelMessage         = "coherence log level"
 	profileMessage          = "profile to add to cluster startup command line"
 	startClassMessage       = "class name to start server with (default from Coherence version)"
+	logDestinationMessage   = "root directory to place log files in"
 	commaSeparatedIDMessage = "comma separated node ids to target"
 
 	outputFormats = "table, wide, json or jsonpath=\"...\""
@@ -169,6 +171,7 @@ type ClusterConnection struct {
 	Arguments           string `json:"arguments"`           // arguments to start cluster with including cluster name, etc
 	ManagementPort      int32  `json:"managementPort"`      // arguments to start cluster with including cluster name, etc
 	PersistenceMode     string `json:"persistenceMode"`
+	LoggingDestination  string `json:"loggingDestination"` // logging destination, if empty then place under ~/.cohctl/logs
 	ManagementAvailable bool   // only used when using -o wide option
 }
 

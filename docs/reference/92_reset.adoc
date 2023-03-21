@@ -181,10 +181,10 @@ include::../../build/_output/docs-gen/reset_reporter_stats.adoc[tag=text]
 ----
 $ cohctl get reporters -c local
 
-NODE ID  STATE    CONFIG FILE               OUTPUT PATH                               BATCH#  LAST REPORT  LAST RUN   AVG RUN  INTERVAL  AUTOSTART
-      1  Stopped  reports/report-group.xml  /Users/timmiddleton/Documents/Coheren...       0                    0ms  0.0000ms        60  false
-      2  Stopped  reports/report-group.xml  /Users/timmiddleton/Documents/Coheren...       0                    0ms  0.0000ms        60  false
-      3  Stopped  reports/report-group.xml  /Users/timmiddleton/Documents/Coheren...       0                    0ms  0.0000ms        60  false
+NODE ID  STATE    CONFIG FILE               OUTPUT PATH                       BATCH#  LAST REPORT  LAST RUN   AVG RUN  INTERVAL  AUTOSTART
+      1  Stopped  reports/report-group.xml  /Users/user/Documents/Coheren...       0                    0ms  0.0000ms        60  false
+      2  Stopped  reports/report-group.xml  /Users/user/Documents/Coheren...       0                    0ms  0.0000ms        60  false
+      3  Stopped  reports/report-group.xml  /Users/user/Documents/Coheren...       0                    0ms  0.0000ms        60  false
 $ cohctl reset reporter-stats -c local
 
 Are you sure you want to reset reporters statistics for all 3 nodes? (y/n) y
