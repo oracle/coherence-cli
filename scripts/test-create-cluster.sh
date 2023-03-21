@@ -132,6 +132,48 @@ runCommand stop cluster local -y
 runCommand remove cluster local -y
 pause && pause && pause
 
+LOGS_DEST=$(mktemp -d)
+message "Test different log location - ${LOGS_DEST}"
+runCommand create cluster local -y -M 512m -I $COM -v $VERSION -L ${LOGS_DEST}
+wait_for_ready
+
+# check to see a storage-0.log file exists
+if [ ! -f ${LOGS_DEST}/local/storage-0.log ] ; then
+  echo "Specifying -L ${LOGS_DEST} did not work for create"
+  runCommand stop cluster local -y || true
+  runCommand remove cluster local -y || true
+  exit 1
+fi
+
+runCommand stop cluster local -y
+pause && pause
+
+runCommand start cluster local -r 4
+wait_for_ready
+
+# Check the log file for member 4 exists
+if [ ! -f ${LOGS_DEST}/local/storage-3.log ] ; then
+  echo "Specifying -L ${LOGS_DEST} did not work for start cluster"
+  runCommand stop cluster local -y || true
+  runCommand remove cluster local -y || true
+  exit 1
+fi
+
+runCommand scale cluster local -r 5
+pause && pause
+
+# Check the log file for member 5 exists
+if [ ! -f ${LOGS_DEST}/local/storage-4.log ] ; then
+  echo "Specifying -L ${LOGS_DEST} did not work for scale cluster"
+  runCommand stop cluster local -y || true
+  runCommand remove cluster local -y || true
+  exit 1
+fi
+
+runCommand stop cluster local -y
+runCommand remove cluster local -y
+pause && pause && pause
+
 message "Start cluster using different HTTP port"
 runCommand create cluster local -H 30001 -l 9 $COM -v $VERSION -y
 wait_for_ready 30001

@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 
-    Copyright (c) 2022, Oracle and/or its affiliates.
+    Copyright (c) 2022, 2023 Oracle and/or its affiliates.
     Licensed under the Universal Permissive License v 1.0 as shown at
     https://oss.oracle.com/licenses/upl.
 
@@ -45,7 +45,7 @@ these commands to create production clusters.
 * <<start-cluster, `cohctl start cluster`>> - starts a cluster that was manually created
 * <<start-console, `cohctl start console`>> - starts a console client against a cluster that was manually created
 * <<start-cohql, `cohctl start cohql`>> - starts a CohQL client against a cluster that was manually created
-* <<start-class, `cohctl start class`>> - starts a specific Java class against the local Coherence cluster
+* <<start-class, `cohctl start class`>> - starts a specific Java class against a cluster that was manually created
 
 *Setting dependency tool*
 
@@ -69,6 +69,9 @@ these commands to create production clusters.
 
 include::../../build/_output/docs-gen/create_cluster.adoc[tag=text]
 
+NOTE: The log files are stored under the `.cohctl/logs/` directory off your home directory. You can
+change this for an individual cluster by specifying the `-L` option when you create the cluster.
+
 *Examples*
 
 Add and start a cluster using all default values.
@@ -88,6 +91,8 @@ Initial memory:         128m
 Persistence mode:       on-demand
 Group ID:               com.oracle.coherence.ce
 Additional artifacts:
+Log destination root:
+Dependency tool:        mvn
 Are you sure you want to create the cluster with the above details? (y/n) y
 
 Checking 3 Maven dependencies...
@@ -133,6 +138,8 @@ Initial memory:       1g
 Persistence mode:     active
 Group ID:             com.oracle.coherence
 Additional artifacts:
+Log destination root:
+Dependency tool:      mvn
 Are you sure you want to create the cluster with the above details? (y/n) y
 
 Skipping downloading Maven artifcts
@@ -160,6 +167,8 @@ Initial memory:         128m
 Persistence mode:       on-demand
 Group ID:               com.oracle.coherence.ce
 Additional artifacts:   coherence-rest,io.opentracing:opentracing-api:0.33.0,io.opentracing:opentracing-util:0.33.0
+Log destination root:
+Dependency tool:        mvn
 Are you sure you want to create the cluster with the above details? (y/n) y
 
 Checking 6 Maven dependencies...

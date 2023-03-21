@@ -18,6 +18,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"os"
+	"path/filepath"
 	"sort"
 	"strconv"
 	"strings"
@@ -985,14 +986,17 @@ var (
 	profileValueParam        string
 	fileNameParam            string
 	statementParam           string
+	logDestinationParam      string
 )
 
-const defaultCoherenceVersion = "22.06.3"
-const startClusterCommand = "start cluster"
-const scaleClusterCommand = "scale cluster"
-const stopClusterCommand = "stop cluster"
-const defaultHeap = "128m"
-const localHost = "127.0.0.1"
+const (
+	defaultCoherenceVersion = "22.06.3"
+	startClusterCommand     = "start cluster"
+	scaleClusterCommand     = "scale cluster"
+	stopClusterCommand      = "stop cluster"
+	defaultHeap             = "128m"
+	localHost               = "127.0.0.1"
+)
 
 // createClusterCmd represents the create cluster command
 var createClusterCmd = &cobra.Command{
@@ -1100,6 +1104,18 @@ NOTE: This is an experimental feature and my be altered or removed in the future
 			heap = heapMemoryParam
 		}
 
+		// validate logging destination
+		if logDestinationParam != "" {
+			stat, err := os.Stat(logDestinationParam)
+			if err != nil || !stat.IsDir() {
+				return fmt.Errorf("directory %s does not exist", logDestinationParam)
+			}
+			if !filepath.IsAbs(logDestinationParam) {
+				return errors.New("you must provide an absolute path for log destination")
+			}
+			logsDirectory = logDestinationParam
+		}
+
 		// validate profile
 		if err = validateProfile(); err != nil {
 			return err
@@ -1115,7 +1131,8 @@ NOTE: This is an experimental feature and my be altered or removed in the future
 		cmd.Printf("Group ID:             %s\n", groupID)
 		cmd.Printf("Additional artifacts: %v\n", additionalArtifactsParam)
 		cmd.Printf("Startup Profile:      %v\n", profileValueParam)
-		cmd.Printf("Dependency Tool:      %v\n", getExecType())
+		cmd.Printf("Log destination root: %v\n", logDestinationParam)
+		cmd.Printf("Dependency tool:      %v\n", getExecType())
 
 		// confirm the operation
 		if !confirmOperation(cmd, "Are you sure you want to create the cluster with the above details? (y/n) ") {
@@ -1184,7 +1201,7 @@ NOTE: This is an experimental feature and my be altered or removed in the future
 				if entry.Artifact != "jline" && entry.Artifact != "coherence" {
 					// if we have specified to get transitive dependencies, then we need to use the downloaded pom
 					// file for the dependency and get the classpath. Ignore coherence and jline as this will
-					// bring in many dependencies due to me not uet figuring out how to not bring in optional deps
+					// bring in many dependencies due to me not yet figuring out how to not bring in optional deps
 					cpEntry, err = getTransitiveClasspath(entry.GroupID, entry.Artifact, entry.Version)
 
 					if err != nil {
@@ -1204,7 +1221,8 @@ NOTE: This is an experimental feature and my be altered or removed in the future
 			ConnectionURL:   fmt.Sprintf("http://localhost:%d/management/coherence/cluster", httpPortParam),
 			ManuallyCreated: true, ClusterVersion: clusterVersionParam, ClusterName: clusterName,
 			ClusterType: "Standalone", BaseClasspath: strings.Join(classpath, getClasspathSeparator()),
-			Arguments: arguments, ManagementPort: httpPortParam, PersistenceMode: persistenceModeParam}
+			Arguments: arguments, ManagementPort: httpPortParam, PersistenceMode: persistenceModeParam,
+			LoggingDestination: logDestinationParam}
 
 		cmd.Printf("Starting %d cluster members for cluster %s\n", replicaCountParam, clusterName)
 
@@ -1285,7 +1303,7 @@ var stopClusterCmd = &cobra.Command{
 // startConsoleCmd represents the start console command
 var startConsoleCmd = &cobra.Command{
 	Use:   "console",
-	Short: "start a console client and connect to a local Coherence cluster",
+	Short: "start a console client against a cluster that was manually created",
 	Long: `The 'start console' command starts a console client which connects to a
 cluster using the current context or a cluster specified by using '-c'.`,
 	Args: cobra.ExactArgs(0),
@@ -1297,7 +1315,7 @@ cluster using the current context or a cluster specified by using '-c'.`,
 // startCohQL represents the start cohql command
 var startCohQLCmd = &cobra.Command{
 	Use:   "cohql",
-	Short: "start a CohQL client and connect to a local Coherence cluster",
+	Short: "start a CohQL client against a cluster that was manually created",
 	Long: `The 'start cohql' command starts a CohQL client which connects to a
 cluster using the current context or a cluster specified by using '-c'..`,
 	Args: cobra.ExactArgs(0),
@@ -1309,7 +1327,7 @@ cluster using the current context or a cluster specified by using '-c'..`,
 // startClassCmd represents the start class command
 var startClassCmd = &cobra.Command{
 	Use:   "class",
-	Short: "start a specific Java class and connect to a local Coherence cluster",
+	Short: "start a specific Java class against a cluster that was manually created",
 	Long: `The 'start class' command starts a specific Java class which connects to a
 cluster using the current context or a cluster specified by using '-c'.
 The class name must include the full package and class name and must be included in
@@ -1464,6 +1482,11 @@ func runClusterOperation(cmd *cobra.Command, connectionName, operation string) e
 		return nil
 	}
 
+	// if the logging destination has been set on the connection then override it
+	if connection.LoggingDestination != "" {
+		logsDirectory = connection.LoggingDestination
+	}
+
 	if operation == stopClusterCommand {
 		count := 0
 		for _, v := range processIDs {
@@ -1531,6 +1554,7 @@ func init() {
 	createClusterCmd.Flags().Int32VarP(&metricsStartPortParam, metricsPortArg, "t", 0, metricsPortMessage)
 	createClusterCmd.Flags().StringVarP(&profileValueParam, profileArg, "P", "", profileMessage)
 	createClusterCmd.Flags().StringVarP(&serverStartClassParam, startClassArg, "S", "", startClassMessage)
+	createClusterCmd.Flags().StringVarP(&logDestinationParam, logDestinationArg, "L", "", logDestinationMessage)
 
 	stopClusterCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
 
