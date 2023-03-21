@@ -65,6 +65,11 @@ jobs:
       run: |
         make copyright
 
+    - name: Trivy Scan
+      shell: bash
+      run: |
+        make trivy-scan
+
     - name: Unit Tests
       shell: bash
       run: make test-cohctl
