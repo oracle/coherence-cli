@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, 2022 Oracle and/or its affiliates.
+ * Copyright (c) 2021, 2023 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -19,7 +19,7 @@ import (
 	"time"
 )
 
-// getMachinesCmd represents the get machines command
+// getMachinesCmd represents the get machines command.
 var getMachinesCmd = &cobra.Command{
 	Use:   "machines",
 	Short: "display machines for a cluster",
@@ -87,7 +87,7 @@ var getMachinesCmd = &cobra.Command{
 	},
 }
 
-// getMachines returns the machines given a map of machine names
+// getMachines returns the machines given a map of machine names.
 func getMachines(machinesMap map[string]string, dataFetcher fetcher.Fetcher) ([]config.Machine, error) {
 	var (
 		err      error
@@ -118,7 +118,7 @@ func getMachines(machinesMap map[string]string, dataFetcher fetcher.Fetcher) ([]
 	return machines, nil
 }
 
-// getOSJson returns the json for the selected machines in the map
+// getOSJson returns the json for the selected machines in the map.
 func getOSJson(machinesMap map[string]string, dataFetcher fetcher.Fetcher) ([]byte, error) {
 	var (
 		finalGeneric = config.GenericDetails{}
@@ -156,7 +156,7 @@ func getOSJson(machinesMap map[string]string, dataFetcher fetcher.Fetcher) ([]by
 	return finalData, nil
 }
 
-// describeMachineCmd represents the describe machine command
+// describeMachineCmd represents the describe machine command.
 var describeMachineCmd = &cobra.Command{
 	Use:   "machine machine-name",
 	Short: "describe a machine",

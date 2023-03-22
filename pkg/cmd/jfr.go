@@ -30,7 +30,7 @@ const (
 	supplyJFR  = "you must provide a JFR name"
 )
 
-// getJfrsCmd represents the get jfrs command
+// getJfrsCmd represents the get jfrs command.
 var getJfrsCmd = &cobra.Command{
 	Use:   "jfrs",
 	Short: "display Java Flight Recordings for a cluster",
@@ -54,7 +54,7 @@ var getJfrsCmd = &cobra.Command{
 	},
 }
 
-// describeJfrCmd represents the describe jfr command
+// describeJfrCmd represents the describe jfr command.
 var describeJfrCmd = &cobra.Command{
 	Use:   jfrNameUse,
 	Short: "describe a Java Flight Recording (JFR)",
@@ -83,7 +83,7 @@ var describeJfrCmd = &cobra.Command{
 	},
 }
 
-// startJfrCmd represents the start jfr command
+// startJfrCmd represents the start jfr command.
 var startJfrCmd = &cobra.Command{
 	Use:   jfrNameUse,
 	Short: "start a Java Flight Recording (JFR) for all or selected members",
@@ -174,7 +174,7 @@ of 0 to make the recording continuous.`,
 	},
 }
 
-// stopJfrCmd represents the start jfr command
+// stopJfrCmd represents the start jfr command.
 var stopJfrCmd = &cobra.Command{
 	Use:   jfrNameUse,
 	Short: "stop a Java Flight Recording (JFR) for all or selected members",
@@ -204,7 +204,7 @@ You can specify either a node or leave the node blank to stop for all nodes.`,
 	},
 }
 
-// dumpJfrCmd represents the dump jfr command
+// dumpJfrCmd represents the dump jfr command.
 var dumpJfrCmd = &cobra.Command{
 	Use:   jfrNameUse,
 	Short: "dump a Java Flight Recording (JFR) for all or selected members",
@@ -234,7 +234,7 @@ A JFR command mut be in progress for this to succeed.`,
 	},
 }
 
-// executeJFROperation executes a jfrStop, jfrDump, jfrCheck or  command
+// executeJFROperation executes a jfrStop, jfrDump, jfrCheck or  command.
 func executeJFROperation(cmd *cobra.Command, jfrName, operation string, dataFetcher fetcher.Fetcher, filename string) error {
 	var (
 		err         error
@@ -347,7 +347,7 @@ func getJFResults(jfrType string, data []byte) (string, error) {
 	return formatJFROutput(finalResult), nil
 }
 
-// formatJFROutput formats the output of a JFR result
+// formatJFROutput formats the output of a JFR result.
 func formatJFROutput(result string) string {
 	var (
 		finalResult = strings.Replace(strings.Replace(result, "\n\n", "\n", -1), "->", "->\n", -1)

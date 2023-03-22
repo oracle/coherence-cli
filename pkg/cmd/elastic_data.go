@@ -33,7 +33,7 @@ var (
 	nodeIDsED          string
 )
 
-// getElasticDataCmd represents the get elastic-data command
+// getElasticDataCmd represents the get elastic-data command.
 var getElasticDataCmd = &cobra.Command{
 	Use:   "elastic-data",
 	Short: "display elastic data information for a cluster",
@@ -119,7 +119,7 @@ Journal details for the cluster.`,
 	},
 }
 
-// describeElasticDataCmd represents the describe elastic-data command
+// describeElasticDataCmd represents the describe elastic-data command.
 var describeElasticDataCmd = &cobra.Command{
 	Use:   "elastic-data {" + flash + "|" + ram + "}",
 	Short: "describe a flash or ram journal",
@@ -202,7 +202,7 @@ The allowable values are ` + ram + ` or ` + flash + `.`,
 	},
 }
 
-// compactElasticDataCmd represents the compact elastic-data command
+// compactElasticDataCmd represents the compact elastic-data command.
 var compactElasticDataCmd = &cobra.Command{
 	Use:   "elastic-data {" + flash + "|" + ram + "}",
 	Short: "compact a flash or ram journal",
@@ -301,7 +301,7 @@ for all or specific nodes. ` + `The allowable values are ` + ram + ` or ` + flas
 	},
 }
 
-// getElasticDataResult returns elastic data results
+// getElasticDataResult returns elastic data results.
 func getElasticDataResult(flashResult, ramResult []byte) (string, error) {
 	var (
 		flashValues = config.ElasticDataValues{}
@@ -344,7 +344,7 @@ func getElasticDataResult(flashResult, ramResult []byte) (string, error) {
 	return "", nil
 }
 
-// combineElasticData combines all the elastic data details together to give a summary
+// combineElasticData combines all the elastic data details together to give a summary.
 func combineElasticData(elasticData config.ElasticDataValues) []config.ElasticData {
 	var finalData = make([]config.ElasticData, 0)
 

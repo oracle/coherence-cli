@@ -21,7 +21,7 @@ var (
 	getIgnoreCertsMsg = "Current setting: "
 )
 
-// getIgnoreCertsCmd represents the get ignore-certs
+// getIgnoreCertsCmd represents the get ignore-certs.
 var getIgnoreCertsCmd = &cobra.Command{
 	Use:   "ignore-certs",
 	Short: "display the current setting for ignoring invalid SSL Certificates",
@@ -41,7 +41,7 @@ You should only use this option when you are sure of the identify of the target 
 	},
 }
 
-// setIgnoreInvalidCertsCmd represents the set ignore-certs command
+// setIgnoreInvalidCertsCmd represents the set ignore-certs command.
 var setIgnoreCertsCmd = &cobra.Command{
 	Use:   "ignore-certs {true|false}",
 	Short: "set current setting for ignoring invalid SSL Certificates",

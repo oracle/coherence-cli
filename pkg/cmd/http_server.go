@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, 2022 Oracle and/or its affiliates.
+ * Copyright (c) 2021, 2023 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -17,7 +17,7 @@ import (
 
 const httpString = "http"
 
-// getHTTPProxiesCmd represents the get http-servers command
+// getHTTPProxiesCmd represents the get http-servers command.
 var getHTTPProxiesCmd = &cobra.Command{
 	Use:   "http-servers",
 	Short: "display http proxy services for a cluster",
@@ -47,7 +47,7 @@ var getHTTPProxiesCmd = &cobra.Command{
 	},
 }
 
-// describeHTTPProxyCmd represents the describe http-proxy command
+// describeHTTPProxyCmd represents the describe http-proxy command.
 var describeHTTPProxyCmd = &cobra.Command{
 	Use:   "http-server service-name",
 	Short: "describe a http server",

@@ -54,7 +54,7 @@ const (
 	disconnectAll        = "/disconnectAll"
 )
 
-// HTTPFetcher is an implementation of a Fetcher to retrieve data from Management over REST
+// HTTPFetcher is an implementation of a Fetcher to retrieve data from Management over REST.
 type HTTPFetcher struct {
 	URL            string
 	ConnectionType string
@@ -63,7 +63,7 @@ type HTTPFetcher struct {
 	ClusterName    string
 }
 
-// GetClusterDetailsJSON returns cluster details in raw json
+// GetClusterDetailsJSON returns cluster details in raw json.
 func (h HTTPFetcher) GetClusterDetailsJSON() ([]byte, error) {
 	result, err := httpGetRequest(h, "/?links=")
 	if err != nil {
@@ -73,7 +73,7 @@ func (h HTTPFetcher) GetClusterDetailsJSON() ([]byte, error) {
 }
 
 // GetMemberDetailsJSON returns members details in raw json. verbose indicates to
-// retrieve all fields rather than selected fields
+// retrieve all fields rather than selected fields.
 func (h HTTPFetcher) GetMemberDetailsJSON(verbose bool) ([]byte, error) {
 	var fields = ""
 	if !verbose {
@@ -92,7 +92,7 @@ func (h HTTPFetcher) GetMemberDetailsJSON(verbose bool) ([]byte, error) {
 	return result, nil
 }
 
-// GetSingleMemberDetailsJSON returns a single members details in raw json
+// GetSingleMemberDetailsJSON returns a single members details in raw json.
 func (h HTTPFetcher) GetSingleMemberDetailsJSON(nodeID string) ([]byte, error) {
 	result, err := httpGetRequest(h, membersPath+nodeID+links)
 	if err != nil {
@@ -101,7 +101,7 @@ func (h HTTPFetcher) GetSingleMemberDetailsJSON(nodeID string) ([]byte, error) {
 	return result, nil
 }
 
-// GetManagementJSON returns the management information
+// GetManagementJSON returns the management information.
 func (h HTTPFetcher) GetManagementJSON() ([]byte, error) {
 	result, err := httpGetRequest(h, "/management?links=")
 	if err != nil {
@@ -110,7 +110,7 @@ func (h HTTPFetcher) GetManagementJSON() ([]byte, error) {
 	return result, nil
 }
 
-// GetHTTPSessionDetailsJSON returns Coherence*Web Http session details in raw json
+// GetHTTPSessionDetailsJSON returns Coherence*Web Http session details in raw json.
 func (h HTTPFetcher) GetHTTPSessionDetailsJSON() ([]byte, error) {
 	var (
 		links          = config.ItemLinks{}
@@ -169,7 +169,7 @@ func (h HTTPFetcher) GetHTTPSessionDetailsJSON() ([]byte, error) {
 	return finalResult, nil
 }
 
-// GetExtendedMemberInfoJSON returns a single members extended info
+// GetExtendedMemberInfoJSON returns a single members extended info.
 func (h HTTPFetcher) GetExtendedMemberInfoJSON(result []byte, nodeID string, tokens []string) ([][]byte, error) {
 	var (
 		links        = config.Links{}
@@ -224,7 +224,7 @@ func (h HTTPFetcher) GetExtendedMemberInfoJSON(result []byte, nodeID string, tok
 	return extendedData, nil
 }
 
-// GetServiceDetailsJSON returns member details in raw json
+// GetServiceDetailsJSON returns member details in raw json.
 func (h HTTPFetcher) GetServiceDetailsJSON() ([]byte, error) {
 	result, err := httpGetRequest(h, "/services/members/?links=")
 	if err != nil {
@@ -233,7 +233,7 @@ func (h HTTPFetcher) GetServiceDetailsJSON() ([]byte, error) {
 	return result, nil
 }
 
-// GetStorageDetailsJSON returns member storage details in raw json
+// GetStorageDetailsJSON returns member storage details in raw json.
 func (h HTTPFetcher) GetStorageDetailsJSON() ([]byte, error) {
 	result, err := httpGetRequest(h, "/services/members/?links=&fields=nodeId,ownedPartitionsPrimary")
 	if err != nil {
@@ -242,7 +242,7 @@ func (h HTTPFetcher) GetStorageDetailsJSON() ([]byte, error) {
 	return result, nil
 }
 
-// SetMemberAttribute sets the given attribute for a member
+// SetMemberAttribute sets the given attribute for a member.
 func (h HTTPFetcher) SetMemberAttribute(memberID, attribute string, value interface{}) ([]byte, error) {
 	var valueString = getJSONValueString(value)
 
@@ -255,7 +255,7 @@ func (h HTTPFetcher) SetMemberAttribute(memberID, attribute string, value interf
 	return result, nil
 }
 
-// SetFederationAttribute sets the given attribute for a federated service
+// SetFederationAttribute sets the given attribute for a federated service.
 func (h HTTPFetcher) SetFederationAttribute(serviceName, attribute string, value interface{}) ([]byte, error) {
 	var (
 		err         error
@@ -273,7 +273,7 @@ func (h HTTPFetcher) SetFederationAttribute(serviceName, attribute string, value
 	return result, nil
 }
 
-// SetExecutorAttribute sets the given attribute for an executor
+// SetExecutorAttribute sets the given attribute for an executor.
 func (h HTTPFetcher) SetExecutorAttribute(executor, attribute string, value interface{}) ([]byte, error) {
 	var valueString = getJSONValueString(value)
 
@@ -286,7 +286,7 @@ func (h HTTPFetcher) SetExecutorAttribute(executor, attribute string, value inte
 	return result, nil
 }
 
-// SetReporterAttribute sets the given attribute for a reporter member
+// SetReporterAttribute sets the given attribute for a reporter member.
 func (h HTTPFetcher) SetReporterAttribute(memberID, attribute string, value interface{}) ([]byte, error) {
 	var valueString = getJSONValueString(value)
 
@@ -299,7 +299,7 @@ func (h HTTPFetcher) SetReporterAttribute(memberID, attribute string, value inte
 	return result, nil
 }
 
-// SetManagementAttribute sets the given management attribute for a cluster
+// SetManagementAttribute sets the given management attribute for a cluster.
 func (h HTTPFetcher) SetManagementAttribute(attribute string, value interface{}) ([]byte, error) {
 	var valueString = getJSONValueString(value)
 	payload := []byte(fmt.Sprintf(jsonStringFormat, attribute, valueString))
@@ -312,7 +312,7 @@ func (h HTTPFetcher) SetManagementAttribute(attribute string, value interface{})
 	return result, nil
 }
 
-// SetCacheAttribute sets the given attribute for a cache
+// SetCacheAttribute sets the given attribute for a cache.
 func (h HTTPFetcher) SetCacheAttribute(memberID, serviceName, cacheName, tier, attribute string, value interface{}) ([]byte, error) {
 	var valueString = getJSONValueString(value)
 	payload := []byte(fmt.Sprintf(jsonStringFormat, attribute, valueString))
@@ -327,7 +327,7 @@ func (h HTTPFetcher) SetCacheAttribute(memberID, serviceName, cacheName, tier, a
 	return result, nil
 }
 
-// SetServiceAttribute sets the given attribute for a service
+// SetServiceAttribute sets the given attribute for a service.
 func (h HTTPFetcher) SetServiceAttribute(memberID, serviceName, attribute string, value interface{}) ([]byte, error) {
 	var valueString = getJSONValueString(value)
 	payload := []byte(fmt.Sprintf(jsonStringFormat, attribute, valueString))
@@ -341,7 +341,7 @@ func (h HTTPFetcher) SetServiceAttribute(memberID, serviceName, attribute string
 	return result, nil
 }
 
-// GetExecutorsJSON returns executor details in raw json
+// GetExecutorsJSON returns executor details in raw json.
 func (h HTTPFetcher) GetExecutorsJSON() ([]byte, error) {
 	result, err := httpGetRequest(h, "/executors/members?links=")
 	if err != nil && !strings.Contains(err.Error(), "404") {
@@ -355,7 +355,7 @@ func (h HTTPFetcher) GetExecutorsJSON() ([]byte, error) {
 	return result, nil
 }
 
-// GetSingleServiceDetailsJSON returns a single service details in raw json
+// GetSingleServiceDetailsJSON returns a single service details in raw json.
 func (h HTTPFetcher) GetSingleServiceDetailsJSON(serviceName string) ([]byte, error) {
 	result, err := httpGetRequest(h, servicesPath+getSafeServiceName(h, serviceName)+links)
 	if err != nil {
@@ -364,7 +364,7 @@ func (h HTTPFetcher) GetSingleServiceDetailsJSON(serviceName string) ([]byte, er
 	return result, nil
 }
 
-// GetScheduledDistributionsJSON returns scheduled distributions for a service
+// GetScheduledDistributionsJSON returns scheduled distributions for a service.
 func (h HTTPFetcher) GetScheduledDistributionsJSON(serviceName string) ([]byte, error) {
 	result, err := httpGetRequest(h, servicesPath+getSafeServiceName(h, serviceName)+
 		"/partition/scheduledDistributions?links=")
@@ -374,7 +374,7 @@ func (h HTTPFetcher) GetScheduledDistributionsJSON(serviceName string) ([]byte, 
 	return result, nil
 }
 
-// GetServicePartitionsJSON returns partition information for a service
+// GetServicePartitionsJSON returns partition information for a service.
 func (h HTTPFetcher) GetServicePartitionsJSON(serviceName string) ([]byte, error) {
 	result, err := httpGetRequest(h, servicesPath+getSafeServiceName(h, serviceName)+
 		"/partition/?links=")
@@ -384,7 +384,7 @@ func (h HTTPFetcher) GetServicePartitionsJSON(serviceName string) ([]byte, error
 	return result, nil
 }
 
-// GetServiceMembersDetailsJSON returns all the service member details for a service
+// GetServiceMembersDetailsJSON returns all the service member details for a service.
 func (h HTTPFetcher) GetServiceMembersDetailsJSON(serviceName string) ([]byte, error) {
 	result, err := httpGetRequest(h, servicesPath+getSafeServiceName(h, serviceName)+"/members/?links=")
 	if err != nil {
@@ -393,7 +393,7 @@ func (h HTTPFetcher) GetServiceMembersDetailsJSON(serviceName string) ([]byte, e
 	return result, nil
 }
 
-// GetCachesSummaryJSON returns summary caches details for a service
+// GetCachesSummaryJSON returns summary caches details for a service.
 func (h HTTPFetcher) GetCachesSummaryJSON(serviceName string) ([]byte, error) {
 	result, err := httpGetRequest(h, servicesPath+getSafeServiceName(h, serviceName)+"/caches?links=")
 	if err != nil {
@@ -402,7 +402,7 @@ func (h HTTPFetcher) GetCachesSummaryJSON(serviceName string) ([]byte, error) {
 	return result, nil
 }
 
-// GetCachesSummaryJSONAllServices returns summary caches details for all services
+// GetCachesSummaryJSONAllServices returns summary caches details for all services.
 func (h HTTPFetcher) GetCachesSummaryJSONAllServices() ([]byte, error) {
 	result, err := httpGetRequest(h, "/caches?links=")
 	if err != nil {
@@ -411,7 +411,7 @@ func (h HTTPFetcher) GetCachesSummaryJSONAllServices() ([]byte, error) {
 	return result, nil
 }
 
-// GetTopicsJSON returns the topics in a cluster
+// GetTopicsJSON returns the topics in a cluster.
 func (h HTTPFetcher) GetTopicsJSON() ([]byte, error) {
 	result, err := httpGetRequest(h, topicsPath+links)
 	if err != nil && !strings.Contains(err.Error(), "404") {
@@ -420,7 +420,7 @@ func (h HTTPFetcher) GetTopicsJSON() ([]byte, error) {
 	return result, nil
 }
 
-// GetTopicsMembersJSON returns the topics member details in a cluster
+// GetTopicsMembersJSON returns the topics member details in a cluster.
 func (h HTTPFetcher) GetTopicsMembersJSON(serviceName, topicName string) ([]byte, error) {
 	result, err := httpGetRequest(h, servicesPath+getSafeServiceName(h, serviceName)+topicsPath+getSafeServiceName(h, topicName)+
 		membersPath+links)
@@ -430,7 +430,7 @@ func (h HTTPFetcher) GetTopicsMembersJSON(serviceName, topicName string) ([]byte
 	return result, nil
 }
 
-// GetTopicsSubscribersJSON returns the topics subscriber details in a cluster
+// GetTopicsSubscribersJSON returns the topics subscriber details in a cluster.
 func (h HTTPFetcher) GetTopicsSubscribersJSON(serviceName, topicName string) ([]byte, error) {
 	result, err := httpGetRequest(h, servicesPath+getSafeServiceName(h, serviceName)+topicsPath+getSafeServiceName(h, topicName)+
 		subscribersPath+links)
@@ -440,7 +440,7 @@ func (h HTTPFetcher) GetTopicsSubscribersJSON(serviceName, topicName string) ([]
 	return result, nil
 }
 
-// GetTopicsSubscriberGroupsJSON returns the topics subscriber group details in a cluster
+// GetTopicsSubscriberGroupsJSON returns the topics subscriber group details in a cluster.
 func (h HTTPFetcher) GetTopicsSubscriberGroupsJSON(serviceName, topicName string) ([]byte, error) {
 	result, err := httpGetRequest(h, servicesPath+getSafeServiceName(h, serviceName)+topicsPath+getSafeServiceName(h, topicName)+
 		subscriberGroupsPath+links)
@@ -450,7 +450,7 @@ func (h HTTPFetcher) GetTopicsSubscriberGroupsJSON(serviceName, topicName string
 	return result, nil
 }
 
-// GetProxySummaryJSON returns proxy server summary
+// GetProxySummaryJSON returns proxy server summary.
 func (h HTTPFetcher) GetProxySummaryJSON() ([]byte, error) {
 	result, err := httpGetRequest(h, "/services/proxy/members/?links=")
 	if err != nil && !strings.Contains(err.Error(), "404") {
@@ -459,7 +459,7 @@ func (h HTTPFetcher) GetProxySummaryJSON() ([]byte, error) {
 	return result, nil
 }
 
-// GetProxyConnectionsJSON returns the proxy connections for the specified service and node
+// GetProxyConnectionsJSON returns the proxy connections for the specified service and node.
 func (h HTTPFetcher) GetProxyConnectionsJSON(serviceName, nodeID string) ([]byte, error) {
 	result, err := httpGetRequest(h, servicesPath+getSafeServiceName(h, serviceName)+membersPath+
 		nodeID+"/proxy/connections?links=")
@@ -470,7 +470,7 @@ func (h HTTPFetcher) GetProxyConnectionsJSON(serviceName, nodeID string) ([]byte
 	return result, nil
 }
 
-// GetThreadDump retrieves a thread dump from a member
+// GetThreadDump retrieves a thread dump from a member.
 func (h HTTPFetcher) GetThreadDump(memberID string) ([]byte, error) {
 	result, err := httpGetRequest(h, membersPath+memberID+"/state")
 	if err != nil {
@@ -479,7 +479,7 @@ func (h HTTPFetcher) GetThreadDump(memberID string) ([]byte, error) {
 	return result, nil
 }
 
-// ShutdownMember shuts down a member
+// ShutdownMember shuts down a member.
 func (h HTTPFetcher) ShutdownMember(memberID string) ([]byte, error) {
 	result, err := httpPostRequest(h, membersPath+memberID+"/shutdown", constants.EmptyByte)
 	if err != nil {
@@ -488,7 +488,7 @@ func (h HTTPFetcher) ShutdownMember(memberID string) ([]byte, error) {
 	return result, nil
 }
 
-// GetEnvironment returns the environment for a member
+// GetEnvironment returns the environment for a member.
 func (h HTTPFetcher) GetEnvironment(memberID string) ([]byte, error) {
 	result, err := httpGetRequest(h, membersPath+memberID+"/environment"+links)
 	if err != nil {
@@ -497,8 +497,8 @@ func (h HTTPFetcher) GetEnvironment(memberID string) ([]byte, error) {
 	return result, nil
 }
 
-// DumpClusterHeap instructs the cluster to dump the cluster heap for the role.
-// role of "all" indicates all members
+// DumpClusterHeap instructs the cluster to dump the cluster heap for the role,
+// role of "all" indicates all members.
 func (h HTTPFetcher) DumpClusterHeap(role string) ([]byte, error) {
 	var (
 		payload = constants.EmptyByte
@@ -531,7 +531,7 @@ func (h HTTPFetcher) ConfigureTracing(role string, tracingRatio float32) ([]byte
 	return result, nil
 }
 
-// LogClusterState instructs the cluster to log cluster state for the role
+// LogClusterState instructs the cluster to log cluster state for the role.
 func (h HTTPFetcher) LogClusterState(role string) ([]byte, error) {
 	var (
 		payload = constants.EmptyByte
@@ -546,7 +546,7 @@ func (h HTTPFetcher) LogClusterState(role string) ([]byte, error) {
 	return result, nil
 }
 
-// GetCacheMembers retrieves cache member details
+// GetCacheMembers retrieves cache member details.
 func (h HTTPFetcher) GetCacheMembers(serviceName, cacheName string) ([]byte, error) {
 	result, err := httpGetRequest(h, servicesPath+getSafeServiceName(h, serviceName)+"/caches/"+
 		url.PathEscape(cacheName)+"/members?links=")
@@ -557,7 +557,7 @@ func (h HTTPFetcher) GetCacheMembers(serviceName, cacheName string) ([]byte, err
 	return result, nil
 }
 
-// GetPersistenceCoordinator retrieves persistence coordinator details
+// GetPersistenceCoordinator retrieves persistence coordinator details.
 func (h HTTPFetcher) GetPersistenceCoordinator(serviceName string) ([]byte, error) {
 	result, err := httpGetRequest(h, servicesPath+getSafeServiceName(h, serviceName)+"/persistence?links=")
 	if err != nil {
@@ -566,7 +566,7 @@ func (h HTTPFetcher) GetPersistenceCoordinator(serviceName string) ([]byte, erro
 	return result, nil
 }
 
-// GetMemberOSJson returns the OS information for the member
+// GetMemberOSJson returns the OS information for the member.
 func (h HTTPFetcher) GetMemberOSJson(memberID string) ([]byte, error) {
 	result, err := httpGetRequest(h, membersPath+memberID+"/platform/operatingSystem"+links)
 	if err != nil && !strings.Contains(err.Error(), "404") {
@@ -575,7 +575,7 @@ func (h HTTPFetcher) GetMemberOSJson(memberID string) ([]byte, error) {
 	return result, nil
 }
 
-// GetMembersHealth returns the health for the members in the cluster
+// GetMembersHealth returns the health for the members in the cluster.
 func (h HTTPFetcher) GetMembersHealth() ([]byte, error) {
 	result, err := httpGetRequest(h, "/health"+membersPath+links)
 	if err != nil && !strings.Contains(err.Error(), "404") {
@@ -588,7 +588,7 @@ func (h HTTPFetcher) GetMembersHealth() ([]byte, error) {
 	return result, nil
 }
 
-// GetReportersJSON returns reporters in raw json
+// GetReportersJSON returns reporters in raw json.
 func (h HTTPFetcher) GetReportersJSON() ([]byte, error) {
 	result, err := httpGetRequest(h, "/reporters"+links)
 	if err != nil {
@@ -597,7 +597,7 @@ func (h HTTPFetcher) GetReportersJSON() ([]byte, error) {
 	return result, nil
 }
 
-// GetReporterJSON returns reporter for a node in raw json
+// GetReporterJSON returns reporter for a node in raw json.
 func (h HTTPFetcher) GetReporterJSON(nodeID string) ([]byte, error) {
 	result, err := httpGetRequest(h, reportersPath+nodeID+links)
 	if err != nil {
@@ -606,19 +606,19 @@ func (h HTTPFetcher) GetReporterJSON(nodeID string) ([]byte, error) {
 	return result, nil
 }
 
-// StartReporter starts the reporter on a member
+// StartReporter starts the reporter on a member.
 func (h HTTPFetcher) StartReporter(nodeID string) error {
 	_, err := issueReporterCommand(h, nodeID, "start")
 	return err
 }
 
-// StopReporter stops the reporter on a member
+// StopReporter stops the reporter on a member.
 func (h HTTPFetcher) StopReporter(nodeID string) error {
 	_, err := issueReporterCommand(h, nodeID, "stop")
 	return err
 }
 
-// CompactElasticData compacts elastic data for a journal type and node
+// CompactElasticData compacts elastic data for a journal type and node.
 func (h HTTPFetcher) CompactElasticData(journalType, nodeID string) ([]byte, error) {
 	var (
 		err      error
@@ -634,7 +634,7 @@ func (h HTTPFetcher) CompactElasticData(journalType, nodeID string) ([]byte, err
 	return constants.EmptyByte, nil
 }
 
-// GetElasticDataDetails retrieves elastic data details for the type of flash or ram
+// GetElasticDataDetails retrieves elastic data details for the type of flash or ram.
 func (h HTTPFetcher) GetElasticDataDetails(journalType string) ([]byte, error) {
 	if journalType != "ram" && journalType != "flash" {
 		return constants.EmptyByte, errors.New("journal type must be flash or ram")
@@ -650,7 +650,7 @@ func (h HTTPFetcher) GetElasticDataDetails(journalType string) ([]byte, error) {
 	return result, nil
 }
 
-// GetArchivedSnapshots retrieves the list of archives snapshots
+// GetArchivedSnapshots retrieves the list of archives snapshots.
 func (h HTTPFetcher) GetArchivedSnapshots(serviceName string) ([]byte, error) {
 	result, err := httpGetRequest(h, servicesPath+getSafeServiceName(h, serviceName)+"/persistence/archives?links=")
 	if err != nil {
@@ -659,7 +659,7 @@ func (h HTTPFetcher) GetArchivedSnapshots(serviceName string) ([]byte, error) {
 	return result, nil
 }
 
-// InvokeFederationOperation invokes a federation operation against a service and participant
+// InvokeFederationOperation invokes a federation operation against a service and participant.
 func (h HTTPFetcher) InvokeFederationOperation(serviceName, command, participant, mode string) ([]byte, error) {
 	var (
 		err error
@@ -692,7 +692,7 @@ func (h HTTPFetcher) InvokeFederationOperation(serviceName, command, participant
 	return constants.EmptyByte, nil
 }
 
-// InvokeServiceOperation invokes a service operation such as suspend or resume
+// InvokeServiceOperation invokes a service operation such as suspend or resume.
 func (h HTTPFetcher) InvokeServiceOperation(serviceName, operation string) ([]byte, error) {
 	var (
 		err      error
@@ -715,7 +715,7 @@ func (h HTTPFetcher) InvokeServiceOperation(serviceName, operation string) ([]by
 
 // InvokeResetStatistics invokes a reset statistics operation
 // nodeID is either "all" for all members or a specific nodeID
-// args[] are specific to various commands
+// args[] are specific to various commands.
 func (h HTTPFetcher) InvokeResetStatistics(operation string, nodeID string, args []string) ([]byte, error) {
 	var (
 		err      error
@@ -770,7 +770,7 @@ func (h HTTPFetcher) InvokeResetStatistics(operation string, nodeID string, args
 	return constants.EmptyByte, nil
 }
 
-// InvokeServiceMemberOperation invokes a service operation such as start, stop, shutdown against a node
+// InvokeServiceMemberOperation invokes a service operation such as start, stop, shutdown against a node.
 func (h HTTPFetcher) InvokeServiceMemberOperation(serviceName, nodeID, operation string) ([]byte, error) {
 	var (
 		err      error
@@ -786,7 +786,7 @@ func (h HTTPFetcher) InvokeServiceMemberOperation(serviceName, nodeID, operation
 	return constants.EmptyByte, nil
 }
 
-// InvokeSnapshotOperation invokes a snapshot operation against a service
+// InvokeSnapshotOperation invokes a snapshot operation against a service.
 func (h HTTPFetcher) InvokeSnapshotOperation(serviceName, snapshotName, operation string, archived bool) ([]byte, error) {
 	var (
 		err       error
@@ -821,7 +821,7 @@ func (h HTTPFetcher) InvokeSnapshotOperation(serviceName, snapshotName, operatio
 	}
 }
 
-// StartJFR starts a JFR. type is "role", "cluster" or "node" and target is the role or node
+// StartJFR starts a JFR. type is "role", "cluster" or "node" and target is the role or node.
 func (h HTTPFetcher) StartJFR(jfrName, directory, jfrType, target string, duration int32) ([]byte, error) {
 	var (
 		err      error
@@ -845,22 +845,22 @@ func (h HTTPFetcher) StartJFR(jfrName, directory, jfrType, target string, durati
 	return response, nil
 }
 
-// DumpJFR dumps a JFR. type is "cluster" or "node" and target is the node id if type "node"
+// DumpJFR dumps a JFR. type is "cluster" or "node" and target is the node id if type "node".
 func (h HTTPFetcher) DumpJFR(jfrName, jfrType, target, filename string) ([]byte, error) {
 	return jfrOperation(h, jfrName, DumpJFR, jfrType, target, filename)
 }
 
-// StopJFR stops a JFR. type is "cluster" or "node" and target is the node id if type "node"
+// StopJFR stops a JFR. type is "cluster" or "node" and target is the node id if type "node".
 func (h HTTPFetcher) StopJFR(jfrName, jfrType, target string) ([]byte, error) {
 	return jfrOperation(h, jfrName, StopJFR, jfrType, target, "")
 }
 
-// CheckJFR checks a JFR. type is "cluster" or "node" and target is the node id if type "node"
+// CheckJFR checks a JFR. type is "cluster" or "node" and target is the node id if type "node".
 func (h HTTPFetcher) CheckJFR(jfrName, jfrType, target string) ([]byte, error) {
 	return jfrOperation(h, jfrName, CheckJFR, jfrType, target, "")
 }
 
-// GetFederationStatistics returns federation statistics for a service and type
+// GetFederationStatistics returns federation statistics for a service and type.
 func (h HTTPFetcher) GetFederationStatistics(serviceName, federationType string) ([]byte, error) {
 	result, err := httpGetRequest(h, servicesPath+getSafeServiceName(h, serviceName)+
 		federationStatsPath+federationType+"/participants"+links)
@@ -874,7 +874,7 @@ func (h HTTPFetcher) GetFederationStatistics(serviceName, federationType string)
 	return result, nil
 }
 
-// GetFederationDetails returns federation statistics for a service and type and participant
+// GetFederationDetails returns federation statistics for a service and type and participant.
 func (h HTTPFetcher) GetFederationDetails(serviceName, federationType, nodeID, participant string) ([]byte, error) {
 	result, err := httpGetRequest(h, servicesPath+getSafeServiceName(h, serviceName)+membersPath+nodeID+
 		federationStatsPath+federationType+"/participants/"+participant+links)
@@ -887,7 +887,7 @@ func (h HTTPFetcher) GetFederationDetails(serviceName, federationType, nodeID, p
 	return result, nil
 }
 
-// InvokeDisconnectAll invokes a disconnect all operation against a topic
+// InvokeDisconnectAll invokes a disconnect all operation against a topic.
 func (h HTTPFetcher) InvokeDisconnectAll(topicName, topicService, subscriberGroup string) error {
 	httpURL := servicesPath + getSafeServiceName(h, topicService) + topicsPath + getSafeServiceName(h, topicName)
 
@@ -906,7 +906,7 @@ func (h HTTPFetcher) InvokeDisconnectAll(topicName, topicService, subscriberGrou
 	return nil
 }
 
-// InvokeSubscriberOperation invokes a subscriber operation against a topic subscriber
+// InvokeSubscriberOperation invokes a subscriber operation against a topic subscriber.
 func (h HTTPFetcher) InvokeSubscriberOperation(topicName, topicService string, subscriber int64, operation string, args ...interface{}) ([]byte, error) {
 	var (
 		err         error
@@ -936,7 +936,7 @@ func (h HTTPFetcher) InvokeSubscriberOperation(topicName, topicService string, s
 	return result, nil
 }
 
-// jfrOperation issues a jfrStop, jfrDump or jfrCheck. type is "cluster" or "node" and target is the node id if type "node"
+// jfrOperation issues a jfrStop, jfrDump or jfrCheck. type is "cluster" or "node" and target is the node id if type "node".
 func jfrOperation(h HTTPFetcher, jfrName, operation, jfrType, target, filename string) ([]byte, error) {
 	var (
 		err      error
@@ -962,7 +962,7 @@ func jfrOperation(h HTTPFetcher, jfrName, operation, jfrType, target, filename s
 	return response, nil
 }
 
-// getInitialURL returns an initial URL for a JFR operation
+// getInitialURL returns an initial URL for a JFR operation.
 func getInitialURL(jfrOperation, jfrType, target string) string {
 	finalURL := "/diagnostic-cmd/" + jfrOperation + links
 	if jfrType == JfrTypeRole {
@@ -973,7 +973,7 @@ func getInitialURL(jfrOperation, jfrType, target string) string {
 	return finalURL
 }
 
-// issueReporterCommand issues a reporter command for a node
+// issueReporterCommand issues a reporter command for a node.
 func issueReporterCommand(h HTTPFetcher, nodeID, command string) ([]byte, error) {
 	_, err := httpPostRequest(h, reportersPath+nodeID+"/"+command, constants.EmptyByte)
 	if err != nil {
@@ -983,32 +983,32 @@ func issueReporterCommand(h HTTPFetcher, nodeID, command string) ([]byte, error)
 	return constants.EmptyByte, nil
 }
 
-// GetURL returns the URL
+// GetURL returns the URL.
 func (h HTTPFetcher) GetURL() string {
 	return h.ConnectionType
 }
 
-// GetType returns the connection type
+// GetType returns the connection type.
 func (h HTTPFetcher) GetType() string {
 	return h.ConnectionType
 }
 
-// IsWebLogicServer returns true if the connection is a WebLogic server connection
+// IsWebLogicServer returns true if the connection is a WebLogic server connection.
 func (h HTTPFetcher) IsWebLogicServer() bool {
 	return h.WebLogicServer
 }
 
-// GetUsername returns the username
+// GetUsername returns the username.
 func (h HTTPFetcher) GetUsername() string {
 	return h.Username
 }
 
-// GetClusterName returns the cluster name
+// GetClusterName returns the cluster name.
 func (h HTTPFetcher) GetClusterName() string {
 	return h.ClusterName
 }
 
-// getSafeServiceName returns a safe name with quotes removed if connected to WLS and encoded
+// getSafeServiceName returns a safe name with quotes removed if connected to WLS and encoded.
 func getSafeServiceName(h HTTPFetcher, serviceName string) string {
 	if h.IsWebLogicServer() || strings.Contains(serviceName, "\"") {
 		serviceName = strings.ReplaceAll(serviceName, "\"", "")
@@ -1017,7 +1017,7 @@ func getSafeServiceName(h HTTPFetcher, serviceName string) string {
 }
 
 // setUsernamePassword accepts a username and password from the terminal with
-// the password not displayed
+// the password not displayed.
 func setUsernamePassword() error {
 	if username == "" {
 		fmt.Print("Enter username: ")
@@ -1050,27 +1050,27 @@ func setUsernamePassword() error {
 	return nil
 }
 
-// HttpGetRequest issues a HTTP GET request for the given a relative url
+// HttpGetRequest issues a HTTP GET request for the given a relative url.
 func httpGetRequest(h HTTPFetcher, urlAppend string) ([]byte, error) {
 	return httpRequest(h, "GET", urlAppend, false, constants.EmptyByte)
 }
 
-// httpGetRequestAbsolute issues a HTTP GET request for the given absolute url
+// httpGetRequestAbsolute issues a HTTP GET request for the given absolute url.
 func httpGetRequestAbsolute(h HTTPFetcher, urlAppend string) ([]byte, error) {
 	return httpRequest(h, "GET", urlAppend, true, constants.EmptyByte)
 }
 
-// HttpPostRequest issues a HTTP POST request for the given url
+// HttpPostRequest issues a HTTP POST request for the given url.
 func httpPostRequest(h HTTPFetcher, urlAppend string, body []byte) ([]byte, error) {
 	return httpRequest(h, "POST", urlAppend, false, body)
 }
 
-// httpDeleteRequest issues a HTTP DELETE request for the given url
+// httpDeleteRequest issues a HTTP DELETE request for the given url.
 func httpDeleteRequest(h HTTPFetcher, urlAppend string) ([]byte, error) {
 	return httpRequest(h, "DELETE", urlAppend, false, constants.EmptyByte)
 }
 
-// HttpRequest issues a HTTP request for the given url
+// HttpRequest issues a HTTP request for the given url.
 func httpRequest(h HTTPFetcher, requestType, urlAppend string, absolute bool, content []byte) ([]byte, error) {
 	var (
 		finalURL        string
@@ -1242,7 +1242,7 @@ func httpRequest(h HTTPFetcher, requestType, urlAppend string, absolute bool, co
 	return body, err
 }
 
-// GetLinkData returns the data from the absolute url
+// GetLinkData returns the data from the absolute url.
 func getLinkData(h HTTPFetcher, url string) ([]byte, error) {
 	result, err := httpGetRequest(h, url)
 	if err != nil && !strings.Contains(err.Error(), "404") {
@@ -1251,7 +1251,7 @@ func getLinkData(h HTTPFetcher, url string) ([]byte, error) {
 	return result, nil
 }
 
-// getJSONValueString returns a json representation of a value
+// getJSONValueString returns a json representation of a value.
 func getJSONValueString(value interface{}) string {
 	switch value.(type) {
 	case string:

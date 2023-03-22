@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, 2022 Oracle and/or its affiliates.
+ * Copyright (c) 2021, 2023 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -18,7 +18,7 @@ import (
 	"time"
 )
 
-// getHTTPSessionsCmd represents the get http-sessions command
+// getHTTPSessionsCmd represents the get http-sessions command.
 var getHTTPSessionsCmd = &cobra.Command{
 	Use:   "http-sessions",
 	Short: "display Coherence*Web Http session information for a cluster",
@@ -79,7 +79,7 @@ var getHTTPSessionsCmd = &cobra.Command{
 	},
 }
 
-// DeduplicateSessions removes duplicated http session details
+// DeduplicateSessions removes duplicated http session details.
 func DeduplicateSessions(httpSummary config.HTTPSessionSummaries) []config.HTTPSessionSummary {
 	// the current results include 1 entry for each http session and member, so we need to remove duplicates
 	var finalSessions = make([]config.HTTPSessionSummary, 0)
@@ -129,7 +129,7 @@ func DeduplicateSessions(httpSummary config.HTTPSessionSummaries) []config.HTTPS
 	return finalSessions
 }
 
-// describeHTTPSessionCmd represents the describe http-session command
+// describeHTTPSessionCmd represents the describe http-session command.
 var describeHTTPSessionCmd = &cobra.Command{
 	Use:   "http-session application-id",
 	Short: "describe a http session",

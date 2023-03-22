@@ -56,7 +56,7 @@ const (
 	roleNameDescription = "role name to display"
 )
 
-// getMembersCmd represents the get members command
+// getMembersCmd represents the get members command.
 var getMembersCmd = &cobra.Command{
 	Use:   "members",
 	Short: "display members for a cluster",
@@ -157,7 +157,7 @@ func getMembers(cmd *cobra.Command, networkStats bool) error {
 	return nil
 }
 
-// getMemberStats represents the get network-stats command
+// getMemberStats represents the get network-stats command.
 var getMemberStats = &cobra.Command{
 	Use:   "member-stats",
 	Short: "display member network statistics for a cluster",
@@ -168,7 +168,7 @@ var getMemberStats = &cobra.Command{
 	},
 }
 
-// describeMemberCmd represents the describe member command
+// describeMemberCmd represents the describe member command.
 var describeMemberCmd = &cobra.Command{
 	Use:   "member node-id",
 	Short: "describe a member",
@@ -320,7 +320,7 @@ Full list of options are JVM dependant, but can include the full values or part 
 	},
 }
 
-// setMemberCmd represents the set member command
+// setMemberCmd represents the set member command.
 var setMemberCmd = &cobra.Command{
 	Use:   "member {node-ids|all}",
 	Short: "set a member attribute for one or more members",
@@ -429,7 +429,7 @@ or loggingFormat.`,
 	},
 }
 
-// dumpClusterHeapCmd represents the dump cluster-heap command
+// dumpClusterHeapCmd represents the dump cluster-heap command.
 var dumpClusterHeapCmd = &cobra.Command{
 	Use:   "cluster-heap",
 	Short: "dump the cluster heap for all members or a specific role",
@@ -441,7 +441,7 @@ by using the -r flag.`,
 	},
 }
 
-// configureTracingCmd represents the configure tracing command
+// configureTracingCmd represents the configure tracing command.
 var configureTracingCmd = &cobra.Command{
 	Use:   "tracing",
 	Short: "configure tracing for all members or a specific role",
@@ -453,7 +453,7 @@ by using the -r flag. You can specify a tracingRatio of -1 to turn off tracing.`
 	},
 }
 
-// getTracingCmd represents the get tracing command
+// getTracingCmd represents the get tracing command.
 var getTracingCmd = &cobra.Command{
 	Use:   "tracing",
 	Short: "display tracing for all members",
@@ -511,7 +511,7 @@ var getTracingCmd = &cobra.Command{
 	},
 }
 
-// logClusterStateCmd represents the log cluster-state command
+// logClusterStateCmd represents the log cluster-state command.
 var logClusterStateCmd = &cobra.Command{
 	Use:   "cluster-state",
 	Short: "Logs the cluster state via a thread dump, for all members or a specific role",
@@ -523,7 +523,7 @@ polls, in the logs files, for all members or the selected role by using the -r f
 	},
 }
 
-// shutdownMemberCmd represents the shutdown member command
+// shutdownMemberCmd represents the shutdown member command.
 var shutdownMemberCmd = &cobra.Command{
 	Use:   "member node-id",
 	Short: "shutdown a members services",
@@ -581,7 +581,7 @@ DefaultCacheServer, then they will be restarted.`,
 	},
 }
 
-// issueClusterCommand issues a variety of cluster commands
+// issueClusterCommand issues a variety of cluster commands.
 func issueClusterCommand(cmd *cobra.Command, command string) error {
 	var (
 		dataFetcher   fetcher.Fetcher
@@ -659,7 +659,7 @@ func issueClusterCommand(cmd *cobra.Command, command string) error {
 	return nil
 }
 
-// retrieveThreadDumpsCmd represents the retrieve thread-dumps command
+// retrieveThreadDumpsCmd represents the retrieve thread-dumps command.
 var retrieveThreadDumpsCmd = &cobra.Command{
 	Use:   "thread-dumps [node-ids]",
 	Short: "generate and retrieve thread dumps for all or selected members",
@@ -800,7 +800,7 @@ a role to retrieve thread dumps for.`,
 	},
 }
 
-// generateThreadDumps generates the required number of thread dumps for a node
+// generateThreadDumps generates the required number of thread dumps for a node.
 func generateThreadDumps(nodeID string, dataFetcher fetcher.Fetcher,
 	cmd *cobra.Command, isLast bool) error {
 	var (
@@ -860,7 +860,7 @@ func generateThreadDumps(nodeID string, dataFetcher fetcher.Fetcher,
 	return nil
 }
 
-// GetFileName returns a file name for the thread dump
+// GetFileName returns a file name for the thread dump.
 func GetFileName(nodeID string, iteration int32) string {
 	return fmt.Sprintf("thread-dump-node-%s-%d.log", nodeID, iteration)
 }

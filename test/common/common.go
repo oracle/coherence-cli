@@ -36,7 +36,7 @@ const doesNotExist = "does not exist"
 // there is expected output
 //
 
-// RunTestClusterCommands tests add/remove/get/describe cluster commands
+// RunTestClusterCommands tests add/remove/get/describe cluster commands.
 func RunTestClusterCommands(t *testing.T) {
 	context := test_utils.GetTestContext()
 	g := NewGomegaWithT(t)
@@ -146,7 +146,7 @@ func RunTestClusterCommands(t *testing.T) {
 	test_utils.EnsureCommandContains(g, t, cliCmd, "", configArg, file, "get", "clusters")
 }
 
-// RunTestNSLookupCommands tests nslookup commands
+// RunTestNSLookupCommands tests nslookup commands.
 func RunTestNSLookupCommands(t *testing.T) {
 	g := NewGomegaWithT(t)
 
@@ -170,7 +170,7 @@ func RunTestNSLookupCommands(t *testing.T) {
 		"nslookup", "-q", "Cluster/info")
 }
 
-// RunTestDiscoverClustersCommands tests discover clusters commands
+// RunTestDiscoverClustersCommands tests discover clusters commands.
 func RunTestDiscoverClustersCommands(t *testing.T) {
 	g := NewGomegaWithT(t)
 
@@ -266,7 +266,7 @@ func getVersion(restUrl string) (string, error) {
 	return string(version), nil
 }
 
-// RunTestServicesCommands tests various services commands
+// RunTestServicesCommands tests various services commands.
 func RunTestServicesCommands(t *testing.T) {
 	var (
 		g             = NewGomegaWithT(t)
@@ -342,7 +342,7 @@ func RunTestServicesCommands(t *testing.T) {
 	test_utils.EnsureCommandContains(g, t, cliCmd, context.ClusterName, configArg, file, "remove", "cluster", "cluster1")
 }
 
-// RunTestServiceOperations tests various services operations
+// RunTestServiceOperations tests various services operations.
 func RunTestServiceOperations(t *testing.T) {
 	var (
 		g       = NewGomegaWithT(t)
@@ -377,14 +377,6 @@ func RunTestServiceOperations(t *testing.T) {
 	test_utils.EnsureCommandContains(g, t, cliCmd, cmd.OperationCompleted, configArg, file, "resume", "service",
 		"PartitionedCache", "-y", "-c", context.ClusterName)
 
-	// NOTE: The following is disabled because of an intermittent
-	// test to ensure that services are now resumed
-	// test_utils.Sleep(15)
-	//
-	// test service is suspended
-	//test_utils.EnsureCommandNotContains(g, t, cliCmd, "Suspended", configArg, file, "describe", "service",
-	//	"PartitionedCache", "-c", context.ClusterName)
-
 	test_utils.EnsureCommandContains(g, t, cliCmd, "60", configArg, file, "set", "timeout", "60")
 
 	// test stop service on invalid member
@@ -410,7 +402,7 @@ func RunTestServiceOperations(t *testing.T) {
 	test_utils.EnsureCommandContains(g, t, cliCmd, context.ClusterName, configArg, file, "remove", "cluster", "cluster1")
 }
 
-// RunTestProxyCommands tests various services commands
+// RunTestProxyCommands tests various services commands.
 func RunTestProxyCommands(t *testing.T) {
 	g := NewGomegaWithT(t)
 	context := test_utils.GetTestContext()
@@ -447,7 +439,7 @@ func RunTestProxyCommands(t *testing.T) {
 	test_utils.EnsureCommandContains(g, t, cliCmd, context.ClusterName, configArg, file, "remove", "cluster", "cluster1")
 }
 
-// RunTestManagementCommands tests the get/set management command
+// RunTestManagementCommands tests the get/set management command.
 func RunTestManagementCommands(t *testing.T) {
 	g := NewGomegaWithT(t)
 	context := test_utils.GetTestContext()
@@ -499,7 +491,7 @@ func RunTestManagementCommands(t *testing.T) {
 	test_utils.EnsureCommandContains(g, t, cliCmd, context.ClusterName, configArg, file, "remove", "cluster", "cluster1")
 }
 
-// RunTestSetMemberCommands tests various set member commands
+// RunTestSetMemberCommands tests various set member commands.
 func RunTestSetMemberCommands(t *testing.T) {
 	var (
 		g             = NewGomegaWithT(t)
@@ -580,7 +572,7 @@ func RunTestSetMemberCommands(t *testing.T) {
 	test_utils.EnsureCommandContains(g, t, cliCmd, context.ClusterName, configArg, file, "remove", "cluster", "cluster1")
 }
 
-// RunTestMachinesCommands tests various machines commands
+// RunTestMachinesCommands tests various machines commands.
 func RunTestMachinesCommands(t *testing.T) {
 	g := NewGomegaWithT(t)
 	context := test_utils.GetTestContext()
@@ -619,7 +611,7 @@ func RunTestMachinesCommands(t *testing.T) {
 	test_utils.EnsureCommandContains(g, t, cliCmd, context.ClusterName, configArg, file, "remove", "cluster", "cluster1", "-y")
 }
 
-// RunTestReporterCommands tests various reporter commands
+// RunTestReporterCommands tests various reporter commands.
 func RunTestReporterCommands(t *testing.T) {
 	var (
 		g       = NewGomegaWithT(t)
@@ -694,7 +686,7 @@ func RunTestReporterCommands(t *testing.T) {
 	test_utils.EnsureCommandContains(g, t, cliCmd, context.ClusterName, configArg, file, "remove", "cluster", "cluster1", "-y")
 }
 
-// RunTestThreadDumpsCommands tests thread dump commands
+// RunTestThreadDumpsCommands tests thread dump commands.
 func RunTestThreadDumpsCommands(t *testing.T) {
 	var (
 		g              = NewGomegaWithT(t)
@@ -753,7 +745,7 @@ func RunTestThreadDumpsCommands(t *testing.T) {
 	test_utils.EnsureCommandContains(g, t, cliCmd, context.ClusterName, configArg, file, "remove", "cluster", "cluster1", "-y")
 }
 
-// RunTestExecutorCommands runs basic executor tests
+// RunTestExecutorCommands runs basic executor tests.
 func RunTestExecutorCommands(t *testing.T) {
 	var (
 		g       = NewGomegaWithT(t)
@@ -787,7 +779,7 @@ func RunTestExecutorCommands(t *testing.T) {
 	test_utils.EnsureCommandContains(g, t, cliCmd, context.ClusterName, configArg, file, "remove", "cluster", "cluster1", "-y")
 }
 
-// RunTestJFRCommands tests various jfr commands
+// RunTestJFRCommands tests various jfr commands.
 func RunTestJFRCommands(t *testing.T) {
 	var (
 		g             = NewGomegaWithT(t)
@@ -873,7 +865,7 @@ func RunTestJFRCommands(t *testing.T) {
 	test_utils.EnsureCommandContains(g, t, cliCmd, context.ClusterName, configArg, file, "remove", "cluster", "cluster1", "-y")
 }
 
-// RunTestDumpClusterHeapCommands tests the dump cluster-heap command
+// RunTestDumpClusterHeapCommands tests the dump cluster-heap command.
 func RunTestDumpClusterHeapCommands(t *testing.T) {
 	var (
 		g       = NewGomegaWithT(t)
@@ -909,7 +901,7 @@ func RunTestDumpClusterHeapCommands(t *testing.T) {
 
 // RunTestConfigureTracingCommands tests the configure tracing command
 // note these commands will not actual starting tracing as the required libraries
-// are not included. Messages should be in the logs indicating these deps are missing
+// are not included. Messages should be in the logs indicating these deps are missing.
 func RunTestConfigureTracingCommands(t *testing.T) {
 	var (
 		g             = NewGomegaWithT(t)
@@ -957,7 +949,7 @@ func RunTestConfigureTracingCommands(t *testing.T) {
 	test_utils.EnsureCommandContains(g, t, cliCmd, context.ClusterName, configArg, file, "remove", "cluster", "cluster1", "-y")
 }
 
-// RunTestLogClusterStateCommands tests the log cluster-state command
+// RunTestLogClusterStateCommands tests the log cluster-state command.
 func RunTestLogClusterStateCommands(t *testing.T) {
 	var (
 		g       = NewGomegaWithT(t)
@@ -990,7 +982,7 @@ func RunTestLogClusterStateCommands(t *testing.T) {
 	test_utils.EnsureCommandContains(g, t, cliCmd, context.ClusterName, configArg, file, "remove", "cluster", "cluster1", "-y")
 }
 
-// RunTestHttpSessionCommands tests various elastic data commands
+// RunTestHttpSessionCommands tests various elastic data commands.
 func RunTestHttpSessionCommands(t *testing.T) {
 	var (
 		g       = NewGomegaWithT(t)
@@ -1037,7 +1029,7 @@ func RunTestHttpSessionCommands(t *testing.T) {
 	test_utils.EnsureCommandContains(g, t, cliCmd, context.ClusterName, configArg, file, "remove", "cluster", "cluster1", "-y")
 }
 
-// RunTestElasticDataCommands tests various elastic data commands
+// RunTestElasticDataCommands tests various elastic data commands.
 func RunTestElasticDataCommands(t *testing.T) {
 	var (
 		g       = NewGomegaWithT(t)
@@ -1100,7 +1092,7 @@ func RunTestElasticDataCommands(t *testing.T) {
 	test_utils.EnsureCommandContains(g, t, cliCmd, context.ClusterName, configArg, file, "remove", "cluster", "cluster1", "-y")
 }
 
-// RunTestCachesCommands tests various caches commands
+// RunTestCachesCommands tests various caches commands.
 func RunTestCachesCommands(t *testing.T) {
 	var err error
 	g := NewGomegaWithT(t)
@@ -1208,7 +1200,7 @@ func RunTestCachesCommands(t *testing.T) {
 	test_utils.EnsureCommandContains(g, t, cliCmd, context.ClusterName, configArg, file, "remove", "cluster", "cluster1", "-y")
 }
 
-// RunTestPersistenceCommands tests various caches commands
+// RunTestPersistenceCommands tests various caches commands.
 func RunTestPersistenceCommands(t *testing.T) {
 	var (
 		g            = NewGomegaWithT(t)
@@ -1346,7 +1338,7 @@ func RunTestPersistenceCommands(t *testing.T) {
 	test_utils.EnsureCommandContains(g, t, cliCmd, context.ClusterName, configArg, file, "remove", "cluster", "cluster1", "-y")
 }
 
-// RunTestHealthCommands tests various health commands
+// RunTestHealthCommands tests various health commands.
 func RunTestHealthCommands(t *testing.T) {
 	var (
 		g       = NewGomegaWithT(t)
@@ -1376,7 +1368,7 @@ func RunTestHealthCommands(t *testing.T) {
 	test_utils.EnsureCommandContains(g, t, cliCmd, context.ClusterName, configArg, file, "remove", "cluster", "cluster1", "-y")
 }
 
-// RunTestHttpProxyCommands tests various http proxy commands
+// RunTestHttpProxyCommands tests various http proxy commands.
 func RunTestHttpProxyCommands(t *testing.T) {
 	g := NewGomegaWithT(t)
 	context := test_utils.GetTestContext()
@@ -1416,7 +1408,7 @@ func RunTestHttpProxyCommands(t *testing.T) {
 	test_utils.EnsureCommandContains(g, t, cliCmd, context.ClusterName, configArg, file, "remove", "cluster", "cluster1", "-y")
 }
 
-// RunTestClusterGetClusterRequest tests get cluster http request
+// RunTestClusterGetClusterRequest tests get cluster http request.
 func RunTestClusterGetClusterRequest(t *testing.T) {
 	g := NewGomegaWithT(t)
 	context := test_utils.GetTestContext()
@@ -1450,7 +1442,7 @@ func RunTestClusterGetClusterRequest(t *testing.T) {
 	test_utils.EnsureCommandContains(g, t, cliCmd, context.ClusterName, configArg, file, "remove", "cluster", "cluster1", "-y")
 }
 
-// RunTestClusterGetMembersRequest tests members http request
+// RunTestClusterGetMembersRequest tests members http request.
 func RunTestClusterGetMembersRequest(t *testing.T) {
 	g := NewGomegaWithT(t)
 	context := test_utils.GetTestContext()
@@ -1487,7 +1479,7 @@ func RunTestClusterGetMembersRequest(t *testing.T) {
 	test_utils.EnsureCommandContains(g, t, cliCmd, context.ClusterName, configArg, file, "remove", "cluster", "cluster1", "-y")
 }
 
-// RunTestClusterServicesRequest tests services http request
+// RunTestClusterServicesRequest tests services http request.
 func RunTestClusterServicesRequest(t *testing.T) {
 	var (
 		g        = NewGomegaWithT(t)
@@ -1539,7 +1531,7 @@ func RunTestClusterServicesRequest(t *testing.T) {
 	test_utils.EnsureCommandContains(g, t, cliCmd, context.ClusterName, configArg, file, "remove", "cluster", "cluster1", "-y")
 }
 
-// RunTestCachesRequests tests caches http request
+// RunTestCachesRequests tests caches http request.
 func RunTestCachesRequests(t *testing.T) {
 	g := NewGomegaWithT(t)
 	context := test_utils.GetTestContext()
@@ -1581,7 +1573,7 @@ func RunTestCachesRequests(t *testing.T) {
 	test_utils.EnsureCommandContains(g, t, cliCmd, context.ClusterName, configArg, file, "remove", "cluster", "cluster1", "-y")
 }
 
-// RunTestFederationCommands tests federation commands
+// RunTestFederationCommands tests federation commands.
 func RunTestFederationCommands(t *testing.T) {
 	var (
 		context = test_utils.GetTestContext()
@@ -1723,7 +1715,7 @@ func RunTestFederationCommands(t *testing.T) {
 	test_utils.EnsureCommandContains(g, t, cliCmd, "", configArg, file, "get", "clusters")
 }
 
-// RunTestTopicsCommands tests federation commands
+// RunTestTopicsCommands tests federation commands.
 func RunTestTopicsCommands(t *testing.T) {
 	const noTopics = "there are no topics for service"
 	var (
@@ -1877,7 +1869,7 @@ func RunTestTopicsCommands(t *testing.T) {
 	test_utils.EnsureCommandContains(g, t, cliCmd, "", configArg, file, "get", "clusters")
 }
 
-// GetDataFetcher returns a Fetcher instance or throws an assertion if not found
+// GetDataFetcher returns a Fetcher instance or throws an assertion if not found.
 func GetDataFetcher(g *WithT, clusterName string) fetcher.Fetcher {
 	found, connection := cmd.GetClusterConnection(clusterName)
 
@@ -1888,13 +1880,13 @@ func GetDataFetcher(g *WithT, clusterName string) fetcher.Fetcher {
 	return dataFetcher
 }
 
-// isHealthEnabled returns true if health API is enabled, which is 14.1.1.2206 and 22.06+
+// isHealthEnabled returns true if health API is enabled, which is 14.1.1.2206 and 22.06+.
 func isHealthEnabled(restUrl string) bool {
 	result, err := test_utils.IssueGetRequest(restUrl + "/healthPresent")
 	return err != nil && string(result) == "true"
 }
 
-// RunTestProfileCommands tests profile commands
+// RunTestProfileCommands tests profile commands.
 func RunTestProfileCommands(t *testing.T) {
 	g := NewGomegaWithT(t)
 
@@ -1934,7 +1926,7 @@ func RunTestProfileCommands(t *testing.T) {
 		"profile2", "-y")
 }
 
-// RunTestResetCommands tests various reset commands
+// RunTestResetCommands tests various reset commands.
 func RunTestResetCommands(t *testing.T) {
 	var (
 		g       = NewGomegaWithT(t)

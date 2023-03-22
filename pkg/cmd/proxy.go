@@ -24,7 +24,7 @@ const (
 	proxyErrorMsg       = "unable to find proxy service with service name"
 )
 
-// var getProxiesCmd = &cobra.Command{ represents the getProxies command
+// var getProxiesCmd = &cobra.Command{ represents the getProxies command.
 var getProxiesCmd = &cobra.Command{
 	Use:   "proxies",
 	Short: "display Coherence*Extend proxy services for a cluster",
@@ -55,7 +55,7 @@ servers for a cluster. You can specify '-o wide' to display addition information
 	},
 }
 
-// describeProxyCmd represents the describe proxy command
+// describeProxyCmd represents the describe proxy command.
 var describeProxyCmd = &cobra.Command{
 	Use:   "proxy service-name",
 	Short: "describe a proxy server",
@@ -153,7 +153,7 @@ all nodes running the proxy service as well as detailed connection information.`
 	},
 }
 
-// getProxyConnectionsCmd represents the get proxy-connections command
+// getProxyConnectionsCmd represents the get proxy-connections command.
 var getProxyConnectionsCmd = &cobra.Command{
 	Use:   "proxy-connections service-name",
 	Short: "display proxy server connections for a specific proxy server",

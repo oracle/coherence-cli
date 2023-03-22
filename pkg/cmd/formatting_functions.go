@@ -17,7 +17,7 @@ var (
 	yellow = color.New(color.FgHiYellow).SprintFunc()
 )
 
-// statusHAFormatter formats a column value and makes it Red if if contains ENDANGERED
+// statusHAFormatter formats a column value and makes it Red if contains ENDANGERED.
 var statusHAFormatter = func(s string) string {
 	if strings.Contains(s, endangered) {
 		return red(s)

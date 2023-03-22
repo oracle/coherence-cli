@@ -18,7 +18,7 @@ const (
 	invalidDefaultHeapValue = "you must provide a value"
 )
 
-// setDefaultHeapCmd represents the set default-heap command
+// setDefaultHeapCmd represents the set default-heap command.
 var setDefaultHeapCmd = &cobra.Command{
 	Use:   "default-heap value",
 	Short: "set default heap for creating and starting clusters",
@@ -43,7 +43,7 @@ Valid values are in the format suitable for -Xms such as 256m, 1g, etc.`,
 	},
 }
 
-// getDefaultHeapCmd represents the get default-heap command
+// getDefaultHeapCmd represents the get default-heap command.
 var getDefaultHeapCmd = &cobra.Command{
 	Use:   "default-heap",
 	Short: "display the default heap for creating and starting clusters",
@@ -55,7 +55,7 @@ var getDefaultHeapCmd = &cobra.Command{
 	},
 }
 
-// clearDefaultHeapCmd represents the clear default-heap command
+// clearDefaultHeapCmd represents the clear default-heap command.
 var clearDefaultHeapCmd = &cobra.Command{
 	Use:   "default-heap",
 	Short: "clear the current default heap for creating and starting clusters",

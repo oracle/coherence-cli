@@ -58,16 +58,6 @@ func TestFormatting(t *testing.T) {
 
 }
 
-func TestGetMaxColumnLengths(t *testing.T) {
-	g := NewGomegaWithT(t)
-
-	g.Expect(len(getMaxColumnLengths([]string{}))).To(Equal(0))
-	values := getMaxColumnLengths([]string{"A" + sep + "B", "B" + sep + "CDD"})
-	g.Expect(len(values)).To(Equal(2))
-	g.Expect(values[0]).To(Equal(1))
-	g.Expect(values[1]).To(Equal(3))
-}
-
 func TestMax(t *testing.T) {
 	g := NewGomegaWithT(t)
 

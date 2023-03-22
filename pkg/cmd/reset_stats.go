@@ -22,14 +22,14 @@ var resetNodeIDs string
 
 const serviceNotFound = "unable to find service with service name '%s'"
 
-// resetStatsCmd represents the reset command
+// resetStatsCmd represents the reset command.
 var resetCmd = &cobra.Command{
 	Use:   "reset",
 	Short: "reset statistics for various resources",
 	Long:  `The 'reset-stats' command resets statistics for various resources.`,
 }
 
-// resetMemberStatsCmd represents the reset member-stats command
+// resetMemberStatsCmd represents the reset member-stats command.
 var resetMemberStatsCmd = &cobra.Command{
 	Use:   "member-stats",
 	Short: "reset statistics for all or a specific member",
@@ -40,7 +40,7 @@ var resetMemberStatsCmd = &cobra.Command{
 	},
 }
 
-// resetReporterStatsCmd represents the reset reporter-stats command
+// resetReporterStatsCmd represents the reset reporter-stats command.
 var resetReporterStatsCmd = &cobra.Command{
 	Use:   "reporter-stats",
 	Short: "reset reporter statistics for all or a specific reporter",
@@ -51,7 +51,7 @@ var resetReporterStatsCmd = &cobra.Command{
 	},
 }
 
-// resetRAMJournalStatsCmd represents the reset ramjournal-stats command
+// resetRAMJournalStatsCmd represents the reset ramjournal-stats command.
 var resetRAMJournalStatsCmd = &cobra.Command{
 	Use:   "ramjournal-stats",
 	Short: "reset statistics for all ram journals",
@@ -62,7 +62,7 @@ var resetRAMJournalStatsCmd = &cobra.Command{
 	},
 }
 
-// resetFlashJournalStatsCmd represents the reset flashjournal-stats command
+// resetFlashJournalStatsCmd represents the reset flashjournal-stats command.
 var resetFlashJournalStatsCmd = &cobra.Command{
 	Use:   "flashjournal-stats",
 	Short: "reset statistics for all flash journals",
@@ -73,7 +73,7 @@ var resetFlashJournalStatsCmd = &cobra.Command{
 	},
 }
 
-// resetExecutorStatsCmd represents the reset executor-stats command
+// resetExecutorStatsCmd represents the reset executor-stats command.
 var resetExecutorStatsCmd = &cobra.Command{
 	Use:   "executor-stats executor-name",
 	Short: "reset statistics for an executor",
@@ -89,7 +89,7 @@ var resetExecutorStatsCmd = &cobra.Command{
 	},
 }
 
-// resetServiceStatsCmd represents the reset service-stats command
+// resetServiceStatsCmd represents the reset service-stats command.
 var resetServiceStatsCmd = &cobra.Command{
 	Use:   "service-stats service-name",
 	Short: "reset services statistics for all service members or specific service members",
@@ -105,7 +105,7 @@ var resetServiceStatsCmd = &cobra.Command{
 	},
 }
 
-// resetProxyStatsCmd represents the reset proxy-stats command
+// resetProxyStatsCmd represents the reset proxy-stats command.
 var resetProxyStatsCmd = &cobra.Command{
 	Use:   "proxy-stats service-name",
 	Short: "reset proxy connection manager statistics for all proxy members or specific proxy members",
@@ -121,7 +121,7 @@ var resetProxyStatsCmd = &cobra.Command{
 	},
 }
 
-// resetCacheStatsCmd represents the reset cache-stats command
+// resetCacheStatsCmd represents the reset cache-stats command.
 var resetCacheStatsCmd = &cobra.Command{
 	Use:   "cache-stats cache-name",
 	Short: "reset cache statistics for all cache members or specific cache members",
@@ -137,7 +137,7 @@ var resetCacheStatsCmd = &cobra.Command{
 	},
 }
 
-// resetFederationStatsCmd represents the reset federation-stats command
+// resetFederationStatsCmd represents the reset federation-stats command.
 var resetFederationStatsCmd = &cobra.Command{
 	Use:   "federation-stats service-name",
 	Short: "reset federation statistics for all federation or specific federation members",
@@ -153,7 +153,7 @@ var resetFederationStatsCmd = &cobra.Command{
 	},
 }
 
-// issueResetStatsCommand validates the resetStatistics command
+// issueResetStatsCommand validates the resetStatistics command.
 func issueResetStatsCommand(cmd *cobra.Command, args []string, operation string) error {
 	var (
 		confirmMessage string
@@ -165,7 +165,7 @@ func issueResetStatsCommand(cmd *cobra.Command, args []string, operation string)
 		message        string
 	)
 
-	// retrieve the current context or the value from "-c"
+	// retrieve the current context or the value from "-c".
 	connection, dataFetcher, err = GetConnectionAndDataFetcher()
 	if err != nil {
 		return err
@@ -381,14 +381,14 @@ func init() {
 
 }
 
-// setResetFlags sets common flags for reset operations
+// setResetFlags sets common flags for reset operations.
 func setResetFlags(cmd *cobra.Command) {
 	cmd.Flags().StringVarP(&resetNodeIDs, "node", "n", all, commaSeparatedIDMessage)
 	cmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
 }
 
 // isOperationSupported returns true if the operation is supported for the given coherence
-// version prefix. Some operations were not introduced in 14.1.1.0 and 12.2.1.X releases
+// version prefix. Some operations were not introduced in 14.1.1.0 and 12.2.1.X releases.
 func isOperationSupported(operation, resetNodeIDs string, dataFetcher fetcher.Fetcher) error {
 	var (
 		err            error

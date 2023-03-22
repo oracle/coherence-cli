@@ -19,7 +19,7 @@ const (
 	updateURL = "https://github.com/oracle/coherence-cli/releases"
 )
 
-// versionCmd represents the version command
+// versionCmd represents the version command.
 var versionCmd = &cobra.Command{
 	Use:   "version",
 	Short: "show version information",
@@ -57,7 +57,7 @@ Use the '-u' option to check for updates.`,
 	},
 }
 
-// isVersionUpdate returns true if there is a new stable version available
+// isVersionUpdate returns true if there is a new stable version available.
 func isVersionUpdateAvailable(haveVersion, stableVersion string) bool {
 	return haveVersion != stableVersion
 }

@@ -40,7 +40,7 @@ const (
 	all                 = "all"
 )
 
-// getCachesCmd represents the get caches command
+// getCachesCmd represents the get caches command.
 var getCachesCmd = &cobra.Command{
 	Use:   "caches",
 	Short: "display caches for a cluster",
@@ -119,7 +119,7 @@ used by Federation.`,
 	},
 }
 
-// describeCacheCmd represents the describe cache command
+// describeCacheCmd represents the describe cache command.
 var describeCacheCmd = &cobra.Command{
 	Use:   "cache cache-name",
 	Short: "describe a cache",
@@ -254,7 +254,7 @@ You can specify '-o wide' to display addition information.`,
 	},
 }
 
-// getCacheStoresCmd represents the get cache-stores command
+// getCacheStoresCmd represents the get cache-stores command.
 var getCacheStoresCmd = &cobra.Command{
 	Use:   "cache-stores cache-name",
 	Short: "display cache stores for a cache and service",
@@ -341,7 +341,7 @@ You can specify '-o wide' to display addition information.`,
 	},
 }
 
-// ensureTierBack ensures that only back tier are included
+// ensureTierBack ensures that only back tier are included.
 func ensureTierBack(cacheStoreDetails []config.CacheStoreDetail) []config.CacheStoreDetail {
 	finalDetails := make([]config.CacheStoreDetail, 0)
 	for _, v := range cacheStoreDetails {
@@ -365,7 +365,7 @@ func hasCacheStores(cacheStoreDetails []config.CacheStoreDetail) bool {
 	return true
 }
 
-// setCacheCmd represents the set cache command
+// setCacheCmd represents the set cache command.
 var setCacheCmd = &cobra.Command{
 	Use:   "cache cache-name",
 	Short: "set an attribute for a cache across one or more members",
@@ -493,7 +493,7 @@ batchFactor, refreshFactor or requeueThreshold.`,
 	},
 }
 
-// formatCachesSummary returns the formatted caches for the service list
+// formatCachesSummary returns the formatted caches for the service list.
 func formatCachesSummary(serviceList []string, dataFetcher fetcher.Fetcher) (string, error) {
 	allCachesSummary, err := getCaches(serviceList, dataFetcher)
 	if err != nil {
@@ -517,7 +517,7 @@ func formatCachesSummary(serviceList []string, dataFetcher fetcher.Fetcher) (str
 	return value, err
 }
 
-// getCaches returns a list of caches given a slice of services
+// getCaches returns a list of caches given a slice of services.
 func getCaches(serviceList []string, dataFetcher fetcher.Fetcher) ([]config.CacheSummaryDetail, error) {
 	var (
 		wg               sync.WaitGroup
@@ -581,7 +581,7 @@ func getCaches(serviceList []string, dataFetcher fetcher.Fetcher) ([]config.Cach
 }
 
 // findServiceForCacheOrTopic attempts to find the service name for a cache or topic and will return
-// the service name or an error indicating that the service and cache name is not unique
+// the service name or an error indicating that the service and cache name is not unique.
 func findServiceForCacheOrTopic(dataFetcher fetcher.Fetcher, cacheName, serviceType string) (string, error) {
 	// if the serviceName is not blank then return it as the user has specified on command line
 	if serviceName != "" {

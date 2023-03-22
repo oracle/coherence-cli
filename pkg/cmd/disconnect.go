@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Oracle and/or its affiliates.
+ * Copyright (c) 2022, 2023 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -10,7 +10,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// disconnectCmd represents the disconnect command
+// disconnectCmd represents the disconnect command.
 var disconnectCmd = &cobra.Command{
 	Use:   "disconnect",
 	Short: "disconnect a resource",

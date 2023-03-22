@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, 2022 Oracle and/or its affiliates.
+ * Copyright (c) 2021, 2023 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -18,7 +18,7 @@ import (
 	"time"
 )
 
-// getPersistenceCmd represents the get persistence command
+// getPersistenceCmd represents the get persistence command.
 var getPersistenceCmd = &cobra.Command{
 	Use:   "persistence",
 	Short: "display persistence details for a cluster",
@@ -131,7 +131,7 @@ func processPersistenceServices(deDuplicatedServices []config.ServiceSummary, da
 	return utils.GetErrors(errorList)
 }
 
-// DeduplicatePersistenceServices removes duplicated persistence details
+// DeduplicatePersistenceServices removes duplicated persistence details.
 func DeduplicatePersistenceServices(servicesSummary config.ServicesSummaries) []config.ServiceSummary {
 	// the current results include 1 entry for each service and member, so we need to remove duplicates
 	var finalServices = make([]config.ServiceSummary, 0)

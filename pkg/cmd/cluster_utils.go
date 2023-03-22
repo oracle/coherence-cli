@@ -80,7 +80,7 @@ var (
 
 // checkCreateRequirements validates that all the necessary requirements are fulfilled
 // for creating a cluster. This includes mvn and java executables. Nil is returned to
-// indicate everything is ok, otherwise an error is returned
+// indicate everything is ok, otherwise an error is returned.
 func checkRuntimeRequirements() error {
 	var (
 		err error
@@ -95,7 +95,7 @@ func checkRuntimeRequirements() error {
 }
 
 // checkDepsRequirements checks for either mvn or gradle depending upon the
-// setting of Config.useGradle
+// setting of Config.useGradle.
 func checkDepsRequirements() error {
 	var (
 		err      error
@@ -120,7 +120,7 @@ func getExecType() string {
 
 // buildGradleClasspath builds a classpath using gradle by creating a temporary
 // build.gradle file and running a custom task.
-// this is experimental and if we can find a better way to do this then we can change this
+// this is experimental and if we can find a better way to do this then we can change this.
 func buildGradleClasspath() ([]string, error) {
 	var (
 		err           error
@@ -190,7 +190,7 @@ func buildGradleClasspath() ([]string, error) {
 }
 
 // getCoherenceMavenDependencies runs the mvn dependency:get command to download coherence.jar and coherence-json.jar
-// which are the minimum requirements to create a cluster with management over rest enabled
+// which are the minimum requirements to create a cluster with management over rest enabled.
 func getCoherenceMavenDependencies(cmd *cobra.Command) error {
 	var (
 		err    error
@@ -228,7 +228,7 @@ func updateDefaultJars() {
 }
 
 // startCluster starts a cluster. If existingCount > 1 then this means we are
-// scaling a cluster, otherwise we are starting one
+// scaling a cluster, otherwise we are starting one.
 func startCluster(cmd *cobra.Command, connection ClusterConnection, serverCount, existingCount int32) error {
 	var (
 		err              error
@@ -298,7 +298,7 @@ func startCluster(cmd *cobra.Command, connection ClusterConnection, serverCount,
 	return nil
 }
 
-// getCommonArguments returns arguments that are common to clients and servers
+// getCommonArguments returns arguments that are common to clients and servers.
 func getCommonArguments(connection ClusterConnection) []string {
 	splitArguments := strings.Split(connection.Arguments, " ")
 	return append(splitArguments, "-cp", connection.BaseClasspath, getPersistenceProperty(connection.PersistenceMode),
@@ -379,7 +379,7 @@ func getCacheServerArgs(member string, httpPort int32, version string) []string 
 }
 
 // getClientArgs returns the arguments for starting a Coherence process such as
-// console or cohQL
+// console or CohQL.
 func getClientArgs(member, class string) []string {
 	baseArgs := make([]string, 0)
 	baseArgs = append(baseArgs, "-Xms"+heapMemoryParam, "-Xmx"+heapMemoryParam)
@@ -416,7 +416,7 @@ func getLogLevelProperty(logLevel int32) string {
 }
 
 // getRunningProcesses returns the running process ID's for a cluster
-// connection from a dataFetcher. Returns an empty slice if none are running
+// connection from a dataFetcher. Returns an empty slice if none are running.
 func getRunningProcesses(dataFetcher fetcher.Fetcher) []int {
 	var (
 		PIDS          = make([]int, 0)
@@ -452,7 +452,7 @@ func checkOperation(connection ClusterConnection, operation string) error {
 }
 
 // getTransitiveClasspath returns the transitive classpath by using mvn dependency:build-classpath,
-// outputting to temp file and reading in
+// outputting to temp file and reading in.
 func getTransitiveClasspath(groupID, artifact, version string) (string, error) {
 	var (
 		err       error
@@ -516,7 +516,7 @@ func getCoherenceGroupID() string {
 	return "com.oracle.coherence.ce"
 }
 
-// getMavenClasspath returns the maven classpath for the given GAV and fileType
+// getMavenClasspath returns the maven classpath for the given GAV and fileType.
 func getMavenClasspath(groupID, artifact, version, fileType string) (string, error) {
 	home, err := os.UserHomeDir()
 	if err != nil {
@@ -541,7 +541,7 @@ func runCommandAsync(command, logFileName string, arguments []string) (string, e
 }
 
 // runCommandBase runs a command. If logFileName is supplied then this is done async and the
-// processId is returned, otherwise the result of the combined stdout and stderr is returned
+// processId is returned, otherwise the result of the combined stdout and stderr is returned.
 func runCommandBase(command, logFileName string, arguments []string) (string, error) {
 	var (
 		err            error
@@ -619,7 +619,7 @@ func getConnection(connectionName string) (bool, ClusterConnection) {
 	return false, ClusterConnection{}
 }
 
-// isPortUsed checks to see if a port on localhost can be connected to
+// isPortUsed checks to see if a port on localhost can be connected to.
 func isPortUsed(managementPort int32) bool {
 	conn, err := net.DialTimeout("tcp", fmt.Sprintf("%s:%d", localHost, managementPort), time.Duration(fetcher.RequestTimeout)*time.Second)
 	if err != nil {

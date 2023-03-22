@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Oracle and/or its affiliates.
+ * Copyright (c) 2021, 2023 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -15,12 +15,12 @@ import (
 // Run the test suite against a standalone Coherence Cluster
 //
 
-// TestDiscoverClustersCommands tests discover clusters commands
+// TestDiscoverClustersCommands tests discover clusters commands.
 func TestDiscoverClustersCommands(t *testing.T) {
 	common.RunTestDiscoverClustersCommands(t)
 }
 
-// TestNSLookupCommands tests nslookup commands
+// TestNSLookupCommands tests nslookup commands.
 func TestNSLookupCommands(t *testing.T) {
 	common.RunTestNSLookupCommands(t)
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, 2022 Oracle and/or its affiliates.
+ * Copyright (c) 2021, 2023 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -15,137 +15,137 @@ import (
 // Run the test suite against a standalone Coherence Cluster
 //
 
-// TestClusterCommands tests add/remove/get/describe cluster commands
+// TestClusterCommands tests add/remove/get/describe cluster commands.
 func TestClusterCommands(t *testing.T) {
 	common.RunTestClusterCommands(t)
 }
 
-// TestMemberCommands tests various member commands
+// TestMemberCommands tests various member commands.
 func TestMemberCommands(t *testing.T) {
 	common.RunTestMemberCommands(t)
 }
 
-// TestManagementCommands tests management commands
+// TestManagementCommands tests management commands.
 func TestManagementCommands(t *testing.T) {
 	common.RunTestManagementCommands(t)
 }
 
-// TestSetMemberCommands tests set member commands
+// TestSetMemberCommands tests set member commands.
 func TestSetMemberCommands(t *testing.T) {
 	common.RunTestSetMemberCommands(t)
 }
 
-// TestServicesCommands tests various services commands
+// TestServicesCommands tests various services commands.
 func TestServicesCommands(t *testing.T) {
 	common.RunTestServicesCommands(t)
 }
 
-// TestServiceOperations tests various services commands
+// TestServiceOperations tests various services commands.
 func TestServiceOperations(t *testing.T) {
 	common.RunTestServiceOperations(t)
 }
 
-// TestProxyCommands tests various services commands
+// TestProxyCommands tests various services commands.
 func TestProxyCommands(t *testing.T) {
 	common.RunTestProxyCommands(t)
 }
 
-// TestHttpProxyCommands tests various http proxy commands
+// TestHttpProxyCommands tests various http proxy commands.
 func TestHttpProxyCommands(t *testing.T) {
 	common.RunTestHttpProxyCommands(t)
 }
 
-// TestCachesCommands tests caches commands
+// TestCachesCommands tests caches commands.
 func TestCachesCommands(t *testing.T) {
 	common.RunTestCachesCommands(t)
 }
 
-// TestExecutorCommands tests executor commands
+// TestExecutorCommands tests executor commands.
 func TestExecutorCommands(t *testing.T) {
 	common.RunTestExecutorCommands(t)
 }
 
-// TestMachinesCommands tests caches commands
+// TestMachinesCommands tests caches commands.
 func TestMachinesCommands(t *testing.T) {
 	common.RunTestMachinesCommands(t)
 }
 
-// TestPersistenceCommands tests persistence commands
+// TestPersistenceCommands tests persistence commands.
 func TestPersistenceCommands(t *testing.T) {
 	common.RunTestPersistenceCommands(t)
 }
 
-// TestReporterCommands tests reporter commands
+// TestReporterCommands tests reporter commands.
 func TestReporterCommands(t *testing.T) {
 	common.RunTestReporterCommands(t)
 }
 
-// TestHealthCommands tests health commands
+// TestHealthCommands tests health commands.
 func TestHealthCommands(t *testing.T) {
 	common.RunTestHealthCommands(t)
 }
 
-// TestElasticDataCommands tests elastic data commands
+// TestElasticDataCommands tests elastic data commands.
 func TestElasticDataCommands(t *testing.T) {
 	common.RunTestElasticDataCommands(t)
 }
 
-// TestHttpSessionCommands tests elastic data commands
+// TestHttpSessionCommands tests elastic data commands.
 func TestHttpSessionCommands(t *testing.T) {
 	common.RunTestHttpSessionCommands(t)
 }
 
-// TestThreadDumpsCommands tests thread-dump commands
+// TestThreadDumpsCommands tests thread-dump commands.
 func TestThreadDumpsCommands(t *testing.T) {
 	common.RunTestThreadDumpsCommands(t)
 }
 
-// TestJFRCommands tests jfr commands
+// TestJFRCommands tests jfr commands.
 func TestJFRCommands(t *testing.T) {
 	common.RunTestJFRCommands(t)
 }
 
-// TestDumpClusterHeapCommands tests dump cluster heap commands
+// TestDumpClusterHeapCommands tests dump cluster heap commands.
 func TestDumpClusterHeapCommands(t *testing.T) {
 	common.RunTestDumpClusterHeapCommands(t)
 }
 
-// TestConfigureTracingCommands tests configure tracing commands
+// TestConfigureTracingCommands tests configure tracing commands.
 func TestConfigureTracingCommands(t *testing.T) {
 	common.RunTestConfigureTracingCommands(t)
 }
 
-// TestLogClusterStateCommands tests log cluster heap commands
+// TestLogClusterStateCommands tests log cluster heap commands.
 func TestLogClusterStateCommands(t *testing.T) {
 	common.RunTestLogClusterStateCommands(t)
 }
 
-// TestClusterGetClusterRequest tests get cluster request
+// TestClusterGetClusterRequest tests get cluster request.
 func TestClusterGetClusterRequest(t *testing.T) {
 	common.RunTestClusterGetClusterRequest(t)
 }
 
-// TestClusterGetClusterHttpRequest tests members request
+// TestClusterGetClusterHttpRequest tests members request.
 func TestClusterGetMembersRequest(t *testing.T) {
 	common.RunTestClusterGetMembersRequest(t)
 }
 
-// TestClusterServicesRequest tests services request
+// TestClusterServicesRequest tests services request.
 func TestClusterServicesRequest(t *testing.T) {
 	common.RunTestClusterServicesRequest(t)
 }
 
-// TestCachesRequests tests caches request
+// TestCachesRequests tests caches request.
 func TestCachesRequests(t *testing.T) {
 	common.RunTestCachesRequests(t)
 }
 
-// TestProfileCommands tests profile command
+// TestProfileCommands tests profile command.
 func TestProfileCommands(t *testing.T) {
 	common.RunTestProfileCommands(t)
 }
 
-// TestResetCommands tests reset commands
+// TestResetCommands tests reset commands.
 func TestResetCommands(t *testing.T) {
 	common.RunTestResetCommands(t)
 }

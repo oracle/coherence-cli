@@ -40,7 +40,7 @@ var (
 	federationAttributeValue string
 )
 
-// getFederationCmd represents the get federation command
+// getFederationCmd represents the get federation command.
 var getFederationCmd = &cobra.Command{
 	Use:   "federation {destinations|origins|all}",
 	Short: "display federation details for a cluster",
@@ -146,7 +146,7 @@ can also specify '-o wide' to display addition information.`,
 	},
 }
 
-// startFederationCmd represents the start federation command
+// startFederationCmd represents the start federation command.
 var startFederationCmd = &cobra.Command{
 	Use:   federationUse,
 	Short: "start federation for a service",
@@ -166,7 +166,7 @@ You may also specify a participant otherwise the command will apply to all parti
 	},
 }
 
-// setFederationCmd represents the set federation command
+// setFederationCmd represents the set federation command.
 var setFederationCmd = &cobra.Command{
 	Use:   federationUse,
 	Short: "set an attribute for a federated service",
@@ -183,7 +183,7 @@ following attribute names are allowed: traceLogging.`,
 	},
 }
 
-// stopFederationCmd represents the stop federation command
+// stopFederationCmd represents the stop federation command.
 var stopFederationCmd = &cobra.Command{
 	Use:   federationUse,
 	Short: "stop federation for a service",
@@ -200,7 +200,7 @@ You may also specify a participant otherwise the command will apply to all parti
 	},
 }
 
-// replicateAllCmd represents the replicate all command
+// replicateAllCmd represents the replicate all command.
 var replicateAllCmd = &cobra.Command{
 	Use:   "all service-name",
 	Short: "initiate a replication of all cache entries for a federated service",
@@ -217,7 +217,7 @@ You must specify a participant to replicate for.`,
 	},
 }
 
-// pauseFederationCmd represents the pause federation command
+// pauseFederationCmd represents the pause federation command.
 var pauseFederationCmd = &cobra.Command{
 	Use:   federationUse,
 	Short: "Pause federation for a service",
@@ -234,7 +234,7 @@ You may also specify a participant otherwise the command will apply to all parti
 	},
 }
 
-// getFederationSummaries returns federation summaries for the specified target
+// getFederationSummaries returns federation summaries for the specified target.
 func getFederationSummaries(federatedServices []string, target string, dataFetcher fetcher.Fetcher) ([]config.FederationSummary, error) {
 	var (
 		data                []byte
@@ -266,7 +266,7 @@ func getFederationSummaries(federatedServices []string, target string, dataFetch
 	return finalSummaries, nil
 }
 
-// describeFederationCmd represents the describe federation command
+// describeFederationCmd represents the describe federation command.
 var describeFederationCmd = &cobra.Command{
 	Use:   federationUse,
 	Short: "describe federation details for a given service and participant",

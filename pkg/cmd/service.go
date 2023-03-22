@@ -45,7 +45,7 @@ const (
 	unableToFindService = "unable to find service with service name '%s'"
 )
 
-// getServicesCmd represents the get services command
+// getServicesCmd represents the get services command.
 var getServicesCmd = &cobra.Command{
 	Use:   "services",
 	Short: "display services for a cluster",
@@ -152,7 +152,7 @@ can also specify '-o wide' to display addition information.`,
 	},
 }
 
-// getServiceStorageCmd represents the get service-storage command
+// getServiceStorageCmd represents the get service-storage command.
 var getServiceStorageCmd = &cobra.Command{
 	Use:   "service-storage",
 	Short: "display partitioned services storage information for a cluster",
@@ -274,7 +274,7 @@ information regarding partition sizes.`,
 	},
 }
 
-// getServiceMembersCmd represents the get service-members command
+// getServiceMembersCmd represents the get service-members command.
 var getServiceMembersCmd = &cobra.Command{
 	Use:   "service-members service-name",
 	Short: "display service members for a cluster",
@@ -377,7 +377,7 @@ var getServiceMembersCmd = &cobra.Command{
 	},
 }
 
-// describeService represents the describe service command
+// describeService represents the describe service command.
 var describeServiceCmd = &cobra.Command{
 	Use:   serviceUse,
 	Short: "describe a service",
@@ -631,7 +631,7 @@ service is a cache service.`,
 	},
 }
 
-// setServiceCmd represents the set service command
+// setServiceCmd represents the set service command.
 var setServiceCmd = &cobra.Command{
 	Use:   "service service-name",
 	Short: "set a service attribute across one or more members",
@@ -751,7 +751,7 @@ taskHungThresholdMillis or requestTimeoutMillis.`,
 	},
 }
 
-// suspendServiceCmd represents the suspend service command
+// suspendServiceCmd represents the suspend service command.
 var suspendServiceCmd = &cobra.Command{
 	Use:   serviceUse,
 	Short: "suspend a service",
@@ -767,7 +767,7 @@ var suspendServiceCmd = &cobra.Command{
 	},
 }
 
-// resumeServiceCmd represents the resume service command
+// resumeServiceCmd represents the resume service command.
 var resumeServiceCmd = &cobra.Command{
 	Use:   serviceUse,
 	Short: "resume a service",
@@ -783,7 +783,7 @@ var resumeServiceCmd = &cobra.Command{
 	},
 }
 
-// stopServiceCmd represents the stop service command
+// stopServiceCmd represents the stop service command.
 var stopServiceCmd = &cobra.Command{
 	Use:   serviceUse,
 	Short: "stop a service",
@@ -800,7 +800,7 @@ Use the shutdown service command for normal service termination.`,
 	},
 }
 
-// startServiceCmd represents the start service command
+// startServiceCmd represents the start service command.
 var startServiceCmd = &cobra.Command{
 	Use:   serviceUse,
 	Short: "start a service",
@@ -816,7 +816,7 @@ var startServiceCmd = &cobra.Command{
 	},
 }
 
-// shutdownServiceCmd represents the shutdown service command
+// shutdownServiceCmd represents the shutdown service command.
 var shutdownServiceCmd = &cobra.Command{
 	Use:   serviceUse,
 	Short: "shutdown a service",
@@ -833,7 +833,7 @@ on a cluster member. Shutting down a service is preferred over stopping a servic
 	},
 }
 
-// issueServiceNodeCommand issues an operation against a service member
+// issueServiceNodeCommand issues an operation against a service member.
 func issueServiceNodeCommand(cmd *cobra.Command, serviceName, operation string) error {
 	var (
 		dataFetcher     fetcher.Fetcher
@@ -896,7 +896,7 @@ func issueServiceNodeCommand(cmd *cobra.Command, serviceName, operation string) 
 	return nil
 }
 
-// issueServiceCommand issues an operation against a service such as suspend or resume
+// issueServiceCommand issues an operation against a service such as suspend or resume.
 func issueServiceCommand(cmd *cobra.Command, serviceName, operation string) error {
 	var (
 		dataFetcher    fetcher.Fetcher
@@ -936,14 +936,14 @@ func issueServiceCommand(cmd *cobra.Command, serviceName, operation string) erro
 	return nil
 }
 
-// isStatusHASaferThan returns true if the statusHaValue is safer that the safestStatusHAValue
+// isStatusHASaferThan returns true if the statusHaValue is safer that the safestStatusHAValue.
 func isStatusHASaferThan(statusHAValue, safestStatusHAValue string) bool {
 	thisIndex := utils.GetSliceIndex(allStatusHA, statusHAValue)
 	safestIndex := utils.GetSliceIndex(allStatusHA, safestStatusHAValue)
 	return thisIndex >= safestIndex
 }
 
-// DeduplicateServices removes duplicated service details
+// DeduplicateServices removes duplicated service details.
 func DeduplicateServices(servicesSummary config.ServicesSummaries, serviceType string) []config.ServiceSummary {
 	// the current results include 1 entry for each service and member, so we need to remove duplicates
 	var finalServices = make([]config.ServiceSummary, 0)
@@ -972,7 +972,7 @@ func DeduplicateServices(servicesSummary config.ServicesSummaries, serviceType s
 	return finalServices
 }
 
-// serviceExists returns true if the service exists in the services summary
+// serviceExists returns true if the service exists in the services summary.
 func serviceExists(serviceName string, servicesSummary config.ServicesSummaries) bool {
 	for _, v := range servicesSummary.Services {
 		if v.ServiceName == serviceName {

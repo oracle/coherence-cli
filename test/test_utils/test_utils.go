@@ -28,7 +28,7 @@ import (
 	"time"
 )
 
-// TestContext is a context to pass to tests
+// TestContext is a context to pass to tests.
 type TestContext struct {
 	ClusterName     string
 	HttpPort        int
@@ -39,25 +39,27 @@ type TestContext struct {
 	Password        string
 }
 
-const failedToExecute = "Failed to execute 'cliCmd.Execute()'."
-const errMessage = "Error msg "
+const (
+	failedToExecute = "Failed to execute 'cliCmd.Execute()'."
+	errMessage      = "Error msg "
+)
 
 var (
 	currentTestContext *TestContext
 	emptyByte          = make([]byte, 0)
 )
 
-// SetTestContext sets the current context
+// SetTestContext sets the current context.
 func SetTestContext(context *TestContext) {
 	currentTestContext = context
 }
 
-// GetTestContext gets the current context
+// GetTestContext gets the current context.
 func GetTestContext() *TestContext {
 	return currentTestContext
 }
 
-// CreateTempDirectory creates a temporary directory
+// CreateTempDirectory creates a temporary directory.
 func CreateTempDirectory(pattern string) string {
 	dir, err := os.MkdirTemp("", pattern)
 	if err != nil {
@@ -68,7 +70,7 @@ func CreateTempDirectory(pattern string) string {
 	return dir
 }
 
-// FileExistsInDirectory returns true if a file exists in a directory
+// FileExistsInDirectory returns true if a file exists in a directory.
 func FileExistsInDirectory(dir string, file string) bool {
 	files, err := os.ReadDir(dir)
 
@@ -84,7 +86,7 @@ func FileExistsInDirectory(dir string, file string) bool {
 	return false
 }
 
-// CreateNewConfigYaml creates a full path of a new directory and config
+// CreateNewConfigYaml creates a full path of a new directory and config.
 func CreateNewConfigYaml(name string) (string, error) {
 	dir := CreateTempDirectory("temp")
 	err := os.Mkdir(dir, 0755)
@@ -95,7 +97,7 @@ func CreateNewConfigYaml(name string) (string, error) {
 	return filepath.Join(dir, name), nil
 }
 
-// EnsureCommandContains executes a command and checks that it contains the output expected
+// EnsureCommandContains executes a command and checks that it contains the output expected.
 func EnsureCommandContains(g *WithT, t *testing.T, command *cobra.Command, expected string, args ...string) {
 	_, output, err := ExecuteCommand(t, command, args...)
 	t.Log("Actual Output=[" + output + "], expected to contain=[" + expected + "]")
@@ -105,7 +107,7 @@ func EnsureCommandContains(g *WithT, t *testing.T, command *cobra.Command, expec
 	g.Expect(strings.Contains(output, expected)).To(Equal(true))
 }
 
-// EnsureCommandNotContains executes a command and checks that it does not contain the output expected
+// EnsureCommandNotContains executes a command and checks that it does not contain the output expected.
 func EnsureCommandNotContains(g *WithT, t *testing.T, command *cobra.Command, expected string, args ...string) {
 	_, output, err := ExecuteCommand(t, command, args...)
 	t.Log("Actual Output=[" + output + "], expected NOT to contain=[" + expected + "]")
@@ -116,7 +118,7 @@ func EnsureCommandNotContains(g *WithT, t *testing.T, command *cobra.Command, ex
 }
 
 // EnsureCommandContainsAll executes a command and checks that it contains all the comma
-// separated values in expectedCSV
+// separated values in expectedCSV.
 func EnsureCommandContainsAll(g *WithT, t *testing.T, command *cobra.Command, expectedCSV string, args ...string) {
 	_, output, err := ExecuteCommand(t, command, args...)
 	t.Log("Actual Output=[" + output + "], expected to contain=[" + expectedCSV + "]")
@@ -128,7 +130,7 @@ func EnsureCommandContainsAll(g *WithT, t *testing.T, command *cobra.Command, ex
 	}
 }
 
-// GetCommandOutput returns the output from a command
+// GetCommandOutput returns the output from a command.
 func GetCommandOutput(t *testing.T, command *cobra.Command, args ...string) string {
 	_, output, err := ExecuteCommand(t, command, args...)
 	if err != nil {
@@ -137,7 +139,7 @@ func GetCommandOutput(t *testing.T, command *cobra.Command, args ...string) stri
 	return output
 }
 
-// EnsureCommandErrorContains executes a command and checks that the error contains expected output
+// EnsureCommandErrorContains executes a command and checks that the error contains expected output.
 func EnsureCommandErrorContains(g *WithT, t *testing.T, command *cobra.Command, expected string, args ...string) {
 	_, output, err := ExecuteCommand(t, command, args...)
 	g.Expect(err).NotTo(BeNil())
@@ -146,7 +148,7 @@ func EnsureCommandErrorContains(g *WithT, t *testing.T, command *cobra.Command, 
 	g.Expect(strings.Contains(errString, expected)).To(Equal(true))
 }
 
-// EnsureCommandOutputEquals executes a command and checks that it equals the output expected
+// EnsureCommandOutputEquals executes a command and checks that it equals the output expected.
 func EnsureCommandOutputEquals(g *WithT, t *testing.T, command *cobra.Command, expected string, args ...string) {
 	_, output, err := ExecuteCommand(t, command, args...)
 	t.Log("Actual Output=[" + output + "], expected=[" + expected + "]")
@@ -156,7 +158,7 @@ func EnsureCommandOutputEquals(g *WithT, t *testing.T, command *cobra.Command, e
 	g.Expect(output == expected).To(Equal(true))
 }
 
-// ExecuteCommand executes a given command with the arguments provided
+// ExecuteCommand executes a given command with the arguments provided.
 func ExecuteCommand(t *testing.T, root *cobra.Command, args ...string) (c *cobra.Command, output string, err error) {
 	t.Log("Executing with args " + strings.Join(args, " "))
 	var bufferResults = new(bytes.Buffer)
@@ -169,14 +171,14 @@ func ExecuteCommand(t *testing.T, root *cobra.Command, args ...string) (c *cobra
 	return c, bufferResults.String(), err
 }
 
-// GetFilePath returns the file path of a file
+// GetFilePath returns the file path of a file.
 func GetFilePath(fileName string) string {
 	_, c, _, _ := runtime.Caller(0)
 	dir := filepath.Dir(c)
 	return dir + string(os.PathSeparator) + fileName
 }
 
-// StartCoherenceCluster starts a Coherence cluster
+// StartCoherenceCluster starts a Coherence cluster.
 func StartCoherenceCluster(fileName, url string) error {
 	output, err := DockerComposeUp(fileName)
 	if err != nil {
@@ -190,7 +192,7 @@ func StartCoherenceCluster(fileName, url string) error {
 	return nil
 }
 
-// DockerComposeUp runs docker-compose up on a given file
+// DockerComposeUp runs docker-compose up on a given file.
 func DockerComposeUp(composeFile string) (string, error) {
 	fmt.Println("Issuing docker-compose up with file " + composeFile)
 
@@ -205,7 +207,7 @@ func DockerComposeUp(composeFile string) (string, error) {
 	return output, err
 }
 
-// CollectDockerLogs collects docker logs
+// CollectDockerLogs collects docker logs.
 func CollectDockerLogs() error {
 	var (
 		output    string
@@ -249,7 +251,7 @@ func CollectDockerLogs() error {
 	return nil
 }
 
-// DockerComposeDown runs docker-compose down on a given file
+// DockerComposeDown runs docker-compose down on a given file.
 func DockerComposeDown(composeFile string) (string, error) {
 	fmt.Println("Issuing docker-compose down with file " + composeFile)
 	// sleep as sometimes docker compose networks are not completely stopped
@@ -264,7 +266,7 @@ func DockerComposeDown(composeFile string) (string, error) {
 	return output, err
 }
 
-// StartDockerImage starts a coherence image using docker
+// StartDockerImage starts a coherence image using docker.
 func StartDockerImage(t *testing.T, image string, name string, httpPort int, clusterName string, delete bool) (string, error) {
 	t.Log(fmt.Sprintf("Starting docker image %s with image name %s, httpPort %d and clusterName %s",
 		image, name, httpPort, clusterName))
@@ -289,17 +291,17 @@ func StartDockerImage(t *testing.T, image string, name string, httpPort int, clu
 	return output, WaitForHttpReady(GetManagementUrl(httpPort), 120)
 }
 
-// GetManagementUrl returns the management URL given a management port
+// GetManagementUrl returns the management URL given a management port.
 func GetManagementUrl(httpPort int) string {
 	return fmt.Sprintf("http://localhost:%d/management/coherence/cluster", httpPort)
 }
 
-// GetRestUrl returns the REST URL
+// GetRestUrl returns the REST URL.
 func GetRestUrl(restPort int) string {
 	return fmt.Sprintf("http://localhost:%d", restPort)
 }
 
-// IssueGetRequest issues a HTTP GET request using the URL
+// IssueGetRequest issues a HTTP GET request using the URL.
 func IssueGetRequest(url string) ([]byte, error) {
 	resp, err := http.Get(url)
 	if err != nil {
@@ -318,7 +320,7 @@ func IssueGetRequest(url string) ([]byte, error) {
 	return body, nil
 }
 
-// IssuePostRequest issues a HTTP POST request using the URL
+// IssuePostRequest issues a HTTP POST request using the URL.
 func IssuePostRequest(url string) ([]byte, error) {
 	resp, err := issueRequest("POST", url, emptyByte)
 
@@ -360,7 +362,7 @@ func issueRequest(requestType, url string, data []byte) (*http.Response, error) 
 	return client.Do(req)
 }
 
-// WaitForHttpReady waits for the HTTP endpoint to be ready
+// WaitForHttpReady waits for the HTTP endpoint to be ready.
 func WaitForHttpReady(url string, timeout int) error {
 	var duration = 0
 	for duration < timeout {
@@ -379,7 +381,7 @@ func WaitForHttpReady(url string, timeout int) error {
 	return fmt.Errorf("Unable to connect to url %s after %d seconds\n", url, timeout)
 }
 
-// WaitForHttpBalancedServices waits for all services to be balanced
+// WaitForHttpBalancedServices waits for all services to be balanced.
 func WaitForHttpBalancedServices(url string, timeout int) error {
 	var duration = 0
 	fmt.Println("Waiting for services to be balanced...")
@@ -405,7 +407,7 @@ func WaitForHttpBalancedServices(url string, timeout int) error {
 	return fmt.Errorf("Unable to connect to url %s after %d seconds\n", url, timeout)
 }
 
-// WaitForIdlePersistence waits for idle persistence coordinator which means the last operation has completed
+// WaitForIdlePersistence waits for idle persistence coordinator which means the last operation has completed.
 func WaitForIdlePersistence(timeout int, dataFetcher fetcher.Fetcher, serviceName string) error {
 	var (
 		duration    = 0
@@ -441,17 +443,17 @@ func WaitForIdlePersistence(timeout int, dataFetcher fetcher.Fetcher, serviceNam
 		serviceName, timeout, status)
 }
 
-// Sleep will sleep for a duration of seconds
+// Sleep will sleep for a duration of seconds.
 func Sleep(seconds int) {
 	time.Sleep(time.Duration(seconds) * time.Second)
 }
 
-// StopDockerImage stops a docker image with the given name
+// StopDockerImage stops a docker image with the given name.
 func StopDockerImage(name string) (string, error) {
 	return ExecuteHostCommand("docker", "stop", name)
 }
 
-// ExecuteHostCommand executes a host command
+// ExecuteHostCommand executes a host command.
 func ExecuteHostCommand(name string, arg ...string) (string, error) {
 	cmd := exec.Command(name, arg...)
 	stdout, err := cmd.CombinedOutput()
@@ -465,14 +467,14 @@ func ExecuteHostCommand(name string, arg ...string) (string, error) {
 	return stringStdOut, nil
 }
 
-// CleanupConfigFileAfterTest cleans up a config file after a test
+// CleanupConfigFileAfterTest cleans up a config file after a test.
 func CleanupConfigFileAfterTest(t *testing.T, file string) {
 	t.Cleanup(func() {
 		_ = os.Remove(file)
 	})
 }
 
-// CleanupDirectoryAfterTest cleans up a directory after a test
+// CleanupDirectoryAfterTest cleans up a directory after a test.
 func CleanupDirectoryAfterTest(t *testing.T, dir string) {
 	t.Cleanup(func() {
 		_ = os.RemoveAll(dir)

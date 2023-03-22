@@ -21,7 +21,7 @@ const (
 	on            = "on"
 )
 
-// setDebugCmd represents the set debug command
+// setDebugCmd represents the set debug command.
 var setDebugCmd = &cobra.Command{
 	Use:   "debug {on|off}}",
 	Short: "set debug messages to be on or off",
@@ -54,7 +54,7 @@ information is logged in the log file (cohctl.log).`,
 	},
 }
 
-// getDebugCmd represents the get debug command
+// getDebugCmd represents the get debug command.
 var getDebugCmd = &cobra.Command{
 	Use:   "debug",
 	Short: "display the current debug level",

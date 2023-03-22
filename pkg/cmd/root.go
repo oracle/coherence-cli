@@ -132,7 +132,7 @@ var (
 	Date string
 )
 
-// CoherenceCLIConfig describes the details stored in the .cohctl.yaml
+// CoherenceCLIConfig describes the details stored in the .cohctl.yaml.
 type CoherenceCLIConfig struct {
 	Version            string              `json:"version"`
 	CurrentContext     string              `json:"currentContext"`
@@ -147,13 +147,13 @@ type CoherenceCLIConfig struct {
 	Profiles           []ProfileValue      `mapstructure:"profiles"`
 }
 
-// ProfileValue describes a profile to be used for creating and starting clusters
+// ProfileValue describes a profile to be used for creating and starting clusters.
 type ProfileValue struct {
 	Name  string `json:"name"`
 	Value string `json:"value"`
 }
 
-// ClusterConnection describes an individual connection to a cluster
+// ClusterConnection describes an individual connection to a cluster.
 type ClusterConnection struct {
 	Name                 string `json:"name"` // the name the user gives to the cluster connection
 	DiscoveryType        string `json:"discoveryType"`
@@ -178,7 +178,7 @@ type ClusterConnection struct {
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = createRootCommand()
 
-// createRootCommand creates the root command off which all others are places
+// createRootCommand creates the root command off which all others are places.
 func createRootCommand() *cobra.Command {
 	root := &cobra.Command{
 		Use:          "cohctl",
@@ -200,7 +200,7 @@ func Execute(version string, date string, commit string) {
 	}
 }
 
-// SetRootCommandFlags sets all the persistent root command flags
+// SetRootCommandFlags sets all the persistent root command flags.
 func SetRootCommandFlags(command *cobra.Command) {
 	// Global flags for all commands
 	command.PersistentFlags().StringVar(&cfgDirectory, "config-dir", "", "config directory (default is $HOME/.cohctl)")
@@ -396,7 +396,7 @@ func initConfig() {
 	}
 }
 
-// GetClusterConnection returns the URL for a given a cluster connection name
+// GetClusterConnection returns the URL for a given a cluster connection name.
 func GetClusterConnection(connectionName string) (bool, ClusterConnection) {
 	for _, cluster := range Config.Clusters {
 		if cluster.Name == connectionName {
@@ -406,7 +406,7 @@ func GetClusterConnection(connectionName string) (bool, ClusterConnection) {
 	return false, ClusterConnection{}
 }
 
-// WriteConfig writes the viper config and exit if there is an error
+// WriteConfig writes the viper config and exit if there is an error.
 func WriteConfig() error {
 	err := viper.WriteConfig()
 	if err != nil {
@@ -415,7 +415,7 @@ func WriteConfig() error {
 	return nil
 }
 
-// GetConfigDir returns the configuration directory
+// GetConfigDir returns the configuration directory.
 func GetConfigDir() string {
 	return cfgDirectory
 }
@@ -433,7 +433,7 @@ func ensureLogsDir() error {
 
 // Initialize initializes the command hierarchy - required for tests
 // if command is nil then a new command is created otherwise the existing
-// one is used
+// one is used.
 func Initialize(command *cobra.Command) *cobra.Command {
 	viper.Reset()
 	cfgDirectory = ""
@@ -668,7 +668,7 @@ func Initialize(command *cobra.Command) *cobra.Command {
 	return command
 }
 
-// GetDataFetcher returns a Fetcher given a cluster name
+// GetDataFetcher returns a Fetcher given a cluster name.
 func GetDataFetcher(clusterName string) (fetcher.Fetcher, error) {
 	found, connection := GetClusterConnection(clusterName)
 	if !found {
@@ -679,7 +679,7 @@ func GetDataFetcher(clusterName string) (fetcher.Fetcher, error) {
 }
 
 // GetConnectionNameFromContextOrArg returns the connection name from the '-c' option
-// or the current context if set
+// or the current context if set.
 func GetConnectionNameFromContextOrArg() (string, error) {
 	// firstly check for '-c' which will override everything
 	if clusterConnection != "" {
@@ -698,7 +698,7 @@ func GetConnectionNameFromContextOrArg() (string, error) {
 	return "", errors.New("you must supply a connection name if you have not set the current context")
 }
 
-// GetConnectionAndDataFetcher returns the connection and dataFetcher
+// GetConnectionAndDataFetcher returns the connection and dataFetcher.
 func GetConnectionAndDataFetcher() (string, fetcher.Fetcher, error) {
 	var (
 		err          error
@@ -741,7 +741,7 @@ func GetConnectionAndDataFetcher() (string, fetcher.Fetcher, error) {
 	return connection, dataFetcher, err
 }
 
-// checkOutputFormat checks for valid output formats
+// checkOutputFormat checks for valid output formats.
 func checkOutputFormat() error {
 	if OutputFormat != constants.TABLE && OutputFormat != constants.JSON && OutputFormat != constants.WIDE &&
 		!strings.Contains(OutputFormat, constants.JSONPATH) {
@@ -750,12 +750,12 @@ func checkOutputFormat() error {
 	return nil
 }
 
-// newWinFileSink returns a Zap.Sink to get around windows issue
+// newWinFileSink returns a Zap.Sink to get around windows issue.
 func newWinFileSink(u *url.URL) (zap.Sink, error) {
 	return os.OpenFile(u.Path[1:], os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0644)
 }
 
-// initLogging initializes the logging
+// initLogging initializes the logging.
 func initLogging(homeDir string) (*zap.Logger, error) {
 	cfg := zap.NewDevelopmentConfig()
 
@@ -774,14 +774,14 @@ func initLogging(homeDir string) (*zap.Logger, error) {
 	return cfg.Build()
 }
 
-// isWindows returns true if the OS is Windows
+// isWindows returns true if the OS is Windows.
 func isWindows() bool {
 	return runtime.GOOS == "windows"
 }
 
 // confirmOperation displays a confirmation message and will return true if
 // the operation is confirmed to continue via either the -y option or the
-// user answers "y"
+// user answers "y".
 func confirmOperation(cmd *cobra.Command, message string) bool {
 	var (
 		response string
@@ -819,7 +819,7 @@ func processJSONOutput(cmd *cobra.Command, jsonData []byte) error {
 	return nil
 }
 
-// isJSONPathOrJSON returns true of the output is JSONPath or JSON
+// isJSONPathOrJSON returns true of the output is JSONPath or JSON.
 func isJSONPathOrJSON() bool {
 	return strings.Contains(OutputFormat, constants.JSONPATH) || OutputFormat == constants.JSON
 }

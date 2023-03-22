@@ -18,7 +18,7 @@ const (
 	getTimeoutMessage = "Current timeout: "
 )
 
-// setTimeoutCmd represents the set timeout command
+// setTimeoutCmd represents the set timeout command.
 var setTimeoutCmd = &cobra.Command{
 	Use:   "timeout value",
 	Short: "set request timeout",
@@ -44,7 +44,7 @@ var setTimeoutCmd = &cobra.Command{
 	},
 }
 
-// getTimeoutCmd represents the get timeout command
+// getTimeoutCmd represents the get timeout command.
 var getTimeoutCmd = &cobra.Command{
 	Use:   "timeout",
 	Short: "display the current request timeout",
