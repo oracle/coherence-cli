@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Oracle and/or its affiliates.
+ * Copyright (c) 2022, 2023 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -14,7 +14,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// getEnvironmentCmd represents the get environment command
+// getEnvironmentCmd represents the get environment command.
 var getEnvironmentCmd = &cobra.Command{
 	Use:   "environment node-id",
 	Short: "display the member environment",

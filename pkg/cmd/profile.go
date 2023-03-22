@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Oracle and/or its affiliates.
+ * Copyright (c) 2022, 2023 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -21,7 +21,7 @@ var (
 	profileValue string
 )
 
-// setProfileCmd represents the set profile command
+// setProfileCmd represents the set profile command.
 var setProfileCmd = &cobra.Command{
 	Use:   "profile profile-name",
 	Short: "set a profile value for creating and starting clusters",
@@ -82,7 +82,7 @@ and be space delimited. If you set a profile that exists, it will be overwritten
 	},
 }
 
-// removeProfileCmd represents the remove profile command
+// removeProfileCmd represents the remove profile command.
 var removeProfileCmd = &cobra.Command{
 	Use:   "profile profile-name",
 	Short: "remove a profile value from the list of profiles",
@@ -128,7 +128,7 @@ var removeProfileCmd = &cobra.Command{
 	},
 }
 
-// getProfilesCmd represents the get profiles command
+// getProfilesCmd represents the get profiles command.
 var getProfilesCmd = &cobra.Command{
 	Use:   "profiles",
 	Short: "display the profiles that have been created",
@@ -156,7 +156,7 @@ func validateProfileName(profileName string) error {
 	return nil
 }
 
-// getProfileValue returns the value for a given profile or "" if the profile doesn't exist
+// getProfileValue returns the value for a given profile or "" if the profile doesn't exist.
 func getProfileValue(profileName string) string {
 	for _, v := range Config.Profiles {
 		if v.Name == profileName {

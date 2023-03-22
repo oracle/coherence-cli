@@ -10,7 +10,7 @@ package config
 // Various structure definitions for text command output
 //
 
-// Cluster is a structure to display cluster details for 'describe cluster'
+// Cluster is a structure to display cluster details for 'describe cluster'.
 type Cluster struct {
 	ClusterName           string `json:"clusterName"`
 	ClusterSize           int    `json:"clusterSize"`
@@ -20,12 +20,12 @@ type Cluster struct {
 	MembersDepartureCount int    `json:"membersDepartureCount"`
 }
 
-// Members contains an array of member objects
+// Members contains an array of member objects.
 type Members struct {
 	Members []Member `json:"items"`
 }
 
-// Executor contains individual executor information
+// Executor contains individual executor information.
 type Executor struct {
 	Name                 string `json:"name"`
 	ID                   string `json:"id"`
@@ -40,12 +40,12 @@ type Executor struct {
 	TraceLogging         bool   `json:"traceLogging"`
 }
 
-// Executors contains multiple Executor objects
+// Executors contains multiple Executor objects.
 type Executors struct {
 	Executors []Executor `json:"items"`
 }
 
-// Member contains an individual members output
+// Member contains an individual members output.
 type Member struct {
 	NodeID                   string  `json:"nodeId"`
 	UnicastAddress           string  `json:"unicastAddress"`
@@ -72,23 +72,23 @@ type Member struct {
 	WeakestChannel           int32   `json:"weakestChannel"`
 }
 
-// StorageDetails contains a summary of storage member details
+// StorageDetails contains a summary of storage member details.
 type StorageDetails struct {
 	Details []StorageDetail `json:"items"`
 }
 
-// StorageDetail contains an individual storage details for a member
+// StorageDetail contains an individual storage details for a member.
 type StorageDetail struct {
 	NodeID                 string `json:"nodeId"`
 	OwnedPartitionsPrimary int    `json:"ownedPartitionsPrimary"`
 }
 
-// ProxiesSummary contains a summary of individual proxy servers
+// ProxiesSummary contains a summary of individual proxy servers.
 type ProxiesSummary struct {
 	Proxies []ProxySummary `json:"items"`
 }
 
-// ProxySummary contains proxy server summary details
+// ProxySummary contains proxy server summary details.
 type ProxySummary struct {
 	HostIP                   string `json:"hostIP"`
 	NodeID                   string `json:"nodeId"`
@@ -133,12 +133,12 @@ type ProxyConnection struct {
 	ClientRole           string `json:"clientRole"`
 }
 
-// HTTPSessionSummaries contains an array of Coherence*Web Sessions
+// HTTPSessionSummaries contains an array of Coherence*Web Sessions.
 type HTTPSessionSummaries struct {
 	HTTPSessions []HTTPSessionSummary `json:"items"`
 }
 
-// HTTPSessionSummary contains a summary of Coherence*Web Sessions
+// HTTPSessionSummary contains a summary of Coherence*Web Sessions.
 type HTTPSessionSummary struct {
 	NodeID              string `json:"nodeId"`
 	AppID               string `json:"appId"`
@@ -158,12 +158,12 @@ type HTTPSessionSummary struct {
 	MemberCount         int32
 }
 
-// ServicesSummaries contains an array of ServiceSummary
+// ServicesSummaries contains an array of ServiceSummary.
 type ServicesSummaries struct {
 	Services []ServiceSummary `json:"items"`
 }
 
-// ServiceSummary contains a summary of individual services
+// ServiceSummary contains a summary of individual services.
 type ServiceSummary struct {
 	NodeID               string `json:"nodeId"`
 	ServiceName          string `json:"name"`
@@ -193,12 +193,12 @@ type ServiceSummary struct {
 	Idle                           bool
 }
 
-// ServicesStorageSummaries contains an array of ServiceStorageSummary
+// ServicesStorageSummaries contains an array of ServiceStorageSummary.
 type ServicesStorageSummaries struct {
 	Services []ServiceStorageSummary `json:"items"`
 }
 
-// ServiceStorageSummary contains a storage summary for individual services
+// ServiceStorageSummary contains a storage summary for individual services.
 type ServiceStorageSummary struct {
 	ServiceName            string `json:"service"`
 	AveragePartitionSizeKB int64  `json:"averagePartitionSizeKB"`
@@ -212,12 +212,12 @@ type ServiceStorageSummary struct {
 	ServiceNodeCount       int32  `json:"serviceNodeCount"`
 }
 
-// HealthSummaries contains and array of HealthSummary
+// HealthSummaries contains and array of HealthSummary.
 type HealthSummaries struct {
 	Summaries []HealthSummary `json:"items"`
 }
 
-// HealthSummary contains individual health summary details
+// HealthSummary contains individual health summary details.
 type HealthSummary struct {
 	Type              string `json:"type"`
 	SubType           string `json:"subType"`
@@ -232,7 +232,7 @@ type HealthSummary struct {
 	Safe              bool   `json:"safe"`
 }
 
-// HealthSummaryShort contains summarised health across all nodes for a SubType and Name
+// HealthSummaryShort contains summarised health across all nodes for a SubType and Name.
 type HealthSummaryShort struct {
 	TotalCount   int32
 	SubType      string
@@ -244,7 +244,7 @@ type HealthSummaryShort struct {
 	SafeCount    int32
 }
 
-// StatsSummary contains statistics summaries
+// StatsSummary contains statistics summaries.
 type StatsSummary struct {
 	Count   int64   `json:"count"`
 	Average float64 `json:"average"`
@@ -253,12 +253,12 @@ type StatsSummary struct {
 	Sum     float64 `json:"sum"`
 }
 
-// FederationSummaries contains an array of FederationSummary
+// FederationSummaries contains an array of FederationSummary.
 type FederationSummaries struct {
 	Services []FederationSummary `json:"items"`
 }
 
-// FederationSummary contains Federation summary details for a service and participant
+// FederationSummary contains Federation summary details for a service and participant.
 type FederationSummary struct {
 	ServiceName                             string       `json:"serviceName"`
 	ParticipantName                         string       `json:"participantName"`
@@ -285,7 +285,7 @@ type FederationSummary struct {
 	TotalReplicateAllPartitionsUnacked StatsSummary `json:"totalReplicateAllPartitionsUnacked"`
 }
 
-// FederationDescription contains federation description details
+// FederationDescription contains federation description details.
 type FederationDescription struct {
 	NodeID                                  string  `json:"nodeId"`
 	State                                   string  `json:"state"`
@@ -310,12 +310,12 @@ type FederationDescription struct {
 	TotalReplicateAllPartitionsUnacked int64 `json:"totalReplicateAllPartitionsUnacked"`
 }
 
-// ServiceMemberDetails contains service members details
+// ServiceMemberDetails contains service members details.
 type ServiceMemberDetails struct {
 	Services []ServiceMemberDetail `json:"items"`
 }
 
-// ServiceMemberDetail contains details about a service and node
+// ServiceMemberDetail contains details about a service and node.
 type ServiceMemberDetail struct {
 	NodeID                 string  `json:"nodeId"`
 	ThreadCount            int32   `json:"threadCount"`
@@ -330,12 +330,12 @@ type ServiceMemberDetail struct {
 	TaskAverageDuration    float32 `json:"taskAverageDuration"`
 }
 
-// CacheSummaries contains cache summary details
+// CacheSummaries contains cache summary details.
 type CacheSummaries struct {
 	Caches []CacheSummaryDetail `json:"items"`
 }
 
-// CacheSummaryDetail contains a summary of cache details
+// CacheSummaryDetail contains a summary of cache details.
 type CacheSummaryDetail struct {
 	ServiceName  string `json:"service"`
 	CacheName    string `json:"name"`
@@ -348,12 +348,12 @@ type CacheSummaryDetail struct {
 	CacheMisses  int64  `json:"cacheMisses"`
 }
 
-// TopicDetails contains topics details
+// TopicDetails contains topics details.
 type TopicDetails struct {
 	Details []TopicDetail `json:"items"`
 }
 
-// TopicDetail contains individual topic details
+// TopicDetail contains individual topic details.
 type TopicDetail struct {
 	ServiceName    string `json:"service"`
 	TopicName      string `json:"name"`
@@ -363,12 +363,12 @@ type TopicDetail struct {
 	PublishedCount int64  `json:"-"`
 }
 
-// TopicsMemberDetails contains topics member details
+// TopicsMemberDetails contains topics member details.
 type TopicsMemberDetails struct {
 	Details []TopicsMemberDetail `json:"items"`
 }
 
-// TopicsMemberDetail contains individual detailed member information for a topic
+// TopicsMemberDetail contains individual detailed member information for a topic.
 type TopicsMemberDetail struct {
 	ServiceName         string                 `json:"service"`
 	TopicName           string                 `json:"name"`
@@ -393,12 +393,12 @@ type TopicsMemberDetail struct {
 	PublishedFifteenMinuteRate float64 `json:"publishedFifteenMinuteRate"`
 }
 
-// TopicsSubscriberDetails contains topics subscriber details
+// TopicsSubscriberDetails contains topics subscriber details.
 type TopicsSubscriberDetails struct {
 	Details []TopicsSubscriberDetail `json:"items"`
 }
 
-// TopicsSubscriberDetail contains individual detailed subscriber information for a topic
+// TopicsSubscriberDetail contains individual detailed subscriber information for a topic.
 type TopicsSubscriberDetail struct {
 	ServiceName        string                 `json:"service"`
 	TopicName          string                 `json:"topic"`
@@ -420,23 +420,23 @@ type TopicsSubscriberDetail struct {
 	SubType            string                 `json:"subType"`
 }
 
-// HeadsResult contains raw results from retrieve heads
+// HeadsResult contains raw results from retrieve heads.
 type HeadsResult struct {
 	Channels map[string]interface{} `json:"heads"`
 }
 
-// HeadStats contains retrieved heads details
+// HeadStats contains retrieved heads details.
 type HeadStats struct {
 	Channel  int64  `json:"channel"`
 	Position string `json:"position"`
 }
 
-// TopicsSubscriberGroups contains details about subscriber groups
+// TopicsSubscriberGroups contains details about subscriber groups.
 type TopicsSubscriberGroups struct {
 	Details []TopicsSubscriberGroupDetail `json:"items"`
 }
 
-// TopicsSubscriberGroupDetail contains detail about subscriber groups
+// TopicsSubscriberGroupDetail contains detail about subscriber groups.
 type TopicsSubscriberGroupDetail struct {
 	ServiceName             string                 `json:"service"`
 	TopicName               string                 `json:"topic"`
@@ -451,12 +451,12 @@ type TopicsSubscriberGroupDetail struct {
 	Channels                map[string]interface{} `json:"channels"`
 }
 
-// ChannelDetails contains all channels details
+// ChannelDetails contains all channels details.
 type ChannelDetails struct {
 	Details map[string]interface{} `json:"channels"`
 }
 
-// ChannelStats contains statistics summaries for Channels
+// ChannelStats contains statistics summaries for Channels.
 type ChannelStats struct {
 	Channel                    int64   `json:"channel"`
 	PublishedCount             int64   `json:"publishedCount"`
@@ -467,7 +467,7 @@ type ChannelStats struct {
 	Tail                       string  `json:"tail"`
 }
 
-// SubscriberChannelStats contains statistics summaries for channel subscribers
+// SubscriberChannelStats contains statistics summaries for channel subscribers.
 type SubscriberChannelStats struct {
 	Channel      int64  `json:"channel"`
 	Empty        bool   `json:"empty"`
@@ -477,7 +477,7 @@ type SubscriberChannelStats struct {
 	LastReceived string `json:"lastReceived"`
 }
 
-// SubscriberGroupChannelStats contains statistics summaries for channel subscriber groups
+// SubscriberGroupChannelStats contains statistics summaries for channel subscriber groups.
 type SubscriberGroupChannelStats struct {
 	Channel                              int64   `json:"channel"`
 	Head                                 string  `json:"head"`
@@ -501,7 +501,7 @@ type CacheDetails struct {
 	Details []CacheDetail `json:"items"`
 }
 
-// CacheDetail contains individual cache details for a cache, tier and node
+// CacheDetail contains individual cache details for a cache, tier and node.
 type CacheDetail struct {
 	NodeID        string `json:"nodeId"`
 	Tier          string `json:"tier"`
@@ -532,23 +532,23 @@ type CacheDetail struct {
 	IndexInfo                      []string `json:"indexInfo"`
 }
 
-// ServiceCaches contains a list of service caches
+// ServiceCaches contains a list of service cache.
 type ServiceCaches struct {
 	Details []ServiceCache `json:"items"`
 }
 
-// ServiceCache contains an individual service cache mapping
+// ServiceCache contains an individual service cache mapping.
 type ServiceCache struct {
 	ServiceName string `json:"service"`
 	Name        string `json:"name"`
 }
 
-// CacheStoreDetails contains cache details
+// CacheStoreDetails contains cache details.
 type CacheStoreDetails struct {
 	Details []CacheStoreDetail `json:"items"`
 }
 
-// CacheStoreDetail contains the cache store information
+// CacheStoreDetail contains the cache store information.
 type CacheStoreDetail struct {
 	NodeID                  string `json:"nodeId"`
 	Tier                    string `json:"tier"`
@@ -564,12 +564,12 @@ type CacheStoreDetail struct {
 	PersistenceType         string `json:"persistenceType"`
 }
 
-// GenericDetails contains a slice of generic Json structures
+// GenericDetails contains a slice of generic Json structures.
 type GenericDetails struct {
 	Details []interface{} `json:"items"`
 }
 
-// PersistenceCoordinator contains details about a persistence coordinator
+// PersistenceCoordinator contains details about a persistence coordinator.
 type PersistenceCoordinator struct {
 	Idle              bool     `json:"idle"`
 	OperationStatus   string   `json:"operationStatus"`
@@ -577,7 +577,7 @@ type PersistenceCoordinator struct {
 	CoordinatorNodeID int32    `json:"coordinatorId"`
 }
 
-// Machine contains machine details
+// Machine contains machine details.
 type Machine struct {
 	MachineName             string      `json:"operationStatus"`
 	AvailableProcessors     int32       `json:"availableProcessors"`
@@ -590,12 +590,12 @@ type Machine struct {
 	Version                 string      `json:"version"`
 }
 
-// Reporters contains reporter details
+// Reporters contains reporter details.
 type Reporters struct {
 	Reporters []Reporter `json:"items"`
 }
 
-// Reporter contains individual node reporter details
+// Reporter contains individual node reporter details.
 type Reporter struct {
 	NodeID           string  `json:"nodeId"`
 	State            string  `json:"state"`
@@ -609,12 +609,12 @@ type Reporter struct {
 	AutoStart        bool    `json:"autoStart"`
 }
 
-// ElasticDataValues contains elastic data details
+// ElasticDataValues contains elastic data details.
 type ElasticDataValues struct {
 	ElasticData []ElasticData `json:"items"`
 }
 
-// ElasticData contains elastic data information for a node and type
+// ElasticData contains elastic data information for a node and type.
 type ElasticData struct {
 	NodeID                     string  `json:"nodeId"`
 	Name                       string  `json:"name"`
@@ -629,7 +629,7 @@ type ElasticData struct {
 	TotalDataSize              int64   `json:"totalDataSize"`
 }
 
-// DefaultDependency holds the default dependencies for starting a Cache server
+// DefaultDependency holds the default dependencies for starting a Cache server.
 type DefaultDependency struct {
 	GroupID     string
 	Artifact    string
@@ -637,39 +637,39 @@ type DefaultDependency struct {
 	Version     string
 }
 
-// Links contains any links returned via HTTP
+// Links contains any links returned via HTTP.
 type Links struct {
 	Links []Link `json:"links"`
 }
 
-// Link contains link details
+// Link contains link details.
 type Link struct {
 	Rel  string `json:"rel"`
 	Href string `json:"href"`
 }
 
-// ItemLinks contains links for an item
+// ItemLinks contains links for an item.
 type ItemLinks struct {
 	Links []Links `json:"items"`
 }
 
-// Snapshots contains snapshots for services
+// Snapshots contains snapshots for services.
 type Snapshots struct {
 	ServiceName string   `json:"serviceName"`
 	Snapshots   []string `json:"snapshots"`
 }
 
-// Archives contains archived snapshots
+// Archives contains archived snapshots.
 type Archives struct {
 	Snapshots []string `json:"archives"`
 }
 
-// StatusValues contains JFR status result
+// StatusValues contains JFR status result.
 type StatusValues struct {
 	Status []string `json:"status"`
 }
 
-// SingleStatusValue contains a single JFR status result
+// SingleStatusValue contains a single JFR status result.
 type SingleStatusValue struct {
 	Status string `json:"status"`
 }

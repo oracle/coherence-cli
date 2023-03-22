@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Oracle and/or its affiliates.
+ * Copyright (c) 2022, 2023 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -21,7 +21,7 @@ var (
 	healthSummary bool
 )
 
-// getHealthCmd represents the get health command
+// getHealthCmd represents the get health command.
 var getHealthCmd = &cobra.Command{
 	Use:   "health",
 	Short: "display health information for a cluster",
@@ -156,7 +156,7 @@ func summariseHealth(health []config.HealthSummary) []config.HealthSummaryShort 
 	return healthShort
 }
 
-// findIndex finds the index of the entry for name and subType, -1 means no entry found
+// findIndex finds the index of the entry for name and subType, -1 means no entry found.
 func findIndex(health []config.HealthSummaryShort, name, subType string) int32 {
 	for i, value := range health {
 		if value.Name == name && value.SubType == subType {

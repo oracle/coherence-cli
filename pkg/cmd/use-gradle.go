@@ -18,7 +18,7 @@ const (
 	getUseGradleMsg   = "Use Gradle: "
 )
 
-// setUseGradleCmd represents the set use-gradle command
+// setUseGradleCmd represents the set use-gradle command.
 var setUseGradleCmd = &cobra.Command{
 	Use:   "use-gradle {true|false}",
 	Short: "set whether to use gradle for dependency management",
@@ -51,7 +51,7 @@ This setting only affects when you create a cluster. If set to false, the defaul
 	},
 }
 
-// getUseGradleCmd represents the get use-gradle
+// getUseGradleCmd represents the get use-gradle.
 var getUseGradleCmd = &cobra.Command{
 	Use:   "use-gradle",
 	Short: "display the current setting for using gradle for dependency management",

@@ -35,7 +35,7 @@ const (
 	snapshotUse     = "snapshot snapshot-name"
 )
 
-// createSnapshotCmd represents the create snapshot command
+// createSnapshotCmd represents the create snapshot command.
 var createSnapshotCmd = &cobra.Command{
 	Use:   snapshotUse,
 	Short: "create a snapshot for a given service",
@@ -52,7 +52,7 @@ do not specify the -y option you will be prompted to confirm the operation.`,
 	},
 }
 
-// getSnapshotsCmd represents the get snapshots command
+// getSnapshotsCmd represents the get snapshots command.
 var getSnapshotsCmd = &cobra.Command{
 	Use:   "snapshots",
 	Short: "display snapshots for a cluster",
@@ -177,7 +177,7 @@ local snapshots are shown, but you can use the -a option to show archived snapsh
 	},
 }
 
-// recoverSnapshotCmd represents the recover snapshot command
+// recoverSnapshotCmd represents the recover snapshot command.
 var recoverSnapshotCmd = &cobra.Command{
 	Use:   snapshotUse,
 	Short: "recover a snapshot for a given service",
@@ -195,7 +195,7 @@ data from the requested snapshot.`,
 	},
 }
 
-// removeSnapshotCmd represents the remove snapshot command
+// removeSnapshotCmd represents the remove snapshot command.
 var removeSnapshotCmd = &cobra.Command{
 	Use:   snapshotUse,
 	Short: "remove a snapshot for a given service",
@@ -212,7 +212,7 @@ By default local snapshots are removed, but you can use the -a option to remove 
 	},
 }
 
-// archiveSnapshotCmd represents the archive snapshot command
+// archiveSnapshotCmd represents the archive snapshot command.
 var archiveSnapshotCmd = &cobra.Command{
 	Use:   snapshotUse,
 	Short: "archive a snapshot for a given service",
@@ -229,7 +229,7 @@ have an archiver setup on the service for this to be successful.`,
 	},
 }
 
-// retrieveSnapshotCmd represents the retrieve snapshot command
+// retrieveSnapshotCmd represents the retrieve snapshot command.
 var retrieveSnapshotCmd = &cobra.Command{
 	Use:   snapshotUse,
 	Short: "retrieve an archived snapshot for a given service",

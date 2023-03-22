@@ -23,7 +23,7 @@ const (
 	bytesFormatT         = "t"
 )
 
-// setBytesFormatCmd represents the set bytes-format command
+// setBytesFormatCmd represents the set bytes-format command.
 var setBytesFormatCmd = &cobra.Command{
 	Use:   "bytes-format {k|m|g|t}",
 	Short: "set default bytes format for displaying memory or disk based sizes",
@@ -52,7 +52,7 @@ The default value will be overridden if you specify the -k, -m, -g or --tb optio
 	},
 }
 
-// getBytesFormatCmd represents the get bytes-format command
+// getBytesFormatCmd represents the get bytes-format command.
 var getBytesFormatCmd = &cobra.Command{
 	Use:   "bytes-format",
 	Short: "display the current format for displaying memory or disk based sizes",
@@ -64,7 +64,7 @@ var getBytesFormatCmd = &cobra.Command{
 	},
 }
 
-// clearBytesFormatCmd represents the clear bytes-format command
+// clearBytesFormatCmd represents the clear bytes-format command.
 var clearBytesFormatCmd = &cobra.Command{
 	Use:   "bytes-format",
 	Short: "clear the current format for displaying memory or disk based sizes",

@@ -24,7 +24,6 @@ import (
 )
 
 const (
-	sep                   = "~~"
 	R                     = "R"
 	L                     = "L"
 	NodeIDColumn          = "NODE ID"
@@ -76,7 +75,7 @@ type KeyValues struct {
 
 var printer = message.NewPrinter(language.English)
 
-// FormatCurrentCluster will display a message indicating a cluster context is being used
+// FormatCurrentCluster will display a message indicating a cluster context is being used.
 func FormatCurrentCluster(clusterName string) string {
 	if UsingContext {
 		return fmt.Sprintf("Using cluster connection '%s' from current context.\n", clusterName)
@@ -84,7 +83,7 @@ func FormatCurrentCluster(clusterName string) string {
 	return ""
 }
 
-// FormatCluster returns a string representing a cluster
+// FormatCluster returns a string representing a cluster.
 func FormatCluster(cluster config.Cluster) string {
 	var sb strings.Builder
 	sb.WriteString(fmt.Sprintf("Cluster Name:    %s\n", cluster.ClusterName))
@@ -99,7 +98,7 @@ func FormatCluster(cluster config.Cluster) string {
 
 // FormatJSONForDescribe formats a two column display for a describe command
 // showAllColumns indicates if all the columns including ordered are shown
-// orderedColumns are the column names, expanded, that should be displayed first for context
+// orderedColumns are the column names, expanded, that should be displayed first for context.
 func FormatJSONForDescribe(jsonValue []byte, showAllColumns bool, orderedColumns ...string) (string, error) {
 	var result map[string]json.RawMessage
 	err := json.Unmarshal(jsonValue, &result)
@@ -274,7 +273,7 @@ func FormatFederationDetails(federationDetails []config.FederationDescription, t
 }
 
 // FormatFederationSummary returns the federation summary in column formatted output
-// the target may be destinations or origins and columns will change slightly
+// the target may be destinations or origins and columns will change slightly.
 func FormatFederationSummary(federationSummaries []config.FederationSummary, target string) string {
 	var (
 		fedCount           = len(federationSummaries)
@@ -400,7 +399,7 @@ func FormatFederationSummary(federationSummaries []config.FederationSummary, tar
 	return table.String()
 }
 
-// FormatCacheSummary returns the cache summary in column formatted output
+// FormatCacheSummary returns the cache summary in column formatted output.
 func FormatCacheSummary(cacheSummaries []config.CacheSummaryDetail) string {
 	var (
 		cacheCount         = len(cacheSummaries)
@@ -473,7 +472,7 @@ func FormatCacheSummary(cacheSummaries []config.CacheSummaryDetail) string {
 		strings.TrimSpace(formattingFunction(totalUnits))) + table.String()
 }
 
-// FormatTopicsSummary returns the topics summary in column formatted output
+// FormatTopicsSummary returns the topics summary in column formatted output.
 func FormatTopicsSummary(topicDetails []config.TopicDetail) string {
 	var (
 		cacheCount = len(topicDetails)
@@ -551,7 +550,7 @@ func FormatTopicsSubscribers(topicsSubscribers []config.TopicsSubscriberDetail) 
 	return table.String()
 }
 
-// FormatTopicsSubscriberGroups returns the topics subscriber groups details in column formatted output
+// FormatTopicsSubscriberGroups returns the topics subscriber groups details in column formatted output.
 func FormatTopicsSubscriberGroups(subscriberGroups []config.TopicsSubscriberGroupDetail) string {
 	var (
 		count = len(subscriberGroups)
@@ -584,7 +583,7 @@ func FormatTopicsSubscriberGroups(subscriberGroups []config.TopicsSubscriberGrou
 	return table.String()
 }
 
-// FormatTopicsMembers returns the topics member details in column formatted output
+// FormatTopicsMembers returns the topics member details in column formatted output.
 func FormatTopicsMembers(topicsMembers []config.TopicsMemberDetail) string {
 	var (
 		memberCount = len(topicsMembers)
@@ -625,7 +624,7 @@ func FormatTopicsMembers(topicsMembers []config.TopicsMemberDetail) string {
 	return table.String()
 }
 
-// FormatChannelStats returns the channel stats in column formatted output
+// FormatChannelStats returns the channel stats in column formatted output.
 func FormatChannelStats(channelStats []config.ChannelStats) string {
 	var memberCount = len(channelStats)
 
@@ -650,7 +649,7 @@ func FormatChannelStats(channelStats []config.ChannelStats) string {
 	return table.String()
 }
 
-// FormatSubscriberChannelStats returns the subscriber channel stats in column formatted output
+// FormatSubscriberChannelStats returns the subscriber channel stats in column formatted output.
 func FormatSubscriberChannelStats(channelStats []config.SubscriberChannelStats) string {
 	var memberCount = len(channelStats)
 
@@ -673,7 +672,7 @@ func FormatSubscriberChannelStats(channelStats []config.SubscriberChannelStats) 
 	return table.String()
 }
 
-// FormatHeadsStats returns the subscriber heads stats in column formatted output
+// FormatHeadsStats returns the subscriber heads stats in column formatted output.
 func FormatHeadsStats(channelStats []config.HeadStats) string {
 	var memberCount = len(channelStats)
 
@@ -694,7 +693,7 @@ func FormatHeadsStats(channelStats []config.HeadStats) string {
 	return table.String()
 }
 
-// FormatSubscriberGroupChannelStats returns the subscriber channel stats in column formatted output
+// FormatSubscriberGroupChannelStats returns the subscriber channel stats in column formatted output.
 func FormatSubscriberGroupChannelStats(channelStats []config.SubscriberGroupChannelStats) string {
 	var (
 		memberCount = len(channelStats)
@@ -732,7 +731,7 @@ func FormatSubscriberGroupChannelStats(channelStats []config.SubscriberGroupChan
 	return table.String()
 }
 
-// FormatServiceMembers returns the service member details in column formatted output
+// FormatServiceMembers returns the service member details in column formatted output.
 func FormatServiceMembers(serviceMembers []config.ServiceMemberDetail) string {
 	var (
 		memberCount = len(serviceMembers)
@@ -779,7 +778,7 @@ func FormatServiceMembers(serviceMembers []config.ServiceMemberDetail) string {
 	return table.String()
 }
 
-// FormatCacheDetailsSizeAndAccess returns the cache details size and access details in column formatted output
+// FormatCacheDetailsSizeAndAccess returns the cache details size and access details in column formatted output.
 func FormatCacheDetailsSizeAndAccess(cacheDetails []config.CacheDetail) string {
 	var (
 		detailsCount       = len(cacheDetails)
@@ -833,7 +832,7 @@ func FormatCacheDetailsSizeAndAccess(cacheDetails []config.CacheDetail) string {
 	return table.String()
 }
 
-// FormatCacheIndexDetails returns the cache index details
+// FormatCacheIndexDetails returns the cache index details.
 func FormatCacheIndexDetails(cacheDetails []config.CacheDetail) string {
 	var (
 		sb                  = strings.Builder{}
@@ -865,7 +864,7 @@ func FormatCacheIndexDetails(cacheDetails []config.CacheDetail) string {
 		"\n" + sb.String()
 }
 
-// FormatCacheDetailsStorage returns the cache storage details in column formatted output
+// FormatCacheDetailsStorage returns the cache storage details in column formatted output.
 func FormatCacheDetailsStorage(cacheDetails []config.CacheDetail) string {
 	var (
 		detailsCount       = len(cacheDetails)
@@ -908,7 +907,7 @@ func FormatCacheDetailsStorage(cacheDetails []config.CacheDetail) string {
 	return table.String()
 }
 
-// FormatCacheStoreDetails returns the cache store details in column formatted output
+// FormatCacheStoreDetails returns the cache store details in column formatted output.
 func FormatCacheStoreDetails(cacheDetails []config.CacheStoreDetail, cache, service string, includeHeader bool) string {
 	var (
 		detailsCount   = len(cacheDetails)
@@ -959,7 +958,7 @@ func FormatCacheStoreDetails(cacheDetails []config.CacheStoreDetail, cache, serv
 	return header + table.String()
 }
 
-// FormatDiscoveredClusters returns the discovered clusters in the column formatted output
+// FormatDiscoveredClusters returns the discovered clusters in the column formatted output.
 func FormatDiscoveredClusters(clusters []discovery.DiscoveredCluster) string {
 	var (
 		count = len(clusters)
@@ -981,7 +980,7 @@ func FormatDiscoveredClusters(clusters []discovery.DiscoveredCluster) string {
 	return table.String()
 }
 
-// FormatProfiles returns the profiles in a column formatted output
+// FormatProfiles returns the profiles in a column formatted output.
 func FormatProfiles(profiles []ProfileValue) string {
 	var (
 		profileCount = len(profiles)
@@ -999,7 +998,7 @@ func FormatProfiles(profiles []ProfileValue) string {
 	return table.String()
 }
 
-// FormatClusterConnections returns the cluster information in a column formatted output
+// FormatClusterConnections returns the cluster information in a column formatted output.
 func FormatClusterConnections(clusters []ClusterConnection) string {
 	var (
 		clusterCount   = len(clusters)
@@ -1047,7 +1046,7 @@ func FormatClusterConnections(clusters []ClusterConnection) string {
 	return table.String()
 }
 
-// FormatTracing returns the member's tracing details in a column formatted output
+// FormatTracing returns the member's tracing details in a column formatted output.
 func FormatTracing(members []config.Member) string {
 	var memberCount = len(members)
 
@@ -1083,7 +1082,7 @@ func FormatTracing(members []config.Member) string {
 	return table.String()
 }
 
-// FormatHealthSummary returns member health in a short or summary view
+// FormatHealthSummary returns member health in a short or summary view.
 func FormatHealthSummary(health []config.HealthSummaryShort) string {
 	if len(health) == 0 {
 		return ""
@@ -1117,7 +1116,7 @@ func getCountString(total, ready int32) string {
 	return formatSmallInteger(ready) + "/" + formatSmallInteger(total)
 }
 
-// FormatMemberHealth returns member health in a column formatted output
+// FormatMemberHealth returns member health in a column formatted output.
 func FormatMemberHealth(health []config.HealthSummary) string {
 	if len(health) == 0 {
 		return ""
@@ -1169,7 +1168,7 @@ func FormatMemberHealth(health []config.HealthSummary) string {
 	return table.String()
 }
 
-// FormatMembers returns the member's information in a column formatted output
+// FormatMembers returns the member's information in a column formatted output.
 func FormatMembers(members []config.Member, verbose bool, storageMap map[int]bool, summary bool) string {
 	var (
 		memberCount        = len(members)
@@ -1280,7 +1279,7 @@ func FormatMembers(members []config.Member, verbose bool, storageMap map[int]boo
 	return result
 }
 
-// FormatNetworkStatistics returns the member's network statistics in a column formatted output
+// FormatNetworkStatistics returns the member's network statistics in a column formatted output.
 func FormatNetworkStatistics(members []config.Member) string {
 	var (
 		alignmentWide      = []string{R, L, L, R, L, L, R, R, R, R, R, R, R, R}
@@ -1321,14 +1320,10 @@ func FormatNetworkStatistics(members []config.Member) string {
 			formattingFunction(value.TransportReceivedBytes), formatSmallInteger(value.WeakestChannel))
 	}
 
-	//table.AddColumnsToRow(fmt.Sprintf("%v", storageEnabled), formattingFunction(int64(value.MemoryMaxMB)*MB),
-	//	formattingFunction(int64(value.MemoryMaxMB-value.MemoryAvailableMB)*MB),
-	//	formattingFunction(int64(value.MemoryAvailableMB)*MB))
-
 	return table.String()
 }
 
-// FormatExecutors returns the executor's information in a column formatted output
+// FormatExecutors returns the executor's information in a column formatted output.
 func FormatExecutors(executors []config.Executor, summary bool) string {
 	var (
 		executorCount = len(executors)
@@ -1372,7 +1367,7 @@ func FormatExecutors(executors []config.Executor, summary bool) string {
 		table.String()
 }
 
-// FormatElasticData formats the elastic data summary
+// FormatElasticData formats the elastic data summary.
 func FormatElasticData(edData []config.ElasticData, summary bool) string {
 	var (
 		edCount            = len(edData)
@@ -1425,7 +1420,7 @@ func FormatElasticData(edData []config.ElasticData, summary bool) string {
 	return table.String()
 }
 
-// FormatReporters returns the reporters' info in a column formatted output
+// FormatReporters returns the reporters' info in a column formatted output.
 func FormatReporters(reporters []config.Reporter) string {
 	var (
 		memberCount = len(reporters)
@@ -1461,7 +1456,7 @@ func FormatReporters(reporters []config.Reporter) string {
 	return table.String()
 }
 
-// FormatServices returns the services' information in a column formatted output
+// FormatServices returns the services' information in a column formatted output.
 func FormatServices(services []config.ServiceSummary) string {
 	if len(services) == 0 {
 		return ""
@@ -1520,7 +1515,7 @@ func FormatServices(services []config.ServiceSummary) string {
 	return table.String()
 }
 
-// FormatServicesStorage returns the services' storage information in a column formatted output
+// FormatServicesStorage returns the services' storage information in a column formatted output.
 func FormatServicesStorage(services []config.ServiceStorageSummary) string {
 	if len(services) == 0 {
 		return ""
@@ -1548,7 +1543,7 @@ func FormatServicesStorage(services []config.ServiceStorageSummary) string {
 	return table.String()
 }
 
-// FormatMachines returns the machine's information in a column formatted output
+// FormatMachines returns the machine's information in a column formatted output.
 func FormatMachines(machines []config.Machine) string {
 	if len(machines) == 0 {
 		return ""
@@ -1585,7 +1580,7 @@ func FormatMachines(machines []config.Machine) string {
 	return table.String()
 }
 
-// FormatHTTPSessions returns the Coherence*Web information in a column formatted output
+// FormatHTTPSessions returns the Coherence*Web information in a column formatted output.
 func FormatHTTPSessions(sessions []config.HTTPSessionSummary, isSummary bool) string {
 	if len(sessions) == 0 {
 		return ""
@@ -1633,7 +1628,7 @@ func FormatHTTPSessions(sessions []config.HTTPSessionSummary, isSummary bool) st
 }
 
 // FormatPersistenceServices returns the services' persistence information in a column formatted output
-// if isSummary then leave out storage count
+// if isSummary then leave out storage count.
 func FormatPersistenceServices(services []config.ServiceSummary, isSummary bool) string {
 	if len(services) == 0 {
 		return ""
@@ -1705,7 +1700,7 @@ func FormatPersistenceServices(services []config.ServiceSummary, isSummary bool)
 		table.String()
 }
 
-// FormatSnapshots returns the snapshots in a formatted output
+// FormatSnapshots returns the snapshots in a formatted output.
 func FormatSnapshots(serviceSnapshots []config.Snapshots, archived bool) string {
 	if len(serviceSnapshots) == 0 {
 		return ""
@@ -1735,7 +1730,7 @@ func FormatSnapshots(serviceSnapshots []config.Snapshots, archived bool) string 
 	return table.String()
 }
 
-// FormatProxyConnections returns the proxy connections in a column formatted output
+// FormatProxyConnections returns the proxy connections in a column formatted output.
 func FormatProxyConnections(connections []config.ProxyConnection) string {
 
 	if len(connections) == 0 {
@@ -1775,7 +1770,7 @@ func FormatProxyConnections(connections []config.ProxyConnection) string {
 }
 
 // FormatProxyServers returns the proxy servers' information in a column formatted output
-// protocol is either tcp or http and will display a different format based upon this
+// protocol is either tcp or http and will display a different format based upon this.
 func FormatProxyServers(services []config.ProxySummary, protocol string) string {
 	// get the number of proxies matching the protocol
 	var (
@@ -1892,7 +1887,7 @@ func getFormattingFunction() func(bytesValue int64) string {
 	return formatBytesOnly
 }
 
-// maxInt returns the maximum of two values
+// maxInt returns the maximum of two values.
 func max(v1 int64, v2 int64) int64 {
 	if v1 >= v2 {
 		return v1
@@ -1900,52 +1895,52 @@ func max(v1 int64, v2 int64) int64 {
 	return v2
 }
 
-// formatSmallInteger formats a small integer
+// formatSmallInteger formats a small integer.
 func formatSmallInteger(value int32) string {
 	return printer.Sprintf("%d", value)
 }
 
-// formatPort formats a small integer with a max length
+// formatPort formats a small integer with a max length.
 func formatPort(value int32) string {
 	return fmt.Sprintf("%d", value)
 }
 
-// formatLargeInteger formats a large integer
+// formatLargeInteger formats a large integer.
 func formatLargeInteger(value int64) string {
 	return printer.Sprintf("%d", value)
 }
 
-// formatFloat formats a small float
+// formatFloat formats a small float.
 func formatFloat(value float32) string {
 	return printer.Sprintf("%.4f", value)
 }
 
-// formatLargeFloat formats a large float
+// formatLargeFloat formats a large float.
 func formatLargeFloat(value float64) string {
 	return printer.Sprintf("%.4f", value)
 }
 
-// formatLatency formats a float latency
+// formatLatency formats a float latency.
 func formatLatency(value float32) string {
 	return printer.Sprintf("%.3fms", value)
 }
 
-// formatLatency formats a float latency
+// formatLatency formats a float latency.
 func formatLatency0(value float32) string {
 	return printer.Sprintf("%.0fms", value)
 }
 
-// formatMbps formats a Mbps
+// formatMbps formats a Mbps.
 func formatMbps(value float32) string {
 	return printer.Sprintf("%.1fMbps", value)
 }
 
-// formatPublisherReceiver formats a packet publisher/ receiver
+// formatPublisherReceiver formats a packet publisher/ receiver.
 func formatPublisherReceiver(value float32) string {
 	return printer.Sprintf("%-.3f", value)
 }
 
-// formatPercent formats a percent value
+// formatPercent formats a percent value.
 func formatPercent(value float64) string {
 	if value == -1 {
 		return na
@@ -1997,30 +1992,8 @@ func formatConnectionMillis(millis int64) string {
 	return fmt.Sprintf("%d.%.1ds", seconds, ms/100)
 }
 
-// getMaxColumnLengths returns an array representing the max lengths of columns
-// delimited with the sep
-func getMaxColumnLengths(values []string) []int {
-	if len(values) == 0 {
-		return make([]int, 0)
-	}
-	// find the number of values from the first entry
-	var splits = strings.Split(values[0], sep)
-	var numValues = len(splits)
-
-	var lengths = make([]int, numValues)
-
-	for _, value := range values {
-		for j, entry := range strings.Split(value, sep) {
-			if len(entry) > lengths[j] {
-				lengths[j] = len(entry)
-			}
-		}
-	}
-	return lengths
-}
-
 // CreateCamelCaseLabel creates a camel case label from a field, e.g.
-// unicastListener becomes "Unicast Listener"
+// unicastListener becomes "Unicast Listener".
 func CreateCamelCaseLabel(field string) string {
 	// special cases
 	if field == "UID" {
@@ -2083,7 +2056,7 @@ func CreateCamelCaseLabel(field string) string {
 	return sb.String()
 }
 
-// findKeyValueIndex finds the index where the key matches
+// findKeyValueIndex finds the index where the key matches.
 func findKeyValueIndex(keyValues []KeyValues, column string) int {
 	for i, v := range keyValues {
 		if v.Key == column {
@@ -2093,7 +2066,7 @@ func findKeyValueIndex(keyValues []KeyValues, column string) int {
 	return -1
 }
 
-// appendColumnValue appends a column value taking into account if it breaks over multiple lines
+// appendColumnValue appends a column value taking into account if it breaks over multiple lines.
 func appendColumnValue(v KeyValues, sb *strings.Builder, keyFormat string) {
 	value := fmt.Sprintf("%v", v.Value)
 	if strings.Contains(value, "\n") {
@@ -2257,8 +2230,7 @@ func (t *formattedTable) String() string {
 	return sb.String()
 }
 
-// getMaxColumnLengthsNew returns an array representing the max lengths of columns
-// delimited with the sep
+// getMaxColumnLen returns an array representing the max lengths of columns.
 func (t *formattedTable) getMaxColumnLen() []int {
 	columns := t.getCombined()
 

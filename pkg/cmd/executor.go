@@ -33,7 +33,7 @@ const (
 	stringFalse         = "false"
 )
 
-// getExecutorsCmd represents the get executors command
+// getExecutorsCmd represents the get executors command.
 var getExecutorsCmd = &cobra.Command{
 	Use:   "executors",
 	Short: "display executors for a cluster",
@@ -86,7 +86,7 @@ var getExecutorsCmd = &cobra.Command{
 	},
 }
 
-// describeExecutorCmd represents the describe executor command
+// describeExecutorCmd represents the describe executor command.
 var describeExecutorCmd = &cobra.Command{
 	Use:   "executor executor-name",
 	Short: "describe an executor",
@@ -171,7 +171,7 @@ var describeExecutorCmd = &cobra.Command{
 	},
 }
 
-// setExecutorCmd represents the set executor command
+// setExecutorCmd represents the set executor command.
 var setExecutorCmd = &cobra.Command{
 	Use:   "executor executor-name",
 	Short: "set an executor attribute",
@@ -248,7 +248,7 @@ all nodes. The following attribute names are allowed: traceLogging.`,
 }
 
 // getExecutorDetails returns the executor details for the cluster
-// if summary is true then the data is summarised by name
+// if summary is true then the data is summarised by name.
 func getExecutorDetails(dataFetcher fetcher.Fetcher, summary bool) (config.Executors, error) {
 	var (
 		executorsResult []byte

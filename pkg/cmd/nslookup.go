@@ -15,7 +15,7 @@ var (
 	nsQuery string
 )
 
-// nsLookupCmd represents the nslookup command
+// nsLookupCmd represents the nslookup command.
 var nsLookupCmd = &cobra.Command{
 	Use:   "nslookup <host:port>",
 	Short: "execute a Coherence Name Service lookup",

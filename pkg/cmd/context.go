@@ -19,7 +19,7 @@ const (
 	clearContextMessage    = "Current context was cleared"
 )
 
-// setContextCmd represents the set context command
+// setContextCmd represents the set context command.
 var setContextCmd = &cobra.Command{
 	Use:   "context connection-name",
 	Short: "set the current context",
@@ -40,7 +40,7 @@ var setContextCmd = &cobra.Command{
 	},
 }
 
-// setContext sets the context
+// setContext sets the context.
 func setContext(cmd *cobra.Command, cluster string) error {
 	viper.Set(currentContextKey, cluster)
 	err := WriteConfig()
@@ -51,7 +51,7 @@ func setContext(cmd *cobra.Command, cluster string) error {
 	return nil
 }
 
-// getContextCmd represents the get context command
+// getContextCmd represents the get context command.
 var getContextCmd = &cobra.Command{
 	Use:   "context",
 	Short: "display the current context",
@@ -63,7 +63,7 @@ var getContextCmd = &cobra.Command{
 	},
 }
 
-// clearContextCommand represents the clear context command
+// clearContextCommand represents the clear context command.
 var clearContextCmd = &cobra.Command{
 	Use:   "context",
 	Short: "clear the current context",
@@ -74,7 +74,7 @@ var clearContextCmd = &cobra.Command{
 	},
 }
 
-// clearContext clears the current context
+// clearContext clears the current context.
 func clearContext(cmd *cobra.Command) error {
 	viper.Set(currentContextKey, "")
 	if err := WriteConfig(); err != nil {

@@ -41,7 +41,7 @@ func displayErrorAndExit(cmd *cobra.Command, message string) {
 	os.Exit(1)
 }
 
-// ServiceExists returns true if a service exists
+// ServiceExists returns true if a service exists.
 func ServiceExists(dataFetcher fetcher.Fetcher, serviceName string) (bool, error) {
 	var (
 		servicesSummary = config.ServicesSummaries{}
@@ -67,7 +67,7 @@ func ServiceExists(dataFetcher fetcher.Fetcher, serviceName string) (bool, error
 	return false, nil
 }
 
-// GetListOfCacheServices returns a list of cache services
+// GetListOfCacheServices returns a list of cache services.
 func GetListOfCacheServices(servicesSummary config.ServicesSummaries) []string {
 	var cacheServices = make([]string, 0)
 	for _, value := range servicesSummary.Services {
@@ -82,7 +82,7 @@ func GetListOfCacheServices(servicesSummary config.ServicesSummaries) []string {
 	return cacheServices
 }
 
-// GetPersistenceServices returns a list of persistence services
+// GetPersistenceServices returns a list of persistence services.
 func GetPersistenceServices(dataFetcher fetcher.Fetcher) ([]string, error) {
 	servicesSummary, err := GetServices(dataFetcher)
 	if err != nil {
@@ -99,7 +99,7 @@ func GetPersistenceServices(dataFetcher fetcher.Fetcher) ([]string, error) {
 	return persistenceServices, nil
 }
 
-// GetServices returns a list of services
+// GetServices returns a list of services.
 func GetServices(dataFetcher fetcher.Fetcher) (config.ServicesSummaries, error) {
 	var (
 		servicesResult  []byte
@@ -120,7 +120,7 @@ func GetServices(dataFetcher fetcher.Fetcher) (config.ServicesSummaries, error) 
 	return servicesSummary, nil
 }
 
-// GetFederatedServices returns a list of federated services
+// GetFederatedServices returns a list of federated services.
 func GetFederatedServices(dataFetcher fetcher.Fetcher) ([]string, error) {
 	servicesSummary, err := GetServices(dataFetcher)
 	if err != nil {
@@ -137,7 +137,7 @@ func GetFederatedServices(dataFetcher fetcher.Fetcher) ([]string, error) {
 	return federatedServices, nil
 }
 
-// GetSnapshots returns the snapshots for a service
+// GetSnapshots returns the snapshots for a service.
 func GetSnapshots(dataFetcher fetcher.Fetcher, serviceName string) ([]string, error) {
 	var coordinator = config.PersistenceCoordinator{}
 
@@ -154,7 +154,7 @@ func GetSnapshots(dataFetcher fetcher.Fetcher, serviceName string) ([]string, er
 	return coordinator.Snapshots, nil
 }
 
-// GetArchivedSnapshots retrieves the archived snapshots for a service
+// GetArchivedSnapshots retrieves the archived snapshots for a service.
 func GetArchivedSnapshots(dataFetcher fetcher.Fetcher, serviceName string) ([]string, error) {
 	var (
 		archivedData      []byte
@@ -165,7 +165,7 @@ func GetArchivedSnapshots(dataFetcher fetcher.Fetcher, serviceName string) ([]st
 	archivedData, err = dataFetcher.GetArchivedSnapshots(serviceName)
 	if err != nil {
 		var errMsg = err.Error()
-		// 404 = not found means no snapshots and 400 bad request means no archiver
+		// 404 = not found means no snapshots and 400 bad request means no archiver.
 		if strings.Contains(errMsg, "404") || strings.Contains(errMsg, "400") {
 			return constants.EmptyString, nil
 		}
@@ -182,7 +182,7 @@ func GetArchivedSnapshots(dataFetcher fetcher.Fetcher, serviceName string) ([]st
 	return constants.EmptyString, err
 }
 
-// UnmarshalThreadDump unmarshal a thread dump
+// UnmarshalThreadDump unmarshal a thread dump.
 func UnmarshalThreadDump(jsonData []byte) (string, error) {
 	type threadDump struct {
 		State string `json:"state"`
@@ -198,7 +198,7 @@ func UnmarshalThreadDump(jsonData []byte) (string, error) {
 	return data.State, nil
 }
 
-// GetMachineList returns a list of machines
+// GetMachineList returns a list of machines.
 func GetMachineList(dataFetcher fetcher.Fetcher) (map[string]string, error) {
 	var (
 		err           error
@@ -230,7 +230,7 @@ func GetMachineList(dataFetcher fetcher.Fetcher) (map[string]string, error) {
 	return machinesMap, nil
 }
 
-// IssueReporterCommand issues a reporter command
+// IssueReporterCommand issues a reporter command.
 func IssueReporterCommand(nodeID, command string, cmd *cobra.Command) error {
 	var (
 		err             error
@@ -305,7 +305,7 @@ func IssueReporterCommand(nodeID, command string, cmd *cobra.Command) error {
 	return nil
 }
 
-// IssueFederationCommand issues a federation command
+// IssueFederationCommand issues a federation command.
 func IssueFederationCommand(cmd *cobra.Command, serviceName, command, participant, mode string) error {
 	var (
 		err                        error
@@ -412,7 +412,7 @@ func IssueFederationCommand(cmd *cobra.Command, serviceName, command, participan
 	return nil
 }
 
-// GetNodeIds returns the node id for the current cluster
+// GetNodeIds returns the node id for the current cluster.
 func GetNodeIds(dataFetcher fetcher.Fetcher) ([]string, error) {
 	var (
 		members       = config.Members{}
@@ -437,57 +437,57 @@ func GetNodeIds(dataFetcher fetcher.Fetcher) ([]string, error) {
 	return nodeIDArray, nil
 }
 
-// ErrorSink holds errors from multiple go routines
+// ErrorSink holds errors from multiple go routines.
 type ErrorSink struct {
 	sync.RWMutex
 	errors []error
 }
 
-// createErrorSync creates an error sync
+// createErrorSync creates an error sync.
 func createErrorSink() ErrorSink {
 	return ErrorSink{
 		errors: make([]error, 0),
 	}
 }
 
-// GetErrors returns the errors for an ErrorSync
+// GetErrors returns the errors for an ErrorSync.
 func (e *ErrorSink) GetErrors() []error {
 	return e.errors
 }
 
-// AppendError appends an error
+// AppendError appends an error.
 func (e *ErrorSink) AppendError(err error) {
 	e.Lock()
 	defer e.Unlock()
 	e.errors = append(e.errors, err)
 }
 
-// ByteArraySink is a thread safe byte array
+// ByteArraySink is a thread safe byte array.
 type ByteArraySink struct {
 	sync.RWMutex
 	values [][]byte
 }
 
-// ByteArray creates a byte array sync
+// ByteArray creates a byte array sync.
 func createByteArraySink() ByteArraySink {
 	return ByteArraySink{
 		values: make([][]byte, 0),
 	}
 }
 
-// GetByteArrays returns the values for an GetByteArrays
+// GetByteArrays returns the values for an GetByteArrays.
 func (b *ByteArraySink) GetByteArrays() [][]byte {
 	return b.values
 }
 
-// AppendByteArray appends a byte array
+// AppendByteArray appends a byte array.
 func (b *ByteArraySink) AppendByteArray(bytes []byte) {
 	b.Lock()
 	defer b.Unlock()
 	b.values = append(b.values, bytes)
 }
 
-// GetURLContents returns the contents at the given url as a []byte
+// GetURLContents returns the contents at the given url as a []byte.
 func GetURLContents(resourceURL string) ([]byte, error) {
 	var (
 		err       error
@@ -543,7 +543,7 @@ func GetURLContents(resourceURL string) ([]byte, error) {
 	return body, nil
 }
 
-// validateNodeIDs gets the node id list from the nodeIDArray and validates
+// validateNodeIDs gets the node id list from the nodeIDArray and validates.
 func getNodeIDs(nodeIDs string, nodeIDArray []string) ([]string, error) {
 	nodeIDList := strings.Split(nodeIDs, ",")
 	for _, value := range nodeIDList {
@@ -562,7 +562,7 @@ func isWatchEnabled() bool {
 	return watchEnabled || watchClearEnabled
 }
 
-// printWatchHeader prints the header and optionally clears the screen
+// printWatchHeader prints the header and optionally clears the screen.
 func printWatchHeader(cmd *cobra.Command) {
 	if isWatchEnabled() {
 		if watchClearEnabled {

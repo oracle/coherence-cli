@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, 2022 Oracle and/or its affiliates.
+ * Copyright (c) 2021, 2023 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -39,7 +39,7 @@ const (
 	coherenceDCS  = "com.tangosol.net.DefaultCacheServer"
 )
 
-// GetError returns a formatted error and prints to log
+// GetError returns a formatted error and prints to log.
 func GetError(message string, err error) error {
 	var (
 		errorDetails = fmt.Sprintf("%v", err)
@@ -67,18 +67,18 @@ func GetError(message string, err error) error {
 	return fmt.Errorf("%s: %s", message, errorDetails)
 }
 
-// IsDistributedCache returns true if the service type is distributed
+// IsDistributedCache returns true if the service type is distributed.
 func IsDistributedCache(serviceType string) bool {
 	return serviceType == constants.DistributedService || serviceType == constants.FederatedService ||
 		serviceType == constants.PagedTopic
 }
 
-// SliceContains returns true of the slice contains the value
+// SliceContains returns true of the slice contains the value.
 func SliceContains(theSlice []string, value string) bool {
 	return GetSliceIndex(theSlice, value) != -1
 }
 
-// GetUniqueValues returns the slice of unique values
+// GetUniqueValues returns the slice of unique values.
 func GetUniqueValues(input []string) []string {
 	result := make([]string, 0)
 	for _, value := range input {
@@ -89,7 +89,7 @@ func GetUniqueValues(input []string) []string {
 	return result
 }
 
-// GetSliceIndex returns the index of the matching slice value
+// GetSliceIndex returns the index of the matching slice value.
 func GetSliceIndex(theSlice []string, value string) int {
 	if len(theSlice) != 0 {
 		for i, v := range theSlice {
@@ -101,7 +101,7 @@ func GetSliceIndex(theSlice []string, value string) int {
 	return -1
 }
 
-// ProcessJSONPath parses json path expression on Json and returns the json
+// ProcessJSONPath parses json path expression on Json and returns the json.
 func ProcessJSONPath(jsonData interface{}, jsonPathQuery string) ([]byte, error) {
 	x, err := jp.ParseString(jsonPathQuery)
 	if err != nil {
@@ -112,7 +112,7 @@ func ProcessJSONPath(jsonData interface{}, jsonPathQuery string) ([]byte, error)
 	return data, err
 }
 
-// GetJSONPathResults returns jsonapth results
+// GetJSONPathResults returns jsonapth results.
 func GetJSONPathResults(jsonData []byte, jsonPath string) (string, error) {
 	var result interface{}
 	err := json.Unmarshal(jsonData, &result)
@@ -128,7 +128,7 @@ func GetJSONPathResults(jsonData []byte, jsonPath string) (string, error) {
 	return string(results), nil
 }
 
-// EnsureDirectory ensures a directory exists and if not then will create it
+// EnsureDirectory ensures a directory exists and if not then will create it.
 func EnsureDirectory(directory string) error {
 	if _, err := os.Stat(directory); err != nil {
 		if os.IsNotExist(err) {
@@ -141,7 +141,7 @@ func EnsureDirectory(directory string) error {
 	return nil
 }
 
-// DirectoryExists returns a bool indicating if a directory exists
+// DirectoryExists returns a bool indicating if a directory exists.
 func DirectoryExists(directory string) bool {
 	file, err := os.Stat(directory)
 	if err != nil {
@@ -151,13 +151,13 @@ func DirectoryExists(directory string) bool {
 	return file.IsDir()
 }
 
-// IsValidInt returns true or false indicating if a string int is a valid integer
+// IsValidInt returns true or false indicating if a string int is a valid integer.
 func IsValidInt(value string) bool {
 	_, err := strconv.Atoi(value)
 	return err == nil
 }
 
-// SanitizeSnapshotName sanitizes a snapshot name by replacing any unwanted characters with '-'
+// SanitizeSnapshotName sanitizes a snapshot name by replacing any unwanted characters with '-'.
 func SanitizeSnapshotName(snapshotName string) string {
 	var (
 		sb = strings.Builder{}
@@ -175,7 +175,7 @@ func SanitizeSnapshotName(snapshotName string) string {
 }
 
 // GetErrors return an error containing either the single error or an
-// error indicating there are multiple errors in the log
+// error indicating there are multiple errors in the log.
 func GetErrors(errorList []error) error {
 	if len(errorList) == 1 {
 		return errorList[0]
@@ -224,7 +224,7 @@ func CombineByteArraysForJSON(elements [][]byte, elementName []string) ([]byte, 
 	return append(result, closeBracket...), nil
 }
 
-// GetStorageMap returns a map by node Id indicating if the node is storage enabled
+// GetStorageMap returns a map by node Id indicating if the node is storage enabled.
 func GetStorageMap(storage config.StorageDetails) map[int]bool {
 	storageMap := make(map[int]bool)
 
@@ -240,7 +240,7 @@ func GetStorageMap(storage config.StorageDetails) map[int]bool {
 	return storageMap
 }
 
-// IsStorageEnabled returns true or false
+// IsStorageEnabled returns true or false.
 func IsStorageEnabled(nodeID int, storageMap map[int]bool) bool {
 	if nodeEntry, ok := storageMap[nodeID]; ok {
 		return nodeEntry
@@ -248,7 +248,7 @@ func IsStorageEnabled(nodeID int, storageMap map[int]bool) bool {
 	return false
 }
 
-// ValidatePort validates that a port is valid
+// ValidatePort validates that a port is valid.
 func ValidatePort(port int32) error {
 	if port < 1024 || port > 65535 {
 		return ErrPort
@@ -258,13 +258,13 @@ func ValidatePort(port int32) error {
 }
 
 // GetCoherenceMainClass returns the default startup class for the specified Coherence version.
-// In the future this may be automatically determined but default to coherenceMain
+// In the future this may be automatically determined but default to coherenceMain.
 func GetCoherenceMainClass(version string) string {
 	return coherenceMain
 }
 
 // ValidateStartClass validates that the server start class is and empty string, and therefore
-// use the default, or a valid option
+// use the default, or a valid option.
 func ValidateStartClass(startClass string) error {
 	if startClass == "" || startClass == coherenceMain || startClass == coherenceDCS {
 		return nil
@@ -276,7 +276,7 @@ func ValidateStartClass(startClass string) error {
 // GetStartupDelayInMillis returns the startup delay in millis converted from the following suffixes:
 // ms = millis - eg. 10ms
 // s = seconds ed 5s
-// no suffix is millis
+// no suffix is millis.
 func GetStartupDelayInMillis(startupDelay string) (int64, error) {
 	var (
 		err    error

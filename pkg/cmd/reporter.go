@@ -35,7 +35,7 @@ var (
 	reporterAttributeValue  string
 )
 
-// getReportersCmd represents the get reporters command
+// getReportersCmd represents the get reporters command.
 var getReportersCmd = &cobra.Command{
 	Use:   "reporters",
 	Short: "display reporters for a cluster",
@@ -93,7 +93,7 @@ var getReportersCmd = &cobra.Command{
 	},
 }
 
-// describeReporterCmd represents the describe reporter command
+// describeReporterCmd represents the describe reporter command.
 var describeReporterCmd = &cobra.Command{
 	Use:   reporterUse,
 	Short: "describe a reporter",
@@ -154,7 +154,7 @@ var describeReporterCmd = &cobra.Command{
 	},
 }
 
-// startReporterCmd represents the start reporter command
+// startReporterCmd represents the start reporter command.
 var startReporterCmd = &cobra.Command{
 	Use:   reporterUse,
 	Short: "start a reporter on a node",
@@ -170,7 +170,7 @@ var startReporterCmd = &cobra.Command{
 	},
 }
 
-// stopReporterCmd represents the stop reporter command
+// stopReporterCmd represents the stop reporter command.
 var stopReporterCmd = &cobra.Command{
 	Use:   reporterUse,
 	Short: "stop a reporter on a node",
@@ -186,7 +186,7 @@ var stopReporterCmd = &cobra.Command{
 	},
 }
 
-// setReporterCmd represents the set reporter command
+// setReporterCmd represents the set reporter command.
 var setReporterCmd = &cobra.Command{
 	Use:   "reporter {node-ids|all}",
 	Short: "set a reporter attribute for one or more members",

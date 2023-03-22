@@ -35,7 +35,7 @@ var (
 	notifyChannel   int32
 )
 
-// getTopicsCmd represents the get topics command
+// getTopicsCmd represents the get topics command.
 var getTopicsCmd = &cobra.Command{
 	Use:   "topics",
 	Short: "display topics for a cluster",
@@ -105,7 +105,7 @@ var getTopicsCmd = &cobra.Command{
 	},
 }
 
-// getSubscribersCmd represents the get subscribers command
+// getSubscribersCmd represents the get subscribers command.
 var getSubscribersCmd = &cobra.Command{
 	Use:   "subscribers topic-name",
 	Short: "display subscribers for a topic and service",
@@ -179,7 +179,7 @@ var getSubscribersCmd = &cobra.Command{
 	},
 }
 
-// getSubscriberGroupsCmd represents the get subscriber-groups command
+// getSubscriberGroupsCmd represents the get subscriber-groups command.
 var getSubscriberGroupsCmd = &cobra.Command{
 	Use:   "subscriber-groups topic-name",
 	Short: "display subscriber-groups for a topic and service",
@@ -262,8 +262,8 @@ var getSubscriberGroupsCmd = &cobra.Command{
 	},
 }
 
-// getTopicsDetails returns selected topic details for a given service and topic.
-// typically used when a topic and service is selected
+// getTopicsDetails returns selected topic details for a given service and topic,
+// typically used when a topic and service is selected.
 func getTopicsDetails(dataFetcher fetcher.Fetcher, topicServiceName, topicName string) (config.TopicDetails, error) {
 	// get the topics and services
 	topicsDetails, err := getTopics(dataFetcher, topicServiceName)
@@ -286,7 +286,7 @@ func getTopicsDetails(dataFetcher fetcher.Fetcher, topicServiceName, topicName s
 	return selectedDetails, nil
 }
 
-// describeTopicCmd represents the describe topic command
+// describeTopicCmd represents the describe topic command.
 var describeTopicCmd = &cobra.Command{
 	Use:   "topic topic-name",
 	Short: "describe a topic",
@@ -416,7 +416,7 @@ var describeTopicCmd = &cobra.Command{
 	},
 }
 
-// getTopicMembersCmd represents the get topic-members command
+// getTopicMembersCmd represents the get topic-members command.
 var getTopicMembersCmd = &cobra.Command{
 	Use:   "topic-members topic-name",
 	Short: "display members for a topic",
@@ -490,7 +490,7 @@ var getTopicMembersCmd = &cobra.Command{
 	},
 }
 
-// getTopicChannelsCmd represents the get topic-channels command
+// getTopicChannelsCmd represents the get topic-channels command.
 var getTopicChannelsCmd = &cobra.Command{
 	Use:   "topic-channels topic-name",
 	Short: "display channel details for a topic, service and node",
@@ -589,7 +589,7 @@ var getTopicChannelsCmd = &cobra.Command{
 	},
 }
 
-// getSubscriberChannelsCmd represents the get subscriber-channels command
+// getSubscriberChannelsCmd represents the get subscriber-channels command.
 var getSubscriberChannelsCmd = &cobra.Command{
 	Use:   "subscriber-channels topic-name",
 	Short: "display channel details for a topic, service and subscriber",
@@ -784,7 +784,7 @@ func issueSubscriberOperation(cmd *cobra.Command, operation string, args []strin
 	return nil
 }
 
-// getSubscriberNodeIndex returns the index for the subscriber. Ignore the node as a subscriber is always unique
+// getSubscriberNodeIndex returns the index for the subscriber. Ignore the node as a subscriber is always unique.
 func getSubscriberNodeIndex(topicsSubscriberDetails []config.TopicsSubscriberDetail) int {
 	for i, v := range topicsSubscriberDetails {
 		if v.ID == subscriber {
@@ -811,7 +811,7 @@ itself given a topic, service and subscriber id.`,
 	},
 }
 
-// disconnectAllCmd represents the disconnect all command
+// disconnectAllCmd represents the disconnect all command.
 var disconnectAllCmd = &cobra.Command{
 	Use:   "all topic-name",
 	Short: "instruct a topic to disconnect all subscribers for a topic or subscriber group",
@@ -828,7 +828,7 @@ specific subscriber topic or all subscribers for the specified subscriber group.
 	},
 }
 
-// connectSubscriberCmd represents the connect subscriber command
+// connectSubscriberCmd represents the connect subscriber command.
 var connectSubscriberCmd = &cobra.Command{
 	Use:   "subscriber topic-name",
 	Short: "instruct a subscriber to ensure it is connected",
@@ -845,7 +845,7 @@ given a topic, service and subscriber id.`,
 	},
 }
 
-// retrieveHeadsCmd represents the retrieve heads command
+// retrieveHeadsCmd represents the retrieve heads command.
 var retrieveHeadsCmd = &cobra.Command{
 	Use:   "heads topic-name",
 	Short: "instruct a subscriber to retrieve the current head positions for each channel",
@@ -862,7 +862,7 @@ positions for each channel given a topic, service and subscriber id.`,
 	},
 }
 
-// retrieveRemainingCmd represents the retrieve remaining command
+// retrieveRemainingCmd represents the retrieve remaining command.
 var retrieveRemainingCmd = &cobra.Command{
 	Use:   "remaining topic-name",
 	Short: "instruct a subscriber to retrieve the count of remaining messages for each channel",
@@ -879,7 +879,7 @@ remaining messages for each channel given a topic, service and subscriber id.`,
 	},
 }
 
-// notifyPopulatedCmd represents the notify populated command
+// notifyPopulatedCmd represents the notify populated command.
 var notifyPopulatedCmd = &cobra.Command{
 	Use:   "populated topic-name",
 	Short: "instruct a subscriber to send a channel populated notification to this subscriber and channel",
@@ -896,7 +896,7 @@ this subscriber and channel given a topic, service, subscriber id and channel.`,
 	},
 }
 
-// getSubscriberGroupChannelsCmd represents the get sub-grp-channels command
+// getSubscriberGroupChannelsCmd represents the get sub-grp-channels command.
 var getSubscriberGroupChannelsCmd = &cobra.Command{
 	Use:   "sub-grp-channels topic-name",
 	Short: "display channel details for a topic, service, node and subscriber group",

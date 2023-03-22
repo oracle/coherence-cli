@@ -29,7 +29,7 @@ var (
 	validRefreshPolicies = []string{"refresh-ahead", "refresh-behind", "refresh-expired", "refresh-onquery"}
 )
 
-// getManagementCmd represents the get management command
+// getManagementCmd represents the get management command.
 var getManagementCmd = &cobra.Command{
 	Use:   "management",
 	Short: "display management information for a cluster",
@@ -88,7 +88,7 @@ var getManagementCmd = &cobra.Command{
 	},
 }
 
-// setManagementCmd represents the set member command
+// setManagementCmd represents the set member command.
 var setManagementCmd = &cobra.Command{
 	Use:   "management",
 	Short: "set a management attribute for the cluster",
