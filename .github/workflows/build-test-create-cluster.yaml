@@ -21,8 +21,10 @@ jobs:
       fail-fast: false
       matrix:
         coherenceVersion:
+          - 22.6.4-SNAPSHOT
           - 22.06.3
           - 22.06.2
+          - 23.03-SNAPSHOT
           - 22.09
         javaVersion:
           - 17

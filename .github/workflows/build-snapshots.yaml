@@ -22,9 +22,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        branch:
-          - main
-          - v22.09
+        coherenceVersion:
+          - 23.03-SNAPSHOT
+          - 22.09-SNAPSHOT
+          - 22.06.4-SNAPSHOT
 
 #   Checkout the source, we need a depth of zero to fetch all of the history otherwise
 #   the copyright check cannot work out the date of the files from Git.
@@ -43,24 +44,6 @@ jobs:
       with:
         java-version: '17'
         distribution: 'zulu'
-
-    - name: Build Coherence Snapshot
-      shell: bash
-      env:
-        COH_BRANCH: ${{ matrix.branch }}
-        MAVEN_OPTS: -Dhttp.keepAlive=false -Dmaven.wagon.http.pool=false
-      run: |
-        # Checkout the git repo for coherence snapshot and build
-        DIR=`pwd`
-        CLONE_DIR=coherence-$COH_BRANCH
-        cd /tmp
-        git clone https://github.com/oracle/coherence.git $CLONE_DIR
-        cd $CLONE_DIR/prj
-        if [ "$COH_BRANCH" != main ] ; then
-           git checkout $COH_BRANCH
-        fi
-        make all
-        cd $DIR
 
     - name: Cache Go Modules
       uses: actions/cache@v3
@@ -84,16 +67,9 @@ jobs:
 
     - name: Verify Coherence CLI
       env:
-        COH_BRANCH: ${{ matrix.branch }}
+        COH_VERSION: ${{ matrix.coherenceVersion }}
       shell: bash
       run: |
-        CLONE_DIR=coherence-$COH_BRANCH
-        POM_FILE=/tmp/${CLONE_DIR}/prj/coherence-bom/pom.xml
-        if [ ! -r $POM_FILE ] ; then
-           POM_FILE=/tmp/${CLONE_DIR}/prj/pom.xml
-        fi
-        COH_VERSION=`cat ${POM_FILE} | grep '<revision>' | sed -e 's,^.*<revision>,,' -e 's,</revision>.*$,,'`
-
         echo "Running verify against $COH_VERSION"
         COHERENCE_BASE_IMAGE=gcr.io/distroless/java17 COHERENCE_VERSION=$COH_VERSION make clean build-test-images test-e2e-standalone
         PROFILES=,topics COHERENCE_BASE_IMAGE=gcr.io/distroless/java17 COHERENCE_VERSION=$COH_VERSION make clean build-test-images test-e2e-topics
