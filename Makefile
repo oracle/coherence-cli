@@ -360,7 +360,6 @@ golangci: $(TOOLS_BIN)/golangci-lint ## Go code review
 # ======================================================================================================================
 ##@ Miscellaneous
 
-
 .PHONY: trivy-scan
 trivy-scan: gettrivy ## Scan the CLI using trivy
 	$(TOOLS_BIN)/trivy fs .
