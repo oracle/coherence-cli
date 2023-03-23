@@ -115,7 +115,7 @@ or give us feedback or suggestions about what features and improvements you woul
 to hear from you. To join our channel,
 please [visit this site to get an invitation](https://join.slack.com/t/oraclecoherence/shared_invite/enQtNzcxNTQwMTAzNjE4LTJkZWI5ZDkzNGEzOTllZDgwZDU3NGM2YjY5YWYwMzM3ODdkNTU2NmNmNDFhOWIxMDZlNjg2MzE3NmMxZWMxMWE).  
 The invitation email will include details of how to access our Slack
-workspace.  After you are logged in, please come to `#cli` and say, "hello!"
+workspace.  After you are logged in, please come to `#coherence-cli` and say, "hello!"
 
 ## Contributing
 
