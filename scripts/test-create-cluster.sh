@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #
-# Copyright (c) 2022 Oracle and/or its affiliates.
+# Copyright (c) 2022, 2023 Oracle and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at
 # https://oss.oracle.com/licenses/upl.
 #
@@ -30,6 +30,15 @@ echo "Config Dir: ${CONFIG_DIR}"
 echo "Version:    ${VERSION}"
 echo "Commercial: ${COM}"
 echo
+
+# Build the Java project so we get any deps downloaded
+
+COHERENCE_GROUP_ID=com.oracle.coherence.ce
+if [ ! -z "$COM" ] ; then
+  COHERENCE_GROUP_ID=com.oracle.coherence
+fi
+
+mvn -f java/coherence-cli-test dependency:build-classpath -Dcoherence.group.id=${COHERENCE_GROUP_ID} -Dcoherence.version=${VERSION}
 
 # Default command
 COHCTL="$DIR/bin/cohctl --config-dir ${CONFIG_DIR}"
@@ -215,8 +224,8 @@ runCommand stop cluster local -y
 pause
 runCommand remove cluster local -y
 
-# Don't run concurrent test for commercial
-if [ -z "$COM" ] ; then
+# Don't run concurrent test for commercial or if we have a snapshot
+if [ -z "$COM" -a -z "`echo $VERSION | grep SNAPSHOT`" ] ; then
   message "Create cluster with executor"
   runCommand create cluster local -y -M 512m -a coherence-concurrent -v $VERSION
   wait_for_ready
@@ -231,8 +240,8 @@ fi
 
 pause
 
-# Don't run gradle tests on commercial until we figure out gradle proxy
-if [ -z "$COM" ] ; then
+# Don't run gradle tests on commercial or snapshots until we figure out gradle proxy
+if [ -z "$COM" -a -z "`echo $VERSION | grep SNAPSHOT`" ] ; then
   # Setup to create a cluster using gradle
 
   runCommand set use-gradle true

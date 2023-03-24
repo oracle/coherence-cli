@@ -1,4 +1,4 @@
-# Copyright 2022,2023 Oracle Corporation and/or its affiliates.
+# Copyright 2022, 2023 Oracle Corporation and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at
 # https://oss.oracle.com/licenses/upl.
 
@@ -22,8 +22,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        branch:
-          - v14.1.1.0
+        coherenceVersion:
+          - 14.1.1-0-14-SNAPSHOT
 
 #   Checkout the source, we need a depth of zero to fetch all of the history otherwise
 #   the copyright check cannot work out the date of the files from Git.
@@ -42,22 +42,6 @@ jobs:
       with:
         java-version: 8
         distribution: 'zulu'
-
-    - name: Build Coherence Snapshot
-      shell: bash
-      env:
-        COH_BRANCH: ${{ matrix.branch }}
-        MAVEN_OPTS: -Dhttp.keepAlive=false -Dmaven.wagon.http.pool=false
-      run: |
-        # Checkout the git repo for coherence snapshot and build
-        DIR=`pwd`
-        CLONE_DIR=coherence-$COH_BRANCH
-        cd /tmp
-        git clone https://github.com/oracle/coherence.git $CLONE_DIR
-        cd $CLONE_DIR
-        git checkout $COH_BRANCH
-        mvn --file prj/pom.xml --batch-mode -e -DskipTests clean install
-        cd $DIR
 
     - name: Cache Go Modules
       uses: actions/cache@v3
@@ -87,16 +71,9 @@ jobs:
 
     - name: Verify Coherence CLI
       env:
-        COH_BRANCH: ${{ matrix.branch }}
+        COH_VERSION: ${{ matrix.coherenceVersion }}
       shell: bash
       run: |
-        CLONE_DIR=coherence-$COH_BRANCH
-        POM_FILE=/tmp/${CLONE_DIR}/prj/coherence-bom/pom.xml
-        if [ ! -r $POM_FILE ] ; then
-           POM_FILE=/tmp/${CLONE_DIR}/prj/pom.xml
-        fi
-        COH_VERSION=`cat ${POM_FILE} | grep '<revision>' | sed -e 's,^.*<revision>,,' -e 's,</revision>.*$,,'`
-
         echo "Running verify against $COH_VERSION"
 
         COHERENCE_VERSION=$COH_VERSION make clean build-test-images test-e2e-standalone
