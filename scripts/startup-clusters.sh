@@ -25,45 +25,6 @@ if [ "$COHERENCE_GROUP_ID" == "com.oracle.coherence" ] ; then
    PROFILE="-P commercial"
 fi
 
-# Add a default ~/.m2/settings.xml to ensure we can get the snapshot versions
-cat > ~/.m2/settings.xml <<EOF
-<settings>
-  <profiles>
-    <profile>
-      <id>default</id>
-      <repositories>
-        <repository>
-          <id>ossrh-staging</id>
-          <name>OSS Sonatype Staging</name>
-          <url>https://oss.sonatype.org/content/groups/staging/</url>
-          <snapshots>
-            <enabled>false</enabled>
-          </snapshots>
-          <releases>
-            <enabled>true</enabled>
-          </releases>
-        </repository>
-
-        <repository>
-          <id>snapshots-repo</id>
-          <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-          <releases>
-            <enabled>false</enabled>
-          </releases>
-          <snapshots>
-            <enabled>true</enabled>
-          </snapshots>
-        </repository>
-      </repositories>
-    </profile>
-  </profiles>
-
-  <activeProfiles>
-    <activeProfile>default</activeProfile>
-  </activeProfiles>
-</settings>
-EOF
-
 COHERENCE_STARTUP="-Dcoherence.wka=127.0.0.1 -Dcoherence.ttl=0 -Dcoherence.clusterport=${CLUSTER_PORT} -D${TAG} -Dcoherence.management.http=all -Dcoherence.management.http.port=0"
 
 echo "Generating Classpath..."
