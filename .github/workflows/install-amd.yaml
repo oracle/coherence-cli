@@ -8,9 +8,6 @@
 name: CI - Install AMD
 
 on:
-  workflow_dispatch:
-    branches-ignore:
-      - gh-pages
   schedule:
     # Once a week
     - cron: '0 0 * * 0'
