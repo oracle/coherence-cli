@@ -8,19 +8,15 @@
 name: CI - Install AMD
 
 on:
-  workflow_dispatch:
-    branches-ignore:
-      - gh-pages
   schedule:
-    # Twice a day
-    - cron: '0 0,12 * * *'
+    # Once a week
+    - cron: '0 0 * * 0'
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-
     - name: Test Installing CLI via curl for Linux AMD
       shell: bash
       run: |
