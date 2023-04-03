@@ -21,7 +21,7 @@ jobs:
       fail-fast: false
       matrix:
         coherenceVersion:
-          - 22.03
+          - 23.03
           - 22.09
           - 22.06.2
           - 22.06.3
