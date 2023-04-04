@@ -12,7 +12,6 @@ on:
   push:
     branches-ignore:
       - gh-pages
-      - '*'
   schedule:
     # Every day at midnight
     - cron: '0 0 * * *'
