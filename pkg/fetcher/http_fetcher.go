@@ -92,6 +92,15 @@ func (h HTTPFetcher) GetMemberDetailsJSON(verbose bool) ([]byte, error) {
 	return result, nil
 }
 
+// GetNetworkStatsJSON returns network stats in raw json.
+func (h HTTPFetcher) GetNetworkStatsJSON(nodeID string) ([]byte, error) {
+	result, err := httpGetRequest(h, "/members/"+nodeID+"/networkStats"+links)
+	if err != nil {
+		return constants.EmptyByte, utils.GetError("cannot get get networkStats information", err)
+	}
+	return result, nil
+}
+
 // GetSingleMemberDetailsJSON returns a single members details in raw json.
 func (h HTTPFetcher) GetSingleMemberDetailsJSON(nodeID string) ([]byte, error) {
 	result, err := httpGetRequest(h, membersPath+nodeID+links)

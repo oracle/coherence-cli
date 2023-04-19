@@ -65,7 +65,8 @@ create_doc $DOCS_DIR/clear_context "${COHCTL} clear context --help"
 
 # Members
 create_doc $DOCS_DIR/get_members "${COHCTL} get members --help"
-create_doc $DOCS_DIR/get_member_stats "${COHCTL} get member-stats --help"
+create_doc $DOCS_DIR/get_network_stats "${COHCTL} get network-stats --help"
+create_doc $DOCS_DIR/get_p2p_stats "${COHCTL} get p2p-stats --help"
 create_doc $DOCS_DIR/describe_member "${COHCTL} describe member --help"
 create_doc $DOCS_DIR/set_member "${COHCTL} set member --help"
 create_doc $DOCS_DIR/shutdown_member "${COHCTL} shutdown member --help"

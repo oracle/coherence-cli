@@ -212,8 +212,12 @@ func RunTestMemberCommands(t *testing.T) {
 		"-c", context.ClusterName)
 
 	// test default output format
-	test_utils.EnsureCommandContainsAll(g, t, cliCmd, nodeID, configArg, file, "get", "member-stats",
+	test_utils.EnsureCommandContainsAll(g, t, cliCmd, nodeID, configArg, file, "get", "network-stats",
 		"-c", context.ClusterName)
+
+	// test p2p-stats
+	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "OUTSTANDING,DEFERRING,LAST DEATH", configArg, file,
+		"get", "p2p-stats", "1", "-c", context.ClusterName)
 
 	// test wide output format
 	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "PUBLISHER,RECEIVER", configArg, file, "get", "members",

@@ -25,6 +25,29 @@ type Members struct {
 	Members []Member `json:"items"`
 }
 
+// NetworkStats is used to decode network stats call for a member.
+type NetworkStats struct {
+	ViewerStatistics []string `json:"viewerStatistics"`
+}
+
+// NetworkStatsDetails contains viewer statistics for a member.
+type NetworkStatsDetails struct {
+	NodeID               string  `json:"nodeId"`
+	ReceiverSuccessRate  float32 `json:"receiverSuccessRate"`
+	PublisherSuccessRate float32 `json:"publisherSuccessRate"`
+	PauseRate            float32 `json:"pauseRate"`
+	Threshold            int64   `json:"threshold"`
+	Paused               bool    `json:"paused"`
+	Deferring            bool    `json:"deferring"`
+	OutstandingPackets   int64   `json:"outstandingPackets"`
+	DeferredPackets      int64   `json:"deferredPackets"`
+	ReadyPackets         int64   `json:"readyPackets"`
+	LastIn               string  `json:"lastIn"`
+	LastOut              string  `json:"lastOut"`
+	LastSlow             string  `json:"LastSlow"`
+	LastHeuristicDeath   string  `json:"lastHeuristicDeath"`
+}
+
 // Executor contains individual executor information.
 type Executor struct {
 	Name                 string `json:"name"`
