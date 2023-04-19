@@ -58,7 +58,7 @@ var machineMemoryFormatting = func(s string) string {
 	return red(s)
 }
 
-// errorFormatter formats a column value which represents and error or number that needs to be highlighted.
+// errorFormatter formats a column value which represents an error or number that needs to be highlighted.
 var errorFormatter = func(s string) string {
 	v, err := getInt64Value(s)
 	if err != nil {
@@ -75,9 +75,34 @@ var errorFormatter = func(s string) string {
 	return yellow(s)
 }
 
+// packetFormatter formats a column value which represents packages where higher numbers need to be highlighted.
+var packetFormatter = func(s string) string {
+	v, err := getInt64Value(s)
+	if err != nil {
+		return s
+	}
+
+	if v == 0 {
+		return s
+	}
+
+	if v > 10 {
+		return red(s)
+	}
+	return yellow(s)
+}
+
 // healthFormatter formats a column value when false will be displayed in red.
 var healthFormatter = func(s string) string {
-	if s == "false" {
+	if s == stringFalse {
+		return red(s)
+	}
+	return s
+}
+
+// trueBoolFormatter formats a column value when true will be displayed in red.
+var trueBoolFormatter = func(s string) string {
+	if s == stringTrue {
 		return red(s)
 	}
 	return s

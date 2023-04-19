@@ -157,15 +157,188 @@ func getMembers(cmd *cobra.Command, networkStats bool) error {
 	return nil
 }
 
-// getMemberStats represents the get network-stats command.
-var getMemberStats = &cobra.Command{
-	Use:   "member-stats",
-	Short: "display member network statistics for a cluster",
-	Long:  `The 'get member-stats' command displays the member network statistic for a cluster.`,
+// getNetworkStatsCmd represents the get member-stats command.
+var getNetworkStatsCmd = &cobra.Command{
+	Use:   "network-stats",
+	Short: "display all member network statistics for a cluster",
+	Long:  `The 'get network-stats' command displays all member network statistic for a cluster.`,
 	Args:  cobra.ExactArgs(0),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		return getMembers(cmd, true)
 	},
+}
+
+// getP2PStatsCmd represents the get p2p-stats command.
+var getP2PStatsCmd = &cobra.Command{
+	Use:   "p2p-stats node-id",
+	Short: "display point-to-point network statistics for a specific member",
+	Long: `The 'get p2ps-stats' command displays the network statistics from the point 
+of view of a member and all the members it connects to.`,
+	Args: func(cmd *cobra.Command, args []string) error {
+		if len(args) != 1 {
+			displayErrorAndExit(cmd, provideNodeID)
+		}
+		return nil
+	},
+	RunE: func(cmd *cobra.Command, args []string) error {
+		var (
+			dataFetcher  fetcher.Fetcher
+			connection   string
+			memberResult []byte
+			members      = config.Members{}
+			err          error
+			member       config.Member
+		)
+
+		nodeID := args[0]
+		if !utils.IsValidInt(nodeID) {
+			return fmt.Errorf("invalid node id %s", nodeID)
+		}
+
+		// retrieve the current context or the value from "-c"
+		connection, dataFetcher, err = GetConnectionAndDataFetcher()
+		if err != nil {
+			return err
+		}
+
+		memberResult, err = dataFetcher.GetMemberDetailsJSON(false)
+		if err != nil {
+			return err
+		}
+
+		err = json.Unmarshal(memberResult, &members)
+		if err != nil {
+			return err
+		}
+
+		// check to see the member is valid
+		var found bool
+
+		for _, value := range members.Members {
+			if value.NodeID == nodeID {
+				found = true
+				member = value
+				break
+			}
+		}
+
+		if !found {
+			return fmt.Errorf("unable to find member with nodeId = %s", nodeID)
+		}
+
+		for {
+			var (
+				result       string
+				networkStats []byte
+				statistics   config.NetworkStats
+				details      []config.NetworkStatsDetails
+			)
+
+			networkStats, err = dataFetcher.GetNetworkStatsJSON(nodeID)
+			if err != nil {
+				return err
+			}
+
+			if strings.Contains(OutputFormat, constants.JSONPATH) {
+				result, err = utils.GetJSONPathResults(networkStats, OutputFormat)
+				if err != nil {
+					return err
+				}
+				cmd.Println(result)
+			} else if OutputFormat == constants.JSON {
+				cmd.Println(string(networkStats))
+			} else {
+				err = json.Unmarshal(networkStats, &statistics)
+				if err != nil {
+					return utils.GetError("unable to decode networkStats", err)
+				}
+
+				// decode the network stats
+				details, err = decodeNetworkStats(statistics)
+				if err != nil {
+					return err
+				}
+
+				printWatchHeader(cmd)
+				cmd.Println(FormatCurrentCluster(connection))
+
+				var sb strings.Builder
+
+				sb.WriteString(fmt.Sprintf("Viewing Node Id:     %s\n", member.NodeID))
+				sb.WriteString(fmt.Sprintf("Viewing Member Name: %s\n\n", member.MemberName))
+				sb.WriteString(FormatNetworkStats(details))
+
+				cmd.Print(sb.String())
+			}
+
+			// check to see if we should exit if we are not watching
+			if !isWatchEnabled() {
+				break
+			}
+			// we are watching services so sleep and then repeat until CTRL-C
+			time.Sleep(time.Duration(watchDelay) * time.Second)
+		}
+
+		return nil
+	},
+}
+
+func decodeNetworkStats(statistics config.NetworkStats) ([]config.NetworkStatsDetails, error) {
+	var details = make([]config.NetworkStatsDetails, 0)
+
+	for _, v := range statistics.ViewerStatistics {
+		// split on ", "
+		values := strings.Split(v, ", ")
+		if len(values) == 0 {
+			return details, errors.New("invalid response from networkStats")
+		}
+
+		detail := config.NetworkStatsDetails{}
+		detailMap := make(map[string]string)
+
+		// split the key/ values and store in a map
+		for _, v2 := range values {
+			kv := strings.Split(v2, "=")
+			if len(kv) != 2 {
+				return details, fmt.Errorf("invalid key/value of %s", v2)
+			}
+			detailMap[kv[0]] = kv[1]
+		}
+
+		detail.NodeID = detailMap["Member"]
+		detail.ReceiverSuccessRate = getFloat32Value(detailMap["ReceiverSuccessRate"])
+		detail.PublisherSuccessRate = getFloat32Value(detailMap["PublisherSuccessRate"])
+		detail.PauseRate = getFloat32Value(detailMap["PauseRate"])
+		detail.Threshold = getIn64Value(detailMap["Threshold"])
+		detail.OutstandingPackets = getIn64Value(detailMap["OutstandingPackets"])
+		detail.DeferredPackets = getIn64Value(detailMap["DeferredPackets"])
+		detail.ReadyPackets = getIn64Value(detailMap["ReadyPackets"])
+		detail.Paused = getBoolValue(detailMap["Paused"])
+		detail.Deferring = getBoolValue(detailMap["Deferring"])
+		detail.LastIn = detailMap["LastIn"]
+		detail.LastOut = detailMap["LastOut"]
+		detail.LastSlow = detailMap["LastSlow"]
+		detail.LastHeuristicDeath = detailMap["LastHeuristicDeath"]
+
+		details = append(details, detail)
+	}
+
+	return details, nil
+}
+
+func getFloat32Value(value string) float32 {
+	result, _ := strconv.ParseFloat(value, 32)
+	return float32(result)
+}
+
+func getIn64Value(value string) int64 {
+	result, _ := strconv.ParseInt(value, 10, 64)
+	return result
+}
+
+func getBoolValue(value string) bool {
+	result, _ := strconv.ParseBool(value)
+	return result
 }
 
 // describeMemberCmd represents the describe member command.
@@ -188,7 +361,7 @@ Full list of options are JVM dependant, but can include the full values or part 
 `,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
-			displayErrorAndExit(cmd, "you must provide a node id")
+			displayErrorAndExit(cmd, provideNodeID)
 		}
 		return nil
 	},
@@ -532,7 +705,7 @@ running on a specific member via a controlled shutdown. If the services were sta
 DefaultCacheServer, then they will be restarted.`,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
-			displayErrorAndExit(cmd, "you must provide a node id")
+			displayErrorAndExit(cmd, provideNodeID)
 		}
 		return nil
 	},
@@ -871,7 +1044,7 @@ func init() {
 	getMembersCmd.Flags().StringVarP(&roleName, "role", "r", all, roleNameDescription)
 	getMembersCmd.Flags().BoolVarP(&memberSummary, "summary", "S", false, "show a member summary")
 
-	getMemberStats.Flags().StringVarP(&roleName, "role", "r", all, roleNameDescription)
+	getNetworkStatsCmd.Flags().StringVarP(&roleName, "role", "r", all, roleNameDescription)
 
 	describeMemberCmd.Flags().BoolVarP(&threadDump, "thread-dump", "D", false, "include a thread dump")
 	describeMemberCmd.Flags().StringVarP(&extendedInfo, "extended", "X", none, "include extended information such as g1OldGen, etc. See --help")

@@ -14,7 +14,8 @@
 There are various cluster commands that allow you to work with and manage cluster members.
 
 * <<get-members, `cohctl get members`>> - displays the members for a cluster
-* <<get-member-stats, `cohctl get member-stats`>> - displays the member network statistics for a cluster
+* <<get-network-stats, `cohctl get network-stats`>> - displays all member network statistics for a cluster
+* <<get-p2p-stats, `cohctl get p2p-stats`>> - displays point-to-point network statistics for a specific member
 * <<describe-member, `cohctl describe member`>> - shows information related to a specific member
 * <<set-member, `cohctl set member`>> - sets a member attribute for one or more members
 * <<shutdown-member, `cohctl shutdown member`>> - shuts down a members services in a controlled manner
@@ -60,16 +61,16 @@ NODE ID  ADDRESS         PORT   PROCESS  MEMBER  ROLE              STORAGE  MAX 
 
 NOTE: You can also use `-o wide` to display more columns.
 
-[#get-member-stats]
-==== Get Member Stats
+[#get-network-stats]
+==== Get Network Stats
 
-include::../../build/_output/docs-gen/get_member_stats.adoc[tag=text]
+include::../../build/_output/docs-gen/get_network_stats.adoc[tag=text]
 
 *Examples*
 
 [source,bash]
 ----
-$ cohctl get member-stats -c local
+$ cohctl get netwok-stats -c local
 
 Total cluster members: 3
 NODE ID  ADDRESS     PORT   PROCESS  MEMBER                         ROLE              PKT SENT  PKT REC  RESENT  EFFICIENCY  SEND Q  DATA SENT  DATA REC  WEAKEST
@@ -77,6 +78,25 @@ NODE ID  ADDRESS     PORT   PROCESS  MEMBER                         ROLE        
       2  /127.0.0.1  50725    81364  storage-2                      CoherenceServer        181      152       0     100.00%       0       8 MB      8 MB       -1
       3  /127.0.0.1  50726    81362  storage-0                      CoherenceServer        182      148       0     100.00%       0       7 MB     10 MB       -1
       4  /127.0.0.1  50968    81733  com.tangosol.net.CacheFactory  CoherenceConsole        64       58       0     100.00%       0       3 MB      0 MB       -1
+----
+
+[#get-p2p-stats]
+==== Get P2P Stats
+
+include::../../build/_output/docs-gen/get_p2p_stats.adoc[tag=text]
+
+*Examples*
+
+[source,bash]
+----
+$ cohctl get p2p-stats -c local
+
+Viewing Node Id:     1
+Viewing Member Name: storage-2
+
+MEMBER  PUBLISHER  RECEIVER  PAUSE RATE  THRESHOLD  PAUSED  DEFERRING  DEFERRED  OUTSTANDING  READY  LAST IN  LAST OUT  LAST SLOW  LAST DEATH
+     2      0.990     1.000      0.0000      1,976  false   false             0            0      0  33223ms   33243ms        n/a         n/a
+     3      1.000     1.000      0.0000      2,080  false   false             0            0      0  28220ms   28240ms        n/a         n/a
 ----
 
 [#describe-member]

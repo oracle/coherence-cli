@@ -51,6 +51,8 @@ const (
 	UsedHeapColumn        = "USED HEAP"
 	AvailHeapColumn       = "AVAIL HEAP"
 	NameColumn            = "NAME"
+	publisherColumn       = "PUBLISHER"
+	receiverColumn        = "RECEIVER"
 	avgSize               = "AVG SIZE"
 	avgApply              = "AVG APPLY"
 	avgBacklogDelay       = "AVG BACKLOG DELAY"
@@ -1204,7 +1206,7 @@ func FormatMembers(members []config.Member, verbose bool, storageMap map[int]boo
 		WithAlignment(finalAlignment...)
 
 	if OutputFormat == constants.WIDE {
-		table.AddHeaderColumns("MACHINE", "RACK", "SITE", "PUBLISHER", "RECEIVER")
+		table.AddHeaderColumns("MACHINE", "RACK", "SITE", publisherColumn, receiverColumn)
 		table.AddFormattingFunction(9, networkStatsFormatter)
 		table.AddFormattingFunction(10, networkStatsFormatter)
 	}
@@ -1279,7 +1281,7 @@ func FormatMembers(members []config.Member, verbose bool, storageMap map[int]boo
 	return result
 }
 
-// FormatNetworkStatistics returns the member's network statistics in a column formatted output.
+// FormatNetworkStatistics returns all the member's network statistics in a column formatted output.
 func FormatNetworkStatistics(members []config.Member) string {
 	var (
 		alignmentWide      = []string{R, L, L, R, L, L, R, R, R, R, R, R, R, R}
@@ -1415,6 +1417,43 @@ func FormatElasticData(edData []config.ElasticData, summary bool) string {
 			formattingFunction(data.TotalDataSize), formattingFunction(committed),
 			formatLargeFloat(float64(data.HighestLoadFactor)),
 			formatLargeInteger(data.CompactionCount), formatLargeInteger(data.ExhaustiveCompactionCount))
+	}
+
+	return table.String()
+}
+
+// FormatNetworkStats formats the network stats.
+func FormatNetworkStats(details []config.NetworkStatsDetails) string {
+	var (
+		edCount = len(details)
+		//	formattingFunction = getFormattingFunction()
+	)
+	if edCount == 0 {
+		return ""
+	}
+
+	sort.Slice(details, func(p, q int) bool {
+		nodeID1, _ := strconv.Atoi(details[p].NodeID)
+		nodeID2, _ := strconv.Atoi(details[q].NodeID)
+		return nodeID1 < nodeID2
+	})
+
+	table := newFormattedTable().WithHeader(MemberColumn, publisherColumn, receiverColumn, "PAUSE RATE", "THRESHOLD",
+		"PAUSED", "DEFERRING", "DEFERRED", "OUTSTANDING", "READY", "LAST IN", "LAST OUT", "LAST SLOW", "LAST DEATH").
+		WithAlignment(R, R, R, R, R, L, L, R, R, R, R, R, R, R)
+
+	table.AddFormattingFunction(1, networkStatsFormatter)
+	table.AddFormattingFunction(2, networkStatsFormatter)
+	table.AddFormattingFunction(5, trueBoolFormatter)
+	table.AddFormattingFunction(6, trueBoolFormatter)
+	table.AddFormattingFunction(7, packetFormatter)
+	table.AddFormattingFunction(8, packetFormatter)
+
+	for _, data := range details {
+		table.AddRow(data.NodeID, formatPublisherReceiver(data.PublisherSuccessRate), formatPublisherReceiver(data.ReceiverSuccessRate),
+			formatFloat(data.PauseRate), formatLargeInteger(data.Threshold), formatBool(data.Paused), formatBool(data.Deferring),
+			formatLargeInteger(data.DeferredPackets), formatLargeInteger(data.OutstandingPackets), formatLargeInteger(data.ReadyPackets),
+			data.LastIn, data.LastOut, data.LastSlow, data.LastHeuristicDeath)
 	}
 
 	return table.String()

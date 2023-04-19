@@ -339,7 +339,7 @@ var describeTopicCmd = &cobra.Command{
 		selectedDetails := config.TopicDetails{Details: make([]config.TopicDetail, 1)}
 		selectedDetails.Details[0] = topicsDetails.Details[index]
 
-		topicsMemberDetails, topicsSubscriberDetails, err = getMemberAndSubscribers(dataFetcher, topicsDetails)
+		topicsMemberDetails, topicsSubscriberDetails, err = getMemberAndSubscribers(dataFetcher, selectedDetails)
 		if err != nil {
 			return err
 		}

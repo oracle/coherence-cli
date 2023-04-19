@@ -80,6 +80,9 @@ type Fetcher interface {
 	// retrieve all fields rather than selected fields.
 	GetMemberDetailsJSON(verbose bool) ([]byte, error)
 
+	// GetNetworkStatsJSON returns network stats in raw json.
+	GetNetworkStatsJSON(nodeID string) ([]byte, error)
+
 	// GetSingleMemberDetailsJSON returns a single members details in raw json.
 	GetSingleMemberDetailsJSON(nodeID string) ([]byte, error)
 
