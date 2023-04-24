@@ -37,16 +37,19 @@ echo "Installing Coherence CLI ${VERSION} for ${OS}/${ARCH} into /usr/local/bin 
 
 if [ "$OS" == "Darwin" ]; then
     set_arch
+    TEMP=`mktemp -d`
     PKG="Oracle-Coherence-CLI-${VERSION}-darwin-${ARCH}.pkg"
-    echo "Downloading and opening /tmp/${PKG}"
+    DEST=${TEMP}/${PKG}
+    echo "Downloading and opening ${DEST}"
     URL=https://github.com/oracle/coherence-cli/releases/download/${VERSION}/${PKG}
-    curl -sLo /tmp/${PKG} $URL && open /tmp/${PKG} && installed
+    curl -sLo  ${DEST} $URL && open ${DEST} && installed
 elif [ "$OS" == "Linux" ]; then
     set_arch
     echo "Using 'sudo' to mv cohctl binary to /usr/local/bin"
+    TEMP=`mktemp -d`
     URL=https://github.com/oracle/coherence-cli/releases/download/${VERSION}/cohctl-${VERSION}-linux-${ARCH}
-    curl -sLo /tmp/cohctl $URL && chmod u+x /tmp/cohctl
-    sudo mv /tmp/cohctl /usr/local/bin && installed
+    curl -sLo ${TEMP}/cohctl $URL && chmod u+x ${TEMP}/cohctl
+    sudo mv ${TEMP}/cohctl /usr/local/bin/ && installed
 else
     echo "For all other platforms, please see: https://github.com/oracle/coherence-cli/releases"
     exit 1
