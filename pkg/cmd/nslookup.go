@@ -7,7 +7,7 @@
 package cmd
 
 import (
-	"github.com/oracle/coherence-cli/pkg/discovery"
+	"github.com/oracle/coherence-go-client/coherence/discovery"
 	"github.com/spf13/cobra"
 )
 
