@@ -1200,6 +1200,22 @@ func RunTestCachesCommands(t *testing.T) {
 		"set", "cache", cacheName, "-a", "expiryDelayd", "-v", "60", "-y", "-s", "PartitionedCache",
 		"-c", context.ClusterName)
 
+	// Check if storageManager is present which means we can test clearn and truncate cache
+	result, err := test_utils.IssueGetRequest(restUrl + "/storageManagerPresent")
+	g.Expect(err).To(BeNil())
+
+	if string(result) == "true" {
+		// test truncate and clea
+		test_utils.EnsureCommandContains(g, t, cliCmd, cmd.OperationCompleted, configArg, file, "truncate", "cache", cacheName, "-y", "-c", context.ClusterName)
+		test_utils.EnsureCommandContains(g, t, cliCmd, cmd.OperationCompleted, configArg, file, "clear", "cache", cacheName, "-y", "-c", context.ClusterName)
+
+		// validate incorrect service
+		test_utils.EnsureCommandErrorContains(g, t, cliCmd, "no cache named cache-1", configArg, file, "truncate", "cache",
+			cacheName, "-s", "PartitionedCache2", "-y", "-c", context.ClusterName)
+		test_utils.EnsureCommandErrorContains(g, t, cliCmd, "no cache named cache-1", configArg, file, "clear", "cache",
+			cacheName, "-s", "PartitionedCache2", "-y", "-c", context.ClusterName)
+	}
+
 	// remove the cluster entries
 	test_utils.EnsureCommandContains(g, t, cliCmd, context.ClusterName, configArg, file, "remove", "cluster", "cluster1", "-y")
 }

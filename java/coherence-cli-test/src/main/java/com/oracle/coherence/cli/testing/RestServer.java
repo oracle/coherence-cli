@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, 2022 Oracle and/or its affiliates.
+ * Copyright (c) 2019, 2023 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -28,6 +28,7 @@ import com.tangosol.net.NamedCache;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
 import com.tangosol.net.management.MBeanServerProxy;
+import sun.security.util.Cache;
 
 /**
  * A simple Http server that is deployed into a Coherence cluster
@@ -69,6 +70,7 @@ public class RestServer {
             server.createContext("/startTopics", RestServer::startTopics);
             server.createContext("/stopTopics", RestServer::stopTopics);
             server.createContext("/executorPresent", RestServer::isExecutorPresent);
+            server.createContext("/storageManagerPresent", RestServer::isStorageManagerPresent);
             server.createContext("/healthPresent", RestServer::isHealthCheckPresent);
             server.createContext("/balanced", RestServer::balanced);
 
@@ -136,12 +138,21 @@ public class RestServer {
         }
 
         for (String s : setServices) {
-            String statusHA = (String) proxy.getAttribute("Coherence:type=Service,name=" + s + ",nodeId=1", "StatusHA");
+            String statusHA = null;
+            CacheFactory.log("Checking " + s);
+            try {
+                statusHA = (String) proxy.getAttribute("Coherence:type=Service,name=" + s + ",nodeId=1", "StatusHA");
+            } catch (Exception e) {
+                CacheFactory.log(e);
+                send(t, 500, "error");
+            }
+            CacheFactory.log("StatusHA for " + s + " is " + statusHA, CacheFactory.LOG_INFO);
             if (ENDANGERED.equals(statusHA)) {
                 // fail fast
                 send(t, 200, "Service " + s + " is still " + ENDANGERED + ".\nFull list is: " + setServices);
             }
         }
+        CacheFactory.log("Done", CacheFactory.LOG_INFO);
 
         CacheFactory.log("All services balanced", CacheFactory.LOG_INFO);
         // all ok, then success
@@ -239,6 +250,10 @@ public class RestServer {
         send(t, 200, Boolean.toString(canFindExecutor()));
     }
 
+    private static void isStorageManagerPresent(HttpExchange t) throws IOException {
+        send(t, 200, Boolean.toString(canFindStorageManagerResource()));
+    }
+
     private static void isHealthCheckPresent(HttpExchange t) throws IOException {
         send(t, 200, Boolean.toString(canFindHealthCheck()));
     }
@@ -246,6 +261,20 @@ public class RestServer {
     private static boolean canFindExecutor() {
         try {
             Class.forName("com.oracle.coherence.concurrent.executor.ClusteredExecutorInfo");
+            return true;
+        }
+        catch (ClassNotFoundException e) {
+            return false;
+        }
+    }
+
+    /**
+     * This indicates that the truncate and clear cache operations are available.
+     * @return true if StorageManagerResource is available
+     */
+    private static boolean canFindStorageManagerResource() {
+       try {
+            Class.forName("com.tangosol.internal.management.resources.StorageManagerResource");
             return true;
         }
         catch (ClassNotFoundException e) {

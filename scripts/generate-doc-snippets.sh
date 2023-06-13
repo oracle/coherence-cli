@@ -105,6 +105,8 @@ create_doc $DOCS_DIR/get_caches "${COHCTL} get caches --help"
 create_doc $DOCS_DIR/get_cache_stores "${COHCTL} get cache-stores --help"
 create_doc $DOCS_DIR/describe_cache "${COHCTL} describe cache --help"
 create_doc $DOCS_DIR/set_cache "${COHCTL} set cache --help"
+create_doc $DOCS_DIR/truncate_cache "${COHCTL} truncate cache --help"
+create_doc $DOCS_DIR/clear_cache "${COHCTL} clear cache --help"
 
 # Topics
 create_doc $DOCS_DIR/get_topics "${COHCTL} get topics --help"

@@ -35,7 +35,7 @@ func TestMain(m *testing.M) {
 	} else {
 		// wait for balanced services
 		if err = test_utils.WaitForHttpBalancedServices(context.RestUrl+"/balanced", 120); err != nil {
-			fmt.Printf("Unable to wait for balanced services: %s\n" + err.Error())
+			fmt.Printf("Unable to wait for balanced services: %s\n", err.Error())
 			exitCode = 1
 		} else {
 			exitCode = m.Run()
