@@ -378,7 +378,7 @@ func executeCacheOperation(cmd *cobra.Command, operation, cacheName string) erro
 		err         error
 		dataFetcher fetcher.Fetcher
 		found       bool
-		cacheResult []byte
+		cacheData   []byte
 	)
 
 	_, dataFetcher, err = GetConnectionAndDataFetcher()
@@ -390,17 +390,19 @@ func executeCacheOperation(cmd *cobra.Command, operation, cacheName string) erro
 		return err
 	}
 
+	// validate that the service exists
 	found, err = ServiceExists(dataFetcher, serviceName)
 	if !found || err != nil {
 		return fmt.Errorf(cannotFindService, serviceName)
 	}
 
-	cacheResult, err = dataFetcher.GetCacheMembers(serviceName, cacheName)
+	// ensure the cache exists
+	cacheData, err = dataFetcher.GetCacheMembers(serviceName, cacheName)
 	if err != nil {
 		return err
 	}
 
-	if string(cacheResult) == "{}" || len(cacheResult) == 0 {
+	if string(cacheData) == "{}" || len(cacheData) == 0 {
 		return fmt.Errorf(cannotFindCache, cacheName, serviceName)
 	}
 
