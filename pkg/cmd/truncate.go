@@ -10,9 +10,9 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// clearCmd represents the clear command.
-var clearCmd = &cobra.Command{
-	Use:   "clear",
-	Short: "clears resources",
-	Long:  `The 'clear' command clears various resources.`,
+// truncateCmd represents the truncate command.
+var truncateCmd = &cobra.Command{
+	Use:   "truncate",
+	Short: "truncates resources",
+	Long:  `The 'truncate' command truncates resources.`,
 }

@@ -55,6 +55,9 @@ const (
 	NotifyPopulated      = "notify populated"
 	RetrieveHeads        = "retrieve current heads"
 	RemainingMessages    = "retrieve remaining messages"
+
+	TruncateCache = "truncate"
+	ClearCache    = "clear"
 )
 
 var (
@@ -205,6 +208,9 @@ type Fetcher interface {
 
 	// InvokeSnapshotOperation invokes a snapshot operation against a service.
 	InvokeSnapshotOperation(serviceName, snapshotName, operation string, archived bool) ([]byte, error)
+
+	// InvokeStorageOperation invokes a storage manager operation against a service and cache
+	InvokeStorageOperation(serviceName, cacheName, operation string) error
 
 	// InvokeServiceOperation invokes a service operation such as suspend or resume.
 	InvokeServiceOperation(serviceName, operation string) ([]byte, error)

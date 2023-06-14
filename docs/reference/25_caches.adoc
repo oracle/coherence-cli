@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 
-    Copyright (c) 2021, 2022 Oracle and/or its affiliates.
+    Copyright (c) 2021, 2023 Oracle and/or its affiliates.
     Licensed under the Universal Permissive License v 1.0 as shown at
     https://oss.oracle.com/licenses/upl.
 
@@ -17,6 +17,8 @@ There are various commands that allow you to work with and manage cluster caches
 * <<describe-cache, `cohctl describe cache`>> - shows information related to a specific cache and service
 * <<get-cache-stores, `cohctl get cache-stores`>> - displays the cache stores for a cache and service
 * <<set-cache, `cohctl set cache`>> - sets an attribute for a cache across one or more members
+* <<truncate-cache, `cohctl truncate cache`>> - truncates a caches contents, not generating any cache events
+* <<clear-cache, `cohctl clear cache`>> - clears a caches contents
 
 [#get-caches]
 ==== Get Caches
@@ -216,8 +218,7 @@ Set the expiry delay for all nodes to 30 seconds. (we are assuming we have 3 sto
 
 [source,bash]
 ----
-$ cohctl set cache test -a expiryDelay -v 30 -s PartitionedCache
-Using cluster connection 'local' from current context.
+$ cohctl set cache test -a expiryDelay -v 30 -s PartitionedCache -c local
 
 Selected service/cache: PartitionedCache/test
 Are you sure you want to set the value of attribute expiryDelay to 30 in tier back for all 3 nodes? (y/n) y
@@ -226,6 +227,35 @@ operation completed
 
 NOTE: See <<docs/examples/15_set_cache_attrs.adoc,here>> for a more detailed example of this command.
 
+[#truncate-cache]
+==== Truncate Cache
+
+include::../../build/_output/docs-gen/truncate_cache.adoc[tag=text]
+
+[source,bash]
+----
+$ cohctl truncate cache test -c local
+
+Are you sure you want to truncate cache test in service PartitionedCache? (y/n) y
+operation completed
+----
+
+NOTE: You may omit the service name option if the cache name is unique.
+
+[#clear-cache]
+==== Clear Cache
+
+include::../../build/_output/docs-gen/clear_cache.adoc[tag=text]
+
+[source,bash]
+----
+$ cohctl clear cache test -c local
+
+Are you sure you want to clear cache test in service PartitionedCache? (y/n) y
+operation completed
+----
+
+NOTE: You may omit the service name option if the cache name is unique.
 
 === See Also
 

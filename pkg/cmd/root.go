@@ -525,6 +525,11 @@ func Initialize(command *cobra.Command) *cobra.Command {
 	clearCmd.AddCommand(clearContextCmd)
 	clearCmd.AddCommand(clearBytesFormatCmd)
 	clearCmd.AddCommand(clearDefaultHeapCmd)
+	clearCmd.AddCommand(clearCacheCmd)
+
+	// truncate
+	command.AddCommand(truncateCmd)
+	truncateCmd.AddCommand(truncateCacheCmd)
 
 	// add
 	command.AddCommand(addCmd)

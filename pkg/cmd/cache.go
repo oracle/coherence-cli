@@ -341,6 +341,85 @@ You can specify '-o wide' to display addition information.`,
 	},
 }
 
+// clearCacheCmd represents the clear cache command.
+var clearCacheCmd = &cobra.Command{
+	Use:   "cache cache-name",
+	Short: "clear a caches contents",
+	Long:  `The 'clear cache' command issues a clear against a specific cache.`,
+	Args: func(cmd *cobra.Command, args []string) error {
+		if len(args) != 1 {
+			displayErrorAndExit(cmd, provideCacheMessage)
+		}
+		return nil
+	},
+	RunE: func(cmd *cobra.Command, args []string) error {
+		return executeCacheOperation(cmd, fetcher.ClearCache, args[0])
+	},
+}
+
+// truncateCacheCmd represents the truncate cache command.
+var truncateCacheCmd = &cobra.Command{
+	Use:   "cache cache-name",
+	Short: "truncate a caches contents, which does not generate any cache events.",
+	Long:  `The 'truncate cache' command issues a truncate against a specific cache. The truncate cache will not generate cache events.`,
+	Args: func(cmd *cobra.Command, args []string) error {
+		if len(args) != 1 {
+			displayErrorAndExit(cmd, provideCacheMessage)
+		}
+		return nil
+	},
+	RunE: func(cmd *cobra.Command, args []string) error {
+		return executeCacheOperation(cmd, fetcher.TruncateCache, args[0])
+	},
+}
+
+func executeCacheOperation(cmd *cobra.Command, operation, cacheName string) error {
+	var (
+		err         error
+		dataFetcher fetcher.Fetcher
+		found       bool
+		cacheData   []byte
+	)
+
+	_, dataFetcher, err = GetConnectionAndDataFetcher()
+	if err != nil {
+		return err
+	}
+
+	if serviceName, err = findServiceForCacheOrTopic(dataFetcher, cacheName, "cache"); err != nil {
+		return err
+	}
+
+	// validate that the service exists
+	found, err = ServiceExists(dataFetcher, serviceName)
+	if !found || err != nil {
+		return fmt.Errorf(cannotFindService, serviceName)
+	}
+
+	// ensure the cache exists
+	cacheData, err = dataFetcher.GetCacheMembers(serviceName, cacheName)
+	if err != nil {
+		return err
+	}
+
+	if string(cacheData) == "{}" || len(cacheData) == 0 {
+		return fmt.Errorf(cannotFindCache, cacheName, serviceName)
+	}
+
+	// confirm the operation
+	if !confirmOperation(cmd, fmt.Sprintf("Are you sure you want to %s cache %s in service %s? (y/n) ",
+		operation, cacheName, serviceName)) {
+		return nil
+	}
+
+	err = dataFetcher.InvokeStorageOperation(serviceName, cacheName, operation)
+	if err == nil {
+		cmd.Println(OperationCompleted)
+	}
+
+	return err
+}
+
 // ensureTierBack ensures that only back tier are included.
 func ensureTierBack(cacheStoreDetails []config.CacheStoreDetail) []config.CacheStoreDetail {
 	finalDetails := make([]config.CacheStoreDetail, 0)
@@ -636,6 +715,12 @@ func init() {
 	describeCacheCmd.Flags().StringVarP(&serviceName, serviceNameOption, serviceNameOptionShort, "", serviceNameDescription)
 
 	getCacheStoresCmd.Flags().StringVarP(&serviceName, serviceNameOption, serviceNameOptionShort, "", serviceNameDescription)
+
+	clearCacheCmd.Flags().StringVarP(&serviceName, serviceNameOption, serviceNameOptionShort, "", serviceNameDescription)
+	clearCacheCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
+
+	truncateCacheCmd.Flags().StringVarP(&serviceName, serviceNameOption, serviceNameOptionShort, "", serviceNameDescription)
+	truncateCacheCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
 
 	setCacheCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
 	setCacheCmd.Flags().StringVarP(&attributeNameCache, "attribute", "a", "", "attribute name to set")

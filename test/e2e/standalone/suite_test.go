@@ -27,15 +27,15 @@ func TestMain(m *testing.M) {
 	test_utils.SetTestContext(&context)
 
 	var fileName = test_utils.GetFilePath("docker-compose-2-members.yaml")
-
 	err = test_utils.StartCoherenceCluster(fileName, context.Url)
+
 	if err != nil {
 		fmt.Println(err)
 		exitCode = 1
 	} else {
-		// wait for balanced services
+		// wait for balanced services for standalone test
 		if err = test_utils.WaitForHttpBalancedServices(context.RestUrl+"/balanced", 120); err != nil {
-			fmt.Printf("Unable to wait for balanced services: %s\n" + err.Error())
+			fmt.Printf("Unable to wait for balanced services: %s\n", err.Error())
 			exitCode = 1
 		} else {
 			exitCode = m.Run()

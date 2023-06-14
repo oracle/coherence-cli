@@ -830,6 +830,16 @@ func (h HTTPFetcher) InvokeSnapshotOperation(serviceName, snapshotName, operatio
 	}
 }
 
+// InvokeStorageOperation invokes a storage manager operation against a service and cache
+func (h HTTPFetcher) InvokeStorageOperation(serviceName, cacheName, operation string) error {
+	var (
+		err      error
+		finalURL = servicesPath + getSafeServiceName(h, serviceName) + "/storage/" + url.PathEscape(cacheName) + "/" + operation
+	)
+	_, err = httpPostRequest(h, finalURL, constants.EmptyByte)
+	return err
+}
+
 // StartJFR starts a JFR. type is "role", "cluster" or "node" and target is the role or node.
 func (h HTTPFetcher) StartJFR(jfrName, directory, jfrType, target string, duration int32) ([]byte, error) {
 	var (
