@@ -79,9 +79,10 @@ populated constructed.`,
 
 // removeClusterCmd represents the remove cluster command
 var removeClusterCmd = &cobra.Command{
-	Use:   "cluster connection-name",
-	Short: "remove a cluster connection",
-	Long:  `The 'remove cluster' command removes a cluster connection.`,
+	Use:               "cluster connection-name",
+	Short:             "remove a cluster connection",
+	Long:              `The 'remove cluster' command removes a cluster connection.`,
+	ValidArgsFunction: completionAllClusters,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
 			displayErrorAndExit(cmd, "you must provide a connection name")
@@ -232,6 +233,7 @@ var describeClusterCmd = &cobra.Command{
 cluster connection, including: cluster overview, members, machines, services, caches, 
 reporters, proxy servers and Http servers. You can specify '-o wide' to display 
 addition information as well as '-v' to displayed additional information.`,
+	ValidArgsFunction: completionAllClusters,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
 			displayErrorAndExit(cmd, "you must provide a cluster connection")
@@ -697,7 +699,7 @@ addition information as well as '-v' to displayed additional information.`,
 	},
 }
 
-// discoverClustersCmd represents the discover clusters command
+// discoverClustersCmd represents the discover clusters command.
 var discoverClustersCmd = &cobra.Command{
 	Use:   "clusters [host[:port]...]",
 	Short: "discover clusters using the Coherence Name Service",
@@ -910,7 +912,7 @@ you can confirm if you wish to add the discovered clusters.`,
 	},
 }
 
-// addCluster adds a new cluster
+// addCluster adds a new cluster.
 func addCluster(cmd *cobra.Command, connection, connectionURL, discoveryType, nsAddress string) error {
 	// check to see if the url is just host:port and then build the full management URL using http as default
 	// otherwise let it fall through and get validated
@@ -1000,7 +1002,7 @@ const (
 	localHost               = "127.0.0.1"
 )
 
-// createClusterCmd represents the create cluster command
+// createClusterCmd represents the create cluster command.
 var createClusterCmd = &cobra.Command{
 	Use:   "cluster cluster-name",
 	Short: "create a local Coherence cluster",
@@ -1251,11 +1253,12 @@ NOTE: This is an experimental feature and my be altered or removed in the future
 	},
 }
 
-// startClusterCmd represents the start cluster command
+// startClusterCmd represents the start cluster command.
 var startClusterCmd = &cobra.Command{
-	Use:   "cluster",
-	Short: "start a local Coherence cluster",
-	Long:  `The 'start cluster' command starts a cluster that was manually created.`,
+	Use:               "cluster",
+	Short:             "start a local Coherence cluster",
+	Long:              `The 'start cluster' command starts a cluster that was manually created.`,
+	ValidArgsFunction: completionAllManualClusters,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
 			displayErrorAndExit(cmd, youMustProviderClusterMessage)
@@ -1270,11 +1273,12 @@ var startClusterCmd = &cobra.Command{
 	},
 }
 
-// scaleClusterCmd represents the start cluster command
+// scaleClusterCmd represents the start cluster command.
 var scaleClusterCmd = &cobra.Command{
-	Use:   "cluster",
-	Short: "scales a local Coherence cluster",
-	Long:  `The 'scale cluster' command scales a cluster that was manually created.`,
+	Use:               "cluster",
+	Short:             "scales a local Coherence cluster",
+	Long:              `The 'scale cluster' command scales a cluster that was manually created.`,
+	ValidArgsFunction: completionAllManualClusters,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
 			displayErrorAndExit(cmd, youMustProviderClusterMessage)
@@ -1286,11 +1290,12 @@ var scaleClusterCmd = &cobra.Command{
 	},
 }
 
-// stopClusterCmd represents the stop cluster command
+// stopClusterCmd represents the stop cluster command.
 var stopClusterCmd = &cobra.Command{
-	Use:   "cluster",
-	Short: "stop a local Coherence cluster",
-	Long:  `The 'stop cluster' command stops a cluster that was manually created or started.`,
+	Use:               "cluster",
+	Short:             "stop a local Coherence cluster",
+	Long:              `The 'stop cluster' command stops a cluster that was manually created or started.`,
+	ValidArgsFunction: completionAllManualClusters,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
 			displayErrorAndExit(cmd, youMustProviderClusterMessage)

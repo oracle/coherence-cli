@@ -22,14 +22,16 @@ import (
 	"testing"
 )
 
-const configArg = "--config"
-const addedCluster = "Added cluster"
-const version1221 = "12.2.1"
-const version1411 = "14.1.1"
-const configYaml = "config.yaml"
-const nodeID = "NODE ID"
-const jsonPathServices = "jsonpath=$.services"
-const doesNotExist = "does not exist"
+const (
+	configArg        = "--config"
+	addedCluster     = "Added cluster"
+	version1221      = "12.2.1"
+	version1411      = "14.1.1"
+	configYaml       = "config.yaml"
+	nodeID           = "NODE ID"
+	jsonPathServices = "jsonpath=$.services"
+	doesNotExist     = "does not exist"
+)
 
 //
 // These tests run each of the CLI commands and inspects the output to ensure that the

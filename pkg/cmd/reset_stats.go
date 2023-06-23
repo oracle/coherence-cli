@@ -75,9 +75,10 @@ var resetFlashJournalStatsCmd = &cobra.Command{
 
 // resetExecutorStatsCmd represents the reset executor-stats command.
 var resetExecutorStatsCmd = &cobra.Command{
-	Use:   "executor-stats executor-name",
-	Short: "reset statistics for an executor",
-	Long:  `The 'reset executor-stats' command resets executor statistics for a specific executor.`,
+	Use:               "executor-stats executor-name",
+	Short:             "reset statistics for an executor",
+	Long:              `The 'reset executor-stats' command resets executor statistics for a specific executor.`,
+	ValidArgsFunction: completionExecutors,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
 			displayErrorAndExit(cmd, provideExecutorName)
@@ -91,9 +92,10 @@ var resetExecutorStatsCmd = &cobra.Command{
 
 // resetServiceStatsCmd represents the reset service-stats command.
 var resetServiceStatsCmd = &cobra.Command{
-	Use:   "service-stats service-name",
-	Short: "reset services statistics for all service members or specific service members",
-	Long:  `The 'reset service-stats' command resets service statistics for all service or a comma separated list of member IDs.`,
+	Use:               "service-stats service-name",
+	Short:             "reset services statistics for all service members or specific service members",
+	Long:              `The 'reset service-stats' command resets service statistics for all service or a comma separated list of member IDs.`,
+	ValidArgsFunction: completionService,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
 			displayErrorAndExit(cmd, provideServiceName)
@@ -107,9 +109,10 @@ var resetServiceStatsCmd = &cobra.Command{
 
 // resetProxyStatsCmd represents the reset proxy-stats command.
 var resetProxyStatsCmd = &cobra.Command{
-	Use:   "proxy-stats service-name",
-	Short: "reset proxy connection manager statistics for all proxy members or specific proxy members",
-	Long:  `The 'reset proxy-stats' command resets connection manager statistics for all proxy services or a comma separated list of member IDs.`,
+	Use:               "proxy-stats service-name",
+	Short:             "reset proxy connection manager statistics for all proxy members or specific proxy members",
+	Long:              `The 'reset proxy-stats' command resets connection manager statistics for all proxy services or a comma separated list of member IDs.`,
+	ValidArgsFunction: completionProxies,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
 			displayErrorAndExit(cmd, provideServiceName)
@@ -123,9 +126,10 @@ var resetProxyStatsCmd = &cobra.Command{
 
 // resetCacheStatsCmd represents the reset cache-stats command.
 var resetCacheStatsCmd = &cobra.Command{
-	Use:   "cache-stats cache-name",
-	Short: "reset cache statistics for all cache members or specific cache members",
-	Long:  `The 'reset cache-stats' command resets cache statistics for all cache members or a comma separated list of member IDs.`,
+	Use:               "cache-stats cache-name",
+	Short:             "reset cache statistics for all cache members or specific cache members",
+	Long:              `The 'reset cache-stats' command resets cache statistics for all cache members or a comma separated list of member IDs.`,
+	ValidArgsFunction: completionCaches,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
 			displayErrorAndExit(cmd, provideCacheMessage)

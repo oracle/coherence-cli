@@ -88,9 +88,10 @@ var getExecutorsCmd = &cobra.Command{
 
 // describeExecutorCmd represents the describe executor command.
 var describeExecutorCmd = &cobra.Command{
-	Use:   "executor executor-name",
-	Short: "describe an executor",
-	Long:  `The 'describe executor' command shows information related to a specific executor.`,
+	Use:               "executor executor-name",
+	Short:             "describe an executor",
+	Long:              `The 'describe executor' command shows information related to a specific executor.`,
+	ValidArgsFunction: completionExecutors,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
 			displayErrorAndExit(cmd, provideExecutorName)

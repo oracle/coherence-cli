@@ -49,9 +49,10 @@ var getHTTPProxiesCmd = &cobra.Command{
 
 // describeHTTPProxyCmd represents the describe http-proxy command.
 var describeHTTPProxyCmd = &cobra.Command{
-	Use:   "http-server service-name",
-	Short: "describe a http server",
-	Long:  `The 'describe http-server' command shows information related to http servers.`,
+	Use:               "http-server service-name",
+	Short:             "describe a http server",
+	Long:              `The 'describe http-server' command shows information related to http servers.`,
+	ValidArgsFunction: completionHTTPServers,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
 			displayErrorAndExit(cmd, "you must provide a service name")

@@ -107,9 +107,10 @@ var getTopicsCmd = &cobra.Command{
 
 // getSubscribersCmd represents the get subscribers command.
 var getSubscribersCmd = &cobra.Command{
-	Use:   "subscribers topic-name",
-	Short: "display subscribers for a topic and service",
-	Long:  `The 'get subscribers' command displays subscribers for a topic and service.`,
+	Use:               "subscribers topic-name",
+	Short:             "display subscribers for a topic and service",
+	Long:              `The 'get subscribers' command displays subscribers for a topic and service.`,
+	ValidArgsFunction: completionTopics,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
 			displayErrorAndExit(cmd, SupplyTopicMessage)
@@ -181,9 +182,10 @@ var getSubscribersCmd = &cobra.Command{
 
 // getSubscriberGroupsCmd represents the get subscriber-groups command.
 var getSubscriberGroupsCmd = &cobra.Command{
-	Use:   "subscriber-groups topic-name",
-	Short: "display subscriber-groups for a topic and service",
-	Long:  `The 'get subscribers' command displays subscriber-groups for a topic and service.`,
+	Use:               "subscriber-groups topic-name",
+	Short:             "display subscriber-groups for a topic and service",
+	Long:              `The 'get subscribers' command displays subscriber-groups for a topic and service.`,
+	ValidArgsFunction: completionTopics,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
 			displayErrorAndExit(cmd, SupplyTopicMessage)
@@ -288,9 +290,10 @@ func getTopicsDetails(dataFetcher fetcher.Fetcher, topicServiceName, topicName s
 
 // describeTopicCmd represents the describe topic command.
 var describeTopicCmd = &cobra.Command{
-	Use:   "topic topic-name",
-	Short: "describe a topic",
-	Long:  `The 'describe topic' command shows information related to a topic and service.`,
+	Use:               "topic topic-name",
+	Short:             "describe a topic",
+	Long:              `The 'describe topic' command shows information related to a topic and service.`,
+	ValidArgsFunction: completionTopics,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
 			displayErrorAndExit(cmd, SupplyTopicMessage)
@@ -418,9 +421,10 @@ var describeTopicCmd = &cobra.Command{
 
 // getTopicMembersCmd represents the get topic-members command.
 var getTopicMembersCmd = &cobra.Command{
-	Use:   "topic-members topic-name",
-	Short: "display members for a topic",
-	Long:  `The 'get topic-members' command displays members for topic and service.`,
+	Use:               "topic-members topic-name",
+	Short:             "display members for a topic",
+	Long:              `The 'get topic-members' command displays members for topic and service.`,
+	ValidArgsFunction: completionTopics,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
 			displayErrorAndExit(cmd, SupplyTopicMessage)
@@ -492,9 +496,10 @@ var getTopicMembersCmd = &cobra.Command{
 
 // getTopicChannelsCmd represents the get topic-channels command.
 var getTopicChannelsCmd = &cobra.Command{
-	Use:   "topic-channels topic-name",
-	Short: "display channel details for a topic, service and node",
-	Long:  `The 'get topic-channels' command displays channel details for a topic, service and node.`,
+	Use:               "topic-channels topic-name",
+	Short:             "display channel details for a topic, service and node",
+	Long:              `The 'get topic-channels' command displays channel details for a topic, service and node.`,
+	ValidArgsFunction: completionTopics,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
 			displayErrorAndExit(cmd, SupplyTopicMessage)
@@ -591,9 +596,10 @@ var getTopicChannelsCmd = &cobra.Command{
 
 // getSubscriberChannelsCmd represents the get subscriber-channels command.
 var getSubscriberChannelsCmd = &cobra.Command{
-	Use:   "subscriber-channels topic-name",
-	Short: "display channel details for a topic, service and subscriber",
-	Long:  `The 'get subscriber-channels' command displays channel details for a topic, service and subscriber.`,
+	Use:               "subscriber-channels topic-name",
+	Short:             "display channel details for a topic, service and subscriber",
+	Long:              `The 'get subscriber-channels' command displays channel details for a topic, service and subscriber.`,
+	ValidArgsFunction: completionTopics,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
 			displayErrorAndExit(cmd, SupplyTopicMessage)
@@ -800,6 +806,7 @@ var disconnectSubscriberCmd = &cobra.Command{
 	Short: "instruct a subscriber to disconnect and reset itself",
 	Long: `The 'disconnect subscriber' command instructs a subscriber to disconnect and reset
 itself given a topic, service and subscriber id.`,
+	ValidArgsFunction: completionTopics,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
 			displayErrorAndExit(cmd, SupplyTopicMessage)
@@ -817,6 +824,7 @@ var disconnectAllCmd = &cobra.Command{
 	Short: "instruct a topic to disconnect all subscribers for a topic or subscriber group",
 	Long: `The 'disconnect all' command instructs a topic to disconnect all subscribers for a 
 specific subscriber topic or all subscribers for the specified subscriber group.`,
+	ValidArgsFunction: completionTopics,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
 			displayErrorAndExit(cmd, SupplyTopicMessage)
@@ -834,6 +842,7 @@ var connectSubscriberCmd = &cobra.Command{
 	Short: "instruct a subscriber to ensure it is connected",
 	Long: `The 'connect subscriber' command instructs a subscriber to ensure it is connected
 given a topic, service and subscriber id.`,
+	ValidArgsFunction: completionTopics,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
 			displayErrorAndExit(cmd, SupplyTopicMessage)
@@ -851,6 +860,7 @@ var retrieveHeadsCmd = &cobra.Command{
 	Short: "instruct a subscriber to retrieve the current head positions for each channel",
 	Long: `The 'retrieve heads' command instructs a subscriber to retrieve the current head 
 positions for each channel given a topic, service and subscriber id.`,
+	ValidArgsFunction: completionTopics,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
 			displayErrorAndExit(cmd, SupplyTopicMessage)
@@ -868,6 +878,7 @@ var retrieveRemainingCmd = &cobra.Command{
 	Short: "instruct a subscriber to retrieve the count of remaining messages for each channel",
 	Long: `The 'retrieve header' command instructs a subscriber to retrieve the the count of 
 remaining messages for each channel given a topic, service and subscriber id.`,
+	ValidArgsFunction: completionTopics,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
 			displayErrorAndExit(cmd, SupplyTopicMessage)
@@ -885,6 +896,7 @@ var notifyPopulatedCmd = &cobra.Command{
 	Short: "instruct a subscriber to send a channel populated notification to this subscriber and channel",
 	Long: `The 'notify populated' command instructs a subscriber to send a channel populated notification to 
 this subscriber and channel given a topic, service, subscriber id and channel.`,
+	ValidArgsFunction: completionTopics,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
 			displayErrorAndExit(cmd, SupplyTopicMessage)
@@ -898,9 +910,10 @@ this subscriber and channel given a topic, service, subscriber id and channel.`,
 
 // getSubscriberGroupChannelsCmd represents the get sub-grp-channels command.
 var getSubscriberGroupChannelsCmd = &cobra.Command{
-	Use:   "sub-grp-channels topic-name",
-	Short: "display channel details for a topic, service, node and subscriber group",
-	Long:  `The 'get sub-grp-channels' command displays channel details for a topic, service, node and subscriber group.`,
+	Use:               "sub-grp-channels topic-name",
+	Short:             "display channel details for a topic, service, node and subscriber group",
+	Long:              `The 'get sub-grp-channels' command displays channel details for a topic, service, node and subscriber group.`,
+	ValidArgsFunction: completionTopics,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
 			displayErrorAndExit(cmd, SupplyTopicMessage)

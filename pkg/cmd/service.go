@@ -276,9 +276,10 @@ information regarding partition sizes.`,
 
 // getServiceMembersCmd represents the get service-members command.
 var getServiceMembersCmd = &cobra.Command{
-	Use:   "service-members service-name",
-	Short: "display service members for a cluster",
-	Long:  `The 'get service-members' command displays service members for a cluster.`,
+	Use:               "service-members service-name",
+	Short:             "display service members for a cluster",
+	Long:              `The 'get service-members' command displays service members for a cluster.`,
+	ValidArgsFunction: completionService,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
 			displayErrorAndExit(cmd, provideServiceName)
@@ -384,6 +385,7 @@ var describeServiceCmd = &cobra.Command{
 	Long: `The 'describe service' command shows information related to services. This
 includes information about each service member as well as Persistence information if the
 service is a cache service.`,
+	ValidArgsFunction: completionService,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
 			displayErrorAndExit(cmd, provideServiceName)
@@ -638,6 +640,7 @@ var setServiceCmd = &cobra.Command{
 	Long: `The 'set service' command sets an attribute for a service across one or member nodes.
 The following attribute names are allowed: threadCount, threadCountMin, threadCountMax or
 taskHungThresholdMillis or requestTimeoutMillis.`,
+	ValidArgsFunction: completionService,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
 			displayErrorAndExit(cmd, provideServiceName)
@@ -753,9 +756,10 @@ taskHungThresholdMillis or requestTimeoutMillis.`,
 
 // suspendServiceCmd represents the suspend service command.
 var suspendServiceCmd = &cobra.Command{
-	Use:   serviceUse,
-	Short: "suspend a service",
-	Long:  `The 'suspend service' command suspends a specific service in all the members of a cluster.`,
+	Use:               serviceUse,
+	Short:             "suspend a service",
+	Long:              `The 'suspend service' command suspends a specific service in all the members of a cluster.`,
+	ValidArgsFunction: completionPersistenceService,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
 			displayErrorAndExit(cmd, provideServiceName)
@@ -769,9 +773,10 @@ var suspendServiceCmd = &cobra.Command{
 
 // resumeServiceCmd represents the resume service command.
 var resumeServiceCmd = &cobra.Command{
-	Use:   serviceUse,
-	Short: "resume a service",
-	Long:  `The 'resume service' command resumes a specific service in all the members of a cluster.`,
+	Use:               serviceUse,
+	Short:             "resume a service",
+	Long:              `The 'resume service' command resumes a specific service in all the members of a cluster.`,
+	ValidArgsFunction: completionPersistenceService,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
 			displayErrorAndExit(cmd, provideServiceName)
@@ -789,6 +794,7 @@ var stopServiceCmd = &cobra.Command{
 	Short: "stop a service",
 	Long: `The 'stop service' command forces a specific service to stop on a cluster member.
 Use the shutdown service command for normal service termination.`,
+	ValidArgsFunction: completionPersistenceService,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
 			displayErrorAndExit(cmd, provideServiceName)
@@ -802,9 +808,10 @@ Use the shutdown service command for normal service termination.`,
 
 // startServiceCmd represents the start service command.
 var startServiceCmd = &cobra.Command{
-	Use:   serviceUse,
-	Short: "start a service",
-	Long:  `The 'start service' command starts a specific service on a cluster member.`,
+	Use:               serviceUse,
+	Short:             "start a service",
+	Long:              `The 'start service' command starts a specific service on a cluster member.`,
+	ValidArgsFunction: completionPersistenceService,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
 			displayErrorAndExit(cmd, provideServiceName)
@@ -822,6 +829,7 @@ var shutdownServiceCmd = &cobra.Command{
 	Short: "shutdown a service",
 	Long: `The 'shutdown service' command performs a controlled shut-down of a specific service
 on a cluster member. Shutting down a service is preferred over stopping a service.`,
+	ValidArgsFunction: completionPersistenceService,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
 			displayErrorAndExit(cmd, provideServiceName)
