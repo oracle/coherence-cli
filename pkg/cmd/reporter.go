@@ -98,7 +98,7 @@ var describeReporterCmd = &cobra.Command{
 	Use:               reporterUse,
 	Short:             "describe a reporter",
 	Long:              `The 'describe reporter' command shows information related to a particular reporter.`,
-	ValidArgsFunction: completionNodeId,
+	ValidArgsFunction: completionNodeID,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
 			displayErrorAndExit(cmd, provideNodeID)
@@ -160,7 +160,7 @@ var startReporterCmd = &cobra.Command{
 	Use:               reporterUse,
 	Short:             "start a reporter on a node",
 	Long:              `The 'start reporter' command starts the Coherence reporter on the specified node.`,
-	ValidArgsFunction: completionNodeId,
+	ValidArgsFunction: completionNodeID,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
 			displayErrorAndExit(cmd, provideNodeID)
@@ -177,7 +177,7 @@ var stopReporterCmd = &cobra.Command{
 	Use:               reporterUse,
 	Short:             "stop a reporter on a node",
 	Long:              `The 'stop reporter' command stops the Coherence reporter on the specified node.`,
-	ValidArgsFunction: completionNodeId,
+	ValidArgsFunction: completionNodeID,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
 			displayErrorAndExit(cmd, provideNodeID)

@@ -143,8 +143,8 @@ func completionFederatedService(cmd *cobra.Command, args []string, toComplete st
 	return federatedServices, cobra.ShellCompDirectiveNoFileComp
 }
 
-// completionNodeId provides a completion function to return all node ids in a cluster.
-func completionNodeId(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+// completionNodeID provides a completion function to return all node ids in a cluster.
+func completionNodeID(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 	_, dataFetcher, err := GetConnectionAndDataFetcher()
 	if err != nil {
 		return emptySlice, cobra.ShellCompDirectiveNoFileComp
@@ -200,8 +200,8 @@ func completionMachines(cmd *cobra.Command, args []string, toComplete string) ([
 	return results, cobra.ShellCompDirectiveNoFileComp
 }
 
-// completionHttpSessions provides a completion function to return all http sessions in a cluster.
-func completionHttpSessions(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+// completionHTTPSessions provides a completion function to return all http sessions in a cluster.
+func completionHTTPSessions(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 	var (
 		results      = make([]string, 0)
 		httpSessions = config.HTTPSessionSummaries{}
@@ -220,6 +220,9 @@ func completionHttpSessions(cmd *cobra.Command, args []string, toComplete string
 	if len(sessions) > 0 {
 		err = json.Unmarshal(sessions, &httpSessions)
 	}
+	if err != nil {
+		return emptySlice, cobra.ShellCompDirectiveNoFileComp
+	}
 
 	for _, v := range httpSessions.HTTPSessions {
 		results = append(results, v.AppID)
@@ -228,8 +231,8 @@ func completionHttpSessions(cmd *cobra.Command, args []string, toComplete string
 	return results, cobra.ShellCompDirectiveNoFileComp
 }
 
-// completionHttpServers provides a completion function to return all HTTP servers in a cluster.
-func completionHttpServers(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+// completionHTTPServers provides a completion function to return all HTTP servers in a cluster.
+func completionHTTPServers(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 	return getProxies(httpString)
 }
 

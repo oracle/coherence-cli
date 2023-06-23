@@ -174,7 +174,7 @@ var getP2PStatsCmd = &cobra.Command{
 	Short: "display point-to-point network statistics for a specific member",
 	Long: `The 'get p2ps-stats' command displays the network statistics from the point 
 of view of a member and all the members it connects to.`,
-	ValidArgsFunction: completionNodeId,
+	ValidArgsFunction: completionNodeID,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
 			displayErrorAndExit(cmd, provideNodeID)
@@ -359,7 +359,7 @@ Full list of options are JVM dependant, but can include the full values or part 
   g1CodeHeapNonNMethods, g1OldGeneration g1MetaSpaceManager, g1YoungGeneration, g1EdenSpace,
   g1CodeCacheManager, psScavenge, psEdenSpace, psMarkSweep, codeCache, psOldGen, psSurvivorSpace,
   runtime`,
-	ValidArgsFunction: completionNodeId,
+	ValidArgsFunction: completionNodeID,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
 			displayErrorAndExit(cmd, provideNodeID)
@@ -704,7 +704,7 @@ var shutdownMemberCmd = &cobra.Command{
 	Long: `The 'shutdown member' command shuts down all the clustered services that are
 running on a specific member via a controlled shutdown. If the services were started using
 DefaultCacheServer, then they will be restarted.`,
-	ValidArgsFunction: completionNodeId,
+	ValidArgsFunction: completionNodeID,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
 			displayErrorAndExit(cmd, provideNodeID)

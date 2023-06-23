@@ -134,7 +134,7 @@ var describeHTTPSessionCmd = &cobra.Command{
 	Use:               "http-session application-id",
 	Short:             "describe a http session",
 	Long:              `The 'describe http-session' command shows information related to a specific Coherence*Web application.`,
-	ValidArgsFunction: completionHttpSessions,
+	ValidArgsFunction: completionHTTPSessions,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
 			displayErrorAndExit(cmd, "you must provide an application id")
