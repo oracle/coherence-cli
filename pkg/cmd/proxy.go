@@ -22,6 +22,7 @@ import (
 const (
 	provideProxyService = "you must provide a proxy service name"
 	proxyErrorMsg       = "unable to find proxy service with service name"
+	tcpString           = "tcp"
 )
 
 // var getProxiesCmd = &cobra.Command{ represents the getProxies command.
@@ -43,7 +44,7 @@ servers for a cluster. You can specify '-o wide' to display addition information
 			return err
 		}
 
-		details, err := returnGetProxiesDetails(cmd, "tcp", dataFetcher, connection)
+		details, err := returnGetProxiesDetails(cmd, tcpString, dataFetcher, connection)
 		if err != nil {
 			return err
 		}
@@ -61,6 +62,7 @@ var describeProxyCmd = &cobra.Command{
 	Short: "describe a proxy server",
 	Long: `The 'describe proxy' command shows information related to proxy servers including
 all nodes running the proxy service as well as detailed connection information.`,
+	ValidArgsFunction: completionProxies,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
 			displayErrorAndExit(cmd, provideProxyService)
@@ -155,9 +157,10 @@ all nodes running the proxy service as well as detailed connection information.`
 
 // getProxyConnectionsCmd represents the get proxy-connections command.
 var getProxyConnectionsCmd = &cobra.Command{
-	Use:   "proxy-connections service-name",
-	Short: "display proxy server connections for a specific proxy server",
-	Long:  `The 'get proxy-connections' command displays proxy server connections for a specific proxy server.`,
+	Use:               "proxy-connections service-name",
+	Short:             "display proxy server connections for a specific proxy server",
+	Long:              `The 'get proxy-connections' command displays proxy server connections for a specific proxy server.`,
+	ValidArgsFunction: completionProxies,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
 			displayErrorAndExit(cmd, provideProxyService)

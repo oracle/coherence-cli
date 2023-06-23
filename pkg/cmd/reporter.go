@@ -95,9 +95,10 @@ var getReportersCmd = &cobra.Command{
 
 // describeReporterCmd represents the describe reporter command.
 var describeReporterCmd = &cobra.Command{
-	Use:   reporterUse,
-	Short: "describe a reporter",
-	Long:  `The 'describe reporter' command shows information related to a particular reporter.`,
+	Use:               reporterUse,
+	Short:             "describe a reporter",
+	Long:              `The 'describe reporter' command shows information related to a particular reporter.`,
+	ValidArgsFunction: completionNodeId,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
 			displayErrorAndExit(cmd, provideNodeID)
@@ -156,9 +157,10 @@ var describeReporterCmd = &cobra.Command{
 
 // startReporterCmd represents the start reporter command.
 var startReporterCmd = &cobra.Command{
-	Use:   reporterUse,
-	Short: "start a reporter on a node",
-	Long:  `The 'start reporter' command starts the Coherence reporter on the specified node.`,
+	Use:               reporterUse,
+	Short:             "start a reporter on a node",
+	Long:              `The 'start reporter' command starts the Coherence reporter on the specified node.`,
+	ValidArgsFunction: completionNodeId,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
 			displayErrorAndExit(cmd, provideNodeID)
@@ -172,9 +174,10 @@ var startReporterCmd = &cobra.Command{
 
 // stopReporterCmd represents the stop reporter command.
 var stopReporterCmd = &cobra.Command{
-	Use:   reporterUse,
-	Short: "stop a reporter on a node",
-	Long:  `The 'stop reporter' command stops the Coherence reporter on the specified node.`,
+	Use:               reporterUse,
+	Short:             "stop a reporter on a node",
+	Long:              `The 'stop reporter' command stops the Coherence reporter on the specified node.`,
+	ValidArgsFunction: completionNodeId,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
 			displayErrorAndExit(cmd, provideNodeID)

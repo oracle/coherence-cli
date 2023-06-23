@@ -158,9 +158,10 @@ func getOSJson(machinesMap map[string]string, dataFetcher fetcher.Fetcher) ([]by
 
 // describeMachineCmd represents the describe machine command.
 var describeMachineCmd = &cobra.Command{
-	Use:   "machine machine-name",
-	Short: "describe a machine",
-	Long:  `The 'describe machine' command shows information related to a particular machine.`,
+	Use:               "machine machine-name",
+	Short:             "describe a machine",
+	Long:              `The 'describe machine' command shows information related to a particular machine.`,
+	ValidArgsFunction: completionMachines,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
 			displayErrorAndExit(cmd, "you must provide a machine name")

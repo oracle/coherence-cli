@@ -20,6 +20,7 @@ var getEnvironmentCmd = &cobra.Command{
 	Short: "display the member environment",
 	Long: `The 'get environment' command returns the environment information for a member.
 This includes details of the JVM as well as system properties.`,
+	ValidArgsFunction: completionNodeId,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
 			displayErrorAndExit(cmd, "you must provide a node id")

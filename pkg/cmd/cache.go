@@ -126,6 +126,7 @@ var describeCacheCmd = &cobra.Command{
 	Long: `The 'describe cache' command displays information related to a specific cache. This
 includes cache size, access, storage and index information across all nodes.
 You can specify '-o wide' to display addition information.`,
+	ValidArgsFunction: completionCaches,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
 			displayErrorAndExit(cmd, provideCacheMessage)
@@ -260,6 +261,7 @@ var getCacheStoresCmd = &cobra.Command{
 	Short: "display cache stores for a cache and service",
 	Long: `The 'get cache-stores' command displays cache store information related to a specific cache.
 You can specify '-o wide' to display addition information.`,
+	ValidArgsFunction: completionCaches,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
 			displayErrorAndExit(cmd, provideCacheMessage)
@@ -343,9 +345,10 @@ You can specify '-o wide' to display addition information.`,
 
 // clearCacheCmd represents the clear cache command.
 var clearCacheCmd = &cobra.Command{
-	Use:   "cache cache-name",
-	Short: "clear a caches contents",
-	Long:  `The 'clear cache' command issues a clear against a specific cache.`,
+	Use:               "cache cache-name",
+	Short:             "clear a caches contents",
+	Long:              `The 'clear cache' command issues a clear against a specific cache.`,
+	ValidArgsFunction: completionCaches,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
 			displayErrorAndExit(cmd, provideCacheMessage)
@@ -359,9 +362,10 @@ var clearCacheCmd = &cobra.Command{
 
 // truncateCacheCmd represents the truncate cache command.
 var truncateCacheCmd = &cobra.Command{
-	Use:   "cache cache-name",
-	Short: "truncate a caches contents, which does not generate any cache events.",
-	Long:  `The 'truncate cache' command issues a truncate against a specific cache. The truncate cache will not generate cache events.`,
+	Use:               "cache cache-name",
+	Short:             "truncate a caches contents, which does not generate any cache events.",
+	Long:              `The 'truncate cache' command issues a truncate against a specific cache. The truncate cache will not generate cache events.`,
+	ValidArgsFunction: completionCaches,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
 			displayErrorAndExit(cmd, provideCacheMessage)
@@ -451,6 +455,7 @@ var setCacheCmd = &cobra.Command{
 	Long: `The 'set cache' command sets an attribute for a cache across one or member nodes.
 The following attribute names are allowed: expiryDelay, highUnits, lowUnits,
 batchFactor, refreshFactor or requeueThreshold.`,
+	ValidArgsFunction: completionCaches,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
 			displayErrorAndExit(cmd, "you must provide a cache name")

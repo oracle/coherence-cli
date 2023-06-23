@@ -125,6 +125,7 @@ var describeElasticDataCmd = &cobra.Command{
 	Short: "describe a flash or ram journal",
 	Long: `The 'describe elastic-data' command shows information related to a specific journal type.
 The allowable values are ` + ram + ` or ` + flash + `.`,
+	ValidArgsFunction: completionElasticData,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
 			displayErrorAndExit(cmd, ElasticDataMessage)
@@ -208,6 +209,7 @@ var compactElasticDataCmd = &cobra.Command{
 	Short: "compact a flash or ram journal",
 	Long: `The 'compact elastic-data' command compacts (garbage collects) a specific journal type 
 for all or specific nodes. ` + `The allowable values are ` + ram + ` or ` + flash + `.`,
+	ValidArgsFunction: completionElasticData,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
 			displayErrorAndExit(cmd, ElasticDataMessage)

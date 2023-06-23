@@ -21,9 +21,10 @@ const (
 
 // setContextCmd represents the set context command.
 var setContextCmd = &cobra.Command{
-	Use:   "context connection-name",
-	Short: "set the current context",
-	Long:  `The 'set context' command sets the current context or connection for running commands in.`,
+	Use:               "context connection-name",
+	Short:             "set the current context",
+	Long:              `The 'set context' command sets the current context or connection for running commands in.`,
+	ValidArgsFunction: completionAllClusters,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
 			displayErrorAndExit(cmd, "you must provide a connection name")

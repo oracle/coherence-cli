@@ -155,6 +155,7 @@ are various options available using '-M' including:
 - with-sync - start after federating all cache entries
 - no-backlog - clear any initial backlog and start federating
 You may also specify a participant otherwise the command will apply to all participants.`,
+	ValidArgsFunction: completionFederatedService,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
 			displayErrorAndExit(cmd, supplyService)
@@ -172,6 +173,7 @@ var setFederationCmd = &cobra.Command{
 	Short: "set an attribute for a federated service",
 	Long: `The 'set federation' command sets an attribute for a federated service. The
 following attribute names are allowed: traceLogging.`,
+	ValidArgsFunction: completionFederatedService,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
 			displayErrorAndExit(cmd, supplyService)
@@ -189,6 +191,7 @@ var stopFederationCmd = &cobra.Command{
 	Short: "stop federation for a service",
 	Long: `The 'stop federation' command stops federation on a service. There
 You may also specify a participant otherwise the command will apply to all participants.`,
+	ValidArgsFunction: completionFederatedService,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
 			displayErrorAndExit(cmd, supplyService)
@@ -206,6 +209,7 @@ var replicateAllCmd = &cobra.Command{
 	Short: "initiate a replication of all cache entries for a federated service",
 	Long: `The 'replicate all' command replicates all caches for a federated service.
 You must specify a participant to replicate for.`,
+	ValidArgsFunction: completionFederatedService,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
 			displayErrorAndExit(cmd, supplyService)
@@ -223,6 +227,7 @@ var pauseFederationCmd = &cobra.Command{
 	Short: "Pause federation for a service",
 	Long: `The 'pause' command stops federation on a service.
 You may also specify a participant otherwise the command will apply to all participants.`,
+	ValidArgsFunction: completionFederatedService,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
 			displayErrorAndExit(cmd, supplyService)
@@ -272,6 +277,7 @@ var describeFederationCmd = &cobra.Command{
 	Short: "describe federation details for a given service and participant",
 	Long: `The 'describe federation' command displays the federation details for a given
 service, type and participant. Specify -T to set type outgoing or incoming and -p for participant.`,
+	ValidArgsFunction: completionFederatedService,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
 			displayErrorAndExit(cmd, "you must provide a service name")
