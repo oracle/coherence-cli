@@ -425,10 +425,7 @@ func GetLogDirectory() string {
 }
 
 func ensureLogsDir() error {
-	if err := utils.EnsureDirectory(GetLogDirectory()); err != nil {
-		return err
-	}
-	return nil
+	return utils.EnsureDirectory(GetLogDirectory())
 }
 
 // Initialize initializes the command hierarchy - required for tests

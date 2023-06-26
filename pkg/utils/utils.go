@@ -259,7 +259,7 @@ func ValidatePort(port int32) error {
 
 // GetCoherenceMainClass returns the default startup class for the specified Coherence version.
 // In the future this may be automatically determined but default to coherenceMain.
-func GetCoherenceMainClass(version string) string {
+func GetCoherenceMainClass(_ string) string {
 	return coherenceMain
 }
 

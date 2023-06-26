@@ -20,17 +20,17 @@ import (
 var emptySlice = make([]string, 0)
 
 // completionAllClusters provides a completion function to return all clusters.
-func completionAllClusters(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+func completionAllClusters(_ *cobra.Command, _ []string, _ string) ([]string, cobra.ShellCompDirective) {
 	return getAllClusters(false), cobra.ShellCompDirectiveNoFileComp
 }
 
 // completionAllManualClusters provides a completion function to return all clusters that were manually created.
-func completionAllManualClusters(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+func completionAllManualClusters(_ *cobra.Command, _ []string, _ string) ([]string, cobra.ShellCompDirective) {
 	return getAllClusters(true), cobra.ShellCompDirectiveNoFileComp
 }
 
 // completionCaches provides a completion function to return all cache names.
-func completionCaches(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+func completionCaches(_ *cobra.Command, _ []string, _ string) ([]string, cobra.ShellCompDirective) {
 	var (
 		cacheSummaries config.CacheSummaries
 		caches         = make([]string, 0)
@@ -59,7 +59,7 @@ func completionCaches(cmd *cobra.Command, args []string, toComplete string) ([]s
 }
 
 // completionTopics provides a completion function to return all topic names.
-func completionTopics(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+func completionTopics(_ *cobra.Command, _ []string, _ string) ([]string, cobra.ShellCompDirective) {
 	var topics = make([]string, 0)
 
 	_, dataFetcher, err := GetConnectionAndDataFetcher()
@@ -81,7 +81,7 @@ func completionTopics(cmd *cobra.Command, args []string, toComplete string) ([]s
 }
 
 // completionService provides a completion function to return all services in a cluster.
-func completionService(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+func completionService(_ *cobra.Command, _ []string, _ string) ([]string, cobra.ShellCompDirective) {
 	var results = make([]string, 0)
 
 	_, dataFetcher, err := GetConnectionAndDataFetcher()
@@ -109,7 +109,7 @@ func completionService(cmd *cobra.Command, args []string, toComplete string) ([]
 }
 
 // completionPersistenceService provides a completion function to return all persistence services in a cluster.
-func completionPersistenceService(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+func completionPersistenceService(_ *cobra.Command, _ []string, _ string) ([]string, cobra.ShellCompDirective) {
 	_, dataFetcher, err := GetConnectionAndDataFetcher()
 	if err != nil {
 		return emptySlice, cobra.ShellCompDirectiveNoFileComp
@@ -124,12 +124,12 @@ func completionPersistenceService(cmd *cobra.Command, args []string, toComplete 
 }
 
 // completionFederatedService provides a completion function to return all federated services in a cluster.
-func completionElasticData(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+func completionElasticData(_ *cobra.Command, _ []string, _ string) ([]string, cobra.ShellCompDirective) {
 	return []string{ram, flash}, cobra.ShellCompDirectiveNoFileComp
 }
 
 // completionFederatedService provides a completion function to return all federated services in a cluster.
-func completionFederatedService(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+func completionFederatedService(_ *cobra.Command, _ []string, _ string) ([]string, cobra.ShellCompDirective) {
 	_, dataFetcher, err := GetConnectionAndDataFetcher()
 	if err != nil {
 		return emptySlice, cobra.ShellCompDirectiveNoFileComp
@@ -144,7 +144,7 @@ func completionFederatedService(cmd *cobra.Command, args []string, toComplete st
 }
 
 // completionNodeID provides a completion function to return all node ids in a cluster.
-func completionNodeID(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+func completionNodeID(_ *cobra.Command, _ []string, _ string) ([]string, cobra.ShellCompDirective) {
 	_, dataFetcher, err := GetConnectionAndDataFetcher()
 	if err != nil {
 		return emptySlice, cobra.ShellCompDirectiveNoFileComp
@@ -159,7 +159,7 @@ func completionNodeID(cmd *cobra.Command, args []string, toComplete string) ([]s
 }
 
 // completionExecutors provides a completion function to return all executor names in a cluster.
-func completionExecutors(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+func completionExecutors(_ *cobra.Command, _ []string, _ string) ([]string, cobra.ShellCompDirective) {
 	var results = make([]string, 0)
 
 	_, dataFetcher, err := GetConnectionAndDataFetcher()
@@ -180,7 +180,7 @@ func completionExecutors(cmd *cobra.Command, args []string, toComplete string) (
 }
 
 // completionExecutors provides a completion function to return all machines in a cluster.
-func completionMachines(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+func completionMachines(_ *cobra.Command, _ []string, _ string) ([]string, cobra.ShellCompDirective) {
 	var results = make([]string, 0)
 
 	_, dataFetcher, err := GetConnectionAndDataFetcher()
@@ -201,7 +201,7 @@ func completionMachines(cmd *cobra.Command, args []string, toComplete string) ([
 }
 
 // completionHTTPSessions provides a completion function to return all http sessions in a cluster.
-func completionHTTPSessions(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+func completionHTTPSessions(_ *cobra.Command, _ []string, _ string) ([]string, cobra.ShellCompDirective) {
 	var (
 		results      = make([]string, 0)
 		httpSessions = config.HTTPSessionSummaries{}
@@ -232,12 +232,12 @@ func completionHTTPSessions(cmd *cobra.Command, args []string, toComplete string
 }
 
 // completionHTTPServers provides a completion function to return all HTTP servers in a cluster.
-func completionHTTPServers(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+func completionHTTPServers(_ *cobra.Command, _ []string, _ string) ([]string, cobra.ShellCompDirective) {
 	return getProxies(httpString)
 }
 
 // completionProxies provides a completion function to return all proxies in a cluster.
-func completionProxies(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+func completionProxies(_ *cobra.Command, _ []string, _ string) ([]string, cobra.ShellCompDirective) {
 	return getProxies(tcpString)
 }
 
