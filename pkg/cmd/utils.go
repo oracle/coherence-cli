@@ -35,7 +35,7 @@ const (
 	start                = "start"
 )
 
-func displayErrorAndExit(cmd *cobra.Command, message string) {
+func displayErrorAndExit(_ *cobra.Command, message string) {
 	_, _ = fmt.Fprintln(os.Stderr, "Error: "+message)
 	_, _ = fmt.Fprintln(os.Stderr, "Provide the --help flag to display full help")
 	os.Exit(1)
@@ -265,9 +265,7 @@ func IssueReporterCommand(nodeID, command string, cmd *cobra.Command) error {
 	// find the reporter
 	for _, value := range reporters.Reporters {
 		if value.NodeID == nodeID {
-			if value.State == "Error" {
-				// ignore
-			} else {
+			if value.State != "Error" {
 				if command == start && value.State != "Stopped" {
 					return fmt.Errorf("the reporter on node %s is already started", nodeID)
 				} else if command == "stop" && value.State == "Stopped" {

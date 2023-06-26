@@ -69,11 +69,7 @@ populated constructed.`,
 			return err
 		}
 
-		if err = setContext(cmd, connection); err != nil {
-			return err
-		}
-
-		return nil
+		return setContext(cmd, connection)
 	},
 }
 
@@ -1498,9 +1494,7 @@ func runClusterOperation(cmd *cobra.Command, connectionName, operation string) e
 		count := 0
 		for _, v := range processIDs {
 			proc, err = os.FindProcess(v)
-			if err != nil {
-				// silently ignore as it may have gone already
-			} else {
+			if err == nil {
 				err = proc.Kill()
 				if err != nil {
 					// ignore as process may have exited

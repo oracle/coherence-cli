@@ -165,7 +165,7 @@ func TestFormatConnectionMillis(t *testing.T) {
 	g.Expect(formatConnectionMillis(3*day + hour)).To(Equal("3d 01h 00m 00s"))
 }
 
-func TestTableFormatting(t *testing.T) {
+func TestTableFormatting(_ *testing.T) {
 	//g := NewGomegaWithT(t)
 	table := newFormattedTable().
 		WithHeader("ONE", "TWO", "THREE IS LONG").

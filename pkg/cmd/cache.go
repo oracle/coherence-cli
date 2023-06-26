@@ -556,7 +556,7 @@ batchFactor, refreshFactor or requeueThreshold.`,
 				defer wg.Done()
 				_, err1 = dataFetcher.SetCacheAttribute(nodeId, serviceName, cacheName, tier, attributeNameCache, floatValue)
 				if err1 != nil {
-					if strings.Contains(err1.Error(), "404") {
+					if strings.Contains(err1.Error(), "404") { //nolint:all
 						// ignore as this is likely trying to set a value for a back tier where the member is a near cache
 					} else {
 						errorSink.AppendError(err1)
