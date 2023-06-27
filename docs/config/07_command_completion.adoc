@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 
-    Copyright (c) 2021, Oracle and/or its affiliates.
+    Copyright (c) 2021, 2023 Oracle and/or its affiliates.
     Licensed under the Universal Permissive License v 1.0 as shown at
     https://oss.oracle.com/licenses/upl.
 
@@ -59,7 +59,7 @@ Complete the `describe` command by typing the following and then `TAB`.
 $ cohctl des
 ----
 
-Next, when the following is displayed, press `TAB` twice and you will see the available describe options.
+Next, when the following is displayed, press `TAB` twice, and you will see the available describe options.
 
 [source,bash]
 ----
@@ -69,4 +69,15 @@ cohctl describe
 cache        (describe a cache)         machine      (describe a machine)       reporter     (describe a reporter)
 cluster      (describe a cluster)       member       (describe a member)        service      (describe a service)
 http-server  (describe a http server)   proxy        (describe a proxy server)
+----
+
+You can then also use command completion on any `describe` operation and the CLI will display a list
+of possible options. For example:
+
+If you typed `cohctl describe cache`, then pressed `TAB` twice, it will show the list of caches that you can describe:
+
+[source,bash]
+----
+$ cohctl describe cache
+customers  orders     products
 ----
