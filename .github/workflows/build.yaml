@@ -77,7 +77,7 @@ jobs:
     - name: E2E Local Tests
       shell: bash
       run: |
-        COHERENCE_BASE_IMAGE=gcr.io/distroless/java17 PROFILES=,executor COHERENCE_VERSION=22.09 make clean build-test-images test-e2e-standalone
+        COHERENCE_BASE_IMAGE=gcr.io/distroless/java17 PROFILES=,executor COHERENCE_VERSION=22.06.4 make clean build-test-images test-e2e-standalone
 
     - name: Discovery Tests
       shell: bash

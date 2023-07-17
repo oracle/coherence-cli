@@ -16,13 +16,13 @@
 
 # The version of the CLI being build - this should be a valid SemVer format
 VERSION ?= 1.5.1
-MILESTONE ?= -RC1
+MILESTONE ?=
 
 # Maven version is always 1.0.0 as it is only for testing
 MVN_VERSION ?= 1.0.0
 
 # Coherence CE version to run base tests against
-COHERENCE_VERSION ?= 22.06.4
+COHERENCE_VERSION ?= 22.06.5
 COHERENCE_GROUP_ID ?= com.oracle.coherence.ce
 COHERENCE_WKA1 ?= server1
 COHERENCE_WKA2 ?= server1
