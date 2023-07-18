@@ -23,7 +23,7 @@ jobs:
       fail-fast: false
       matrix:
         coherenceVersion:
-          - 14.1.1-0-14-SNAPSHOT
+          - 14.1.1-0-15-SNAPSHOT
 
 #   Checkout the source, we need a depth of zero to fetch all of the history otherwise
 #   the copyright check cannot work out the date of the files from Git.

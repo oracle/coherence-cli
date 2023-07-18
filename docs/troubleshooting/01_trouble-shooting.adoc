@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 
-    Copyright (c) 2021, 2022 Oracle and/or its affiliates.
+    Copyright (c) 2021, 2023 Oracle and/or its affiliates.
     Licensed under the Universal Permissive License v 1.0 as shown at
     https://oss.oracle.com/licenses/upl.
 
@@ -22,6 +22,7 @@ This page will be updated and maintained over time to include common issues we s
 * <<wls, Issues adding correct cluster when WebLogic Server has multiple Coherence clusters>>
 * <<windows, Issues setting reporter path on Windows>>
 * <<create, Issues creating or starting clusters using `cohctl create cluster`>>
+* <<completion, Issues using command completion with services, caches or topics with $ in the name>>
 
 [#bad]
 === Bad CPU type in executable on macOS
@@ -236,7 +237,9 @@ the following to check if there are any issues.
 NOTE: The main reasons for clusters not starting up are that you have not used the correct JDK version.
 For example for 22.09 and above clusters you must have JDK 17+.
 
-==== Check the logfile for the cluster
+==== Solution
+
+===== Check the logfile for the cluster
 
 The logfiles for a created cluster are in the following location `$HOME/.cohctl/logs/<cluster>` and
 you should check these if you cluster is not starting up.
@@ -255,3 +258,45 @@ java.lang.UnsupportedClassVersionError: com/tangosol/net/Coherence has been comp
    (class file version 61.0), this version of the Java Runtime only recognizes class file versions up to 55.0
 ----
 
+[#completion]
+=== Issues using command completion with services, caches or topics with $ in the name
+
+If you use command completion, and you try to describe services, caches or topics with `$` in the name then the
+command completion may not work correctly.
+
+For example, using `cohctl get services` you see:
+
+[source,bash]
+----
+cohctl get services
+Using cluster connection 'main' from current context.
+
+SERVICE NAME            TYPE              MEMBERS  STATUS HA  STORAGE  PARTITIONS
+"$SYS:Config"           DistributedCache        3  NODE-SAFE        3         257
+"$SYS:HealthHttpProxy"  Proxy                   3  n/a             -1          -1
+"$SYS:SystemProxy"      Proxy                   3  n/a             -1          -1
+ManagementHttpProxy     Proxy                   1  n/a             -1          -1
+PartitionedCache        DistributedCache        3  NODE-SAFE        3         257
+PartitionedTopic        PagedTopic              3  NODE-SAFE        3         257
+Proxy                   Proxy                   3  n/a             -1          -1
+----
+
+If you try to use `cohctl describe service` then press `TAB` twice, you will see:
+
+[source,bash]
+----
+$ cohctl describe service
+"$SYS:Config"           "$SYS:HealthHttpProxy"  "$SYS:SystemProxy"      ManagementHttpProxy     PartitionedCache        PartitionedTopic        Proxy
+----
+
+You cannot complete any services using command completion with `$` in their name using `TAB` twice.
+
+==== Solution
+
+For any services that have $ such as `"$SYS:Config"` you need to copy/paste the service name to describe
+and enclose the name in single quote. For example:
+
+[source,bash]
+----
+cohctl describe service '"$SYS:Config"'
+----
