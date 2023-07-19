@@ -7,7 +7,9 @@
 package cmd
 
 import (
+	"fmt"
 	"github.com/spf13/cobra"
+	"strings"
 )
 
 import (
@@ -55,7 +57,7 @@ func completionCaches(_ *cobra.Command, _ []string, _ string) ([]string, cobra.S
 		caches = append(caches, v.CacheName)
 	}
 
-	return caches, cobra.ShellCompDirectiveNoFileComp
+	return escapeValues(caches, cobra.ShellCompDirectiveNoFileComp)
 }
 
 // completionTopics provides a completion function to return all topic names.
@@ -77,7 +79,7 @@ func completionTopics(_ *cobra.Command, _ []string, _ string) ([]string, cobra.S
 		topics = append(topics, v.TopicName)
 	}
 
-	return topics, cobra.ShellCompDirectiveNoFileComp
+	return escapeValues(topics, cobra.ShellCompDirectiveNoFileComp)
 }
 
 // completionService provides a completion function to return all services in a cluster.
@@ -105,7 +107,7 @@ func completionService(_ *cobra.Command, _ []string, _ string) ([]string, cobra.
 		results = append(results, v.ServiceName)
 	}
 
-	return results, cobra.ShellCompDirectiveNoFileComp
+	return escapeValues(results, cobra.ShellCompDirectiveNoFileComp)
 }
 
 // completionPersistenceService provides a completion function to return all persistence services in a cluster.
@@ -120,7 +122,7 @@ func completionPersistenceService(_ *cobra.Command, _ []string, _ string) ([]str
 		return emptySlice, cobra.ShellCompDirectiveNoFileComp
 	}
 
-	return servicesResult, cobra.ShellCompDirectiveNoFileComp
+	return escapeValues(servicesResult, cobra.ShellCompDirectiveNoFileComp)
 }
 
 // completionFederatedService provides a completion function to return all federated services in a cluster.
@@ -140,7 +142,7 @@ func completionFederatedService(_ *cobra.Command, _ []string, _ string) ([]strin
 		return emptySlice, cobra.ShellCompDirectiveNoFileComp
 	}
 
-	return federatedServices, cobra.ShellCompDirectiveNoFileComp
+	return escapeValues(federatedServices, cobra.ShellCompDirectiveNoFileComp)
 }
 
 // completionNodeID provides a completion function to return all node ids in a cluster.
@@ -281,4 +283,24 @@ func getAllClusters(manualOnly bool) []string {
 		}
 	}
 	return clusters
+}
+
+// escapeValues escapes any values so that if we have values with $ they are not
+// interpreted by the shell.
+func escapeValues(values []string, directive cobra.ShellCompDirective) ([]string, cobra.ShellCompDirective) {
+	if isWindows() {
+		return values, directive
+	}
+
+	for i, v := range values {
+		if strings.Contains(v, ":") {
+			// must be a service name so enclose in double quotes and escape the $
+			values[i] = fmt.Sprintf("\\\"%s\\\"", strings.ReplaceAll(v, "$", "\\$"))
+		} else if strings.Contains(v, "$") {
+			// must just be a topic or service name so enclose in single quotes
+			values[i] = fmt.Sprintf("\\'%s\\'", strings.ReplaceAll(v, "$", "\\$"))
+		}
+	}
+
+	return values, directive
 }

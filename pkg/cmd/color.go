@@ -20,7 +20,7 @@ const (
 
 // setColorCmd represents the set color command.
 var setColorCmd = &cobra.Command{
-	Use:   "color {on|off}}",
+	Use:   "color {on|off}",
 	Short: "set color formatting to be on or off",
 	Long: `The 'set color' command sets color formatting to on or off. If 'on' then formatting
 of output when using a terminal highlights columns requiring attention.`,

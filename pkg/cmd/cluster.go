@@ -832,7 +832,7 @@ you can confirm if you wish to add the discovered clusters.`,
 			if urlsLen == 1 {
 				discoveredClusters[i].SelectedURL = urls[0]
 			} else {
-				cmd.Printf("\nCluster: %s, Name Service address: %s%d\n", cluster.ClusterName, cluster.Host, cluster.NSPort)
+				cmd.Printf("\nCluster: %s, Name Service address: %s:%d\n", cluster.ClusterName, cluster.Host, cluster.NSPort)
 
 				header := "Urls: "
 				for i, url := range urls {
@@ -990,7 +990,7 @@ var (
 )
 
 const (
-	defaultCoherenceVersion = "22.06.4"
+	defaultCoherenceVersion = "22.06.5"
 	startClusterCommand     = "start cluster"
 	scaleClusterCommand     = "scale cluster"
 	stopClusterCommand      = "stop cluster"

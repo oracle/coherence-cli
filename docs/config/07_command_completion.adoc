@@ -48,7 +48,9 @@ Once you have generated the script, you can source it.
 $ source ~/cohctl-completion.sh
 ----
 
-Once it is sourced the script, you can type `cohctl` and then press `TAB`
+=== Using Command Completion
+
+Once your script is sourced, you can type `cohctl` and then press `TAB`
 to auto-complete a command and `TAB` twice, and it will show completion
 for a sub command.
 
@@ -71,7 +73,9 @@ cluster      (describe a cluster)       member       (describe a member)        
 http-server  (describe a http server)   proxy        (describe a proxy server)
 ----
 
-You can then also use command completion on any `describe` operation and the CLI will display a list
+=== Command Completion for Describe Commands
+
+You can use command completion on any `describe` operation and the CLI will display a list
 of possible options. For example:
 
 If you typed `cohctl describe cache`, then pressed `TAB` twice, it will show the list of caches that you can describe:
