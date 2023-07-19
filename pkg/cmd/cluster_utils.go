@@ -68,7 +68,7 @@ var (
 	defaultJars = []*config.DefaultDependency{
 		{GroupID: ceGroupID, Artifact: "coherence", IsCoherence: true},
 		{GroupID: ceGroupID, Artifact: "coherence-json", IsCoherence: true},
-		{GroupID: "org.jline", Artifact: "jline", IsCoherence: false, Version: "3.20.0"},
+		{GroupID: "org.jline", Artifact: "jline", IsCoherence: false, Version: "3.23.0"},
 	}
 
 	// list of additional coherence artifacts
