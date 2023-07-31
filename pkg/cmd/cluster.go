@@ -1213,8 +1213,8 @@ NOTE: This is an experimental feature and my be altered or removed in the future
 		}
 
 		// generate startup arguments
-		arguments := fmt.Sprintf("-Dcoherence.cluster=%s -Dcoherence.clusterport=%d -Dcoherence.ttl=0 -Dcoherence.wka=%s -Djava.net.preferIPv4Stack=true",
-			clusterName, clusterPortParam, wkaParam)
+		arguments := fmt.Sprintf("-Dcoherence.cluster=%s -Dcoherence.clusterport=%d -Dcoherence.ttl=0 -Dcoherence.wka=%s -Djava.net.preferIPv4Stack=true"+
+			" -Djava.rmi.server.hostname=%s", clusterName, clusterPortParam, wkaParam, wkaParam)
 
 		// add the new cluster
 		newCluster := ClusterConnection{Name: clusterName, ConnectionType: "http",
