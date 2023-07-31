@@ -353,7 +353,8 @@ func getCacheServerArgs(member string, httpPort int32, version string) []string 
 	)
 	if httpPort != -1 {
 		baseArgs = append(baseArgs, "-Dcoherence.management.http=all", fmt.Sprintf("-Dcoherence.management.http.port=%d", httpPort),
-			"-Dcoherence.management=all")
+			"-Dcoherence.management=all", "-Dcom.sun.management.jmxremote.ssl=false", "-Dcom.sun.management.jmxremote",
+			"-Dcom.sun.management.jmxremote.authenticate=false")
 	}
 
 	// if default heap is overridden, then use this
