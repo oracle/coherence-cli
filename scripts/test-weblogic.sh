@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #
-# Copyright (c) 2022 Oracle and/or its affiliates.
+# Copyright (c) 2022, 2023 Oracle and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at
 # https://oss.oracle.com/licenses/upl.
 #
@@ -39,6 +39,9 @@ function runCommand() {
     echo "welcome1" | $COHCTL $* > $OUTPUT
     cat $OUTPUT
 }
+
+# Sleep to ensure WLS is ready to accept requests
+sleep 30
 
 runCommand version
 
