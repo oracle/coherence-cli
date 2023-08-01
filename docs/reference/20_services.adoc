@@ -17,7 +17,7 @@ There are various commands that allow you to work with and manage cluster servic
 * <<describe-service, `cohctl describe service`>> - shows information related to a specific service
 * <<get-service-storage, `cohctl get service-storage`>> - displays partitioned services storage information for a cluster
 * <<get-service-members, `cohctl get service-members`>> - displays service members
-* <<get-service-distributions, `cohctl get service-distributions`>> - displays partition distributions information for a service"
+* <<get-service-distributions, `cohctl get service-distributions`>> - displays partition distribution information for a service"
 * <<start-service, `cohctl start service`>> - starts a specific service on a cluster member
 * <<stop-service, `cohctl stop service`>> - forces a specific service to stop on a cluster member
 * <<shutdown-service, `cohctl shutdown service`>> - performs a controlled shut-down of a specific service on a cluster member
