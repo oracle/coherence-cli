@@ -274,6 +274,84 @@ information regarding partition sizes.`,
 	},
 }
 
+// getServiceDistributionsCmd represents the get service-distributions command.
+var getServiceDistributionsCmd = &cobra.Command{
+	Use:   "service-distributions service-name",
+	Short: "display partition distributions information for a service",
+	Long:  `The 'get service-distributions' command displays partition distributions for a service.`,
+	Args: func(cmd *cobra.Command, args []string) error {
+		if len(args) != 1 {
+			displayErrorAndExit(cmd, provideServiceName)
+		}
+		return nil
+	},
+	ValidArgsFunction: completionDistributedService,
+	RunE: func(cmd *cobra.Command, args []string) error {
+		var (
+			err         error
+			dataFetcher fetcher.Fetcher
+			connection  string
+		)
+
+		connection, dataFetcher, err = GetConnectionAndDataFetcher()
+		if err != nil {
+			return err
+		}
+
+		servicesResult, err := GetDistributedServices(dataFetcher)
+		if err != nil {
+			return err
+		}
+
+		if !utils.SliceContains(servicesResult, args[0]) {
+			return fmt.Errorf(unableToFindService, args[0])
+		}
+
+		for {
+			var (
+				distributionsData []byte
+				distributions     config.Distributions
+			)
+			distributionsData, err = dataFetcher.GetScheduledDistributionsJSON(args[0])
+			if err != nil {
+				return err
+			}
+
+			if strings.Contains(OutputFormat, constants.JSONPATH) || OutputFormat == constants.JSON {
+				if strings.Contains(OutputFormat, constants.JSONPATH) {
+					result, err := utils.GetJSONPathResults(distributionsData, OutputFormat)
+					if err != nil {
+						return err
+					}
+					cmd.Println(result)
+				} else {
+					cmd.Println(string(distributionsData))
+				}
+			} else {
+				printWatchHeader(cmd)
+
+				err = json.Unmarshal(distributionsData, &distributions)
+				if err != nil {
+					return err
+				}
+
+				cmd.Println(FormatCurrentCluster(connection))
+				cmd.Println(distributions.ScheduledDistributions)
+			}
+
+			// check to see if we should exit if we are not watching
+			if !isWatchEnabled() {
+				break
+			}
+
+			// we are watching so sleep and then repeat until CTRL-C
+			time.Sleep(time.Duration(watchDelay) * time.Second)
+		}
+
+		return nil
+	},
+}
+
 // getServiceMembersCmd represents the get service-members command.
 var getServiceMembersCmd = &cobra.Command{
 	Use:               "service-members service-name",

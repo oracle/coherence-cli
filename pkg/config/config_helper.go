@@ -696,3 +696,8 @@ type StatusValues struct {
 type SingleStatusValue struct {
 	Status string `json:"status"`
 }
+
+// Distributions contains scheduled distributions
+type Distributions struct {
+	ScheduledDistributions string `json:"scheduledDistributions"`
+}

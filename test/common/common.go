@@ -312,6 +312,9 @@ func RunTestServicesCommands(t *testing.T) {
 	// test get service-members
 	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "NODE ID,PartitionedCache", configArg, file, "get", "service-members", "PartitionedCache")
 
+	// test get service-distributions
+	test_utils.EnsureCommandContains(g, t, cliCmd, "No distributions are currently scheduled for this service", configArg, file, "get", "service-distributions", "PartitionedCache")
+
 	// test get services-storage
 	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "NODES,AVG PARTITION", configArg, file, "get", "service-storage")
 
