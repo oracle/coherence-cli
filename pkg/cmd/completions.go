@@ -125,6 +125,21 @@ func completionPersistenceService(_ *cobra.Command, _ []string, _ string) ([]str
 	return escapeValues(servicesResult, cobra.ShellCompDirectiveNoFileComp)
 }
 
+// completionDistributedService provides a completion function to return all distributed services in a cluster.
+func completionDistributedService(_ *cobra.Command, _ []string, _ string) ([]string, cobra.ShellCompDirective) {
+	_, dataFetcher, err := GetConnectionAndDataFetcher()
+	if err != nil {
+		return emptySlice, cobra.ShellCompDirectiveNoFileComp
+	}
+
+	servicesResult, err := GetDistributedServices(dataFetcher)
+	if err != nil {
+		return emptySlice, cobra.ShellCompDirectiveNoFileComp
+	}
+
+	return escapeValues(servicesResult, cobra.ShellCompDirectiveNoFileComp)
+}
+
 // completionFederatedService provides a completion function to return all federated services in a cluster.
 func completionElasticData(_ *cobra.Command, _ []string, _ string) ([]string, cobra.ShellCompDirective) {
 	return []string{ram, flash}, cobra.ShellCompDirectiveNoFileComp

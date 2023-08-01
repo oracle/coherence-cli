@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 
-    Copyright (c) 2021, 2022 Oracle and/or its affiliates.
+    Copyright (c) 2021, 2023 Oracle and/or its affiliates.
     Licensed under the Universal Permissive License v 1.0 as shown at
     https://oss.oracle.com/licenses/upl.
 
@@ -17,6 +17,7 @@ There are various commands that allow you to work with and manage cluster servic
 * <<describe-service, `cohctl describe service`>> - shows information related to a specific service
 * <<get-service-storage, `cohctl get service-storage`>> - displays partitioned services storage information for a cluster
 * <<get-service-members, `cohctl get service-members`>> - displays service members
+* <<get-service-distributions, `cohctl get service-distributions`>> - displays partition distribution information for a service"
 * <<start-service, `cohctl start service`>> - starts a specific service on a cluster member
 * <<stop-service, `cohctl stop service`>> - forces a specific service to stop on a cluster member
 * <<shutdown-service, `cohctl shutdown service`>> - performs a controlled shut-down of a specific service on a cluster member
@@ -104,6 +105,39 @@ NODE ID  THREADS  IDLE  THREAD UTIL  MIN THREADS    MAX THREADS  TASK COUNT  TAS
       1        1     1        0.00%            1  2,147,483,647           0             0             85            86      6.0946       0.0000
       2        1     1        0.00%            1  2,147,483,647           0             0             86            86      9.2803       0.0000
       3        1     1        0.00%            1  2,147,483,647           0             0             86            85      9.7037       0.0000
+----
+
+[#get-service-distributions]
+==== Get Service Distributions
+
+include::../../build/_output/docs-gen/get_service_distributions.adoc[tag=text]
+
+*Examples*
+
+[source,bash]
+----
+$ cohctl get service-distributions PartitionedCache -c local
+
+Partition Distributions Scheduled for Service "PartitionedCache"
+
+Machine localhost
+    Member 1:
+        - scheduled to receive 1 Backup partitions:
+           -- 1 from member 6
+    Member 7:
+        - scheduled to receive 16 Primary partitions:
+           -- 16 from member 3
+        - scheduled to receive 35 Backup partitions:
+           -- 15 from member 1
+           -- 16 from member 3
+           -- 4 from member 6
+    Member 6:
+        - scheduled to receive 34 Primary partitions:
+           -- 18 from member 1
+           -- 16 from member 3
+        - scheduled to receive 27 Backup partitions:
+           -- 7 from member 3
+           -- 20 from member 7
 ----
 
 [#start-service]

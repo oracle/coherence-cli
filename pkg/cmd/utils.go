@@ -99,6 +99,23 @@ func GetPersistenceServices(dataFetcher fetcher.Fetcher) ([]string, error) {
 	return persistenceServices, nil
 }
 
+// GetDistributedServices returns a list of distributed services.
+func GetDistributedServices(dataFetcher fetcher.Fetcher) ([]string, error) {
+	servicesSummary, err := GetServices(dataFetcher)
+	if err != nil {
+		return nil, err
+	}
+
+	distributedServices := make([]string, 0)
+	for _, value := range servicesSummary.Services {
+		if utils.IsDistributedCache(value.ServiceType) {
+			distributedServices = append(distributedServices, value.ServiceName)
+		}
+	}
+
+	return distributedServices, nil
+}
+
 // GetServices returns a list of services.
 func GetServices(dataFetcher fetcher.Fetcher) (config.ServicesSummaries, error) {
 	var (
