@@ -43,6 +43,7 @@ const (
 	serviceUse          = "service service-name"
 	provideServiceName  = "you must provide a service name"
 	unableToFindService = "unable to find service with service name '%s'"
+	noDistributionsData = "No distributions data is available"
 )
 
 // getServicesCmd represents the get services command.
@@ -330,9 +331,13 @@ var getServiceDistributionsCmd = &cobra.Command{
 			} else {
 				printWatchHeader(cmd)
 
-				err = json.Unmarshal(distributionsData, &distributions)
-				if err != nil {
-					return err
+				if len(distributionsData) != 0 {
+					err = json.Unmarshal(distributionsData, &distributions)
+					if err != nil {
+						return err
+					}
+				} else {
+					distributions.ScheduledDistributions = noDistributionsData
 				}
 
 				cmd.Println(FormatCurrentCluster(connection))
@@ -668,9 +673,13 @@ service is a cache service.`,
 				sb.WriteString("-----------------------\n")
 				sb.WriteString(value)
 
-				value, err = FormatJSONForDescribe(distributionsData, true)
-				if err != nil {
-					return err
+				if len(distributionsData) != 0 {
+					value, err = FormatJSONForDescribe(distributionsData, true)
+					if err != nil {
+						return err
+					}
+				} else {
+					value = noDistributionsData
 				}
 
 				if value != "" {
@@ -679,10 +688,14 @@ service is a cache service.`,
 					sb.WriteString(value)
 				}
 
-				value, err = FormatJSONForDescribe(partitionsData, true,
-					"Service", "Strategy Name")
-				if err != nil {
-					return err
+				if string(partitionsData) != "" {
+					value, err = FormatJSONForDescribe(partitionsData, true,
+						"Service", "Strategy Name")
+					if err != nil {
+						return err
+					}
+				} else {
+					value = ""
 				}
 
 				if value != "" {
