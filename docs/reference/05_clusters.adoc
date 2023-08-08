@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 
-    Copyright (c) 2021, 2022 Oracle and/or its affiliates.
+    Copyright (c) 2021, 2023 Oracle and/or its affiliates.
     Licensed under the Universal Permissive License v 1.0 as shown at
     https://oss.oracle.com/licenses/upl.
 
@@ -28,7 +28,11 @@ include::../../build/_output/docs-gen/add_cluster.adoc[tag=text]
 
 [source,bash]
 ----
-$ cohctl add cluster local -u http://localhost:30000/management/coherence/cluster
+cohctl add cluster local -u http://localhost:30000/management/coherence/cluster
+----
+Output:
+[source,bash]
+----
 Added cluster local with type http and URL http://localhost:30000/management/coherence/cluster
 ----
 
@@ -50,7 +54,11 @@ format.
 
 [source,bash]
 ----
-$ cohctl add cluster local -u localhost:30000
+cohctl add cluster local -u localhost:30000
+----
+Output:
+[source,bash]
+----
 Added cluster local with type http and URL http://localhost:30000/management/coherence/cluster
 ----
 
@@ -67,7 +75,11 @@ include::../../build/_output/docs-gen/discover_clusters.adoc[tag=text]
 
 [source,bash]
 ----
-$ cohctl discover clusters
+cohctl discover clusters
+----
+Output:
+[source,bash]
+----
 Attempting to discover clusters using the following NameService addresses: [localhost]
 Discovering Management URL for my-cluster on localhost:7574 ...
 Discovering Management URL for test-cluster on localhost:63868 ...
@@ -84,10 +96,14 @@ my-cluster  my-cluster    localhost     7574  http://127.0.0.1:30000/management/
 
 Are you sure you want to add the above 1 cluster(s)? (y/n) y
 Added cluster my-cluster with type http and URL http://127.0.0.1:30000/management/coherence/cluster
+----
+Display the clusters
 
-coherence-cli$ (master)$ cohctl get clusters
+[source,bash]
+----
+cohctl get clusters
 CONNECTION  TYPE  URL                                                  VERSION     CLUSTER NAME  TYPE        CTX  CREATED
-my-cluster  http  http://127.0.0.1:30000/management/coherence/cluster  14.1.2.0.0  my-cluster    Standalone       N
+my-cluster  http  http://127.0.0.1:30000/management/coherence/cluster  14.1.1.0.13 my-cluster    Standalone       N
 ----
 
 NOTE: The cluster connection is automatically generated from the cluster name. If it already exists you will
@@ -104,7 +120,11 @@ include::../../build/_output/docs-gen/remove_cluster.adoc[tag=text]
 
 [source,bash]
 ----
-$ cohctl remove cluster local
+cohctl remove cluster local
+----
+Output:
+[source,bash]
+----
 Are you sure you want to remove the connection to cluster local? (y/n) y
 Removed connection for cluster local
 ----
@@ -121,8 +141,11 @@ include::../../build/_output/docs-gen/get_clusters.adoc[tag=text]
 
 [source,bash]
 ----
-$ cohctl get clusters
-
+cohctl get clusters
+----
+Output:
+[source,bash]
+----
 CONNECTION  TYPE  URL                                                  VERSION  CLUSTER NAME  CLUSTER TYPE  CTX LOCAL
 local       http  http://localhost:30000/management/coherence/cluster  21.06.1  my-cluster    Standalone        false
 ----
@@ -139,7 +162,11 @@ and may take a while if you have a large number of connections. See below
 
 [source,bash]
 ----
-$ cohctl get clusters -o wide
+cohctl get clusters -o wide
+----
+Output:
+[source,bash]
+----
 
 CONNECTION  TYPE  URL                                                  VERSION  CLUSTER NAME  CLUSTER TYPE  CTX LOCAL RUNNING
 local       http  http://localhost:30000/management/coherence/cluster  21.06.1  my-cluster    Standalone        false true

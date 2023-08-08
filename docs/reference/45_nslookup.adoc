@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 
-    Copyright (c) 2021, 2022 Oracle and/or its affiliates.
+    Copyright (c) 2021, 2023 Oracle and/or its affiliates.
     Licensed under the Universal Permissive License v 1.0 as shown at
     https://oss.oracle.com/licenses/upl.
 
@@ -30,7 +30,11 @@ Display the name of the cluster on localhost port 7574.
 
 [source,bash]
 ----
-$ cohctl nslookup -q Cluster/name
+cohctl nslookup -q Cluster/name
+----
+Output:
+[source,bash]
+----
 cluster1
 ----
 
@@ -38,7 +42,11 @@ Display the cluster information for the cluster on localhost:7574.
 
 [source,bash]
 ----
-$ cohctl nslookup -q Cluster/info localhost:7574
+cohctl nslookup -q Cluster/info localhost:7574
+----
+Output:
+[source,bash]
+----
 Name=cluster1, ClusterPort=7574
 
 WellKnownAddressList(
@@ -68,10 +76,20 @@ Display the local cluster and foreign clusters registered with the Name Service 
 
 [source,bash]
 ----
-$ cohctl nslookup -q Cluster/name
+cohctl nslookup -q Cluster/name
+----
+Output:
+[source,bash]
+----
 cluster1
-
-$ cohctl nslookup -q NameService/string/Cluster/foreign
+----
+[source,bash]
+----
+cohctl nslookup -q NameService/string/Cluster/foreign
+----
+Output:
+[source,bash]
+----
 [cluster3, cluster2]
 ----
 
@@ -79,7 +97,11 @@ Display the Management over REST endpoint for the local cluster.
 
 [source,bash]
 ----
-$ cohctl nslookup -q NameService/string/management/HTTPManagementURL
+cohctl nslookup -q NameService/string/management/HTTPManagementURL
+----
+Output:
+[source,bash]
+----
 [http://127.0.0.1:51078/management/coherence/cluster]
 ----
 
@@ -87,7 +109,11 @@ Display the local Name Serivce port for a foreign registered cluster.
 
 [source,bash]
 ----
-$ cohctl nslookup -q NameService/string/Cluster/foreign/cluster2/NameService/localPort
+cohctl nslookup -q NameService/string/Cluster/foreign/cluster2/NameService/localPort
+----
+Output:
+[source,bash]
+----
 51065
 ----
 

@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 
-    Copyright (c) 2021, 2022 Oracle and/or its affiliates.
+    Copyright (c) 2021, 2023 Oracle and/or its affiliates.
     Licensed under the Universal Permissive License v 1.0 as shown at
     https://oss.oracle.com/licenses/upl.
 
@@ -30,8 +30,11 @@ Display elastic data.
 
 [source,bash]
 ----
-$ cohctl get http-servers -c local -m
-
+cohctl get http-servers -c local -m
+----
+Output:
+[source,bash]
+----
 NAME            USED FILES  TOTAL FILES  % USED  MAX FILE SIZE  USED SPACE   COMMITTED  HIGHEST LOAD  COMPACTIONS  EXHAUSTIVE
 RamJournalRM            80       19,600   0.41%           1 MB        0 MB       80 MB        0.0041            0           0
 FlashJournalRM          81       41,391   0.20%        2,048 MB       0 MB  162,000 GB        0.0020            0           0
@@ -46,7 +49,7 @@ include::../../build/_output/docs-gen/describe_elastic_data.adoc[tag=text]
 
 [source,bash]
 ----
-$ cohctl describe elastic-data RamJournalRM -c local
+cohctl describe elastic-data RamJournalRM -c local
 ----
 
 [#compact-elastic-data]
@@ -60,8 +63,11 @@ Compact flash journal for all nodes.
 
 [source,bash]
 ----
-$ cohctl compact elastic-data FlashJournalRM -c local
-
+cohctl compact elastic-data FlashJournalRM -c local
+----
+Output:
+[source,bash]
+----
 Are you sure you want to compact flash for all 2 nodes? (y/n) y
 operation completed
 ----
@@ -70,8 +76,11 @@ Compact ram journal for 1 node.
 
 [source,bash]
 ----
-$ cohctl compact elastic-data RamJournalRM -n 1 -c local
-
+cohctl compact elastic-data RamJournalRM -n 1 -c local
+----
+Output:
+[source,bash]
+----
 Are you sure you want to compact ram for 1 node(s)? (y/n) y
 operation completed
 ----

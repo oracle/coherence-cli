@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 
-    Copyright (c) 2021, 2022 Oracle and/or its affiliates.
+    Copyright (c) 2021, 2023 Oracle and/or its affiliates.
     Licensed under the Universal Permissive License v 1.0 as shown at
     https://oss.oracle.com/licenses/upl.
 
@@ -27,8 +27,11 @@ Get members and display the memory in GB using `-g` option.
 
 [source,bash]
 ----
-$ cohctl get machines -c local -g
-
+cohctl get machines -c local -g
+----
+Output:
+[source,bash]
+----
 MACHINE       PROCESSORS    LOAD  TOTAL MEMORY  FREE MEMORY  % FREE  OS        ARCH    VERSION
 192.168.1.117          8  2.8774       32.0 GB       0.5 GB   1.59%  Mac OS X  x86_64  10.16
 ----
@@ -44,8 +47,11 @@ Describe machine 192.168.1.117.
 
 [source,bash]
 ----
-$ cohctl describe machine 192.168.1.117   -c local
-
+cohctl describe machine 192.168.1.117 -c local
+----
+Output:
+[source,bash]
+----
 Machine Name                 :  192.168.1.117
 Arch                         :  amd64
 Available Processors         :  4

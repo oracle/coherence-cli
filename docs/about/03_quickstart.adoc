@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 
-    Copyright (c) 2021, 2022 Oracle and/or its affiliates.
+    Copyright (c) 2021, 2023 Oracle and/or its affiliates.
     Licensed under the Universal Permissive License v 1.0 as shown at
     https://oss.oracle.com/licenses/upl.
 
@@ -55,11 +55,14 @@ Issue the following command to show the version details of the tool you are usin
 
 [source,bash,subs="attributes"]
 ----
-$ cohctl version
-
+cohctl version
+----
+Output:
+[source,bash,subs="attributes"]
+----
 Coherence Command Line Interface
 CLI Version: {cli-version}
-Date:        2021-10-13T02:36:48Z
+Date:        2023-07-13T02:36:48Z
 Commit:      6d1266bb473dad224a3672367126381263af
 OS:          darwin
 OS Version:  amd64
@@ -76,8 +79,11 @@ These options are explained in detail in  <<docs/config/05_global_flags.adoc,Glo
 
 [source,bash]
 ----
-$ cohctl --help
-
+cohctl --help
+----
+Output:
+[source,bash]
+----
 include::../../build/_output/docs-gen/cohctl_help.adoc[tag=text]
 ----
 
@@ -92,12 +98,25 @@ connect to.
 
 [source,bash]
 ----
-$ cohctl add cluster local -u http://localhost:30000/management/coherence/cluster
+cohctl add cluster local -u http://localhost:30000/management/coherence/cluster
+----
+Output:
+[source,bash]
+----
 Added cluster local with type http and URL http://localhost:30000/management/coherence/cluster
+----
 
-$ cohctl get clusters
+Display the clusters
+
+[source,bash]
+----
+cohctl get clusters
+----
+Output:
+[source,bash]
+----
 CONNECTION  TYPE  URL                                                  VERSION  CLUSTER NAME  CLUSTER TYPE  CTX  LOCAL
-local       http  http://localhost:30000/management/coherence/cluster  21.12    my-cluster    Standalone         false
+local       http  http://localhost:30000/management/coherence/cluster  23.03    my-cluster    Standalone         false
 ----
 
 NOTE: If you are not using a Docker container, you can also use the `cohctl discover clusters` command to automatically discover clusters using the Name Service.
@@ -109,11 +128,15 @@ Now that the cluster connection is added, you can describe the cluster using the
 
 [source,bash]
 ----
-$ cohctl describe cluster local
+cohctl describe cluster local
+----
+Output:
+[source,bash]
+----
 CLUSTER
 -------
 Cluster Name:    my-cluster
-Version:         21.12.4
+Version:         23.03
 Cluster Size:    3
 License Mode:    Development
 Departure Count: 0
@@ -190,8 +213,11 @@ show the services for the cluster only.
 
 [source,bash]
 ----
-$ cohctl get services -c local
-
+cohctl get services -c local
+----
+Output:
+[source,bash]
+----
 SERVICE NAME         TYPE              MEMBERS  STATUS HA     STORAGE  PARTITIONS
 Proxy                Proxy                   2  n/a                -1          -1
 PartitionedCache     DistributedCache        2  MACHINE-SAFE        2          31
@@ -204,10 +230,14 @@ connection) you are working  with, so you don't have to specify `-c` each time.
 
 [source,bash]
 ----
-$ cohctl set context local
+cohctl set context local
+----
+Output:
+[source,bash]
+----
 Current context is now local
 
-$ cohctl get services
+cohctl get services
 Using cluster connection 'local' from current context.
 
 SERVICE NAME         TYPE              MEMBERS  STATUS HA     STORAGE  PARTITIONS
@@ -226,8 +256,11 @@ The output from a `describe` command will usually contain much more detailed inf
 
 [source,bash]
 ----
-$ cohctl describe service PartitionedCache
-
+cohctl describe service PartitionedCache
+----
+Output:
+[source,bash]
+----
 Using cluster connection 'local' from current context.
 
 SERVICE DETAILS
@@ -294,12 +327,17 @@ NOTE: The output above has been truncated for brevity.
 For all the `get` commands, you can add the `-w` option to watch the resource continuously until `CTRL-C`
 has been pressed.  In the example below we are watching the cluster members.
 
+NOTE: You can also use the `-W` option which will clear the screen between displaying data.
+
 NOTE: We are setting the `-m` option to show sizes in MB rather than the default of bytes.
 
 [source,bash]
 ----
-$ cohctl get members -w -m
-
+cohctl get members -w -m
+----
+Output:
+[source,bash]
+----
 2022-04-27 15:11:24.393725 +0800 AWST m=+0.031247503
 Using cluster connection 'local' from current context.
 
@@ -340,8 +378,11 @@ Below we are changing the format for the `get members` to be Json and piping it 
 
 [source,bash]
 ----
-$ cohctl get members -o json | jq
-
+cohctl get members -o json | jq
+----
+Output:
+[source,bash]
+----
 {
   "items": [
     {
@@ -362,7 +403,11 @@ where the requestAverageDuration > 15 millis.
 
 [source,bash]
 ----
-$ cohctl get services -o jsonpath="$.items[?(@.requestAverageDuration > 15)]..['nodeId','name','requestAverageDuration']"
+cohctl get services -o jsonpath="$.items[?(@.requestAverageDuration > 15)]..['nodeId','name','requestAverageDuration']"
+----
+Output:
+[source,bash]
+----
 [
   "2",
   "PartitionedCache2",

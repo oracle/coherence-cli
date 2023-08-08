@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 
-    Copyright (c) 2021, 2022 Oracle and/or its affiliates.
+    Copyright (c) 2021, 2023 Oracle and/or its affiliates.
     Licensed under the Universal Permissive License v 1.0 as shown at
     https://oss.oracle.com/licenses/upl.
 
@@ -29,7 +29,11 @@ include::../../build/_output/docs-gen/set_context.adoc[tag=text]
 
 [source,bash]
 ----
-$ cohctl set context local
+cohctl set context local
+----
+Output:
+[source,bash]
+----
 Current context is now local
 ----
 
@@ -42,7 +46,11 @@ include::../../build/_output/docs-gen/get_context.adoc[tag=text]
 
 [source,bash]
 ----
-$ cohctl get context
+cohctl get context
+----
+Output:
+[source,bash]
+----
 Current context: local
 ----
 
@@ -55,7 +63,11 @@ include::../../build/_output/docs-gen/clear_context.adoc[tag=text]
 
 [source,bash]
 ----
-$ cohctl clear context
+cohctl clear context
+----
+Output:
+[source,bash]
+----
 Current context was cleared
 ----
 

@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 
-    Copyright (c) 2021, 2022 Oracle and/or its affiliates.
+    Copyright (c) 2021, 2023 Oracle and/or its affiliates.
     Licensed under the Universal Permissive License v 1.0 as shown at
     https://oss.oracle.com/licenses/upl.
 
@@ -39,8 +39,11 @@ NOTE: Destinations are clusters that this cluster is sending data to.
 
 [source,bash]
 ----
-$ cohctl get federation destinations -c local -m
-
+cohctl get federation destinations -c local -m
+----
+Output:
+[source,bash]
+----
 SERVICE         DESTINATION        MEMBERS  STATES    DATA SENT  MSG SENT  REC SENT  CURR AVG BWIDTH
 FederatedCache  secondary-cluster        2  [PAUSED]       0 MB         0         0          0.0Mbps
 ----
@@ -49,8 +52,11 @@ Display all destinations in wide format.
 
 [source,bash]
 ----
-$ cohctl get federation destinations -c local -o wide -m
-
+cohctl get federation destinations -c local -o wide -m
+----
+Output:
+[source,bash]
+----
 SERVICE         DESTINATION        MEMBERS  STATES  DATA SENT  MSG SENT  REC SENT  CURR AVG BWIDTH  AVG APPLY  AVG ROUND TRIP  AVG BACKLOG DELAY  REPLICATE  PARTITIONS  ERRORS  UNACKED
 FederatedCache  secondary-cluster        2  [IDLE]     204 MB     1,028     3,348          0.0Mbps      338ms         1,393ms           37,770ms    100.00%          31       0        0
 ----
@@ -70,8 +76,11 @@ NOTE: Origins are clusters that this cluster is receiving data from.
 
 [source,bash]
 ----
-$ cohctl get federation destinations -c local
-
+cohctl get federation destinations -c local
+----
+Output:
+[source,bash]
+----
 cohctl get federation origins -c local -m
 
 SERVICE         ORIGIN             REMOTE CONNECTIONS  DATA REC  MSG REC  REC REC
@@ -82,8 +91,11 @@ Display all origins in wide format.
 
 [source,bash]
 ----
-$ cohctl get federation origins -c local -o wide -m
-
+cohctl get federation origins -c local -o wide -m
+----
+Output:
+[source,bash]
+----
 SERVICE         ORIGIN             REMOTE CONNECTIONS  DATA REC  MSG REC  REC REC  AVG APPLY  AVG BACKLOG DELAY
 FederatedCache  secondary-cluster                   2     20 MB      755    2,577    1,456ms              248ms
 ----
@@ -97,8 +109,11 @@ Set `traceLogging` to true for a federated service.
 
 [source,bash]
 ----
-$ cohctl set federation FederatedPartitionedPofCache -a traceLogging -v true -c local
-
+cohctl set federation FederatedPartitionedPofCache -a traceLogging -v true -c local
+----
+Output:
+[source,bash]
+----
 Are you sure you want to set the value of attribute traceLogging to true for service FederatedPartitionedPofCache? (y/n) y
 operation completed
 ----
@@ -116,8 +131,11 @@ NOTE: This indicates to display data being sent `to` the destination `secondary-
 
 [source,bash]
 ----
-$ cohctl describe federation -c local FederatedPartitionedPofCache -p secondary-cluster -T destinations
-
+cohctl describe federation -c local FederatedPartitionedPofCache -p secondary-cluster -T destinations
+----
+Output:
+[source,bash]
+----
 FEDERATION DETAILS
 ------------------
 Service:     FederatedCache
@@ -135,8 +153,11 @@ NOTE: This indicates to display data being sent `from` the destination `secondar
 
 [source,bash]
 ----
-$ cohctl describe federation -c local FederatedPartitionedPofCache -p secondary-cluster -T origins -o wide
-
+cohctl describe federation -c local FederatedPartitionedPofCache -p secondary-cluster -T origins -o wide
+----
+Output:
+[source,bash]
+----
 FEDERATION DETAILS
 ------------------
 Service:     FederatedPartitionedPofCache
@@ -159,8 +180,11 @@ Start Federation for all participants.
 
 [source,bash]
 ----
-$ cohctl start federation FederatedCache -c local
-
+cohctl start federation FederatedCache -c local
+----
+Output:
+[source,bash]
+----
 Are you sure you want to start federation for service FederatedCache for participants [secondary-cluster] ? (y/n) y
 operation completed
 ----
@@ -169,8 +193,11 @@ Start Federation for a specific participant.
 
 [source,bash]
 ----
-$ cohctl start federation FederatedCache -p secondary-cluster -c local
-
+cohctl start federation FederatedCache -p secondary-cluster -c local
+----
+Output:
+[source,bash]
+----
 Are you sure you want to start federation for service FederatedCache for participants [secondary-cluster] ? (y/n) y
 operation completed
 ----
@@ -179,8 +206,11 @@ Start Federation for a specific participant with no backlog.
 
 [source,bash]
 ----
-$ cohctl start federation FederatedCache -p secondary-cluster -m no-backlog -c local
-
+cohctl start federation FederatedCache -p secondary-cluster -m no-backlog -c local
+----
+Output:
+[source,bash]
+----
 Are you sure you want to start (no-backlog) federation for service FederatedCache for participants [secondary-cluster] ? (y/n) y
 operation completed
 ----
@@ -196,8 +226,11 @@ Stop Federation for all participants.
 
 [source,bash]
 ----
-$ cohctl stop federation FederatedCache -c local
-
+cohctl stop federation FederatedCache -c local
+----
+Output:
+[source,bash]
+----
 Are you sure you want to stop federation for service FederatedCache for participants [secondary-cluster] ? (y/n) y
 operation completed
 ----
@@ -206,8 +239,11 @@ Stop Federation for a specific participant.
 
 [source,bash]
 ----
-$ cohctl stop federation FederatedCache -p secondary-cluster -c local
-
+cohctl stop federation FederatedCache -p secondary-cluster -c local
+----
+Output:
+[source,bash]
+----
 Are you sure you want to start federation for service FederatedCache for participants [secondary-cluster] ? (y/n) y
 operation completed
 ----
@@ -223,8 +259,11 @@ Pause Federation for all participants.
 
 [source,bash]
 ----
-$ cohctl pause FederatedCache -c local
-
+cohctl pause FederatedCache -c local
+----
+Output:
+[source,bash]
+----
 Are you sure you want to pause federation for service FederatedCache for participants [secondary-cluster] ? (y/n) y
 operation completed
 ----
@@ -240,8 +279,11 @@ Replicate all for a specific participant
 
 [source,bash]
 ----
-$ cohctl replicate all FederatedCache -p secondary-cluster -c local
-
+cohctl replicate all FederatedCache -p secondary-cluster -c local
+----
+Output:
+[source,bash]
+----
 Are you sure you want to replicateAll federation for service FederatedCache for participants [secondary-cluster] ? (y/n) y
 operation complete
 ----

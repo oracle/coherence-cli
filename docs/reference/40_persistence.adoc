@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 
-    Copyright (c) 2021, 2022 Oracle and/or its affiliates.
+    Copyright (c) 2021, 2023 Oracle and/or its affiliates.
     Licensed under the Universal Permissive License v 1.0 as shown at
     https://oss.oracle.com/licenses/upl.
 
@@ -33,11 +33,15 @@ include::../../build/_output/docs-gen/get_persistence.adoc[tag=text]
 
 *Examples*
 
-Display all caches.
+Display all persistence services.
 
 [source,bash]
 ----
-$ cohctl get persistence -c local
+cohctl get persistence -c local
+----
+Output:
+[source,bash]
+----
 Total Active Space Used: 7MB
 
 SERVICE NAME       STORAGE COUNT  PERSISTENCE MODE  ACTIVE SPACE USED  AVG LATENCY  MAX LATENCY  SNAPSHOTS  STATUS
@@ -57,7 +61,11 @@ Display snapshots for all services.
 
 [source,bash]
 ----
-$ cohctl get snapshots -c local
+cohctl get snapshots -c local
+----
+Output:
+[source,bash]
+----
 SERVICE            SNAPSHOT NAME
 PartitionedCache2  snapshot-test
 PartitionedCache   snapshot-1
@@ -68,7 +76,11 @@ Display snapshots for a specific service.
 
 [source,bash]
 ----
-$ cohctl get snapshots -c local -s PartitionedCache
+cohctl get snapshots -c local -s PartitionedCache
+----
+Output:
+[source,bash]
+----
 SERVICE            SNAPSHOT NAME
 PartitionedCache   snapshot-1
 PartitionedCache   snapshot-2
@@ -78,8 +90,11 @@ Display *archived* snapshots for all services.
 
 [source,bash]
 ----
-$ cohctl get snapshots -c local -a
-
+cohctl get snapshots -c local -a
+----
+Output:
+[source,bash]
+----
 SERVICE            ARCHIVED SNAPSHOT NAME
 PartitionedCache2  snapshot-test
 PartitionedCache   snapshot-1
@@ -89,7 +104,11 @@ Display *archived* snapshots for a specific service.
 
 [source,bash]
 ----
-$ cohctl get snapshots -c local -s PartitionedCache -a
+cohctl get snapshots -c local -s PartitionedCache -a
+----
+Output:
+[source,bash]
+----
 SERVICE           ARCHIVED SNAPSHOT NAME
 PartitionedCache  snapshot-1
 ----
@@ -103,7 +122,11 @@ include::../../build/_output/docs-gen/create_snapshot.adoc[tag=text]
 
 [source,bash]
 ----
-$ cohctl create snapshot my-snapshot -s PartitionedCache -c local
+cohctl create snapshot my-snapshot -s PartitionedCache -c local
+----
+Output:
+[source,bash]
+----
 Are you sure you want to perform create snapshot for snapshot my-snapshot and service PartitionedCache? (y/n) y
 
 Operation create snapshot for snapshot my-snapshot on service PartitionedCache invoked
@@ -124,7 +147,11 @@ include::../../build/_output/docs-gen/recover_snapshot.adoc[tag=text]
 
 [source,bash]
 ----
-$ cohctl recover snapshot my-snapshot -s PartitionedCache -c local
+cohctl recover snapshot my-snapshot -s PartitionedCache -c local
+----
+Output:
+[source,bash]
+----
 Are you sure you want to perform recover snapshot for snapshot my-snapshot and service PartitionedCache? (y/n) y
 
 Operation recover snapshot for snapshot my-snapshot on service PartitionedCache invoked
@@ -145,7 +172,11 @@ Remove a local snapshot.
 
 [source,bash]
 ----
-$ cohctl recover snapshot my-snapshot -s PartitionedCache -c local
+cohctl recover snapshot my-snapshot -s PartitionedCache -c local
+----
+Output:
+[source,bash]
+----
 Are you sure you want to perform remove snapshot for snapshot my-snapshot and service PartitionedCache? (y/n) y
 
 Operation remove snapshot for snapshot my-snapshot on service PartitionedCache invoked
@@ -156,7 +187,11 @@ Remove an *archived* snapshot.
 
 [source,bash]
 ----
-$ cohctl recover snapshot my-snapshot -s PartitionedCache -a -c local
+cohctl recover snapshot my-snapshot -s PartitionedCache -a -c local
+----
+Output:
+[source,bash]
+----
 Are you sure you want to perform remove archived snapshot for snapshot my-snapshot and service PartitionedCache? (y/n) y
 
 Operation remove archived snapshot for snapshot my-snapshot on service PartitionedCache invoked
@@ -172,7 +207,11 @@ include::../../build/_output/docs-gen/archive_snapshot.adoc[tag=text]
 
 [source,bash]
 ----
-$ cohctl archive snapshot my-snapshot -s PartitionedCache -c local
+cohctl archive snapshot my-snapshot -s PartitionedCache -c local
+----
+Output:
+[source,bash]
+----
 Are you sure you want to perform archive snapshot for snapshot my-snapshot and service PartitionedCache? (y/n) y
 
 Operation archive snapshot for snapshot my-snapshot on service PartitionedCache invoked
@@ -194,7 +233,11 @@ include::../../build/_output/docs-gen/retrieve_snapshot.adoc[tag=text]
 
 [source,bash]
 ----
-$ cohctl retrieve snapshot my-snapshot -s PartitionedCache -c local
+cohctl retrieve snapshot my-snapshot -s PartitionedCache -c local
+----
+Output:
+[source,bash]
+----
 Are you sure you want to perform retrieve snapshot for snapshot my-snapshot and service PartitionedCache? (y/n) y
 
 Operation retrieve snapshot for snapshot my-snapshot on service PartitionedCache invoked
@@ -214,8 +257,11 @@ include::../../build/_output/docs-gen/suspend_service.adoc[tag=text]
 
 [source,bash]
 ----
-$ cohctl suspend service PartitionedCache -c local
-
+cohctl suspend service PartitionedCache -c local
+----
+Output:
+[source,bash]
+----
 Are you sure you want to perform suspend service for service PartitionedCache? (y/n) y
 operation completed
 ----
@@ -231,8 +277,11 @@ include::../../build/_output/docs-gen/resume_service.adoc[tag=text]
 
 [source,bash]
 ----
-$ cohctl resume service PartitionedCache -c local
-
+cohctl resume service PartitionedCache -c local
+----
+Output:
+[source,bash]
+----
 Are you sure you want to perform resume service for service PartitionedCache? (y/n) y
 operation completed
 ----

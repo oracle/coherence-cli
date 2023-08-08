@@ -31,7 +31,11 @@ Display all caches and display cache size in MB using `-m` option.
 
 [source,bash]
 ----
-$ cohctl get caches -c local -o wide -m
+cohctl get caches -c local -o wide -m
+----
+Output:
+[source,bash]
+----
 Total Caches: 2, Total primary storage: 36 MB
 
 SERVICE           CACHE        COUNT   SIZE  AVG SIZE  TOTAL PUTS  TOTAL GETS  TOTAL REMOVES  TOTAL HITS  TOTAL MISSES  HIT PROB
@@ -45,8 +49,11 @@ Display all caches for a particular service.
 
 [source,bash]
 ----
-$ cohctl get caches -c local -s PartitionedCache -o wide -m
-
+cohctl get caches -c local -s PartitionedCache -o wide -m
+----
+Output:
+[source,bash]
+----
 Total Caches: 2, Total primary storage: 36 MB
 
 SERVICE           CACHE        COUNT   SIZE  AVG SIZE  TOTAL PUTS  TOTAL GETS  TOTAL REMOVES  TOTAL HITS  TOTAL MISSES  HIT PROB
@@ -63,8 +70,11 @@ include::../../build/_output/docs-gen/describe_cache.adoc[tag=text]
 
 [source,bash]
 ----
-$ cohctl describe cache orders -c local -s PartitionedCache -m
-
+cohctl describe cache orders -c local -s PartitionedCache -m
+----
+Output:
+[source,bash]
+----
 CACHE DETAILS
 -------------
 Service         :  PartitionedCache
@@ -118,8 +128,11 @@ NOTE: The default memory display format is bytes but can be changed by using `-k
 
 [source,bash]
 ----
-$ cohctl describe cache test -c local -s PartitionedCache -o wide -m
-
+cohctl describe cache test -c local -s PartitionedCache -o wide -m
+----
+Output:
+[source,bash]
+----
 CACHE DETAILS
 -------------
 Service         :  PartitionedCache
@@ -172,8 +185,11 @@ include::../../build/_output/docs-gen/get_cache_stores.adoc[tag=text]
 
 [source,bash]
 ----
-$ cohctl get cache-stores -c local test -s DistributedCache
-
+cohctl get cache-stores -c local test -s DistributedCache
+----
+Output:
+[source,bash]
+----
 Service/Cache:        DistributedCache/test
 Cache Store Type:     WRITE-BEHIND
 Total Queue Size:     6,708,931
@@ -194,8 +210,11 @@ Display all caches for a particular service.
 
 [source,bash]
 ----
-$ cohctl get caches -c local -s PartitionedCache -o wide -m
-
+cohctl get caches -c local -s PartitionedCache -o wide -m
+----
+Output:
+[source,bash]
+----
 Total Caches: 2, Total primary storage: 36 MB
 
 SERVICE           CACHE        COUNT   SIZE  AVG SIZE  TOTAL PUTS  TOTAL GETS  TOTAL REMOVES  TOTAL HITS  TOTAL MISSES  HIT PROB
@@ -218,8 +237,11 @@ Set the expiry delay for all nodes to 30 seconds. (we are assuming we have 3 sto
 
 [source,bash]
 ----
-$ cohctl set cache test -a expiryDelay -v 30 -s PartitionedCache -c local
-
+cohctl set cache test -a expiryDelay -v 30 -s PartitionedCache -c local
+----
+Output:
+[source,bash]
+----
 Selected service/cache: PartitionedCache/test
 Are you sure you want to set the value of attribute expiryDelay to 30 in tier back for all 3 nodes? (y/n) y
 operation completed
@@ -234,8 +256,11 @@ include::../../build/_output/docs-gen/truncate_cache.adoc[tag=text]
 
 [source,bash]
 ----
-$ cohctl truncate cache test -c local
-
+cohctl truncate cache test -c local
+----
+Output:
+[source,bash]
+----
 Are you sure you want to truncate cache test in service PartitionedCache? (y/n) y
 operation completed
 ----
@@ -249,8 +274,11 @@ include::../../build/_output/docs-gen/clear_cache.adoc[tag=text]
 
 [source,bash]
 ----
-$ cohctl clear cache test -c local
-
+cohctl clear cache test -c local
+----
+Output:
+[source,bash]
+----
 Are you sure you want to clear cache test in service PartitionedCache? (y/n) y
 operation completed
 ----

@@ -80,8 +80,11 @@ NOTE: After the cluster has been created, the current context is automatically s
 
 [source,bash,subs="attributes"]]
 ----
-$ cohctl create cluster local
-
+cohctl create cluster local
+----
+Output:
+[source,bash]
+----
 Cluster name:           local
 Cluster version:        {coherence-default-version}
 Cluster port:           7574
@@ -105,8 +108,16 @@ Starting cluster member storage-1...
 Starting cluster member storage-2...
 Cluster added and started
 Current context is now local
+----
+Display the cluster members
 
-$ cohctl get members
+[source,bash]
+----
+cohctl get members
+----
+Output:
+[source,bash]
+----
 Using cluster connection 'local' from current context.
 
 Total cluster members: 3
@@ -123,14 +134,17 @@ NOTE: By default, Coherence CE groupId is used and the version is {coherence-def
 
 NOTE: Additional dependencies `coherence-json` is included to enable Management over REST and `jline` is included for `CohQL` history support.
 
-Add and start a commercial Coherence cluster (14.1.1.2206.1) and set initial memory for each cluster to 1g and use active persistence mode.
+Add and start a commercial Coherence cluster (14.1.1.2206.5) and set initial memory for each cluster to 1g and use active persistence mode.
 
 [source,bash]
 ----
-$ cohctl create cluster local -C -v 14.1.1-2206-1 -M 1g -P active -S
-
+cohctl create cluster local -C -v 14.1.1-2206-5 -M 1g -P active -S
+----
+Output:
+[source,bash]
+----
 Cluster name:         local
-Cluster version:      14.1.1-2206-1
+Cluster version:      14.1.1-2206-5
 Cluster port:         7574
 Management port:      30000
 Server count:         3
@@ -156,8 +170,12 @@ Add and start a cluster using all default values but include additional `coheren
 
 [source,bash,subs="attributes"]]
 ----
-$ cohctl create cluster local -a coherence-rest,io.opentracing:opentracing-api:0.33.0,io.opentracing:opentracing-util:0.33.0
+cohctl create cluster local -a coherence-rest,io.opentracing:opentracing-api:0.33.0,io.opentracing:opentracing-util:0.33.0
+----
 
+Output:
+[source,bash,subs="attributes"]]
+----
 Cluster name:           local
 Cluster version:        {coherence-default-version}
 Cluster port:           7574
@@ -192,8 +210,11 @@ include::../../build/_output/docs-gen/scale_cluster.adoc[tag=text]
 
 [source,bash]
 ----
-$ cohctl scale cluster local -r 4
-
+cohctl scale cluster local -r 4
+----
+Output:
+[source,bash]
+----
 Are you sure you want to scale the cluster local up by 1 member(s) to 4 members? (y/n) y
 Starting cluster member storage-3...
 Cluster local scaled
@@ -208,8 +229,11 @@ include::../../build/_output/docs-gen/stop_cluster.adoc[tag=text]
 
 [source,bash]
 ----
-$ cohctl stop cluster local
-
+cohctl stop cluster local
+----
+Output:
+[source,bash]
+----
 Are you sure you want to stop 3 members for the cluster local? (y/n) y
 killed process 47760
 killed process 47761
@@ -228,8 +252,11 @@ Start a cluster and specify heap size of `1g`. (default is 128m)
 
 [source,bash]
 ----
-$ cohctl start cluster local -M 1g
-
+cohctl start cluster local -M 1g
+----
+Output:
+[source,bash]
+----
 Are you sure you want to start 3 members for cluster local? (y/n) y
 Starting cluster member storage-0...
 Starting cluster member storage-1...
@@ -241,8 +268,11 @@ Start a cluster and specify heap size of `1g` with 4 replicas/members.
 
 [source,bash]
 ----
-$ cohctl start cluster local -M 1g -r 4
-
+cohctl start cluster local -M 1g -r 4
+----
+Output:
+[source,bash]
+----
 Are you sure you want to start 4 members for cluster local? (y/n) y
 Starting cluster member storage-0...
 Starting cluster member storage-1...
@@ -260,8 +290,11 @@ Start a Coherence console.
 
 [source,bash,subs="attributes"]
 ----
-$ cohctl start console -c local
-
+cohctl start console -c local
+----
+Output:
+[source,bash,subs="attributes"]
+----
 Starting client com.tangosol.net.CacheFactory...
 2022-08-29 16:00:01.346/0.620 Oracle Coherence {coherence-default-version} <Info> (thread=main, member=n/a): Loaded operational configuration from "jar:file:/Users/user/.m2/repository/com/oracle/coherence/ce/coherence/{coherence-default-version}/coherence-{coherence-default-version}.jar!/tangosol-coherence.xml"
 ...
@@ -280,8 +313,11 @@ Start a CohQL session.
 
 [source,bash]
 ----
-$ cohctl start cohql -c local
-
+cohctl start cohql -c local
+----
+Output:
+[source,bash]
+----
 Starting client com.tangosol.coherence.dslquery.QueryPlus...
 Coherence Command Line Tool
 
@@ -294,18 +330,14 @@ Start a CohQL Session and execute a statement
 
 [source,bash]
 ----
-$ cohctl start cohql -c local -S "insert into test key(1) value(1)"
-
-...
+cohctl start cohql -c local -S "insert into test key(1) value(1)"
 ----
 
 Start a CohQL Session and execute statements from a file.
 
 [source,bash]
 ----
-$ cohctl start cohql -c local -f /tmp/run.cohql
-
-...
+cohctl start cohql -c local -f /tmp/run.cohql
 ----
 
 [#start-class]
@@ -315,8 +347,11 @@ include::../../build/_output/docs-gen/start_class.adoc[tag=text]
 
 [source,bash]
 ----
-$ cohctl start class com.my.company.Class -c local
-
+cohctl start class com.my.company.Class -c local
+----
+Output:
+[source,bash]
+----
 Starting client com.my.company.Class...
 ----
 
@@ -327,7 +362,11 @@ include::../../build/_output/docs-gen/set_use_gradle.adoc[tag=text]
 
 [source,bash]
 ----
-$ cohctl set use-gradle true
+cohctl set use-gradle true
+----
+Output:
+[source,bash]
+----
 Use Gradle is now set to true
 ----
 
@@ -338,7 +377,11 @@ include::../../build/_output/docs-gen/get_use_gradle.adoc[tag=text]
 
 [source,bash]
 ----
-$ cohctl get use-gradle
+cohctl get use-gradle
+----
+Output:
+[source,bash]
+----
 Use Gradle: true
 ----
 
@@ -352,7 +395,11 @@ Set default heap to 512m.
 
 [source,bash]
 ----
-$ cohctl set default-heap 512m
+cohctl set default-heap 512m
+----
+Output:
+[source,bash]
+----
 Default heap is now set to 512m
 ----
 
@@ -363,7 +410,11 @@ include::../../build/_output/docs-gen/get_default_heap.adoc[tag=text]
 
 [source,bash]
 ----
-$ cohctl get default-heap
+cohctl get default-heap
+----
+Output:
+[source,bash]
+----
 Current default heap: 512m
 ----
 
@@ -374,7 +425,11 @@ include::../../build/_output/docs-gen/clear_default_heap.adoc[tag=text]
 
 [source,bash]
 ----
-$ cohctl clear default-heap
+cohctl clear default-heap
+----
+Output:
+[source,bash]
+----
 Default heap has been cleared
 ----
 
@@ -387,7 +442,11 @@ include::../../build/_output/docs-gen/set_profile.adoc[tag=text]
 
 [source,bash]
 ----
-$ cohctl set profile debug-enabled -v "-Dmy.debug.enabled=true -Dmy.debug.level=10"
+cohctl set profile debug-enabled -v "-Dmy.debug.enabled=true -Dmy.debug.level=10"
+----
+Output:
+[source,bash]
+----
 Are you sure you want to set the profile debug-enabled to a value of [-Dmy.debug.enabled=true -Dmy.debug.level=10]? (y/n) y
 profile debug-enabled was set to value [-Dmy.debug.enabled=true -Dmy.debug.level=10]
 ----
@@ -402,7 +461,11 @@ include::../../build/_output/docs-gen/remove_profile.adoc[tag=text]
 
 [source,bash]
 ----
-$ cohctl remove profile debug-enabled
+cohctl remove profile debug-enabled
+----
+Output:
+[source,bash]
+----
 Are you sure you want to remove the profile debug-enabled? (y/n) y
 profile debug-enabled was removed
 ----
@@ -414,7 +477,11 @@ include::../../build/_output/docs-gen/get_profiles.adoc[tag=text]
 
 [source,bash]
 ----
-$ cohctl get profiles
+cohctl get profiles
+----
+Output:
+[source,bash]
+----
 PROFILE    VALUE
 profile1   -Dproperty1.value=2
 profile2   -Dproperty2.value=2 -Dproperty3.value=4
