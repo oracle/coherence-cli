@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 
-    Copyright (c) 2021, 2022 Oracle and/or its affiliates.
+    Copyright (c) 2021, 2023 Oracle and/or its affiliates.
     Licensed under the Universal Permissive License v 1.0 as shown at
     https://oss.oracle.com/licenses/upl.
 
@@ -49,11 +49,22 @@ Read on below for the example.
 
 [source,bash]
 ----
-$ cohctl get clusters
+cohctl get clusters
+----
+Output:
+[source,bash]
+----
 CONNECTION  TYPE  URL                                                  VERSION  CLUSTER NAME  CLUSTER TYPE  LOCAL
-local       http  http://localhost:30000/management/coherence/cluster  21.12    my-cluster    Standalone    false
+local       http  http://localhost:30000/management/coherence/cluster  23.03    my-cluster    Standalone    false
+----
 
-$ cohctl set context local
+[source,bash]
+----
+cohctl set context local
+----
+Output:
+[source,bash]
+----
 Current context is now local
 ----
 
@@ -61,7 +72,11 @@ Current context is now local
 
 [source,bash]
 ----
-$ cohctl get members -o wide -m
+cohctl get members -o wide -m
+----
+Output:
+[source,bash]
+----
 Using cluster connection 'local' from current context.
 
 Cluster Heap - Total: 6.750GB, Used: 1.076GB, Available: 5.674GB (84.1%)
@@ -83,7 +98,11 @@ NOTE: We can see the management node on Node 1, the storage members on nodes 2-5
 
 [source,bash]
 ----
-$ cohctl get services -t DistributedCache -o wide
+cohctl get services -t DistributedCache -o wide
+----
+Output:
+[source,bash]
+----
 Using cluster connection 'local' from current context.
 
 SERVICE NAME       TYPE              MEMBERS  STATUS HA     STORAGE  PARTITIONS  ENDANGERED  VULNERABLE  UNBALANCED  STATUS
@@ -107,7 +126,11 @@ In our case we have the following caches defined:
 
 [source,bash]
 ----
-$ cohctl get caches -m
+cohctl get caches -m
+----
+Output:
+[source,bash]
+----
 Using cluster connection 'local' from current context.
 
 Total Caches: 3, Total primary storage: 175MB
@@ -124,7 +147,7 @@ NOTE: You can use the `-o wide` to display more information.
 
 [source,bash]
 ----
-$ cohctl get services -t DistributedCache -w -o wide
+cohctl get services -t DistributedCache -w -o wide
 ----
 
 NOTE: The above will continue watching the services. Keep this open in a separate terminal.
@@ -153,7 +176,7 @@ The following example would wait up to 60 seconds for DistributedCache services 
 
 [source,bash]
 ----
-$ cohctl get services -t DistributedCache -w -a MACHINE-SAFE
+cohctl get services -t DistributedCache -w -a MACHINE-SAFE
 ----
 
 == See Also

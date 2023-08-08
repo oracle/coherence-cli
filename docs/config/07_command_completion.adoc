@@ -19,7 +19,11 @@ Use the following command to show the help for the `completion` command
 
 [source,bash]
 ----
-$ cohctl completion
+cohctl completion
+----
+Output:
+[source,bash]
+----
 
 Generate the autocompletion script for cohctl for the specified shell.
 See each sub-command's help for details on how to use the generated script.
@@ -38,14 +42,14 @@ Execute the command for your desired shell. In our case it will be `bash`.
 
 [source,bash]
 ----
-$ cohctl completion bash > ~/cohctl-completion.sh
+cohctl completion bash > ~/cohctl-completion.sh
 ----
 
 Once you have generated the script, you can source it.
 
 [source,bash]
 ----
-$ source ~/cohctl-completion.sh
+source ~/cohctl-completion.sh
 ----
 
 === Using Command Completion
@@ -58,15 +62,18 @@ Complete the `describe` command by typing the following and then `TAB`.
 
 [source,bash]
 ----
-$ cohctl des
+cohctl des
 ----
 
 Next, when the following is displayed, press `TAB` twice, and you will see the available describe options.
 
 [source,bash]
 ----
-$ cohctl describe
-
+cohctl describe
+----
+Output:
+[source,bash]
+----
 cohctl describe
 cache        (describe a cache)         machine      (describe a machine)       reporter     (describe a reporter)
 cluster      (describe a cluster)       member       (describe a member)        service      (describe a service)
@@ -82,6 +89,10 @@ If you typed `cohctl describe cache`, then pressed `TAB` twice, it will show the
 
 [source,bash]
 ----
-$ cohctl describe cache
+cohctl describe cache
+----
+Output:
+[source,bash]
+----
 customers  orders     products
 ----

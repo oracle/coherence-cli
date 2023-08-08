@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 
-    Copyright (c) 2021, Oracle and/or its affiliates.
+    Copyright (c) 2021, 2023 Oracle and/or its affiliates.
     Licensed under the Universal Permissive License v 1.0 as shown at
     https://oss.oracle.com/licenses/upl.
 
@@ -17,14 +17,14 @@ If you wish to change this directory from the default, you can use the following
 
 [source,bash]
 ----
-$ cohctl get clusters --config-dir /u01/config
+cohctl get clusters --config-dir /u01/config
 ----
 
 You can also specify a different location for the `cohct.yaml` file that is generated.
 
 [source,bash]
 ----
-$ cohctl get clusters --config /u01/my-config.yaml.
+cohctl get clusters --config /u01/my-config.yaml
 ----
 
 NOTE: It is recommended to leave these values as default unless you have a good reason to change them

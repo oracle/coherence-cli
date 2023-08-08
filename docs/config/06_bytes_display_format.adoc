@@ -39,7 +39,11 @@ include::../../build/_output/docs-gen/set_bytes_format.adoc[tag=text]
 
 [source,bash]
 ----
-$ cohctl set bytes-format m
+cohctl set bytes-format m
+----
+Output:
+[source,bash]
+----
 Bytes format is now set to m
 ----
 
@@ -52,7 +56,11 @@ include::../../build/_output/docs-gen/get_bytes_format.adoc[tag=text]
 
 [source,bash]
 ----
-$ cohctl get bytes-format
+cohctl get bytes-format
+----
+Output:
+[source,bash]
+----
 Current bytes format: m
 ----
 
@@ -65,6 +73,10 @@ include::../../build/_output/docs-gen/clear_bytes_format.adoc[tag=text]
 
 [source,bash]
 ----
-$ cohctl clear bytes-format
+cohctl clear bytes-format
+----
+Output:
+[source,bash]
+----
 Default bytes format has been cleared
 ----

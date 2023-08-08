@@ -31,8 +31,11 @@ Display all members and specify to display memory sizes in MB using `-m` option.
 
 [source,bash]
 ----
-$ cohctl get members -c local -m
-
+cohctl get members -c local -m
+----
+Output:
+[source,bash]
+----
 Total cluster members: 3
 Cluster Heap - Total: 4,352 MB Used: 250 MB Available: 4,102 MB (94.3%)
 Storage Heap - Total: 4,096 MB Used: 201 MB Available: 3,895 MB (95.1%)
@@ -49,8 +52,11 @@ Display all members with the role `CoherenceConsole`.
 
 [source,bash]
 ----
-$ cohctl get members -c local -r CoherenceConsole -m
-
+cohctl get members -c local -r CoherenceConsole -m
+----
+Output:
+[source,bash]
+----
 Total cluster members: 1
 Cluster Heap - Total: 256 MB Used: 50 MB Available: 206 MB (80.5%)
 Storage Heap - Total: 0 MB Used: 0 MB Available: 0 MB ( 0.0%)
@@ -70,8 +76,11 @@ include::../../build/_output/docs-gen/get_network_stats.adoc[tag=text]
 
 [source,bash]
 ----
-$ cohctl get netwok-stats -c local
-
+cohctl get netwok-stats -c local
+----
+Output:
+[source,bash]
+----
 Total cluster members: 3
 NODE ID  ADDRESS     PORT   PROCESS  MEMBER                         ROLE              PKT SENT  PKT REC  RESENT  EFFICIENCY  SEND Q  DATA SENT  DATA REC  WEAKEST
       1  /127.0.0.1  50724    81363  storage-1                      CoherenceServer        531      586       2     100.00%       0       8 MB      9 MB        4
@@ -89,8 +98,11 @@ include::../../build/_output/docs-gen/get_p2p_stats.adoc[tag=text]
 
 [source,bash]
 ----
-$ cohctl get p2p-stats -c local
-
+cohctl get p2p-stats -c local
+----
+Output:
+[source,bash]
+----
 Viewing Node Id:     1
 Viewing Member Name: storage-2
 
@@ -110,7 +122,7 @@ Describe member and include heap dump.
 
 [source,bash]
 ----
-$ cohctl describe member 1 -D
+cohctl describe member 1 -D
 ----
 
 NOTE: When taking one or more thread dumps, if you want full deadlock analysis, you should set the following system property
@@ -120,7 +132,7 @@ Describe member and include extended information on G1 garbage collection.
 
 [source,bash]
 ----
-$ cohctl describe member 1 -Xg1
+cohctl describe member 1 -Xg1
 ----
 
 [#set-member]
@@ -130,21 +142,37 @@ include::../../build/_output/docs-gen/set_member.adoc[tag=text]
 
 *Examples*
 
-Set the log level for all members.
+Set the log level for all members, Check the log level first.
 
 [source,bash]
 ----
-# Check the log level first
-$ cohctl get members -o json | jq | grep loggingLevel
+cohctl get members -o json | jq | grep loggingLevel
+----
+Output:
+[source,bash]
+----
       "loggingLevel": 6,
       "loggingLevel": 6,
       "loggingLevel": 6,
-
-$ cohctl set member all -a loggingLevel -v 6 -c local
-
-re you sure you want to set the value of attribute loggingLevel to 6 for all 3 nodes? (y/n) y
+----
+[source,bash]
+----
+cohctl set member all -a loggingLevel -v 6 -c local
+----
+Output:
+[source,bash]
+----
+Are you sure you want to set the value of attribute loggingLevel to 6 for all 3 nodes? (y/n) y
 operation completed
-$ cohctl get members -o json | jq | grep loggingLevel
+----
+
+[source,bash]
+----
+cohctl get members -o json | jq | grep loggingLevel
+----
+Output:
+[source,bash]
+----
       "loggingLevel": 6,
       "loggingLevel": 6,
       "loggingLevel": 6,
@@ -154,12 +182,23 @@ Set the log level to 9 for node id 1.
 
 [source,bash]
 ----
-$ cohctl set member 1 -a loggingLevel -v 9 -c local
+cohctl set member 1 -a loggingLevel -v 9 -c local
+----
+Output:
+[source,bash]
+----
 
 Are you sure you want to set the value of attribute loggingLevel to 9 for 1 nodes? (y/n) y
 operation completed
+----
 
-$ cohctl get members -o json | jq | grep loggingLevel
+[source,bash]
+----
+cohctl get members -o json | jq | grep loggingLevel
+----
+Output:
+[source,bash]
+----
       "loggingLevel": 9,
       "loggingLevel": 6,
       "loggingLevel": 6,
@@ -172,7 +211,11 @@ include::../../build/_output/docs-gen/shutdown_member.adoc[tag=text]
 
 [source,bash]
 ----
-$ cohctl shutdown member 1 -c local
+cohctl shutdown member 1 -c local
+----
+Output:
+[source,bash]
+----
 Are you sure you want to shutdown member 1? (y/n) y
 operation completed
 ----

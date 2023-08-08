@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 
-    Copyright (c) 2021, 2022 Oracle and/or its affiliates.
+    Copyright (c) 2021, 2023 Oracle and/or its affiliates.
     Licensed under the Universal Permissive License v 1.0 as shown at
     https://oss.oracle.com/licenses/upl.
 
@@ -30,7 +30,11 @@ Retrieve the cluster name, version and cluster size from `cohctl describe cluste
 
 [source,bash]
 ----
-$ cohctl describe cluster my-cluster -o jsonpath="$.cluster..['clusterName', 'version', 'clusterSize']"
+cohctl describe cluster my-cluster -o jsonpath="$.cluster..['clusterName', 'version', 'clusterSize']"
+----
+Output:
+[source,bash]
+----
 ["cluster1","21.12",2]
 ----
 
@@ -41,7 +45,11 @@ Get all service members where the requestAverageDuration > 10 millis.
 
 [source,bash]
 ----
-$ cohctl get services -o jsonpath="$.items[?(@.requestAverageDuration > 10)]..['nodeId','name','requestAverageDuration']"  | jq
+cohctl get services -o jsonpath="$.items[?(@.requestAverageDuration > 10)]..['nodeId','name','requestAverageDuration']"  | jq
+----
+Output:
+[source,bash]
+----
 [
   "6",
   "PartitionedTopic",
@@ -65,7 +73,11 @@ Get all members where the available memory < 250MB
 
 [source,bash]
 ----
-$ cohctl get members -o jsonpath="$.items[?(@.memoryAvailableMB < 250)]..['nodeId','memoryMaxMB','memoryAvailableMB']" | jq
+cohctl get members -o jsonpath="$.items[?(@.memoryAvailableMB < 250)]..['nodeId','memoryMaxMB','memoryAvailableMB']" | jq
+----
+Output:
+[source,bash]
+----
 [
   "9",
   256,
@@ -80,7 +92,11 @@ Get caches where total puts > 10000.
 
 [source,bash]
 ----
-$ cohctl get caches -o jsonpath="$.items[?(@.totalPuts > 10000)]..['service','name','totalPuts']" | jq
+cohctl get caches -o jsonpath="$.items[?(@.totalPuts > 10000)]..['service','name','totalPuts']" | jq
+----
+Output:
+[source,bash]
+----
 [
   "PartitionedCache2",
   "test-3",
@@ -101,7 +117,11 @@ Get http proxy servers where total request count > 40.
 
 [source,bash]
 ----
-$ cohctl get http-servers -o jsonpath="$.items[?(@.totalRequestCount > 15)]..['nodeId','name','totalRequestCount']"
+cohctl get http-servers -o jsonpath="$.items[?(@.totalRequestCount > 15)]..['nodeId','name','totalRequestCount']"
+----
+Output:
+[source,bash]
+----
 ["1","ManagementHttpProxy",45]
 ----
 
@@ -109,7 +129,11 @@ Get persistence where latency average > 0.020ms or 20 micros.
 
 [source,bash]
 ----
-$ cohctl get persistence -o jsonpath="$.items[?(@.persistenceLatencyAverage > 0.020)]..['nodeId','name','persistenceLatencyAverage']" | jq
+cohctl get persistence -o jsonpath="$.items[?(@.persistenceLatencyAverage > 0.020)]..['nodeId','name','persistenceLatencyAverage']" | jq
+----
+Output:
+[source,bash]
+----
 [
   "4",
   "PartitionedCache2",

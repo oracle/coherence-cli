@@ -47,8 +47,11 @@ Display all topics.
 
 [source,bash]
 ----
-$ cohctl get topics -c local
-
+cohctl get topics -c local
+----
+Output:
+[source,bash]
+----
 SERVICE           TOPIC             MEMBERS  CHANNELS  SUBSCRIBERS  PUBLISHED
 PartitionedTopic  private-messages        1        17            1          0
 PartitionedTopic  public-messages         1        17            1          0
@@ -61,8 +64,11 @@ include::../../build/_output/docs-gen/describe_topic.adoc[tag=text]
 
 [source,bash]
 ----
-$ cohctl describe topic private-messages -s PartitionedTopic -c local
-
+cohctl describe topic private-messages -s PartitionedTopic -c local
+----
+Output:
+[source,bash]
+----
 TOPIC DETAILS
 -------------
 Name           :  private-messages
@@ -102,8 +108,11 @@ Display all members for a topic using the wide option
 
 [source,bash]
 ----
-$ cohctl get topic-members private-messages -s PartitionedTopic -o wide -c local
-
+cohctl get topic-members private-messages -s PartitionedTopic -o wide -c local
+----
+Output:
+[source,bash]
+----
 Service:  PartitionedTopic
 Topic:    private-messages
 
@@ -123,8 +132,11 @@ Display the channels for a topic, service and node.
 
 [source,bash]
 ----
-$ cohctl get topic-members private-messages -s PartitionedTopic -c local
-
+cohctl get topic-members private-messages -s PartitionedTopic -c local
+----
+Output:
+[source,bash]
+----
 Service:  PartitionedTopic
 Topic:    private-messages
 
@@ -132,8 +144,11 @@ NODE ID  CHANNELS  PUBLISHED    MEAN   1 MIN   5 MIN  15 MIN
       4        17          0  0.0000  0.0000  0.0000  0.0000
       5        17          0  0.0000  0.0000  0.0000  0.0000
       6        17          0  0.0000  0.0000  0.0000  0.0000
+----
 
-$ cohctl get topic-channels private-messages -s PartitionedTopic -n 4 -c local
+[source,bash]
+----
+cohctl get topic-channels private-messages -s PartitionedTopic -n 4 -c local
 
 Service:      PartitionedTopic
 Topic:        private-messages
@@ -171,8 +186,11 @@ Display the subscribers for a topic and service.
 
 [source,bash]
 ----
-$ cohctl get subscribers private-messages -s PartitionedTopic -c local
-
+cohctl get subscribers private-messages -s PartitionedTopic -c local
+----
+Output:
+[source,bash]
+----
 Service:  PartitionedTopic
 Topic:    private-messages
 
@@ -194,8 +212,11 @@ Display the subscribers channels for a topic, service and subscriber.
 
 [source,bash]
 ----
-$ cohctl get subscribers private-messages -s PartitionedTopic -c local
-
+cohctl get subscribers private-messages -s PartitionedTopic -c local
+----
+Output:
+[source,bash]
+----
 Service:  PartitionedTopic
 Topic:    private-messages
 
@@ -203,9 +224,15 @@ NODE ID  SUBSCRIBER ID  STATE      CHANNELS  SUBSCRIBER GROUP  RECEIVED  ERRORS 
       4    17663538530  Connected        17  1                        0       0        0
       5    23267662748  Connected        17  1                        0       0        0
       6    26845397584  Connected        17  1                        0       0        0
+----
 
-$ cohctl get subscriber-channels  private-messages -s PartitionedTopic -S 17663538530 -c local
-
+[source,bash]
+----
+cohctl get subscriber-channels  private-messages -s PartitionedTopic -S 17663538530 -c local
+----
+Output:
+[source,bash]
+----
 Service:          PartitionedTopic
 Topic:            private-messages
 Node ID:          4
@@ -243,8 +270,11 @@ Display the subscriber groups for a topic and service.
 
 [source,bash]
 ----
-$ cohctl get subscriber-groups private-messages -s PartitionedTopic -c local
-
+cohctl get subscriber-groups private-messages -s PartitionedTopic -c local
+----
+Output:
+[source,bash]
+----
 Service:  PartitionedTopic
 Topic:    private-messages
 
@@ -268,8 +298,11 @@ Display subscriber group channels a topic, service, node and subscriber group.
 
 [source,bash]
 ----
-$ cohctl get sub-grp-channels private-messages -s PartitionedTopic -n 3 -G admin -c local
-
+cohctl get sub-grp-channels private-messages -s PartitionedTopic -n 3 -G admin -c local
+----
+Output:
+[source,bash]
+----
 Service:          PartitionedTopic
 Topic:            private-messages
 Node ID:          3
@@ -307,8 +340,11 @@ Disconnect all subscribers for the topic 'sms-messages'.
 
 [source,bash]
 ----
-$ cohctl disconnect all sms-messages -c local
-
+cohctl disconnect all sms-messages -c local
+----
+Output:
+[source,bash]
+----
 Are you sure you want to issue 'disconnect all' for topic sms-messages and service PartitionedTopic? (y/n) y
 operation completed
 ----
@@ -317,8 +353,11 @@ Disconnect all subscribers for the topic 'sms-messages' and subscriber group 'sm
 
 [source,bash]
 ----
-$ cohctl disconnect all sms-messages -G sms-processor -c local
-
+cohctl disconnect all sms-messages -G sms-processor -c local
+----
+Output:
+[source,bash]
+----
 Are you sure you want to issue 'disconnect all' for topic sms-messages, service PartitionedTopic and subscriber group sms-processor? (y/n) y
 operation completed
 ----
@@ -328,18 +367,29 @@ operation completed
 
 include::../../build/_output/docs-gen/connect_subscriber.adoc[tag=text]
 
+*Example*
+
 [source,bash]
 ----
-$ cohctl get subscribers public-messages -s PartitionedTopic -c local
-
+cohctl get subscribers public-messages -s PartitionedTopic -c local
+----
+Output:
+[source,bash]
+----
 Service:  PartitionedTopic
 Topic:    public-messages
 
 NODE ID  SUBSCRIBER ID  STATE      CHANNELS  SUBSCRIBER GROUP  RECEIVED  ERRORS  BACKLOG
       4    17179869184  Connected        17  1                    7,406       0        0
+----
 
-$ cohctl connect subscriber public-messages -s PartitionedTopic -S 17179869184 -c local
-
+[source,bash]
+----
+cohctl connect subscriber public-messages -s PartitionedTopic -S 17179869184 -c local
+----
+Output:
+[source,bash]
+----
 Are you sure you want to issue 'connect' for topic public-messages, service PartitionedTopic and subscriber 17179869184? (y/n) y
 operation completed
 ----
@@ -349,10 +399,15 @@ operation completed
 
 include::../../build/_output/docs-gen/disconnect_subscriber.adoc[tag=text]
 
+*Example*
+
 [source,bash]
 ----
-$ cohctl dicconnect subscriber public-messages -s PartitionedTopic -S 17179869184 -c local
-
+cohctl dicconnect subscriber public-messages -s PartitionedTopic -S 17179869184 -c local
+----
+Output:
+[source,bash]
+----
 Are you sure you want to issue 'disconnect' for topic public-messages, service PartitionedTopic and subscriber 17179869184? (y/n) y
 operation completed
 ----
@@ -362,12 +417,16 @@ operation completed
 
 include::../../build/_output/docs-gen/retrieve_heads.adoc[tag=text]
 
+*Example*
+
 [source,bash]
 ----
-$ cohctl retrieve heads public-messages -s PartitionedTopic -S 17179869184 -c local
-
+cohctl retrieve heads public-messages -s PartitionedTopic -S 17179869184 -c local
+----
+Output:
+[source,bash]
+----
 Are you sure you want to issue 'retrieve current heads' for topic public-messages, service PartitionedTopic and subscriber 17179869184? (y/n) y
-
 
 Service:    PartitionedTopic
 Topic:      public-messages
@@ -398,10 +457,15 @@ CHANNEL  POSITION
 
 include::../../build/_output/docs-gen/retrieve_remaining.adoc[tag=text]
 
+*Example*
+
 [source,bash]
 ----
-$ cohctl retrieve remaining public-messages -s  PartitionedTopic -S 17179869184 -c local
-
+cohctl retrieve remaining public-messages -s  PartitionedTopic -S 17179869184 -c local
+----
+Output:
+[source,bash]
+----
 Are you sure you want to issue 'retrieve remaining messages' for topic public-messages, service PartitionedTopic and subscriber 17179869184? (y/n) y
 operation completed
 ----
@@ -411,10 +475,14 @@ operation completed
 
 include::../../build/_output/docs-gen/notify_populated.adoc[tag=text]
 
+*Example*
 [source,bash]
 ----
-$ cohctl notify populated public-messages -s PartitionedTopic -S 17179869184 -C 16 -c local
-
+cohctl notify populated public-messages -s PartitionedTopic -S 17179869184 -C 16 -c local
+----
+Output:
+[source,bash]
+----
 Are you sure you want to issue 'notify populated' for topic public-messages, service PartitionedTopic, subscriber 17179869184 and channel 16? (y/n) y
 operation completed
 ----

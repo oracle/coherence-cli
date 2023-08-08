@@ -45,14 +45,20 @@ Reset statistics for all cache members for cache `test`.
 
 [source,bash]
 ----
-$ cohctl get caches -c local
-
+cohctl get caches -c local
+----
+Output:
+[source,bash]
+----
 Total Caches: 1, Total primary storage: 30 MB
 
 SERVICE           CACHE    COUNT   SIZE
 PartitionedCache  test   123,000  30 MB
+----
 
-$ cohctl reset cache-stats test -s PartitionedCache
+[source,bash]
+----
+cohctl reset cache-stats test -s PartitionedCache
 Using cluster connection 'local' from current context.
 
 Are you sure you want to reset cache statistics for cache test, service PartitionedCache for all 3 nodes? (y/n) y
@@ -63,8 +69,11 @@ Reset statistics for cache members 1 and 2 for cache `test`.
 
 [source,bash]
 ----
-$ cohctl reset cache-stats test -s PartitionedCache -n 1,2 -c local
-
+cohctl reset cache-stats test -s PartitionedCache -n 1,2 -c local
+----
+Output:
+[source,bash]
+----
 Are you sure you want to reset cache statistics for cache test, service PartitionedCache for 2 node(s)? (y/n) y
 operation completed
 ----
@@ -78,15 +87,24 @@ include::../../build/_output/docs-gen/reset_executor_stats.adoc[tag=text]
 
 [source,bash]
 ----
-$ cohctl get executors -c local
-
+cohctl get executors -c local
+----
+Output:
+[source,bash]
+----
 Total executors: 1
 Running tasks:   0
 Completed tasks: 0
 
 NAME                                   MEMBER COUNT  IN PROGRESS  COMPLETED  REJECTED  DESCRIPTION
 coherence-concurrent-default-executor             3            0          0         0  SingleThreaded(ThreadFactory=default)
-coherence-cli$ (rc)$ cohctl reset executor-stats coherence-concurrent-default-executor
+----
+
+Reset the stats.
+
+[source,bash]
+----
+cohctl reset executor-stats coherence-concurrent-default-executor
 Using cluster connection 'local' from current context.
 
 Are you sure you want to reset executor statistics for exeutor coherence-concurrent-default-executor? (y/n) y
@@ -102,13 +120,22 @@ include::../../build/_output/docs-gen/reset_federation_stats.adoc[tag=text]
 
 [source,bash]
 ----
-$ cohctl get federation all -c local
-
+cohctl get federation all -c local
+----
+Output:
+[source,bash]
+----
 SERVICE           DESTINATION  MEMBERS  STATES  DATA SENT  MSG SENT  REC SENT  CURR AVG BWIDTH
 FederatedService  cluster2           1  [IDLE]       3 MB    13,873    30,000          0.0Mbps
+----
 
-$ cohctl reset federation-stats FederatedService -p cluster2 -T outgoing -c local
-
+[source,bash]
+----
+cohctl reset federation-stats FederatedService -p cluster2 -T outgoing -c local
+----
+Output:
+[source,bash]
+----
 Are you sure you want to reset federation statistics for service FederatedService, participant cluster2, type outgoing for all 1 nodes? (y/n) y
 operation completed
 ----
@@ -124,8 +151,11 @@ include::../../build/_output/docs-gen/reset_ramjournal_stats.adoc[tag=text]
 
 [source,bash]
 ----
-$ cohctl reset ramjournal-stats -c local
-
+cohctl reset ramjournal-stats -c local
+----
+Output:
+[source,bash]
+----
 Are you sure you want to reset ramjournal statistics for all 2 nodes? (y/n) y
 operation completed
 ----
@@ -139,8 +169,11 @@ include::../../build/_output/docs-gen/reset_flashjournal_stats.adoc[tag=text]
 
 [source,bash]
 ----
-$ cohctl reset flashjournal-stats -c local
-
+cohctl reset flashjournal-stats -c local
+----
+Output:
+[source,bash]
+----
 Are you sure you want to reset flashjournal statistics for all 2 nodes? (y/n) y
 operation completed
 ----
@@ -156,8 +189,11 @@ Reset member statistics for member 1 and 3.
 
 [source,bash]
 ----
-$ cohctl get members -c local
-
+cohctl get members -c local
+----
+Output:
+[source,bash]
+----
 Total cluster members: 3
 Cluster Heap - Total: 384 MB Used: 127 MB Available: 257 MB (66.9%)
 Storage Heap - Total: 384 MB Used: 127 MB Available: 257 MB (66.9%)
@@ -166,8 +202,15 @@ NODE ID  ADDRESS     PORT   PROCESS  MEMBER     ROLE             STORAGE  MAX HE
       1  /127.0.0.1  58938    96295  storage-0  CoherenceServer  true       128 MB      65 MB       63 MB
       2  /127.0.0.1  58944    96303  storage-2  CoherenceServer  true       128 MB      41 MB       87 MB
       3  /127.0.0.1  58941    96296  storage-1  CoherenceServer  true       128 MB      21 MB      107 MB
-$ cohctl reset member-stats -n 1,3 -c local
+----
 
+[source,bash]
+----
+cohctl reset member-stats -n 1,3 -c local
+----
+Output:
+[source,bash]
+----
 Are you sure you want to reset members statistics for 2 node(s)? (y/n) y
 operation completed
 ----
@@ -179,14 +222,24 @@ include::../../build/_output/docs-gen/reset_reporter_stats.adoc[tag=text]
 
 [source,bash]
 ----
-$ cohctl get reporters -c local
-
+cohctl get reporters -c local
+----
+Output:
+[source,bash]
+----
 NODE ID  STATE    CONFIG FILE               OUTPUT PATH                       BATCH#  LAST REPORT  LAST RUN   AVG RUN  INTERVAL  AUTOSTART
       1  Stopped  reports/report-group.xml  /Users/user/Documents/Coheren...       0                    0ms  0.0000ms        60  false
       2  Stopped  reports/report-group.xml  /Users/user/Documents/Coheren...       0                    0ms  0.0000ms        60  false
       3  Stopped  reports/report-group.xml  /Users/user/Documents/Coheren...       0                    0ms  0.0000ms        60  false
-$ cohctl reset reporter-stats -c local
+----
 
+[source,bash]
+----
+cohctl reset reporter-stats -c local
+----
+Output:
+[source,bash]
+----
 Are you sure you want to reset reporters statistics for all 3 nodes? (y/n) y
 operation completed
 ----
@@ -198,8 +251,11 @@ include::../../build/_output/docs-gen/reset_service_stats.adoc[tag=text]
 
 [source,bash]
 ----
-$ cohctl get services -c  local
-
+cohctl get services -c  local
+----
+Output:
+[source,bash]
+----
 SERVICE NAME            TYPE              MEMBERS  STATUS HA  STORAGE  PARTITIONS
 Proxy                   Proxy                   3  n/a             -1          -1
 PartitionedTopic        PagedTopic              3  NODE-SAFE        3         257
@@ -209,9 +265,15 @@ ManagementHttpProxy     Proxy                   1  n/a             -1          -
 "$SYS:Config"           DistributedCache        3  NODE-SAFE        3         257
 "$SYS:ConcurrentProxy"  Proxy                   3  n/a             -1          -1
 "$SYS:Concurrent"       DistributedCache        3  NODE-SAFE        3         257
+----
 
-$ cohctl reset service-stats PartitionedCache -c local
-
+[source,bash]
+----
+cohctl reset service-stats PartitionedCache -c local
+----
+Output:
+[source,bash]
+----
 Are you sure you want to reset service statistics for all 3 nodes? (y/n) y
 operation completed
 ----
@@ -223,13 +285,19 @@ include::../../build/_output/docs-gen/reset_proxy_stats.adoc[tag=text]
 
 [source,bash]
 ----
-$ cohctl get proxies -c local
-
+cohctl get proxies -c local
+----
+Output:
+[source,bash]
+----
 NODE ID  HOST IP              SERVICE NAME        CONNECTIONS  DATA SENT  DATA REC
 1        0.0.0.0:64073.58994  "$SYS:SystemProxy"            0       0 MB      0 MB
 1        0.0.0.0:64073.41509  Proxy                         0       0 MB      0 MB
+----
 
-$ cohctl reset proxy-stats Proxy -c local
+[source,bash]
+----
+cohctl reset proxy-stats Proxy -c local
 
 Are you sure you want to reset connectionManager statics statistics for service Proxy for all 1 nodes? (y/n) y
 operation completed
