@@ -140,9 +140,14 @@ func completionDistributedService(_ *cobra.Command, _ []string, _ string) ([]str
 	return escapeValues(servicesResult, cobra.ShellCompDirectiveNoFileComp)
 }
 
-// completionFederatedService provides a completion function to return all federated services in a cluster.
+// completionElasticData provides a completion function to return elastic data options.
 func completionElasticData(_ *cobra.Command, _ []string, _ string) ([]string, cobra.ShellCompDirective) {
 	return []string{ram, flash}, cobra.ShellCompDirectiveNoFileComp
+}
+
+// completionFederationOptions provides a completion function to return the options for get federation.
+func completionFederationOptions(_ *cobra.Command, _ []string, _ string) ([]string, cobra.ShellCompDirective) {
+	return []string{all, destinations, origins}, cobra.ShellCompDirectiveNoFileComp
 }
 
 // completionFederatedService provides a completion function to return all federated services in a cluster.
