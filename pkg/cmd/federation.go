@@ -53,7 +53,7 @@ can also specify '-o wide' to display addition information.`,
 		}
 		return nil
 	},
-	ValidArgsFunction: completionFederationOptions,
+	ValidArgs: []string{all, destinations, origins},
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var (
 			err               error
