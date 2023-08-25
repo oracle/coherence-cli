@@ -136,7 +136,7 @@ var federationStateFormatter = func(s string) string {
 	if strings.Contains(s, "ERROR") {
 		return red(s)
 	}
-	if strings.Contains(s, "PAUSED") || strings.Contains(s, "STOPPED") {
+	if strings.Contains(s, "PAUSED") || strings.Contains(s, "STOPPED") || strings.Contains(s, "CONNECT_WAIT") {
 		return yellow(s)
 	}
 

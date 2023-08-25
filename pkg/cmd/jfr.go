@@ -48,9 +48,7 @@ var getJfrsCmd = &cobra.Command{
 			return err
 		}
 
-		cmd.Println(FormatCurrentCluster(connection))
-
-		return executeJFROperation(cmd, "", fetcher.GetJFRs, dataFetcher, "")
+		return executeJFROperation(cmd, "", fetcher.GetJFRs, dataFetcher, "", connection)
 	},
 }
 
@@ -77,9 +75,7 @@ var describeJfrCmd = &cobra.Command{
 			return err
 		}
 
-		cmd.Println(FormatCurrentCluster(connection))
-
-		return executeJFROperation(cmd, args[0], fetcher.CheckJFR, dataFetcher, "")
+		return executeJFROperation(cmd, args[0], fetcher.CheckJFR, dataFetcher, "", connection)
 	},
 }
 
@@ -198,9 +194,7 @@ You can specify either a node or leave the node blank to stop for all nodes.`,
 			return err
 		}
 
-		cmd.Println(FormatCurrentCluster(connection))
-
-		return executeJFROperation(cmd, args[0], fetcher.StopJFR, dataFetcher, "")
+		return executeJFROperation(cmd, args[0], fetcher.StopJFR, dataFetcher, "", connection)
 	},
 }
 
@@ -228,14 +222,12 @@ A JFR command mut be in progress for this to succeed.`,
 			return err
 		}
 
-		cmd.Println(FormatCurrentCluster(connection))
-
-		return executeJFROperation(cmd, args[0], fetcher.DumpJFR, dataFetcher, jfrDumpFileName)
+		return executeJFROperation(cmd, args[0], fetcher.DumpJFR, dataFetcher, jfrDumpFileName, connection)
 	},
 }
 
 // executeJFROperation executes a jfrStop, jfrDump, jfrCheck or  command.
-func executeJFROperation(cmd *cobra.Command, jfrName, operation string, dataFetcher fetcher.Fetcher, filename string) error {
+func executeJFROperation(cmd *cobra.Command, jfrName, operation string, dataFetcher fetcher.Fetcher, filename, connection string) error {
 	var (
 		err         error
 		NodeIds     []string
@@ -306,6 +298,7 @@ func executeJFROperation(cmd *cobra.Command, jfrName, operation string, dataFetc
 
 		// format the result
 		printWatchHeader(cmd)
+		cmd.Println(FormatCurrentCluster(connection))
 		cmd.Println(formatJFROutput(finalResult))
 
 		// check to see if we should exit if we are not watching
