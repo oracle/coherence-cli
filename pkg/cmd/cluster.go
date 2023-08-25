@@ -687,7 +687,7 @@ addition information as well as '-v' to displayed additional information.`,
 			if verboseOutput {
 				cmd.Println("\nFLIGHT RECORDINGS")
 				cmd.Println("-----------------")
-				_ = executeJFROperation(cmd, "", fetcher.GetJFRs, dataFetcher, "")
+				_ = executeJFROperation(cmd, "", fetcher.GetJFRs, dataFetcher, "", connection)
 			}
 		}
 
