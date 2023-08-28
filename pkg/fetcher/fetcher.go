@@ -228,7 +228,7 @@ type Fetcher interface {
 	GetHTTPSessionDetailsJSON() ([]byte, error)
 
 	// StartJFR starts a JFR. type is "role", "cluster" or "node" and target is the role or node.
-	StartJFR(jfrName, directory, jfrType, target string, duration int32) ([]byte, error)
+	StartJFR(jfrName, directory, jfrType, target string, duration int32, settingsFile string) ([]byte, error)
 
 	// StopJFR stops a JFR. type is "cluster" or "node" and target is the node id if type "node".
 	StopJFR(jfrName, jfrType, target string) ([]byte, error)
