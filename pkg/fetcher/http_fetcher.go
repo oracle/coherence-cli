@@ -841,7 +841,7 @@ func (h HTTPFetcher) InvokeStorageOperation(serviceName, cacheName, operation st
 }
 
 // StartJFR starts a JFR. type is "role", "cluster" or "node" and target is the role or node.
-func (h HTTPFetcher) StartJFR(jfrName, directory, jfrType, target string, duration int32) ([]byte, error) {
+func (h HTTPFetcher) StartJFR(jfrName, directory, jfrType, target string, duration int32, settingsFile string) ([]byte, error) {
 	var (
 		err      error
 		finalURL = getInitialURL("jfrStart", jfrType, target)
@@ -849,7 +849,7 @@ func (h HTTPFetcher) StartJFR(jfrName, directory, jfrType, target string, durati
 	)
 
 	// append the common options
-	options := "name=" + jfrName + ",filename=" + directory
+	options := "name=" + jfrName + ",filename=" + directory + ",settings=" + settingsFile
 	if duration > 0 {
 		options += fmt.Sprintf(",duration=%ds", duration)
 	}

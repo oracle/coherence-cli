@@ -23,6 +23,7 @@ var (
 	duration        int32
 	jfrRoleName     string
 	jfrDumpFileName string
+	settingsFile    = "default"
 )
 
 const (
@@ -150,12 +151,12 @@ of 0 to make the recording continuous.`,
 		}
 
 		// confirm the operation
-		if !confirmOperation(cmd, fmt.Sprintf("Are you sure you want to start a JFR named %s for %s of duration: %d seconds? (y/n) ",
-			jfrName, jfrMessage, duration)) {
+		if !confirmOperation(cmd, fmt.Sprintf("Are you sure you want to start a JFR named %s for %s of duration: %d seconds using settings file %s? (y/n) ",
+			jfrName, jfrMessage, duration, settingsFile)) {
 			return nil
 		}
 
-		data, err = dataFetcher.StartJFR(jfrName, outputDirectory, jfrType, target, duration)
+		data, err = dataFetcher.StartJFR(jfrName, outputDirectory, jfrType, target, duration, settingsFile)
 		if err != nil {
 			return err
 		}
@@ -369,6 +370,7 @@ func init() {
 	_ = startJfrCmd.MarkFlagRequired("output-dir")
 	startJfrCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
 	startJfrCmd.Flags().StringVarP(&jfrRoleName, "role", "r", all, "role name to target")
+	startJfrCmd.Flags().StringVarP(&settingsFile, "settings-file", "s", "default", "settings file to use, options are \"profile\" or a specific file")
 	startJfrCmd.Flags().StringVarP(&NodeID, "node", "n", "", nodeIDDesc)
 	startJfrCmd.Flags().Int32VarP(&duration, "duration", "D", 60, "duration for JFR in seconds. Use 0 for continuous")
 
