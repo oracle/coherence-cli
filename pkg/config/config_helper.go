@@ -360,15 +360,16 @@ type CacheSummaries struct {
 
 // CacheSummaryDetail contains a summary of cache details.
 type CacheSummaryDetail struct {
-	ServiceName  string `json:"service"`
-	CacheName    string `json:"name"`
-	CacheSize    int32  `json:"size"`
-	UnitsBytes   int64  `json:"unitsBytes"`
-	TotalPuts    int64  `json:"totalPuts"`
-	TotalGets    int64  `json:"totalGets"`
-	TotalRemoves int64  `json:"removeCount"`
-	CacheHits    int64  `json:"cacheHits"`
-	CacheMisses  int64  `json:"cacheMisses"`
+	ServiceName    string `json:"service"`
+	CacheName      string `json:"name"`
+	CacheSize      int32  `json:"size"`
+	UnitsBytes     int64  `json:"unitsBytes"`
+	TotalPuts      int64  `json:"totalPuts"`
+	TotalGets      int64  `json:"totalGets"`
+	TotalRemoves   int64  `json:"removeCount"`
+	CacheHits      int64  `json:"cacheHits"`
+	CacheMisses    int64  `json:"cacheMisses"`
+	TotalEvictions int64  `json:"evictionCount"`
 }
 
 // TopicDetails contains topics details.
@@ -537,6 +538,7 @@ type CacheDetail struct {
 	TotalRemoves  int64  `json:"removeCount"`
 	CacheHits     int64  `json:"cacheHits"`
 	CacheMisses   int64  `json:"cacheMisses"`
+	Evictions     int64  `json:"evictionCount"`
 	StoreReads    int64  `json:"storeReads"`
 	StoreWrites   int64  `json:"storeWrites"`
 	StoreFailures int64  `json:"storeFailures"`

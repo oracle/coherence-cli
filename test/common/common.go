@@ -1140,7 +1140,7 @@ func RunTestCachesCommands(t *testing.T) {
 		"get", "cache-stores", "cache-store-1", "-s", "", "-c", context.ClusterName)
 
 	// test wide output
-	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "TOTAL PUTS", configArg, file,
+	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "PUTS", configArg, file,
 		"get", "caches", "-c", context.ClusterName, "-o", "wide")
 
 	// test describe cache with invalid service

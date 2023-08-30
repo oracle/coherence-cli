@@ -38,9 +38,9 @@ Output:
 ----
 Total Caches: 2, Total primary storage: 36 MB
 
-SERVICE           CACHE        COUNT   SIZE  AVG SIZE  TOTAL PUTS  TOTAL GETS  TOTAL REMOVES  TOTAL HITS  TOTAL MISSES  HIT PROB
-PartitionedCache  customers  100,000  25 MB       262     200,000           0              0           0             0     0.00%
-PartitionedCache  orders      10,000  11 MB     1,160      20,000      20,000              0      20,000             0   100.00%
+SERVICE           CACHE        COUNT   SIZE  AVG SIZE     PUTS    GETS  REMOVES    HITS  MISSES  HIT PROB
+PartitionedCache  customers  100,000  25 MB       262  200,000       0        0       0       0     0.00%
+PartitionedCache  orders      10,000  11 MB     1,160   20,000  20,000        0  20,000       0   100.00%
 ----
 
 NOTE: If you do not use the `-o wide` option, then you will only see service, cache name, count and size.
@@ -56,9 +56,9 @@ Output:
 ----
 Total Caches: 2, Total primary storage: 36 MB
 
-SERVICE           CACHE        COUNT   SIZE  AVG SIZE  TOTAL PUTS  TOTAL GETS  TOTAL REMOVES  TOTAL HITS  TOTAL MISSES  HIT PROB
-PartitionedCache  customers  100,000  25 MB       262     200,000           0              0           0             0     0.00%
-PartitionedCache  orders      10,000  11 MB     1,160      20,000      20,000              0      20,000             0   100.00%
+SERVICE           CACHE        COUNT   SIZE  AVG SIZE     PUTS    GETS  REMOVES    HITS  MISSES  HIT PROB
+PartitionedCache  customers  100,000  25 MB       262  200,000       0        0       0       0     0.00%
+PartitionedCache  orders      10,000  11 MB     1,160   20,000  20,000        0  20,000       0   100.00%
 ----
 
 [#describe-cache]
@@ -85,10 +85,10 @@ Cache Store Type:  NONE
 
 CACHE SIZE AND ACCESS DETAILS
 -----------------------------
-NODE ID  TIER   COUNT  SIZE  TOTAL PUTS  TOTAL GETS  TOTAL REMOVES
-      1  back   5,022  5 MB       5,022      10,044              0
-      2  back   4,978  5 MB       4,978       9,956              0
-      3  front      0  0 MB      10,000           0              0
+NODE ID  TIER   COUNT  SIZE    PUTS    GETS  REMOVES
+      1  back   5,022  5 MB   5,022  10,044        0
+      2  back   4,978  5 MB   4,978   9,956        0
+      3  front      0  0 MB  10,000       0        0
 
 CACHE STORAGE DETAILS
 ---------------------
