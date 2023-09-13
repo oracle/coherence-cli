@@ -522,6 +522,15 @@ func (h HTTPFetcher) DumpClusterHeap(role string) ([]byte, error) {
 	return result, nil
 }
 
+// GetClusterConfig returns the cluster operational config.
+func (h HTTPFetcher) GetClusterConfig() ([]byte, error) {
+	result, err := httpGetRequest(h, "/getClusterConfig")
+	if err != nil {
+		return constants.EmptyByte, utils.GetError("cannot get cluster config", err)
+	}
+	return result, nil
+}
+
 // ConfigureTracing instructs the cluster to configure tracing for the role or all members
 func (h HTTPFetcher) ConfigureTracing(role string, tracingRatio float32) ([]byte, error) {
 	var (
@@ -1102,6 +1111,7 @@ func httpRequest(h HTTPFetcher, requestType, urlAppend string, absolute bool, co
 		URL             = url.URL{}
 		httpProxy       = os.Getenv("HTTP_PROXY")
 		proxy           *url.URL
+		isJSON          = true
 	)
 
 	// if the username and password was sent in then use it
@@ -1187,6 +1197,12 @@ func httpRequest(h HTTPFetcher, requestType, urlAppend string, absolute bool, co
 		req.Header.Set("Content-Type", "application/json")
 	}
 
+	// special case for getClusterConfig
+	if strings.Contains(urlAppend, "getClusterConfig") {
+		isJSON = false
+		req.Header.Set("Content-Type", "application/xml")
+	}
+
 	resp, err = client.Do(req)
 	if err != nil {
 		return empty, err
@@ -1216,7 +1232,7 @@ func httpRequest(h HTTPFetcher, requestType, urlAppend string, absolute bool, co
 	}
 
 	body = buffer.Bytes()
-	if len(body) > 0 && !isValidJSON(body) {
+	if len(body) > 0 && isJSON && !isValidJSON(body) {
 		return empty, errors.New("invalid JSON body")
 	}
 

@@ -39,6 +39,6 @@ do
   sleep 3
 done
 
-sleep 10
+sleep 30
 
 

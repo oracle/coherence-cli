@@ -1249,6 +1249,40 @@ NOTE: This is an experimental feature and my be altered or removed in the future
 	},
 }
 
+// getClusterConfigCmd represents the get cluster-config command.
+var getClusterConfigCmd = &cobra.Command{
+	Use:   "cluster-config",
+	Short: "display the cluster operational config",
+	Long: `The 'get cluster-config' displays the cluster operational config for a
+cluster using the current context or a cluster specified by using '-c'. Only available
+in most recent Coherence versions`,
+	Args: cobra.ExactArgs(0),
+	RunE: func(cmd *cobra.Command, args []string) error {
+		var (
+			err         error
+			connection  string
+			dataFetcher fetcher.Fetcher
+			data        []byte
+		)
+
+		connection, dataFetcher, err = GetConnectionAndDataFetcher()
+		if err != nil {
+			return err
+		}
+
+		cmd.Println(FormatCurrentCluster(connection))
+
+		data, err = dataFetcher.GetClusterConfig()
+		if err != nil {
+			return err
+		}
+
+		cmd.Println(string(data))
+
+		return nil
+	},
+}
+
 // startClusterCmd represents the start cluster command.
 var startClusterCmd = &cobra.Command{
 	Use:               "cluster",

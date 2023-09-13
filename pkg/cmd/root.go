@@ -498,6 +498,7 @@ func Initialize(command *cobra.Command) *cobra.Command {
 	getCmd.AddCommand(getP2PStatsCmd)
 	getCmd.AddCommand(getConfigCmd)
 	getCmd.AddCommand(getServiceDistributionsCmd)
+	getCmd.AddCommand(getClusterConfigCmd)
 
 	// set command
 	command.AddCommand(setCmd)

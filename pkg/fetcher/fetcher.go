@@ -146,6 +146,9 @@ type Fetcher interface {
 	// GetEnvironment returns the environment for a member.
 	GetEnvironment(memberID string) ([]byte, error)
 
+	// GetClusterConfig returns the cluster operational config.
+	GetClusterConfig() ([]byte, error)
+
 	// SetMemberAttribute sets the given attribute for a member.
 	SetMemberAttribute(memberID, attribute string, value interface{}) ([]byte, error)
 
