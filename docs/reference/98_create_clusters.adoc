@@ -88,6 +88,7 @@ Output:
 Cluster name:           local
 Cluster version:        {coherence-default-version}
 Cluster port:           7574
+Partition count:        257
 Management port:        30000
 Server count:           3
 Initial memory:         128m
@@ -146,6 +147,7 @@ Output:
 Cluster name:         local
 Cluster version:      14.1.1-2206-5
 Cluster port:         7574
+Partition count:      257
 Management port:      30000
 Server count:         3
 Initial memory:       1g
@@ -179,6 +181,7 @@ Output:
 Cluster name:           local
 Cluster version:        {coherence-default-version}
 Cluster port:           7574
+Partition count:        257
 Management port:        30000
 Server count:           3
 Initial memory:         128m

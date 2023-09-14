@@ -969,6 +969,7 @@ func addCluster(cmd *cobra.Command, connection, connectionURL, discoveryType, ns
 var (
 	httpPortParam            int32
 	clusterPortParam         int32
+	partitionCountParam      int32
 	wkaParam                 string
 	clusterVersionParam      string
 	replicaCountParam        int32
@@ -996,6 +997,8 @@ const (
 	stopClusterCommand      = "stop cluster"
 	defaultHeap             = "128m"
 	localHost               = "127.0.0.1"
+	minPartitionCount       = 3
+	maxPartitionCount       = 9973
 )
 
 // createClusterCmd represents the create cluster command.
@@ -1050,6 +1053,11 @@ NOTE: This is an experimental feature and my be altered or removed in the future
 		// validate cluster port
 		if err = utils.ValidatePort(clusterPortParam); err != nil {
 			return err
+		}
+
+		// validate partition count
+		if partitionCountParam < minPartitionCount || partitionCountParam > maxPartitionCount {
+			return fmt.Errorf("partition count must be between %v and %v", minPartitionCount, maxPartitionCount)
 		}
 
 		// validate metrics port
@@ -1125,6 +1133,7 @@ NOTE: This is an experimental feature and my be altered or removed in the future
 		cmd.Printf("Cluster version:      %s\n", clusterVersionParam)
 		cmd.Printf("Cluster port:         %d\n", clusterPortParam)
 		cmd.Printf("Management port:      %d\n", httpPortParam)
+		cmd.Printf("Partition count:      %d\n", partitionCountParam)
 		cmd.Printf("Replica count:        %d\n", replicaCountParam)
 		cmd.Printf("Initial memory:       %s\n", heap)
 		cmd.Printf("Persistence mode:     %s\n", persistenceModeParam)
@@ -1214,7 +1223,8 @@ NOTE: This is an experimental feature and my be altered or removed in the future
 
 		// generate startup arguments
 		arguments := fmt.Sprintf("-Dcoherence.cluster=%s -Dcoherence.clusterport=%d -Dcoherence.ttl=0 -Dcoherence.wka=%s -Djava.net.preferIPv4Stack=true"+
-			" -Djava.rmi.server.hostname=%s", clusterName, clusterPortParam, wkaParam, wkaParam)
+			" -Djava.rmi.server.hostname=%s -Dcoherence.distributed.partitioncount=%d -Dcoherence.distributed.partitions=%d",
+			clusterName, clusterPortParam, wkaParam, wkaParam, partitionCountParam, partitionCountParam)
 
 		// add the new cluster
 		newCluster := ClusterConnection{Name: clusterName, ConnectionType: "http",
@@ -1577,6 +1587,7 @@ func init() {
 		fmt.Sprintf("persistence mode %v", validPersistenceModes))
 	createClusterCmd.Flags().Int32VarP(&httpPortParam, "http-port", "H", 30000, "http management port")
 	createClusterCmd.Flags().Int32VarP(&clusterPortParam, "cluster-port", "p", 7574, "cluster port")
+	createClusterCmd.Flags().Int32VarP(&partitionCountParam, "partition-count", "T", 257, "partition count")
 	createClusterCmd.Flags().StringVarP(&wkaParam, "wka", "K", localHost, "well known address")
 	createClusterCmd.Flags().Int32VarP(&logLevelParam, logLevelArg, "l", 5, logLevelMessage)
 	createClusterCmd.Flags().StringVarP(&startupDelayParam, startupDelayArg, "D", "0ms", startupDelayMessage)
