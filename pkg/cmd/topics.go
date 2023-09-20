@@ -14,6 +14,7 @@ import (
 	"github.com/oracle/coherence-cli/pkg/fetcher"
 	"github.com/oracle/coherence-cli/pkg/utils"
 	"github.com/spf13/cobra"
+	"sort"
 	"strconv"
 	"strings"
 	"sync"
@@ -1046,6 +1047,11 @@ func generateSubscriberChannelStats(stats map[string]interface{}) []config.Subsc
 		}
 		result = append(result, stat)
 	}
+
+	// sort the stats by channel
+	sort.Slice(result, func(i, j int) bool {
+		return result[i].Channel < result[j].Channel
+	})
 
 	return result
 }
