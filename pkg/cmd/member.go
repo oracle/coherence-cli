@@ -54,6 +54,7 @@ const (
 	invalidNodeID       = "invalid value for node id of %s"
 	none                = "none"
 	roleNameDescription = "role name to display"
+	unableToFindMember  = "unable to find member with nodeId %s"
 )
 
 // getMembersCmd represents the get members command.
@@ -180,7 +181,7 @@ Only available in most recent Coherence versions.`,
 
 		nodeID := args[0]
 		if !utils.IsValidInt(nodeID) {
-			return fmt.Errorf("invalid node id %s", nodeID)
+			return fmt.Errorf(invalidNodeID, nodeID)
 		}
 
 		connection, dataFetcher, err = GetConnectionAndDataFetcher()
@@ -194,7 +195,7 @@ Only available in most recent Coherence versions.`,
 		}
 
 		if !utils.SliceContains(nodeIDArray, nodeID) {
-			return fmt.Errorf("unable to find member with nodeId = %s", nodeID)
+			return fmt.Errorf(unableToFindMember, nodeID)
 		}
 
 		for {
@@ -270,7 +271,7 @@ of view of a member and all the members it connects to.`,
 
 		nodeID := args[0]
 		if !utils.IsValidInt(nodeID) {
-			return fmt.Errorf("invalid node id %s", nodeID)
+			return fmt.Errorf(invalidNodeID, nodeID)
 		}
 
 		// retrieve the current context or the value from "-c"
@@ -301,7 +302,7 @@ of view of a member and all the members it connects to.`,
 		}
 
 		if !found {
-			return fmt.Errorf("unable to find member with nodeId = %s", nodeID)
+			return fmt.Errorf(unableToFindMember, nodeID)
 		}
 
 		for {
@@ -458,7 +459,7 @@ Full list of options are JVM dependant, but can include the full values or part 
 
 		nodeID := args[0]
 		if !utils.IsValidInt(nodeID) {
-			return fmt.Errorf("invalid node id %s", nodeID)
+			return fmt.Errorf(invalidNodeID, nodeID)
 		}
 
 		// retrieve the current context or the value from "-c"
@@ -488,7 +489,7 @@ Full list of options are JVM dependant, but can include the full values or part 
 		}
 
 		if !found {
-			return fmt.Errorf("unable to find member with nodeId = %s", nodeID)
+			return fmt.Errorf(unableToFindMember, nodeID)
 		}
 
 		// we have a valid member id so get the details from fetcher
