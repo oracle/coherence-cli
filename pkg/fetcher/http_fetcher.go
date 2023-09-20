@@ -384,7 +384,7 @@ func (h HTTPFetcher) GetScheduledDistributionsJSON(serviceName string) ([]byte, 
 	return result, nil
 }
 
-// GetServiceDescriptionJSON returns service description for a service.
+// GetServiceDescriptionJSON returns service description.
 func (h HTTPFetcher) GetServiceDescriptionJSON(serviceName string) ([]byte, error) {
 	result, err := httpGetRequest(h, servicesPath+getSafeServiceName(h, serviceName)+descriptionPath)
 	if err != nil && !strings.Contains(err.Error(), "404") {
@@ -402,7 +402,7 @@ func (h HTTPFetcher) GetClusterDescriptionJSON() ([]byte, error) {
 	return result, nil
 }
 
-// GetNodeDescriptionJSON returns mode description.
+// GetNodeDescriptionJSON returns node description.
 func (h HTTPFetcher) GetNodeDescriptionJSON(nodeID string) ([]byte, error) {
 	result, err := httpGetRequest(h, membersPath+nodeID+descriptionPath)
 	if err != nil && !strings.Contains(err.Error(), "404") {

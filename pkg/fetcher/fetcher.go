@@ -107,10 +107,10 @@ type Fetcher interface {
 	// GetScheduledDistributionsJSON returns scheduled distributions for a service.
 	GetScheduledDistributionsJSON(serviceName string) ([]byte, error)
 
-	// GetServiceDescriptionJSON returns service description for a service.
+	// GetServiceDescriptionJSON returns service description.
 	GetServiceDescriptionJSON(serviceName string) ([]byte, error)
 
-	// GetNodeDescriptionJSON returns mode description.
+	// GetNodeDescriptionJSON returns node description.
 	GetNodeDescriptionJSON(nodeID string) ([]byte, error)
 
 	// GetClusterDescriptionJSON returns cluster description.
