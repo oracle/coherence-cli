@@ -18,6 +18,7 @@ There are various commands that allow you to work with and manage cluster servic
 * <<get-service-storage, `cohctl get service-storage`>> - displays partitioned services storage information for a cluster
 * <<get-service-members, `cohctl get service-members`>> - displays service members
 * <<get-service-distributions, `cohctl get service-distributions`>> - displays partition distribution information for a service"
+* <<get-service-description, `cohctl get service-description`>> - displays service description including membership"
 * <<start-service, `cohctl start service`>> - starts a specific service on a cluster member
 * <<stop-service, `cohctl stop service`>> - forces a specific service to stop on a cluster member
 * <<shutdown-service, `cohctl shutdown service`>> - performs a controlled shut-down of a specific service on a cluster member
@@ -147,6 +148,18 @@ Machine localhost
         - scheduled to receive 27 Backup partitions:
            -- 7 from member 3
            -- 20 from member 7
+----
+
+[#get-service-description]
+==== Get Service Description
+
+include::../../build/_output/docs-gen/get_service_description.adoc[tag=text]
+
+*Examples*
+
+[source,bash]
+----
+cohctl get service-description PartitionedCache -c local
 ----
 
 [#start-service]
