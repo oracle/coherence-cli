@@ -499,6 +499,9 @@ func Initialize(command *cobra.Command) *cobra.Command {
 	getCmd.AddCommand(getConfigCmd)
 	getCmd.AddCommand(getServiceDistributionsCmd)
 	getCmd.AddCommand(getClusterConfigCmd)
+	getCmd.AddCommand(getServiceDescriptionCmd)
+	getCmd.AddCommand(getClusterDescription)
+	getCmd.AddCommand(getMemberDescriptionCmd)
 
 	// set command
 	command.AddCommand(setCmd)

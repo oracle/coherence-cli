@@ -427,7 +427,7 @@ func IssueFederationCommand(cmd *cobra.Command, serviceName, command, participan
 	return nil
 }
 
-// GetNodeIds returns the node id for the current cluster.
+// GetNodeIds returns the node ids for the current cluster.
 func GetNodeIds(dataFetcher fetcher.Fetcher) ([]string, error) {
 	var (
 		members       = config.Members{}

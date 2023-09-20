@@ -357,6 +357,84 @@ var getServiceDistributionsCmd = &cobra.Command{
 	},
 }
 
+// getServiceDescriptionCmd represents the get service-description command.
+var getServiceDescriptionCmd = &cobra.Command{
+	Use:   "service-description service-name",
+	Short: "display description for a service",
+	Long: `The 'get service-description' command displays information regarding a service and it's members.
+Only available in most recent Coherence versions.`,
+	Args: func(cmd *cobra.Command, args []string) error {
+		if len(args) != 1 {
+			displayErrorAndExit(cmd, provideServiceName)
+		}
+		return nil
+	},
+	ValidArgsFunction: completionService,
+	RunE: func(cmd *cobra.Command, args []string) error {
+		var (
+			err             error
+			dataFetcher     fetcher.Fetcher
+			connection      string
+			servicesSummary = config.ServicesSummaries{}
+			serviceResult   []byte
+		)
+
+		connection, dataFetcher, err = GetConnectionAndDataFetcher()
+		if err != nil {
+			return err
+		}
+
+		serviceResult, err = dataFetcher.GetServiceDetailsJSON()
+		if err != nil {
+			return err
+		}
+
+		err = json.Unmarshal(serviceResult, &servicesSummary)
+		if err != nil {
+			return err
+		}
+
+		if found := serviceExists(args[0], servicesSummary); !found {
+			return fmt.Errorf(unableToFindService, args[0])
+		}
+
+		for {
+			var (
+				descriptionData []byte
+				description     config.Description
+			)
+
+			descriptionData, err = dataFetcher.GetServiceDescriptionJSON(args[0])
+			if err != nil {
+				return err
+			}
+			if len(descriptionData) != 0 {
+				err = json.Unmarshal(descriptionData, &description)
+				if err != nil {
+					return err
+				}
+			} else {
+				return nil
+			}
+
+			printWatchHeader(cmd)
+
+			cmd.Println(FormatCurrentCluster(connection))
+			cmd.Println(description.Description)
+
+			// check to see if we should exit if we are not watching
+			if !isWatchEnabled() {
+				break
+			}
+
+			// we are watching so sleep and then repeat until CTRL-C
+			time.Sleep(time.Duration(watchDelay) * time.Second)
+		}
+
+		return nil
+	},
+}
+
 // getServiceMembersCmd represents the get service-members command.
 var getServiceMembersCmd = &cobra.Command{
 	Use:               "service-members service-name",

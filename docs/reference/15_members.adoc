@@ -19,6 +19,7 @@ There are various cluster commands that allow you to work with and manage cluste
 * <<describe-member, `cohctl describe member`>> - shows information related to a specific member
 * <<set-member, `cohctl set member`>> - sets a member attribute for one or more members
 * <<shutdown-member, `cohctl shutdown member`>> - shuts down a members services in a controlled manner
+* <<get-member-description, `cohctl get member-description`>> - displays member description
 
 [#get-members]
 ==== Get Members
@@ -220,8 +221,15 @@ Are you sure you want to shutdown member 1? (y/n) y
 operation completed
 ----
 
-NOTE: This command may take a while to complete. Check the server logs for information regarding the
-member's status.  If the services were started using DefaultCacheServer, then they will be restarted.
+[#get-member-description]
+==== Get Member Description
+
+include::../../build/_output/docs-gen/get_member_description.adoc[tag=text]
+
+[source,bash]
+----
+cohctl get member-description 1 -c local
+----
 
 === See Also
 

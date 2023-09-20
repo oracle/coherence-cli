@@ -703,3 +703,8 @@ type SingleStatusValue struct {
 type Distributions struct {
 	ScheduledDistributions string `json:"scheduledDistributions"`
 }
+
+// Description contains description for an item.
+type Description struct {
+	Description string `json:"description"`
+}

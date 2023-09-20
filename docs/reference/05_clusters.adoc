@@ -19,6 +19,7 @@ There are various cluster commands that allow you to work with and manage cluste
 * <<get-clusters, `cohctl get clusters`>> - returns the list of cluster connections
 * <<describe-cluster, `cohctl describe cluster`>> - describes a cluster referred to by a cluster connection
 * <<get-cluster-config, `cohctl get cluster-config`>> - displays the cluster operational config
+* <<get-cluster-description, `cohctl get cluster-description`>> - displays the cluster description including members
 
 [#add-cluster]
 ==== Add Cluster
@@ -186,7 +187,7 @@ cohctl describe cluster local
 ----
 
 [#get-cluster-config]
-==== Get Cluster COnfig
+==== Get Cluster Config
 
 include::../../build/_output/docs-gen/get_cluster_config.adoc[tag=text]
 
@@ -195,6 +196,18 @@ include::../../build/_output/docs-gen/get_cluster_config.adoc[tag=text]
 [source,bash]
 ----
 cohctl get cluster-config
+----
+
+[#get-cluster-description]
+==== Get Cluster Description
+
+include::../../build/_output/docs-gen/get_cluster_description.adoc[tag=text]
+
+*Examples*
+
+[source,bash]
+----
+cohctl get cluster-description -c local
 ----
 
 === See Also

@@ -54,6 +54,7 @@ const (
 	invalidNodeID       = "invalid value for node id of %s"
 	none                = "none"
 	roleNameDescription = "role name to display"
+	unableToFindMember  = "unable to find member with nodeId %s"
 )
 
 // getMembersCmd represents the get members command.
@@ -157,6 +158,83 @@ func getMembers(cmd *cobra.Command, networkStats bool) error {
 	return nil
 }
 
+// getMemberDescriptionCmd represents the get member-description command.
+var getMemberDescriptionCmd = &cobra.Command{
+	Use:   "member-description node-id",
+	Short: "display member description",
+	Long: `The 'get member-description' command displays information regarding a member.
+Only available in most recent Coherence versions.`,
+	ValidArgsFunction: completionNodeID,
+	Args: func(cmd *cobra.Command, args []string) error {
+		if len(args) != 1 {
+			displayErrorAndExit(cmd, provideNodeID)
+		}
+		return nil
+	},
+	RunE: func(cmd *cobra.Command, args []string) error {
+		var (
+			dataFetcher fetcher.Fetcher
+			connection  string
+			err         error
+			nodeIDArray []string
+		)
+
+		nodeID := args[0]
+		if !utils.IsValidInt(nodeID) {
+			return fmt.Errorf(invalidNodeID, nodeID)
+		}
+
+		connection, dataFetcher, err = GetConnectionAndDataFetcher()
+		if err != nil {
+			return err
+		}
+
+		nodeIDArray, err = GetNodeIds(dataFetcher)
+		if err != nil {
+			return err
+		}
+
+		if !utils.SliceContains(nodeIDArray, nodeID) {
+			return fmt.Errorf(unableToFindMember, nodeID)
+		}
+
+		for {
+			var (
+				descriptionData []byte
+				description     config.Description
+			)
+
+			descriptionData, err = dataFetcher.GetNodeDescriptionJSON(args[0])
+			if err != nil {
+				return err
+			}
+			if len(descriptionData) != 0 {
+				err = json.Unmarshal(descriptionData, &description)
+				if err != nil {
+					return err
+				}
+			} else {
+				return nil
+			}
+
+			printWatchHeader(cmd)
+
+			cmd.Println(FormatCurrentCluster(connection))
+			cmd.Println(description.Description)
+
+			// check to see if we should exit if we are not watching
+			if !isWatchEnabled() {
+				break
+			}
+
+			// we are watching so sleep and then repeat until CTRL-C
+			time.Sleep(time.Duration(watchDelay) * time.Second)
+		}
+
+		return nil
+	},
+}
+
 // getNetworkStatsCmd represents the get member-stats command.
 var getNetworkStatsCmd = &cobra.Command{
 	Use:   "network-stats",
@@ -193,7 +271,7 @@ of view of a member and all the members it connects to.`,
 
 		nodeID := args[0]
 		if !utils.IsValidInt(nodeID) {
-			return fmt.Errorf("invalid node id %s", nodeID)
+			return fmt.Errorf(invalidNodeID, nodeID)
 		}
 
 		// retrieve the current context or the value from "-c"
@@ -224,7 +302,7 @@ of view of a member and all the members it connects to.`,
 		}
 
 		if !found {
-			return fmt.Errorf("unable to find member with nodeId = %s", nodeID)
+			return fmt.Errorf(unableToFindMember, nodeID)
 		}
 
 		for {
@@ -381,7 +459,7 @@ Full list of options are JVM dependant, but can include the full values or part 
 
 		nodeID := args[0]
 		if !utils.IsValidInt(nodeID) {
-			return fmt.Errorf("invalid node id %s", nodeID)
+			return fmt.Errorf(invalidNodeID, nodeID)
 		}
 
 		// retrieve the current context or the value from "-c"
@@ -411,7 +489,7 @@ Full list of options are JVM dependant, but can include the full values or part 
 		}
 
 		if !found {
-			return fmt.Errorf("unable to find member with nodeId = %s", nodeID)
+			return fmt.Errorf(unableToFindMember, nodeID)
 		}
 
 		// we have a valid member id so get the details from fetcher

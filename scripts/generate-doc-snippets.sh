@@ -46,6 +46,7 @@ create_doc $DOCS_DIR/get_clusters "${COHCTL} get clusters --help"
 create_doc $DOCS_DIR/describe_cluster "${COHCTL} describe cluster --help"
 create_doc $DOCS_DIR/discover_clusters "${COHCTL} discover clusters --help"
 create_doc $DOCS_DIR/get_cluster_config "${COHCTL} get cluster-config --help"
+create_doc $DOCS_DIR/get_cluster_description "${COHCTL} get cluster-description --help"
 
 # Create Cluster
 create_doc $DOCS_DIR/create_cluster "${COHCTL} create cluster --help"
@@ -71,6 +72,7 @@ create_doc $DOCS_DIR/get_p2p_stats "${COHCTL} get p2p-stats --help"
 create_doc $DOCS_DIR/describe_member "${COHCTL} describe member --help"
 create_doc $DOCS_DIR/set_member "${COHCTL} set member --help"
 create_doc $DOCS_DIR/shutdown_member "${COHCTL} shutdown member --help"
+create_doc $DOCS_DIR/get_member_description "${COHCTL} get member-description --help"
 
 # Machines
 create_doc $DOCS_DIR/get_machines "${COHCTL} get machines --help"
@@ -97,6 +99,7 @@ create_doc $DOCS_DIR/stop_service "${COHCTL} stop service --help"
 create_doc $DOCS_DIR/shutdown_service "${COHCTL} shutdown service --help"
 create_doc $DOCS_DIR/suspend_service "${COHCTL} suspend service --help"
 create_doc $DOCS_DIR/resume_service "${COHCTL} resume service --help"
+create_doc $DOCS_DIR/get_service_description "${COHCTL} get service-description --help"
 
 # Management
 create_doc $DOCS_DIR/get_management "${COHCTL} get management --help"

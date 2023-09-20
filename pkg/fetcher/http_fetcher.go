@@ -52,6 +52,7 @@ const (
 	resetStatistics      = "resetStatistics"
 	all                  = "all"
 	disconnectAll        = "/disconnectAll"
+	descriptionPath      = "/description?links="
 )
 
 // HTTPFetcher is an implementation of a Fetcher to retrieve data from Management over REST.
@@ -379,6 +380,33 @@ func (h HTTPFetcher) GetScheduledDistributionsJSON(serviceName string) ([]byte, 
 		"/partition/scheduledDistributions?links=")
 	if err != nil && !strings.Contains(err.Error(), "404") {
 		return constants.EmptyByte, utils.GetError("cannot get scheduled distributions for service "+serviceName, err)
+	}
+	return result, nil
+}
+
+// GetServiceDescriptionJSON returns service description.
+func (h HTTPFetcher) GetServiceDescriptionJSON(serviceName string) ([]byte, error) {
+	result, err := httpGetRequest(h, servicesPath+getSafeServiceName(h, serviceName)+descriptionPath)
+	if err != nil && !strings.Contains(err.Error(), "404") {
+		return constants.EmptyByte, utils.GetError("cannot get description for service "+serviceName, err)
+	}
+	return result, nil
+}
+
+// GetClusterDescriptionJSON returns cluster description.
+func (h HTTPFetcher) GetClusterDescriptionJSON() ([]byte, error) {
+	result, err := httpGetRequest(h, descriptionPath)
+	if err != nil && !strings.Contains(err.Error(), "404") {
+		return constants.EmptyByte, utils.GetError("cannot get description for cluster", err)
+	}
+	return result, nil
+}
+
+// GetNodeDescriptionJSON returns node description.
+func (h HTTPFetcher) GetNodeDescriptionJSON(nodeID string) ([]byte, error) {
+	result, err := httpGetRequest(h, membersPath+nodeID+descriptionPath)
+	if err != nil && !strings.Contains(err.Error(), "404") {
+		return constants.EmptyByte, utils.GetError("cannot get description for node "+nodeID, err)
 	}
 	return result, nil
 }
@@ -1198,7 +1226,7 @@ func httpRequest(h HTTPFetcher, requestType, urlAppend string, absolute bool, co
 	}
 
 	// special case for getClusterConfig
-	if strings.Contains(urlAppend, "getClusterConfig") {
+	if strings.Contains(urlAppend, "/getClusterConfig") {
 		isJSON = false
 		req.Header.Set("Content-Type", "application/xml")
 	}

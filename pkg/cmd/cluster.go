@@ -23,6 +23,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"time"
 )
 
 var (
@@ -1288,6 +1289,62 @@ in most recent Coherence versions`,
 		}
 
 		cmd.Println(string(data))
+
+		return nil
+	},
+}
+
+// getClusterDescription represents the get cluster-description command.
+var getClusterDescription = &cobra.Command{
+	Use:   "cluster-description",
+	Short: "display cluster description",
+	Long: `The 'get cluster-description' command displays information regarding a cluster and it's members.
+Only available in most recent Coherence versions.`,
+	Args: cobra.ExactArgs(0),
+	RunE: func(cmd *cobra.Command, args []string) error {
+		var (
+			err         error
+			dataFetcher fetcher.Fetcher
+			connection  string
+		)
+
+		connection, dataFetcher, err = GetConnectionAndDataFetcher()
+		if err != nil {
+			return err
+		}
+
+		for {
+			var (
+				descriptionData []byte
+				description     config.Description
+			)
+
+			descriptionData, err = dataFetcher.GetClusterDescriptionJSON()
+			if err != nil {
+				return err
+			}
+			if len(descriptionData) != 0 {
+				err = json.Unmarshal(descriptionData, &description)
+				if err != nil {
+					return err
+				}
+			} else {
+				return nil
+			}
+
+			printWatchHeader(cmd)
+
+			cmd.Println(FormatCurrentCluster(connection))
+			cmd.Println(description.Description)
+
+			// check to see if we should exit if we are not watching
+			if !isWatchEnabled() {
+				break
+			}
+
+			// we are watching so sleep and then repeat until CTRL-C
+			time.Sleep(time.Duration(watchDelay) * time.Second)
+		}
 
 		return nil
 	},
