@@ -524,10 +524,11 @@ func FormatTopicsSubscribers(topicsSubscribers []config.TopicsSubscriberDetail) 
 	table := newFormattedTable().WithHeader(NodeIDColumn, SubscriberIDColumn, "STATE", ChannelsColumn, SubscriberGroupColumn,
 		"RECEIVED", "ERRORS", "BACKLOG", "DISCONNECTS", "TYPE")
 	if OutputFormat == constants.WIDE {
-		table.WithAlignment(R, R, L, R, L, R, R, R, R, L, L)
+		table.WithAlignment(R, R, L, L, L, R, R, R, R, L, L, L)
+		table.AddHeaderColumns("OWNED CHANNELS")
 		table.AddHeaderColumns(MemberColumn)
 	} else {
-		table.WithAlignment(R, R, L, R, L, R, R, R, R, L)
+		table.WithAlignment(R, R, L, L, L, R, R, R, R, L)
 	}
 	table.AddFormattingFunction(6, errorFormatter)
 	table.AddFormattingFunction(7, errorFormatter)
@@ -540,10 +541,29 @@ func FormatTopicsSubscribers(topicsSubscribers []config.TopicsSubscriberDetail) 
 			subGroup = "n/a"
 		}
 
+		var channels string
+		var channelsOwned string
+		if "Durable" == value.SubType {
+			var owned []string
+			stats := generateSubscriberChannelStats(value.Channels)
+			for _, ch := range stats {
+				if ch.Owned {
+					owned = append(owned, strconv.FormatInt(ch.Channel, 10))
+				}
+			}
+			channels = fmt.Sprintf("%d/%d", len(owned), value.ChannelCount)
+			channelsOwned = strings.Join(owned[:], ",")
+		} else {
+			channels = fmt.Sprintf("%d", value.ChannelCount)
+			channelsOwned = "All"
+		}
+
 		table.AddRow(formatSmallInteger(int32(nodeID)), fmt.Sprintf("%v", value.ID),
-			value.StateName, formatLargeInteger(value.ChannelCount), subGroup, formatLargeInteger(value.ReceivedCount),
+			value.StateName, channels, subGroup, formatLargeInteger(value.ReceivedCount),
 			formatLargeInteger(value.ReceiveErrors), formatLargeInteger(value.Backlog), formatLargeInteger(value.Disconnections), value.SubType)
+
 		if OutputFormat == constants.WIDE {
+			table.AddColumnsToRow(channelsOwned)
 			table.AddColumnsToRow(value.Member)
 		}
 	}
