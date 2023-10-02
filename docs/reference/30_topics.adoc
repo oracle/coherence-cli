@@ -194,10 +194,9 @@ Output:
 Service:  PartitionedTopic
 Topic:    private-messages
 
-NODE ID  SUBSCRIBER ID  STATE      CHANNELS  SUBSCRIBER GROUP  RECEIVED  ERRORS  BACKLOG  TYPE
-      4    17663538530  Connected        17  1                        0       0        0  Anonymous
-      5    23267662748  Connected        17  1                        0       0        0  Anonymous
-      6    26845397584  Connected        17  1                        0       0        0  Anonymous
+NODE ID  SUBSCRIBER ID  STATE      CHANNELS  SUBSCRIBER GROUP  RECEIVED  ERRORS  BACKLOG  TYPE     OWNED CHANNELS
+      4    17663538530  Connected      9/17  1                        0       0        0  Durable  0,1,2,3,4,5,6,7,16
+      5    23267662748  Connected      8/17  1                        0       0        0  Durable  8,9,10,11,12,13,14,15
 ----
 
 

@@ -522,13 +522,12 @@ func FormatTopicsSubscribers(topicsSubscribers []config.TopicsSubscriberDetail) 
 	})
 
 	table := newFormattedTable().WithHeader(NodeIDColumn, SubscriberIDColumn, "STATE", ChannelsColumn, SubscriberGroupColumn,
-		"RECEIVED", "ERRORS", "BACKLOG", "DISCONNECTS", "TYPE")
+		"RECEIVED", "ERRORS", "BACKLOG", "DISCONNECTS", "TYPE", "OWNED CHANNELS")
 	if OutputFormat == constants.WIDE {
 		table.WithAlignment(R, R, L, L, L, R, R, R, R, L, L, L)
-		table.AddHeaderColumns("OWNED CHANNELS")
 		table.AddHeaderColumns(MemberColumn)
 	} else {
-		table.WithAlignment(R, R, L, L, L, R, R, R, R, L)
+		table.WithAlignment(R, R, L, L, L, R, R, R, R, L, L)
 	}
 	table.AddFormattingFunction(6, errorFormatter)
 	table.AddFormattingFunction(7, errorFormatter)
@@ -560,10 +559,10 @@ func FormatTopicsSubscribers(topicsSubscribers []config.TopicsSubscriberDetail) 
 
 		table.AddRow(formatSmallInteger(int32(nodeID)), fmt.Sprintf("%v", value.ID),
 			value.StateName, channels, subGroup, formatLargeInteger(value.ReceivedCount),
-			formatLargeInteger(value.ReceiveErrors), formatLargeInteger(value.Backlog), formatLargeInteger(value.Disconnections), value.SubType)
+			formatLargeInteger(value.ReceiveErrors), formatLargeInteger(value.Backlog), formatLargeInteger(value.Disconnections), value.SubType,
+			channelsOwned)
 
 		if OutputFormat == constants.WIDE {
-			table.AddColumnsToRow(channelsOwned)
 			table.AddColumnsToRow(value.Member)
 		}
 	}
