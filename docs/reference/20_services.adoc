@@ -237,12 +237,12 @@ cohctl get services -c local
 Output:
 [source,bash]
 ----
-SERVICE NAME         TYPE              MEMBERS  STATUS HA  STORAGE  PARTITIONS
-Proxy                Proxy                   2  n/a             -1          -1
-PartitionedTopic     DistributedCache        2  NODE-SAFE        2         257
-PartitionedCache2    DistributedCache        2  NODE-SAFE        2         257
-PartitionedCache     DistributedCache        2  NODE-SAFE        2         257
-ManagementHttpProxy  Proxy                   1  n/a             -1          -1
+SERVICE NAME         TYPE              MEMBERS  STATUS HA  STORAGE  SENIOR PARTITIONS
+Proxy                Proxy                   2  n/a             -1       1         -1
+PartitionedTopic     DistributedCache        2  NODE-SAFE        2       2        257
+PartitionedCache2    DistributedCache        2  NODE-SAFE        2       2        257
+PartitionedCache     DistributedCache        2  NODE-SAFE        2       1        257
+ManagementHttpProxy  Proxy                   1  n/a             -1       1         -1
 ----
 
 [source,bash]

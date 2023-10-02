@@ -1524,13 +1524,13 @@ func FormatServices(services []config.ServiceSummary) string {
 		return strings.Compare(services[p].ServiceName, services[q].ServiceName) < 0
 	})
 
-	table := newFormattedTable().WithHeader(ServiceNameColumn, "TYPE", MembersColumn, "STATUS HA", "STORAGE", partitions)
+	table := newFormattedTable().WithHeader(ServiceNameColumn, "TYPE", MembersColumn, "STATUS HA", "STORAGE", "SENIOR", partitions)
 	if OutputFormat == constants.WIDE {
-		table.WithAlignment(L, L, R, L, R, R, R, R, R, L, L)
+		table.WithAlignment(L, L, R, L, R, R, R, R, R, R, L, L)
 		table.AddHeaderColumns(endangered, "VULNERABLE", "UNBALANCED", "STATUS", "SUSPENDED")
 		table.AddFormattingFunction(9, statusHAFormatter)
 	} else {
-		table.WithAlignment(L, L, R, L, R, R)
+		table.WithAlignment(L, L, R, L, R, R, R)
 	}
 
 	table.AddFormattingFunction(3, statusHAFormatter)
@@ -1561,7 +1561,8 @@ func FormatServices(services []config.ServiceSummary) string {
 		}
 
 		table.AddRow(value.ServiceName, value.ServiceType, formatSmallInteger(value.MemberCount),
-			value.StatusHA, formatSmallInteger(value.StorageEnabledCount), formatSmallInteger(value.PartitionsAll))
+			value.StatusHA, formatSmallInteger(value.StorageEnabledCount), formatSmallInteger(value.SeniorMemberID),
+			formatSmallInteger(value.PartitionsAll))
 
 		if OutputFormat == constants.WIDE {
 			table.AddColumnsToRow(formatSmallInteger(value.PartitionsEndangered),
