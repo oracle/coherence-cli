@@ -200,6 +200,7 @@ type ServiceSummary struct {
 	PartitionsUnbalanced int32  `json:"partitionsUnbalanced"`
 	StorageEnabled       bool   `json:"storageEnabled"`
 	QuorumStatus         string `json:"quorumStatus"`
+	SeniorMemberID       int32  `json:"seniorMemberId"`
 
 	// persistence related
 	PersistenceMode                   string  `json:"persistenceMode"`

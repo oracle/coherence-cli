@@ -522,13 +522,12 @@ func FormatTopicsSubscribers(topicsSubscribers []config.TopicsSubscriberDetail) 
 	})
 
 	table := newFormattedTable().WithHeader(NodeIDColumn, SubscriberIDColumn, "STATE", ChannelsColumn, SubscriberGroupColumn,
-		"RECEIVED", "ERRORS", "BACKLOG", "DISCONNECTS", "TYPE")
+		"RECEIVED", "ERRORS", "BACKLOG", "DISCONNECTS", "TYPE", "OWNED CHANNELS")
 	if OutputFormat == constants.WIDE {
 		table.WithAlignment(R, R, L, L, L, R, R, R, R, L, L, L)
-		table.AddHeaderColumns("OWNED CHANNELS")
 		table.AddHeaderColumns(MemberColumn)
 	} else {
-		table.WithAlignment(R, R, L, L, L, R, R, R, R, L)
+		table.WithAlignment(R, R, L, L, L, R, R, R, R, L, L)
 	}
 	table.AddFormattingFunction(6, errorFormatter)
 	table.AddFormattingFunction(7, errorFormatter)
@@ -560,10 +559,10 @@ func FormatTopicsSubscribers(topicsSubscribers []config.TopicsSubscriberDetail) 
 
 		table.AddRow(formatSmallInteger(int32(nodeID)), fmt.Sprintf("%v", value.ID),
 			value.StateName, channels, subGroup, formatLargeInteger(value.ReceivedCount),
-			formatLargeInteger(value.ReceiveErrors), formatLargeInteger(value.Backlog), formatLargeInteger(value.Disconnections), value.SubType)
+			formatLargeInteger(value.ReceiveErrors), formatLargeInteger(value.Backlog), formatLargeInteger(value.Disconnections), value.SubType,
+			channelsOwned)
 
 		if OutputFormat == constants.WIDE {
-			table.AddColumnsToRow(channelsOwned)
 			table.AddColumnsToRow(value.Member)
 		}
 	}
@@ -1525,13 +1524,13 @@ func FormatServices(services []config.ServiceSummary) string {
 		return strings.Compare(services[p].ServiceName, services[q].ServiceName) < 0
 	})
 
-	table := newFormattedTable().WithHeader(ServiceNameColumn, "TYPE", MembersColumn, "STATUS HA", "STORAGE", partitions)
+	table := newFormattedTable().WithHeader(ServiceNameColumn, "TYPE", MembersColumn, "STATUS HA", "STORAGE", "SENIOR", partitions)
 	if OutputFormat == constants.WIDE {
-		table.WithAlignment(L, L, R, L, R, R, R, R, R, L, L)
+		table.WithAlignment(L, L, R, L, R, R, R, R, R, R, L, L)
 		table.AddHeaderColumns(endangered, "VULNERABLE", "UNBALANCED", "STATUS", "SUSPENDED")
 		table.AddFormattingFunction(9, statusHAFormatter)
 	} else {
-		table.WithAlignment(L, L, R, L, R, R)
+		table.WithAlignment(L, L, R, L, R, R, R)
 	}
 
 	table.AddFormattingFunction(3, statusHAFormatter)
@@ -1562,7 +1561,8 @@ func FormatServices(services []config.ServiceSummary) string {
 		}
 
 		table.AddRow(value.ServiceName, value.ServiceType, formatSmallInteger(value.MemberCount),
-			value.StatusHA, formatSmallInteger(value.StorageEnabledCount), formatSmallInteger(value.PartitionsAll))
+			value.StatusHA, formatSmallInteger(value.StorageEnabledCount), formatSmallInteger(value.SeniorMemberID),
+			formatSmallInteger(value.PartitionsAll))
 
 		if OutputFormat == constants.WIDE {
 			table.AddColumnsToRow(formatSmallInteger(value.PartitionsEndangered),
