@@ -10,7 +10,7 @@ require (
 	github.com/fatih/color v1.14.1
 	github.com/ohler55/ojg v1.12.8
 	github.com/onsi/gomega v1.19.0
-	github.com/oracle/coherence-go-client v1.0.1
+	github.com/oracle/coherence-go-client v1.0.2
 	github.com/spf13/cobra v1.7.0
 	github.com/spf13/viper v1.12.0
 	go.uber.org/zap v1.21.0
