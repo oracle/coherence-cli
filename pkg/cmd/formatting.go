@@ -816,13 +816,13 @@ func FormatCacheDetailsSizeAndAccess(cacheDetails []config.CacheDetail) string {
 	})
 
 	table := newFormattedTable().WithHeader(NodeIDColumn, "TIER", "COUNT", "SIZE",
-		"PUTS", "GETS", "REMOVES", "EVICTIONS")
+		"PUTS", "GETS", "REMOVES", "CLEARS", "EVICTIONS")
 	if OutputFormat == constants.WIDE {
-		table.WithAlignment(R, L, R, R, R, R, R, R, R, R, R, R, R, R)
+		table.WithAlignment(R, L, R, R, R, R, R, R, R, R, R, R, R, R, R)
 		table.AddHeaderColumns("HITS", "MISSES", "HIT PROB", "STORE READS",
 			"WRITES", "FAILURES")
 	} else {
-		table.WithAlignment(R, L, R, R, R, R, R, R)
+		table.WithAlignment(R, L, R, R, R, R, R, R, R)
 	}
 
 	for _, value := range cacheDetails {
@@ -841,7 +841,7 @@ func FormatCacheDetailsSizeAndAccess(cacheDetails []config.CacheDetail) string {
 			formatSmallInteger(value.CacheSize), formattingFunction(unitsBytes),
 			formatLargeInteger(value.TotalPuts),
 			formatLargeInteger(totalGets), formatLargeInteger(value.TotalRemoves),
-			formatLargeInteger(value.Evictions))
+			formatLargeInteger(value.TotalClears), formatLargeInteger(value.Evictions))
 		if OutputFormat == constants.WIDE {
 			table.AddColumnsToRow(formatLargeInteger(totalHits),
 				formatLargeInteger(value.CacheMisses), formatPercent(hitProb),
