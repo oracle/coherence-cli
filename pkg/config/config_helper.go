@@ -537,6 +537,7 @@ type CacheDetail struct {
 	TotalPuts     int64  `json:"totalPuts"`
 	TotalGets     int64  `json:"totalGets"`
 	TotalRemoves  int64  `json:"removeCount"`
+	TotalClears   int64  `json:"clearCount"`
 	CacheHits     int64  `json:"cacheHits"`
 	CacheMisses   int64  `json:"cacheMisses"`
 	Evictions     int64  `json:"evictionCount"`

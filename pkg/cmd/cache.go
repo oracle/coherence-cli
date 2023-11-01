@@ -343,6 +343,140 @@ You can specify '-o wide' to display addition information.`,
 	},
 }
 
+// getCacheAccessCmd represents the get cache-access command.
+var getCacheAccessCmd = &cobra.Command{
+	Use:   "cache-access cache-name",
+	Short: "display cache access information for a cache and service",
+	Long: `The 'get cache-access' command displays cache access information related to a specific cache.
+You can specify '-o wide' to display addition information.`,
+	ValidArgsFunction: completionCaches,
+	Args: func(cmd *cobra.Command, args []string) error {
+		if len(args) != 1 {
+			displayErrorAndExit(cmd, provideCacheMessage)
+		}
+		return nil
+	},
+	RunE: func(cmd *cobra.Command, args []string) error {
+		return getCacheDetails(cmd, args, "access")
+	},
+}
+
+// getCacheStorageCmd represents the get cache-storage command.
+var getCacheStorageCmd = &cobra.Command{
+	Use:   "cache-storage cache-name",
+	Short: "display cache storage information for a cache and service",
+	Long: `The 'get cache-storage' command displays cache storage information related to a specific cache.
+You can specify '-o wide' to display addition information.`,
+	ValidArgsFunction: completionCaches,
+	Args: func(cmd *cobra.Command, args []string) error {
+		if len(args) != 1 {
+			displayErrorAndExit(cmd, provideCacheMessage)
+		}
+		return nil
+	},
+	RunE: func(cmd *cobra.Command, args []string) error {
+		return getCacheDetails(cmd, args, "storage")
+	},
+}
+
+// getCacheIndexesCmd represents the get cache-indexes command.
+var getCacheIndexesCmd = &cobra.Command{
+	Use:               "cache-indexes cache-name",
+	Short:             "display cache index information for a cache and service",
+	Long:              `The 'get cache-indexes' command displays cache index information related to a specific cache.`,
+	ValidArgsFunction: completionCaches,
+	Args: func(cmd *cobra.Command, args []string) error {
+		if len(args) != 1 {
+			displayErrorAndExit(cmd, provideCacheMessage)
+		}
+		return nil
+	},
+	RunE: func(cmd *cobra.Command, args []string) error {
+		return getCacheDetails(cmd, args, "index")
+	},
+}
+
+// getCacheDetails displays either access, storage or index details for a cache depending upon
+// the value of displayType.
+func getCacheDetails(cmd *cobra.Command, args []string, displayType string) error {
+	var (
+		err         error
+		dataFetcher fetcher.Fetcher
+		found       bool
+		connection  string
+	)
+
+	cacheName := args[0]
+
+	connection, dataFetcher, err = GetConnectionAndDataFetcher()
+	if err != nil {
+		return err
+	}
+
+	if serviceName, err = findServiceForCacheOrTopic(dataFetcher, cacheName, "cache"); err != nil {
+		return err
+	}
+
+	found, err = ServiceExists(dataFetcher, serviceName)
+	if !found || err != nil {
+		return fmt.Errorf(cannotFindService, serviceName)
+	}
+
+	for {
+		var (
+			cacheResult  []byte
+			cacheDetails = config.CacheDetails{}
+			result       string
+		)
+
+		cacheResult, err = dataFetcher.GetCacheMembers(serviceName, cacheName)
+		if err != nil {
+			return err
+		}
+
+		if string(cacheResult) == "{}" || len(cacheResult) == 0 {
+			return fmt.Errorf(cannotFindCache, cacheName, serviceName)
+		}
+
+		if strings.Contains(OutputFormat, constants.JSONPATH) {
+			result, err = utils.GetJSONPathResults(cacheResult, OutputFormat)
+			if err != nil {
+				return err
+			}
+			cmd.Println(result)
+		} else if OutputFormat == constants.JSON {
+			cmd.Println(string(cacheResult))
+		} else {
+			err = json.Unmarshal(cacheResult, &cacheDetails)
+			if err != nil {
+				return utils.GetError("unable to unmarshall cache result", err)
+			}
+
+			printWatchHeader(cmd)
+			cmd.Println(FormatCurrentCluster(connection))
+
+			cmd.Printf("Cache: %s\n\n", args[0])
+
+			if displayType == "access" {
+				cmd.Println(FormatCacheDetailsSizeAndAccess(cacheDetails.Details))
+			} else if displayType == "index" {
+				cmd.Println(FormatCacheIndexDetails(cacheDetails.Details))
+			} else if displayType == "storage" {
+				cmd.Println(FormatCacheDetailsStorage(cacheDetails.Details))
+			}
+		}
+
+		// check to see if we should exit if we are not watching
+		if !isWatchEnabled() {
+			break
+		}
+		// we are watching so sleep and then repeat until CTRL-C
+		time.Sleep(time.Duration(watchDelay) * time.Second)
+	}
+
+	return nil
+}
+
 // clearCacheCmd represents the clear cache command.
 var clearCacheCmd = &cobra.Command{
 	Use:               "cache cache-name",
@@ -720,6 +854,9 @@ func init() {
 	describeCacheCmd.Flags().StringVarP(&serviceName, serviceNameOption, serviceNameOptionShort, "", serviceNameDescription)
 
 	getCacheStoresCmd.Flags().StringVarP(&serviceName, serviceNameOption, serviceNameOptionShort, "", serviceNameDescription)
+	getCacheAccessCmd.Flags().StringVarP(&serviceName, serviceNameOption, serviceNameOptionShort, "", serviceNameDescription)
+	getCacheStorageCmd.Flags().StringVarP(&serviceName, serviceNameOption, serviceNameOptionShort, "", serviceNameDescription)
+	getCacheIndexesCmd.Flags().StringVarP(&serviceName, serviceNameOption, serviceNameOptionShort, "", serviceNameDescription)
 
 	clearCacheCmd.Flags().StringVarP(&serviceName, serviceNameOption, serviceNameOptionShort, "", serviceNameDescription)
 	clearCacheCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)

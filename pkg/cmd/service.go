@@ -523,7 +523,7 @@ var getServiceMembersCmd = &cobra.Command{
 					finalDetails = membersDetails.Services
 				}
 
-				cmd.Println("Service: " + serviceName)
+				cmd.Println("Service: " + serviceName + "\n")
 				cmd.Println(FormatServiceMembers(finalDetails))
 			}
 

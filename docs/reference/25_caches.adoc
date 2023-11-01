@@ -15,7 +15,10 @@ There are various commands that allow you to work with and manage cluster caches
 
 * <<get-caches, `cohctl get caches`>> - displays the caches for a cluster
 * <<describe-cache, `cohctl describe cache`>> - shows information related to a specific cache and service
-* <<get-cache-stores, `cohctl get cache-stores`>> - displays the cache stores for a cache and service
+* <<get-cache-stores, `cohctl get cache-stores`>> - displays cache stores for a cache and service
+* <<get-cache-storage, `cohctl get cache-storage`>> - displays cache storage information for a cache and service
+* <<get-cache-access, `cohctl get cache-access`>> - displays cache access information for a cache and service
+* <<get-cache-indexes, `cohctl get cache-indexes`>> - displays cache index information for a cache and service
 * <<set-cache, `cohctl set cache`>> - sets an attribute for a cache across one or more members
 * <<truncate-cache, `cohctl truncate cache`>> - truncates a caches contents, not generating any cache events
 * <<clear-cache, `cohctl clear cache`>> - clears a caches contents
@@ -206,21 +209,71 @@ You may omit the service name if the cache name is unique.
 
 NOTE: If you do not use the `-o wide` option, then you will only see service, cache name, count and size.
 
-Display all caches for a particular service.
+[#get-cache-storage]
+==== Get Cache Storage
+
+include::../../build/_output/docs-gen/get_cache_storage.adoc[tag=text]
 
 [source,bash]
 ----
-cohctl get caches -c local -s PartitionedCache -o wide -m
+cohctl get cache-storage -c local test
 ----
 Output:
 [source,bash]
 ----
-Total Caches: 2, Total primary storage: 36 MB
 
-SERVICE           CACHE        COUNT   SIZE  AVG SIZE  TOTAL PUTS  TOTAL GETS  TOTAL REMOVES  TOTAL HITS  TOTAL MISSES  HIT PROB
-PartitionedCache  customers  100,000  25 MB       262     200,000           0              0           0             0     0.00%
-PartitionedCache  orders      10,000  11 MB     1,160      20,000      20,000              0      20,000             0   100.00%
+Cache: test
+
+NODE ID  TIER  LOCKS GRANTED  LOCKS PENDING  KEY LISTENERS  FILTER LISTENERS  MAX QUERY MS  MAX QUERY DESC
+      1  back              0              0              0                 0             0
+      2  back              0              0              0                 0             0
+      3  back              0              0              0                 0             0
 ----
+
+[#get-cache-access]
+==== Get Cache Access
+
+include::../../build/_output/docs-gen/get_cache_access.adoc[tag=text]
+
+[source,bash]
+----
+cohctl get cache-access -c local test
+----
+Output:
+[source,bash]
+----
+Cache: test
+
+NODE ID  TIER  COUNT  SIZE  PUTS  GETS  REMOVES  CLEARS  EVICTIONS
+      1  back      0  0 MB     0     0        0       2          0
+      2  back      0  0 MB     2     0        2       2          0
+      3  back      0  0 MB     0     0        0       2          0
+----
+
+[#get-cache-indexes]
+==== Get Cache Indexes
+
+include::../../build/_output/docs-gen/get_cache_indexes.adoc[tag=text]
+
+[source,bash]
+----
+cohctl get cache-indexes -c local test
+----
+Output:
+[source,bash]
+----
+Cache: test
+
+Total Indexing Bytes:  49,756
+Total Indexing:        0 MB
+Total Indexing Millis: 1,942
+
+Node:2:   PartitionedIndex: Extractor=.toString()(), Ordered=true, Footprint=16.2KB
+Node:1:   PartitionedIndex: Extractor=.toString()(), Ordered=true, Footprint=16.2KB
+Node:3:   PartitionedIndex: Extractor=.toString()(), Ordered=true, Footprint=16.0KB
+----
+
+NOTE: Depending upon the Coherence version, you may not see all the above information.
 
 
 [#set-cache]

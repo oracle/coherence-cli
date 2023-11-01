@@ -1131,6 +1131,18 @@ func RunTestCachesCommands(t *testing.T) {
 	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "SERVICE,COUNT,SIZE,cache-1,cache-2", configArg, file,
 		"get", "caches", "-c", context.ClusterName)
 
+	// test cache-storage
+	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "LOCKS GRANTED,", configArg, file,
+		"get", "cache-storage", cacheName, "-c", context.ClusterName)
+
+	// test cache-access
+	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "EVICTIONS,", configArg, file,
+		"get", "cache-access", cacheName, "-c", context.ClusterName)
+
+	// test cache-indexes
+	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "Total Indexing Bytes,", configArg, file,
+		"get", "cache-indexes", cacheName, "-c", context.ClusterName)
+
 	// test write-behind
 	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "PartitionedCacheWriteBehind,QUEUE SIZE,cache-store-1", configArg, file,
 		"get", "cache-stores", "cache-store-1", "-s", "PartitionedCacheWriteBehind", "-c", context.ClusterName)
