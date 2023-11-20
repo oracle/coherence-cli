@@ -20,13 +20,17 @@ COHCTL=$1
 ITERS=$2
 BUILD_OUTPUT=$3
 
-CONFIG_DIR=/tmp/$$.config
-trap "rm -rf $CONFIG_DIR" 0 1 2 3
+CONFIG_DIR=${BUILD_OUTPUT}/config
+mkdir -p ${CONFIG_DIR}
+#trap "rm -rf $CONFIG_DIR" 0 1 2 3
 
 echo "Redirecting output to $BUILD_OUTPUT/stress.log..."
 exec > $BUILD_OUTPUT/stress.log 2>&1
 
 mkdir -p $CONFIG_DIR
+
+# Add some data
+curl http://localhost:8080/populate
 
 ARGS="--config-dir $CONFIG_DIR"
 
