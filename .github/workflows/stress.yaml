@@ -1,4 +1,4 @@
-# Copyright 2022, Oracle Corporation and/or its affiliates.
+# Copyright 2022, 2023, Oracle Corporation and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at
 # https://oss.oracle.com/licenses/upl.
 
@@ -62,7 +62,7 @@ jobs:
 
     - name: Build Test Images
       shell: bash
-      run: COHERENCE_BASE_IMAGE=gcr.io/distroless/java17 PROFILES=,executor COHERENCE_VERSION=22.09 make clean build-test-images
+      run: COHERENCE_BASE_IMAGE=gcr.io/distroless/java17 PROFILES=,executor COHERENCE_VERSION=23.09.1 make clean build-test-images
 
     - name: Run Stress Test
       shell: bash
@@ -84,4 +84,6 @@ jobs:
       if: failure()
       with:
         name: test-output
-        path: build/_output/stress.log
+        path: |
+          build/_output/stress.log
+          build/_output/config
