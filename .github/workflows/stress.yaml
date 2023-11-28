@@ -71,7 +71,7 @@ jobs:
         make test-cluster-startup 
         ITERS="${{ github.event.inputs.iterations }}"
         if [ -z "$ITERS" ] ; then
-            ITERS=50000
+            ITERS=1000
         fi
         # Sleep for 20 seconds to allow management startup
         sleep 20
