@@ -1456,11 +1456,11 @@ func FormatNetworkStats(details []config.NetworkStatsDetails) string {
 			return details[p].PublisherSuccessRate < details[q].PublisherSuccessRate
 		} else if p2pSortByReceiver {
 			return details[p].ReceiverSuccessRate < details[q].ReceiverSuccessRate
-		} else {
-			nodeID1, _ := strconv.Atoi(details[p].NodeID)
-			nodeID2, _ := strconv.Atoi(details[q].NodeID)
-			return nodeID1 < nodeID2
 		}
+
+		nodeID1, _ := strconv.Atoi(details[p].NodeID)
+		nodeID2, _ := strconv.Atoi(details[q].NodeID)
+		return nodeID1 < nodeID2
 	})
 
 	table := newFormattedTable().WithHeader(MemberColumn, publisherColumn, receiverColumn, "PAUSE RATE", "THRESHOLD",
