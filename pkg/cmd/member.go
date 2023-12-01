@@ -39,6 +39,8 @@ var (
 	attributeValue  string
 	validAttributes = []string{"loggingLevel", "resendDelay", "sendAckDelay",
 		"trafficJamCount", "trafficJamDelay", "loggingLimit,", "loggingFormat"}
+	p2pSortByPublisher bool
+	p2pSortByReceiver  bool
 
 	memberSummary bool
 
@@ -278,6 +280,10 @@ of view of a member and all the members it connects to.`,
 		connection, dataFetcher, err = GetConnectionAndDataFetcher()
 		if err != nil {
 			return err
+		}
+
+		if p2pSortByReceiver && p2pSortByPublisher {
+			return errors.New("you cannot specify to sort by publisher and receiver, please choose only one")
 		}
 
 		memberResult, err = dataFetcher.GetMemberDetailsJSON(false)
@@ -1155,4 +1161,7 @@ func init() {
 	configureTracingCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
 
 	shutdownMemberCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
+
+	getP2PStatsCmd.Flags().BoolVarP(&p2pSortByPublisher, "publisher-sort", "P", false, "sort output by publisher rate")
+	getP2PStatsCmd.Flags().BoolVarP(&p2pSortByReceiver, "receiver-sort", "R", false, "sort output by receiver rate")
 }
