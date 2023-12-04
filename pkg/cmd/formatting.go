@@ -771,6 +771,7 @@ func FormatServiceMembers(serviceMembers []config.ServiceMemberDetail) string {
 		table.WithAlignment(R, R, R, R, R, R, R, R, R, R, R, R)
 		table.AddHeaderColumns("TASK COUNT", "TASK BACKLOG", "PRIMARY OWNED",
 			"BACKUP OWNED", "REQ AVG MS", "TASK AVG MS")
+		table.AddFormattingFunction(7, errorFormatter)
 	} else {
 		table.WithAlignment(R, R, R, R, R, R)
 	}

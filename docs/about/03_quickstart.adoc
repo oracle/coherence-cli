@@ -25,7 +25,7 @@ for more information on setting up Management over REST.
 If you do not have a cluster running with Management over REST, you can run the following Docker
 image to start a Coherence CE cluster and expose management on port 30000.
 +
-[source,bash,subs="attributes"]]
+[source,bash,subs="attributes"]
 ----
 docker run -d -p 30000:30000 ghcr.io/oracle/coherence-ce:{coherence-version}
 ----

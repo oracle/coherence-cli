@@ -61,11 +61,7 @@ var machineMemoryFormatting = func(s string) string {
 // errorFormatter formats a column value which represents an error or number that needs to be highlighted.
 var errorFormatter = func(s string) string {
 	v, err := getInt64Value(s)
-	if err != nil {
-		return s
-	}
-
-	if v == 0 {
+	if err != nil || v == 0 {
 		return s
 	}
 
@@ -160,7 +156,7 @@ var networkStatsFormatter = func(s string) string {
 }
 
 func getInt64Value(s string) (int64, error) {
-	return strconv.ParseInt(strings.TrimSpace(s), 10, 64)
+	return strconv.ParseInt(strings.ReplaceAll(strings.TrimSpace(s), ",", ""), 10, 64)
 }
 
 func trimPercent(s string) string {
