@@ -16,7 +16,7 @@ There are various cluster commands that allow you to create and work with local 
 These commands allow you to create local only development based clusters (scoped to localhost) for Coherence CE 22.06.x and
 Commercial 14.1.1.2206.x versions and above. You must have the following setup for this to work:
 
-1. Java 17+ executable on the PATH, if you are using the default Coherence CE {coherence-default-version} version.
+1. Java 17+ executable on the PATH, if you are using the default Coherence CE {coherence-version} version.
 2. Maven 3.6+ or JDK compatible Gradle version 7.+ executable on the PATH.
 
 NOTE: If you wish to use an earlier version of Coherence such as CE 22.06, you can use JDK11+.
@@ -78,15 +78,15 @@ Add and start a cluster using all default values.
 
 NOTE: After the cluster has been created, the current context is automatically set to the new cluster.
 
-[source,bash,subs="attributes"]]
+[source,bash,subs="attributes"]
 ----
 cohctl create cluster local
 ----
 Output:
-[source,bash]
+[source,bash,subs="attributes"]
 ----
 Cluster name:           local
-Cluster version:        {coherence-default-version}
+Cluster version:        {coherence-version}
 Cluster port:           7574
 Partition count:        257
 Management port:        30000
@@ -100,8 +100,8 @@ Dependency tool:        mvn
 Are you sure you want to create the cluster with the above details? (y/n) y
 
 Checking 3 Maven dependencies...
-- com.oracle.coherence.ce:coherence:{coherence-default-version}
-- com.oracle.coherence.ce:coherence-json:{coherence-default-version}
+- com.oracle.coherence.ce:coherence:{coherence-version}
+- com.oracle.coherence.ce:coherence-json:{coherence-version}
 - org.jline:jline:3.20.0
 Starting 3 cluster members for cluster local
 Starting cluster member storage-0...
@@ -131,7 +131,7 @@ NODE ID  ADDRESS     PORT   PROCESS  MEMBER     ROLE             STORAGE  MAX HE
       3  /127.0.0.1  61567    63755  storage-2  CoherenceServer  true       128 MB      70 MB       58 MB
 ----
 
-NOTE: By default, Coherence CE groupId is used and the version is {coherence-default-version}. You can change this via using `-C` for commercial and `-v` to change the Coherence version.
+NOTE: By default, Coherence CE groupId is used and the version is {coherence-version}. You can change this via using `-C` for commercial and `-v` to change the Coherence version.
 
 NOTE: Additional dependencies `coherence-json` is included to enable Management over REST and `jline` is included for `CohQL` history support.
 
@@ -170,16 +170,16 @@ NOTE: In this example we are using the `-S` option to skip downloading maven art
 
 Add and start a cluster using all default values but include additional `coherence-rest` and opentracing dependencies.
 
-[source,bash,subs="attributes"]]
+[source,bash]
 ----
 cohctl create cluster local -a coherence-rest,io.opentracing:opentracing-api:0.33.0,io.opentracing:opentracing-util:0.33.0
 ----
 
 Output:
-[source,bash,subs="attributes"]]
+[source,bash,subs="attributes"]
 ----
 Cluster name:           local
-Cluster version:        {coherence-default-version}
+Cluster version:        {coherence-version}
 Cluster port:           7574
 Partition count:        257
 Management port:        30000
@@ -193,9 +193,9 @@ Dependency tool:        mvn
 Are you sure you want to create the cluster with the above details? (y/n) y
 
 Checking 6 Maven dependencies...
-- com.oracle.coherence.ce:coherence:{coherence-default-version}
-- com.oracle.coherence.ce:coherence-json:{coherence-default-version}
-- com.oracle.coherence.ce:coherence-rest:{coherence-default-version}
+- com.oracle.coherence.ce:coherence:{coherence-version}
+- com.oracle.coherence.ce:coherence-json:{coherence-version}
+- com.oracle.coherence.ce:coherence-rest:{coherence-version}
 - io.opentracing:opentracing-api:0.33.0
 - io.opentracing:opentracing-util:0.33.0
 - org.jline:jline:3.20.0
@@ -299,7 +299,7 @@ Output:
 [source,bash,subs="attributes"]
 ----
 Starting client com.tangosol.net.CacheFactory...
-2022-08-29 16:00:01.346/0.620 Oracle Coherence {coherence-default-version} <Info> (thread=main, member=n/a): Loaded operational configuration from "jar:file:/Users/user/.m2/repository/com/oracle/coherence/ce/coherence/{coherence-default-version}/coherence-{coherence-default-version}.jar!/tangosol-coherence.xml"
+2022-08-29 16:00:01.346/0.620 Oracle Coherence {coherence-version} <Info> (thread=main, member=n/a): Loaded operational configuration from "jar:file:/Users/user/.m2/repository/com/oracle/coherence/ce/coherence/{coherence-version}/coherence-{coherence-version}.jar!/tangosol-coherence.xml"
 ...
 
 Map (?):

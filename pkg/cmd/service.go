@@ -37,6 +37,7 @@ var (
 	nodeIDService          string
 	nodeIDServiceOperation string
 	excludeStorageDisabled bool
+	includeBacklogOnly     bool
 )
 
 const (
@@ -515,6 +516,15 @@ var getServiceMembersCmd = &cobra.Command{
 					var newMemberDetails = make([]config.ServiceMemberDetail, 0)
 					for _, v := range membersDetails.Services {
 						if v.OwnedPartitionsPrimary > 0 {
+							newMemberDetails = append(newMemberDetails, v)
+						}
+					}
+					finalDetails = newMemberDetails
+				} else if includeBacklogOnly {
+					// Only include members with backlog > 0
+					var newMemberDetails = make([]config.ServiceMemberDetail, 0)
+					for _, v := range membersDetails.Services {
+						if v.TaskBacklog > 0 {
 							newMemberDetails = append(newMemberDetails, v)
 						}
 					}
@@ -1191,4 +1201,5 @@ Invocation, Proxy, RemoteCache or ReplicatedCache`)
 	shutdownServiceCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
 
 	getServiceMembersCmd.Flags().BoolVarP(&excludeStorageDisabled, "exclude", "x", false, "exclude storage-disabled clients")
+	getServiceMembersCmd.Flags().BoolVarP(&includeBacklogOnly, "include", "B", false, "include members with backlog only")
 }
