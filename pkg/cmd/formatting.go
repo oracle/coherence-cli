@@ -1536,12 +1536,16 @@ func FormatServices(services []config.ServiceSummary) string {
 	if OutputFormat == constants.WIDE {
 		table.WithAlignment(L, L, R, L, R, R, R, L, R, R, R, L)
 		table.AddHeaderColumns(endangered, "VULNERABLE", "UNBALANCED", "SUSPENDED")
-		table.AddFormattingFunction(9, statusHAFormatter)
+		table.AddFormattingFunction(8, endangeredPartitionsFormatter)
+		table.AddFormattingFunction(9, vulnerablePartitionsFormatter)
+		table.AddFormattingFunction(10, vulnerablePartitionsFormatter)
+		table.AddFormattingFunction(11, yesBoolFormatter)
 	} else {
 		table.WithAlignment(L, L, R, L, R, R, R, L)
 	}
 
 	table.AddFormattingFunction(3, statusHAFormatter)
+	table.AddFormattingFunction(7, statusHAFormatter)
 
 	for _, value := range services {
 		var (
