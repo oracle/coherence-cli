@@ -71,6 +71,26 @@ var errorFormatter = func(s string) string {
 	return yellow(s)
 }
 
+// endangeredPartitionsFormatter formats a column value which represents the number of endangered partitions.
+var endangeredPartitionsFormatter = func(s string) string {
+	v, err := getInt64Value(s)
+	if err != nil || v == 0 || v == -1 {
+		return s
+	}
+
+	return red(s)
+}
+
+// vulnerablePartitionsFormatter formats a column value which represents the number of vulnerable or unbalanced partitions.
+var vulnerablePartitionsFormatter = func(s string) string {
+	v, err := getInt64Value(s)
+	if err != nil || v == 0 || v == -1 {
+		return s
+	}
+
+	return yellow(s)
+}
+
 // packetFormatter formats a column value which represents packages where higher numbers need to be highlighted.
 var packetFormatter = func(s string) string {
 	v, err := getInt64Value(s)
@@ -99,6 +119,14 @@ var healthFormatter = func(s string) string {
 // trueBoolFormatter formats a column value when true will be displayed in red.
 var trueBoolFormatter = func(s string) string {
 	if s == stringTrue {
+		return red(s)
+	}
+	return s
+}
+
+// yesBoolFormatter formats a column value when yes will be displayed in red.
+var yesBoolFormatter = func(s string) string {
+	if strings.Contains(s, "yes") {
 		return red(s)
 	}
 	return s
