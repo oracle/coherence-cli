@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, 2023 Oracle and/or its affiliates.
+ * Copyright (c) 2021, 2024 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -1508,6 +1508,8 @@ func FormatReporters(reporters []config.Reporter) string {
 	table := newFormattedTable().WithHeader(NodeIDColumn, "STATE", "CONFIG FILE", "OUTPUT PATH",
 		"BATCH#", "LAST REPORT", "LAST RUN", "AVG RUN", "INTERVAL", "AUTOSTART").
 		WithAlignment(R, L, L, L, R, L, R, R, R, L).MaxLength(maxLength)
+
+	table.AddFormattingFunction(1, reporterFormatter)
 
 	for _, value := range reporters {
 		var nodeID, _ = strconv.Atoi(value.NodeID)
