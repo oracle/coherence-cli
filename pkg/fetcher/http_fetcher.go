@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, 2023 Oracle and/or its affiliates.
+ * Copyright (c) 2021, 2024 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -53,6 +53,7 @@ const (
 	all                  = "all"
 	disconnectAll        = "/disconnectAll"
 	descriptionPath      = "/description?links="
+	errorCode404         = "404"
 )
 
 // HTTPFetcher is an implementation of a Fetcher to retrieve data from Management over REST.
@@ -133,7 +134,7 @@ func (h HTTPFetcher) GetHTTPSessionDetailsJSON() ([]byte, error) {
 	)
 
 	result, err = httpGetRequest(h, "/webApplications")
-	if err != nil && !strings.Contains(err.Error(), "404") {
+	if err != nil && !strings.Contains(err.Error(), errorCode404) {
 		return constants.EmptyByte, utils.GetError("cannot get Coherence*Web information", err)
 	}
 	if len(result) == 0 {
@@ -202,7 +203,7 @@ func (h HTTPFetcher) GetExtendedMemberInfoJSON(result []byte, nodeID string, tok
 	}
 
 	result, err := httpGetRequest(h, membersPath+finalNodeID+"?fields=nodeId")
-	if err != nil && !strings.Contains(err.Error(), "404") {
+	if err != nil && !strings.Contains(err.Error(), errorCode404) {
 		return extendedData, utils.GetError("unable to get member links nodeId = "+finalNodeID, err)
 	}
 	if len(result) == 0 {
@@ -225,7 +226,7 @@ func (h HTTPFetcher) GetExtendedMemberInfoJSON(result []byte, nodeID string, tok
 		}
 		if found {
 			newData, err = getLinkData(h, membersPath+finalNodeID+"/"+value.Rel)
-			if err != nil && !strings.Contains(err.Error(), "404") {
+			if err != nil && !strings.Contains(err.Error(), errorCode404) {
 				return extendedData, utils.GetError("unable to retrieve link data", err)
 			}
 			extendedData = append(extendedData, newData)
@@ -354,7 +355,7 @@ func (h HTTPFetcher) SetServiceAttribute(memberID, serviceName, attribute string
 // GetExecutorsJSON returns executor details in raw json.
 func (h HTTPFetcher) GetExecutorsJSON() ([]byte, error) {
 	result, err := httpGetRequest(h, "/executors/members?links=")
-	if err != nil && !strings.Contains(err.Error(), "404") {
+	if err != nil && !strings.Contains(err.Error(), errorCode404) {
 		return constants.EmptyByte, utils.GetError("cannot get executors information", err)
 	}
 
@@ -378,7 +379,7 @@ func (h HTTPFetcher) GetSingleServiceDetailsJSON(serviceName string) ([]byte, er
 func (h HTTPFetcher) GetScheduledDistributionsJSON(serviceName string) ([]byte, error) {
 	result, err := httpGetRequest(h, servicesPath+getSafeServiceName(h, serviceName)+
 		"/partition/scheduledDistributions?links=")
-	if err != nil && !strings.Contains(err.Error(), "404") {
+	if err != nil && !strings.Contains(err.Error(), errorCode404) {
 		return constants.EmptyByte, utils.GetError("cannot get scheduled distributions for service "+serviceName, err)
 	}
 	return result, nil
@@ -387,7 +388,7 @@ func (h HTTPFetcher) GetScheduledDistributionsJSON(serviceName string) ([]byte, 
 // GetServiceDescriptionJSON returns service description.
 func (h HTTPFetcher) GetServiceDescriptionJSON(serviceName string) ([]byte, error) {
 	result, err := httpGetRequest(h, servicesPath+getSafeServiceName(h, serviceName)+descriptionPath)
-	if err != nil && !strings.Contains(err.Error(), "404") {
+	if err != nil && !strings.Contains(err.Error(), errorCode404) {
 		return constants.EmptyByte, utils.GetError("cannot get description for service "+serviceName, err)
 	}
 	return result, nil
@@ -396,7 +397,7 @@ func (h HTTPFetcher) GetServiceDescriptionJSON(serviceName string) ([]byte, erro
 // GetClusterDescriptionJSON returns cluster description.
 func (h HTTPFetcher) GetClusterDescriptionJSON() ([]byte, error) {
 	result, err := httpGetRequest(h, descriptionPath)
-	if err != nil && !strings.Contains(err.Error(), "404") {
+	if err != nil && !strings.Contains(err.Error(), errorCode404) {
 		return constants.EmptyByte, utils.GetError("cannot get description for cluster", err)
 	}
 	return result, nil
@@ -405,7 +406,7 @@ func (h HTTPFetcher) GetClusterDescriptionJSON() ([]byte, error) {
 // GetNodeDescriptionJSON returns node description.
 func (h HTTPFetcher) GetNodeDescriptionJSON(nodeID string) ([]byte, error) {
 	result, err := httpGetRequest(h, membersPath+nodeID+descriptionPath)
-	if err != nil && !strings.Contains(err.Error(), "404") {
+	if err != nil && !strings.Contains(err.Error(), errorCode404) {
 		return constants.EmptyByte, utils.GetError("cannot get description for node "+nodeID, err)
 	}
 	return result, nil
@@ -451,7 +452,7 @@ func (h HTTPFetcher) GetCachesSummaryJSONAllServices() ([]byte, error) {
 // GetTopicsJSON returns the topics in a cluster.
 func (h HTTPFetcher) GetTopicsJSON() ([]byte, error) {
 	result, err := httpGetRequest(h, topicsPath+links)
-	if err != nil && !strings.Contains(err.Error(), "404") {
+	if err != nil && !strings.Contains(err.Error(), errorCode404) {
 		return constants.EmptyByte, utils.GetError("cannot get topics information", err)
 	}
 	return result, nil
@@ -461,7 +462,7 @@ func (h HTTPFetcher) GetTopicsJSON() ([]byte, error) {
 func (h HTTPFetcher) GetTopicsMembersJSON(serviceName, topicName string) ([]byte, error) {
 	result, err := httpGetRequest(h, servicesPath+getSafeServiceName(h, serviceName)+topicsPath+getSafeServiceName(h, topicName)+
 		membersPath+links)
-	if err != nil && !strings.Contains(err.Error(), "404") {
+	if err != nil && !strings.Contains(err.Error(), errorCode404) {
 		return constants.EmptyByte, utils.GetError("cannot get topics member information", err)
 	}
 	return result, nil
@@ -471,7 +472,7 @@ func (h HTTPFetcher) GetTopicsMembersJSON(serviceName, topicName string) ([]byte
 func (h HTTPFetcher) GetTopicsSubscribersJSON(serviceName, topicName string) ([]byte, error) {
 	result, err := httpGetRequest(h, servicesPath+getSafeServiceName(h, serviceName)+topicsPath+getSafeServiceName(h, topicName)+
 		subscribersPath+links)
-	if err != nil && !strings.Contains(err.Error(), "404") {
+	if err != nil && !strings.Contains(err.Error(), errorCode404) {
 		return constants.EmptyByte, utils.GetError("cannot get topics subscriber information", err)
 	}
 	return result, nil
@@ -481,7 +482,7 @@ func (h HTTPFetcher) GetTopicsSubscribersJSON(serviceName, topicName string) ([]
 func (h HTTPFetcher) GetTopicsSubscriberGroupsJSON(serviceName, topicName string) ([]byte, error) {
 	result, err := httpGetRequest(h, servicesPath+getSafeServiceName(h, serviceName)+topicsPath+getSafeServiceName(h, topicName)+
 		subscriberGroupsPath+links)
-	if err != nil && !strings.Contains(err.Error(), "404") {
+	if err != nil && !strings.Contains(err.Error(), errorCode404) {
 		return constants.EmptyByte, utils.GetError("cannot get topics subscriber information", err)
 	}
 	return result, nil
@@ -490,7 +491,7 @@ func (h HTTPFetcher) GetTopicsSubscriberGroupsJSON(serviceName, topicName string
 // GetProxySummaryJSON returns proxy server summary.
 func (h HTTPFetcher) GetProxySummaryJSON() ([]byte, error) {
 	result, err := httpGetRequest(h, "/services/proxy/members/?links=")
-	if err != nil && !strings.Contains(err.Error(), "404") {
+	if err != nil && !strings.Contains(err.Error(), errorCode404) {
 		return constants.EmptyByte, utils.GetError("cannot get proxy information", err)
 	}
 	return result, nil
@@ -596,7 +597,7 @@ func (h HTTPFetcher) LogClusterState(role string) ([]byte, error) {
 func (h HTTPFetcher) GetCacheMembers(serviceName, cacheName string) ([]byte, error) {
 	result, err := httpGetRequest(h, servicesPath+getSafeServiceName(h, serviceName)+"/caches/"+
 		url.PathEscape(cacheName)+"/members?links=")
-	if err != nil && !strings.Contains(err.Error(), "404") {
+	if err != nil && !strings.Contains(err.Error(), errorCode404) {
 		return constants.EmptyByte, utils.GetError("cannot get cache members for service "+serviceName+
 			" and cache = "+cacheName, err)
 	}
@@ -615,7 +616,7 @@ func (h HTTPFetcher) GetPersistenceCoordinator(serviceName string) ([]byte, erro
 // GetMemberOSJson returns the OS information for the member.
 func (h HTTPFetcher) GetMemberOSJson(memberID string) ([]byte, error) {
 	result, err := httpGetRequest(h, membersPath+memberID+"/platform/operatingSystem"+links)
-	if err != nil && !strings.Contains(err.Error(), "404") {
+	if err != nil && !strings.Contains(err.Error(), errorCode404) {
 		return constants.EmptyByte, utils.GetError("cannot get Member OS for member "+memberID, err)
 	}
 	return result, nil
@@ -624,7 +625,7 @@ func (h HTTPFetcher) GetMemberOSJson(memberID string) ([]byte, error) {
 // GetMembersHealth returns the health for the members in the cluster.
 func (h HTTPFetcher) GetMembersHealth() ([]byte, error) {
 	result, err := httpGetRequest(h, "/health"+membersPath+links)
-	if err != nil && !strings.Contains(err.Error(), "404") {
+	if err != nil && !strings.Contains(err.Error(), errorCode404) {
 		return constants.EmptyByte, utils.GetError("cannot get member health information", err)
 	}
 	if len(result) == 0 {
@@ -686,7 +687,7 @@ func (h HTTPFetcher) GetElasticDataDetails(journalType string) ([]byte, error) {
 		return constants.EmptyByte, errors.New("journal type must be flash or ram")
 	}
 	result, err := httpGetRequest(h, journalPath+journalType+"/members?links=")
-	if err != nil && !strings.Contains(err.Error(), "404") {
+	if err != nil && !strings.Contains(err.Error(), errorCode404) {
 		return constants.EmptyByte, utils.GetError("cannot get Journal details for type "+journalType, err)
 	}
 	if len(result) == 0 {
@@ -708,29 +709,29 @@ func (h HTTPFetcher) GetArchivedSnapshots(serviceName string) ([]byte, error) {
 // InvokeFederationOperation invokes a federation operation against a service and participant.
 func (h HTTPFetcher) InvokeFederationOperation(serviceName, command, participant, mode string) ([]byte, error) {
 	var (
-		err error
-		url = servicesPath + getSafeServiceName(h, serviceName) + "/federation/"
+		err     error
+		postURL = servicesPath + getSafeServiceName(h, serviceName) + "/federation/"
 	)
 
 	if participant != all {
-		url += "participants/" + getSafeServiceName(h, participant) + "/"
+		postURL += "participants/" + getSafeServiceName(h, participant) + "/"
 	}
 
 	if command == "start" {
 		if mode == WithSync {
-			url += "startWithSync"
+			postURL += "startWithSync"
 		} else if mode == NoBacklog {
-			url += "startWithNoBacklog"
+			postURL += "startWithNoBacklog"
 		} else if mode == "" {
-			url += "start"
+			postURL += "start"
 		} else {
 			return constants.EmptyByte, fmt.Errorf("invalid mode of %s", mode)
 		}
 	} else {
-		url += command
+		postURL += command
 	}
 
-	_, err = httpPostRequest(h, url, constants.EmptyByte)
+	_, err = httpPostRequest(h, postURL, constants.EmptyByte)
 	if err != nil {
 		return constants.EmptyByte, utils.GetError(fmt.Sprintf("unable to perform %s for service %s", command, serviceName), err)
 	}
@@ -921,7 +922,7 @@ func (h HTTPFetcher) GetFederationStatistics(serviceName, federationType string)
 	result, err := httpGetRequest(h, servicesPath+getSafeServiceName(h, serviceName)+
 		federationStatsPath+federationType+"/participants"+links)
 	// workaround bug with incoming returning 500 if no federation, ignore 404 as this means no incoming
-	if err != nil && !strings.Contains(err.Error(), "500") && !strings.Contains(err.Error(), "404") {
+	if err != nil && !strings.Contains(err.Error(), "500") && !strings.Contains(err.Error(), errorCode404) {
 		return constants.EmptyByte, utils.GetError("cannot get federation statistics for "+serviceName+" and "+federationType, err)
 	}
 	if len(result) == 0 {
@@ -934,7 +935,7 @@ func (h HTTPFetcher) GetFederationStatistics(serviceName, federationType string)
 func (h HTTPFetcher) GetFederationDetails(serviceName, federationType, nodeID, participant string) ([]byte, error) {
 	result, err := httpGetRequest(h, servicesPath+getSafeServiceName(h, serviceName)+membersPath+nodeID+
 		federationStatsPath+federationType+"/participants/"+participant+links)
-	if err != nil && !strings.Contains(err.Error(), "500") && !strings.Contains(err.Error(), "404") {
+	if err != nil && !strings.Contains(err.Error(), "500") && !strings.Contains(err.Error(), errorCode404) {
 		return constants.EmptyByte, utils.GetError("cannot get federation details for "+serviceName+" and "+federationType, err)
 	}
 	if len(result) == 0 {
@@ -1308,7 +1309,7 @@ func httpRequest(h HTTPFetcher, requestType, urlAppend string, absolute bool, co
 // GetLinkData returns the data from the absolute url.
 func getLinkData(h HTTPFetcher, url string) ([]byte, error) {
 	result, err := httpGetRequest(h, url)
-	if err != nil && !strings.Contains(err.Error(), "404") {
+	if err != nil && !strings.Contains(err.Error(), errorCode404) {
 		return constants.EmptyByte, utils.GetError("cannot get member links from "+url, err)
 	}
 	return result, nil

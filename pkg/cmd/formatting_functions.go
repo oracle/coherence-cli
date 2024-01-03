@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Oracle and/or its affiliates.
+ * Copyright (c) 2023, 2024 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -16,6 +16,8 @@ var (
 	red    = color.New(color.FgRed).SprintFunc()
 	yellow = color.New(color.FgHiYellow).SprintFunc()
 )
+
+const stopped = "stopped"
 
 // statusHAFormatter formats a column value and makes it Red if contains ENDANGERED.
 var statusHAFormatter = func(s string) string {
@@ -116,6 +118,14 @@ var healthFormatter = func(s string) string {
 	return s
 }
 
+// reporterFormatter formats a column value when "Stopped" will be displayed in red.
+var reporterFormatter = func(s string) string {
+	if strings.Contains(strings.ToLower(s), stopped) {
+		return red(s)
+	}
+	return s
+}
+
 // trueBoolFormatter formats a column value when true will be displayed in red.
 var trueBoolFormatter = func(s string) string {
 	if s == stringTrue {
@@ -157,10 +167,11 @@ var healthSummaryFormatter = func(s string) string {
 
 // healthSummaryFormatter formats a column value for federation state.
 var federationStateFormatter = func(s string) string {
-	if strings.Contains(s, "ERROR") {
+	lowerCase := strings.ToLower(s)
+	if strings.Contains(lowerCase, "error") {
 		return red(s)
 	}
-	if strings.Contains(s, "PAUSED") || strings.Contains(s, "STOPPED") || strings.Contains(s, "CONNECT_WAIT") {
+	if strings.Contains(lowerCase, "paused") || strings.Contains(lowerCase, stopped) || strings.Contains(lowerCase, "connect_wait") {
 		return yellow(s)
 	}
 
