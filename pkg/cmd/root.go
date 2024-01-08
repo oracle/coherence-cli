@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, 2023 Oracle and/or its affiliates.
+ * Copyright (c) 2021, 2024 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -505,6 +505,7 @@ func Initialize(command *cobra.Command) *cobra.Command {
 	getCmd.AddCommand(getCacheAccessCmd)
 	getCmd.AddCommand(getCacheStorageCmd)
 	getCmd.AddCommand(getCacheIndexesCmd)
+	getCmd.AddCommand(getViewCachesCmd)
 
 	// set command
 	command.AddCommand(setCmd)
@@ -602,6 +603,7 @@ func Initialize(command *cobra.Command) *cobra.Command {
 	describeCmd.AddCommand(describeExecutorCmd)
 	describeCmd.AddCommand(describeFederationCmd)
 	describeCmd.AddCommand(describeTopicCmd)
+	describeCmd.AddCommand(describeViewCacheCmd)
 
 	// create
 	command.AddCommand(createCmd)

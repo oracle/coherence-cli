@@ -30,6 +30,7 @@ const (
 	SubscriberIDColumn    = "SUBSCRIBER ID"
 	ServiceColumn         = "SERVICE"
 	CacheColumn           = "CACHE"
+	CountColumn           = "COUNT"
 	PolledColumn          = "POLLED"
 	HeadColumn            = "HEAD"
 	ChannelsColumn        = "CHANNELS"
@@ -435,7 +436,7 @@ func FormatCacheSummary(cacheSummaries []config.CacheSummaryDetail) string {
 	var totalCaches = len(cacheSummaries)
 	var totalUnits int64
 
-	table.WithHeader(ServiceColumn, CacheColumn, "COUNT", "SIZE")
+	table.WithHeader(ServiceColumn, CacheColumn, CountColumn, "SIZE")
 
 	if OutputFormat == constants.WIDE {
 		table.AddHeaderColumns(avgSize, "PUTS", "GETS", "REMOVES", "EVICTIONS", "HITS", " MISSES", "HIT PROB")
@@ -471,6 +472,78 @@ func FormatCacheSummary(cacheSummaries []config.CacheSummaryDetail) string {
 
 	return fmt.Sprintf("Total Caches: %d, Total primary storage: %s\n\n", totalCaches,
 		strings.TrimSpace(formattingFunction(totalUnits))) + table.String()
+}
+
+// FormatViewCacheSummary returns the view cache summary in column formatted output.
+func FormatViewCacheSummary(cacheSummaries []config.ViewCacheSummaryDetail) string {
+	var cacheCount = len(cacheSummaries)
+
+	if cacheCount == 0 {
+		return ""
+	}
+
+	table := newFormattedTable().WithAlignment(L, L, R)
+
+	sort.Slice(cacheSummaries, func(p, q int) bool {
+		if cacheSummaries[p].ServiceName < cacheSummaries[q].ServiceName {
+			return true
+		} else if cacheSummaries[p].ServiceName > cacheSummaries[q].ServiceName {
+			return false
+		} else {
+			return cacheSummaries[p].ViewName < cacheSummaries[q].ViewName
+		}
+	})
+
+	// get summary details
+	var totalCaches = len(cacheSummaries)
+
+	table.WithHeader(ServiceColumn, "VIEW NAME", "MEMBERS")
+
+	if OutputFormat == constants.WIDE {
+		table.AddHeaderColumns(avgSize, "PUTS", "GETS", "REMOVES", "EVICTIONS", "HITS", " MISSES", "HIT PROB")
+		table.AddFormattingFunction(11, hitRateFormatter)
+	}
+
+	for _, value := range cacheSummaries {
+		table.AddRow(value.ServiceName, value.ViewName, formatSmallInteger(value.MemberCount))
+
+	}
+
+	return fmt.Sprintf("Total View Caches: %d\n\n", totalCaches) + table.String()
+}
+
+// FormatViewCacheDetail returns the view cache details in column formatted output.
+func FormatViewCacheDetail(cacheDetails []config.ViewCacheDetail) string {
+	if len(cacheDetails) == 0 {
+		return ""
+	}
+
+	sort.Slice(cacheDetails, func(p, q int) bool {
+		nodeID1, _ := strconv.Atoi(cacheDetails[p].NodeID)
+		nodeID2, _ := strconv.Atoi(cacheDetails[q].NodeID)
+		return nodeID1 < nodeID2
+	})
+
+	table := newFormattedTable().WithHeader(NodeIDColumn, "VIEW SIZE", "RECONNECT", "FILTER",
+		"TRANSFORMED", "TRANSFORMER", "READ ONLY")
+	table.WithAlignment(R, R, R, L, L, L, L)
+
+	for _, value := range cacheDetails {
+		var (
+			nodeID, _   = strconv.Atoi(value.NodeID)
+			transformer = "n/a"
+		)
+
+		if value.Transformer != "" {
+			transformer = value.Transformer
+		}
+
+		table.AddRow(formatSmallInteger(int32(nodeID)), formatLargeInteger(value.Size),
+			formatConnectionMillis(value.ReconnectInterval), value.Filter,
+			formatBool(value.Transformed), transformer, formatBool(value.ReadOnly))
+	}
+
+	return table.String()
 }
 
 // FormatTopicsSummary returns the topics summary in column formatted output.
@@ -816,7 +889,7 @@ func FormatCacheDetailsSizeAndAccess(cacheDetails []config.CacheDetail) string {
 		return nodeID1 < nodeID2
 	})
 
-	table := newFormattedTable().WithHeader(NodeIDColumn, "TIER", "COUNT", "SIZE",
+	table := newFormattedTable().WithHeader(NodeIDColumn, "TIER", CountColumn, "SIZE",
 		"PUTS", "GETS", "REMOVES", "CLEARS", "EVICTIONS")
 	if OutputFormat == constants.WIDE {
 		table.WithAlignment(R, L, R, R, R, R, R, R, R, R, R, R, R, R, R)
@@ -1289,7 +1362,7 @@ func FormatMembers(members []config.Member, verbose bool, storageMap map[int]boo
 				strings.TrimSpace(formattingFunction(int64(totalAvailStorageMemoryMB)*MB)), availableStoragePercent)
 
 	if summary {
-		tableSummary := newFormattedTable().WithHeader(RoleColumn, "COUNT").WithAlignment(L, R)
+		tableSummary := newFormattedTable().WithHeader(RoleColumn, CountColumn).WithAlignment(L, R)
 		for k, v := range roleMap {
 			tableSummary.AddRow(k, formatSmallInteger(v))
 		}

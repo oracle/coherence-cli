@@ -440,11 +440,39 @@ func (h HTTPFetcher) GetCachesSummaryJSON(serviceName string) ([]byte, error) {
 	return result, nil
 }
 
+// GetViewCachesJSON returns view caches details for a service.
+func (h HTTPFetcher) GetViewCachesJSON(serviceName string) ([]byte, error) {
+	result, err := httpGetRequest(h, servicesPath+getSafeServiceName(h, serviceName)+"/views/members?links=")
+	if err != nil {
+		return constants.EmptyByte, utils.GetError("cannot get view caches summary information for service "+serviceName, err)
+	}
+	return result, nil
+}
+
+// GetViewCachesDetailsJSON returns view cache details json for a service and view.
+func (h HTTPFetcher) GetViewCachesDetailsJSON(serviceName, viewName string) ([]byte, error) {
+	result, err := httpGetRequest(h, servicesPath+getSafeServiceName(h, serviceName)+"/views/"+viewName+links)
+	if err != nil {
+		return constants.EmptyByte, utils.GetError("cannot get view caches summary information for service "+serviceName+
+			", view "+viewName, err)
+	}
+	return result, nil
+}
+
 // GetCachesSummaryJSONAllServices returns summary caches details for all services.
 func (h HTTPFetcher) GetCachesSummaryJSONAllServices() ([]byte, error) {
 	result, err := httpGetRequest(h, "/caches?links=")
 	if err != nil {
 		return constants.EmptyByte, utils.GetError("cannot get caches summary information", err)
+	}
+	return result, nil
+}
+
+// GetViewsSummaryJSONAllServices returns summary view caches details for all services.
+func (h HTTPFetcher) GetViewsSummaryJSONAllServices() ([]byte, error) {
+	result, err := httpGetRequest(h, "/views?links=")
+	if err != nil {
+		return constants.EmptyByte, utils.GetError("cannot get views summary information", err)
 	}
 	return result, nil
 }
