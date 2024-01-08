@@ -509,7 +509,7 @@ name is specified then all services are queried.`,
 		}
 
 		for {
-			var servicesSummary = config.ServicesSummaries{}
+			var viewServicesSummary = config.ServicesSummaries{}
 
 			if strings.Contains(OutputFormat, constants.JSONPATH) || OutputFormat == constants.JSON {
 				data, err := dataFetcher.GetViewsSummaryJSONAllServices()
@@ -520,17 +520,17 @@ name is specified then all services are queried.`,
 					return err
 				}
 			} else {
-				servicesResult, err := dataFetcher.GetServiceDetailsJSON()
+				viewServicesResult, err := dataFetcher.GetServiceDetailsJSON()
 				if err != nil {
 					return err
 				}
 
-				err = json.Unmarshal(servicesResult, &servicesSummary)
+				err = json.Unmarshal(viewServicesResult, &viewServicesSummary)
 				if err != nil {
 					return err
 				}
 
-				serviceList := GetListOfCacheServices(servicesSummary)
+				serviceList := GetListOfCacheServices(viewServicesSummary)
 
 				if serviceName != "" {
 					if !utils.SliceContains(serviceList, serviceName) {
