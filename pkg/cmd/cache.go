@@ -520,7 +520,6 @@ name is specified then all services are queried.`,
 					return err
 				}
 			} else {
-				// get the services
 				servicesResult, err := dataFetcher.GetServiceDetailsJSON()
 				if err != nil {
 					return err
@@ -538,7 +537,6 @@ name is specified then all services are queried.`,
 						return fmt.Errorf("service '%s' was not found", serviceName)
 					}
 
-					// overwrite the list of services with the selected one
 					serviceList = make([]string, 1)
 					serviceList[0] = serviceName
 				}
