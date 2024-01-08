@@ -33,6 +33,7 @@ const (
 	CountColumn           = "COUNT"
 	PolledColumn          = "POLLED"
 	HeadColumn            = "HEAD"
+	HitProbColumn         = "HIT PROB"
 	ChannelsColumn        = "CHANNELS"
 	ChannelColumn         = "CHANNEL"
 	SubscriberGroupColumn = "SUBSCRIBER GROUP"
@@ -439,7 +440,7 @@ func FormatCacheSummary(cacheSummaries []config.CacheSummaryDetail) string {
 	table.WithHeader(ServiceColumn, CacheColumn, CountColumn, "SIZE")
 
 	if OutputFormat == constants.WIDE {
-		table.AddHeaderColumns(avgSize, "PUTS", "GETS", "REMOVES", "EVICTIONS", "HITS", " MISSES", "HIT PROB")
+		table.AddHeaderColumns(avgSize, "PUTS", "GETS", "REMOVES", "EVICTIONS", "HITS", " MISSES", HitProbColumn)
 		table.AddFormattingFunction(11, hitRateFormatter)
 	}
 
@@ -500,7 +501,7 @@ func FormatViewCacheSummary(cacheSummaries []config.ViewCacheSummaryDetail) stri
 	table.WithHeader(ServiceColumn, "VIEW NAME", "MEMBERS")
 
 	if OutputFormat == constants.WIDE {
-		table.AddHeaderColumns(avgSize, "PUTS", "GETS", "REMOVES", "EVICTIONS", "HITS", " MISSES", "HIT PROB")
+		table.AddHeaderColumns(avgSize, "PUTS", "GETS", "REMOVES", "EVICTIONS", "HITS", " MISSES", HitProbColumn)
 		table.AddFormattingFunction(11, hitRateFormatter)
 	}
 
@@ -893,7 +894,7 @@ func FormatCacheDetailsSizeAndAccess(cacheDetails []config.CacheDetail) string {
 		"PUTS", "GETS", "REMOVES", "CLEARS", "EVICTIONS")
 	if OutputFormat == constants.WIDE {
 		table.WithAlignment(R, L, R, R, R, R, R, R, R, R, R, R, R, R, R)
-		table.AddHeaderColumns("HITS", "MISSES", "HIT PROB", "STORE READS",
+		table.AddHeaderColumns("HITS", "MISSES", HitProbColumn, "STORE READS",
 			"WRITES", "FAILURES")
 	} else {
 		table.WithAlignment(R, L, R, R, R, R, R, R, R)
