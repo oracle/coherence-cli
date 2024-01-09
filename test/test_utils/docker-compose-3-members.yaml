@@ -1,0 +1,54 @@
+# Copyright 2024 Oracle Corporation and/or its affiliates.
+# Licensed under the Universal Permissive License v 1.0 as shown at
+# https://oss.oracle.com/licenses/upl.
+
+version: "3.5"
+services:
+  coherence1:
+    hostname: server1
+    networks:
+      coherence:
+        aliases:
+          - server1
+    env_file:
+      - .env
+    image: ${COHERENCE_IMAGE1}
+    ports:
+      - 30000:30000
+      - 8080:8080
+      - 7574:7574
+      - 9612:9612
+    volumes:
+      - ./shared:/shared
+    user: ${CURRENT_UID}
+
+  coherence2:
+    hostname: server2
+    networks:
+      coherence:
+        aliases:
+          - server2
+    env_file:
+      - .env
+    image: ${COHERENCE_IMAGE2}
+    ports:
+      - 30001:30001
+      - 8081:8080
+      - 9613:9613
+    volumes:
+      - ./shared:/shared
+    user: ${CURRENT_UID}
+
+  view1:
+    hostname: view1
+    networks:
+      coherence:
+        aliases:
+          - view1
+    env_file:
+      - .env
+    image: ${COHERENCE_IMAGE3}
+    user: ${CURRENT_UID}
+
+networks:
+  coherence:

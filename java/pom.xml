@@ -2,7 +2,7 @@
 
 <!--
 
-    Copyright (c) 2021, 2023 Oracle and/or its affiliates.
+    Copyright (c) 2021, 2024 Oracle and/or its affiliates.
     Licensed under the Universal Permissive License v 1.0 as shown at
     https://oss.oracle.com/licenses/upl.
 
@@ -181,6 +181,13 @@
     </profile>
 
     <profile>
+      <id>views</id>
+      <properties>
+        <coherence.cache.config>test-cache-config-view.xml</coherence.cache.config>
+      </properties>
+    </profile>
+
+    <profile>
       <id>topics</id>
       <properties>
         <coherence.cache.config>test-cache-config-topics.xml</coherence.cache.config>
@@ -292,6 +299,42 @@
                   <jvmFlag>-Dcoherence.override=${coherence.override}</jvmFlag>
                 </jvmFlags>
                 <mainClass>com.oracle.coherence.cli.testing.RestServer</mainClass>
+                <format>OCI</format>
+              </container>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+
+    <!-- view1 image, containing a view client  -->
+    <profile>
+      <id>view1</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>com.google.cloud.tools</groupId>
+            <artifactId>jib-maven-plugin</artifactId>
+            <version>${version.plugin.jib}</version>
+            <configuration>
+              <from>
+                <image>docker://${coherence.test.base.image}</image>
+              </from>
+              <container>
+                <jvmFlags>
+                  <jvmFlag>-Dcoherence.wka=server1</jvmFlag>
+                  <jvmFlag>-Dcoherence.cluster=cluster1</jvmFlag>
+                  <jvmFlag>-Dcoherence.member=view1</jvmFlag>
+                  <jvmFlag>-Dcoherence.machine=view1</jvmFlag>
+                  <jvmFlag>-Dcoherence.site=Site1</jvmFlag>
+                  <jvmFlag>-Dcoherence.log.level=9</jvmFlag>
+                  <jvmFlag>-Dcoherence.management=all</jvmFlag>
+                  <jvmFlag>-Dcoherence.management.refresh.expiry=1s</jvmFlag>
+                  <jvmFlag>-Dcoherence.distributed.localstorage=false</jvmFlag>
+                  <jvmFlag>-Dcoherence.cacheconfig=${coherence.cache.config}</jvmFlag>
+                  <jvmFlag>-Dcoherence.override=${coherence.override}</jvmFlag>
+                </jvmFlags>
+                <mainClass>com.oracle.coherence.cli.testing.ViewCacheClient</mainClass>
                 <format>OCI</format>
               </container>
             </configuration>
