@@ -1933,118 +1933,17 @@ func RunTestViewCacheCommands(t *testing.T) {
 	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "SERVICE,VIEW NAME,MEMBERS,view-cache-1,view-cache-2", configArg, file,
 		"get", "view-caches", "-c", context.ClusterName)
 
-	//// ensure no topics returned for invalid service
-	//test_utils.EnsureCommandErrorContains(g, t, cliCmd, "there are no topics for service invalid-service", configArg, file,
-	//	"get", "topics", "-s", "invalid-service", "-c", context.ClusterName)
-	//
-	//// describe a topic without a service name
-	//test_utils.EnsureCommandContainsAll(g, t, cliCmd, "TOPIC DETAILS,MEMBERS,SUBSCRIBERS,SUBSCRIBER GROUPS,private-messages,17", configArg, file,
-	//	"describe", "topic", "private-messages", "-s", "", "-c", context.ClusterName)
-	//
-	//// describe a topic
-	//test_utils.EnsureCommandContainsAll(g, t, cliCmd, "TOPIC DETAILS,MEMBERS,SUBSCRIBERS,SUBSCRIBER GROUPS,private-messages,17", configArg, file,
-	//	"describe", "topic", "private-messages", "-s", "PartitionedTopic", "-c", context.ClusterName)
-	//
-	//// describe a non-existent topic
-	//test_utils.EnsureCommandErrorContains(g, t, cliCmd, "a topic named", configArg, file,
-	//	"describe", "topic", "private-messagesxxx", "-s", "PartitionedTopic", "-c", context.ClusterName)
-	//
-	//// get topic-members without a service name
-	//test_utils.EnsureCommandContainsAll(g, t, cliCmd, "PartitionedTopic,17,private-messages,PUBLISHED,NODE ID", configArg, file,
-	//	"get", "topic-members", "private-messages", "-s", "", "-c", context.ClusterName)
-	//
-	//// get topic-members
-	//test_utils.EnsureCommandContainsAll(g, t, cliCmd, "PartitionedTopic,17,private-messages,PUBLISHED,NODE ID", configArg, file,
-	//	"get", "topic-members", "private-messages", "-s", "PartitionedTopic", "-c", context.ClusterName)
-	//
-	//// test get topic-members with invalid service
-	//test_utils.EnsureCommandErrorContains(g, t, cliCmd, noTopics, configArg, file,
-	//	"get", "topic-members", "private-messages", "-s", "PartitionedTopicx", "-c", context.ClusterName)
-	//
-	//// get topic-channels
-	//test_utils.EnsureCommandContainsAll(g, t, cliCmd, "PartitionedTopic,17,private-messages,PUBLISHED,MEAN,PagedPosition", configArg, file,
-	//	"get", "topic-channels", "private-messages", "-s", "PartitionedTopic", "-n", "1", "-c", context.ClusterName)
-	//
-	//// get topic-channels without a service
-	//test_utils.EnsureCommandContainsAll(g, t, cliCmd, "PartitionedTopic,17,private-messages,PUBLISHED,MEAN,PagedPosition", configArg, file,
-	//	"get", "topic-channels", "private-messages", "-n", "1", "-c", context.ClusterName)
-	//
-	//// get subscribers
-	//test_utils.EnsureCommandContainsAll(g, t, cliCmd, "PartitionedTopic,17,public-messages,SUBSCRIBER ID,NODE ID,SUBSCRIBER GROUP", configArg, file,
-	//	"get", "subscribers", "public-messages", "-s", "PartitionedTopic", "-c", context.ClusterName)
-	//
-	//// get subscribers without a service
-	//test_utils.EnsureCommandContainsAll(g, t, cliCmd, "PartitionedTopic,17,public-messages,SUBSCRIBER ID,NODE ID,SUBSCRIBER GROUP", configArg, file,
-	//	"get", "subscribers", "public-messages", "-c", context.ClusterName)
-	//
-	//// test get subscribers with invalid service
-	//test_utils.EnsureCommandErrorContains(g, t, cliCmd, noTopics, configArg, file,
-	//	"get", "subscribers", "public-messages", "-s", "PartitionedTopicxx", "-c", context.ClusterName)
-	//
-	//// get subscriber channels - need to use the dataFetcher to find a valid subscriber
-	//topicsResult, err := dataFetcher.GetTopicsSubscribersJSON("PartitionedTopic", "public-messages")
-	//g.Expect(err).To(Not(HaveOccurred()))
-	//
-	//topicsSummary := config.TopicsSubscriberDetails{}
-	//err = json.Unmarshal(topicsResult, &topicsSummary)
-	//g.Expect(err).To(Not(HaveOccurred()))
-	//g.Expect(len(topicsSummary.Details)).To(BeNumerically(">", 0))
-	//
-	//// retrieve the subscriber
-	//subscriber := fmt.Sprintf("%v", topicsSummary.Details[0].ID)
-	//
-	//// test subscriber channels
-	//test_utils.EnsureCommandContainsAll(g, t, cliCmd, "PartitionedTopic,17,public-messages,EMPTY,LAST COMMIT,HEAD", configArg, file,
-	//	"get", "subscriber-channels", "public-messages", "-s", "PartitionedTopic", "-S", subscriber, "-c", context.ClusterName)
-	//
-	//// test subscriber channels without a service
-	//test_utils.EnsureCommandContainsAll(g, t, cliCmd, "PartitionedTopic,17,public-messages,EMPTY,LAST COMMIT,HEAD", configArg, file,
-	//	"get", "subscriber-channels", "public-messages", "-S", subscriber, "-c", context.ClusterName)
-	//
-	//// test various topic subscriber operations
-	//test_utils.EnsureCommandContainsAll(g, t, cliCmd, cmd.OperationCompleted, configArg, file,
-	//	"disconnect", "subscriber", "public-messages", "-s", "", "-S", subscriber, "-c", context.ClusterName, "-y")
-	//
-	//test_utils.EnsureCommandContainsAll(g, t, cliCmd, cmd.OperationCompleted, configArg, file,
-	//	"disconnect", "subscriber", "public-messages", "-s", "PartitionedTopic", "-S", subscriber, "-c", context.ClusterName, "-y")
-	//
-	//test_utils.EnsureCommandContainsAll(g, t, cliCmd, cmd.OperationCompleted, configArg, file,
-	//	"connect", "subscriber", "public-messages", "-s", "", "-S", subscriber, "-c", context.ClusterName, "-y")
-	//
-	//test_utils.EnsureCommandContainsAll(g, t, cliCmd, cmd.OperationCompleted, configArg, file,
-	//	"connect", "subscriber", "public-messages", "-s", "PartitionedTopic", "-S", subscriber, "-c", context.ClusterName, "-y")
-	//
-	//test_utils.EnsureCommandContainsAll(g, t, cliCmd, cmd.OperationCompleted, configArg, file,
-	//	"retrieve", "remaining", "public-messages", "-s", "", "-S", subscriber, "-c", context.ClusterName, "-y")
-	//
-	//test_utils.EnsureCommandContainsAll(g, t, cliCmd, cmd.OperationCompleted, configArg, file,
-	//	"notify", "populated", "public-messages", "-s", "", "-S", subscriber, "-C", "16", "-c", context.ClusterName, "-y")
-	//
-	//test_utils.EnsureCommandContainsAll(g, t, cliCmd, cmd.OperationCompleted, configArg, file,
-	//	"notify", "populated", "public-messages", "-s", "PartitionedTopic", "-S", subscriber, "-C", "16", "-c", context.ClusterName, "-y")
-	//
-	//test_utils.EnsureCommandErrorContains(g, t, cliCmd, "channel must be between 0 and 1", configArg, file,
-	//	"notify", "populated", "public-messages", "-s", "PartitionedTopic", "-S", subscriber, "-C", "17", "-c", context.ClusterName, "-y")
-	//
-	//// test sub-grp-channels
-	//test_utils.EnsureCommandContainsAll(g, t, cliCmd, "PartitionedTopic,17,private-messages,MEMBER,MEAN,OWNING SUB", configArg, file,
-	//	"get", "sub-grp-channels", "private-messages", "-s", "PartitionedTopic", "-n", "1", "-G", "admin", "-c", context.ClusterName)
-	//
-	//// test disconnect all for a topic
-	//test_utils.EnsureCommandContainsAll(g, t, cliCmd, cmd.OperationCompleted, configArg, file,
-	//	"disconnect", "all", "private-messages", "-s", "PartitionedTopic", "-c", context.ClusterName, "-y")
-	//
-	//// test disconnect all for a topic and subscriber group admin
-	//test_utils.EnsureCommandContainsAll(g, t, cliCmd, cmd.OperationCompleted, configArg, file,
-	//	"disconnect", "all", "private-messages", "-s", "PartitionedTopic", "-G", "admin", "-c", context.ClusterName, "-y")
-	//
-	//// test invalid topic
-	//test_utils.EnsureCommandErrorContains(g, t, cliCmd, "there are no topics", configArg, file,
-	//	"disconnect", "all", "private-messagesxxxx", "-s", "PartitionedTopicxx", "-c", context.ClusterName)
-	//
-	//// test invalid topic
-	//test_utils.EnsureCommandErrorContains(g, t, cliCmd, "unable to find subscriber group", configArg, file,
-	//	"disconnect", "all", "private-messages", "-s", "PartitionedTopic", "-G", "admind", "-c", context.ClusterName, "-y")
+	// ensure no views returned for invalid service
+	test_utils.EnsureCommandErrorContains(g, t, cliCmd, "service 'invalid-service' was not found", configArg, file,
+		"get", "view-caches", "-s", "invalid-service", "-c", context.ClusterName)
+
+	// describe a view without a service name
+	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "ViewDistributedCacheService,VIEW SIZE,AlwaysFilter,TRANSFORMER", configArg, file,
+		"describe", "view-cache", "view-cache-1", "-s", "", "-c", context.ClusterName)
+
+	// describe a non-existent view cache
+	test_utils.EnsureCommandErrorContains(g, t, cliCmd, "no view cache named view-cache-12 exists", configArg, file,
+		"describe", "view-cache", "view-cache-12", "-s", "ViewDistributedCacheService", "-c", context.ClusterName)
 
 	// remove the cluster entry
 	test_utils.EnsureCommandContains(g, t, cliCmd, context.ClusterName, configArg, file, "remove", "cluster", "cluster1", "-y")

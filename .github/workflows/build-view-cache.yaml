@@ -25,7 +25,6 @@ jobs:
         coherenceVersion:
           - 24.03-SNAPSHOT
           - 22.06.8-SNAPSHOT
-          - 22.09-2-SNAPSHOT
 
 #   Checkout the source, we need a depth of zero to fetch all of the history otherwise
 #   the copyright check cannot work out the date of the files from Git.
