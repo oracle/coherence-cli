@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #
-# Copyright (c) 2021, 2023 Oracle and/or its affiliates.
+# Copyright (c) 2021, 2024 Oracle and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at
 # https://oss.oracle.com/licenses/upl.
 #
@@ -115,6 +115,10 @@ create_doc $DOCS_DIR/describe_cache "${COHCTL} describe cache --help"
 create_doc $DOCS_DIR/set_cache "${COHCTL} set cache --help"
 create_doc $DOCS_DIR/truncate_cache "${COHCTL} truncate cache --help"
 create_doc $DOCS_DIR/clear_cache "${COHCTL} clear cache --help"
+
+# View Caches
+create_doc $DOCS_DIR/get_view_caches "${COHCTL} get view-caches --help"
+create_doc $DOCS_DIR/describe_view_cache "${COHCTL} describe view-cache --help"
 
 # Topics
 create_doc $DOCS_DIR/get_topics "${COHCTL} get topics --help"

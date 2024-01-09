@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, 2023 Oracle and/or its affiliates.
+ * Copyright (c) 2021, 2024 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -27,17 +27,19 @@ var (
 	ignoreSpecialCaches  bool
 	validAttributesCache = []string{"expiryDelay", "highUnits", "lowUnits", "batchFactor", "refreshFactor",
 		"requeueThreshold"}
-	nodeIDCache       string
-	tier              string
-	InvalidTierMsg    = "tier must be back or front"
-	cannotFindService = "unable to find service with service name '%s'"
-	cannotFindCache   = "no cache named %s exists for service %s"
+	nodeIDCache         string
+	tier                string
+	InvalidTierMsg      = "tier must be back or front"
+	cannotFindService   = "unable to find service with service name '%s'"
+	cannotFindCache     = "no cache named %s exists for service %s"
+	cannotFindViewCache = "no view cache named %s exists for service %s"
 )
 
 const (
-	provideCacheMessage = "you must provide a cache name"
-	back                = "back"
-	all                 = "all"
+	provideCacheMessage     = "you must provide a cache name"
+	provideViewCacheMessage = "you must provide a view cache name"
+	back                    = "back"
+	all                     = "all"
 )
 
 // getCachesCmd represents the get caches command.
@@ -64,12 +66,6 @@ used by Federation.`,
 		for {
 			var servicesSummary = config.ServicesSummaries{}
 
-			// get the services
-			servicesResult, err := dataFetcher.GetServiceDetailsJSON()
-			if err != nil {
-				return err
-			}
-
 			if strings.Contains(OutputFormat, constants.JSONPATH) || OutputFormat == constants.JSON {
 				data, err := dataFetcher.GetCachesSummaryJSONAllServices()
 				if err != nil {
@@ -79,6 +75,12 @@ used by Federation.`,
 					return err
 				}
 			} else {
+				// get the services
+				servicesResult, err := dataFetcher.GetServiceDetailsJSON()
+				if err != nil {
+					return err
+				}
+
 				err = json.Unmarshal(servicesResult, &servicesSummary)
 				if err != nil {
 					return err
@@ -255,6 +257,97 @@ You can specify '-o wide' to display addition information.`,
 	},
 }
 
+// describeViewCacheCmd represents the describe view-cache command.
+var describeViewCacheCmd = &cobra.Command{
+	Use:               "view-cache cache-name",
+	Short:             "describe a cache",
+	Long:              `The 'describe view-cache' command displays information related to a specific view-cache.`,
+	ValidArgsFunction: completionViewCaches,
+	Args: func(cmd *cobra.Command, args []string) error {
+		if len(args) != 1 {
+			displayErrorAndExit(cmd, provideViewCacheMessage)
+		}
+		return nil
+	},
+	RunE: func(cmd *cobra.Command, args []string) error {
+		var (
+			err         error
+			dataFetcher fetcher.Fetcher
+			found       bool
+			connection  string
+		)
+
+		viewCacheName := args[0]
+
+		connection, dataFetcher, err = GetConnectionAndDataFetcher()
+		if err != nil {
+			return err
+		}
+
+		if serviceName, err = findServiceForCacheOrTopic(dataFetcher, viewCacheName, "cache"); err != nil {
+			return err
+		}
+
+		found, err = ServiceExists(dataFetcher, serviceName)
+		if !found || err != nil {
+			return fmt.Errorf(cannotFindService, serviceName)
+		}
+
+		if isJSONPathOrJSON() {
+			cachesResult, err1 := dataFetcher.GetViewCachesDetailsJSON(serviceName, viewCacheName)
+			if err1 != nil {
+				return err1
+			}
+			if string(cachesResult) == "{}" || len(cachesResult) == 0 {
+				return fmt.Errorf(cannotFindViewCache, viewCacheName, serviceName)
+			}
+
+			if strings.Contains(OutputFormat, constants.JSONPATH) {
+				result, err := utils.GetJSONPathResults(cachesResult, OutputFormat)
+				if err != nil {
+					return err
+				}
+				cmd.Println(result)
+			} else {
+				cmd.Println(string(cachesResult))
+			}
+		} else {
+			allCachesSummary, err := getViewCaches([]string{serviceName}, dataFetcher)
+			if err != nil {
+				return err
+			}
+
+			// only cluster view caches that match the name
+
+			finalViewCachesSummary := make([]config.ViewCacheDetail, 0)
+
+			for _, v := range allCachesSummary {
+				if v.ViewName == viewCacheName {
+					finalViewCachesSummary = append(finalViewCachesSummary, v)
+				}
+			}
+
+			if len(finalViewCachesSummary) == 0 {
+				return fmt.Errorf(cannotFindViewCache, viewCacheName, serviceName)
+			}
+
+			var sb strings.Builder
+			sb.WriteString(FormatCurrentCluster(connection))
+
+			sb.WriteString("\nService:    ")
+			sb.WriteString(serviceName + "\n")
+			sb.WriteString("View Cache: ")
+			sb.WriteString(viewCacheName + "\n\n")
+
+			sb.WriteString(FormatViewCacheDetail(finalViewCachesSummary))
+
+			cmd.Println(sb.String())
+		}
+
+		return nil
+	},
+}
+
 // getCacheStoresCmd represents the get cache-stores command.
 var getCacheStoresCmd = &cobra.Command{
 	Use:   "cache-stores cache-name",
@@ -393,6 +486,81 @@ var getCacheIndexesCmd = &cobra.Command{
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
 		return getCacheDetails(cmd, args, "index")
+	},
+}
+
+// getViewCachesCmd represents the get view-caches command.
+var getViewCachesCmd = &cobra.Command{
+	Use:   "view-caches",
+	Short: "display view caches for a cluster",
+	Long: `The 'get view-caches' command displays view caches for a cluster. If no service
+name is specified then all services are queried.`,
+	Args: cobra.ExactArgs(0),
+	RunE: func(cmd *cobra.Command, args []string) error {
+		var (
+			err         error
+			connection  string
+			dataFetcher fetcher.Fetcher
+		)
+
+		connection, dataFetcher, err = GetConnectionAndDataFetcher()
+		if err != nil {
+			return err
+		}
+
+		for {
+			var viewServicesSummary = config.ServicesSummaries{}
+
+			if strings.Contains(OutputFormat, constants.JSONPATH) || OutputFormat == constants.JSON {
+				data, err := dataFetcher.GetViewsSummaryJSONAllServices()
+				if err != nil {
+					return err
+				}
+				if err = processJSONOutput(cmd, data); err != nil {
+					return err
+				}
+			} else {
+				viewServicesResult, err := dataFetcher.GetServiceDetailsJSON()
+				if err != nil {
+					return err
+				}
+
+				err = json.Unmarshal(viewServicesResult, &viewServicesSummary)
+				if err != nil {
+					return err
+				}
+
+				serviceList := GetListOfCacheServices(viewServicesSummary)
+
+				if serviceName != "" {
+					if !utils.SliceContains(serviceList, serviceName) {
+						return fmt.Errorf("service '%s' was not found", serviceName)
+					}
+
+					serviceList = make([]string, 1)
+					serviceList[0] = serviceName
+				}
+
+				value, err := formatViewCachesSummary(serviceList, dataFetcher)
+				if err != nil {
+					return err
+				}
+
+				printWatchHeader(cmd)
+				cmd.Println(FormatCurrentCluster(connection))
+
+				cmd.Println(value)
+			}
+
+			// check to see if we should exit if we are not watching
+			if !isWatchEnabled() {
+				break
+			}
+			// we are watching so sleep and then repeat until CTRL-C
+			time.Sleep(time.Duration(watchDelay) * time.Second)
+		}
+
+		return nil
 	},
 }
 
@@ -735,6 +903,55 @@ func formatCachesSummary(serviceList []string, dataFetcher fetcher.Fetcher) (str
 	return value, err
 }
 
+// formatViewCachesSummary returns the formatted view caches for the service list.
+func formatViewCachesSummary(serviceList []string, dataFetcher fetcher.Fetcher) (string, error) {
+	allCachesSummary, err := getViewCaches(serviceList, dataFetcher)
+	if err != nil {
+		return "", err
+	}
+
+	// build up the summary
+	viewCacheSummary := make([]config.ViewCacheSummaryDetail, 0)
+
+	// go through each service and get the view caches and counts of members
+	for _, service := range serviceList {
+
+		// get list of view caches for service
+		caches := make(map[string]int)
+
+		for _, value := range allCachesSummary {
+			viewName := value.ViewName
+			svcName := value.ServiceName
+
+			if service == svcName {
+				// find the cache in the map
+				count := 1
+				viewCount, ok := caches[viewName]
+				if ok {
+					// increment the count
+					count = count + viewCount
+				}
+				caches[viewName] = count
+			}
+		}
+
+		// now we have map of caches and member counts for the service, build the summary
+		for k, v := range caches {
+			viewCacheSummary = append(viewCacheSummary, config.ViewCacheSummaryDetail{
+				ViewName:    k,
+				ServiceName: service,
+				MemberCount: int32(v),
+			})
+		}
+	}
+
+	value := FormatViewCacheSummary(viewCacheSummary)
+	if err != nil {
+		return "", err
+	}
+	return value, err
+}
+
 // getCaches returns a list of caches given a slice of services.
 func getCaches(serviceList []string, dataFetcher fetcher.Fetcher) ([]config.CacheSummaryDetail, error) {
 	var (
@@ -777,6 +994,69 @@ func getCaches(serviceList []string, dataFetcher fetcher.Fetcher) ([]config.Cach
 				}
 
 				finalCaches = append(finalCaches, cachesSummary.Caches[i])
+			}
+
+			// protect the slice for update
+			m.Lock()
+			defer m.Unlock()
+			allCachesSummary = append(allCachesSummary, finalCaches...)
+		}(service)
+	}
+
+	// wait for the results
+	wg.Wait()
+
+	errorList := errorSink.GetErrors()
+
+	if len(errorList) > 0 {
+		return nil, utils.GetErrors(errorList)
+	}
+
+	return allCachesSummary, nil
+}
+
+// getViewCaches returns a list of view caches given a slice of services.
+func getViewCaches(serviceList []string, dataFetcher fetcher.Fetcher) ([]config.ViewCacheDetail, error) {
+	var (
+		wg               sync.WaitGroup
+		allCachesSummary = make([]config.ViewCacheDetail, 0)
+		errorSink        = createErrorSink()
+		numServices      = len(serviceList)
+		m                = sync.RWMutex{}
+	)
+
+	// loop through the services and build up the view cache list. carry out each service concurrently
+	wg.Add(numServices)
+	for _, service := range serviceList {
+		go func(serviceNameValue string) {
+			defer wg.Done()
+			cachesResult, err := dataFetcher.GetViewCachesJSON(serviceNameValue)
+			if err != nil {
+				if strings.Contains(err.Error(), "404") {
+					// no view caches for this service, so finish with no error
+					return
+				}
+				// must be another error so log it and finish
+				errorSink.AppendError(err)
+				return
+			}
+
+			cachesSummary := config.ViewCacheDetails{}
+			err = json.Unmarshal(cachesResult, &cachesSummary)
+			if err != nil {
+				errorSink.AppendError(utils.GetError("unable to unmarshal view caches result", err))
+				return
+			}
+
+			finalCaches := make([]config.ViewCacheDetail, 0)
+
+			for i := range cachesSummary.ViewCaches {
+				// WebLogic Server doesn't return service attribute, so we need to fix it
+				if cachesSummary.ViewCaches[i].ServiceName == "" {
+					cachesSummary.ViewCaches[i].ServiceName = serviceNameValue
+				}
+
+				finalCaches = append(finalCaches, cachesSummary.ViewCaches[i])
 			}
 
 			// protect the slice for update
@@ -852,11 +1132,14 @@ func init() {
 	getCachesCmd.Flags().BoolVarP(&ignoreSpecialCaches, "ignore-special", "I", false, "ignore caches with $ in name")
 
 	describeCacheCmd.Flags().StringVarP(&serviceName, serviceNameOption, serviceNameOptionShort, "", serviceNameDescription)
+	describeViewCacheCmd.Flags().StringVarP(&serviceName, serviceNameOption, serviceNameOptionShort, "", serviceNameDescription)
 
 	getCacheStoresCmd.Flags().StringVarP(&serviceName, serviceNameOption, serviceNameOptionShort, "", serviceNameDescription)
 	getCacheAccessCmd.Flags().StringVarP(&serviceName, serviceNameOption, serviceNameOptionShort, "", serviceNameDescription)
 	getCacheStorageCmd.Flags().StringVarP(&serviceName, serviceNameOption, serviceNameOptionShort, "", serviceNameDescription)
 	getCacheIndexesCmd.Flags().StringVarP(&serviceName, serviceNameOption, serviceNameOptionShort, "", serviceNameDescription)
+
+	getViewCachesCmd.Flags().StringVarP(&serviceName, serviceNameOption, serviceNameOptionShort, "", serviceNameDescription)
 
 	clearCacheCmd.Flags().StringVarP(&serviceName, serviceNameOption, serviceNameOptionShort, "", serviceNameDescription)
 	clearCacheCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)

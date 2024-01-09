@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 
-    Copyright (c) 2021, 2022 Oracle and/or its affiliates.
+    Copyright (c) 2021, 2024 Oracle and/or its affiliates.
     Licensed under the Universal Permissive License v 1.0 as shown at
     https://oss.oracle.com/licenses/upl.
 
@@ -54,6 +54,13 @@ Display and describe service information.
 [link=docs/reference/25_caches.adoc]
 --
 Display and describe cache information.
+--
+
+[CARD]
+.View Caches
+[link=docs/reference/26_view_caches.adoc]
+--
+Display and describe view cache information.
 --
 
 [CARD]

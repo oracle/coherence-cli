@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Oracle and/or its affiliates.
+ * Copyright (c) 2023, 2024 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -55,6 +55,35 @@ func completionCaches(_ *cobra.Command, _ []string, _ string) ([]string, cobra.S
 
 	for _, v := range cacheSummaries.Caches {
 		caches = append(caches, v.CacheName)
+	}
+
+	return escapeValues(caches, cobra.ShellCompDirectiveNoFileComp)
+}
+
+// completionViewCaches provides a completion function to return all cache names.
+func completionViewCaches(_ *cobra.Command, _ []string, _ string) ([]string, cobra.ShellCompDirective) {
+	var (
+		cacheSummaries config.ViewCacheSummaries
+		caches         = make([]string, 0)
+	)
+
+	_, dataFetcher, err := GetConnectionAndDataFetcher()
+	if err != nil {
+		return emptySlice, cobra.ShellCompDirectiveNoFileComp
+	}
+
+	data, err := dataFetcher.GetViewsSummaryJSONAllServices()
+	if err != nil || len(data) == 0 || string(data) == "{}" {
+		return emptySlice, cobra.ShellCompDirectiveNoFileComp
+	}
+
+	err = json.Unmarshal(data, &cacheSummaries)
+	if err != nil {
+		return emptySlice, cobra.ShellCompDirectiveNoFileComp
+	}
+
+	for _, v := range cacheSummaries.ViewCaches {
+		caches = append(caches, v.ViewName)
 	}
 
 	return escapeValues(caches, cobra.ShellCompDirectiveNoFileComp)

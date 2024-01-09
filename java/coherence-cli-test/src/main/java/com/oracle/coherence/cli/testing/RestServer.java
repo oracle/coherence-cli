@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, 2023 Oracle and/or its affiliates.
+ * Copyright (c) 2019, 2024 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -62,6 +62,7 @@ public class RestServer {
             server.createContext("/populate", RestServer::populate);
             server.createContext("/populateFlash", RestServer::populateFlash);
             server.createContext("/populateRam", RestServer::populateRam);
+            server.createContext("/populateViewCache", RestServer::populateViewCache);
             server.createContext("/populateFederation", RestServer::populateFederation);
             server.createContext("/populateCacheStore", RestServer::populateCacheStore);
             server.createContext("/edition", RestServer::edition);
@@ -122,11 +123,16 @@ public class RestServer {
             setServices.add(TOPICS_SERVICE);
         }
 
-        if (isCommercial) {
-            if (isFederationConfigured()) {
-                setServices.add(FEDERATED_SERVICE);
+        if (isViewCacheConfigured()) {
+            setServices.clear();
+            setServices.add(VIEW_CACHE_SERVICE);
+        } else {
+            if (isCommercial) {
+                if (isFederationConfigured()) {
+                    setServices.add(FEDERATED_SERVICE);
+                }
+                setServices.addAll(COMMERCIAL_SERVICES);
             }
-            setServices.addAll(COMMERCIAL_SERVICES);
         }
 
         CacheFactory.log("Checking for the following balanced services: " + setServices, CacheFactory.LOG_INFO);
@@ -175,6 +181,10 @@ public class RestServer {
         }
     }
 
+    private static boolean isViewCacheConfigured() {
+        return System.getProperty("coherence.cacheconfig").equals("test-cache-config-view.xml");
+    }
+
     private static void env(HttpExchange t) throws IOException {
         String data = System.getenv()
                             .entrySet()
@@ -217,6 +227,16 @@ public class RestServer {
         populateCache(CacheFactory.getCache("flash-1"), 1000);
         populateCache(CacheFactory.getCache("flash-2"), 1000);
         send(t, 200, "OK");
+    }
+
+    public static void populateViewCache(HttpExchange t) throws IOException {
+        populateCache(CacheFactory.getCache("view-cache-1"), 1000);
+        populateCache(CacheFactory.getCache("view-cache-2"), 1000);
+
+        // only sent response if initiated by a http request
+        if (t != null) {
+            send(t, 200, "OK");
+        }
     }
 
     private static void populateRam(HttpExchange t) throws IOException {
@@ -361,6 +381,7 @@ public class RestServer {
     private static final String FEDERATED_SERVICE = "FederatedService";
     private static final String ENDANGERED = "ENDANGERED";
     private static final String TOPICS_SERVICE = "PartitionedTopic";
+    private static final String VIEW_CACHE_SERVICE = "ViewDistributedCacheService";
 
     private static final Set<String> BASE_SERVICES =
             new HashSet<>(Arrays.asList("PartitionedCache", "PartitionedCache2", "CanaryService", "PartitionedCacheWriteBehind"));

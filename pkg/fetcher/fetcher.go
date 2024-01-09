@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, 2023 Oracle and/or its affiliates.
+ * Copyright (c) 2021, 2024 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -125,8 +125,17 @@ type Fetcher interface {
 	// GetCachesSummaryJSON returns caches summary json for a service.
 	GetCachesSummaryJSON(serviceName string) ([]byte, error)
 
+	// GetViewCachesJSON returns view caches summary json for a service.
+	GetViewCachesJSON(serviceName string) ([]byte, error)
+
+	// GetViewCachesDetailsJSON returns view cache details json for a service and view.
+	GetViewCachesDetailsJSON(serviceName, viewName string) ([]byte, error)
+
 	// GetCachesSummaryJSONAllServices returns summary caches details for all services.
 	GetCachesSummaryJSONAllServices() ([]byte, error)
+
+	// GetViewsSummaryJSONAllServices returns summary view caches details for all services.
+	GetViewsSummaryJSONAllServices() ([]byte, error)
 
 	// GetTopicsJSON returns the topics in a cluster.
 	GetTopicsJSON() ([]byte, error)

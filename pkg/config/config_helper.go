@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, 2023 Oracle and/or its affiliates.
+ * Copyright (c) 2021, 2024 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -371,6 +371,37 @@ type CacheSummaryDetail struct {
 	CacheHits      int64  `json:"cacheHits"`
 	CacheMisses    int64  `json:"cacheMisses"`
 	TotalEvictions int64  `json:"evictionCount"`
+}
+
+// ViewCacheSummaries contains view cache summary details.
+type ViewCacheSummaries struct {
+	ViewCaches []ViewCacheSummaryDetail `json:"items"`
+}
+
+// ViewCacheSummaryDetail contains a summary of cache details.
+type ViewCacheSummaryDetail struct {
+	ServiceName string `json:"service"`
+	ViewName    string `json:"name"`
+	MemberCount int32  `json:"memberCount"`
+}
+
+// ViewCacheDetails contains view cache details.
+type ViewCacheDetails struct {
+	ViewCaches []ViewCacheDetail `json:"items"`
+}
+
+// ViewCacheDetail contains a summary of view cache details.
+type ViewCacheDetail struct {
+	ServiceName       string `json:"service"`
+	ViewName          string `json:"viewName"`
+	Name              string `json:"name"`
+	NodeID            string `json:"nodeId"`
+	Size              int64  `json:"size"`
+	ReconnectInterval int64  `json:"reconnectInterval"`
+	Filter            string `json:"filter"`
+	Transformed       bool   `json:"transformed"`
+	Transformer       string `json:"transformer"`
+	ReadOnly          bool   `json:"readOnly"`
 }
 
 // TopicDetails contains topics details.

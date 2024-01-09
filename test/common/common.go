@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, 2023 Oracle and/or its affiliates.
+ * Copyright (c) 2021, 2024 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -1752,7 +1752,7 @@ func RunTestFederationCommands(t *testing.T) {
 	test_utils.EnsureCommandContains(g, t, cliCmd, "", configArg, file, "get", "clusters")
 }
 
-// RunTestTopicsCommands tests federation commands.
+// RunTestTopicsCommands tests topics commands.
 func RunTestTopicsCommands(t *testing.T) {
 	const noTopics = "there are no topics for service"
 	var (
@@ -1898,6 +1898,52 @@ func RunTestTopicsCommands(t *testing.T) {
 	// test invalid topic
 	test_utils.EnsureCommandErrorContains(g, t, cliCmd, "unable to find subscriber group", configArg, file,
 		"disconnect", "all", "private-messages", "-s", "PartitionedTopic", "-G", "admind", "-c", context.ClusterName, "-y")
+
+	// remove the cluster entry
+	test_utils.EnsureCommandContains(g, t, cliCmd, context.ClusterName, configArg, file, "remove", "cluster", "cluster1", "-y")
+
+	// get clusters should return nothing
+	test_utils.EnsureCommandContains(g, t, cliCmd, "", configArg, file, "get", "clusters")
+}
+
+// RunTestViewCacheCommands tests view cache commands.
+func RunTestViewCacheCommands(t *testing.T) {
+	const noTopics = "there are no topics for service"
+	var (
+		context = test_utils.GetTestContext()
+		restUrl = context.RestUrl
+		g       = NewGomegaWithT(t)
+	)
+
+	file := initializeTestFile(t)
+
+	cliCmd := cmd.Initialize(nil)
+
+	// add a new cluster
+	test_utils.EnsureCommandContains(g, t, cliCmd, addedCluster, configArg, file, "add", "cluster", context.ClusterName, "-u", context.Url)
+
+	// Populate view caches
+	_, err := test_utils.IssueGetRequest(restUrl + "/populateViewCache")
+	g.Expect(err).To(BeNil())
+
+	// sleep to ensure the view cache client is ready
+	test_utils.Sleep(30)
+
+	// validate get view-caches
+	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "SERVICE,VIEW NAME,MEMBERS,view-cache-1,view-cache-2", configArg, file,
+		"get", "view-caches", "-c", context.ClusterName)
+
+	// ensure no views returned for invalid service
+	test_utils.EnsureCommandErrorContains(g, t, cliCmd, "service 'invalid-service' was not found", configArg, file,
+		"get", "view-caches", "-s", "invalid-service", "-c", context.ClusterName)
+
+	// describe a view without a service name
+	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "ViewDistributedCacheService,VIEW SIZE,AlwaysFilter,TRANSFORMER", configArg, file,
+		"describe", "view-cache", "view-cache-1", "-s", "", "-c", context.ClusterName)
+
+	// describe a non-existent view cache
+	test_utils.EnsureCommandErrorContains(g, t, cliCmd, "no view cache named view-cache-12 exists", configArg, file,
+		"describe", "view-cache", "view-cache-12", "-s", "ViewDistributedCacheService", "-c", context.ClusterName)
 
 	// remove the cluster entry
 	test_utils.EnsureCommandContains(g, t, cliCmd, context.ClusterName, configArg, file, "remove", "cluster", "cluster1", "-y")

@@ -1,5 +1,5 @@
 # ----------------------------------------------------------------------------------------------------------------------
-# Copyright (c) 2021, 2023 Oracle and/or its affiliates.
+# Copyright (c) 2021, 2024 Oracle and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at
 # https://oss.oracle.com/licenses/upl.
 #
@@ -75,6 +75,7 @@ TOOLS_BIN         = $(TOOLS_DIRECTORY)/bin
 RELEASE_IMAGE_PREFIX     ?= ghcr.io/oracle/
 TEST_APPLICATION_IMAGE_1 := $(RELEASE_IMAGE_PREFIX)coherence-cli-test-1:1.0.0
 TEST_APPLICATION_IMAGE_2 := $(RELEASE_IMAGE_PREFIX)coherence-cli-test-2:1.0.0
+TEST_APPLICATION_IMAGE_3 := $(RELEASE_IMAGE_PREFIX)coherence-cli-test-view-client-1:1.0.0
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Get the currently used golang install path (in GOPATH/bin, unless GOBIN is set)
@@ -142,6 +143,8 @@ else ifeq ($(PROFILES),,federation)
 	mvn -B -f java $(MAVEN_BUILD_OPTS) clean install -DskipTests -P federation
 else ifeq ($(PROFILES),,topics)
 	mvn -B -f java $(MAVEN_BUILD_OPTS) clean install -DskipTests -P topics
+else ifeq ($(PROFILES),,views)
+	mvn -B -f java $(MAVEN_BUILD_OPTS) clean install -DskipTests -P views
 else ifeq ($(PROFILES),,topics-commercial)
 	mvn -B -f java $(MAVEN_BUILD_OPTS) clean install -DskipTests -P topics-commercial
 else
@@ -163,6 +166,8 @@ else ifeq ($(PROFILES),,federation)
 	mvn -B -f java $(MAVEN_BUILD_OPTS) clean install -DskipTests -P federation
 else ifeq ($(PROFILES),,topics)
 	mvn -B -f java $(MAVEN_BUILD_OPTS) clean install -DskipTests -P topics
+else ifeq ($(PROFILES),,views)
+	mvn -B -f java $(MAVEN_BUILD_OPTS) clean install -DskipTests -P views
 else ifeq ($(PROFILES),,topics-commercial)
 	mvn -B -f java $(MAVEN_BUILD_OPTS) clean install -DskipTests -P topics-commercial
 else
@@ -208,6 +213,21 @@ build-test-images: ## Build the Test images
 	mvn -f java/coherence-cli-test -nsu clean package jib:dockerBuild -DskipTests -P member2$(PROFILES) -Djib.to.image=$(TEST_APPLICATION_IMAGE_2) -Dcoherence.test.base.image=$(COHERENCE_BASE_IMAGE) $(MAVEN_BUILD_OPTS)
 	echo "COHERENCE_IMAGE1=$(TEST_APPLICATION_IMAGE_1)" > $(ENV_FILE)
 	echo "COHERENCE_IMAGE2=$(TEST_APPLICATION_IMAGE_2)" >> $(ENV_FILE)
+	echo "CURRENT_UID=$(USER_ID)" >> $(ENV_FILE)
+
+# ----------------------------------------------------------------------------------------------------------------------
+# Build the Coherence CLI View Cache images
+# ----------------------------------------------------------------------------------------------------------------------
+.PHONY: build-view-images
+build-view-images: ## Build the view cache test images
+	@echo "${MAVEN_BUILD_OPTS}"
+	@ ./scripts/check_image.sh $(COHERENCE_BASE_IMAGE)
+	mvn -f java/coherence-cli-test -nsu clean package jib:dockerBuild -DskipTests -P member1$(PROFILES) -Djib.to.image=$(TEST_APPLICATION_IMAGE_1) -Dcoherence.test.base.image=$(COHERENCE_BASE_IMAGE) $(MAVEN_BUILD_OPTS)
+	mvn -f java/coherence-cli-test -nsu clean package jib:dockerBuild -DskipTests -P member2$(PROFILES) -Djib.to.image=$(TEST_APPLICATION_IMAGE_2) -Dcoherence.test.base.image=$(COHERENCE_BASE_IMAGE) $(MAVEN_BUILD_OPTS)
+	mvn -f java/coherence-cli-test -nsu clean package jib:dockerBuild -DskipTests -P view1$(PROFILES)   -Djib.to.image=$(TEST_APPLICATION_IMAGE_3) -Dcoherence.test.base.image=$(COHERENCE_BASE_IMAGE) $(MAVEN_BUILD_OPTS)
+	echo "COHERENCE_IMAGE1=$(TEST_APPLICATION_IMAGE_1)" > $(ENV_FILE)
+	echo "COHERENCE_IMAGE2=$(TEST_APPLICATION_IMAGE_2)" >> $(ENV_FILE)
+	echo "COHERENCE_IMAGE3=$(TEST_APPLICATION_IMAGE_3)" >> $(ENV_FILE)
 	echo "CURRENT_UID=$(USER_ID)" >> $(ENV_FILE)
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -384,6 +404,20 @@ test-cluster-shutdown: ## Shutdown any test cluster members using docker-compose
 	cd test/test_utils && docker-compose -f docker-compose-2-members.yaml down || true
 
 # ----------------------------------------------------------------------------------------------------------------------
+# Startup view cluster members via docker compose
+# ----------------------------------------------------------------------------------------------------------------------
+.PHONY: test-cluster-startup-views
+test-cluster-startup-views: $(BUILD_PROPS) ## Startup any test cluster members using docker-compose
+	cd test/test_utils && docker-compose -f docker-compose-3-members.yaml --env-file .env up -d
+
+# ----------------------------------------------------------------------------------------------------------------------
+# Shutdown view cluster members via docker compose
+# ----------------------------------------------------------------------------------------------------------------------
+.PHONY: test-cluster-shutdown-views
+test-cluster-shutdown-views: ## Shutdown any test cluster members using docker-compose
+	cd test/test_utils && docker-compose -f docker-compose-3-members.yaml down || true
+
+# ----------------------------------------------------------------------------------------------------------------------
 # Startup standalone coherence via java -jar
 # ----------------------------------------------------------------------------------------------------------------------
 .PHONY: test-coherence-startup
@@ -424,6 +458,14 @@ test-e2e-standalone: test-clean gotestsum $(BUILD_PROPS) ## Run e2e tests with C
 test-e2e-topics: test-clean gotestsum $(BUILD_PROPS) ## Run e2e tests with Coherence against topics
 	CGO_ENABLED=0 $(GOTESTSUM) --format testname --junitfile $(TEST_LOGS_DIR)/cohctl-test-e2e-topics.xml \
 	  -- $(GO_TEST_FLAGS) -v ./test/e2e/topics/...
+
+# ----------------------------------------------------------------------------------------------------------------------
+# Executes the Go end to end tests for view caches
+# ----------------------------------------------------------------------------------------------------------------------
+.PHONY: test-e2e-views
+test-e2e-views: test-clean gotestsum $(BUILD_PROPS) ## Run e2e tests with Coherence against view caches
+	CGO_ENABLED=0 $(GOTESTSUM) --format testname --junitfile $(TEST_LOGS_DIR)/cohctl-test-e2e-views.xml \
+	  -- $(GO_TEST_FLAGS) -v ./test/e2e/views/...
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Executes tests against an already running WebLogic Server
