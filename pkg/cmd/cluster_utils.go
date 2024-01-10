@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, 2023 Oracle and/or its affiliates.
+ * Copyright (c) 2022, 2024 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -68,7 +68,7 @@ var (
 	defaultJars = []*config.DefaultDependency{
 		{GroupID: ceGroupID, Artifact: "coherence", IsCoherence: true},
 		{GroupID: ceGroupID, Artifact: "coherence-json", IsCoherence: true},
-		{GroupID: "org.jline", Artifact: "jline", IsCoherence: false, Version: "3.23.0"},
+		{GroupID: "org.jline", Artifact: "jline", IsCoherence: false, Version: "3.25.0"},
 	}
 
 	// list of additional coherence artifacts
