@@ -1,4 +1,4 @@
-# Copyright 2022, 2023 Oracle Corporation and/or its affiliates.
+# Copyright 2022, 2024 Oracle Corporation and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at
 # https://oss.oracle.com/licenses/upl.
 
@@ -23,7 +23,7 @@ jobs:
       fail-fast: false
       matrix:
         coherenceVersion:
-          - 14.1.1-0-16-SNAPSHOT
+          - 14.1.1-0-17-SNAPSHOT
 
 #   Checkout the source, we need a depth of zero to fetch all of the history otherwise
 #   the copyright check cannot work out the date of the files from Git.
