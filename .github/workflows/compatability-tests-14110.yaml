@@ -26,7 +26,7 @@ jobs:
         javaImage:
           - gcr.io/distroless/java:11
 
-#   Checkout the source, we need a depth of zero to fetch all of the history otherwise
+#   Checkout the source, we need a depth of zero to fetch all the history otherwise
 #   the copyright check cannot work out the date of the files from Git.
     steps:
     - uses: actions/checkout@v3
