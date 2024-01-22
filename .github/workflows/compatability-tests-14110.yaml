@@ -24,7 +24,7 @@ jobs:
           - 14.1.1-0-16
           - 14.1.1-0-17-SNAPSHOT
         javaImage:
-          - gcr.io/distroless/java:8
+          - gcr.io/distroless/java:11
 
 #   Checkout the source, we need a depth of zero to fetch all the history otherwise
 #   the copyright check cannot work out the date of the files from Git.
@@ -36,12 +36,12 @@ jobs:
     - name: Get Docker Images
       shell: bash
       run: |
-        docker pull gcr.io/distroless/java:8
+        docker pull gcr.io/distroless/java:11
 
     - name: Set up JDK
       uses: actions/setup-java@v3
       with:
-        java-version: '8'
+        java-version: '11'
         distribution: 'zulu'
 
     - name: Cache Go Modules
