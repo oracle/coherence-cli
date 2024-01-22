@@ -23,7 +23,7 @@ jobs:
       fail-fast: false
       matrix:
         coherenceVersion:
-          - 23.09.2-SNAPSHOT
+          - 23.09.3-SNAPSHOT
           - 22.06.8-SNAPSHOT
 
 #   Checkout the source, we need a depth of zero to fetch all of the history otherwise
