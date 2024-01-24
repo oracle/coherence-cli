@@ -194,7 +194,7 @@ func FormatFederationDetails(federationDetails []config.FederationDescription, t
 		}
 	} else { // WIDE
 		if target == destinations {
-			finalAlignment = []string{R, L, R, R, R, R, R, R, R, R, R, R, R}
+			finalAlignment = []string{R, L, R, R, R, R, R, R, R, R, R, R, R, R}
 		} else {
 			finalAlignment = []string{R, R, R, R, R, R, R}
 		}
@@ -213,9 +213,10 @@ func FormatFederationDetails(federationDetails []config.FederationDescription, t
 	if OutputFormat == constants.WIDE {
 		if target == destinations {
 			table.AddHeaderColumns(avgApply, "AVG ROUND TRIP", avgBacklogDelay, "REPLICATE",
-				partitions, "ERRORS", "UNACKED")
+				partitions, "ERRORS", "UNACKED", "RETRIES")
 			table.AddFormattingFunction(11, errorFormatter)
 			table.AddFormattingFunction(12, errorFormatter)
+			table.AddFormattingFunction(13, errorFormatter)
 		} else {
 			table.AddHeaderColumns(avgApply, avgBacklogDelay)
 		}
@@ -264,6 +265,7 @@ func FormatFederationDetails(federationDetails []config.FederationDescription, t
 					formatLargeInteger(value.ReplicateAllPartitionCount),
 					formatLargeInteger(value.ReplicateAllPartitionErrorCount),
 					formatLargeInteger(value.TotalReplicateAllPartitionsUnacked),
+					formatLargeInteger(value.TotalRetryResponses),
 				)
 			} else {
 				table.AddColumnsToRow(

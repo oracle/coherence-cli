@@ -332,6 +332,7 @@ type FederationDescription struct {
 	ReplicateAllPartitionCount         int64 `json:"replicateAllPartitionCount"`
 	ReplicateAllPartitionErrorCount    int64 `json:"replicateAllPartitionErrorCount"`
 	TotalReplicateAllPartitionsUnacked int64 `json:"totalReplicateAllPartitionsUnacked"`
+	TotalRetryResponses                int64 `json:"totalRetryResponses"`
 }
 
 // ServiceMemberDetails contains service members details.
