@@ -1,5 +1,5 @@
 <!--
-Copyright (c) 2021, 2022 Oracle and/or its affiliates.
+Copyright (c) 2021, 2024 Oracle and/or its affiliates.
 Licensed under the Universal Permissive License v 1.0 as shown at
 https://oss.oracle.com/licenses/upl.
 -->
@@ -21,9 +21,11 @@ This section outlines how to build the CLI.
 
 ### Pre-Requisites
 
-1. Install Go version 1.17 or above from [https://golang.org/doc/install](https://golang.org/doc/install).
+1. Install Go version 1.20 from [https://golang.org/doc/install](https://golang.org/doc/install).
 2. Maven 3.6.3+
 3. JDK 1.8+
+
+> Note: Java and Maven are only required if you wish to run the tests.
 
 ### Build for local platform
 
@@ -38,8 +40,22 @@ export PATH=`pwd`/bin:$PATH
 Test by running the following:
 
 ```bash
-$ cohctl version
+cohctl version
 ```
+
+### Build for all platforms
+
+```bash
+make cohctl-all
+```
+
+The binaries for all supported platforms are available in the following directories:
+
+* `bin/linux/amd64/cohctl`
+* `bin/linux/arm64/cohctl`
+* `bin/linux/386/cohctl`
+* `bin/windows/amd64/cohctl.exe`
+* `bin/windows/arm/cohctl.exe`
 
 ## Testing
 
