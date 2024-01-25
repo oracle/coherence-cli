@@ -56,6 +56,8 @@ The binaries for all supported platforms are available in the following director
 * `bin/linux/386/cohctl`
 * `bin/windows/amd64/cohctl.exe`
 * `bin/windows/arm/cohctl.exe`
+* `bin/darwin/amd64/cohctl`
+* `bin/darwin/arm64/cohctl`
 
 ## Testing
 
