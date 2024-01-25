@@ -262,6 +262,8 @@ cohctl-all: $(BUILD_PROPS) $(GOS)  ## Build the Coherence CLI binary for all sup
 	mkdir -p $(BUILD_BIN)/windows/arm || true
 	CGO_ENABLED=0 GOOS=windows GOARCH=arm GO111MODULE=on go build -trimpath -ldflags "$(LDFLAGS)" -a -o $(BUILD_BIN)/windows/arm/cohctl.exe ./cohctl
 
+	make cohctl-mac-amd cohctl-mac-arm
+
 # ----------------------------------------------------------------------------------------------------------------------
 # Internal make step that builds the Coherence CLI for Mac AMD
 # ----------------------------------------------------------------------------------------------------------------------
