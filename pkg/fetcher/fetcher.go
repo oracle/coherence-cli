@@ -197,6 +197,9 @@ type Fetcher interface {
 	// GetCacheMembers retrieves cache member details.
 	GetCacheMembers(serviceName, cacheName string) ([]byte, error)
 
+	// GetCachePartitions retrieves cache partition details.
+	GetCachePartitions(serviceName, cacheName string) ([]byte, error)
+
 	// GetPersistenceCoordinator retrieves persistence coordinator details.
 	GetPersistenceCoordinator(serviceName string) ([]byte, error)
 

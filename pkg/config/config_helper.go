@@ -553,7 +553,7 @@ type SubscriberGroupChannelStats struct {
 	RemainingUnpolledMessages            int64   `json:"remainingUnpolledMessages"`
 }
 
-// CacheDetails contains cache details
+// CacheDetails contains cache details.
 type CacheDetails struct {
 	Details []CacheDetail `json:"items"`
 }
@@ -589,6 +589,18 @@ type CacheDetail struct {
 	IndexTotalUnits                int64    `json:"indexTotalUnits"`
 	IndexingTotalMillis            int64    `json:"indexingTotalMillis"`
 	IndexInfo                      []string `json:"indexInfo"`
+}
+
+// CachePartitionDetails contains cache partition details.
+type CachePartitionDetails struct {
+	Details []CachePartitionDetail `json:"reportPartitionStats"`
+}
+
+// CachePartitionDetail contains individual partition details for a cache.
+type CachePartitionDetail struct {
+	PartitionID int32 `json:"partitionId"`
+	Count       int32 `json:"count"`
+	Size        int64 `json:"size"`
 }
 
 // ServiceCaches contains a list of service cache.

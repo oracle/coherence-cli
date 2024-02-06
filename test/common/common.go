@@ -1908,7 +1908,6 @@ func RunTestTopicsCommands(t *testing.T) {
 
 // RunTestViewCacheCommands tests view cache commands.
 func RunTestViewCacheCommands(t *testing.T) {
-	const noTopics = "there are no topics for service"
 	var (
 		context = test_utils.GetTestContext()
 		restUrl = context.RestUrl
@@ -1950,6 +1949,33 @@ func RunTestViewCacheCommands(t *testing.T) {
 
 	// get clusters should return nothing
 	test_utils.EnsureCommandContains(g, t, cliCmd, "", configArg, file, "get", "clusters")
+}
+
+// RunTestCachePartitionsCommands tests cache-partitions commands.
+func RunTestCachePartitionsCommands(t *testing.T) {
+	var (
+		context = test_utils.GetTestContext()
+		restUrl = context.RestUrl
+		g       = NewGomegaWithT(t)
+	)
+
+	file := initializeTestFile(t)
+
+	cliCmd := cmd.Initialize(nil)
+
+	// add a new cluster
+	test_utils.EnsureCommandContains(g, t, cliCmd, addedCluster, configArg, file, "add", "cluster", context.ClusterName, "-u", context.Url)
+
+	// Populate view caches
+	_, err := test_utils.IssueGetRequest(restUrl + "/populateViewCache")
+	g.Expect(err).To(BeNil())
+
+	// sleep to ensure the view cache client is ready
+	test_utils.Sleep(30)
+
+	// validate get view-caches
+	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "SERVICE,VIEW NAME,MEMBERS,view-cache-1,view-cache-2", configArg, file,
+		"get", "caches-partitions", "view-cache1", "-c", context.ClusterName)
 }
 
 // GetDataFetcher returns a Fetcher instance or throws an assertion if not found.

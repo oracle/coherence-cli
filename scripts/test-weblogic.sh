@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #
-# Copyright (c) 2022, 2023 Oracle and/or its affiliates.
+# Copyright (c) 2022, 2024 Oracle and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at
 # https://oss.oracle.com/licenses/upl.
 #
@@ -9,6 +9,9 @@
 # Run a suite of tests against WebLogic Server
 # A WebLogic Server instance from the multi-server example should be
 # running on the specified URL with weblogic/welcome1
+#
+# Note: the environment variable PRE_1412 is set to true if we are running
+#       WLS 14.1.1.0 or below
 
 set -e
 
@@ -39,6 +42,11 @@ function runCommand() {
     echo "welcome1" | $COHCTL $* > $OUTPUT
     cat $OUTPUT
 }
+
+if [ -z "$PRE_1412" ]; then
+  PRE_1412=false
+fi
+
 
 # Sleep to ensure WLS is ready to accept requests
 sleep 30
@@ -83,16 +91,28 @@ runCommand get services -o wide
 runCommand get services -o json
 runCommand get services -t DistributedCache
 runCommand get services -w -a NODE-SAFE
-runCommand describe service '"ExampleGAR:PartitionedPofCache"'
-runCommand describe service '"ExampleGAR:PartitionedPofCache"' -o wide
+
+if [ "$PRE_1412" == "true "]; then
+  runCommand describe service '"ExampleGAR:PartitionedPofCache"'
+  runCommand describe service '"ExampleGAR:PartitionedPofCache"' -o wide
+else
+  runCommand describe service '"ExampleGAR:PartitionedPofCache"'
+  runCommand describe service '"ExampleGAR:PartitionedPofCache"' -o wide
+fi
 
 # Caches
 runCommand get caches
 runCommand get caches -o wide
 runCommand get caches -o json
-runCommand describe cache contacts -s '"ExampleGAR:PartitionedPofCache"'
-runCommand describe cache contacts -s '"ExampleGAR:PartitionedPofCache"' -o wide
-runCommand describe cache contacts -s '"ExampleGAR:PartitionedPofCache"' -o json
+if [ "$PRE_1412" == "true "]; then
+  runCommand describe cache contacts -s '"ExampleGAR:PartitionedPofCache"'
+  runCommand describe cache contacts -s '"ExampleGAR:PartitionedPofCache"' -o wide
+  runCommand describe cache contacts -s '"ExampleGAR:PartitionedPofCache"' -o json
+else
+  runCommand describe cache Price -s '"demo:DistributedCache"'
+  runCommand describe cache Price -s '"demo:DistributedCache"' -o wide
+  runCommand describe cache Price -s '"demo:DistributedCache"' -o json
+fi
 
 # Persistence
 runCommand get persistence

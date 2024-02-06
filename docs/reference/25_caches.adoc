@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 
-    Copyright (c) 2021, 2023 Oracle and/or its affiliates.
+    Copyright (c) 2021, 2024 Oracle and/or its affiliates.
     Licensed under the Universal Permissive License v 1.0 as shown at
     https://oss.oracle.com/licenses/upl.
 
@@ -16,9 +16,10 @@ There are various commands that allow you to work with and manage cluster caches
 * <<get-caches, `cohctl get caches`>> - displays the caches for a cluster
 * <<describe-cache, `cohctl describe cache`>> - shows information related to a specific cache and service
 * <<get-cache-stores, `cohctl get cache-stores`>> - displays cache stores for a cache and service
-* <<get-cache-storage, `cohctl get cache-storage`>> - displays cache storage information for a cache and service
-* <<get-cache-access, `cohctl get cache-access`>> - displays cache access information for a cache and service
+* <<get-cache-storage, `cohctl get cache-storage`>> - displays storage information for a cache and service
+* <<get-cache-access, `cohctl get cache-access`>> - displays access information for a cache and service
 * <<get-cache-indexes, `cohctl get cache-indexes`>> - displays cache index information for a cache and service
+* <<get-cache-partitions, `cohctl get cache-partitions`>> - displays partition information for a cache and service
 * <<set-cache, `cohctl set cache`>> - sets an attribute for a cache across one or more members
 * <<truncate-cache, `cohctl truncate cache`>> - truncates a caches contents, not generating any cache events
 * <<clear-cache, `cohctl clear cache`>> - clears a caches contents
@@ -275,6 +276,113 @@ Node:3:   PartitionedIndex: Extractor=.toString()(), Ordered=true, Footprint=16.
 
 NOTE: Depending upon the Coherence version, you may not see all the above information.
 
+
+[#get-cache-partitions]
+==== Get Cache Partitions
+
+include::../../build/_output/docs-gen/get_cache_partitions.adoc[tag=text]
+
+*Examples*
+
+Get a summary of partition information for a cache.
+
+[source,bash]
+----
+cohctl get cache-partitions -c local test -S
+----
+Output:
+[source,bash]
+----
+Cache:       test
+Partitions:  257
+Total Count: 200,000
+Total Size:  116 MB
+----
+
+Get all partition information for a cache.
+
+[source,bash]
+----
+cohctl get cache-partitions -c local test
+----
+Output:
+[source,bash]
+----
+Cache:       test
+Partitions:  257
+Total Count: 200,000
+Total Size:  116 MB
+
+PARTITION  COUNT  SIZE
+        0    789  0 MB
+        1    790  0 MB
+        2    747  0 MB
+        3    784  0 MB
+        4    730  0 MB
+...
+      253    782  0 MB
+      254    752  0 MB
+      255    773  0 MB
+      256    785  0 MB
+----
+
+Get partition information and sort by size of cache in partition descending. (Using KB format)
+
+[source,bash]
+----
+cohctl get cache-partitions test -c local -k --sort-size | head -20
+----
+Output:
+[source,bash]
+----
+Cache:       test
+Partitions:  257
+Total Count: 200,000
+Total Size:  119,706 KB
+
+PARTITION  COUNT    SIZE
+      159    852  509 KB
+      229    841  503 KB
+      140    836  500 KB
+        5    833  498 KB
+       25    828  495 KB
+      203    826  494 KB
+      145    821  491 KB
+      179    821  491 KB
+      235    819  490 KB
+      199    819  490 KB
+      193    818  489 KB
+      188    817  488 KB
+----
+
+Get partition information and sort by count of entries in partition descending. (Using KB format)
+
+[source,bash]
+----
+cohctl get cache-partitions test -c local -k --sort-count | head -20
+----
+Output:
+[source,bash]
+----
+Cache:       test
+Partitions:  257
+Total Count: 200,000
+Total Size:  119,706 KB
+
+PARTITION  COUNT    SIZE
+      159    852  509 KB
+      229    841  503 KB
+      140    836  500 KB
+        5    833  498 KB
+       25    828  495 KB
+      203    826  494 KB
+      179    821  491 KB
+      145    821  491 KB
+      199    819  490 KB
+      235    819  490 KB
+      193    818  489 KB
+      188    817  488 KB
+----
 
 [#set-cache]
 ==== Set Cache

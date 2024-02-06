@@ -33,6 +33,9 @@ var (
 	cannotFindService   = "unable to find service with service name '%s'"
 	cannotFindCache     = "no cache named %s exists for service %s"
 	cannotFindViewCache = "no view cache named %s exists for service %s"
+	cacheSummary        bool
+	partitionSortSize   bool
+	partitionSortCount  bool
 )
 
 const (
@@ -40,6 +43,7 @@ const (
 	provideViewCacheMessage = "you must provide a view cache name"
 	back                    = "back"
 	all                     = "all"
+	partitionDisplayType    = "partition"
 )
 
 // getCachesCmd represents the get caches command.
@@ -472,6 +476,24 @@ You can specify '-o wide' to display addition information.`,
 	},
 }
 
+// getCachePartitionsCmd represents the get cache-partitions command.
+var getCachePartitionsCmd = &cobra.Command{
+	Use:   "cache-partitions cache-name",
+	Short: "display cache partition information for a cache and service",
+	Long: `The 'get cache-partitions' command displays cache partition information related to a specific cache.
+This information includes: partition id, count of entries and size of entries (binary key + value lengths).`,
+	ValidArgsFunction: completionCaches,
+	Args: func(cmd *cobra.Command, args []string) error {
+		if len(args) != 1 {
+			displayErrorAndExit(cmd, provideCacheMessage)
+		}
+		return nil
+	},
+	RunE: func(cmd *cobra.Command, args []string) error {
+		return getCacheDetails(cmd, args, partitionDisplayType)
+	},
+}
+
 // getCacheIndexesCmd represents the get cache-indexes command.
 var getCacheIndexesCmd = &cobra.Command{
 	Use:               "cache-indexes cache-name",
@@ -592,12 +614,17 @@ func getCacheDetails(cmd *cobra.Command, args []string, displayType string) erro
 
 	for {
 		var (
-			cacheResult  []byte
-			cacheDetails = config.CacheDetails{}
-			result       string
+			cacheResult           []byte
+			cacheDetails          = config.CacheDetails{}
+			cachePartitionDetails = config.CachePartitionDetails{}
+			result                string
 		)
 
-		cacheResult, err = dataFetcher.GetCacheMembers(serviceName, cacheName)
+		if displayType == partitionDisplayType {
+			cacheResult, err = dataFetcher.GetCachePartitions(serviceName, cacheName)
+		} else {
+			cacheResult, err = dataFetcher.GetCacheMembers(serviceName, cacheName)
+		}
 		if err != nil {
 			return err
 		}
@@ -615,7 +642,11 @@ func getCacheDetails(cmd *cobra.Command, args []string, displayType string) erro
 		} else if OutputFormat == constants.JSON {
 			cmd.Println(string(cacheResult))
 		} else {
-			err = json.Unmarshal(cacheResult, &cacheDetails)
+			if displayType == partitionDisplayType {
+				err = json.Unmarshal(cacheResult, &cachePartitionDetails)
+			} else {
+				err = json.Unmarshal(cacheResult, &cacheDetails)
+			}
 			if err != nil {
 				return utils.GetError("unable to unmarshall cache result", err)
 			}
@@ -623,7 +654,9 @@ func getCacheDetails(cmd *cobra.Command, args []string, displayType string) erro
 			printWatchHeader(cmd)
 			cmd.Println(FormatCurrentCluster(connection))
 
-			cmd.Printf("Cache: %s\n\n", args[0])
+			if displayType != partitionDisplayType {
+				cmd.Printf("Cache: %s\n\n", args[0])
+			}
 
 			if displayType == "access" {
 				cmd.Println(FormatCacheDetailsSizeAndAccess(cacheDetails.Details))
@@ -631,6 +664,9 @@ func getCacheDetails(cmd *cobra.Command, args []string, displayType string) erro
 				cmd.Println(FormatCacheIndexDetails(cacheDetails.Details))
 			} else if displayType == "storage" {
 				cmd.Println(FormatCacheDetailsStorage(cacheDetails.Details))
+			} else if displayType == partitionDisplayType {
+				cmd.Printf("Cache:       %s\n", args[0])
+				cmd.Println(FormatCachePartitions(cachePartitionDetails.Details, cacheSummary))
 			}
 		}
 
@@ -1138,6 +1174,10 @@ func init() {
 	getCacheAccessCmd.Flags().StringVarP(&serviceName, serviceNameOption, serviceNameOptionShort, "", serviceNameDescription)
 	getCacheStorageCmd.Flags().StringVarP(&serviceName, serviceNameOption, serviceNameOptionShort, "", serviceNameDescription)
 	getCacheIndexesCmd.Flags().StringVarP(&serviceName, serviceNameOption, serviceNameOptionShort, "", serviceNameDescription)
+	getCachePartitionsCmd.Flags().StringVarP(&serviceName, serviceNameOption, serviceNameOptionShort, "", serviceNameDescription)
+	getCachePartitionsCmd.Flags().BoolVarP(&cacheSummary, "summary", "S", false, "show a cache summary")
+	getCachePartitionsCmd.Flags().BoolVarP(&partitionSortSize, "sort-size", "", false, "sort by size descending")
+	getCachePartitionsCmd.Flags().BoolVarP(&partitionSortCount, "sort-count", "", false, "sort by count descending")
 
 	getViewCachesCmd.Flags().StringVarP(&serviceName, serviceNameOption, serviceNameOptionShort, "", serviceNameDescription)
 

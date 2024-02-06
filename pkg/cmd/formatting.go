@@ -1005,6 +1005,45 @@ func FormatCacheDetailsStorage(cacheDetails []config.CacheDetail) string {
 	return table.String()
 }
 
+// FormatCachePartitions returns the cache partition details in column formatted output.
+func FormatCachePartitions(cacheDetails []config.CachePartitionDetail, summary bool) string {
+	var (
+		detailsCount       = len(cacheDetails)
+		formattingFunction = getFormattingFunction()
+		totalEntries       int64
+		totalSize          int64
+	)
+	if detailsCount == 0 {
+		return ""
+	}
+
+	sort.Slice(cacheDetails, func(p, q int) bool {
+		if partitionSortSize {
+			return cacheDetails[p].Size > cacheDetails[q].Size
+		}
+		if partitionSortCount {
+			return cacheDetails[p].Count > cacheDetails[q].Count
+		}
+		return cacheDetails[p].PartitionID < cacheDetails[q].PartitionID
+	})
+
+	table := newFormattedTable().WithHeader("PARTITION", CountColumn, "SIZE").WithAlignment(R, R, R)
+
+	for _, value := range cacheDetails {
+		table.AddRow(formatSmallInteger(value.PartitionID), formatSmallInteger(value.Count), formattingFunction(value.Size))
+		totalEntries += int64(value.Count)
+		totalSize += value.Size
+	}
+
+	header := fmt.Sprintf("Partitions:  %s\nTotal Count: %s\nTotal Size:  %s\n\n",
+		formatSmallInteger(int32(len(cacheDetails))), formatLargeInteger(totalEntries), formattingFunction(totalSize))
+
+	if summary {
+		return header
+	}
+	return header + table.String()
+}
+
 // FormatCacheStoreDetails returns the cache store details in column formatted output.
 func FormatCacheStoreDetails(cacheDetails []config.CacheStoreDetail, cache, service string, includeHeader bool) string {
 	var (

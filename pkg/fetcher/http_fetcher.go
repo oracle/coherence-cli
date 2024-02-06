@@ -632,6 +632,17 @@ func (h HTTPFetcher) GetCacheMembers(serviceName, cacheName string) ([]byte, err
 	return result, nil
 }
 
+// GetCachePartitions retrieves cache partition details.
+func (h HTTPFetcher) GetCachePartitions(serviceName, cacheName string) ([]byte, error) {
+	result, err := httpGetRequest(h, servicesPath+getSafeServiceName(h, serviceName)+"/storage/"+
+		url.PathEscape(cacheName)+"/reportPartitionStats?links=")
+	if err != nil && !strings.Contains(err.Error(), errorCode404) {
+		return constants.EmptyByte, utils.GetError("cannot get cache partitions for service "+serviceName+
+			" and cache = "+cacheName, err)
+	}
+	return result, nil
+}
+
 // GetPersistenceCoordinator retrieves persistence coordinator details.
 func (h HTTPFetcher) GetPersistenceCoordinator(serviceName string) ([]byte, error) {
 	result, err := httpGetRequest(h, servicesPath+getSafeServiceName(h, serviceName)+"/persistence?links=")
