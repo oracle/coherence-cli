@@ -92,7 +92,7 @@ runCommand get services -o json
 runCommand get services -t DistributedCache
 runCommand get services -w -a NODE-SAFE
 
-if [ "$PRE_1412" == "true "]; then
+if [ "$PRE_1412" == "true" ] ; then
   runCommand describe service '"ExampleGAR:PartitionedPofCache"'
   runCommand describe service '"ExampleGAR:PartitionedPofCache"' -o wide
 else
@@ -104,7 +104,7 @@ fi
 runCommand get caches
 runCommand get caches -o wide
 runCommand get caches -o json
-if [ "$PRE_1412" == "true "]; then
+if [ "$PRE_1412" == "true" ]; then
   runCommand describe cache contacts -s '"ExampleGAR:PartitionedPofCache"'
   runCommand describe cache contacts -s '"ExampleGAR:PartitionedPofCache"' -o wide
   runCommand describe cache contacts -s '"ExampleGAR:PartitionedPofCache"' -o json
