@@ -43,8 +43,9 @@ function runCommand() {
     cat $OUTPUT
 }
 
+# If this has not been set then assume its true
 if [ -z "$PRE_1412" ]; then
-  PRE_1412=false
+  PRE_1412=true
 fi
 
 
