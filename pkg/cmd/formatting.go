@@ -92,7 +92,7 @@ func FormatCluster(cluster config.Cluster) string {
 	var sb strings.Builder
 	sb.WriteString(fmt.Sprintf("Cluster Name:    %s\n", cluster.ClusterName))
 	sb.WriteString(fmt.Sprintf("Version:         %s\n", cluster.Version))
-	sb.WriteString(fmt.Sprintf("Cluster Size:    %d\n", cluster.ClusterSize))
+	sb.WriteString(fmt.Sprintf("Cluster TotalSize:    %d\n", cluster.ClusterSize))
 	sb.WriteString(fmt.Sprintf("License Mode:    %s\n", cluster.LicenseMode))
 	sb.WriteString(fmt.Sprintf("Departure Count: %d\n", cluster.MembersDepartureCount))
 	sb.WriteString(fmt.Sprintf("Running:         %v\n", cluster.Running))
@@ -1012,6 +1012,8 @@ func FormatCachePartitions(cacheDetails []config.CachePartitionDetail, summary b
 		formattingFunction = getFormattingFunction()
 		totalEntries       int64
 		totalSize          int64
+		maxEntryRecord     config.CachePartitionDetail
+		maxEntrySize       int32
 	)
 	if detailsCount == 0 {
 		return ""
@@ -1019,24 +1021,34 @@ func FormatCachePartitions(cacheDetails []config.CachePartitionDetail, summary b
 
 	sort.Slice(cacheDetails, func(p, q int) bool {
 		if partitionSortSize {
-			return cacheDetails[p].Size > cacheDetails[q].Size
+			return cacheDetails[p].TotalSize > cacheDetails[q].TotalSize
 		}
 		if partitionSortCount {
 			return cacheDetails[p].Count > cacheDetails[q].Count
 		}
+		if partitionSortMaxSize {
+			return cacheDetails[p].MaxEntrySize > cacheDetails[q].MaxEntrySize
+		}
 		return cacheDetails[p].PartitionID < cacheDetails[q].PartitionID
 	})
 
-	table := newFormattedTable().WithHeader("PARTITION", CountColumn, "SIZE").WithAlignment(R, R, R)
+	table := newFormattedTable().WithHeader("PARTITION", "OWNING MEMBER", CountColumn, "SIZE", "MAX ENTRY SIZE").WithAlignment(R, R, R, R, R)
 
 	for _, value := range cacheDetails {
-		table.AddRow(formatSmallInteger(value.PartitionID), formatSmallInteger(value.Count), formattingFunction(value.Size))
+		table.AddRow(formatSmallInteger(value.PartitionID), formatSmallInteger(value.MemberID), formatSmallInteger(value.Count),
+			formattingFunction(value.TotalSize), formatSmallInteger(value.MaxEntrySize))
 		totalEntries += int64(value.Count)
-		totalSize += value.Size
+		totalSize += value.TotalSize
+
+		if value.MaxEntrySize > maxEntrySize {
+			maxEntrySize = value.MaxEntrySize
+			maxEntryRecord = value
+		}
 	}
 
-	header := fmt.Sprintf("Partitions:  %s\nTotal Count: %s\nTotal Size:  %s\n\n",
-		formatSmallInteger(int32(len(cacheDetails))), formatLargeInteger(totalEntries), formattingFunction(totalSize))
+	header := fmt.Sprintf("Partitions:       %s\nTotal Count:      %s\nTotal Size:       %s\nMax Entry Size:   %s (bytes)\nOwning Partition: %s\n\n",
+		formatSmallInteger(int32(len(cacheDetails))), formatLargeInteger(totalEntries), formattingFunction(totalSize),
+		formatSmallInteger(maxEntrySize), formatSmallInteger(maxEntryRecord.PartitionID))
 
 	if summary {
 		return header
@@ -1089,7 +1101,7 @@ func FormatCacheStoreDetails(cacheDetails []config.CacheStoreDetail, cache, serv
 			fmt.Sprintf("Service/Cache:        %s/%s\n", service, cache) +
 				fmt.Sprintf("Cache Store Type:     %s\n", cacheStoreType)
 	}
-	header += fmt.Sprintf("Total Queue Size:     %s\n", formatLargeInteger(totalQueueSize)) +
+	header += fmt.Sprintf("Total Queue TotalSize:     %s\n", formatLargeInteger(totalQueueSize)) +
 		fmt.Sprintf("Total Store Failures: %s\n", formatLargeInteger(totalFailures)) + "\n"
 
 	return header + table.String()

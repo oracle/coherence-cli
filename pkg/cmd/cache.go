@@ -27,15 +27,16 @@ var (
 	ignoreSpecialCaches  bool
 	validAttributesCache = []string{"expiryDelay", "highUnits", "lowUnits", "batchFactor", "refreshFactor",
 		"requeueThreshold"}
-	nodeIDCache         string
-	tier                string
-	InvalidTierMsg      = "tier must be back or front"
-	cannotFindService   = "unable to find service with service name '%s'"
-	cannotFindCache     = "no cache named %s exists for service %s"
-	cannotFindViewCache = "no view cache named %s exists for service %s"
-	cacheSummary        bool
-	partitionSortSize   bool
-	partitionSortCount  bool
+	nodeIDCache          string
+	tier                 string
+	InvalidTierMsg       = "tier must be back or front"
+	cannotFindService    = "unable to find service with service name '%s'"
+	cannotFindCache      = "no cache named %s exists for service %s"
+	cannotFindViewCache  = "no view cache named %s exists for service %s"
+	cacheSummary         bool
+	partitionSortSize    bool
+	partitionSortCount   bool
+	partitionSortMaxSize bool
 )
 
 const (
@@ -665,7 +666,7 @@ func getCacheDetails(cmd *cobra.Command, args []string, displayType string) erro
 			} else if displayType == "storage" {
 				cmd.Println(FormatCacheDetailsStorage(cacheDetails.Details))
 			} else if displayType == partitionDisplayType {
-				cmd.Printf("Cache:       %s\n", args[0])
+				cmd.Printf("Cache:            %s\n", args[0])
 				cmd.Println(FormatCachePartitions(cachePartitionDetails.Details, cacheSummary))
 			}
 		}
@@ -1178,6 +1179,7 @@ func init() {
 	getCachePartitionsCmd.Flags().BoolVarP(&cacheSummary, "summary", "S", false, "show a cache summary")
 	getCachePartitionsCmd.Flags().BoolVarP(&partitionSortSize, "sort-size", "", false, "sort by size descending")
 	getCachePartitionsCmd.Flags().BoolVarP(&partitionSortCount, "sort-count", "", false, "sort by count descending")
+	getCachePartitionsCmd.Flags().BoolVarP(&partitionSortMaxSize, "sort-max", "", false, "sort by maximum entry descending")
 
 	getViewCachesCmd.Flags().StringVarP(&serviceName, serviceNameOption, serviceNameOptionShort, "", serviceNameDescription)
 
