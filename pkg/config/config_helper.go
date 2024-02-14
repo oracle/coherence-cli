@@ -598,9 +598,11 @@ type CachePartitionDetails struct {
 
 // CachePartitionDetail contains individual partition details for a cache.
 type CachePartitionDetail struct {
-	PartitionID int32 `json:"partitionId"`
-	Count       int32 `json:"count"`
-	Size        int64 `json:"size"`
+	PartitionID  int32 `json:"partitionId"`
+	Count        int32 `json:"count"`
+	TotalSize    int64 `json:"totalSize"`
+	MemberID     int32 `json:"memberId"`
+	MaxEntrySize int32 `json:"maxEntrySize"`
 }
 
 // ServiceCaches contains a list of service cache.
