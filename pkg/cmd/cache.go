@@ -526,6 +526,10 @@ name is specified then all services are queried.`,
 			dataFetcher fetcher.Fetcher
 		)
 
+		if OutputFormat == constants.WIDE {
+			return errors.New("-o wide option is not available for view-caches")
+		}
+
 		connection, dataFetcher, err = GetConnectionAndDataFetcher()
 		if err != nil {
 			return err
