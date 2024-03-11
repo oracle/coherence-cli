@@ -235,6 +235,7 @@ func startCluster(cmd *cobra.Command, connection ClusterConnection, serverCount,
 		mgmtPort         = connection.ManagementPort
 		counter          int32
 		metricsStartPort = metricsStartPortParam
+		healthStartPort  = healthStartPortParam
 		startupProfile   = getProfileValue(profileValueParam)
 		profileArgs      = make([]string, 0)
 		startupDelay     int64
@@ -272,6 +273,13 @@ func startCluster(cmd *cobra.Command, connection ClusterConnection, serverCount,
 			metricsArgs := []string{"-Dcoherence.metrics.http.enabled=true", fmt.Sprintf("-Dcoherence.metrics.http.port=%d", metricsStartPort)}
 			metricsStartPort++
 			arguments = append(arguments, metricsArgs...)
+		}
+
+		// check if health start port specified
+		if healthStartPort > 0 {
+			healthArgs := []string{fmt.Sprintf("-Dcoherence.health.http.port=%d", healthStartPort)}
+			healthStartPort++
+			arguments = append(arguments, healthArgs...)
 		}
 
 		arguments = append(arguments, getCacheServerArgs(member, mgmtPort, connection.ClusterVersion)...)
