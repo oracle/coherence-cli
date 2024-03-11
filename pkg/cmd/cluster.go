@@ -975,6 +975,7 @@ var (
 	clusterVersionParam      string
 	replicaCountParam        int32
 	metricsStartPortParam    int32
+	healthStartPortParam     int32
 	logLevelParam            int32
 	heapMemoryParam          string
 	useCommercialParam       bool
@@ -1064,6 +1065,13 @@ NOTE: This is an experimental feature and my be altered or removed in the future
 		// validate metrics port
 		if metricsStartPortParam > 0 {
 			if err = utils.ValidatePort(metricsStartPortParam); err != nil {
+				return err
+			}
+		}
+
+		// validate health port
+		if healthStartPortParam > 0 {
+			if err = utils.ValidatePort(healthStartPortParam); err != nil {
 				return err
 			}
 		}
@@ -1504,6 +1512,13 @@ func runClusterOperation(cmd *cobra.Command, connectionName, operation string) e
 		}
 	}
 
+	// validate health port
+	if healthStartPortParam > 0 {
+		if err = utils.ValidatePort(healthStartPortParam); err != nil {
+			return err
+		}
+	}
+
 	// validate profile
 	if err = validateProfile(); err != nil {
 		return err
@@ -1655,6 +1670,7 @@ func init() {
 	createClusterCmd.Flags().BoolVarP(&useCommercialParam, "commercial", "C", false, "use commercial Coherence groupID (default CE)")
 	createClusterCmd.Flags().BoolVarP(&skipMavenDepsParam, "skip-deps", "I", false, "skip pulling artifacts")
 	createClusterCmd.Flags().Int32VarP(&metricsStartPortParam, metricsPortArg, "t", 0, metricsPortMessage)
+	createClusterCmd.Flags().Int32VarP(&healthStartPortParam, healthPortArg, "e", 0, healthPortMessage)
 	createClusterCmd.Flags().StringVarP(&profileValueParam, profileArg, "P", "", profileMessage)
 	createClusterCmd.Flags().StringVarP(&serverStartClassParam, startClassArg, "S", "", startClassMessage)
 	createClusterCmd.Flags().StringVarP(&logDestinationParam, logDestinationArg, "L", "", logDestinationMessage)
@@ -1663,6 +1679,7 @@ func init() {
 
 	startClusterCmd.Flags().Int32VarP(&replicaCountParam, "replicas", "r", 3, serverCountMessage)
 	startClusterCmd.Flags().Int32VarP(&metricsStartPortParam, metricsPortArg, "t", 0, metricsPortMessage)
+	startClusterCmd.Flags().Int32VarP(&healthStartPortParam, healthPortArg, "e", 0, healthPortMessage)
 	startClusterCmd.Flags().StringVarP(&heapMemoryParam, heapMemoryArg, "M", defaultHeap, heapMemoryMessage)
 	startClusterCmd.Flags().StringVarP(&profileValueParam, profileArg, "P", "", profileMessage)
 	startClusterCmd.Flags().Int32VarP(&logLevelParam, logLevelArg, "l", 5, logLevelMessage)
@@ -1690,6 +1707,7 @@ func init() {
 	scaleClusterCmd.Flags().Int32VarP(&logLevelParam, logLevelArg, "l", 5, logLevelMessage)
 	scaleClusterCmd.Flags().StringVarP(&startupDelayParam, startupDelayArg, "D", "0ms", startupDelayMessage)
 	scaleClusterCmd.Flags().Int32VarP(&metricsStartPortParam, metricsPortArg, "t", 0, metricsPortMessage)
+	scaleClusterCmd.Flags().Int32VarP(&healthStartPortParam, healthPortArg, "e", 0, healthPortMessage)
 	scaleClusterCmd.Flags().StringVarP(&profileValueParam, profileArg, "P", "", profileMessage)
 	scaleClusterCmd.Flags().StringVarP(&serverStartClassParam, startClassArg, "S", "", startClassMessage)
 }
