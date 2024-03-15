@@ -1,4 +1,4 @@
-// Copyright (c) 2021, 2023 Oracle and/or its affiliates.
+// Copyright (c) 2021, 2024 Oracle and/or its affiliates.
 // Licensed under the Universal Permissive License v 1.0 as shown at
 // https://oss.oracle.com/licenses/upl.
 //
@@ -10,8 +10,8 @@ require (
 	github.com/fatih/color v1.14.1
 	github.com/ohler55/ojg v1.12.8
 	github.com/onsi/gomega v1.19.0
-	github.com/oracle/coherence-go-client v1.0.3
-	github.com/spf13/cobra v1.7.0
+	github.com/oracle/coherence-go-client v1.1.1
+	github.com/spf13/cobra v1.8.0
 	github.com/spf13/viper v1.12.0
 	go.uber.org/zap v1.21.0
 	golang.org/x/term v0.13.0
