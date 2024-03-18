@@ -31,6 +31,15 @@ func completionAllManualClusters(_ *cobra.Command, _ []string, _ string) ([]stri
 	return getAllClusters(true), cobra.ShellCompDirectiveNoFileComp
 }
 
+// completionAllProfiles provides a completion function to return all profiles.
+func completionAllProfiles(_ *cobra.Command, _ []string, _ string) ([]string, cobra.ShellCompDirective) {
+	profiles := make([]string, 0)
+	for _, p := range Config.Profiles {
+		profiles = append(profiles, p.Name)
+	}
+	return profiles, cobra.ShellCompDirectiveNoFileComp
+}
+
 // completionCaches provides a completion function to return all cache names.
 func completionCaches(_ *cobra.Command, _ []string, _ string) ([]string, cobra.ShellCompDirective) {
 	var (

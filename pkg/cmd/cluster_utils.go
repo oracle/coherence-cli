@@ -277,9 +277,8 @@ func startCluster(cmd *cobra.Command, connection ClusterConnection, serverCount,
 
 		// check if health start port specified
 		if healthStartPort > 0 {
-			healthArgs := []string{fmt.Sprintf("-Dcoherence.health.http.port=%d", healthStartPort)}
+			arguments = append(arguments, fmt.Sprintf("-Dcoherence.health.http.port=%d", healthStartPort))
 			healthStartPort++
-			arguments = append(arguments, healthArgs...)
 		}
 
 		arguments = append(arguments, getCacheServerArgs(member, mgmtPort, connection.ClusterVersion)...)
@@ -418,6 +417,42 @@ func getMemberProperty(member string) string {
 
 func getPersistenceProperty(persistenceMode string) string {
 	return fmt.Sprintf("-Dcoherence.distributed.persistence.mode=%s", persistenceMode)
+}
+
+func getCacheConfigProperty() string {
+	if cacheConfigParam == "" {
+		return ""
+	}
+	return fmt.Sprintf(" -Dcoherence.cacheconfig=%s", cacheConfigParam)
+}
+
+func getOperationalOverrideConfigProperty() string {
+	if operationalConfigParam == "" {
+		return ""
+	}
+	return fmt.Sprintf(" -Dcoherence.override=%s", operationalConfigParam)
+}
+
+func validateOverrideParams() error {
+	if cacheConfigParam != "" {
+		if !isRegularFile(cacheConfigParam) {
+			return fmt.Errorf("cahce config file %s does not exist", cacheConfigParam)
+		}
+	}
+	if operationalConfigParam != "" {
+		if !isRegularFile(operationalConfigParam) {
+			return fmt.Errorf("operational override file %s does not exist", operationalConfigParam)
+		}
+	}
+	return nil
+}
+
+func isRegularFile(file string) bool {
+	stat, err := os.Stat(file)
+	if err != nil || stat == nil {
+		return false
+	}
+	return stat.Mode().IsRegular()
 }
 
 func getLogLevelProperty(logLevel int32) string {
