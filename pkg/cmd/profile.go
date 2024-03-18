@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, 2023 Oracle and/or its affiliates.
+ * Copyright (c) 2022, 2024 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -84,9 +84,10 @@ and be space delimited. If you set a profile that exists, it will be overwritten
 
 // removeProfileCmd represents the remove profile command.
 var removeProfileCmd = &cobra.Command{
-	Use:   "profile profile-name",
-	Short: "remove a profile value from the list of profiles",
-	Long:  `The 'remove profile' command removes a profile value from the list of profiles.`,
+	Use:               "profile profile-name",
+	Short:             "remove a profile value from the list of profiles",
+	Long:              `The 'remove profile' command removes a profile value from the list of profiles.`,
+	ValidArgsFunction: completionAllProfiles,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
 			displayErrorAndExit(cmd, provideProfileName)

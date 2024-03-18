@@ -990,6 +990,8 @@ var (
 	fileNameParam            string
 	statementParam           string
 	logDestinationParam      string
+	cacheConfigParam         string
+	operationalConfigParam   string
 )
 
 const (
@@ -1092,6 +1094,11 @@ NOTE: This is an experimental feature and my be altered or removed in the future
 			return err
 		}
 
+		err = validateOverrideParams()
+		if err != nil {
+			return err
+		}
+
 		// validate any additional artifacts
 		if additionalArtifactsParam != "" {
 			splitArtifacts = strings.Split(additionalArtifactsParam, ",")
@@ -1150,6 +1157,8 @@ NOTE: This is an experimental feature and my be altered or removed in the future
 		cmd.Printf("Additional artifacts: %v\n", additionalArtifactsParam)
 		cmd.Printf("Startup Profile:      %v\n", profileValueParam)
 		cmd.Printf("Log destination root: %v\n", logDestinationParam)
+		cmd.Printf("Cache Config:         %v\n", cacheConfigParam)
+		cmd.Printf("Operational Override: %v\n", operationalConfigParam)
 		cmd.Printf("Dependency tool:      %v\n", getExecType())
 
 		// confirm the operation
@@ -1230,10 +1239,11 @@ NOTE: This is an experimental feature and my be altered or removed in the future
 			}
 		}
 
-		// generate startup arguments
+		// generate startup arguments. Note we save the cache config or override but this can be overridden
 		arguments := fmt.Sprintf("-Dcoherence.cluster=%s -Dcoherence.clusterport=%d -Dcoherence.ttl=0 -Dcoherence.wka=%s -Djava.net.preferIPv4Stack=true"+
-			" -Djava.rmi.server.hostname=%s -Dcoherence.distributed.partitioncount=%d -Dcoherence.distributed.partitions=%d",
-			clusterName, clusterPortParam, wkaParam, wkaParam, partitionCountParam, partitionCountParam)
+			" -Djava.rmi.server.hostname=%s -Dcoherence.distributed.partitioncount=%d -Dcoherence.distributed.partitions=%d%s%s",
+			clusterName, clusterPortParam, wkaParam, wkaParam, partitionCountParam, partitionCountParam, getCacheConfigProperty(),
+			getOperationalOverrideConfigProperty())
 
 		// add the new cluster
 		newCluster := ClusterConnection{Name: clusterName, ConnectionType: "http",
@@ -1674,6 +1684,8 @@ func init() {
 	createClusterCmd.Flags().StringVarP(&profileValueParam, profileArg, "P", "", profileMessage)
 	createClusterCmd.Flags().StringVarP(&serverStartClassParam, startClassArg, "S", "", startClassMessage)
 	createClusterCmd.Flags().StringVarP(&logDestinationParam, logDestinationArg, "L", "", logDestinationMessage)
+	createClusterCmd.Flags().StringVarP(&cacheConfigParam, cacheConfigArg, "", "", cacheConfigMessage)
+	createClusterCmd.Flags().StringVarP(&operationalConfigParam, operationalConfigArg, "", "", operationalConfigMessage)
 
 	stopClusterCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
 
