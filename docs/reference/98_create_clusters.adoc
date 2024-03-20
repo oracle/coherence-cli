@@ -282,6 +282,17 @@ Starting cluster member storage-3...
 Cluster local and started
 ----
 
+If you wish to enable remote RMI management on you cluster, as well as HTTP management,
+you will need to use the following:
+[source,bash]
+----
+cohctl start cluster local -J 9999 -j hostname
+----
+
+* `-J` is the rmi port
+* `-j` is the rmi host. You should set this to the hostname the cluster is running on. It will default to WKA address if not set.
+
+
 [#start-console]
 ==== Start Console
 

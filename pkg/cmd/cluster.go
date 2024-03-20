@@ -976,6 +976,8 @@ var (
 	replicaCountParam        int32
 	metricsStartPortParam    int32
 	healthStartPortParam     int32
+	jmxRemotePortParam       int32
+	jmxRemoteHostParam       string
 	logLevelParam            int32
 	heapMemoryParam          string
 	useCommercialParam       bool
@@ -1067,6 +1069,13 @@ NOTE: This is an experimental feature and my be altered or removed in the future
 		// validate metrics port
 		if metricsStartPortParam > 0 {
 			if err = utils.ValidatePort(metricsStartPortParam); err != nil {
+				return err
+			}
+		}
+
+		// validate jmx remote port
+		if jmxRemotePortParam > 0 {
+			if err = utils.ValidatePort(jmxRemotePortParam); err != nil {
 				return err
 			}
 		}
@@ -1686,6 +1695,8 @@ func init() {
 	createClusterCmd.Flags().StringVarP(&logDestinationParam, logDestinationArg, "L", "", logDestinationMessage)
 	createClusterCmd.Flags().StringVarP(&cacheConfigParam, cacheConfigArg, "", "", cacheConfigMessage)
 	createClusterCmd.Flags().StringVarP(&operationalConfigParam, operationalConfigArg, "", "", operationalConfigMessage)
+	createClusterCmd.Flags().Int32VarP(&jmxRemotePortParam, jmxPortArg, "J", 0, jmxPortMessage)
+	createClusterCmd.Flags().StringVarP(&jmxRemoteHostParam, jmxHostArg, "j", "", jmxHostMessage)
 
 	stopClusterCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
 
@@ -1697,6 +1708,8 @@ func init() {
 	startClusterCmd.Flags().Int32VarP(&logLevelParam, logLevelArg, "l", 5, logLevelMessage)
 	startClusterCmd.Flags().StringVarP(&startupDelayParam, startupDelayArg, "D", "0ms", startupDelayMessage)
 	startClusterCmd.Flags().StringVarP(&serverStartClassParam, startClassArg, "S", "", startClassMessage)
+	startClusterCmd.Flags().Int32VarP(&jmxRemotePortParam, jmxPortArg, "J", 0, jmxPortMessage)
+	startClusterCmd.Flags().StringVarP(&jmxRemoteHostParam, jmxHostArg, "j", "", jmxHostMessage)
 
 	startConsoleCmd.Flags().StringVarP(&heapMemoryParam, heapMemoryArg, "M", defaultHeap, heapMemoryMessage)
 	startConsoleCmd.Flags().Int32VarP(&logLevelParam, logLevelArg, "l", 5, logLevelMessage)
