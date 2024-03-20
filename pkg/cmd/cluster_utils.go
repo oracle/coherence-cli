@@ -261,6 +261,13 @@ func startCluster(cmd *cobra.Command, connection ClusterConnection, serverCount,
 		return err
 	}
 
+	if jmxRemotePortParam > 0 {
+		// validate jmx remote port
+		if err = utils.ValidatePort(jmxRemotePortParam); err != nil {
+			return err
+		}
+	}
+
 	for counter = existingCount; counter < serverCount+existingCount; counter++ {
 		var (
 			member        = fmt.Sprintf("storage-%d", counter)
@@ -362,6 +369,17 @@ func getCacheServerArgs(member string, httpPort int32, version string) []string 
 		baseArgs = append(baseArgs, "-Dcoherence.management.http=all", fmt.Sprintf("-Dcoherence.management.http.port=%d", httpPort),
 			"-Dcoherence.management=all", "-Dcom.sun.management.jmxremote.ssl=false", "-Dcom.sun.management.jmxremote",
 			"-Dcom.sun.management.jmxremote.authenticate=false")
+
+		// add remote JMX port is specified
+		if jmxRemotePortParam > 0 {
+			rmiHost := jmxRemoteHostParam
+			if rmiHost == "" {
+				rmiHost = wkaParam
+			}
+			baseArgs = append(baseArgs, fmt.Sprintf("-Dcom.sun.management.jmxremote.port=%d", jmxRemotePortParam),
+				fmt.Sprintf("-Dcom.sun.management.jmxremote.rmi.port=%d", jmxRemotePortParam),
+				fmt.Sprintf("-Djava.rmi.server.hostname=%s", rmiHost))
+		}
 	}
 
 	// if default heap is overridden, then use this
