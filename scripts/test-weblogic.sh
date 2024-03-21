@@ -97,8 +97,8 @@ if [ "$PRE_1412" == "true" ] ; then
   runCommand describe service '"ExampleGAR:PartitionedPofCache"'
   runCommand describe service '"ExampleGAR:PartitionedPofCache"' -o wide
 else
-  runCommand describe service '"ExampleGAR:PartitionedPofCache"'
-  runCommand describe service '"ExampleGAR:PartitionedPofCache"' -o wide
+  runCommand describe service '"demo:DistributedCache"'
+  runCommand describe service '"demo:DistributedCache"' -o wide
 fi
 
 # Caches
