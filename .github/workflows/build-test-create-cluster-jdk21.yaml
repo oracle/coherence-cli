@@ -1,0 +1,82 @@
+# Copyright 2021, 2024 Oracle Corporation and/or its affiliates.
+# Licensed under the Universal Permissive License v 1.0 as shown at
+# https://oss.oracle.com/licenses/upl.
+
+# ---------------------------------------------------------------------------
+# Coherence CLI GitHub Actions CI build - Test Create JDK21
+# ---------------------------------------------------------------------------
+name: CI Test Create Cluster JDK21
+
+on:
+  workflow_dispatch:
+  push:
+    branches-ignore:
+      - gh-pages
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        coherenceVersion:
+          - 24.03
+        javaVersion:
+          - 21
+
+#   Checkout the source, we need a depth of zero to fetch all of the history otherwise
+#   the copyright check cannot work out the date of the files from Git.
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+
+    - name: Set up JDK
+      uses: actions/setup-java@v4
+      with:
+        java-version: ${{ matrix.javaVersion }}
+        distribution: 'zulu'
+
+    - name: Cache Go Modules
+      uses: actions/cache@v4
+      with:
+        path: ~/go/pkg/mod
+        key: ${{ runner.os }}-go-mods-${{ hashFiles('**/go.sum') }}
+        restore-keys: |
+          ${{ runner.os }}-go-mods-
+
+    - name: Cache Maven packages
+      uses: actions/cache@v4
+      with:
+        path: ~/.m2
+        key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+        restore-keys: ${{ runner.os }}-m2
+
+    - name: Set up Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: '1.20'
+
+    - name: Build cohctl
+      shell: bash
+      run: make cohctl
+
+    - name: Setup Gradle and Run Create Cluster Tests
+      shell: bash
+      run: |
+        DIR=`pwd`
+        INSTALL=${DIR}/gradle-install
+        mkdir -p ${DIR}/gradle-home ${INSTALL}
+        wget -q -c https://services.gradle.org/distributions/gradle-7.4.2-bin.zip -P ${INSTALL}
+        ls -l ${INSTALL}
+        unzip -d ${DIR}/gradle-home ${INSTALL}/gradle-7.4.2-bin.zip
+        export GRADLE_HOME=${DIR}/gradle-home/gradle-7.4.2
+        export PATH=$GRADLE_HOME/bin:$PATH
+        COHERENCE_VERSION=${{ matrix.coherenceVersion }} make test-create-cluster
+
+    - uses: actions/upload-artifact@v3
+      if: failure()
+      with:
+        name: test-output
+        path: build/_output/test-logs
