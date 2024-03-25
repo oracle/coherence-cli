@@ -26,6 +26,7 @@ jobs:
           - 24.03-SNAPSHOT
           - 22.06.8-SNAPSHOT
           - 23.09.2
+          - 24.03
 
 #   Checkout the source, we need a depth of zero to fetch all of the history otherwise
 #   the copyright check cannot work out the date of the files from Git.

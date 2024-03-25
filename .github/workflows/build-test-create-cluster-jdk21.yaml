@@ -1,17 +1,17 @@
-# Copyright 2022, 2024 Oracle Corporation and/or its affiliates.
+# Copyright 2021, 2024 Oracle Corporation and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at
 # https://oss.oracle.com/licenses/upl.
 
 # ---------------------------------------------------------------------------
-# Coherence CLI Compatability Tests against latest stable CLI version
+# Coherence CLI GitHub Actions CI build - Test Create JDK21
 # ---------------------------------------------------------------------------
-name: Compatability Tests Released
+name: CI Test Create Cluster JDK21
 
 on:
   workflow_dispatch:
-  schedule:
-    # Every day at 1 am
-    - cron: '0 1 * * *'
+  push:
+    branches-ignore:
+      - gh-pages
 
 jobs:
   build:
@@ -22,11 +22,8 @@ jobs:
       matrix:
         coherenceVersion:
           - 24.03
-          - 23.09.2
-          - 22.06.7
-          - 22.06.8-SNAPSHOT
-        javaImage:
-          - gcr.io/distroless/java17
+        javaVersion:
+          - 21
 
 #   Checkout the source, we need a depth of zero to fetch all of the history otherwise
 #   the copyright check cannot work out the date of the files from Git.
@@ -35,15 +32,10 @@ jobs:
       with:
         fetch-depth: 0
 
-    - name: Get Docker Images
-      shell: bash
-      run: |
-        docker pull gcr.io/distroless/java17
-
     - name: Set up JDK
       uses: actions/setup-java@v4
       with:
-        java-version: '17'
+        java-version: ${{ matrix.javaVersion }}
         distribution: 'zulu'
 
     - name: Cache Go Modules
@@ -66,18 +58,23 @@ jobs:
       with:
         go-version: '1.20'
 
-    - name: Compatability Tests
+    - name: Build cohctl
+      shell: bash
+      run: make cohctl
+
+    - name: Setup Gradle and Run Create Cluster Tests
       shell: bash
       run: |
-        # Getting latest version
-        LATEST=$(curl -s https://oracle.github.io/coherence-cli/stable.txt)
-        echo "Checkout out $LATEST"
-        git checkout $LATEST
-        export COHERENCE_BASE_IMAGE=${{ matrix.javaImage }}
-        export COHERENCE_VERSION=${{ matrix.coherenceVersion }}
-        GOBIN=`pwd`/build/tools/bin go install gotest.tools/gotestsum@v1.8.1
-        make clean build-test-images test-e2e-standalone
-        make test-clean test-discovery
+        DIR=`pwd`
+        INSTALL=${DIR}/gradle-install
+        mkdir -p ${DIR}/gradle-home ${INSTALL}
+        VERSION=8.5
+        wget -q -c https://services.gradle.org/distributions/gradle-${VERSION}-bin.zip -P ${INSTALL}
+        ls -l ${INSTALL}
+        unzip -d ${DIR}/gradle-home ${INSTALL}/gradle-${VERSION}-bin.zip
+        export GRADLE_HOME=${DIR}/gradle-home/gradle-${VERSION}
+        export PATH=$GRADLE_HOME/bin:$PATH
+        COHERENCE_VERSION=${{ matrix.coherenceVersion }} make test-create-cluster
 
     - uses: actions/upload-artifact@v3
       if: failure()
