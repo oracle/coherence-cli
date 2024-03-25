@@ -72,10 +72,11 @@ jobs:
         DIR=`pwd`
         INSTALL=${DIR}/gradle-install
         mkdir -p ${DIR}/gradle-home ${INSTALL}
-        wget -q -c https://services.gradle.org/distributions/gradle-7.4.2-bin.zip -P ${INSTALL}
+        VERSION=7.4.2
+        wget -q -c https://services.gradle.org/distributions/gradle-${VERSION}-bin.zip -P ${INSTALL}
         ls -l ${INSTALL}
-        unzip -d ${DIR}/gradle-home ${INSTALL}/gradle-7.4.2-bin.zip
-        export GRADLE_HOME=${DIR}/gradle-home/gradle-7.4.2
+        unzip -d ${DIR}/gradle-home ${INSTALL}/gradle-${VERSION}-bin.zip
+        export GRADLE_HOME=${DIR}/gradle-home/gradle-${VERSION}
         export PATH=$GRADLE_HOME/bin:$PATH
         COHERENCE_VERSION=${{ matrix.coherenceVersion }} make test-create-cluster
 
