@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, 2023 Oracle and/or its affiliates.
+ * Copyright (c) 2021, 2024 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -605,4 +605,68 @@ func runClearCommand(cmd *cobra.Command, command string, args ...string) {
 	process := exec.Command(command, args...)
 	process.Stdout = cmd.OutOrStdout()
 	_ = process.Run()
+}
+
+func decodeDepartedMembers(members []string) ([]config.DepartedMembers, error) {
+	var (
+		membersList = make([]config.DepartedMembers, 0)
+		errInvalid  = errors.New("invalid content")
+	)
+
+	const (
+		prefix = "Member("
+		suffix = ")"
+	)
+
+	for _, value := range members {
+		if !strings.HasPrefix(value, prefix) {
+			return nil, errInvalid
+		}
+
+		value = strings.Replace(value, prefix, "", 1)
+		if !strings.HasSuffix(value, suffix) {
+			return nil, errInvalid
+		}
+
+		value, _ = strings.CutSuffix(value, suffix)
+
+		// get the fields
+		v := strings.Split(value, ", ")
+
+		member := config.DepartedMembers{}
+
+		// go through each field and extract
+
+		count := 1
+		for _, f := range v {
+			s := strings.Split(f, "=")
+			if len(s) != 2 {
+				return nil, errInvalid
+			}
+
+			setField(&member, count, s[1])
+			count++
+		}
+
+		membersList = append(membersList, member)
+	}
+
+	return membersList, nil
+}
+
+func setField(member *config.DepartedMembers, field int, value string) {
+	switch field {
+	case 1:
+		member.NodeID = value
+	case 2:
+		member.TimeStamp = value
+	case 3:
+		member.Address = value
+	case 4:
+		member.MachineID = value
+	case 5:
+		member.Location = value
+	case 6:
+		member.Role = value
+	}
 }

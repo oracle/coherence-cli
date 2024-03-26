@@ -12,17 +12,28 @@ package config
 
 // Cluster is a structure to display cluster details for 'describe cluster'.
 type Cluster struct {
-	ClusterName           string `json:"clusterName"`
-	ClusterSize           int    `json:"clusterSize"`
-	LicenseMode           string `json:"licenseMode"`
-	Version               string `json:"version"`
-	Running               bool   `json:"running"`
-	MembersDepartureCount int    `json:"membersDepartureCount"`
+	ClusterName           string   `json:"clusterName"`
+	ClusterSize           int      `json:"clusterSize"`
+	LicenseMode           string   `json:"licenseMode"`
+	Version               string   `json:"version"`
+	Running               bool     `json:"running"`
+	MembersDepartureCount int      `json:"membersDepartureCount"`
+	MembersDeparted       []string `json:"membersDeparted"`
 }
 
 // Members contains an array of member objects.
 type Members struct {
 	Members []Member `json:"items"`
+}
+
+// DepartedMembers contains a decoded departed member from cluster.
+type DepartedMembers struct {
+	NodeID    string `json:"nodeId"`
+	TimeStamp string `json:"timeStamp"`
+	Address   string `json:"address"`
+	MachineID string `json:"machineID"`
+	Location  string `json:"location"`
+	Role      string `json:"role"`
 }
 
 // NetworkStats is used to decode network stats call for a member.

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, 2023 Oracle and/or its affiliates.
+ * Copyright (c) 2021, 2024 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -747,9 +747,11 @@ service is a cache service.`,
 					return err
 				}
 
-				err = json.Unmarshal(coordData, &coordinator)
-				if err != nil {
-					return err
+				if len(coordData) > 0 {
+					err = json.Unmarshal(coordData, &coordinator)
+					if err != nil {
+						return err
+					}
 				}
 
 				value, err = FormatJSONForDescribe(coordData, false,

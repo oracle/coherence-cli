@@ -213,7 +213,7 @@ func RunTestMemberCommands(t *testing.T) {
 	test_utils.EnsureCommandContainsAll(g, t, cliCmd, nodeID, configArg, file, "get", "members",
 		"-c", context.ClusterName)
 
-	// test default output format
+	// test get network-stats
 	test_utils.EnsureCommandContainsAll(g, t, cliCmd, nodeID, configArg, file, "get", "network-stats",
 		"-c", context.ClusterName)
 
@@ -255,6 +255,10 @@ func RunTestMemberCommands(t *testing.T) {
 	// test jsonpath
 	test_utils.EnsureCommandContains(g, t, cliCmd, "n/a", configArg, file, "get", "members",
 		"-o", "jsonpath=$.items[0].rackName", "-c", "cluster1")
+
+	// test departed members
+	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "NODE ID,TIMESTAMP,ADDRESS,LOCATION,MACHINE ID,ROLE",
+		configArg, file, "get", "members", "-D", "-c", context.ClusterName, "-o", "table")
 
 	// remove the cluster entries
 	test_utils.EnsureCommandContains(g, t, cliCmd, context.ClusterName, configArg, file, "remove", "cluster", "cluster1")

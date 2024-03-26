@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, 2023 Oracle and/or its affiliates.
+ * Copyright (c) 2021, 2024 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -42,7 +42,8 @@ var (
 	p2pSortByPublisher bool
 	p2pSortByReceiver  bool
 
-	memberSummary bool
+	memberSummary   bool
+	departedMembers bool
 
 	tracingRatio float32
 )
@@ -89,6 +90,8 @@ func getMembers(cmd *cobra.Command, networkStats bool) error {
 		var (
 			members       = config.Members{}
 			storage       = config.StorageDetails{}
+			cluster       = config.Cluster{}
+			clusterResult []byte
 			membersResult []byte
 			storageResult []byte
 		)
@@ -99,6 +102,11 @@ func getMembers(cmd *cobra.Command, networkStats bool) error {
 		}
 
 		storageResult, err = dataFetcher.GetStorageDetailsJSON()
+		if err != nil {
+			return err
+		}
+
+		clusterResult, err = dataFetcher.GetClusterDetailsJSON()
 		if err != nil {
 			return err
 		}
@@ -115,6 +123,7 @@ func getMembers(cmd *cobra.Command, networkStats bool) error {
 			printWatchHeader(cmd)
 
 			cmd.Println(FormatCurrentCluster(connection))
+
 			err = json.Unmarshal(membersResult, &members)
 			if err != nil {
 				return utils.GetError(unableToDecode, err)
@@ -123,6 +132,11 @@ func getMembers(cmd *cobra.Command, networkStats bool) error {
 			err = json.Unmarshal(storageResult, &storage)
 			if err != nil {
 				return utils.GetError("unable to decode storage details", err)
+			}
+
+			err = json.Unmarshal(clusterResult, &cluster)
+			if err != nil {
+				return utils.GetError("unable to decode cluster details", err)
 			}
 
 			storageMap := utils.GetStorageMap(storage)
@@ -145,7 +159,15 @@ func getMembers(cmd *cobra.Command, networkStats bool) error {
 			if networkStats {
 				cmd.Println(FormatNetworkStatistics(filteredMembers))
 			} else {
-				cmd.Print(FormatMembers(filteredMembers, true, storageMap, memberSummary))
+				if departedMembers {
+					departedList, err1 := decodeDepartedMembers(cluster.MembersDeparted)
+					if err1 != nil {
+						return err1
+					}
+					cmd.Println(FormatDepartedMembers(departedList))
+				} else {
+					cmd.Print(FormatMembers(filteredMembers, true, storageMap, memberSummary, cluster.MembersDepartureCount))
+				}
 			}
 		}
 
@@ -1129,6 +1151,7 @@ func init() {
 
 	getMembersCmd.Flags().StringVarP(&roleName, "role", "r", all, roleNameDescription)
 	getMembersCmd.Flags().BoolVarP(&memberSummary, "summary", "S", false, "show a member summary")
+	getMembersCmd.Flags().BoolVarP(&departedMembers, "departed", "D", false, "show departed members only")
 
 	getNetworkStatsCmd.Flags().StringVarP(&roleName, "role", "r", all, roleNameDescription)
 
