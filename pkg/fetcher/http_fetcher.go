@@ -646,7 +646,7 @@ func (h HTTPFetcher) GetCachePartitions(serviceName, cacheName string) ([]byte, 
 // GetPersistenceCoordinator retrieves persistence coordinator details.
 func (h HTTPFetcher) GetPersistenceCoordinator(serviceName string) ([]byte, error) {
 	result, err := httpGetRequest(h, servicesPath+getSafeServiceName(h, serviceName)+"/persistence?links=")
-	if err != nil {
+	if err != nil && !strings.Contains(err.Error(), errorCode404) {
 		return constants.EmptyByte, utils.GetError("cannot get persistence coordinator for service "+serviceName, err)
 	}
 	return result, nil

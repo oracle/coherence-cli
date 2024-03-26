@@ -90,12 +90,12 @@ func FormatCurrentCluster(clusterName string) string {
 // FormatCluster returns a string representing a cluster.
 func FormatCluster(cluster config.Cluster) string {
 	var sb strings.Builder
-	sb.WriteString(fmt.Sprintf("Cluster Name:    %s\n", cluster.ClusterName))
-	sb.WriteString(fmt.Sprintf("Version:         %s\n", cluster.Version))
-	sb.WriteString(fmt.Sprintf("Cluster TotalSize:    %d\n", cluster.ClusterSize))
-	sb.WriteString(fmt.Sprintf("License Mode:    %s\n", cluster.LicenseMode))
-	sb.WriteString(fmt.Sprintf("Departure Count: %d\n", cluster.MembersDepartureCount))
-	sb.WriteString(fmt.Sprintf("Running:         %v\n", cluster.Running))
+	sb.WriteString(fmt.Sprintf("Cluster Name:       %s\n", cluster.ClusterName))
+	sb.WriteString(fmt.Sprintf("Version:            %s\n", cluster.Version))
+	sb.WriteString(fmt.Sprintf("Cluster TotalSize:  %d\n", cluster.ClusterSize))
+	sb.WriteString(fmt.Sprintf("License Mode:       %s\n", cluster.LicenseMode))
+	sb.WriteString(fmt.Sprintf("Departure Count:    %d\n", cluster.MembersDepartureCount))
+	sb.WriteString(fmt.Sprintf("Running:            %v\n", cluster.Running))
 
 	return sb.String()
 }
@@ -105,6 +105,9 @@ func FormatCluster(cluster config.Cluster) string {
 // orderedColumns are the column names, expanded, that should be displayed first for context.
 func FormatJSONForDescribe(jsonValue []byte, showAllColumns bool, orderedColumns ...string) (string, error) {
 	var result map[string]json.RawMessage
+	if len(jsonValue) == 0 {
+		return "", nil
+	}
 	err := json.Unmarshal(jsonValue, &result)
 	if err != nil {
 		return "", fmt.Errorf("unable to unmarshal value in FormatJSONForDescribe %v", err)
@@ -1318,7 +1321,7 @@ func FormatMemberHealth(health []config.HealthSummary) string {
 }
 
 // FormatMembers returns the member's information in a column formatted output.
-func FormatMembers(members []config.Member, verbose bool, storageMap map[int]bool, summary bool) string {
+func FormatMembers(members []config.Member, verbose bool, storageMap map[int]bool, summary bool, departureCount int) string {
 	var (
 		memberCount        = len(members)
 		alignmentWide      = []string{R, L, L, R, L, L, L, L, L, R, R, L, R, R, R}
@@ -1406,6 +1409,7 @@ func FormatMembers(members []config.Member, verbose bool, storageMap map[int]boo
 	result :=
 		fmt.Sprintf("Total cluster members: %d\n", memberCount) +
 			fmt.Sprintf("Storage enabled count: %d\n", storageCount) +
+			fmt.Sprintf("Departure count:       %d\n\n", departureCount) +
 			fmt.Sprintf("Cluster Heap - Total: %s Used: %s Available: %s (%4.1f%%)\n",
 				strings.TrimSpace(formattingFunction(int64(totalMaxMemoryMB)*MB)),
 				strings.TrimSpace(formattingFunction(int64(totalUsedMB)*MB)),
@@ -1426,6 +1430,22 @@ func FormatMembers(members []config.Member, verbose bool, storageMap map[int]boo
 		result += table.String()
 	}
 	return result
+}
+
+// FormatDepartedMembers returns the departed member's information in a column formatted output.
+func FormatDepartedMembers(members []config.DepartedMembers) string {
+	sort.Slice(members, func(p, q int) bool {
+		return members[p].TimeStamp > members[q].TimeStamp
+	})
+
+	table := newFormattedTable().WithHeader(NodeIDColumn, "TIMESTAMP", AddressColumn, "MACHINE ID", "LOCATION", RoleColumn).
+		WithAlignment([]string{R, L, L, L, L, L}...)
+
+	for _, value := range members {
+		table.AddRow(value.NodeID, value.TimeStamp, value.Address, value.MachineID, value.Location, value.Role)
+	}
+
+	return table.String()
 }
 
 // FormatNetworkStatistics returns all the member's network statistics in a column formatted output.

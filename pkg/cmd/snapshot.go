@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, 2023 Oracle and/or its affiliates.
+ * Copyright (c) 2021, 2024 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -113,6 +113,9 @@ local snapshots are shown, but you can use the -a option to show archived snapsh
 						newSnapshots = append(newSnapshots, snapshotList...)
 					} else {
 						coordData, err = dataFetcher.GetPersistenceCoordinator(serviceNameValue)
+						if len(coordData) == 0 {
+							return
+						}
 						if err != nil {
 							errorSink.AppendError(err)
 							return

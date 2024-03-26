@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 
-    Copyright (c) 2021, 2023 Oracle and/or its affiliates.
+    Copyright (c) 2021, 2024 Oracle and/or its affiliates.
     Licensed under the Universal Permissive License v 1.0 as shown at
     https://oss.oracle.com/licenses/upl.
 
@@ -67,6 +67,23 @@ NODE ID  ADDRESS         PORT   PROCESS  MEMBER  ROLE              STORAGE  MAX 
 ----
 
 NOTE: You can also use `-o wide` to display more columns.
+
+Display all departed members.
+
+[source,bash]
+----
+cohctl get members -c local -D
+----
+Output:
+[source,bash]
+----
+NODE ID  TIMESTAMP                ADDRESS          MACHINE ID  LOCATION                                         ROLE
+      3  2024-03-26 09:28:12.65   127.0.0.1:49170  10131       machine:localhost,process:5892,member:storage-2  CoherenceServer
+      5  2024-03-26 09:26:22.24   127.0.0.1:50251  10131       machine:localhost,process:6600,member:storage-3  CoherenceServer
+      4  2024-03-26 08:11:00.537  127.0.0.1:50250  10131       machine:localhost,process:6601,member:storage-4  CoherenceServer
+----
+
+NOTE: Members are displayed in descending order of departure time.
 
 [#get-network-stats]
 ==== Get Network Stats
