@@ -1085,12 +1085,12 @@ a role to retrieve thread dumps for.`,
 func generateThreadDumps(nodeID string, dataFetcher fetcher.Fetcher,
 	cmd *cobra.Command, isLast bool) error {
 	var (
-		i          int32
-		fileName   string
-		data       []byte
-		err        error
-		file       *os.File
-		threadDump string
+		i                 int32
+		fileName          string
+		data              []byte
+		err               error
+		file              *os.File
+		threadDumpContent string
 	)
 
 	for i = 1; i <= numThreadDumps; i++ {
@@ -1100,7 +1100,7 @@ func generateThreadDumps(nodeID string, dataFetcher fetcher.Fetcher,
 			return utils.GetError("unable to get thread dump for node "+nodeID, err)
 		}
 
-		threadDump, err = UnmarshalThreadDump(data)
+		threadDumpContent, err = UnmarshalThreadDump(data)
 		if err != nil {
 			return err
 		}
@@ -1110,7 +1110,7 @@ func generateThreadDumps(nodeID string, dataFetcher fetcher.Fetcher,
 		if err != nil {
 			return err
 		}
-		_, err = file.WriteString(threadDump)
+		_, err = file.WriteString(threadDumpContent)
 		if err != nil {
 			return err
 		}

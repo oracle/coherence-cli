@@ -38,6 +38,9 @@ Output:
 [source,bash]
 ----
 Total cluster members: 3
+Storage enabled count: 2
+Departure count:       0
+
 Cluster Heap - Total: 4,352 MB Used: 250 MB Available: 4,102 MB (94.3%)
 Storage Heap - Total: 4,096 MB Used: 201 MB Available: 3,895 MB (95.1%)
 
@@ -59,6 +62,9 @@ Output:
 [source,bash]
 ----
 Total cluster members: 1
+Storage enabled count: 1
+Departure count:       0
+
 Cluster Heap - Total: 256 MB Used: 50 MB Available: 206 MB (80.5%)
 Storage Heap - Total: 0 MB Used: 0 MB Available: 0 MB ( 0.0%)
 
@@ -99,7 +105,6 @@ cohctl get netwok-stats -c local
 Output:
 [source,bash]
 ----
-Total cluster members: 3
 NODE ID  ADDRESS     PORT   PROCESS  MEMBER                         ROLE              PKT SENT  PKT REC  RESENT  EFFICIENCY  SEND Q  DATA SENT  DATA REC  WEAKEST
       1  /127.0.0.1  50724    81363  storage-1                      CoherenceServer        531      586       2     100.00%       0       8 MB      9 MB        4
       2  /127.0.0.1  50725    81364  storage-2                      CoherenceServer        181      152       0     100.00%       0       8 MB      8 MB       -1

@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 
-    Copyright (c) 2021, 2023 Oracle and/or its affiliates.
+    Copyright (c) 2021, 2024 Oracle and/or its affiliates.
     Licensed under the Universal Permissive License v 1.0 as shown at
     https://oss.oracle.com/licenses/upl.
 
@@ -342,6 +342,9 @@ Output:
 Using cluster connection 'local' from current context.
 
 Total cluster members: 3
+Storage enabled count: 2
+Departure count:       0
+
 Cluster Heap - Total: 4,352 MB Used: 261 MB Available: 4,091 MB (94.0%)
 Storage Heap - Total: 4,096 MB Used: 212 MB Available: 3,884 MB (94.8%)
 
@@ -354,6 +357,9 @@ NODE ID  ADDRESS        PORT   PROCESS  MEMBER  ROLE                  STORAGE  M
 Using cluster connection 'local' from current context.
 
 Total cluster members: 3
+Storage enabled count: 2
+Departure count:       0
+
 Cluster Heap - Total: 4,352 MB Used: 263 MB Available: 4,089 MB (94.0%)
 Storage Heap - Total: 4,096 MB Used: 214 MB Available: 3,882 MB (94.8%)
 
