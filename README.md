@@ -75,7 +75,7 @@ curl -sL https://raw.githubusercontent.com/oracle/coherence-cli/main/scripts/ins
 For Windows, use the curl command below, then copy `cohctl.exe` to a directory in your PATH:
 
 ```cmd
-curl -sLo cohctl.exe "https://github.com/oracle/coherence-cli/releases/download/1.5.3/cohctl-1.5.3-windows-amd64.exe"
+curl -sLo cohctl.exe "https://github.com/oracle/coherence-cli/releases/download/1.6.0/cohctl-1.6.0-windows-amd64.exe"
 ```
 
 > Note: Change the **amd64** to **arm** for ARM based processor in the URL above.
@@ -95,8 +95,8 @@ The fastest way to experience the Coherence CLI is to follow the
 The CLI supports and is certified against the following Community and Commercial editions of Coherence:
 
 **Coherence Community Edition**
-* 23.09.+
-* 22.06.+
+* 23.03+
+* 22.06+
 * 14.1.1-0-12+
 
 **Coherence Grid/ Enterprise Edition**
