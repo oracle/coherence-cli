@@ -273,8 +273,11 @@ Operation completed. Please see cache server log file for more information
 
 include::../../build/_output/docs-gen/retrieve_thread_dumps.adoc[tag=text]
 
-NOTE: When taking thread dumps, if you want full deadlock analysis, set the following system property
-on your Coherence JVMS `-Dcom.oracle.coherence.common.util.Threads.dumpLocks=true`
+When taking thread dumps, if you want full deadlock analysis, set the following system property
+on your Coherence JVM's:
+
+* 12.2.1.4.x:     `-Dcom.oracle.common.util.Threads.dumpLocks=FULL`
+* Later versions: `-Dcom.oracle.coherence.common.util.Threads.dumpLocks=true`
 
 *Examples*
 
