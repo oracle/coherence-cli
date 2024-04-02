@@ -461,7 +461,7 @@ a role to retrieve thread dumps for.</p>
 </div>
 
 <div class="admonition note">
-<p class="admonition-inline">When taking thread dumps, if you want full deadlock analysis, you should set the following system property
+<p class="admonition-inline">When taking thread dumps, if you want full deadlock analysis, set the following system property
 on your Coherence JVMS <code>-Dcom.oracle.coherence.common.util.Threads.dumpLocks=FULL</code></p>
 </div>
 <p><strong>Examples</strong></p>
