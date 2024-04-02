@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, 2023 Oracle and/or its affiliates.
+ * Copyright (c) 2021, 2024 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -37,6 +37,7 @@ var (
 const (
 	coherenceMain = "com.tangosol.net.Coherence"
 	coherenceDCS  = "com.tangosol.net.DefaultCacheServer"
+	helidonCDI    = "io.helidon.microprofile.cdi.Main"
 )
 
 // GetError returns a formatted error and prints to log.
@@ -266,11 +267,11 @@ func GetCoherenceMainClass(_ string) string {
 // ValidateStartClass validates that the server start class is and empty string, and therefore
 // use the default, or a valid option.
 func ValidateStartClass(startClass string) error {
-	if startClass == "" || startClass == coherenceMain || startClass == coherenceDCS {
+	if startClass == "" || startClass == coherenceMain || startClass == coherenceDCS || startClass == helidonCDI {
 		return nil
 	}
 
-	return fmt.Errorf("if start server class is specified it should be %s or %s", coherenceMain, coherenceDCS)
+	return fmt.Errorf("if start server class is specified it should be %s, %s or %s", coherenceMain, coherenceDCS, helidonCDI)
 }
 
 // GetStartupDelayInMillis returns the startup delay in millis converted from the following suffixes:

@@ -277,7 +277,7 @@ When taking thread dumps, if you want full deadlock analysis, set the following 
 on your Coherence JVM's:
 
 * 12.2.1.4.x:     `-Dcom.oracle.common.util.Threads.dumpLocks=FULL`
-* Later versions: `-Dcom.oracle.coherence.common.util.Threads.dumpLocks=true`
+* Later versions: `-Dcom.oracle.coherence.common.util.Threads.dumpLocks=FULL`
 
 *Examples*
 
