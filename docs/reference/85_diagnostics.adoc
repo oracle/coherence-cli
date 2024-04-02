@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 
-    Copyright (c) 2021, 2023 Oracle and/or its affiliates.
+    Copyright (c) 2021, 2024 Oracle and/or its affiliates.
     Licensed under the Universal Permissive License v 1.0 as shown at
     https://oss.oracle.com/licenses/upl.
 
@@ -273,8 +273,8 @@ Operation completed. Please see cache server log file for more information
 
 include::../../build/_output/docs-gen/retrieve_thread_dumps.adoc[tag=text]
 
-NOTE: When taking thread dumps, if you want full deadlock analysis, you should set the following system property
-on your Coherence JVMS `-Dcom.oracle.coherence.common.util.Threads.dumpLocks=FULL`
+NOTE: When taking thread dumps, if you want full deadlock analysis, set the following system property
+on your Coherence JVMS `-Dcom.oracle.coherence.common.util.Threads.dumpLocks=true`
 
 *Examples*
 
