@@ -75,7 +75,7 @@ make clean test-cohctl
 ### Run E2E tests
 
 Runs all end-to-end tests for the commands against a two node Coherence CE cluster using the latest
-Coherence CE version. This will automatically start a cluster using docker.compose.
+Coherence CE version. This will automatically start a cluster using docker compose.
 
 ```bash
 $ make clean test-e2e-standalone 
