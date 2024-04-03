@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, 2023 Oracle and/or its affiliates.
+ * Copyright (c) 2021, 2024 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -192,11 +192,11 @@ func StartCoherenceCluster(fileName, url string) error {
 	return nil
 }
 
-// DockerComposeUp runs docker-compose up on a given file.
+// DockerComposeUp runs docker compose up on a given file.
 func DockerComposeUp(composeFile string) (string, error) {
-	fmt.Println("Issuing docker-compose up with file " + composeFile)
+	fmt.Println("Issuing docker compose up with file " + composeFile)
 
-	output, err := ExecuteHostCommand("docker-compose", "-f", composeFile, "--env-file", "../../test_utils/.env", "up", "-d")
+	output, err := ExecuteHostCommand("docker", "compose", "-f", composeFile, "--env-file", "../../test_utils/.env", "up", "-d")
 
 	if err != nil {
 		fmt.Println(output)
@@ -251,13 +251,13 @@ func CollectDockerLogs() error {
 	return nil
 }
 
-// DockerComposeDown runs docker-compose down on a given file.
+// DockerComposeDown runs docker compose down on a given file.
 func DockerComposeDown(composeFile string) (string, error) {
-	fmt.Println("Issuing docker-compose down with file " + composeFile)
+	fmt.Println("Issuing docker compose down with file " + composeFile)
 	// sleep as sometimes docker compose networks are not completely stopped
 	Sleep(5)
 
-	output, err := ExecuteHostCommand("docker-compose", "-f", composeFile, "down")
+	output, err := ExecuteHostCommand("docker", "compose", "-f", composeFile, "down")
 
 	if err != nil {
 		fmt.Println(output)
