@@ -192,11 +192,25 @@ func StartCoherenceCluster(fileName, url string) error {
 	return nil
 }
 
+func getDockerComposeCommand(arguments ...string) (string, []string) {
+	command := "docker"
+	args := arguments
+	if useDockerComposeV1() {
+		command = "docker-compose"
+	} else {
+		finalArgs := []string{"compose"}
+		args = append(finalArgs, args...)
+	}
+
+	return command, args
+}
+
 // DockerComposeUp runs docker compose up on a given file.
 func DockerComposeUp(composeFile string) (string, error) {
-	fmt.Println("Issuing docker compose up with file " + composeFile)
+	command, args := getDockerComposeCommand([]string{"-f", composeFile, "--env-file", "../../test_utils/.env", "up", "-d"}...)
+	fmt.Printf("Issuing %s up with file %v\n", command, composeFile)
 
-	output, err := ExecuteHostCommand("docker", "compose", "-f", composeFile, "--env-file", "../../test_utils/.env", "up", "-d")
+	output, err := ExecuteHostCommand(command, args...)
 
 	if err != nil {
 		fmt.Println(output)
@@ -257,7 +271,9 @@ func DockerComposeDown(composeFile string) (string, error) {
 	// sleep as sometimes docker compose networks are not completely stopped
 	Sleep(5)
 
-	output, err := ExecuteHostCommand("docker", "compose", "-f", composeFile, "down")
+	command, args := getDockerComposeCommand([]string{"-f", composeFile, "down"}...)
+
+	output, err := ExecuteHostCommand(command, args...)
 
 	if err != nil {
 		fmt.Println(output)
@@ -479,4 +495,9 @@ func CleanupDirectoryAfterTest(t *testing.T, dir string) {
 	t.Cleanup(func() {
 		_ = os.RemoveAll(dir)
 	})
+}
+
+// getDockerComposeCommand returns true if we should use "docker-compose" (v1).
+func useDockerComposeV1() bool {
+	return os.Getenv("DOCKER_COMPOSE_V1") != ""
 }

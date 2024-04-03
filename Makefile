@@ -36,6 +36,9 @@ COHERENCE_BASE_IMAGE ?= gcr.io/distroless/java:11
 # WebLogic Server Test Related
 WEBLOGIC_SERVER_URL ?= http://127.0.0.1:7001
 
+# Docker Compose
+DOCKER_COMPOSE_V1 ?= false
+
 # ----------------------------------------------------------------------------------------------------------------------
 # Options to append to the Maven command
 # ----------------------------------------------------------------------------------------------------------------------
@@ -76,6 +79,12 @@ RELEASE_IMAGE_PREFIX     ?= ghcr.io/oracle/
 TEST_APPLICATION_IMAGE_1 := $(RELEASE_IMAGE_PREFIX)coherence-cli-test-1:1.0.0
 TEST_APPLICATION_IMAGE_2 := $(RELEASE_IMAGE_PREFIX)coherence-cli-test-2:1.0.0
 TEST_APPLICATION_IMAGE_3 := $(RELEASE_IMAGE_PREFIX)coherence-cli-test-view-client-1:1.0.0
+
+ifeq ($(DOCKER_COMPOSE_V1),true)
+DOCKER_COMPOSE="docker-compose"
+else
+DOCKER_COMPOSE=docker compose
+endif
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Get the currently used golang install path (in GOPATH/bin, unless GOBIN is set)
@@ -396,28 +405,28 @@ trivy-scan: gettrivy ## Scan the CLI using trivy
 # ----------------------------------------------------------------------------------------------------------------------
 .PHONY: test-cluster-startup
 test-cluster-startup: $(BUILD_PROPS) ## Startup any test cluster members using docker-compose
-	cd test/test_utils && docker-compose -f docker-compose-2-members.yaml --env-file .env up -d
+	cd test/test_utils && $(DOCKER_COMPOSE) -f docker-compose-2-members.yaml --env-file .env up -d
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Shutdown any cluster members via docker compose
 # ----------------------------------------------------------------------------------------------------------------------
 .PHONY: test-cluster-shutdown
 test-cluster-shutdown: ## Shutdown any test cluster members using docker-compose
-	cd test/test_utils && docker-compose -f docker-compose-2-members.yaml down || true
+	cd test/test_utils && $(DOCKER_COMPOSE) -f docker-compose-2-members.yaml down || true
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Startup view cluster members via docker compose
 # ----------------------------------------------------------------------------------------------------------------------
 .PHONY: test-cluster-startup-views
 test-cluster-startup-views: $(BUILD_PROPS) ## Startup any test cluster members using docker-compose
-	cd test/test_utils && docker-compose -f docker-compose-3-members.yaml --env-file .env up -d
+	cd test/test_utils && $(DOCKER_COMPOSE) -f docker-compose-3-members.yaml --env-file .env up -d
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Shutdown view cluster members via docker compose
 # ----------------------------------------------------------------------------------------------------------------------
 .PHONY: test-cluster-shutdown-views
 test-cluster-shutdown-views: ## Shutdown any test cluster members using docker-compose
-	cd test/test_utils && docker-compose -f docker-compose-3-members.yaml down || true
+	cd test/test_utils && $(DOCKER_COMPOSE) -f docker-compose-3-members.yaml down || true
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Startup standalone coherence via java -jar
