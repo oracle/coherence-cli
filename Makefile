@@ -36,9 +36,6 @@ COHERENCE_BASE_IMAGE ?= gcr.io/distroless/java:11
 # WebLogic Server Test Related
 WEBLOGIC_SERVER_URL ?= http://127.0.0.1:7001
 
-# Docker Compose
-DOCKER_COMPOSE_V1 ?= false
-
 # ----------------------------------------------------------------------------------------------------------------------
 # Options to append to the Maven command
 # ----------------------------------------------------------------------------------------------------------------------
@@ -80,11 +77,7 @@ TEST_APPLICATION_IMAGE_1 := $(RELEASE_IMAGE_PREFIX)coherence-cli-test-1:1.0.0
 TEST_APPLICATION_IMAGE_2 := $(RELEASE_IMAGE_PREFIX)coherence-cli-test-2:1.0.0
 TEST_APPLICATION_IMAGE_3 := $(RELEASE_IMAGE_PREFIX)coherence-cli-test-view-client-1:1.0.0
 
-ifeq ($(DOCKER_COMPOSE_V1),true)
-DOCKER_COMPOSE="docker-compose"
-else
-DOCKER_COMPOSE=docker compose
-endif
+DOCKER_COMPOSE:=$(shell type -p docker-compose || echo docker compose)
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Get the currently used golang install path (in GOPATH/bin, unless GOBIN is set)
