@@ -37,7 +37,7 @@ var (
 const (
 	coherenceMain = "com.tangosol.net.Coherence"
 	coherenceDCS  = "com.tangosol.net.DefaultCacheServer"
-	helidonCDI    = "io.helidon.microprofile.cdi.Main"
+	cdiServer     = "com.oracle.coherence.cdi.server.Server"
 )
 
 // GetError returns a formatted error and prints to log.
@@ -267,11 +267,11 @@ func GetCoherenceMainClass(_ string) string {
 // ValidateStartClass validates that the server start class is and empty string, and therefore
 // use the default, or a valid option.
 func ValidateStartClass(startClass string) error {
-	if startClass == "" || startClass == coherenceMain || startClass == coherenceDCS || startClass == helidonCDI {
+	if startClass == "" || startClass == coherenceMain || startClass == coherenceDCS || startClass == cdiServer {
 		return nil
 	}
 
-	return fmt.Errorf("if start server class is specified it should be %s, %s or %s", coherenceMain, coherenceDCS, helidonCDI)
+	return fmt.Errorf("if start server class is specified it should be %s, %s or %s", coherenceMain, coherenceDCS, cdiServer)
 }
 
 // GetStartupDelayInMillis returns the startup delay in millis converted from the following suffixes:

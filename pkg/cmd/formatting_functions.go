@@ -165,6 +165,20 @@ var healthSummaryFormatter = func(s string) string {
 	return yellow(s)
 }
 
+// healthMonitoringFormatter formats a column value for health monitoring summary.
+var healthMonitoringFormatter = func(s string) string {
+	if strings.Contains(s, http200) || strings.Contains(s, "4") {
+		return s
+	}
+	if strings.Contains(s, "0/4") {
+		return red(s)
+	}
+	if strings.Contains(s, "503") || strings.Contains(s, "/") {
+		return yellow(s)
+	}
+	return red(s)
+}
+
 // healthSummaryFormatter formats a column value for federation state.
 var federationStateFormatter = func(s string) string {
 	lowerCase := strings.ToLower(s)

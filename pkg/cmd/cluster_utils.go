@@ -288,7 +288,7 @@ func startCluster(cmd *cobra.Command, connection ClusterConnection, serverCount,
 			healthStartPort++
 		}
 
-		arguments = append(arguments, getCacheServerArgs(member, mgmtPort, connection.ClusterVersion)...)
+		arguments = append(arguments, getCacheServerArgs(connection, member, mgmtPort, connection.ClusterVersion)...)
 
 		// reset so only first member has management enabled
 		mgmtPort = -1
@@ -359,12 +359,18 @@ func startClient(cmd *cobra.Command, connection ClusterConnection, class string)
 	return process.Wait()
 }
 
-func getCacheServerArgs(member string, httpPort int32, version string) []string {
+func getCacheServerArgs(connection ClusterConnection, member string, httpPort int32, version string) []string {
 	var (
 		baseArgs  = make([]string, 0)
 		heap      string
-		mainClass = serverStartClassParam
+		mainClass = connection.StartupClass
 	)
+
+	// override only if we specify the class
+	if serverStartClassParam != "" || connection.StartupClass == "" {
+		mainClass = serverStartClassParam
+	}
+
 	if httpPort != -1 {
 		baseArgs = append(baseArgs, "-Dcoherence.management.http=all", fmt.Sprintf("-Dcoherence.management.http.port=%d", httpPort),
 			"-Dcoherence.management=all", "-Dcom.sun.management.jmxremote.ssl=false", "-Dcom.sun.management.jmxremote",

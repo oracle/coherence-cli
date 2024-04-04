@@ -137,7 +137,7 @@ Add and start a commercial Coherence cluster (14.1.1.2206.5) and set initial mem
 
 [source,bash]
 ----
-cohctl create cluster local -C -v 14.1.1-2206-5 -M 1g -P active -S
+cohctl create cluster local -C -v 14.1.1-2206-5 -M 1g -P active
 ----
 Output:
 [source,bash]
@@ -164,7 +164,7 @@ Starting cluster member storage-2...
 Cluster added and started
 ----
 
-NOTE: In this example we are using the `-S` option to skip downloading maven artifacts as we know they are already installed locally.
+NOTE: In this example we are using the `-I` option to skip downloading maven artifacts as we know they are already installed locally.
 
 Add and start a cluster using all default values but include additional `coherence-rest` and opentracing dependencies.
 

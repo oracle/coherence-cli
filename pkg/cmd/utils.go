@@ -670,3 +670,29 @@ func setField(member *config.DepartedMembers, field int, value string) {
 		member.Role = value
 	}
 }
+
+func parseHealthEndpoints(endpointCSV string) ([]string, error) {
+	var (
+		validEndpoints = make([]string, 0)
+		endpoints      = strings.Split(endpointCSV, ",")
+	)
+
+	// validate them
+	for _, v := range endpoints {
+		_, err := url.ParseRequestURI(v)
+		if err != nil {
+			return validEndpoints, fmt.Errorf("url [%s] is not valid", v)
+		}
+		validEndpoints = append(validEndpoints, v)
+	}
+	return validEndpoints, nil
+}
+
+func getHealthEndpoint(healthURL, healthType string) string {
+	// ensure there is a '/' on the end
+	if !strings.HasSuffix(healthURL, "/") {
+		healthURL = healthURL + "/"
+	}
+
+	return fmt.Sprintf("%s%s", healthURL, healthType)
+}

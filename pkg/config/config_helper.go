@@ -267,6 +267,16 @@ type HealthSummary struct {
 	Safe              bool   `json:"safe"`
 }
 
+// HealthMonitoring contains individual health monitoring details.
+type HealthMonitoring struct {
+	Endpoint string `json:"endpoint"`
+	NodeID   string `json:"nodeID"`
+	Ready    string `json:"ready"`
+	Started  string `json:"started"`
+	Live     string `json:"live"`
+	Safe     string `json:"safe"`
+}
+
 // HealthSummaryShort contains summarised health across all nodes for a SubType and Name.
 type HealthSummaryShort struct {
 	TotalCount   int32

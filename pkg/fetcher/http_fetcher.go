@@ -1002,6 +1002,15 @@ func (h HTTPFetcher) InvokeDisconnectAll(topicName, topicService, subscriberGrou
 	return nil
 }
 
+// GetResponseCode returns the response code for the URL as a string.
+func (h HTTPFetcher) GetResponseCode(requestedURL string) string {
+	result, err := httpGetRequestAbsolute(h, requestedURL)
+	if err != nil {
+		return "Refused"
+	}
+	return string(result)
+}
+
 // InvokeSubscriberOperation invokes a subscriber operation against a topic subscriber.
 func (h HTTPFetcher) InvokeSubscriberOperation(topicName, topicService string, subscriber int64, operation string, args ...interface{}) ([]byte, error) {
 	var (
@@ -1293,6 +1302,14 @@ func httpRequest(h HTTPFetcher, requestType, urlAppend string, absolute bool, co
 			zap.String("requestTimeout", fmt.Sprintf("%d seconds", RequestTimeout)),
 		}
 		Logger.Info("Http Request time", fields...)
+	}
+
+	// special case for http health checks for "monitor health"
+	if strings.HasSuffix(urlAppend, "/live") || strings.HasSuffix(urlAppend, "/ready") ||
+		strings.HasSuffix(urlAppend, "/safe") || strings.HasSuffix(urlAppend, "/started") {
+
+		// just return the status code only
+		return []byte(fmt.Sprintf("%v", resp.StatusCode)), nil
 	}
 
 	if resp.StatusCode != 200 {

@@ -103,7 +103,7 @@ runCommand set debug on
 
 # Create a cluster
 message "Create Cluster"
-runCommand create cluster local -y -v $VERSION $COM
+runCommand create cluster local -y -v $VERSION $COM -S com.tangosol.net.Coherence
 
 wait_for_ready
 
@@ -136,6 +136,12 @@ wait_for_ready
 
 runCommand get services -o jsonpath="$.items[?(@.name=='PartitionedCache')].memberCount"
 grep "[5,5,5,]" $OUTPUT
+
+# Monitor the heath
+runCommand monitor health -n localhost:7574 -N
+grep "NODE ID" $OUTPUT
+grep "STARTED" $OUTPUT
+
 
 runCommand stop cluster local -y
 runCommand remove cluster local -y

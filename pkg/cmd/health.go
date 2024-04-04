@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, 2023 Oracle and/or its affiliates.
+ * Copyright (c) 2022, 2024 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -8,17 +8,25 @@ package cmd
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/oracle/coherence-cli/pkg/config"
 	"github.com/oracle/coherence-cli/pkg/fetcher"
+	"github.com/oracle/coherence-go-client/coherence/discovery"
 	"github.com/spf13/cobra"
+	"net/url"
+	"strings"
+	"sync"
 	"time"
 )
 
 var (
-	healthSubType string
-	healthName    string
-	healthSummary bool
+	healthSubType   string
+	healthName      string
+	healthSummary   bool
+	nslookupAddress string
+	healthEndpoints string
+	getNodeID       bool
 )
 
 // getHealthCmd represents the get health command.
@@ -167,8 +175,188 @@ func findIndex(health []config.HealthSummaryShort, name, subType string) int32 {
 	return -1 // not found
 }
 
+// monitorHealthCmd represents the monitor health command.
+var monitorHealthCmd = &cobra.Command{
+	Use:   "health",
+	Short: "monitors health information for a cluster or set of health endpoints",
+	Long: `The 'get monitor' command monitors the health of nodes for a cluster or set of health endpoints.
+Specify -n and a host:port to lookup or -e and a list of http endpoints without the path.`,
+	RunE: func(cmd *cobra.Command, args []string) error {
+		var (
+			err         error
+			endpoints   []string
+			ns          *discovery.NSLookup
+			result      string
+			clusterName string
+			dataFetcher fetcher.Fetcher
+		)
+		if healthEndpoints == "" && nslookupAddress == "" {
+			return errors.New("you must specify one of -n or -e")
+		} else if healthEndpoints != "" && nslookupAddress != "" {
+			return errors.New("you cannot specify both -n and -e")
+		}
+
+		if getNodeID {
+			// get the dataf etcher if we are wanting the node ID
+			_, dataFetcher, err = GetConnectionAndDataFetcher()
+			if err != nil {
+				return err
+			}
+
+		}
+
+		// retrieve the list of endpoints using either of the 3 methods
+		if healthEndpoints != "" {
+			endpoints, err = parseHealthEndpoints(healthEndpoints)
+			if err != nil {
+				return err
+			}
+		}
+
+		for {
+			if nslookupAddress != "" {
+				// use nslookup to look up the health endpoint of the cluster
+				ns, err = discovery.Open(nslookupAddress, timeout)
+				if err != nil {
+					return fmt.Errorf("unable to use nslookup against %s: %v", nslookupAddress, err)
+				}
+
+				result, err = ns.Lookup("NameService/string/health/HTTPHealthURL")
+				if err != nil {
+					return err
+				}
+
+				clusterName, err = ns.Lookup("Cluster/name")
+				if err != nil {
+					return err
+				}
+
+				_ = ns.Close()
+
+				// format returned is [http://127.0.0.1:6676/, http://127.0.0.1:6677/]
+				result = strings.Replace(result, "[", "", 1)
+				result = strings.Replace(result, "]", "", 1)
+				result = strings.Replace(result, " ", "", -1)
+				endpoints, err = parseHealthEndpoints(result)
+				if err != nil {
+					return err
+				}
+
+			}
+
+			monitoringData := gatherMonitorData(dataFetcher, endpoints)
+
+			printWatchHeader(cmd)
+
+			cmd.Println("\nHEALTH MONITORING")
+			cmd.Println("------------------")
+			if nslookupAddress != "" {
+				cmd.Println("Name Service: ", nslookupAddress)
+				cmd.Println("Cluster Name: ", clusterName)
+
+			} else {
+				cmd.Println("Endpoints: ", endpoints)
+			}
+
+			cmd.Println()
+
+			cmd.Println(FormatHealthMonitoring(monitoringData))
+
+			// check to see if we should exit if we are not watching
+			if !isWatchEnabled() {
+				break
+			}
+			// we are watching so sleep and then repeat until CTRL-C
+			time.Sleep(time.Duration(watchDelay) * time.Second)
+		}
+		return nil
+	},
+}
+
+func gatherMonitorData(dataFetcher fetcher.Fetcher, endpoints []string) []config.HealthMonitoring {
+	var (
+		result      = make([]config.HealthMonitoring, len(endpoints))
+		httpFetcher fetcher.Fetcher
+	)
+
+	// we use a mock http fetcher just so we can use the http methods if we do not already have one
+	if dataFetcher == nil {
+		httpFetcher, _ = fetcher.GetFetcherOrError("http", "", "", "")
+	} else {
+		httpFetcher = dataFetcher
+	}
+
+	for i, v := range endpoints {
+		var (
+			wg           sync.WaitGroup
+			httpResult   = make([]string, 4)
+			routineCount = 4
+			nodeID       = "n/a"
+		)
+
+		healthURLS := []string{
+			getHealthEndpoint(v, "started"),
+			getHealthEndpoint(v, "live"),
+			getHealthEndpoint(v, "ready"),
+			getHealthEndpoint(v, "safe"),
+		}
+
+		if getNodeID {
+			routineCount++
+		}
+
+		// issue concurrent requests
+		wg.Add(routineCount)
+
+		for j := 0; j < 4; j++ {
+			go func(healthURL string, index int) {
+				defer wg.Done()
+				httpResult[index] = httpFetcher.GetResponseCode(healthURL)
+			}(healthURLS[j], j)
+		}
+
+		if getNodeID {
+			// extract the port from the URL
+			parsed, _ := url.Parse(v)
+			port := parsed.Port()
+
+			proxyResults, err := dataFetcher.GetProxySummaryJSON()
+			if err == nil {
+				var proxiesSummary = config.ProxiesSummary{}
+				err = json.Unmarshal(proxyResults, &proxiesSummary)
+				if err == nil {
+					// loop through each entry and see if we have a match for the protocol
+					for _, vv := range proxiesSummary.Proxies {
+						if strings.Contains(vv.HostIP, port) {
+							nodeID = vv.NodeID
+							break
+						}
+					}
+				}
+			}
+			wg.Done()
+		}
+		wg.Wait()
+
+		result[i] = config.HealthMonitoring{Endpoint: v,
+			Started: httpResult[0],
+			Live:    httpResult[1],
+			Ready:   httpResult[2],
+			Safe:    httpResult[3],
+			NodeID:  nodeID,
+		}
+	}
+
+	return result
+}
+
 func init() {
 	getHealthCmd.Flags().StringVarP(&healthSubType, "sub-type", "s", all, "health sub-type")
 	getHealthCmd.Flags().StringVarP(&healthName, "name", "n", all, "health name")
 	getHealthCmd.Flags().BoolVarP(&healthSummary, "summary", "S", false, "if true, returns a summary across nodes")
+
+	monitorHealthCmd.Flags().BoolVarP(&getNodeID, "node-id", "N", false, "if true, returns the node id using the current context")
+	monitorHealthCmd.Flags().Int32VarP(&timeout, "timeout", "t", 30, timeoutMessage)
+	monitorHealthCmd.Flags().StringVarP(&healthEndpoints, "endpoints", "e", "", "csv list of health endpoints")
+	monitorHealthCmd.Flags().StringVarP(&nslookupAddress, "nslookup", "n", "", "host:port to connect to to lookup health endpoints")
 }

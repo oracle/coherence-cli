@@ -280,6 +280,9 @@ type Fetcher interface {
 
 	// InvokeDisconnectAll invokes a disconnect all operation against a topic.
 	InvokeDisconnectAll(topicName, topicService, subscriberGroup string) error
+
+	// GetResponseCode returns the response code for the URL as a string.
+	GetResponseCode(requestedURL string) string
 }
 
 // GetFetcherOrError returns a fetcher and error

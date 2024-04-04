@@ -94,7 +94,7 @@ const (
 	jmxHostArg               = "jmx-host"
 	logLevelMessage          = "coherence log level"
 	profileMessage           = "profile to add to cluster startup command line"
-	startClassMessage        = "class name to start server with (default from Coherence version)"
+	startClassMessage        = "class name to start server with (default com.tangosol.net.Coherence)"
 	logDestinationMessage    = "root directory to place log files in"
 	commaSeparatedIDMessage  = "comma separated node ids to target"
 
@@ -183,6 +183,7 @@ type ClusterConnection struct {
 	PersistenceMode     string `json:"persistenceMode"`
 	LoggingDestination  string `json:"loggingDestination"` // logging destination, if empty then place under ~/.cohctl/logs
 	ManagementAvailable bool   // only used when using -o wide option
+	StartupClass        string `json:"startupClass"`
 }
 
 // rootCmd represents the base command when called without any subcommands
@@ -688,6 +689,10 @@ func Initialize(command *cobra.Command) *cobra.Command {
 	// compact
 	command.AddCommand(compactCmd)
 	compactCmd.AddCommand(compactElasticDataCmd)
+
+	// monitor
+	command.AddCommand(monitorCmd)
+	monitorCmd.AddCommand(monitorHealthCmd)
 
 	return command
 }
