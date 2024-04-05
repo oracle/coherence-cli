@@ -271,6 +271,7 @@ type HealthSummary struct {
 type HealthMonitoring struct {
 	Endpoint string `json:"endpoint"`
 	NodeID   string `json:"nodeID"`
+	Member   string `json:"member"`
 	Ready    string `json:"ready"`
 	Started  string `json:"started"`
 	Live     string `json:"live"`

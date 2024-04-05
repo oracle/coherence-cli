@@ -127,14 +127,13 @@ Output:
 HEALTH MONITORING
 ------------------
 Name Service:  localhost:7574
-Cluster Name:  main
+Cluster Name:  local
 
 URL                      NODE ID  STARTED  LIVE  READY  SAFE  OVERALL
 http://127.0.0.1:63765/      n/a      200   200    200   200        4
 http://127.0.0.1:63766/      n/a      200   200    200   200        4
 http://127.0.0.1:63768/      n/a      200   200    200   200        4
 ----
-
 
 Use the `-N` option to display the node id from the current context.
 
@@ -148,7 +147,7 @@ Output:
 HEALTH MONITORING
 ------------------
 Name Service:  localhost:7574
-Cluster Name:  main
+Cluster Name:  local
 
 URL                      NODE ID  STARTED  LIVE  READY  SAFE  OVERALL
 http://127.0.0.1:63765/        2      200   200    200   200        4
@@ -175,6 +174,38 @@ URL                      NODE ID  STARTED     LIVE    READY     SAFE  OVERALL
 http://127.0.0.1:63744/      n/a  Refused  Refused  Refused  Refused      0/4
 http://127.0.0.1:63768/      n/a      200      200      200      200        4
 http://127.0.0.1:6544/       n/a  Refused  Refused  Refused  Refused      0/4
+----
+
+Monitor the health endpoints via the name service and wait until they are all safe.
+
+This is useful for scripting during a rolling restart when you want to wait until all members are safe
+before proceeding.
+
+You must specify the following options:
+
+* `-T` specifies the number of seconds to wait until all health endpoints are safe
+* `-w` or `-W` to wait
+
+If the endpoints are all safe within the time specified, `cohctl` will return 0, otherwise it will return 1.
+
+[source,bash]
+----
+cohctl monitor health -c local -n localhost:7574 -N -T 60 -W
+----
+Output:
+[source,bash]
+----
+HEALTH MONITORING
+------------------
+Name Service:  localhost:7574
+Cluster Name:  local
+
+URL                      NODE ID  STARTED  LIVE  READY  SAFE  OVERALL
+http://127.0.0.1:52133/        1      200   200    200   200        4
+http://127.0.0.1:52134/        3      200   200    200   200        4
+http://127.0.0.1:52136/        2      200   200    200   200        4
+
+All health endpoints are safe reached in 21 seconds
 ----
 
 

@@ -27,6 +27,7 @@ var (
 	nslookupAddress string
 	healthEndpoints string
 	getNodeID       bool
+	healthTimeout   int32
 )
 
 // getHealthCmd represents the get health command.
@@ -180,7 +181,8 @@ var monitorHealthCmd = &cobra.Command{
 	Use:   "health",
 	Short: "monitors health information for a cluster or set of health endpoints",
 	Long: `The 'get monitor' command monitors the health of nodes for a cluster or set of health endpoints.
-Specify -n and a host:port to lookup or -e and a list of http endpoints without the path.`,
+Specify -n and a host:port to lookup or -e and a list of http endpoints without the path.
+You may also specify -T option to wait until all health endpoints are safe.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var (
 			err         error
@@ -212,6 +214,14 @@ Specify -n and a host:port to lookup or -e and a list of http endpoints without 
 				return err
 			}
 		}
+
+		if healthTimeout < 0 {
+			return errors.New("you must provide a positive value in seconds for health timeout")
+		}
+		if healthTimeout > 0 && !isWatchEnabled() {
+			return errors.New("if you have specified a health timeout you must enable watch option")
+		}
+		startTime := time.Now()
 
 		for {
 			if nslookupAddress != "" {
@@ -262,6 +272,19 @@ Specify -n and a host:port to lookup or -e and a list of http endpoints without 
 
 			cmd.Println(FormatHealthMonitoring(monitoringData))
 
+			if healthTimeout > 0 {
+				elapsedSeconds := int32(time.Since(startTime).Seconds())
+				if isMonitoringDataSafe(monitoringData) {
+					cmd.Printf("All health endpoints are safe reached in %d seconds\n", elapsedSeconds)
+					return nil
+				}
+				if elapsedSeconds > healthTimeout {
+					return fmt.Errorf("all health endpoints NOT safe in %d seconds", elapsedSeconds)
+				}
+
+				cmd.Printf("Waiting for all health endpoints to be safe within %d seconds", healthTimeout)
+			}
+
 			// check to see if we should exit if we are not watching
 			if !isWatchEnabled() {
 				break
@@ -271,6 +294,15 @@ Specify -n and a host:port to lookup or -e and a list of http endpoints without 
 		}
 		return nil
 	},
+}
+
+func isMonitoringDataSafe(monitoringData []config.HealthMonitoring) bool {
+	for _, v := range monitoringData {
+		if v.Safe != http200 || v.Ready != http200 || v.Live != http200 || v.Started != http200 {
+			return false
+		}
+	}
+	return true
 }
 
 func gatherMonitorData(dataFetcher fetcher.Fetcher, endpoints []string) []config.HealthMonitoring {
@@ -359,4 +391,5 @@ func init() {
 	monitorHealthCmd.Flags().Int32VarP(&timeout, "timeout", "t", 30, timeoutMessage)
 	monitorHealthCmd.Flags().StringVarP(&healthEndpoints, "endpoints", "e", "", "csv list of health endpoints")
 	monitorHealthCmd.Flags().StringVarP(&nslookupAddress, "nslookup", "n", "", "host:port to connect to to lookup health endpoints")
+	monitorHealthCmd.Flags().Int32VarP(&healthTimeout, "health-timeout", "T", 0, "timeout to wait for all health checks to be status 200")
 }
