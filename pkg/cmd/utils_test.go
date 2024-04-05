@@ -63,3 +63,31 @@ func TestDecodeMemberDetails(t *testing.T) {
 	g.Expect(result[1].Location).To(Equal("machine:localhost,process:6601,member:storage-5"))
 	g.Expect(result[1].Role).To(Equal("CoherenceServer1"))
 }
+
+func TestParseHealthEndpoints(t *testing.T) {
+	g := NewGomegaWithT(t)
+	_, err := parseHealthEndpoints("")
+	g.Expect(err).To(HaveOccurred())
+
+	_, err = parseHealthEndpoints("rubbish")
+	g.Expect(err).To(HaveOccurred())
+
+	values, err := parseHealthEndpoints("http://127.0.0.1:7767")
+	g.Expect(err).To(Not(HaveOccurred()))
+	g.Expect(len(values)).To(Equal(1))
+	g.Expect(values).To(Equal([]string{"http://127.0.0.1:7767"}))
+
+	_, err = parseHealthEndpoints("http://127.0.0.1:7767,3333")
+	g.Expect(err).To(HaveOccurred())
+
+	values, err = parseHealthEndpoints("http://127.0.0.1:7767,http://127.0.0.1:7768")
+	g.Expect(err).To(Not(HaveOccurred()))
+	g.Expect(len(values)).To(Equal(2))
+	g.Expect(values).To(Equal([]string{"http://127.0.0.1:7767", "http://127.0.0.1:7768"}))
+}
+
+func TestGetHealthEndpoint(t *testing.T) {
+	g := NewGomegaWithT(t)
+	g.Expect(getHealthEndpoint("http://127.0.0.1:7767", "live")).To(Equal("http://127.0.0.1:7767/live"))
+	g.Expect(getHealthEndpoint("http://127.0.0.1:7767/", "live")).To(Equal("http://127.0.0.1:7767/live"))
+}

@@ -1168,6 +1168,7 @@ NOTE: This is an experimental feature and my be altered or removed in the future
 		cmd.Printf("Log destination root: %v\n", logDestinationParam)
 		cmd.Printf("Cache Config:         %v\n", cacheConfigParam)
 		cmd.Printf("Operational Override: %v\n", operationalConfigParam)
+		cmd.Printf("Startup Class:        %v\n", serverStartClassParam)
 		cmd.Printf("Dependency tool:      %v\n", getExecType())
 
 		// confirm the operation
@@ -1260,7 +1261,7 @@ NOTE: This is an experimental feature and my be altered or removed in the future
 			ManuallyCreated: true, ClusterVersion: clusterVersionParam, ClusterName: clusterName,
 			ClusterType: "Standalone", BaseClasspath: strings.Join(classpath, getClasspathSeparator()),
 			Arguments: arguments, ManagementPort: httpPortParam, PersistenceMode: persistenceModeParam,
-			LoggingDestination: logDestinationParam}
+			LoggingDestination: logDestinationParam, StartupClass: serverStartClassParam}
 
 		cmd.Printf("Starting %d cluster members for cluster %s\n", replicaCountParam, clusterName)
 

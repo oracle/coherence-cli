@@ -64,6 +64,7 @@ const (
 	endangered            = "ENDANGERED"
 	dataSent              = "DATA SENT"
 	dataRec               = "DATA REC"
+	http200               = "200"
 )
 
 var (
@@ -1256,6 +1257,50 @@ func FormatHealthSummary(health []config.HealthSummaryShort) string {
 			getCountString(value.TotalCount, value.LiveCount),
 			getCountString(value.TotalCount, value.ReadyCount),
 			getCountString(value.TotalCount, value.SafeCount))
+	}
+
+	return table.String()
+}
+
+// FormatHealthMonitoring returns the healt HTTP endpoints..
+func FormatHealthMonitoring(health []config.HealthMonitoring) string {
+	if len(health) == 0 {
+		return ""
+	}
+
+	sort.Slice(health, func(p, q int) bool {
+		return strings.Compare(health[p].Endpoint, health[q].Endpoint) < 0
+	})
+
+	table := newFormattedTable().WithHeader("URL", NodeIDColumn, "STARTED", "LIVE", "READY", "SAFE", "OVERALL").
+		WithAlignment(L, R, R, R, R, R, R)
+	for i := 2; i <= 6; i++ {
+		table.AddFormattingFunction(i, healthMonitoringFormatter)
+	}
+
+	for _, value := range health {
+		var (
+			totalOK = 0
+			result  = "4"
+		)
+		if value.Started == http200 {
+			totalOK++
+		}
+		if value.Live == http200 {
+			totalOK++
+		}
+		if value.Ready == http200 {
+			totalOK++
+		}
+		if value.Safe == http200 {
+			totalOK++
+		}
+
+		if totalOK != 4 {
+			result = fmt.Sprintf("%d/%d", totalOK, 4)
+		}
+
+		table.AddRow(value.Endpoint, value.NodeID, value.Started, value.Live, value.Ready, value.Safe, result)
 	}
 
 	return table.String()

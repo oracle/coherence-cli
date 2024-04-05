@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 
-    Copyright (c) 2022, 2023 Oracle and/or its affiliates.
+    Copyright (c) 2022, 2024 Oracle and/or its affiliates.
     Licensed under the Universal Permissive License v 1.0 as shown at
     https://oss.oracle.com/licenses/upl.
 
@@ -14,6 +14,7 @@
 If your cluster version supports it, you can display health information using the following commands.
 
 * <<get-health, `cohctl get health`>> - display health information for a cluster
+* <<monitor-health, `cohctl monitor health`>> - monitor health information for a cluster or set of health endpoints
 
 [#get-health]
 ==== Get Health
@@ -100,6 +101,113 @@ Default               Coherence        3        3     3      3     3
 $SYS:HealthHttpProxy  Service          3        3     3      3     3
 $SYS:Config           Service          3        3     3      3     3
 ----
+
+[#monitor-health]
+==== Monitor Health
+
+include::../../build/_output/docs-gen/monitor_health.adoc[tag=text]
+
+NOTE: This is useful especially when you want to check the health of
+members during a rolling restart. Values returned are the HTTP Status codes of `200` if the health is OK, `503`
+if it is not and `Refused` if the endpoint was not able to be reached.
+
+See the {commercial-docs-base-url}/manage/using-health-check-api.html[Coherence Documentation] for more information on the health check API.
+
+*Examples*
+
+Monitor the health endpoints for a cluster using the name service to look up the health endpoints.
+
+[source,bash]
+----
+cohctl monitor health -c local -n localhost:7574
+----
+Output:
+[source,bash]
+----
+HEALTH MONITORING
+------------------
+Name Service:  localhost:7574
+Cluster Name:  local
+
+URL                      NODE ID  STARTED  LIVE  READY  SAFE  OVERALL
+http://127.0.0.1:63765/      n/a      200   200    200   200        4
+http://127.0.0.1:63766/      n/a      200   200    200   200        4
+http://127.0.0.1:63768/      n/a      200   200    200   200        4
+----
+
+Use the `-N` option to display the node id from the current context.
+
+[source,bash]
+----
+cohctl monitor health -c local -n localhost:7574 -N
+----
+Output:
+[source,bash]
+----
+HEALTH MONITORING
+------------------
+Name Service:  localhost:7574
+Cluster Name:  local
+
+URL                      NODE ID  STARTED  LIVE  READY  SAFE  OVERALL
+http://127.0.0.1:63765/        2      200   200    200   200        4
+http://127.0.0.1:63766/        1      200   200    200   200        4
+http://127.0.0.1:63768/        3      200   200    200   200        4
+----
+
+Monitor the health endpoints for a cluster a list of health endpoints.
+
+NOTE: The endpoints should not include any path information.
+
+[source,bash]
+----
+cohctl monitor health -c local -e http://127.0.0.1:63768/,http://127.0.0.1:63744/,http://127.0.0.1:6544/
+----
+Output:
+[source,bash]
+----
+HEALTH MONITORING
+------------------
+Endpoints:  [http://127.0.0.1:63768/ http://127.0.0.1:63744/ http://127.0.0.1:6544/]
+
+URL                      NODE ID  STARTED     LIVE    READY     SAFE  OVERALL
+http://127.0.0.1:63744/      n/a  Refused  Refused  Refused  Refused      0/4
+http://127.0.0.1:63768/      n/a      200      200      200      200        4
+http://127.0.0.1:6544/       n/a  Refused  Refused  Refused  Refused      0/4
+----
+
+Monitor the health endpoints via the name service and wait until they are all safe.
+
+This is useful for scripting during a rolling restart when you want to wait until all members are safe
+before proceeding.
+
+You must specify the following options:
+
+* `-T` specifies the number of seconds to wait until all health endpoints are safe
+* `-w` or `-W` to wait
+
+If the endpoints are all safe within the time specified, `cohctl` will return 0, otherwise it will return 1.
+
+[source,bash]
+----
+cohctl monitor health -c local -n localhost:7574 -N -T 60 -W
+----
+Output:
+[source,bash]
+----
+HEALTH MONITORING
+------------------
+Name Service:  localhost:7574
+Cluster Name:  local
+
+URL                      NODE ID  STARTED  LIVE  READY  SAFE  OVERALL
+http://127.0.0.1:52133/        1      200   200    200   200        4
+http://127.0.0.1:52134/        3      200   200    200   200        4
+http://127.0.0.1:52136/        2      200   200    200   200        4
+
+All health endpoints are safe reached in 21 seconds
+----
+
 
 === See Also
 

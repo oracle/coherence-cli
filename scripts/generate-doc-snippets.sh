@@ -194,6 +194,7 @@ create_doc $DOCS_DIR/describe_http_session "${COHCTL} describe http-session --he
 
 # Health
 create_doc $DOCS_DIR/get_health "${COHCTL} get health --help"
+create_doc $DOCS_DIR/monitor_health "${COHCTL} monitor health --help"
 
 # Environment
 create_doc $DOCS_DIR/get_environment "${COHCTL} get environment --help"
