@@ -28,7 +28,7 @@ jobs:
 #   Checkout the source, we need a depth of zero to fetch all of the history otherwise
 #   the copyright check cannot work out the date of the files from Git.
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         fetch-depth: 0
 
@@ -38,7 +38,7 @@ jobs:
         docker pull gcr.io/distroless/java:11
 
     - name: Set up JDK 8 for Build CE-1411
-      uses: actions/setup-java@v4
+      uses: actions/setup-java@v5
       with:
         java-version: 8
         distribution: 'zulu'

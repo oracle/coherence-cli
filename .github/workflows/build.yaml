@@ -20,7 +20,7 @@ jobs:
 #   Checkout the source, we need a depth of zero to fetch all of the history otherwise
 #   the copyright check cannot work out the date of the files from Git.
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         fetch-depth: 0
 
