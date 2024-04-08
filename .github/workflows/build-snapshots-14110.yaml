@@ -38,7 +38,7 @@ jobs:
         docker pull gcr.io/distroless/java:11
 
     - name: Set up JDK 8 for Build CE-1411
-      uses: actions/setup-java@v5
+      uses: actions/setup-java@v4
       with:
         java-version: 8
         distribution: 'zulu'
