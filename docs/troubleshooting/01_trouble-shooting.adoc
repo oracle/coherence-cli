@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 
-    Copyright (c) 2021, 2023 Oracle and/or its affiliates.
+    Copyright (c) 2021, 2024 Oracle and/or its affiliates.
     Licensed under the Universal Permissive License v 1.0 as shown at
     https://oss.oracle.com/licenses/upl.
 
@@ -192,7 +192,7 @@ Output:
 [source,bash]
 ----
 Enter password: *****
-Added cluster wls1 with type http and URL http://thost:7001/management/coherence/latest/clusters
+Added cluster wls1 with type http and URL http://host:7001/management/coherence/latest/clusters
 ----
 Display the clusters.
 [source,bash]
@@ -212,13 +212,13 @@ You must supply the cluster name on the URL to add a specific cluster, rather th
 
 [source,bash]
 ----
-cohctl add cluster wls2 -U weblogic -u http://hostname:7001/management/coherence/latest/clusters/CoherenceCluster2
+cohctl add cluster wls2 -U weblogic -u http://host:7001/management/coherence/latest/clusters/CoherenceCluster2
 ----
 Output:
 [source,bash]
 ----
 Enter password: ******
-Added cluster wls2 with type http and URL http://hostname:7001/management/coherence/latest/clusters/CoherenceCluster2
+Added cluster wls2 with type http and URL http://host:7001/management/coherence/latest/clusters/CoherenceCluster2
 ----
 
 Display the clusters.
@@ -231,8 +231,8 @@ Output:
 [source,bash]
 ----
 CONNECTION  TYPE  URL                                                                            VERSION      CLUSTER NAME        TYPE        CTX
-wls1        http  http://hostname:7001/management/coherence/latest/clusters                    14.1.1.0.0   CoherenceCluster    WebLogic
-wls2        http  http://hostname:7001/management/coherence/latest/clusters/CoherenceCluster2  14.1.1.0.0   CoherenceCluster2   WebLogic
+wls1        http  http://host:7001/management/coherence/latest/clusters                    14.1.1.0.0   CoherenceCluster    WebLogic
+wls2        http  http://host:7001/management/coherence/latest/clusters/CoherenceCluster2  14.1.1.0.0   CoherenceCluster2   WebLogic
 ----
 
 [#windows]
