@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 
-    Copyright (c) 2021, 2023 Oracle and/or its affiliates.
+    Copyright (c) 2021, 2024 Oracle and/or its affiliates.
     Licensed under the Universal Permissive License v 1.0 as shown at
     https://oss.oracle.com/licenses/upl.
 
@@ -31,7 +31,7 @@ Subscriber Specific Operations
 * <<retrieve-remaining, `cohctl retrieve remaining`>> - instructs a subscriber to retrieve the count of remaining messages for each channel
 * <<notify-populated, `cohctl notify populated`>> - instructs a subscriber to send a channel populated notification to this subscriber and channel
 
-NOTE: These topics commands are available to run against Coherence CE editions 22.06.4+, 22.09.1+ 23.03.+ as well as
+NOTE: These topics commands are available to run against Coherence CE editions 22.06.4+, 23.03.+ and 24.03+ as well as
 Coherence Grid Edition 14.1.1.2206.4+.
 
 NOTE: In most commands you may omit the service name option if the topic name is unique.
