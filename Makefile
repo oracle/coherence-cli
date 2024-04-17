@@ -23,7 +23,7 @@ SHELL := /bin/bash
 MVN_VERSION ?= 1.0.0
 
 # Coherence CE version to run base tests against
-COHERENCE_VERSION ?= 22.06.7
+COHERENCE_VERSION ?= 22.06.8
 COHERENCE_GROUP_ID ?= com.oracle.coherence.ce
 COHERENCE_WKA1 ?= server1
 COHERENCE_WKA2 ?= server1
@@ -529,6 +529,8 @@ test-docs: docs ## Test doc links
 		--exclude 'https://&lt;host&gt;:&lt;management-port&gt;/management/coherence/cluster' \
 		--exclude 'http://&lt;pod-ip' \
 		--exclude 'http://elasticsearch-master' \
+		--exclude 'http://host' \
+		--exclude 'https://goessner.net/articles/JsonPath' \
 		--exclude 'https://oracle.github.io/coherence-operator/docs/latest/' \
 		--exclude 'https://github.com/oracle/coherence-cli/releases/download/' \
  		2>&1 | tee $(TEST_LOGS_DIR)/doc-link-check.log
