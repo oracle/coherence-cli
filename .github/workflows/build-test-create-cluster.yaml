@@ -25,7 +25,7 @@ jobs:
           - 22.06.8
           - 22.06.9-SNAPSHOT
           - 24.03
-	  - 23.03.1-SNAPSHOT
+          - 23.03.1-SNAPSHOT
         javaVersion:
           - 17
 
