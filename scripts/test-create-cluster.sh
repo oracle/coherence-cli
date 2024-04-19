@@ -142,9 +142,22 @@ runCommand monitor health -n localhost:7574 -N
 grep "NODE ID" $OUTPUT
 grep "STARTED" $OUTPUT
 
+runCommand stop cluster local -y
+runCommand remove cluster local -y
+pause && pause && pause
+
+echo "Test -F Startup and profile"
+runCommand set profile grpc -v "-Dcoherence.grpc.server.port=1408" -y
+runCommand create cluster local -y -v $VERSION $COM -P grpc -a coherence-grpc-proxy -F
+wait_for_ready
+
+runCommand stop cluster local -y
+runCommand start cluster local -P grpc -F
+wait_for_ready
 
 runCommand stop cluster local -y
 runCommand remove cluster local -y
+
 pause && pause && pause
 
 LOGS_DEST=$(mktemp -d)

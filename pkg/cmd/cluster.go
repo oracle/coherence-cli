@@ -982,6 +982,7 @@ var (
 	heapMemoryParam          string
 	useCommercialParam       bool
 	extendClientParam        bool
+	profileFirstParam        bool
 	skipMavenDepsParam       bool
 	validPersistenceModes    = []string{"on-demand", "active", "active-backup", "active-async"}
 	persistenceModeParam     string
@@ -1698,6 +1699,7 @@ func init() {
 	createClusterCmd.Flags().StringVarP(&operationalConfigParam, operationalConfigArg, "", "", operationalConfigMessage)
 	createClusterCmd.Flags().Int32VarP(&jmxRemotePortParam, jmxPortArg, "J", 0, jmxPortMessage)
 	createClusterCmd.Flags().StringVarP(&jmxRemoteHostParam, jmxHostArg, "j", "", jmxHostMessage)
+	createClusterCmd.Flags().BoolVarP(&profileFirstParam, profileFirstArg, "F", false, profileFirstMessage)
 
 	stopClusterCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
 
@@ -1711,6 +1713,7 @@ func init() {
 	startClusterCmd.Flags().StringVarP(&serverStartClassParam, startClassArg, "S", "", startClassMessage)
 	startClusterCmd.Flags().Int32VarP(&jmxRemotePortParam, jmxPortArg, "J", 0, jmxPortMessage)
 	startClusterCmd.Flags().StringVarP(&jmxRemoteHostParam, jmxHostArg, "j", "", jmxHostMessage)
+	startClusterCmd.Flags().BoolVarP(&profileFirstParam, profileFirstArg, "F", false, profileFirstMessage)
 
 	startConsoleCmd.Flags().StringVarP(&heapMemoryParam, heapMemoryArg, "M", defaultHeap, heapMemoryMessage)
 	startConsoleCmd.Flags().Int32VarP(&logLevelParam, logLevelArg, "l", 5, logLevelMessage)
@@ -1848,6 +1851,10 @@ func validateProfile() error {
 	startupProfile := getProfileValue(profileValueParam)
 	if profileValueParam != "" && startupProfile == "" {
 		return fmt.Errorf("a profile with the name %s does not exist", profileValueParam)
+	}
+
+	if profileFirstParam && profileValueParam == "" {
+		return errors.New("if you specified -F option you must also specify a profile")
 	}
 
 	return nil
