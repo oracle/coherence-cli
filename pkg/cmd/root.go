@@ -74,6 +74,7 @@ const (
 	heapMemoryMessage        = "heap memory to allocate for JVM if default-heap not set"
 	startupDelayMessage      = "startup delay in millis for each server"
 	heapMemoryArg            = "heap-memory"
+	profileFirstArg          = "profile-first"
 	profileArg               = "profile"
 	startClassArg            = "start-class"
 	logDestinationArg        = "log-destination"
@@ -95,6 +96,7 @@ const (
 	logLevelMessage          = "coherence log level"
 	profileMessage           = "profile to add to cluster startup command line"
 	startClassMessage        = "class name to start server with (default com.tangosol.net.Coherence)"
+	profileFirstMessage      = "only apply profile to the first member starting"
 	logDestinationMessage    = "root directory to place log files in"
 	commaSeparatedIDMessage  = "comma separated node ids to target"
 

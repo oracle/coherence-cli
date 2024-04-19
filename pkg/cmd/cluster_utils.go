@@ -271,7 +271,7 @@ func startCluster(cmd *cobra.Command, connection ClusterConnection, serverCount,
 	for counter = existingCount; counter < serverCount+existingCount; counter++ {
 		var (
 			member        = fmt.Sprintf("storage-%d", counter)
-			arguments     = append(profileArgs, getCommonArguments(connection)...)
+			arguments     = getCommonArguments(connection)
 			memberLogFile string
 		)
 
@@ -280,6 +280,11 @@ func startCluster(cmd *cobra.Command, connection ClusterConnection, serverCount,
 			metricsArgs := []string{"-Dcoherence.metrics.http.enabled=true", fmt.Sprintf("-Dcoherence.metrics.http.port=%d", metricsStartPort)}
 			metricsStartPort++
 			arguments = append(arguments, metricsArgs...)
+		}
+
+		// if -F is specified and we are the first management or -F is not specified then add profile
+		if (profileFirstParam && mgmtPort != -1) || (!profileFirstParam && len(profileArgs) > 0) {
+			arguments = append(arguments, profileArgs...)
 		}
 
 		// check if health start port specified
