@@ -146,19 +146,22 @@ runCommand stop cluster local -y
 runCommand remove cluster local -y
 pause && pause && pause
 
-echo "Test -F Startup and profile"
-runCommand set profile grpc -v "-Dcoherence.grpc.server.port=1408" -y
-runCommand create cluster local -y -v $VERSION $COM -P grpc -a coherence-grpc-proxy -F
-wait_for_ready
+# Don't run for commercial or SNAPSHOT
+if [ -z "$COM" -a -z "`echo $VERSION | grep SNAPSHOT`" ] ; then
+  echo "Test -F Startup and profile"
+  runCommand set profile grpc -v "-Dcoherence.grpc.server.port=1408" -y
+  runCommand create cluster local -y -v $VERSION $COM -P grpc -a coherence-grpc-proxy -F
+  wait_for_ready
 
-runCommand stop cluster local -y
-runCommand start cluster local -P grpc -F
-wait_for_ready
+  runCommand stop cluster local -y
+  runCommand start cluster local -P grpc -F
+  wait_for_ready
 
-runCommand stop cluster local -y
-runCommand remove cluster local -y
+  runCommand stop cluster local -y
+  runCommand remove cluster local -y
 
-pause && pause && pause
+  pause && pause && pause
+fi
 
 LOGS_DEST=$(mktemp -d)
 message "Test different log location - ${LOGS_DEST}"
