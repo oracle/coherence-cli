@@ -47,7 +47,7 @@ jobs:
 
     - name: Set Version
       shell: bash
-      run: echo "::set-output name=version::$(./bin/cohctl version | grep 'CLI Version:' | awk '{print $3}')"
+      run: echo "version=`./bin/cohctl version | grep 'CLI Version:' | awk '{print $3}'`" >> "$GITHUB_OUTPUT"
       id: version
 
     - name: E2E Local Tests
