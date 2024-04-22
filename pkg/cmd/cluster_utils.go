@@ -22,6 +22,7 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -703,4 +704,233 @@ func isPortUsed(managementPort int32) bool {
 	// if err was nil it means we were successful in connecting to the port
 	// as there was something running on it and listening
 	return err == nil
+}
+
+type clusterSummaryInfo struct {
+	machines                   []config.Machine
+	finalSummariesDestinations []config.FederationSummary
+	finalSummariesOrigins      []config.FederationSummary
+	federatedServices          []string
+	clusterResult              []byte
+	membersResult              []byte
+	servicesResult             []byte
+	proxyResults               []byte
+	reportersResult            []byte
+	ramResult                  []byte
+	flashResult                []byte
+	cachesResult               []byte
+	http                       []byte
+	executorsResult            []byte
+	machinesData               []byte
+	storageData                []byte
+	healthResult               []byte
+	executors                  config.Executors
+}
+
+// retrieveClusterSummary retrieves all the required information used by various commands.
+func retrieveClusterSummary(dataFetcher fetcher.Fetcher) (clusterSummaryInfo, []error) {
+	var (
+		errorSink      = createErrorSink()
+		waitGroupCount = 12
+		wg             sync.WaitGroup
+		result         clusterSummaryInfo
+		mutex          sync.Mutex
+	)
+
+	// retrieve cluster details first so if we are connected
+	// to WLS or need authentication, this can be done first
+	data1, err1 := dataFetcher.GetClusterDetailsJSON()
+	if err1 != nil {
+		return result, []error{err1}
+	}
+	result.clusterResult = data1
+
+	// retrieve the details for the cluster in parallel
+	wg.Add(waitGroupCount)
+
+	go func() {
+		defer wg.Done()
+		var (
+			err  error
+			data []byte
+		)
+		data, err = dataFetcher.GetMemberDetailsJSON(false)
+		if err != nil {
+			errorSink.AppendError(err)
+			return
+		}
+		mutex.Lock()
+		defer mutex.Unlock()
+		result.membersResult = data
+	}()
+
+	go func() {
+		defer wg.Done()
+		var (
+			data     []byte
+			machines []config.Machine
+		)
+		machinesMap, err := GetMachineList(dataFetcher)
+		if err != nil {
+			errorSink.AppendError(err)
+			return
+		}
+
+		machines, err = getMachines(machinesMap, dataFetcher)
+		if err != nil {
+			errorSink.AppendError(err)
+			return
+		}
+
+		data, err = getOSJson(machinesMap, dataFetcher)
+		if err != nil {
+			errorSink.AppendError(err)
+		}
+
+		mutex.Lock()
+		defer mutex.Unlock()
+		result.machines = machines
+		result.machinesData = data
+	}()
+
+	go func() {
+		defer wg.Done()
+		data, err := dataFetcher.GetServiceDetailsJSON()
+		if err != nil {
+			errorSink.AppendError(err)
+		}
+
+		mutex.Lock()
+		defer mutex.Unlock()
+		result.servicesResult = data
+	}()
+
+	go func() {
+		defer wg.Done()
+		data, err := dataFetcher.GetMembersHealth()
+		if err != nil {
+			errorSink.AppendError(err)
+		}
+
+		mutex.Lock()
+		defer mutex.Unlock()
+		result.healthResult = data
+	}()
+
+	go func() {
+		defer wg.Done()
+		data, err := dataFetcher.GetStorageDetailsJSON()
+		if err != nil {
+			errorSink.AppendError(err)
+		}
+
+		mutex.Lock()
+		defer mutex.Unlock()
+		result.storageData = data
+	}()
+
+	go func() {
+		defer wg.Done()
+		data, err := dataFetcher.GetProxySummaryJSON()
+		if err != nil {
+			errorSink.AppendError(err)
+		}
+
+		mutex.Lock()
+		defer mutex.Unlock()
+		result.proxyResults = data
+	}()
+
+	go func() {
+		defer wg.Done()
+		if !verboseOutput {
+			return
+		}
+		data, err := dataFetcher.GetReportersJSON()
+		if err != nil {
+			errorSink.AppendError(err)
+		}
+
+		mutex.Lock()
+		defer mutex.Unlock()
+		result.reportersResult = data
+	}()
+
+	go func() {
+		defer wg.Done()
+		federatedServices, err := GetFederatedServices(dataFetcher)
+		if err != nil {
+			errorSink.AppendError(err)
+			return
+		}
+		finalSummariesDestinations, err := getFederationSummaries(result.federatedServices, outgoing, dataFetcher)
+		if err != nil {
+			errorSink.AppendError(err)
+			return
+		}
+		finalSummariesOrigins, err := getFederationSummaries(result.federatedServices, incoming, dataFetcher)
+		if err != nil {
+			errorSink.AppendError(err)
+			return
+		}
+
+		mutex.Lock()
+		defer mutex.Unlock()
+		result.federatedServices = federatedServices
+		result.finalSummariesDestinations = finalSummariesDestinations
+		result.finalSummariesOrigins = finalSummariesOrigins
+	}()
+
+	go func() {
+		defer wg.Done()
+		data, err := dataFetcher.GetElasticDataDetails("flash")
+		if err != nil {
+			errorSink.AppendError(err)
+		}
+
+		mutex.Lock()
+		defer mutex.Unlock()
+		result.flashResult = data
+	}()
+
+	go func() {
+		defer wg.Done()
+		data, err := dataFetcher.GetElasticDataDetails("ram")
+		if err != nil {
+			errorSink.AppendError(err)
+		}
+
+		mutex.Lock()
+		defer mutex.Unlock()
+		result.ramResult = data
+	}()
+
+	go func() {
+		defer wg.Done()
+		data, err := dataFetcher.GetHTTPSessionDetailsJSON()
+		if err != nil {
+			errorSink.AppendError(err)
+		}
+
+		mutex.Lock()
+		defer mutex.Unlock()
+		result.http = data
+	}()
+
+	go func() {
+		defer wg.Done()
+		data, err := getExecutorDetails(dataFetcher, true)
+		if err != nil {
+			errorSink.AppendError(err)
+		}
+
+		mutex.Lock()
+		defer mutex.Unlock()
+		result.executors = data
+	}()
+
+	// wait for all data fetchers requests to complete
+	wg.Wait()
+
+	return result, errorSink.GetErrors()
 }
