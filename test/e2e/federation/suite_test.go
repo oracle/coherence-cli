@@ -31,7 +31,6 @@ func TestMain(m *testing.M) {
 	err = test_utils.StartCoherenceCluster(fileName, context.Url)
 	if err != nil {
 		fmt.Println(err)
-		_ = test_utils.CollectDockerLogs()
 		exitCode = 1
 	} else {
 		// don't check for balanced federation services as there is only 1 member per cluster
