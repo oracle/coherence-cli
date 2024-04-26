@@ -184,8 +184,9 @@ func StartCoherenceCluster(fileName, url string) error {
 	if err != nil {
 		return errors.New(output + ": " + err.Error())
 	} else {
-		// wait for ready
+		// wait for ready and dump logs if not available
 		if err = WaitForHttpReady(url, 120); err != nil {
+			_ = CollectDockerLogs()
 			return errors.New("Unable to start cluster: " + err.Error())
 		}
 	}
