@@ -22,7 +22,6 @@ import (
 	"sort"
 	"strconv"
 	"strings"
-	"sync"
 	"time"
 )
 
@@ -239,43 +238,22 @@ addition information as well as '-v' to displayed additional information.`,
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var (
-			cluster                    = config.Cluster{}
-			members                    = config.Members{}
-			services                   = config.ServicesSummaries{}
-			proxiesSummary             = config.ProxiesSummary{}
-			reporters                  = config.Reporters{}
-			httpSessions               = config.HTTPSessionSummaries{}
-			executors                  = config.Executors{}
-			healthSummaries            = config.HealthSummaries{}
-			machines                   []config.Machine
-			finalSummariesDestinations []config.FederationSummary
-			finalSummariesOrigins      []config.FederationSummary
-			storage                    = config.StorageDetails{}
-			dataFetcher                fetcher.Fetcher
-			federatedServices          []string
-			edData                     string
-			wg                         sync.WaitGroup
-			err                        error
-			clusterResult              []byte
-			membersResult              []byte
-			servicesResult             []byte
-			proxyResults               []byte
-			reportersResult            []byte
-			ramResult                  []byte
-			flashResult                []byte
-			cachesResult               []byte
-			http                       []byte
-			executorsResult            []byte
-			machinesData               []byte
-			storageData                []byte
-			healthResult               []byte
-			errorSink                  = createErrorSink()
-			cachesData                 string
-			topicsData                 string
-			jsonPathOrJSON             = strings.Contains(OutputFormat, constants.JSONPATH) || OutputFormat == constants.JSON
+			cluster         = config.Cluster{}
+			members         = config.Members{}
+			services        = config.ServicesSummaries{}
+			proxiesSummary  = config.ProxiesSummary{}
+			reporters       = config.Reporters{}
+			httpSessions    = config.HTTPSessionSummaries{}
+			executors       = config.Executors{}
+			healthSummaries = config.HealthSummaries{}
+			storage         = config.StorageDetails{}
+			dataFetcher     fetcher.Fetcher
+			edData          string
+			err             error
+			cachesData      string
+			topicsData      string
+			jsonPathOrJSON  = strings.Contains(OutputFormat, constants.JSONPATH) || OutputFormat == constants.JSON
 		)
-
-		const waitGroupCount = 13
 
 		connection := args[0]
 
@@ -290,196 +268,36 @@ addition information as well as '-v' to displayed additional information.`,
 			return err
 		}
 
-		// retrieve cluster details first so if we are connected
-		// to WLS or need authentication, this can be done first
-		clusterResult, err = dataFetcher.GetClusterDetailsJSON()
-		if err != nil {
-			return err
-		}
-
-		// retrieve the rest of the details for the cluster in parallel
-		wg.Add(waitGroupCount)
-
-		go func() {
-			defer wg.Done()
-			var err1 error
-			membersResult, err1 = dataFetcher.GetMemberDetailsJSON(false)
-			if err1 != nil {
-				errorSink.AppendError(err1)
-			}
-		}()
-
-		go func() {
-			defer wg.Done()
-			machinesMap, err1 := GetMachineList(dataFetcher)
-			if err1 != nil {
-				errorSink.AppendError(err1)
-				return
-			}
-			machines, err1 = getMachines(machinesMap, dataFetcher)
-			if err1 != nil {
-				errorSink.AppendError(err1)
-				return
-			}
-
-			if jsonPathOrJSON {
-				machinesData, err = getOSJson(machinesMap, dataFetcher)
-				if err1 != nil {
-					errorSink.AppendError(err1)
-				}
-			}
-		}()
-
-		go func() {
-			defer wg.Done()
-			var err1 error
-			servicesResult, err1 = dataFetcher.GetServiceDetailsJSON()
-			if err1 != nil {
-				errorSink.AppendError(err1)
-			}
-		}()
-
-		go func() {
-			defer wg.Done()
-			var err1 error
-			healthResult, err1 = dataFetcher.GetMembersHealth()
-			if err1 != nil {
-				errorSink.AppendError(err1)
-			}
-		}()
-
-		go func() {
-			defer wg.Done()
-			var err1 error
-			storageData, err1 = dataFetcher.GetStorageDetailsJSON()
-			if err1 != nil {
-				errorSink.AppendError(err1)
-			}
-		}()
-
-		go func() {
-			defer wg.Done()
-			var err1 error
-			proxyResults, err1 = dataFetcher.GetProxySummaryJSON()
-			if err1 != nil {
-				errorSink.AppendError(err1)
-			}
-		}()
-
-		go func() {
-			defer wg.Done()
-			var err1 error
-			if !verboseOutput {
-				return
-			}
-			reportersResult, err1 = dataFetcher.GetReportersJSON()
-			if err1 != nil {
-				errorSink.AppendError(err1)
-			}
-		}()
-
-		go func() {
-			defer wg.Done()
-			var err1 error
-			if !verboseOutput {
-				return
-			}
-			reportersResult, err1 = dataFetcher.GetReportersJSON()
-			if err1 != nil {
-				errorSink.AppendError(err1)
-			}
-		}()
-
-		go func() {
-			defer wg.Done()
-			var err1 error
-			federatedServices, err1 = GetFederatedServices(dataFetcher)
-			if err1 != nil {
-				errorSink.AppendError(err1)
-				return
-			}
-			finalSummariesDestinations, err1 = getFederationSummaries(federatedServices, outgoing, dataFetcher)
-			if err1 != nil {
-				errorSink.AppendError(err1)
-				return
-			}
-			finalSummariesOrigins, err = getFederationSummaries(federatedServices, incoming, dataFetcher)
-			if err1 != nil {
-				errorSink.AppendError(err1)
-				return
-			}
-		}()
-
-		go func() {
-			defer wg.Done()
-			var err1 error
-			flashResult, err1 = dataFetcher.GetElasticDataDetails("flash")
-			if err1 != nil {
-				errorSink.AppendError(err1)
-			}
-		}()
-
-		go func() {
-			defer wg.Done()
-			var err1 error
-			ramResult, err1 = dataFetcher.GetElasticDataDetails("ram")
-			if err1 != nil {
-				errorSink.AppendError(err1)
-			}
-		}()
-
-		go func() {
-			defer wg.Done()
-			var err1 error
-			http, err1 = dataFetcher.GetHTTPSessionDetailsJSON()
-			if err1 != nil {
-				errorSink.AppendError(err1)
-			}
-		}()
-
-		go func() {
-			defer wg.Done()
-			var err1 error
-			executors, err1 = getExecutorDetails(dataFetcher, true)
-			if err1 != nil {
-				errorSink.AppendError(err1)
-			}
-		}()
-
-		// wait for all data fetchers requests to complete
-		wg.Wait()
-
-		errorList := errorSink.GetErrors()
+		clusterSummary, errorList := retrieveClusterSummary(dataFetcher)
 
 		// check if any of the requests returned errors and only fail if all do
-		errorCount := len(errorList)
-		if errorCount == waitGroupCount {
-			return utils.GetErrors(errorList)
-		} else if errorCount != 0 {
+		if len(errorList) != 0 {
 			// one or more errors.
 			err = utils.GetErrors(errorList)
 			_, _ = fmt.Fprint(os.Stderr, err.Error())
+			return err
 		}
 
 		if verboseOutput && len(executors.Executors) > 0 {
-			executorsResult, err = json.Marshal(executors)
+			clusterSummary.executorsResult, err = json.Marshal(executors)
 			if err != nil {
 				return err
 			}
 		}
 
 		if jsonPathOrJSON {
-			cachesResult, err = dataFetcher.GetCachesSummaryJSONAllServices()
+			clusterSummary.cachesResult, err = dataFetcher.GetCachesSummaryJSONAllServices()
 			if err != nil {
 				return err
 			}
 			// build the final json data
-			jsonDataDest, _ := json.Marshal(finalSummariesDestinations)
-			jsonDataOrigins, _ := json.Marshal(finalSummariesOrigins)
+			jsonDataDest, _ := json.Marshal(clusterSummary.finalSummariesDestinations)
+			jsonDataOrigins, _ := json.Marshal(clusterSummary.finalSummariesOrigins)
 			finalResult, err := utils.CombineByteArraysForJSON(
-				[][]byte{clusterResult, machinesData, membersResult, servicesResult, cachesResult,
-					proxyResults, reportersResult, ramResult, flashResult, http, executorsResult,
-					jsonDataDest, jsonDataOrigins, healthResult},
+				[][]byte{clusterSummary.clusterResult, clusterSummary.machinesData, clusterSummary.membersResult,
+					clusterSummary.servicesResult, clusterSummary.cachesResult, clusterSummary.proxyResults,
+					clusterSummary.reportersResult, clusterSummary.ramResult, clusterSummary.flashResult,
+					clusterSummary.http, clusterSummary.executorsResult, jsonDataDest, jsonDataOrigins, clusterSummary.healthResult},
 				[]string{"cluster", "machines", "members", "services", "caches", "proxies", "reporters", constants.RAMJournal,
 					constants.FlashJournal, "httpServers", "executors", "federationDestinations", "federationOrigins", "health"})
 			if err != nil {
@@ -496,51 +314,51 @@ addition information as well as '-v' to displayed additional information.`,
 			cmd.Println(string(finalResult))
 		} else {
 			// format the output for text
-			err = json.Unmarshal(clusterResult, &cluster)
+			err = json.Unmarshal(clusterSummary.clusterResult, &cluster)
 			if err != nil {
 				return utils.GetError("unable to decode cluster details", err)
 			}
 
-			err = json.Unmarshal(membersResult, &members)
+			err = json.Unmarshal(clusterSummary.membersResult, &members)
 			if err != nil {
 				return utils.GetError("unable to decode members result", err)
 			}
 
-			err = json.Unmarshal(servicesResult, &services)
+			err = json.Unmarshal(clusterSummary.servicesResult, &services)
 			if err != nil {
 				return utils.GetError("unable to decode services results", err)
 			}
 
-			err = json.Unmarshal(storageData, &storage)
+			err = json.Unmarshal(clusterSummary.storageData, &storage)
 			if err != nil {
 				return utils.GetError("unable to decode storage details", err)
 			}
 
 			storageMap := utils.GetStorageMap(storage)
 
-			if len(proxyResults) > 0 {
-				err = json.Unmarshal(proxyResults, &proxiesSummary)
+			if len(clusterSummary.proxyResults) > 0 {
+				err = json.Unmarshal(clusterSummary.proxyResults, &proxiesSummary)
 				if err != nil {
 					return utils.GetError("unable to decode proxy details", err)
 				}
 			}
 
-			if len(reportersResult) > 0 {
-				err = json.Unmarshal(reportersResult, &reporters)
+			if len(clusterSummary.reportersResult) > 0 {
+				err = json.Unmarshal(clusterSummary.reportersResult, &reporters)
 				if err != nil {
 					return utils.GetError("unable to unmarshall reporter result", err)
 				}
 			}
 
-			if len(http) > 0 {
-				err = json.Unmarshal(http, &httpSessions)
+			if len(clusterSummary.http) > 0 {
+				err = json.Unmarshal(clusterSummary.http, &httpSessions)
 				if err != nil {
 					return utils.GetError("unable to decode Coherence*Web details", err)
 				}
 			}
 
-			if len(healthResult) > 0 {
-				err = json.Unmarshal(healthResult, &healthSummaries)
+			if len(clusterSummary.healthResult) > 0 {
+				err = json.Unmarshal(clusterSummary.healthResult, &healthSummaries)
 				if err != nil {
 					return err
 				}
@@ -554,7 +372,7 @@ addition information as well as '-v' to displayed additional information.`,
 
 			sb.WriteString("\nMACHINES\n")
 			sb.WriteString("--------\n")
-			sb.WriteString(FormatMachines(machines))
+			sb.WriteString(FormatMachines(clusterSummary.machines))
 
 			sb.WriteString("\nMEMBERS\n")
 			sb.WriteString("-------\n")
@@ -574,66 +392,25 @@ addition information as well as '-v' to displayed additional information.`,
 			}
 			sb.WriteString(FormatPersistenceServices(deDuplicatedServices, true))
 
-			if len(finalSummariesDestinations) > 0 || len(finalSummariesOrigins) > 0 {
+			if len(clusterSummary.finalSummariesDestinations) > 0 || len(clusterSummary.finalSummariesOrigins) > 0 {
 				sb.WriteString("\nFEDERATION\n")
 				sb.WriteString("----------\n")
-				if len(finalSummariesDestinations) > 0 {
-					sb.WriteString(FormatFederationSummary(finalSummariesDestinations, destinations))
+				if len(clusterSummary.finalSummariesDestinations) > 0 {
+					sb.WriteString(FormatFederationSummary(clusterSummary.finalSummariesDestinations, destinations))
 				}
 				sb.WriteString("\n")
-				if len(finalSummariesOrigins) > 0 {
-					sb.WriteString(FormatFederationSummary(finalSummariesOrigins, origins))
+				if len(clusterSummary.finalSummariesOrigins) > 0 {
+					sb.WriteString(FormatFederationSummary(clusterSummary.finalSummariesOrigins, origins))
 				}
 			}
 
-			cacheServices := GetListOfCacheServices(services)
-
-			// reset the error sink
-			errorSink = createErrorSink()
-
-			// carry out the caches and topics requests concurrently
-			wg.Add(2)
-			go func() {
-				defer wg.Done()
-				var err1 error
-				cachesData, err1 = formatCachesSummary(cacheServices, dataFetcher)
-				if err1 != nil {
-					errorSink.AppendError(err1)
-				}
-				cachesData = "\nCACHES\n------\n" + cachesData
-			}()
-
-			go func() {
-				defer wg.Done()
-
-				topicsDetails, err1 := getTopics(dataFetcher, serviceName)
-				if err1 != nil {
-					errorSink.AppendError(err1)
-					return
-				}
-
-				topicsMemberDetails, err1 := getTopicsMembers(dataFetcher, topicsDetails)
-				if err1 != nil {
-					errorSink.AppendError(err1)
-					return
-				}
-
-				topicsSubscriberDetails, err1 := getTopicsSubscribers(dataFetcher, topicsDetails)
-				if err1 != nil {
-					errorSink.AppendError(err1)
-					return
-				}
-
-				enrichTopicsSummary(&topicsDetails, topicsMemberDetails, topicsSubscriberDetails)
-
-				topicsData = "\nTOPICS\n------\n" + FormatTopicsSummary(topicsDetails.Details)
-			}()
-
-			wg.Wait()
-			errorList = errorSink.GetErrors()
-			if len(errorList) > 0 {
-				return utils.GetErrors(errorList)
+			cachesData, err = formatCachesSummary(clusterSummary.serviceList, dataFetcher)
+			if err != nil {
+				return err
 			}
+			cachesData = "\nCACHES\n------\n" + cachesData
+
+			topicsData = "\nTOPICS\n------\n" + FormatTopicsSummary(clusterSummary.topicsDetails.Details)
 
 			sb.WriteString(cachesData + topicsData)
 
@@ -667,7 +444,7 @@ addition information as well as '-v' to displayed additional information.`,
 				}
 			}
 
-			edData, err = getElasticDataResult(flashResult, ramResult)
+			edData, err = getElasticDataResult(clusterSummary.flashResult, clusterSummary.ramResult)
 			if err != nil {
 				return err
 			}

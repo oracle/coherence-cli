@@ -23,9 +23,9 @@ echo "Coherence Federation Test GE 14.1.1-0-7"
 PROFILES=,federation COHERENCE_VERSION=14.1.1-0-7 COHERENCE_GROUP_ID=com.oracle.coherence make clean build-federation-images test-e2e-federation
 
 echo "Coherence Federation Test GE 12.2.1-4-10"
-PROFILES=,federation COHERENCE_VERSION=12.2.1-4-10 COHERENCE_GROUP_ID=com.oracle.coherence make clean build-federation-images test-e2e-federation
+COHERENCE_BASE_IMAGE=gcr.io/distroless/java17 PROFILES=,federation COHERENCE_VERSION=12.2.1-4-10 COHERENCE_GROUP_ID=com.oracle.coherence make clean build-federation-images test-e2e-federation
 
 echo "Coherence Federation Test 14.1.2-0-0-SNAPSHOT"
-PROFILES=,federation COHERENCE_VERSION=14.1.2-0-0-SNAPSHOT COHERENCE_GROUP_ID=com.oracle.coherence make clean build-federation-images test-e2e-federation
+COHERENCE_BASE_IMAGE=gcr.io/distroless/java17 PROFILES=,federation COHERENCE_VERSION=14.1.2-0-0-SNAPSHOT COHERENCE_GROUP_ID=com.oracle.coherence make clean build-federation-images test-e2e-federation
 
 COHERENCE_BASE_IMAGE=gcr.io/distroless/java17 PROFILES=,views COHERENCE_GROUP_ID=com.oracle.coherence COHERENCE_VERSION=15.1.1-0-0-SNAPSHOT make clean build-view-images test-e2e-views

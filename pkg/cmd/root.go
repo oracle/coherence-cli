@@ -695,6 +695,7 @@ func Initialize(command *cobra.Command) *cobra.Command {
 	// monitor
 	command.AddCommand(monitorCmd)
 	monitorCmd.AddCommand(monitorHealthCmd)
+	monitorCmd.AddCommand(monitorClusterCmd)
 
 	return command
 }
