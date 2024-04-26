@@ -31,7 +31,6 @@ func TestMain(m *testing.M) {
 
 	if err != nil {
 		fmt.Println(err)
-		_ = test_utils.CollectDockerLogs()
 		exitCode = 1
 	} else {
 		// wait for balanced services for standalone test
