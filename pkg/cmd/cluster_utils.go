@@ -898,7 +898,7 @@ func retrieveClusterSummary(dataFetcher fetcher.Fetcher) (clusterSummaryInfo, []
 
 	go func() {
 		defer wg.Done()
-		if !verboseOutput {
+		if !verboseOutput && !monitorCluster {
 			return
 		}
 		data, err := dataFetcher.GetReportersJSON()
@@ -918,12 +918,12 @@ func retrieveClusterSummary(dataFetcher fetcher.Fetcher) (clusterSummaryInfo, []
 			errorSink.AppendError(err)
 			return
 		}
-		finalSummariesDestinations, err := getFederationSummaries(result.federatedServices, outgoing, dataFetcher)
+		finalSummariesDestinations, err := getFederationSummaries(federatedServices, outgoing, dataFetcher)
 		if err != nil {
 			errorSink.AppendError(err)
 			return
 		}
-		finalSummariesOrigins, err := getFederationSummaries(result.federatedServices, incoming, dataFetcher)
+		finalSummariesOrigins, err := getFederationSummaries(federatedServices, incoming, dataFetcher)
 		if err != nil {
 			errorSink.AppendError(err)
 			return

@@ -24,10 +24,10 @@ import (
 
 const (
 	defaultLayoutName    = "default"
-	defaultLayout        = "membersSummary,healthSummary:services,caches:proxies,http-servers"
+	defaultLayout        = "members,healthSummary:services,caches:proxies,http-servers:network-stats"
 	pressAdditional      = "(press key in [] to expand panel)"
 	pressAdditionalReset = "(press space-bar to exit expand)"
-	noContent            = "  NO CONTENT"
+	noContent            = "  No Content"
 )
 
 var (
@@ -42,22 +42,33 @@ var (
 	panelCodes             = []rune{'1', '2', '3', '4', '5', '6', '7', '8', '9',
 		'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n',
 		'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'x', 'y', 'z'}
-	lastPanelCode rune
+	lastPanelCode  rune
+	initialRefresh = true
+	lastDuration   time.Duration
 )
 
 var validPanels = []Panel{
 	createContentPanel(10, "caches", "Caches", "show caches", cachesContent),
 	createContentPanel(8, "departedMembers", "Departed Members", "show departed members", departedMembersContent),
+	createContentPanel(5, "elastic-data", "Elastic Data", "show elastic data", elasticDataContent),
+	createContentPanel(8, "executors", "Executors", "show Executors", executorsContent),
 	createContentPanel(10, "healthSummary", "Health Summary", "show health summary", healthSummaryContent),
-	createContentPanel(8, "http-servers", "HTTP Servers", "show HTTP Servers", httpServersContent),
-	createContentPanel(10, "membersSummary", "Members Summary", "show members summary", membersSummaryContent),
+	createContentPanel(5, "federation-all", "Federation All", "show all federation details", federationAllContent),
+	createContentPanel(5, "federation-dest", "Federation Destinations", "show federation destinations", federationDestinationsContent),
+	createContentPanel(5, "federation-origins", "Federation Origins", "show federation origins", federationOriginsContent),
+	createContentPanel(8, "http-servers", "HTTP Servers", "show HTTP servers", httpServersContent),
+	createContentPanel(8, "http-sessions", "HTTP Sessions", "show HTTP sessions", httpSessionsContent),
+	createContentPanel(7, "membersSummary", "Members Summary", "show members summary", membersSummaryContent),
 	createContentPanel(5, "machines", "Machines", "show machines", machinesContent),
-	createContentPanel(8, "members", "Members", "show members", membersContent),
-	createContentPanel(10, "membersShort", "Members (Short)", "show members (short)", membersOnlyContent),
-	createContentPanel(10, "persistence", "Persistence", "show persistence", persistenceContent),
+	createContentPanel(10, "members", "Members", "show members", membersContent),
+	createContentPanel(7, "membersShort", "Members (Short)", "show members (short)", membersOnlyContent),
+	createContentPanel(8, "network-stats", "Network Stats", "show network stats", networkStatsContent),
+	createContentPanel(6, "persistence", "Persistence", "show persistence", persistenceContent),
 	createContentPanel(8, "proxies", "Proxy Servers", "show proxy servers", proxiesContent),
+	createContentPanel(6, "reporters", "Reporters", "show reporters", reportersContent),
 	createContentPanel(10, "services", "Services", "show services", servicesContent),
-	createContentPanel(10, "topics", "Topics", "show topics", topicsContent),
+	createContentPanel(8, "topics", "Topics", "show topics", topicsContent),
+	createContentPanel(8, "view-caches", "View Caches", "show view caches", viewCachesContent),
 }
 
 var longDescription = `The 'monitor cluster' command displays a text base UI to monitor the overall cluster.
@@ -144,6 +155,9 @@ var monitorClusterCmd = &cobra.Command{
 
 		// initial update
 		err = updateScreen(screen, dataFetcher, parsedLayout, true)
+		if err != nil {
+			return err
+		}
 
 		go func() {
 			for {
@@ -151,7 +165,7 @@ var monitorClusterCmd = &cobra.Command{
 				case <-exit:
 					return
 				case <-time.After(time.Duration(watchDelay) * time.Second):
-					err = updateScreen(screen, dataFetcher, parsedLayout, true) // Function to update the display
+					err = updateScreen(screen, dataFetcher, parsedLayout, true)
 					if err != nil {
 						return
 					}
@@ -205,7 +219,19 @@ func updateScreen(screen tcell.Screen, dataFetcher fetcher.Fetcher, parsedLayout
 	w, h := screen.Size()
 
 	if refresh {
+		startTime := time.Now()
+		if initialRefresh {
+			drawText(screen, w-20, 0, w, 0, tcell.StyleDefault, " Retrieving data...")
+			screen.Show()
+			initialRefresh = false
+		}
 		lastClusterSummaryInfo, errorList = retrieveClusterSummary(dataFetcher)
+		lastDuration = time.Since(startTime)
+
+		if lastDuration > time.Second {
+			// if the duration of data retrieval is > 1 second then display the refresh message
+			initialRefresh = true
+		}
 
 		if len(errorList) > 0 {
 			err = utils.GetErrors(errorList)
@@ -274,7 +300,7 @@ func updateScreen(screen tcell.Screen, dataFetcher fetcher.Fetcher, parsedLayout
 					realWidth = w
 				}
 				// now we have the panel then draw it
-				rows, err = drawContent(screen, lastClusterSummaryInfo, dataFetcher, panel, realStartX, realStartY, realWidth, panelCode)
+				rows, err = drawContent(screen, dataFetcher, panel, realStartX, realStartY, realWidth, panelCode)
 				if err != nil {
 					return err
 				}
@@ -375,6 +401,28 @@ var servicesContent = func(_ fetcher.Fetcher, clusterSummary clusterSummaryInfo)
 	return strings.Split(FormatServices(DeduplicateServices(services, "all")), "\n"), nil
 }
 
+var viewCachesContent = func(dataFetcher fetcher.Fetcher, clusterSummary clusterSummaryInfo) ([]string, error) {
+	value, err := formatViewCachesSummary(clusterSummary.serviceList, dataFetcher)
+	if err != nil {
+		return emptyStringArray, err
+	}
+
+	return strings.Split(value, "\n"), nil
+}
+
+var executorsContent = func(_ fetcher.Fetcher, clusterSummary clusterSummaryInfo) ([]string, error) {
+	return strings.Split(FormatExecutors(clusterSummary.executors.Executors, true), "\n"), nil
+}
+
+var elasticDataContent = func(_ fetcher.Fetcher, clusterSummary clusterSummaryInfo) ([]string, error) {
+	edData, err := getElasticDataResult(clusterSummary.flashResult, clusterSummary.ramResult)
+	if err != nil {
+		return emptyStringArray, err
+	}
+
+	return strings.Split(edData, "\n"), nil
+}
+
 var persistenceContent = func(dataFetcher fetcher.Fetcher, clusterSummary clusterSummaryInfo) ([]string, error) {
 	var services = config.ServicesSummaries{}
 
@@ -390,6 +438,78 @@ var persistenceContent = func(dataFetcher fetcher.Fetcher, clusterSummary cluste
 	}
 
 	return strings.Split(FormatPersistenceServices(deDuplicatedServices, true), "\n"), nil
+}
+
+var reportersContent = func(dataFetcher fetcher.Fetcher, clusterSummary clusterSummaryInfo) ([]string, error) {
+	var reporters = config.Reporters{}
+	if len(clusterSummary.reportersResult) > 0 {
+		err := json.Unmarshal(clusterSummary.reportersResult, &reporters)
+		if err != nil {
+			return emptyStringArray, err
+		}
+
+		return strings.Split(FormatReporters(reporters.Reporters), "\n"), nil
+	}
+
+	return []string{}, nil
+}
+
+var networkStatsContent = func(dataFetcher fetcher.Fetcher, clusterSummary clusterSummaryInfo) ([]string, error) {
+	var members = config.Members{}
+
+	err := json.Unmarshal(clusterSummary.membersResult, &members)
+	if err != nil {
+		return emptyStringArray, err
+	}
+
+	return strings.Split(FormatNetworkStatistics(members.Members), "\n"), nil
+}
+
+var httpSessionsContent = func(dataFetcher fetcher.Fetcher, clusterSummary clusterSummaryInfo) ([]string, error) {
+	var httpSessions = config.HTTPSessionSummaries{}
+
+	if len(clusterSummary.http) == 0 {
+		return []string{}, nil
+	}
+
+	err := json.Unmarshal(clusterSummary.http, &httpSessions)
+	if err != nil {
+		return emptyStringArray, err
+	}
+
+	return strings.Split(FormatHTTPSessions(DeduplicateSessions(httpSessions), true), "\n"), nil
+}
+
+var federationAllContent = func(dataFetcher fetcher.Fetcher, clusterSummary clusterSummaryInfo) ([]string, error) {
+	if len(clusterSummary.finalSummariesDestinations) > 0 || len(clusterSummary.finalSummariesOrigins) > 0 {
+		var sb strings.Builder
+		if len(clusterSummary.finalSummariesDestinations) > 0 {
+			sb.WriteString(FormatFederationSummary(clusterSummary.finalSummariesDestinations, destinations))
+		}
+		sb.WriteString("\n")
+		if len(clusterSummary.finalSummariesOrigins) > 0 {
+			sb.WriteString(FormatFederationSummary(clusterSummary.finalSummariesOrigins, origins))
+		}
+		return strings.Split(sb.String(), "\n"), nil
+	}
+
+	return []string{}, nil
+}
+
+var federationDestinationsContent = func(dataFetcher fetcher.Fetcher, clusterSummary clusterSummaryInfo) ([]string, error) {
+	if len(clusterSummary.finalSummariesDestinations) > 0 {
+		return strings.Split(FormatFederationSummary(clusterSummary.finalSummariesDestinations, destinations), "\n"), nil
+	}
+
+	return []string{}, nil
+}
+
+var federationOriginsContent = func(dataFetcher fetcher.Fetcher, clusterSummary clusterSummaryInfo) ([]string, error) {
+	if len(clusterSummary.finalSummariesOrigins) > 0 {
+		return strings.Split(FormatFederationSummary(clusterSummary.finalSummariesOrigins, origins), "\n"), nil
+	}
+
+	return []string{}, nil
 }
 
 var healthSummaryContent = func(_ fetcher.Fetcher, clusterSummary clusterSummaryInfo) ([]string, error) {
@@ -533,11 +653,11 @@ func validatePanels(layout []string) error {
 }
 
 // drawContent draws content and returns the height it drew
-func drawContent(screen tcell.Screen, c clusterSummaryInfo, dataFetcher fetcher.Fetcher, panel Panel, x, y, w int, code rune) (int, error) {
+func drawContent(screen tcell.Screen, dataFetcher fetcher.Fetcher, panel Panel, x, y, w int, code rune) (int, error) {
 	h := panel.GetMaxHeight()
 	title := panel.GetTitle()
 
-	content, err := panel.GetContentFunction()(dataFetcher, c)
+	content, err := panel.GetContentFunction()(dataFetcher, lastClusterSummaryInfo)
 	if err != nil {
 		return 0, err
 	}
@@ -609,14 +729,16 @@ func trimBlankContent(content []string) []string {
 	return content[:last]
 }
 
+// drawHeader draws the screen header with cluster information.
 func drawHeader(screen tcell.Screen, w, h int, cluster config.Cluster) {
 	version := strings.Split(cluster.Version, " ")
-	title := fmt.Sprintf("Coherence CLI: %s - Monitoring cluster %s (%s) ESC to quit %s",
-		time.Now().Format(time.DateTime), cluster.ClusterName, version[0], additionalMonitorMsg)
+	title := fmt.Sprintf("Coherence CLI: %s - Monitoring cluster %s (%s) ESC to quit %s. (refresh=%v)",
+		time.Now().Format(time.DateTime), cluster.ClusterName, version[0], additionalMonitorMsg, lastDuration)
 	drawText(screen, 1, 0, w-1, h-1, tcell.StyleDefault.Reverse(true), title)
 
 }
 
+// drawText draws text on the screen.
 func drawText(s tcell.Screen, x1, y1, x2, y2 int, style tcell.Style, text string) {
 	row := y1
 	col := x1
@@ -633,6 +755,7 @@ func drawText(s tcell.Screen, x1, y1, x2, y2 int, style tcell.Style, text string
 	}
 }
 
+// drawBox draws a box on the screen and fills it.
 func drawBox(s tcell.Screen, x1, y1, x2, y2 int, style tcell.Style, title string) {
 	if y2 < y1 {
 		y1, y2 = y2, y1
@@ -641,7 +764,6 @@ func drawBox(s tcell.Screen, x1, y1, x2, y2 int, style tcell.Style, title string
 		x1, x2 = x2, x1
 	}
 
-	// Fill background
 	for row := y1; row <= y2; row++ {
 		for col := x1; col <= x2; col++ {
 			s.SetContent(col, row, ' ', nil, style)
@@ -658,7 +780,6 @@ func drawBox(s tcell.Screen, x1, y1, x2, y2 int, style tcell.Style, title string
 		s.SetContent(x2, row, tcell.RuneVLine, nil, style)
 	}
 
-	// Only draw corners if necessary
 	if y1 != y2 && x1 != x2 {
 		s.SetContent(x1, y1, tcell.RuneULCorner, nil, style)
 		s.SetContent(x2, y1, tcell.RuneURCorner, nil, style)
@@ -666,10 +787,10 @@ func drawBox(s tcell.Screen, x1, y1, x2, y2 int, style tcell.Style, title string
 		s.SetContent(x2, y2, tcell.RuneLRCorner, nil, style)
 	}
 
-	// title
 	drawText(s, x1+2, y1, x2-1, y2-1, style, title)
 }
 
+// getValidPanelTypes returns the list of panels for the --help command.
 func getValidPanelTypes() string {
 	valid := ""
 	for _, p := range validPanels {
