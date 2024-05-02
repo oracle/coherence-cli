@@ -781,7 +781,7 @@ const (
 	stopClusterCommand      = "stop cluster"
 	defaultHeap             = "128m"
 	localHost               = "127.0.0.1"
-	minPartitionCount       = 3
+	minPartitionCount       = 1
 	maxPartitionCount       = 9973
 )
 

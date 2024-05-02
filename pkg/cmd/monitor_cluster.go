@@ -25,7 +25,7 @@ import (
 const (
 	defaultLayoutName    = "default"
 	defaultLayout        = "members,healthSummary:services,caches:proxies,http-servers:network-stats"
-	pressAdditional      = "(press key in [] to expand panel)"
+	pressAdditional      = "(press key in [] to expand, ? = help)"
 	pressAdditionalReset = "(press space-bar to exit expand)"
 	noContent            = "  No Content"
 )
@@ -41,10 +41,11 @@ var (
 	expandedPanel          = ""
 	panelCodes             = []rune{'1', '2', '3', '4', '5', '6', '7', '8', '9',
 		'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n',
-		'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'x', 'y', 'z'}
+		'o', 'q', 'r', 's', 't', 'u', 'v', 'x', 'y', 'z'}
 	lastPanelCode  rune
 	initialRefresh = true
 	lastDuration   time.Duration
+	inHelp         = false
 )
 
 var validPanels = []Panel{
@@ -165,9 +166,11 @@ var monitorClusterCmd = &cobra.Command{
 				case <-exit:
 					return
 				case <-time.After(time.Duration(watchDelay) * time.Second):
-					err = updateScreen(screen, dataFetcher, parsedLayout, true)
-					if err != nil {
-						return
+					if !inHelp {
+						err = updateScreen(screen, dataFetcher, parsedLayout, true)
+						if err != nil {
+							return
+						}
 					}
 				}
 			}
@@ -187,22 +190,71 @@ var monitorClusterCmd = &cobra.Command{
 					return nil
 				}
 
-				if (pressedKey >= '1' && pressedKey <= '9' && pressedKey <= lastPanelCode) ||
+				if pressedKey == '?' {
+					showHelp(screen)
+					if err := refresh(screen, dataFetcher, parsedLayout, true); err != nil {
+						return err
+					}
+				} else if pressedKey == 'p' {
+					padMaxHeightParam = !padMaxHeightParam
+					if err := refresh(screen, dataFetcher, parsedLayout, false); err != nil {
+						return err
+					}
+				} else if (pressedKey >= '1' && pressedKey <= '9' && pressedKey <= lastPanelCode) ||
 					(pressedKey >= 'a' && pressedKey <= 'z' && pressedKey <= lastPanelCode) {
 					expandedPanel = string(pressedKey)
 					additionalMonitorMsg = pressAdditionalReset
-					screen.Clear()
-					err = updateScreen(screen, dataFetcher, parsedLayout, false)
-					screen.Sync()
+					if err := refresh(screen, dataFetcher, parsedLayout, false); err != nil {
+						return err
+					}
 				} else if ev.Rune() == ' ' {
 					expandedPanel = ""
 					additionalMonitorMsg = pressAdditional
-					err = updateScreen(screen, dataFetcher, parsedLayout, false)
-					screen.Sync()
+					if err := refresh(screen, dataFetcher, parsedLayout, false); err != nil {
+						return err
+					}
 				}
 			}
 		}
 	},
+}
+
+func refresh(screen tcell.Screen, dataFetcher fetcher.Fetcher, parsedLayout []string, refresh bool) error {
+	screen.Clear()
+	err := updateScreen(screen, dataFetcher, parsedLayout, false)
+	screen.Sync()
+
+	return err
+}
+
+func showHelp(screen tcell.Screen) {
+	help := []string{
+		"",
+		" Monitor CLI Help ",
+		"",
+		" - 'p' to toggle row padding",
+		" - Key in [] to expand that panel",
+		" - ESC / CTRL-C to exit monitoring",
+		" ",
+		" Press any key to exit help.",
+	}
+
+	inHelp = true
+	defer func() { inHelp = false }()
+	lenHelp := len(help)
+
+	w, h := screen.Size()
+	x := w/2 - 20
+	y := h/2 - lenHelp
+
+	screen.Clear()
+	drawBox(screen, x, y, x+50, y+lenHelp+2, tcell.StyleDefault, "Help")
+
+	for line := 1; line <= lenHelp; line++ {
+		drawText(screen, x+1, y+line, x+w-1, y+h-1, tcell.StyleDefault, help[line-1])
+	}
+	screen.Show()
+	_ = screen.PollEvent()
 }
 
 func updateScreen(screen tcell.Screen, dataFetcher fetcher.Fetcher, parsedLayout []string, refresh bool) error {
@@ -698,8 +750,8 @@ func drawContent(screen tcell.Screen, dataFetcher fetcher.Fetcher, panel Panel, 
 	// trim any content > w
 	for i := range content {
 		line := content[i]
-		if len(line) > w {
-			content[i] = line[:w-1]
+		if len(line) >= w {
+			content[i] = line[:w-2]
 		}
 	}
 
@@ -717,6 +769,7 @@ func drawContent(screen tcell.Screen, dataFetcher fetcher.Fetcher, panel Panel, 
 	return rows + 2, nil
 }
 
+// trimBlankContent trims blank content at the end of the row.
 func trimBlankContent(content []string) []string {
 	last := len(content)
 
