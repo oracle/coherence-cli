@@ -221,7 +221,7 @@ var monitorClusterCmd = &cobra.Command{
 
 func refresh(screen tcell.Screen, dataFetcher fetcher.Fetcher, parsedLayout []string, refresh bool) error {
 	screen.Clear()
-	err := updateScreen(screen, dataFetcher, parsedLayout, false)
+	err := updateScreen(screen, dataFetcher, parsedLayout, refresh)
 	screen.Sync()
 
 	return err

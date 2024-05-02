@@ -92,41 +92,41 @@ jobs:
       run:  make cohctl-all
 
     - name: Upload Linux amd64
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       if: success()
       with:
         name: cohctl-linux-amd64
         path: bin/linux/amd64/cohctl
 
     - name: Upload Linux arm64
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       if: success()
       with:
         name: cohctl-linux-arm64
         path: bin/linux/arm64/cohctl
 
     - name: Upload Linux 386
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       if: success()
       with:
         name: cohctl-linux-386
         path: bin/linux/386/cohctl
 
     - name: Upload Windows amd64
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       if: success()
       with:
         name: cohctl-windows-amd64
         path: bin/windows/amd64/cohctl.exe
 
     - name: Upload Windows arm
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       if: success()
       with:
         name: cohctl-windows-arm
         path: bin/windows/arm/cohctl.exe
 
-    - uses: actions/upload-artifact@v3
+    - uses: actions/upload-artifact@v4
       if: failure()
       with:
         name: test-output

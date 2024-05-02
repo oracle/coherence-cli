@@ -73,8 +73,8 @@ jobs:
         echo "Running verify against $COH_VERSION"
         COHERENCE_BASE_IMAGE=gcr.io/distroless/java17 PROFILES=,views COHERENCE_VERSION=$COH_VERSION make clean build-view-images test-e2e-views
 
-    - uses: actions/upload-artifact@v3
+    - uses: actions/upload-artifact@v4
       if: failure()
       with:
-        name: test-output
+        name: test-output-${{ matrix.coherenceVersion }}
         path: build/_output/test-logs

@@ -76,8 +76,8 @@ jobs:
         export PATH=$GRADLE_HOME/bin:$PATH
         COHERENCE_VERSION=${{ matrix.coherenceVersion }} make test-create-cluster
 
-    - uses: actions/upload-artifact@v3
+    - uses: actions/upload-artifact@v4
       if: failure()
       with:
-        name: test-output
+        name: test-output-${{ matrix.coherenceVersion }}-${{ matrix.javaVersion }}
         path: build/_output/test-logs
