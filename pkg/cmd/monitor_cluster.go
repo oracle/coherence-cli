@@ -16,7 +16,6 @@ import (
 	"github.com/oracle/coherence-cli/pkg/utils"
 	"github.com/spf13/cobra"
 	"log"
-	"os"
 	"strings"
 	"sync"
 	"time"
@@ -26,7 +25,7 @@ const (
 	defaultLayoutName    = "default"
 	defaultLayout        = "members,healthSummary:services,caches:proxies,http-servers:network-stats"
 	pressAdditional      = "(press key in [] to toggle expand, ? = help)"
-	pressAdditionalReset = "(press key again to exit expand)"
+	pressAdditionalReset = "(press key in [] to exit expand)"
 	noContent            = "  No Content"
 )
 
@@ -49,7 +48,7 @@ var (
 )
 
 var validPanels = []panelImpl{
-	createContentPanel(10, "caches", "Caches", "show caches", cachesContent),
+	createContentPanel(8, "caches", "Caches", "show caches", cachesContent),
 	createContentPanel(8, "departedMembers", "Departed Members", "show departed members", departedMembersContent),
 	createContentPanel(5, "elastic-data", "Elastic Data", "show elastic data", elasticDataContent),
 	createContentPanel(8, "executors", "Executors", "show Executors", executorsContent),
@@ -64,10 +63,10 @@ var validPanels = []panelImpl{
 	createContentPanel(10, "members", "Members", "show members", membersContent),
 	createContentPanel(7, "membersShort", "Members (Short)", "show members (short)", membersOnlyContent),
 	createContentPanel(8, "network-stats", "Network Stats", "show network stats", networkStatsContent),
-	createContentPanel(6, "persistence", "Persistence", "show persistence", persistenceContent),
+	createContentPanel(8, "persistence", "Persistence", "show persistence", persistenceContent),
 	createContentPanel(8, "proxies", "Proxy Servers", "show proxy servers", proxiesContent),
-	createContentPanel(6, "reporters", "Reporters", "show reporters", reportersContent),
-	createContentPanel(10, "services", "Services", "show services", servicesContent),
+	createContentPanel(8, "reporters", "Reporters", "show reporters", reportersContent),
+	createContentPanel(8, "services", "Services", "show services", servicesContent),
 	createContentPanel(8, "topics", "Topics", "show topics", topicsContent),
 	createContentPanel(8, "view-caches", "View Caches", "show view caches", viewCachesContent),
 }
@@ -147,6 +146,8 @@ var monitorClusterCmd = &cobra.Command{
 		// ensure we reset the screen on any panic
 		defer func() {
 			if r := recover(); r != nil {
+				screen.Clear()
+				screen.Show()
 				screen.Fini()
 				log.Println("Panic: ", r)
 			}
@@ -169,7 +170,10 @@ var monitorClusterCmd = &cobra.Command{
 					if !inHelp {
 						err = updateScreen(screen, dataFetcher, parsedLayout, true)
 						if err != nil {
-							return
+							screen.Clear()
+							screen.Show()
+							screen.Fini()
+							panic(err)
 						}
 					}
 				}
@@ -180,7 +184,9 @@ var monitorClusterCmd = &cobra.Command{
 			ev := screen.PollEvent()
 			switch ev := ev.(type) {
 			case *tcell.EventResize:
-				err = updateScreen(screen, dataFetcher, parsedLayout, false)
+				if err := refresh(screen, dataFetcher, parsedLayout, false); err != nil {
+					panic(err)
+				}
 				screen.Sync()
 			case *tcell.EventKey:
 				pressedKey := ev.Rune()
@@ -192,27 +198,27 @@ var monitorClusterCmd = &cobra.Command{
 				if pressedKey == '?' {
 					showHelp(screen)
 					if err := refresh(screen, dataFetcher, parsedLayout, true); err != nil {
-						return err
+						panic(err)
 					}
 				} else if pressedKey == 'p' {
 					padMaxHeightParam = !padMaxHeightParam
 					if err := refresh(screen, dataFetcher, parsedLayout, false); err != nil {
-						return err
+						panic(err)
 					}
 				} else if pressedKey == '+' {
 					increaseMaxHeight()
 					if err := refresh(screen, dataFetcher, parsedLayout, false); err != nil {
-						return err
+						panic(err)
 					}
 				} else if pressedKey == '-' {
 					decreaseMaxHeight()
 					if err := refresh(screen, dataFetcher, parsedLayout, false); err != nil {
-						return err
+						panic(err)
 					}
 				} else if pressedKey == '0' {
 					resetMaxHeight()
 					if err := refresh(screen, dataFetcher, parsedLayout, false); err != nil {
-						return err
+						panic(err)
 					}
 				} else if (pressedKey >= '1' && pressedKey <= '9' && pressedKey <= lastPanelCode) ||
 					(pressedKey >= 'a' && pressedKey <= 'z' && pressedKey <= lastPanelCode) {
@@ -224,7 +230,7 @@ var monitorClusterCmd = &cobra.Command{
 						additionalMonitorMsg = pressAdditionalReset
 					}
 					if err := refresh(screen, dataFetcher, parsedLayout, false); err != nil {
-						return err
+						panic(err)
 					}
 				}
 			}
@@ -255,7 +261,9 @@ func resetMaxHeight() {
 func refresh(screen tcell.Screen, dataFetcher fetcher.Fetcher, parsedLayout []string, refresh bool) error {
 	screen.Clear()
 	err := updateScreen(screen, dataFetcher, parsedLayout, refresh)
-	screen.Sync()
+	if err != nil {
+		screen.Sync()
+	}
 
 	return err
 }
@@ -265,7 +273,7 @@ func showHelp(screen tcell.Screen) {
 		"",
 		" Monitor CLI Help ",
 		"",
-		" - 'p' to toggle row padding",
+		" - 'p' to toggle panel row padding",
 		" - '+' to increase max height of all panels",
 		" - '-' to decrease max height of all panels",
 		" - '0' to reset max height of all panels",
@@ -323,7 +331,6 @@ func updateScreen(screen tcell.Screen, dataFetcher fetcher.Fetcher, parsedLayout
 
 		if len(errorList) > 0 {
 			err = utils.GetErrors(errorList)
-			_, _ = fmt.Fprint(os.Stderr, err.Error())
 			return err
 		}
 	}
