@@ -27,6 +27,7 @@ const (
 	pressAdditional      = "(press key in [] to toggle expand, ? = help)"
 	pressAdditionalReset = "(press key in [] to exit expand)"
 	noContent            = "  No Content"
+	unableToFindPanel    = "unable to find panel [%v], use --help to see all options"
 )
 
 var (
@@ -58,8 +59,8 @@ var validPanels = []panelImpl{
 	createContentPanel(5, "federation-origins", "Federation Origins", "show federation origins", federationOriginsContent),
 	createContentPanel(8, "http-servers", "HTTP Servers", "show HTTP servers", httpServersContent),
 	createContentPanel(8, "http-sessions", "HTTP Sessions", "show HTTP sessions", httpSessionsContent),
-	createContentPanel(7, "membersSummary", "Members Summary", "show members summary", membersSummaryContent),
 	createContentPanel(5, "machines", "Machines", "show machines", machinesContent),
+	createContentPanel(7, "membersSummary", "Members Summary", "show members summary", membersSummaryContent),
 	createContentPanel(10, "members", "Members", "show members", membersContent),
 	createContentPanel(7, "membersShort", "Members (Short)", "show members (short)", membersOnlyContent),
 	createContentPanel(8, "network-stats", "Network Stats", "show network stats", networkStatsContent),
@@ -71,7 +72,7 @@ var validPanels = []panelImpl{
 	createContentPanel(8, "view-caches", "View Caches", "show view caches", viewCachesContent),
 }
 
-var longDescription = `The 'monitor cluster' command displays a text base UI to monitor the overall cluster.
+var longDescription = `The 'monitor cluster' command displays a text based UI to monitor the overall cluster.
 You can specify a layout to show by providing a value for '-l'. Panels can be specified using 'panel1:panel1,panel3'.
 Specifying a ':' is the line separator and ',' means panels on the same line. The valid panel types are below:
 
@@ -271,16 +272,16 @@ func refresh(screen tcell.Screen, dataFetcher fetcher.Fetcher, parsedLayout []st
 func showHelp(screen tcell.Screen) {
 	help := []string{
 		"",
-		" Monitor CLI Help ",
+		"  Monitor CLI Help ",
 		"",
-		" - 'p' to toggle panel row padding",
-		" - '+' to increase max height of all panels",
-		" - '-' to decrease max height of all panels",
-		" - '0' to reset max height of all panels",
-		" - Key in [] to expand that panel",
-		" - ESC / CTRL-C to exit monitoring",
-		" ",
-		" Press any key to exit help.",
+		"  - 'p' to toggle panel row padding",
+		"  - '+' to increase max height of all panels",
+		"  - '-' to decrease max height of all panels",
+		"  - '0' to reset max height of all panels",
+		"  - Key in [] to expand that panel",
+		"  - ESC / CTRL-C to exit monitoring",
+		"  ",
+		"  Press any key to exit help.",
 	}
 
 	inHelp = true
@@ -288,10 +289,9 @@ func showHelp(screen tcell.Screen) {
 	lenHelp := len(help)
 
 	w, h := screen.Size()
-	x := w/2 - 20
+	x := w/2 - 25
 	y := h/2 - lenHelp
 
-	screen.Clear()
 	drawBox(screen, x, y, x+50, y+lenHelp+2, tcell.StyleDefault, "Help")
 
 	for line := 1; line <= lenHelp; line++ {
@@ -369,7 +369,7 @@ func updateScreen(screen tcell.Screen, dataFetcher fetcher.Fetcher, parsedLayout
 		for i, panelName := range panels {
 			panel := getPanel(panelName)
 			if panel == nil {
-				return fmt.Errorf("unable to find panel [%v], use --help to see all options", panelName)
+				return fmt.Errorf(unableToFindPanel, panelName)
 			}
 
 			var panelCode rune
@@ -734,7 +734,7 @@ func validatePanels(layout []string) error {
 				}
 			}
 			if !found {
-				return fmt.Errorf("unable to find panel [%s]", vv)
+				return fmt.Errorf(unableToFindPanel, vv)
 			}
 		}
 	}
