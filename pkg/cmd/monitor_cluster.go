@@ -25,8 +25,8 @@ import (
 const (
 	defaultLayoutName    = "default"
 	defaultLayout        = "members,healthSummary:services,caches:proxies,http-servers:network-stats"
-	pressAdditional      = "(press key in [] to expand, ? = help)"
-	pressAdditionalReset = "(press space-bar to exit expand)"
+	pressAdditional      = "(press key in [] to toggle expand, ? = help)"
+	pressAdditionalReset = "(press key again to exit expand)"
 	noContent            = "  No Content"
 )
 
@@ -48,7 +48,7 @@ var (
 	inHelp         = false
 )
 
-var validPanels = []Panel{
+var validPanels = []panelImpl{
 	createContentPanel(10, "caches", "Caches", "show caches", cachesContent),
 	createContentPanel(8, "departedMembers", "Departed Members", "show departed members", departedMembersContent),
 	createContentPanel(5, "elastic-data", "Elastic Data", "show elastic data", elasticDataContent),
@@ -199,16 +199,30 @@ var monitorClusterCmd = &cobra.Command{
 					if err := refresh(screen, dataFetcher, parsedLayout, false); err != nil {
 						return err
 					}
-				} else if (pressedKey >= '1' && pressedKey <= '9' && pressedKey <= lastPanelCode) ||
-					(pressedKey >= 'a' && pressedKey <= 'z' && pressedKey <= lastPanelCode) {
-					expandedPanel = string(pressedKey)
-					additionalMonitorMsg = pressAdditionalReset
+				} else if pressedKey == '+' {
+					increaseMaxHeight()
 					if err := refresh(screen, dataFetcher, parsedLayout, false); err != nil {
 						return err
 					}
-				} else if ev.Rune() == ' ' {
-					expandedPanel = ""
-					additionalMonitorMsg = pressAdditional
+				} else if pressedKey == '-' {
+					decreaseMaxHeight()
+					if err := refresh(screen, dataFetcher, parsedLayout, false); err != nil {
+						return err
+					}
+				} else if pressedKey == '0' {
+					resetMaxHeight()
+					if err := refresh(screen, dataFetcher, parsedLayout, false); err != nil {
+						return err
+					}
+				} else if (pressedKey >= '1' && pressedKey <= '9' && pressedKey <= lastPanelCode) ||
+					(pressedKey >= 'a' && pressedKey <= 'z' && pressedKey <= lastPanelCode) {
+					if expandedPanel != "" {
+						expandedPanel = ""
+						additionalMonitorMsg = pressAdditional
+					} else {
+						expandedPanel = string(pressedKey)
+						additionalMonitorMsg = pressAdditionalReset
+					}
 					if err := refresh(screen, dataFetcher, parsedLayout, false); err != nil {
 						return err
 					}
@@ -216,6 +230,26 @@ var monitorClusterCmd = &cobra.Command{
 			}
 		}
 	},
+}
+
+func increaseMaxHeight() {
+	for i := range validPanels {
+		validPanels[i].MaxHeight++
+	}
+}
+
+func decreaseMaxHeight() {
+	for i := range validPanels {
+		if validPanels[i].MaxHeight > validPanels[i].OriginalMaxHeight {
+			validPanels[i].MaxHeight--
+		}
+	}
+}
+
+func resetMaxHeight() {
+	for i := range validPanels {
+		validPanels[i].MaxHeight = validPanels[i].OriginalMaxHeight
+	}
 }
 
 func refresh(screen tcell.Screen, dataFetcher fetcher.Fetcher, parsedLayout []string, refresh bool) error {
@@ -232,6 +266,9 @@ func showHelp(screen tcell.Screen) {
 		" Monitor CLI Help ",
 		"",
 		" - 'p' to toggle row padding",
+		" - '+' to increase max height of all panels",
+		" - '-' to decrease max height of all panels",
+		" - '0' to reset max height of all panels",
 		" - Key in [] to expand that panel",
 		" - ESC / CTRL-C to exit monitoring",
 		" ",
@@ -351,7 +388,7 @@ func updateScreen(screen tcell.Screen, dataFetcher fetcher.Fetcher, parsedLayout
 					realWidth = w
 				}
 				// now we have the panel then draw it
-				rows, err = drawContent(screen, dataFetcher, panel, realStartX, realStartY, realWidth, panelCode)
+				rows, err = drawContent(screen, dataFetcher, *panel, realStartX, realStartY, realWidth, panelCode)
 				if err != nil {
 					return err
 				}
@@ -614,20 +651,13 @@ var topicsContent = func(dataFetcher fetcher.Fetcher, clusterSummary clusterSumm
 // contentFunction generates content for a panel.
 type contentFunction func(dataFetcher fetcher.Fetcher, clusterSummary clusterSummaryInfo) ([]string, error)
 
-type Panel interface {
-	GetPanelName() string
-	GetMaxHeight() int
-	GetTitle() string
-	GetContentFunction() contentFunction
-	GetDescription() string
-}
-
 type panelImpl struct {
-	PanelName       string
-	MaxHeight       int
-	Title           string
-	ContentFunction contentFunction
-	Description     string
+	PanelName         string
+	OriginalMaxHeight int
+	MaxHeight         int
+	Title             string
+	ContentFunction   contentFunction
+	Description       string
 }
 
 func (cs panelImpl) GetPanelName() string {
@@ -651,13 +681,14 @@ func (cs panelImpl) GetContentFunction() contentFunction {
 }
 
 // createContentPanel creates a standard content panel.
-func createContentPanel(maxHeight int, panelName, title, description string, f contentFunction) Panel {
+func createContentPanel(maxHeight int, panelName, title, description string, f contentFunction) panelImpl {
 	return panelImpl{
-		MaxHeight:       maxHeight,
-		PanelName:       panelName,
-		Title:           title,
-		ContentFunction: f,
-		Description:     description,
+		MaxHeight:         maxHeight,
+		OriginalMaxHeight: maxHeight,
+		PanelName:         panelName,
+		Title:             title,
+		ContentFunction:   f,
+		Description:       description,
 	}
 }
 
@@ -673,10 +704,10 @@ func parseLayout(layout string) ([]string, error) {
 	return s, nil
 }
 
-func getPanel(panelName string) Panel {
+func getPanel(panelName string) *panelImpl {
 	for _, panel := range validPanels {
 		if panel.GetPanelName() == panelName {
-			return panel
+			return &panel
 		}
 	}
 	return nil
@@ -704,7 +735,7 @@ func validatePanels(layout []string) error {
 }
 
 // drawContent draws content and returns the height it drew
-func drawContent(screen tcell.Screen, dataFetcher fetcher.Fetcher, panel Panel, x, y, w int, code rune) (int, error) {
+func drawContent(screen tcell.Screen, dataFetcher fetcher.Fetcher, panel panelImpl, x, y, w int, code rune) (int, error) {
 	h := panel.GetMaxHeight()
 	title := panel.GetTitle()
 
