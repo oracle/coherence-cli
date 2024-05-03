@@ -189,7 +189,6 @@ var monitorClusterCmd = &cobra.Command{
 					close(exit)
 					return nil
 				}
-
 				if pressedKey == '?' {
 					showHelp(screen)
 					if err := refresh(screen, dataFetcher, parsedLayout, true); err != nil {
@@ -326,7 +325,7 @@ func updateScreen(screen tcell.Screen, dataFetcher fetcher.Fetcher, parsedLayout
 		for i, panelName := range panels {
 			panel := getPanel(panelName)
 			if panel == nil {
-				return fmt.Errorf("unable to find panel [%v]", panelName)
+				return fmt.Errorf("unable to find panel [%v], use --help to see all options", panelName)
 			}
 
 			var panelCode rune
@@ -785,7 +784,7 @@ func trimBlankContent(content []string) []string {
 // drawHeader draws the screen header with cluster information.
 func drawHeader(screen tcell.Screen, w, h int, cluster config.Cluster) {
 	version := strings.Split(cluster.Version, " ")
-	title := fmt.Sprintf("Coherence CLI: %s - Monitoring cluster %s (%s) ESC to quit %s. (refresh=%v)",
+	title := fmt.Sprintf("Coherence CLI: %s - Monitoring cluster %s (%s) ESC to quit %s. (%v)",
 		time.Now().Format(time.DateTime), cluster.ClusterName, version[0], additionalMonitorMsg, lastDuration)
 	drawText(screen, 1, 0, w-1, h-1, tcell.StyleDefault.Reverse(true), title)
 
