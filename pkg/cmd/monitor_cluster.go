@@ -28,9 +28,12 @@ const (
 	pressAdditionalReset = "(press key in [] to exit expand)"
 	noContent            = "  No Content"
 	unableToFindPanel    = "unable to find panel [%v], use --help to see all options"
+	serviceNameToken     = "%SERVICE"
+	cacheNameToken       = "%CACHE"
 )
 
 var (
+	errSelectService       = errors.New("you must provide a service name via -s option")
 	mutex                  sync.Mutex
 	lastClusterSummaryInfo clusterSummaryInfo
 	emptyStringArray       = make([]string, 0)
@@ -46,10 +49,15 @@ var (
 	initialRefresh = true
 	lastDuration   time.Duration
 	inHelp         = false
+	selectedCache  string
 )
 
 var validPanels = []panelImpl{
 	createContentPanel(8, "caches", "Caches", "show caches", cachesContent),
+	createContentPanel(8, "cache-access", "Cache Access (%SERVICE/%CACHE)", "show cache access", cacheAccessContent),
+	createContentPanel(8, "cache-indexes", "Cache Indexes (%SERVICE/%CACHE)", "show cache indexes", cacheIndexesContent),
+	createContentPanel(8, "cache-storage", "Cache Storage (%SERVICE/%CACHE)", "show cache storage", cacheStorageContent),
+	createContentPanel(8, "cache-partitions", "Cache Partitions (%SERVICE/%CACHE)", "show cache partitions", cachePartitionContent),
 	createContentPanel(8, "departedMembers", "Departed Members", "show departed members", departedMembersContent),
 	createContentPanel(5, "elastic-data", "Elastic Data", "show elastic data", elasticDataContent),
 	createContentPanel(8, "executors", "Executors", "show Executors", executorsContent),
@@ -68,6 +76,9 @@ var validPanels = []panelImpl{
 	createContentPanel(8, "proxies", "Proxy Servers", "show proxy servers", proxiesContent),
 	createContentPanel(8, "reporters", "Reporters", "show reporters", reportersContent),
 	createContentPanel(8, "services", "Services", "show services", servicesContent),
+	createContentPanel(8, "service-members", "Service Members (%SERVICE)", "show service members", serviceMembersContent),
+	createContentPanel(8, "service-distributions", "Service Distributions (%SERVICE)", "show service distributions", serviceDistributionsContent),
+	createContentPanel(8, "service-storage", "Service Storage", "show service storage", serviceStorageContent),
 	createContentPanel(8, "topics", "Topics", "show topics", topicsContent),
 	createContentPanel(8, "view-caches", "View Caches", "show view caches", viewCachesContent),
 }
@@ -496,6 +507,71 @@ var servicesContent = func(_ fetcher.Fetcher, clusterSummary clusterSummaryInfo)
 	return strings.Split(FormatServices(DeduplicateServices(services, "all")), "\n"), nil
 }
 
+var serviceMembersContent = func(dataFetcher fetcher.Fetcher, clusterSummary clusterSummaryInfo) ([]string, error) {
+	var membersDetails = config.ServiceMemberDetails{}
+	if serviceName == "" {
+		return emptyStringArray, errSelectService
+	}
+
+	membersResult, err := dataFetcher.GetServiceMembersDetailsJSON(serviceName)
+	if err != nil {
+		return emptyStringArray, err
+	}
+
+	err = json.Unmarshal(membersResult, &membersDetails)
+	if err != nil {
+		return emptyStringArray, err
+	}
+
+	return strings.Split(FormatServiceMembers(membersDetails.Services), "\n"), nil
+}
+
+var serviceDistributionsContent = func(dataFetcher fetcher.Fetcher, clusterSummary clusterSummaryInfo) ([]string, error) {
+	var (
+		distributionsData []byte
+		distributions     config.Distributions
+	)
+
+	if serviceName == "" {
+		return emptyStringArray, errSelectService
+	}
+
+	servicesResult, err := GetDistributedServices(dataFetcher)
+	if err != nil {
+		return emptyStringArray, err
+	}
+
+	if !utils.SliceContains(servicesResult, serviceName) {
+		return emptyStringArray, fmt.Errorf(unableToFindService, serviceName)
+	}
+
+	distributionsData, err = dataFetcher.GetScheduledDistributionsJSON(serviceName)
+	if err != nil {
+		return emptyStringArray, err
+	}
+
+	if len(distributionsData) != 0 {
+		err = json.Unmarshal(distributionsData, &distributions)
+		if err != nil {
+			return emptyStringArray, err
+		}
+	} else {
+		distributions.ScheduledDistributions = noDistributionsData
+	}
+
+	return strings.Split(distributions.ScheduledDistributions, "\n"), nil
+}
+
+var serviceStorageContent = func(dataFetcher fetcher.Fetcher, clusterSummary clusterSummaryInfo) ([]string, error) {
+	storageSummary, err := getServiceStorageDetails(dataFetcher)
+
+	if err != nil {
+		return emptyStringArray, err
+	}
+
+	return strings.Split(FormatServicesStorage(storageSummary), "\n"), nil
+}
+
 var viewCachesContent = func(dataFetcher fetcher.Fetcher, clusterSummary clusterSummaryInfo) ([]string, error) {
 	value, err := formatViewCachesSummary(clusterSummary.serviceList, dataFetcher)
 	if err != nil {
@@ -636,6 +712,73 @@ var proxiesContentInternal = func(protocol string, clusterSummary clusterSummary
 	}
 
 	return strings.Split(FormatProxyServers(proxiesSummary.Proxies, protocol), "\n"), nil
+}
+
+var cacheAccessContent = func(dataFetcher fetcher.Fetcher, clusterSummary clusterSummaryInfo) ([]string, error) {
+	return getCacheContent(dataFetcher, "access")
+}
+
+var cacheIndexesContent = func(dataFetcher fetcher.Fetcher, clusterSummary clusterSummaryInfo) ([]string, error) {
+	return getCacheContent(dataFetcher, "index")
+}
+
+var cacheStorageContent = func(dataFetcher fetcher.Fetcher, clusterSummary clusterSummaryInfo) ([]string, error) {
+	return getCacheContent(dataFetcher, "storage")
+}
+
+var cachePartitionContent = func(dataFetcher fetcher.Fetcher, clusterSummary clusterSummaryInfo) ([]string, error) {
+	return getCacheContent(dataFetcher, partitionDisplayType)
+}
+
+func getCacheContent(dataFetcher fetcher.Fetcher, displayType string) ([]string, error) {
+	var (
+		cacheResult           []byte
+		cacheDetails          = config.CacheDetails{}
+		cachePartitionDetails = config.CachePartitionDetails{}
+		err                   error
+		sb                    strings.Builder
+	)
+
+	if serviceName, err = findServiceForCacheOrTopic(dataFetcher, selectedCache, "cache"); err != nil {
+		return emptyStringArray, err
+	}
+
+	if selectedCache == "" {
+		return emptyStringArray, errors.New("you must select a cache using the -C option")
+	}
+
+	if displayType == partitionDisplayType {
+		cacheResult, err = dataFetcher.GetCachePartitions(serviceName, selectedCache)
+	} else {
+		cacheResult, err = dataFetcher.GetCacheMembers(serviceName, selectedCache)
+	}
+	if err != nil {
+		return emptyStringArray, err
+	}
+
+	if string(cacheResult) == "{}" || len(cacheResult) == 0 {
+		return emptyStringArray, fmt.Errorf(cannotFindCache, selectedCache, serviceName)
+	}
+
+	if displayType == partitionDisplayType {
+		err = json.Unmarshal(cacheResult, &cachePartitionDetails)
+	} else {
+		err = json.Unmarshal(cacheResult, &cacheDetails)
+	}
+	if err != nil {
+		return emptyStringArray, err
+	}
+
+	if displayType == "access" {
+		sb.WriteString(FormatCacheDetailsSizeAndAccess(cacheDetails.Details))
+	} else if displayType == "index" {
+		sb.WriteString(FormatCacheIndexDetails(cacheDetails.Details))
+	} else if displayType == "storage" {
+		sb.WriteString(FormatCacheDetailsStorage(cacheDetails.Details))
+	} else if displayType == partitionDisplayType {
+		sb.WriteString(FormatCachePartitions(cachePartitionDetails.Details, cacheSummary))
+	}
+	return strings.Split(sb.String(), "\n"), nil
 }
 
 var cachesContent = func(dataFetcher fetcher.Fetcher, clusterSummary clusterSummaryInfo) ([]string, error) {
@@ -797,13 +940,17 @@ func drawContent(screen tcell.Screen, dataFetcher fetcher.Fetcher, panel panelIm
 		trimmedText = fmt.Sprintf("%v%s", string(tcell.RuneHLine), "(trimmed)")
 	}
 
-	drawBox(screen, x, y, x+w-1, y+h, tcell.StyleDefault, fmt.Sprintf("%s [%v]%s", title, string(code), trimmedText))
+	drawBox(screen, x, y, x+w-1, y+h, tcell.StyleDefault, fmt.Sprintf("%s [%v]%s", parseTitle(title), string(code), trimmedText))
 
 	for line := 1; line <= rows; line++ {
 		drawText(screen, x+1, y+line, x+w-1, y+h-1, tcell.StyleDefault, content[line-1])
 	}
 
 	return rows + 2, nil
+}
+
+func parseTitle(title string) string {
+	return strings.ReplaceAll(strings.ReplaceAll(title, cacheNameToken, selectedCache), serviceNameToken, serviceName)
 }
 
 // trimBlankContent trims blank content at the end of the row.
@@ -908,4 +1055,6 @@ func getLengths(width, count int) []int {
 func init() {
 	monitorClusterCmd.Flags().StringVarP(&layoutParam, "layout", "l", defaultLayoutName, "layout to use")
 	monitorClusterCmd.Flags().BoolVarP(&padMaxHeightParam, "pad", "p", false, "pad to max height")
+	monitorClusterCmd.Flags().StringVarP(&serviceName, serviceNameOption, "S", "", serviceNameDescription)
+	monitorClusterCmd.Flags().StringVarP(&selectedCache, "cache-name", "C", "", "cache name")
 }

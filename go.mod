@@ -8,6 +8,7 @@ go 1.20
 
 require (
 	github.com/fatih/color v1.14.1
+	github.com/gdamore/tcell/v2 v2.7.4
 	github.com/ohler55/ojg v1.12.8
 	github.com/onsi/gomega v1.19.0
 	github.com/oracle/coherence-go-client v1.1.1
@@ -21,7 +22,6 @@ require (
 require (
 	github.com/fsnotify/fsnotify v1.5.4 // indirect
 	github.com/gdamore/encoding v1.0.0 // indirect
-	github.com/gdamore/tcell/v2 v2.7.4 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/lucasb-eyer/go-colorful v1.2.0 // indirect
