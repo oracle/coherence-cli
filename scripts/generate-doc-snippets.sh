@@ -47,6 +47,7 @@ create_doc $DOCS_DIR/describe_cluster "${COHCTL} describe cluster --help"
 create_doc $DOCS_DIR/discover_clusters "${COHCTL} discover clusters --help"
 create_doc $DOCS_DIR/get_cluster_config "${COHCTL} get cluster-config --help"
 create_doc $DOCS_DIR/get_cluster_description "${COHCTL} get cluster-description --help"
+create_doc $DOCS_DIR/monitor_cluster "${COHCTL} monitor cluster --help"
 
 # Create Cluster
 create_doc $DOCS_DIR/create_cluster "${COHCTL} create cluster --help"

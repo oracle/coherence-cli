@@ -24,6 +24,8 @@ import (
 const (
 	defaultLayoutName    = "default"
 	defaultLayout        = "members,healthSummary:services,caches:proxies,http-servers:network-stats"
+	serviceLayout        = "services:service-members,service-distributions"
+	cacheLayout          = "caches,cache-indexes:cache-access:cache-storage:cache-partitions"
 	pressAdditional      = "(press key in [] to toggle expand, ? = help)"
 	pressAdditionalReset = "(press key in [] to exit expand)"
 	noContent            = "  No Content"
@@ -33,12 +35,13 @@ const (
 )
 
 var (
-	errSelectService       = errors.New("you must provide a service name via -s option")
+	errSelectService       = errors.New("you must provide a service name via -S option")
 	mutex                  sync.Mutex
 	lastClusterSummaryInfo clusterSummaryInfo
 	emptyStringArray       = make([]string, 0)
 	layoutParam            string
 	padMaxHeightParam      bool
+	showAllPanels          bool
 	monitorCluster         bool
 	additionalMonitorMsg   = pressAdditional
 	expandedPanel          = ""
@@ -83,31 +86,37 @@ var validPanels = []panelImpl{
 	createContentPanel(8, "view-caches", "View Caches", "show view caches", viewCachesContent),
 }
 
-var longDescription = `The 'monitor cluster' command displays a text based UI to monitor the overall cluster.
-You can specify a layout to show by providing a value for '-l'. Panels can be specified using 'panel1:panel1,panel3'.
-Specifying a ':' is the line separator and ',' means panels on the same line. The valid panel types are below:
-
-`
-
 // monitorClusterCmd represents the monitor cluster command
 var monitorClusterCmd = &cobra.Command{
-	Use:               "cluster connection-name",
-	Short:             "monitors the cluster using text based UI",
-	Long:              longDescription + fmt.Sprintf("%v", getValidPanelTypes()),
+	Use:   "cluster connection-name",
+	Short: "monitors the cluster using text based UI",
+	Long: `The 'monitor cluster' command displays a text based UI to monitor the overall cluster.
+You can specify a layout to show by providing a value for '-l'. Panels can be specified using 'panel1:panel1,panel3'.
+Specifying a ':' is the line separator and ',' means panels on the same line. If you don't specify one the 'default' layout is used.
+There are a number of layouts available: 'default-service' and 'default-cache' which require you to specify cache or service. 
+Use --show-panels to show all available panels.`,
 	ValidArgsFunction: completionAllClusters,
 	Args: func(cmd *cobra.Command, args []string) error {
-		if len(args) != 1 {
+		if len(args) != 1 && !showAllPanels {
 			displayErrorAndExit(cmd, youMustProviderClusterMessage)
 		}
 		return nil
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var (
-			clusterName  = args[0]
+			clusterName  string
 			dataFetcher  fetcher.Fetcher
 			err          error
 			parsedLayout []string
 		)
+
+		if showAllPanels {
+			cmd.Println("Valid panels")
+			cmd.Println(getValidPanelTypes())
+			return nil
+		}
+
+		clusterName = args[0]
 
 		// set to tru to turn off incompatible color formatting
 		monitorCluster = true
@@ -125,7 +134,12 @@ var monitorClusterCmd = &cobra.Command{
 		// validate the layout
 		if layoutParam == defaultLayoutName {
 			layoutParam = defaultLayout
+		} else if layoutParam == "default-cache" {
+			layoutParam = cacheLayout
+		} else if layoutParam == "default-service" {
+			layoutParam = serviceLayout
 		}
+
 		parsedLayout, err = parseLayout(layoutParam)
 		if err != nil {
 			return err
@@ -283,7 +297,7 @@ func refresh(screen tcell.Screen, dataFetcher fetcher.Fetcher, parsedLayout []st
 func showHelp(screen tcell.Screen) {
 	help := []string{
 		"",
-		"  Monitor CLI Help ",
+		"  Monitor Cluster CLI Help ",
 		"",
 		"  - 'p' to toggle panel row padding",
 		"  - '+' to increase max height of all panels",
@@ -1031,7 +1045,7 @@ func drawBox(s tcell.Screen, x1, y1, x2, y2 int, style tcell.Style, title string
 func getValidPanelTypes() string {
 	valid := ""
 	for _, p := range validPanels {
-		valid = valid + fmt.Sprintf("%-20s: %s\n", p.GetPanelName(), p.GetDescription())
+		valid = valid + fmt.Sprintf("%-22s: %s\n", p.GetPanelName(), p.GetDescription())
 	}
 
 	return valid
@@ -1055,6 +1069,7 @@ func getLengths(width, count int) []int {
 func init() {
 	monitorClusterCmd.Flags().StringVarP(&layoutParam, "layout", "l", defaultLayoutName, "layout to use")
 	monitorClusterCmd.Flags().BoolVarP(&padMaxHeightParam, "pad", "p", false, "pad to max height")
+	monitorClusterCmd.Flags().BoolVarP(&showAllPanels, "show-panels", "", false, "show all available panels")
 	monitorClusterCmd.Flags().StringVarP(&serviceName, serviceNameOption, "S", "", serviceNameDescription)
 	monitorClusterCmd.Flags().StringVarP(&selectedCache, "cache-name", "C", "", "cache name")
 }

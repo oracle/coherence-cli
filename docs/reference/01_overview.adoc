@@ -168,4 +168,11 @@ Various settings related commands.
 Experimental command to create development clusters.
 --
 
+[CARD]
+.Monitor Clusters
+[link=docs/reference/99_monitor_clusters.adoc]
+--
+Experimental command to monitor clusters with text UI.
+--
+
 ====
