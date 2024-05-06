@@ -1068,7 +1068,7 @@ func getLengths(width, count int) []int {
 
 func init() {
 	monitorClusterCmd.Flags().StringVarP(&layoutParam, "layout", "l", defaultLayoutName, "layout to use")
-	monitorClusterCmd.Flags().BoolVarP(&padMaxHeightParam, "pad", "p", false, "pad to max height")
+	monitorClusterCmd.Flags().BoolVarP(&padMaxHeightParam, "pad", "p", true, "pad to max height")
 	monitorClusterCmd.Flags().BoolVarP(&showAllPanels, "show-panels", "", false, "show all available panels")
 	monitorClusterCmd.Flags().StringVarP(&serviceName, serviceNameOption, "S", "", serviceNameDescription)
 	monitorClusterCmd.Flags().StringVarP(&selectedCache, "cache-name", "C", "", "cache name")
