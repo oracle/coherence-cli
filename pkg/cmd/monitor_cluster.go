@@ -29,13 +29,21 @@ const (
 	pressAdditional      = "(press key in [] to toggle expand, ? = help)"
 	pressAdditionalReset = "(press key in [] to exit expand)"
 	noContent            = "  No Content"
-	unableToFindPanel    = "unable to find panel [%v], use --help to see all options"
+	unableToFindPanel    = "unable to find panel [%v], use --help or --show-panels to see all options"
 	serviceNameToken     = "%SERVICE"
 	cacheNameToken       = "%CACHE"
+	topicNameToken       = "%TOPIC"
 )
 
 var (
+	defaultMap = map[string]string{
+		"default":         "members,healthSummary:services,caches:proxies,http-servers:network-stats",
+		"default-service": "services:service-members,service-distributions",
+		"default-cache":   "caches,cache-indexes:cache-access:cache-storage:cache-partitions",
+		"default-topic":   "topics:topic-members:subscribers:subscriber-groups",
+	}
 	errSelectService       = errors.New("you must provide a service name via -S option")
+	errSelectTopic         = errors.New("you must select a topic using the -T option")
 	mutex                  sync.Mutex
 	lastClusterSummaryInfo clusterSummaryInfo
 	emptyStringArray       = make([]string, 0)
@@ -53,6 +61,7 @@ var (
 	lastDuration   time.Duration
 	inHelp         = false
 	selectedCache  string
+	selectedTopic  string
 )
 
 var validPanels = []panelImpl{
@@ -82,6 +91,9 @@ var validPanels = []panelImpl{
 	createContentPanel(8, "service-members", "Service Members (%SERVICE)", "show service members", serviceMembersContent),
 	createContentPanel(8, "service-distributions", "Service Distributions (%SERVICE)", "show service distributions", serviceDistributionsContent),
 	createContentPanel(8, "service-storage", "Service Storage", "show service storage", serviceStorageContent),
+	createContentPanel(8, "topic-members", "Topic Members (%SERVICE/%TOPIC)", "show topic members", topicMembersContent),
+	createContentPanel(8, "subscribers", "Topic Subscribers (%SERVICE/%TOPIC)", "show topic subscribers", topicSubscribersContent),
+	createContentPanel(8, "subscriber-groups", "Topic Subscribers (%SERVICE/%TOPIC)", "show topic subscriber groups", topicSubscriberGroupsContent),
 	createContentPanel(8, "topics", "Topics", "show topics", topicsContent),
 	createContentPanel(8, "view-caches", "View Caches", "show view caches", viewCachesContent),
 }
@@ -93,7 +105,8 @@ var monitorClusterCmd = &cobra.Command{
 	Long: `The 'monitor cluster' command displays a text based UI to monitor the overall cluster.
 You can specify a layout to show by providing a value for '-l'. Panels can be specified using 'panel1:panel1,panel3'.
 Specifying a ':' is the line separator and ',' means panels on the same line. If you don't specify one the 'default' layout is used.
-There are a number of layouts available: 'default-service' and 'default-cache' which require you to specify cache or service. 
+There are a number of layouts available: 'default-service', 'default-cache', 'default-topic' and 'default-subscriber' which require you to specify cache, service
+, topic or subscriber. 
 Use --show-panels to show all available panels.`,
 	ValidArgsFunction: completionAllClusters,
 	Args: func(cmd *cobra.Command, args []string) error {
@@ -131,13 +144,9 @@ Use --show-panels to show all available panels.`,
 			return err
 		}
 
-		// validate the layout
-		if layoutParam == defaultLayoutName {
-			layoutParam = defaultLayout
-		} else if layoutParam == "default-cache" {
-			layoutParam = cacheLayout
-		} else if layoutParam == "default-service" {
-			layoutParam = serviceLayout
+		// check for default layouts
+		if l, ok := defaultMap[layoutParam]; ok {
+			layoutParam = l
 		}
 
 		parsedLayout, err = parseLayout(layoutParam)
@@ -808,6 +817,91 @@ var topicsContent = func(dataFetcher fetcher.Fetcher, clusterSummary clusterSumm
 	return strings.Split(FormatTopicsSummary(clusterSummary.topicsDetails.Details), "\n"), nil
 }
 
+var topicMembersContent = func(dataFetcher fetcher.Fetcher, clusterSummary clusterSummaryInfo) ([]string, error) {
+	var (
+		err                 error
+		selectedDetails     config.TopicDetails
+		topicsMemberDetails []config.TopicsMemberDetail
+	)
+
+	if selectedTopic == "" {
+		return emptyStringArray, errSelectTopic
+	}
+
+	selectedDetails, err = getSelectedDetails(dataFetcher)
+	if err != nil {
+		return emptyStringArray, err
+	}
+
+	topicsMemberDetails, err = getTopicsMembers(dataFetcher, selectedDetails)
+	if err != nil {
+		return emptyStringArray, err
+	}
+
+	return strings.Split(FormatTopicsMembers(topicsMemberDetails), "\n"), nil
+}
+
+var topicSubscribersContent = func(dataFetcher fetcher.Fetcher, clusterSummary clusterSummaryInfo) ([]string, error) {
+	var (
+		err                     error
+		selectedDetails         config.TopicDetails
+		topicsSubscriberDetails []config.TopicsSubscriberDetail
+	)
+
+	if selectedTopic == "" {
+		return emptyStringArray, errSelectTopic
+	}
+
+	selectedDetails, err = getSelectedDetails(dataFetcher)
+	if err != nil {
+		return emptyStringArray, err
+	}
+
+	topicsSubscriberDetails, err = getTopicsSubscribers(dataFetcher, selectedDetails)
+	if err != nil {
+		return emptyStringArray, err
+	}
+
+	return strings.Split(FormatTopicsSubscribers(topicsSubscriberDetails), "\n"), nil
+}
+
+var topicSubscriberGroupsContent = func(dataFetcher fetcher.Fetcher, clusterSummary clusterSummaryInfo) ([]string, error) {
+	var (
+		err                    error
+		selectedDetails        config.TopicDetails
+		subscriberGroupDetails []config.TopicsSubscriberGroupDetail
+	)
+
+	if selectedTopic == "" {
+		return emptyStringArray, errSelectTopic
+	}
+
+	selectedDetails, err = getSelectedDetails(dataFetcher)
+	if err != nil {
+		return emptyStringArray, err
+	}
+
+	subscriberGroupDetails, err = getTopicsSubscriberGroups(dataFetcher, selectedDetails)
+	if err != nil {
+		return emptyStringArray, err
+	}
+
+	return strings.Split(FormatTopicsSubscriberGroups(subscriberGroupDetails), "\n"), nil
+}
+
+func getSelectedDetails(dataFetcher fetcher.Fetcher) (config.TopicDetails, error) {
+	var (
+		err             error
+		selectedDetails config.TopicDetails
+	)
+
+	if serviceName, err = findServiceForCacheOrTopic(dataFetcher, selectedTopic, "topic"); err != nil {
+		return selectedDetails, err
+	}
+
+	return getTopicsDetails(dataFetcher, serviceName, selectedTopic)
+}
+
 //
 // Panel utility functions and types
 //
@@ -964,7 +1058,8 @@ func drawContent(screen tcell.Screen, dataFetcher fetcher.Fetcher, panel panelIm
 }
 
 func parseTitle(title string) string {
-	return strings.ReplaceAll(strings.ReplaceAll(title, cacheNameToken, selectedCache), serviceNameToken, serviceName)
+	return strings.ReplaceAll(strings.ReplaceAll(strings.ReplaceAll(title, topicNameToken, selectedTopic),
+		cacheNameToken, selectedCache), serviceNameToken, serviceName)
 }
 
 // trimBlankContent trims blank content at the end of the row.
@@ -1071,4 +1166,5 @@ func init() {
 	monitorClusterCmd.Flags().BoolVarP(&showAllPanels, "show-panels", "", false, "show all available panels")
 	monitorClusterCmd.Flags().StringVarP(&serviceName, serviceNameOption, "S", "", serviceNameDescription)
 	monitorClusterCmd.Flags().StringVarP(&selectedCache, "cache-name", "C", "", "cache name")
+	monitorClusterCmd.Flags().StringVarP(&selectedTopic, "topic-name", "T", "", "topic name")
 }
