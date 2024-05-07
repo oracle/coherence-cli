@@ -23,9 +23,6 @@ import (
 
 const (
 	defaultLayoutName    = "default"
-	defaultLayout        = "members,healthSummary:services,caches:proxies,http-servers:network-stats"
-	serviceLayout        = "services:service-members,service-distributions"
-	cacheLayout          = "caches,cache-indexes:cache-access:cache-storage:cache-partitions"
 	pressAdditional      = "(press key in [] to toggle expand, ? = help)"
 	pressAdditionalReset = "(press key in [] to exit expand)"
 	noContent            = "  No Content"
@@ -33,17 +30,20 @@ const (
 	serviceNameToken     = "%SERVICE"
 	cacheNameToken       = "%CACHE"
 	topicNameToken       = "%TOPIC"
+	subscriberToken      = "%SUBSCRIBER"
 )
 
 var (
 	defaultMap = map[string]string{
-		"default":         "members,healthSummary:services,caches:proxies,http-servers:network-stats",
-		"default-service": "services:service-members,service-distributions",
-		"default-cache":   "caches,cache-indexes:cache-access:cache-storage:cache-partitions",
-		"default-topic":   "topics:topic-members:subscribers:subscriber-groups",
+		"default":            "members,healthSummary:services,caches:proxies,http-servers:network-stats",
+		"default-service":    "services:service-members,service-distributions",
+		"default-cache":      "caches,cache-indexes:cache-access:cache-storage:cache-partitions",
+		"default-topic":      "topics:topic-members:subscribers:subscriber-groups",
+		"default-subscriber": "topics:subscribers:subscriber-channels",
 	}
 	errSelectService       = errors.New("you must provide a service name via -S option")
 	errSelectTopic         = errors.New("you must select a topic using the -T option")
+	errSelectSubscriber    = errors.New("you must select a subscriber using the -B option")
 	mutex                  sync.Mutex
 	lastClusterSummaryInfo clusterSummaryInfo
 	emptyStringArray       = make([]string, 0)
@@ -93,7 +93,8 @@ var validPanels = []panelImpl{
 	createContentPanel(8, "service-storage", "Service Storage", "show service storage", serviceStorageContent),
 	createContentPanel(8, "topic-members", "Topic Members (%SERVICE/%TOPIC)", "show topic members", topicMembersContent),
 	createContentPanel(8, "subscribers", "Topic Subscribers (%SERVICE/%TOPIC)", "show topic subscribers", topicSubscribersContent),
-	createContentPanel(8, "subscriber-groups", "Topic Subscribers (%SERVICE/%TOPIC)", "show topic subscriber groups", topicSubscriberGroupsContent),
+	createContentPanel(8, "subscriber-channels", "Subscriber Channels (%SERVICE/%TOPIC/%SUBSCRIBER)", "show topic subscriber channels", topicSubscriberChannelsContent),
+	createContentPanel(8, "subscriber-groups", "Subscriber Channels (%SERVICE/%TOPIC)", "show subscriber groups", topicSubscriberGroupsContent),
 	createContentPanel(8, "topics", "Topics", "show topics", topicsContent),
 	createContentPanel(8, "view-caches", "View Caches", "show view caches", viewCachesContent),
 }
@@ -889,6 +890,36 @@ var topicSubscriberGroupsContent = func(dataFetcher fetcher.Fetcher, clusterSumm
 	return strings.Split(FormatTopicsSubscriberGroups(subscriberGroupDetails), "\n"), nil
 }
 
+var topicSubscriberChannelsContent = func(dataFetcher fetcher.Fetcher, clusterSummary clusterSummaryInfo) ([]string, error) {
+	var (
+		err                     error
+		selectedDetails         config.TopicDetails
+		topicsSubscriberDetails []config.TopicsSubscriberDetail
+	)
+
+	if subscriber <= 0 {
+		return emptyStringArray, errSelectSubscriber
+	}
+
+	selectedDetails, err = getSelectedDetails(dataFetcher)
+	if err != nil {
+		return emptyStringArray, err
+	}
+
+	topicsSubscriberDetails, err = getTopicsSubscribers(dataFetcher, selectedDetails)
+	if err != nil {
+		return emptyStringArray, err
+	}
+
+	nodeIndex := getSubscriberNodeIndex(topicsSubscriberDetails)
+
+	if nodeIndex == -1 {
+		return emptyStringArray, fmt.Errorf(subscriberMessage, 0, selectedTopic, serviceName, subscriber)
+	}
+
+	return strings.Split(FormatSubscriberChannelStats(generateSubscriberChannelStats(topicsSubscriberDetails[nodeIndex].Channels)), "\n"), nil
+}
+
 func getSelectedDetails(dataFetcher fetcher.Fetcher) (config.TopicDetails, error) {
 	var (
 		err             error
@@ -1058,8 +1089,10 @@ func drawContent(screen tcell.Screen, dataFetcher fetcher.Fetcher, panel panelIm
 }
 
 func parseTitle(title string) string {
-	return strings.ReplaceAll(strings.ReplaceAll(strings.ReplaceAll(title, topicNameToken, selectedTopic),
-		cacheNameToken, selectedCache), serviceNameToken, serviceName)
+	s := strings.ReplaceAll(title, topicNameToken, selectedTopic)
+	s = strings.ReplaceAll(s, cacheNameToken, selectedCache)
+	s = strings.ReplaceAll(s, serviceNameToken, serviceName)
+	return strings.ReplaceAll(s, subscriberToken, fmt.Sprintf("%v", subscriber))
 }
 
 // trimBlankContent trims blank content at the end of the row.
@@ -1167,4 +1200,5 @@ func init() {
 	monitorClusterCmd.Flags().StringVarP(&serviceName, serviceNameOption, "S", "", serviceNameDescription)
 	monitorClusterCmd.Flags().StringVarP(&selectedCache, "cache-name", "C", "", "cache name")
 	monitorClusterCmd.Flags().StringVarP(&selectedTopic, "topic-name", "T", "", "topic name")
+	monitorClusterCmd.Flags().Int64VarP(&subscriber, "subscriber-id", "B", 0, "subscriber")
 }
