@@ -77,7 +77,7 @@ jobs:
         make clean build-test-images test-e2e-standalone
         make test-clean test-discovery
 
-    - uses: actions/upload-artifact@vv
+    - uses: actions/upload-artifact@v4
       if: failure()
       with:
         name: test-output-${{ matrix.coherenceVersion }}-${{ matrix.javaImage }}
