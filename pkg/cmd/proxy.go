@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, 2023 Oracle and/or its affiliates.
+ * Copyright (c) 2021, 2024 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -183,65 +183,13 @@ var getProxyConnectionsCmd = &cobra.Command{
 
 		for {
 			var (
-				proxiesSummary         = config.ProxiesSummary{}
-				connectionDetailsFinal = make([]config.ProxyConnection, 0)
+				connectionDetailsFinal []config.ProxyConnection
 				connectionsResult      []byte
-				proxyResults           []byte
-				wg                     sync.WaitGroup
-				errorSink              = createErrorSink()
-				m                      = sync.RWMutex{}
 			)
 
-			proxyResults, err = dataFetcher.GetProxySummaryJSON()
+			connectionDetailsFinal, err = getProxyConnections(dataFetcher, serviceName)
 			if err != nil {
 				return err
-			}
-
-			if len(proxyResults) == 0 {
-				return fmt.Errorf("%s '%s'", proxyErrorMsg, serviceName)
-			}
-
-			err = json.Unmarshal(proxyResults, &proxiesSummary)
-			if err != nil {
-				return err
-			}
-
-			nodeIds := getProxyNodeIDs(serviceName, proxiesSummary)
-			nodeIdsLen := len(nodeIds)
-
-			if nodeIdsLen == 0 {
-				return fmt.Errorf("%s '%s'", proxyErrorMsg, serviceName)
-			}
-
-			wg.Add(nodeIdsLen)
-
-			// retrieve all connection details from JSON
-			for i := range nodeIds {
-				go func(nodeID string) {
-					defer wg.Done()
-					connectionDetails := config.ProxyConnections{}
-					data, err1 := dataFetcher.GetProxyConnectionsJSON(serviceName, nodeID)
-					if err1 != nil {
-						errorSink.AppendError(err1)
-						return
-					}
-					err1 = json.Unmarshal(data, &connectionDetails)
-					if err1 != nil {
-						errorSink.AppendError(err1)
-						return
-					}
-					// protect the slice for update
-					m.Lock()
-					defer m.Unlock()
-					connectionDetailsFinal = append(connectionDetailsFinal, connectionDetails.Proxies...)
-				}(nodeIds[i])
-			}
-
-			// wait for the results
-			wg.Wait()
-			errorList := errorSink.GetErrors()
-			if len(errorList) > 0 {
-				return utils.GetErrors(errorList)
 			}
 
 			if strings.Contains(OutputFormat, constants.JSONPATH) || OutputFormat == constants.JSON {
@@ -275,6 +223,68 @@ var getProxyConnectionsCmd = &cobra.Command{
 
 		return nil
 	},
+}
+
+func getProxyConnections(dataFetcher fetcher.Fetcher, proxyService string) ([]config.ProxyConnection, error) {
+	var (
+		wg                     sync.WaitGroup
+		errorSink              = createErrorSink()
+		m                      = sync.RWMutex{}
+		err                    error
+		connectionDetailsFinal = make([]config.ProxyConnection, 0)
+		proxyResults           []byte
+		proxiesSummary         = config.ProxiesSummary{}
+	)
+
+	proxyResults, err = dataFetcher.GetProxySummaryJSON()
+	if err != nil {
+		return connectionDetailsFinal, err
+	}
+
+	err = json.Unmarshal(proxyResults, &proxiesSummary)
+	if err != nil {
+		return connectionDetailsFinal, err
+	}
+
+	nodeIds := getProxyNodeIDs(proxyService, proxiesSummary)
+	nodeIdsLen := len(nodeIds)
+
+	if nodeIdsLen == 0 {
+		return connectionDetailsFinal, fmt.Errorf("%s '%s'", proxyErrorMsg, proxyService)
+	}
+
+	wg.Add(nodeIdsLen)
+
+	// retrieve all connection details from JSON
+	for i := range nodeIds {
+		go func(nodeID string) {
+			defer wg.Done()
+			connectionDetails := config.ProxyConnections{}
+			data, err1 := dataFetcher.GetProxyConnectionsJSON(proxyService, nodeID)
+			if err1 != nil {
+				errorSink.AppendError(err1)
+				return
+			}
+			err1 = json.Unmarshal(data, &connectionDetails)
+			if err1 != nil {
+				errorSink.AppendError(err1)
+				return
+			}
+			// protect the slice for update
+			m.Lock()
+			defer m.Unlock()
+			connectionDetailsFinal = append(connectionDetailsFinal, connectionDetails.Proxies...)
+		}(nodeIds[i])
+	}
+
+	// wait for the results
+	wg.Wait()
+	errorList := errorSink.GetErrors()
+	if len(errorList) > 0 {
+		return connectionDetailsFinal, utils.GetErrors(errorList)
+	}
+
+	return connectionDetailsFinal, nil
 }
 
 func getProxyNodeIDs(selectedService string, proxiesSummary config.ProxiesSummary) []string {
