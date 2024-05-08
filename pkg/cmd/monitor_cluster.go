@@ -106,8 +106,8 @@ var monitorClusterCmd = &cobra.Command{
 	Long: `The 'monitor cluster' command displays a text based UI to monitor the overall cluster.
 You can specify a layout to show by providing a value for '-l'. Panels can be specified using 'panel1:panel1,panel3'.
 Specifying a ':' is the line separator and ',' means panels on the same line. If you don't specify one the 'default' layout is used.
-There are a number of layouts available: 'default-service', 'default-cache', 'default-topic' and 'default-subscriber' which require you to specify cache, service
-, topic or subscriber. 
+There are a number of layouts available: 'default-service', 'default-cache', 'default-topic' and 'default-subscriber' which 
+require you to specify cache, service, topic or subscriber.
 Use --show-panels to show all available panels.`,
 	ValidArgsFunction: completionAllClusters,
 	Args: func(cmd *cobra.Command, args []string) error {
