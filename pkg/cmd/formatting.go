@@ -1451,18 +1451,21 @@ func FormatMembers(members []config.Member, verbose bool, storageMap map[int]boo
 		availableStoragePercent = float32(totalAvailStorageMemoryMB) / float32(totalMaxStorageMemoryMB) * 100
 	}
 
-	result :=
-		fmt.Sprintf("Total cluster members: %d\n", memberCount) +
-			fmt.Sprintf("Storage enabled count: %d\n", storageCount) +
-			fmt.Sprintf("Departure count:       %d\n\n", departureCount) +
-			fmt.Sprintf("Cluster Heap - Total: %s Used: %s Available: %s (%4.1f%%)\n",
-				strings.TrimSpace(formattingFunction(int64(totalMaxMemoryMB)*MB)),
-				strings.TrimSpace(formattingFunction(int64(totalUsedMB)*MB)),
-				strings.TrimSpace(formattingFunction(int64(totalAvailMemoryMB)*MB)), availablePercent) +
-			fmt.Sprintf("Storage Heap - Total: %s Used: %s Available: %s (%4.1f%%)\n\n",
-				strings.TrimSpace(formattingFunction(int64(totalMaxStorageMemoryMB)*MB)),
-				strings.TrimSpace(formattingFunction(int64(totalUsedStorageMB)*MB)),
-				strings.TrimSpace(formattingFunction(int64(totalAvailStorageMemoryMB)*MB)), availableStoragePercent)
+	result := ""
+	if !showMembersOnly {
+		result =
+			fmt.Sprintf("Total cluster members: %d\n", memberCount) +
+				fmt.Sprintf("Storage enabled count: %d\n", storageCount) +
+				fmt.Sprintf("Departure count:       %d\n\n", departureCount) +
+				fmt.Sprintf("Cluster Heap - Total: %s Used: %s Available: %s (%4.1f%%)\n",
+					strings.TrimSpace(formattingFunction(int64(totalMaxMemoryMB)*MB)),
+					strings.TrimSpace(formattingFunction(int64(totalUsedMB)*MB)),
+					strings.TrimSpace(formattingFunction(int64(totalAvailMemoryMB)*MB)), availablePercent) +
+				fmt.Sprintf("Storage Heap - Total: %s Used: %s Available: %s (%4.1f%%)\n\n",
+					strings.TrimSpace(formattingFunction(int64(totalMaxStorageMemoryMB)*MB)),
+					strings.TrimSpace(formattingFunction(int64(totalUsedStorageMB)*MB)),
+					strings.TrimSpace(formattingFunction(int64(totalAvailStorageMemoryMB)*MB)), availableStoragePercent)
+	}
 
 	if summary {
 		tableSummary := newFormattedTable().WithHeader(RoleColumn, CountColumn).WithAlignment(L, R)

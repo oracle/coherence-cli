@@ -21,6 +21,9 @@ const stopped = "stopped"
 
 // statusHAFormatter formats a column value and makes it Red if contains ENDANGERED.
 var statusHAFormatter = func(s string) string {
+	if monitorCluster {
+		return s
+	}
 	if strings.Contains(s, endangered) {
 		return red(s)
 	}
@@ -30,6 +33,9 @@ var statusHAFormatter = func(s string) string {
 
 // hitRateFormatter formats a column value which represents a cache hit rate.
 var hitRateFormatter = func(s string) string {
+	if monitorCluster {
+		return s
+	}
 	floatValue, err := strconv.ParseFloat(trimPercent(s), 32)
 	if err != nil {
 		return s
@@ -46,6 +52,9 @@ var hitRateFormatter = func(s string) string {
 
 // machineMemoryFormatting formats a column value which represents machine percent memory used.
 var machineMemoryFormatting = func(s string) string {
+	if monitorCluster {
+		return s
+	}
 	floatValue, err := strconv.ParseFloat(trimPercent(s), 32)
 	if err != nil {
 		return s
@@ -62,6 +71,9 @@ var machineMemoryFormatting = func(s string) string {
 
 // errorFormatter formats a column value which represents an error or number that needs to be highlighted.
 var errorFormatter = func(s string) string {
+	if monitorCluster {
+		return s
+	}
 	v, err := getInt64Value(s)
 	if err != nil || v == 0 {
 		return s
@@ -75,6 +87,9 @@ var errorFormatter = func(s string) string {
 
 // endangeredPartitionsFormatter formats a column value which represents the number of endangered partitions.
 var endangeredPartitionsFormatter = func(s string) string {
+	if monitorCluster {
+		return s
+	}
 	v, err := getInt64Value(s)
 	if err != nil || v == 0 || v == -1 {
 		return s
@@ -85,6 +100,9 @@ var endangeredPartitionsFormatter = func(s string) string {
 
 // vulnerablePartitionsFormatter formats a column value which represents the number of vulnerable or unbalanced partitions.
 var vulnerablePartitionsFormatter = func(s string) string {
+	if monitorCluster {
+		return s
+	}
 	v, err := getInt64Value(s)
 	if err != nil || v == 0 || v == -1 {
 		return s
@@ -95,6 +113,9 @@ var vulnerablePartitionsFormatter = func(s string) string {
 
 // packetFormatter formats a column value which represents packages where higher numbers need to be highlighted.
 var packetFormatter = func(s string) string {
+	if monitorCluster {
+		return s
+	}
 	v, err := getInt64Value(s)
 	if err != nil {
 		return s
@@ -112,6 +133,9 @@ var packetFormatter = func(s string) string {
 
 // healthFormatter formats a column value when false will be displayed in red.
 var healthFormatter = func(s string) string {
+	if monitorCluster {
+		return s
+	}
 	if s == stringFalse {
 		return red(s)
 	}
@@ -120,6 +144,9 @@ var healthFormatter = func(s string) string {
 
 // reporterFormatter formats a column value when "Stopped" will be displayed in red.
 var reporterFormatter = func(s string) string {
+	if monitorCluster {
+		return s
+	}
 	if strings.Contains(strings.ToLower(s), stopped) {
 		return red(s)
 	}
@@ -128,6 +155,9 @@ var reporterFormatter = func(s string) string {
 
 // trueBoolFormatter formats a column value when true will be displayed in red.
 var trueBoolFormatter = func(s string) string {
+	if monitorCluster {
+		return s
+	}
 	if s == stringTrue {
 		return red(s)
 	}
@@ -136,6 +166,9 @@ var trueBoolFormatter = func(s string) string {
 
 // yesBoolFormatter formats a column value when yes will be displayed in red.
 var yesBoolFormatter = func(s string) string {
+	if monitorCluster {
+		return s
+	}
 	if strings.Contains(s, "yes") {
 		return red(s)
 	}
@@ -144,6 +177,9 @@ var yesBoolFormatter = func(s string) string {
 
 // healthSummaryFormatter formats a column value for a health summary.
 var healthSummaryFormatter = func(s string) string {
+	if monitorCluster {
+		return s
+	}
 	if !strings.Contains(s, "/") {
 		return s
 	}
@@ -167,6 +203,9 @@ var healthSummaryFormatter = func(s string) string {
 
 // healthMonitoringFormatter formats a column value for health monitoring summary.
 var healthMonitoringFormatter = func(s string) string {
+	if monitorCluster {
+		return s
+	}
 	if strings.Contains(s, http200) || strings.Contains(s, "4") {
 		return s
 	}
@@ -181,6 +220,9 @@ var healthMonitoringFormatter = func(s string) string {
 
 // healthSummaryFormatter formats a column value for federation state.
 var federationStateFormatter = func(s string) string {
+	if monitorCluster {
+		return s
+	}
 	lowerCase := strings.ToLower(s)
 	if strings.Contains(lowerCase, "error") {
 		return red(s)
@@ -194,6 +236,9 @@ var federationStateFormatter = func(s string) string {
 
 // networkStatsFormatter formats a column value representing publisher or receiver rates.
 var networkStatsFormatter = func(s string) string {
+	if monitorCluster {
+		return s
+	}
 	floatValue, err := strconv.ParseFloat(trimPercent(s), 32)
 	if err != nil {
 		return s

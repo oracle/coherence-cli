@@ -43,6 +43,7 @@ var (
 	p2pSortByReceiver  bool
 
 	memberSummary   bool
+	showMembersOnly bool
 	departedMembers bool
 
 	tracingRatio float32
@@ -1151,6 +1152,7 @@ func init() {
 
 	getMembersCmd.Flags().StringVarP(&roleName, "role", "r", all, roleNameDescription)
 	getMembersCmd.Flags().BoolVarP(&memberSummary, "summary", "S", false, "show a member summary")
+	getMembersCmd.Flags().BoolVarP(&showMembersOnly, "members", "M", false, "show members only")
 	getMembersCmd.Flags().BoolVarP(&departedMembers, "departed", "D", false, "show departed members only")
 
 	getNetworkStatsCmd.Flags().StringVarP(&roleName, "role", "r", all, roleNameDescription)

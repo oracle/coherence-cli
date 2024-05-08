@@ -166,9 +166,6 @@ information regarding partition sizes.`,
 			err         error
 			dataFetcher fetcher.Fetcher
 			connection  string
-			errorSink   = createErrorSink()
-			wg          sync.WaitGroup
-			m           = sync.RWMutex{}
 			jsonData    []byte
 		)
 
@@ -178,66 +175,9 @@ information regarding partition sizes.`,
 		}
 
 		for {
-			var (
-				servicesSummary = config.ServicesSummaries{}
-				serviceList     = make([]string, 0)
-			)
-
-			// get the list of services
-			servicesResult, err := dataFetcher.GetServiceDetailsJSON()
+			storageSummary, err := getServiceStorageDetails(dataFetcher)
 			if err != nil {
 				return err
-			}
-
-			err = json.Unmarshal(servicesResult, &servicesSummary)
-			if err != nil {
-				return err
-			}
-
-			// get the list of partitioned services
-			for _, v := range servicesSummary.Services {
-				if utils.IsDistributedCache(v.ServiceType) {
-					if !utils.SliceContains(serviceList, v.ServiceName) {
-						serviceList = append(serviceList, v.ServiceName)
-					}
-				}
-			}
-
-			if len(serviceList) == 0 {
-				return errors.New("unable to find any partitioned services")
-			}
-
-			// now we have partitioned services, retrieve the data for each service
-			wg.Add(len(serviceList))
-
-			storageSummary := make([]config.ServiceStorageSummary, 0)
-
-			for _, service := range serviceList {
-				go func(serviceName string) {
-					var data = config.ServiceStorageSummary{}
-					defer wg.Done()
-					partitionsData, err1 := dataFetcher.GetServicePartitionsJSON(serviceName)
-					if err1 != nil {
-						errorSink.AppendError(err1)
-					}
-					err1 = json.Unmarshal(partitionsData, &data)
-					if err1 != nil {
-						errorSink.AppendError(utils.GetError("unable to unmarshall storage data", err1))
-						return
-					}
-
-					// protect the slice for update
-					m.Lock()
-					defer m.Unlock()
-					storageSummary = append(storageSummary, data)
-				}(service)
-			}
-
-			wg.Wait()
-
-			errorList := errorSink.GetErrors()
-			if len(errorList) != 0 {
-				return utils.GetErrors(errorList)
 			}
 
 			if strings.Contains(OutputFormat, constants.JSONPATH) || OutputFormat == constants.JSON {
@@ -274,6 +214,75 @@ information regarding partition sizes.`,
 
 		return nil
 	},
+}
+
+func getServiceStorageDetails(dataFetcher fetcher.Fetcher) ([]config.ServiceStorageSummary, error) {
+	var (
+		servicesSummary = config.ServicesSummaries{}
+		serviceList     = make([]string, 0)
+		errorSink       = createErrorSink()
+		wg              sync.WaitGroup
+		m               = sync.RWMutex{}
+	)
+
+	// get the list of services
+	servicesResult, err := dataFetcher.GetServiceDetailsJSON()
+	if err != nil {
+		return nil, err
+	}
+
+	err = json.Unmarshal(servicesResult, &servicesSummary)
+	if err != nil {
+		return nil, err
+	}
+
+	// get the list of partitioned services
+	for _, v := range servicesSummary.Services {
+		if utils.IsDistributedCache(v.ServiceType) {
+			if !utils.SliceContains(serviceList, v.ServiceName) {
+				serviceList = append(serviceList, v.ServiceName)
+			}
+		}
+	}
+
+	if len(serviceList) == 0 {
+		return nil, errors.New("unable to find any partitioned services")
+	}
+
+	// now we have partitioned services, retrieve the data for each service
+	wg.Add(len(serviceList))
+
+	storageSummary := make([]config.ServiceStorageSummary, 0)
+
+	for _, service := range serviceList {
+		go func(serviceName string) {
+			var data = config.ServiceStorageSummary{}
+			defer wg.Done()
+			partitionsData, err1 := dataFetcher.GetServicePartitionsJSON(serviceName)
+			if err1 != nil {
+				errorSink.AppendError(err1)
+			}
+			err1 = json.Unmarshal(partitionsData, &data)
+			if err1 != nil {
+				errorSink.AppendError(utils.GetError("unable to unmarshall storage data", err1))
+				return
+			}
+
+			// protect the slice for update
+			m.Lock()
+			defer m.Unlock()
+			storageSummary = append(storageSummary, data)
+		}(service)
+	}
+
+	wg.Wait()
+
+	errorList := errorSink.GetErrors()
+	if len(errorList) != 0 {
+		return nil, utils.GetErrors(errorList)
+	}
+
+	return storageSummary, nil
 }
 
 // getServiceDistributionsCmd represents the get service-distributions command.
