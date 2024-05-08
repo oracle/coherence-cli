@@ -86,6 +86,7 @@ var validPanels = []panelImpl{
 	createContentPanel(8, "network-stats", "Network Stats", "show network stats", networkStatsContent),
 	createContentPanel(8, "persistence", "Persistence", "show persistence", persistenceContent),
 	createContentPanel(8, "proxies", "Proxy Servers", "show proxy servers", proxiesContent),
+	createContentPanel(8, "proxy-connections", "Proxy Connections (%SERVICE)", "show proxy connections", proxyConnectionsContent),
 	createContentPanel(8, "reporters", "Reporters", "show reporters", reportersContent),
 	createContentPanel(8, "services", "Services", "show services", servicesContent),
 	createContentPanel(8, "service-members", "Service Members (%SERVICE)", "show service members", serviceMembersContent),
@@ -736,6 +737,19 @@ var proxiesContentInternal = func(protocol string, clusterSummary clusterSummary
 	}
 
 	return strings.Split(FormatProxyServers(proxiesSummary.Proxies, protocol), "\n"), nil
+}
+
+var proxyConnectionsContent = func(dataFetcher fetcher.Fetcher, clusterSummary clusterSummaryInfo) ([]string, error) {
+	if serviceName == "" {
+		return emptyStringArray, errSelectService
+	}
+
+	connectionDetailsFinal, err := getProxyConnections(dataFetcher, serviceName)
+	if err != nil {
+		return emptyStringArray, err
+	}
+
+	return strings.Split(FormatProxyConnections(connectionDetailsFinal), "\n"), nil
 }
 
 var cacheAccessContent = func(dataFetcher fetcher.Fetcher, clusterSummary clusterSummaryInfo) ([]string, error) {
