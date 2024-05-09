@@ -761,6 +761,7 @@ var (
 	extendClientParam        bool
 	profileFirstParam        bool
 	skipMavenDepsParam       bool
+	backupLogFilesParam      bool
 	validPersistenceModes    = []string{"on-demand", "active", "active-backup", "active-async"}
 	persistenceModeParam     string
 	serverStartClassParam    string
@@ -1491,6 +1492,7 @@ func init() {
 	startClusterCmd.Flags().Int32VarP(&jmxRemotePortParam, jmxPortArg, "J", 0, jmxPortMessage)
 	startClusterCmd.Flags().StringVarP(&jmxRemoteHostParam, jmxHostArg, "j", "", jmxHostMessage)
 	startClusterCmd.Flags().BoolVarP(&profileFirstParam, profileFirstArg, "F", false, profileFirstMessage)
+	startClusterCmd.Flags().BoolVarP(&backupLogFilesParam, backupLogFilesArg, "B", false, backupLogFilesMessage)
 
 	startConsoleCmd.Flags().StringVarP(&heapMemoryParam, heapMemoryArg, "M", defaultHeap, heapMemoryMessage)
 	startConsoleCmd.Flags().Int32VarP(&logLevelParam, logLevelArg, "l", 5, logLevelMessage)
@@ -1516,6 +1518,7 @@ func init() {
 	scaleClusterCmd.Flags().Int32VarP(&healthStartPortParam, healthPortArg, "e", 0, healthPortMessage)
 	scaleClusterCmd.Flags().StringVarP(&profileValueParam, profileArg, "P", "", profileMessage)
 	scaleClusterCmd.Flags().StringVarP(&serverStartClassParam, startClassArg, "S", "", startClassMessage)
+	scaleClusterCmd.Flags().BoolVarP(&backupLogFilesParam, backupLogFilesArg, "B", false, backupLogFilesMessage)
 }
 
 // sanitizeConnectionName sanitizes a cluster connection

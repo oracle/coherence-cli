@@ -1090,7 +1090,7 @@ func issueReporterCommand(h HTTPFetcher, nodeID, command string) ([]byte, error)
 
 // GetURL returns the URL.
 func (h HTTPFetcher) GetURL() string {
-	return h.ConnectionType
+	return h.URL
 }
 
 // GetType returns the connection type.

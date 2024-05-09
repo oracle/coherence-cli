@@ -283,7 +283,7 @@ func startCluster(cmd *cobra.Command, connection ClusterConnection, serverCount,
 			arguments = append(arguments, metricsArgs...)
 		}
 
-		// if -F is specified and we are the first management or -F is not specified then add profile
+		// if -F is specified, and we are the first management or -F is not specified then add profile
 		if (profileFirstParam && mgmtPort != -1) || (!profileFirstParam && len(profileArgs) > 0) {
 			arguments = append(arguments, profileArgs...)
 		}
@@ -302,6 +302,20 @@ func startCluster(cmd *cobra.Command, connection ClusterConnection, serverCount,
 		memberLogFile, err = getLogFile(connection.Name, member)
 		if err != nil {
 			return err
+		}
+
+		if backupLogFilesParam {
+			// backup log files before starting cluster
+			backupLogFile := memberLogFile + ".old"
+			input, err1 := os.ReadFile(memberLogFile)
+			if err1 == nil {
+				// original file exists so backup
+				err1 = os.WriteFile(backupLogFile, input, 0600)
+				if err1 != nil {
+					return fmt.Errorf("unable to write to log file %s: %v", backupLogFile, err1)
+				}
+				cmd.Printf("creating backup log file %s\n", backupLogFile)
+			}
 		}
 
 		cmd.Printf("Starting cluster member %s...\n", member)

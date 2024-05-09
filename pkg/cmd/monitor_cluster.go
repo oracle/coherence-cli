@@ -26,6 +26,7 @@ const (
 	pressAdditional      = "(press key in [] to toggle expand, ? = help)"
 	pressAdditionalReset = "(press key in [] to exit expand)"
 	noContent            = "  No Content"
+	errorContent         = "Unable to retrieve data"
 	unableToFindPanel    = "unable to find panel [%v], use --help or --show-panels to see all options"
 	serviceNameToken     = "%SERVICE"
 	cacheNameToken       = "%CACHE"
@@ -50,6 +51,7 @@ var (
 	layoutParam            string
 	padMaxHeightParam      bool
 	showAllPanels          bool
+	ignoreRESTErrors       bool
 	monitorCluster         bool
 	additionalMonitorMsg   = pressAdditional
 	expandedPanel          = ""
@@ -365,7 +367,7 @@ func updateScreen(screen tcell.Screen, dataFetcher fetcher.Fetcher, parsedLayout
 			initialRefresh = true
 		}
 
-		if len(errorList) > 0 {
+		if len(errorList) > 0 && !ignoreRESTErrors {
 			err = utils.GetErrors(errorList)
 			return err
 		}
@@ -374,11 +376,11 @@ func updateScreen(screen tcell.Screen, dataFetcher fetcher.Fetcher, parsedLayout
 	screen.Clear()
 
 	err = json.Unmarshal(lastClusterSummaryInfo.clusterResult, &cluster)
-	if err != nil {
+	if err != nil && !ignoreRESTErrors {
 		return err
 	}
 
-	drawHeader(screen, w, h, cluster)
+	drawHeader(screen, w, h, cluster, dataFetcher)
 
 	var (
 		widths      []int
@@ -1044,12 +1046,16 @@ func drawContent(screen tcell.Screen, dataFetcher fetcher.Fetcher, panel panelIm
 
 	content, err := panel.GetContentFunction()(dataFetcher, lastClusterSummaryInfo)
 	if err != nil {
-		return 0, err
+		if ignoreRESTErrors {
+			content = []string{"  ", noContent, ""}
+		} else {
+			return 0, err
+		}
 	}
 
 	l := len(content)
 
-	if l == 0 || l == 1 && content[0] == "" {
+	if (l == 0 || l == 1) && content[0] == "" {
 		content = []string{" ", noContent, " "}
 		l = len(content)
 	}
@@ -1123,12 +1129,16 @@ func trimBlankContent(content []string) []string {
 }
 
 // drawHeader draws the screen header with cluster information.
-func drawHeader(screen tcell.Screen, w, h int, cluster config.Cluster) {
-	version := strings.Split(cluster.Version, " ")
-	title := fmt.Sprintf("Coherence CLI: %s - Monitoring cluster %s (%s) ESC to quit %s. (%v)",
-		time.Now().Format(time.DateTime), cluster.ClusterName, version[0], additionalMonitorMsg, lastDuration)
+func drawHeader(screen tcell.Screen, w, h int, cluster config.Cluster, dataFetcher fetcher.Fetcher) {
+	var title string
+	if cluster.ClusterName == "" && ignoreRESTErrors {
+		title = errorContent + " from " + dataFetcher.GetURL()
+	} else {
+		version := strings.Split(cluster.Version, " ")
+		title = fmt.Sprintf("Coherence CLI: %s - Monitoring cluster %s (%s) ESC to quit %s. (%v)",
+			time.Now().Format(time.DateTime), cluster.ClusterName, version[0], additionalMonitorMsg, lastDuration)
+	}
 	drawText(screen, 1, 0, w-1, h-1, tcell.StyleDefault.Reverse(true), title)
-
 }
 
 // drawText draws text on the screen.
@@ -1211,6 +1221,7 @@ func getLengths(width, count int) []int {
 func init() {
 	monitorClusterCmd.Flags().StringVarP(&layoutParam, "layout", "l", defaultLayoutName, "layout to use")
 	monitorClusterCmd.Flags().BoolVarP(&showAllPanels, "show-panels", "", false, "show all available panels")
+	monitorClusterCmd.Flags().BoolVarP(&ignoreRESTErrors, "ignore-errors", "I", false, "ignore errors after initial refresh")
 	monitorClusterCmd.Flags().StringVarP(&serviceName, serviceNameOption, "S", "", serviceNameDescription)
 	monitorClusterCmd.Flags().StringVarP(&selectedCache, "cache-name", "C", "", "cache name")
 	monitorClusterCmd.Flags().StringVarP(&selectedTopic, "topic-name", "T", "", "topic name")
