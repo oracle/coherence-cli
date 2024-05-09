@@ -493,6 +493,7 @@ type TopicsSubscriberDetail struct {
 	Disconnections     int64                  `json:"disconnections"`
 	Notifications      int64                  `json:"notifications"`
 	Backlog            int64                  `json:"backlog"`
+	ReceiveBacklog     int64                  `json:"receiveBacklog"`
 	Member             string                 `json:"member"`
 	Cluster            string                 `json:"cluster"`
 	Channels           map[string]interface{} `json:"channels"`

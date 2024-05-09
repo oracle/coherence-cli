@@ -637,9 +637,11 @@ func FormatTopicsSubscribers(topicsSubscribers []config.TopicsSubscriberDetail) 
 			channelsOwned = "All"
 		}
 
+		backlog := max(value.Backlog, value.ReceiveBacklog)
+
 		table.AddRow(formatSmallInteger(int32(nodeID)), fmt.Sprintf("%v", value.ID),
 			value.StateName, channels, subGroup, formatLargeInteger(value.ReceivedCount),
-			formatLargeInteger(value.ReceiveErrors), formatLargeInteger(value.Backlog), formatLargeInteger(value.Disconnections), value.SubType,
+			formatLargeInteger(value.ReceiveErrors), formatLargeInteger(backlog), formatLargeInteger(value.Disconnections), value.SubType,
 			channelsOwned)
 
 		if OutputFormat == constants.WIDE {
