@@ -16,6 +16,7 @@ Experimental command to monitor clusters with text UI
 NOTE: The `monitor cluster` command is current experimental only and may be changed or removed in the future
 
 * <<monitor-cluster, `cohctl monitor cluster`>> - monitors the cluster using text based UI
+* <<monitor-cluster-panels, `cohctl monitor cluster --show-panels`>> - shows all available panels
 
 [#monitor-cluster]
 ==== Monitor Cluster
@@ -184,46 +185,17 @@ NOTE: Any of the panels or layouts that specify `cache-*` or `service-*` must ha
 `-C` or `-S` respectively.
 
 
-**Display all the available panels**
+
+[#monitor-cluster-panels]
+==== Monitor Cluster Show Panels
 
 [source,bash]
 ----
 cohctl monitor cluster --show-panels
 ----
 Output:
-[source,bash]
-----
-Valid panels
 
-caches                : show caches
-cache-access          : show cache access
-cache-indexes         : show cache indexes
-cache-storage         : show cache storage
-cache-partitions      : show cache partitions
-departedMembers       : show departed members
-elastic-data          : show elastic data
-executors             : show Executors
-healthSummary         : show health summary
-federation-all        : show all federation details
-federation-dest       : show federation destinations
-federation-origins    : show federation origins
-http-servers          : show HTTP servers
-http-sessions         : show HTTP sessions
-machines              : show machines
-membersSummary        : show members summary
-members               : show members
-membersShort          : show members (short)
-network-stats         : show network stats
-persistence           : show persistence
-proxies               : show proxy servers
-reporters             : show reporters
-services              : show services
-service-members       : show service members
-service-distributions : show service distributions
-service-storage       : show service storage
-topics                : show topics
-view-caches           : show view caches
-----
+include::../../build/_output/docs-gen/monitor_cluster_panels.adoc[tag=text]
 
 === See Also
 

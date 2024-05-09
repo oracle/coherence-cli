@@ -128,7 +128,6 @@ Use --show-panels to show all available panels.`,
 		)
 
 		if showAllPanels {
-			cmd.Println("Valid panels")
 			cmd.Println(getValidPanelTypes())
 			return nil
 		}
@@ -1195,12 +1194,18 @@ func drawBox(s tcell.Screen, x1, y1, x2, y2 int, style tcell.Style, title string
 
 // getValidPanelTypes returns the list of panels for the --help command.
 func getValidPanelTypes() string {
-	valid := ""
-	for _, p := range validPanels {
-		valid = valid + fmt.Sprintf("%-22s: %s\n", p.GetPanelName(), p.GetDescription())
+	var sb strings.Builder
+	sb.WriteString("Default panels\n--------------\n")
+	for k, v := range defaultMap {
+		sb.WriteString(fmt.Sprintf("%-22s: %s\n", k, v))
 	}
 
-	return valid
+	sb.WriteString("\nIndividual panels\n-----------------\n")
+	for _, p := range validPanels {
+		sb.WriteString(fmt.Sprintf("%-22s: %s\n", p.GetPanelName(), p.GetDescription()))
+	}
+
+	return sb.String()
 }
 
 // getLengths splits up widths into various lengths taking into account the remainder.
