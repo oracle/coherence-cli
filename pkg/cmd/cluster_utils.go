@@ -308,9 +308,8 @@ func startCluster(cmd *cobra.Command, connection ClusterConnection, serverCount,
 			// backup log files before starting cluster
 			backupLogFile := memberLogFile + ".old"
 			input, err1 := os.ReadFile(memberLogFile)
-			if err1 != nil {
-				// no log file so just ignore error as it may have been removed
-			} else {
+			if err1 == nil {
+				// original file exists so backup
 				err1 = os.WriteFile(backupLogFile, input, 0600)
 				if err1 != nil {
 					return fmt.Errorf("unable to write to log file %s: %v", backupLogFile, err1)
