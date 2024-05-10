@@ -297,7 +297,6 @@ func resetMaxHeight() {
 }
 
 func refresh(screen tcell.Screen, dataFetcher fetcher.Fetcher, parsedLayout []string, refresh bool) error {
-	screen.Clear()
 	err := updateScreen(screen, dataFetcher, parsedLayout, refresh)
 	if err != nil {
 		screen.Sync()
