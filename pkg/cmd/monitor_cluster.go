@@ -36,15 +36,16 @@ const (
 
 var (
 	defaultMap = map[string]string{
-		"default":            "members,healthSummary:services,caches:proxies,http-servers:network-stats",
-		"default-service":    "services:service-members,service-distributions",
-		"default-cache":      "caches,cache-indexes:cache-access:cache-storage:cache-partitions",
+		"default":            "members,healthSummary:services,caches:proxies,http-servers:machines,network-stats",
+		"default-service":    "services:service-members:service-distributions",
+		"default-cache":      "caches,cache-indexes:cache-access:cache-storage:cache-stores:cache-partitions",
 		"default-topic":      "topics:topic-members:subscribers:subscriber-groups",
 		"default-subscriber": "topics:subscribers:subscriber-channels",
 	}
 	errSelectService       = errors.New("you must provide a service name via -S option")
-	errSelectTopic         = errors.New("you must select a topic using the -T option")
-	errSelectSubscriber    = errors.New("you must select a subscriber using the -B option")
+	errSelectCache         = errors.New("you must provide a cache using the -C option")
+	errSelectTopic         = errors.New("you must provide a topic using the -T option")
+	errSelectSubscriber    = errors.New("you must provide a subscriber using the -B option")
 	mutex                  sync.Mutex
 	lastClusterSummaryInfo clusterSummaryInfo
 	emptyStringArray       = make([]string, 0)
@@ -64,42 +65,45 @@ var (
 	inHelp         = false
 	selectedCache  string
 	selectedTopic  string
+	allBaseData    []string
+	heightAdjust   int
 )
 
 var validPanels = []panelImpl{
-	createContentPanel(8, "caches", "Caches", "show caches", cachesContent),
-	createContentPanel(8, "cache-access", "Cache Access (%SERVICE/%CACHE)", "show cache access", cacheAccessContent),
-	createContentPanel(8, "cache-indexes", "Cache Indexes (%SERVICE/%CACHE)", "show cache indexes", cacheIndexesContent),
-	createContentPanel(8, "cache-storage", "Cache Storage (%SERVICE/%CACHE)", "show cache storage", cacheStorageContent),
-	createContentPanel(8, "cache-partitions", "Cache Partitions (%SERVICE/%CACHE)", "show cache partitions", cachePartitionContent),
-	createContentPanel(8, "departedMembers", "Departed Members", "show departed members", departedMembersContent),
-	createContentPanel(5, "elastic-data", "Elastic Data", "show elastic data", elasticDataContent),
-	createContentPanel(8, "executors", "Executors", "show Executors", executorsContent),
-	createContentPanel(10, "healthSummary", "Health Summary", "show health summary", healthSummaryContent),
-	createContentPanel(5, "federation-all", "Federation All", "show all federation details", federationAllContent),
-	createContentPanel(5, "federation-dest", "Federation Destinations", "show federation destinations", federationDestinationsContent),
-	createContentPanel(5, "federation-origins", "Federation Origins", "show federation origins", federationOriginsContent),
-	createContentPanel(8, "http-servers", "HTTP Servers", "show HTTP servers", httpServersContent),
-	createContentPanel(8, "http-sessions", "HTTP Sessions", "show HTTP sessions", httpSessionsContent),
-	createContentPanel(5, "machines", "Machines", "show machines", machinesContent),
-	createContentPanel(7, "membersSummary", "Members Summary", "show members summary", membersSummaryContent),
-	createContentPanel(10, "members", "Members", "show members", membersContent),
-	createContentPanel(7, "membersShort", "Members (Short)", "show members (short)", membersOnlyContent),
-	createContentPanel(8, "network-stats", "Network Stats", "show network stats", networkStatsContent),
-	createContentPanel(8, "persistence", "Persistence", "show persistence", persistenceContent),
-	createContentPanel(8, "proxies", "Proxy Servers", "show proxy servers", proxiesContent),
-	createContentPanel(8, "proxy-connections", "Proxy Connections (%SERVICE)", "show proxy connections", proxyConnectionsContent),
-	createContentPanel(8, "reporters", "Reporters", "show reporters", reportersContent),
-	createContentPanel(8, "services", "Services", "show services", servicesContent),
-	createContentPanel(8, "service-members", "Service Members (%SERVICE)", "show service members", serviceMembersContent),
-	createContentPanel(8, "service-distributions", "Service Distributions (%SERVICE)", "show service distributions", serviceDistributionsContent),
-	createContentPanel(8, "service-storage", "Service Storage", "show service storage", serviceStorageContent),
-	createContentPanel(8, "topic-members", "Topic Members (%SERVICE/%TOPIC)", "show topic members", topicMembersContent),
-	createContentPanel(8, "subscribers", "Topic Subscribers (%SERVICE/%TOPIC)", "show topic subscribers", topicSubscribersContent),
-	createContentPanel(8, "subscriber-channels", "Subscriber Channels (%SERVICE/%TOPIC/%SUBSCRIBER)", "show topic subscriber channels", topicSubscriberChannelsContent),
-	createContentPanel(8, "subscriber-groups", "Subscriber Channels (%SERVICE/%TOPIC)", "show subscriber groups", topicSubscriberGroupsContent),
-	createContentPanel(8, "topics", "Topics", "show topics", topicsContent),
-	createContentPanel(8, "view-caches", "View Caches", "show view caches", viewCachesContent),
+	createContentPanel(8, "caches", "Caches", "show caches", cachesContent, cachesPanelData, servicesPanelData),
+	createContentPanel(8, "cache-access", "Cache Access (%SERVICE/%CACHE)", "show cache access", cacheAccessContent, cachesPanelData, servicesPanelData),
+	createContentPanel(8, "cache-indexes", "Cache Indexes (%SERVICE/%CACHE)", "show cache indexes", cacheIndexesContent, cachesPanelData, servicesPanelData),
+	createContentPanel(8, "cache-storage", "Cache Storage (%SERVICE/%CACHE)", "show cache storage", cacheStorageContent, cachesPanelData, servicesPanelData),
+	createContentPanel(8, "cache-stores", "Cache Stores (%SERVICE/%CACHE)", "show cache stores", cacheStoresContent),
+	createContentPanel(8, "cache-partitions", "Cache Partitions (%SERVICE/%CACHE)", "show cache partitions", cachePartitionContent, cachesPanelData, servicesPanelData),
+	createContentPanel(8, "departedMembers", "Departed Members", "show departed members", departedMembersContent, memberPanelData, storagePanelData),
+	createContentPanel(5, "elastic-data", "Elastic Data", "show elastic data", elasticDataContent, elasticDataPanelData),
+	createContentPanel(8, "executors", "Executors", "show Executors", executorsContent, executorsPanelData),
+	createContentPanel(10, "healthSummary", "Health Summary", "show health summary", healthSummaryContent, healthPanelData),
+	createContentPanel(5, "federation-all", "Federation All", "show all federation details", federationAllContent, federationPanelData),
+	createContentPanel(5, "federation-dest", "Federation Destinations", "show federation destinations", federationDestinationsContent, federationPanelData),
+	createContentPanel(5, "federation-origins", "Federation Origins", "show federation origins", federationOriginsContent, federationPanelData),
+	createContentPanel(8, "http-servers", "HTTP Servers", "show HTTP servers", httpServersContent, proxiesPanelData),
+	createContentPanel(8, "http-sessions", "HTTP Sessions", "show HTTP sessions", httpSessionsContent, httpSessionsPanelData),
+	createContentPanel(8, "machines", "Machines", "show machines", machinesContent, memberPanelData, storagePanelData),
+	createContentPanel(7, "membersSummary", "Members Summary", "show members summary", membersSummaryContent, memberPanelData, storagePanelData),
+	createContentPanel(10, "members", "Members", "show members", membersContent, memberPanelData, storagePanelData),
+	createContentPanel(7, "membersShort", "Members (Short)", "show members (short)", membersOnlyContent, memberPanelData, storagePanelData),
+	createContentPanel(8, "network-stats", "Network Stats", "show network stats", networkStatsContent, memberPanelData, storagePanelData),
+	createContentPanel(8, "persistence", "Persistence", "show persistence", persistenceContent, servicesPanelData),
+	createContentPanel(8, "proxies", "Proxy Servers", "show proxy servers", proxiesContent, proxiesPanelData),
+	createContentPanel(8, "proxy-connections", "Proxy Connections (%SERVICE)", "show proxy connections", proxyConnectionsContent, proxiesPanelData),
+	createContentPanel(8, "reporters", "Reporters", "show reporters", reportersContent, reportersPanelData),
+	createContentPanel(8, "services", "Services", "show services", servicesContent, servicesPanelData),
+	createContentPanel(8, "service-members", "Service Members (%SERVICE)", "show service members", serviceMembersContent, servicesPanelData),
+	createContentPanel(8, "service-distributions", "Service Distributions (%SERVICE)", "show service distributions", serviceDistributionsContent, servicesPanelData),
+	createContentPanel(8, "service-storage", "Service Storage", "show service storage", serviceStorageContent, servicesPanelData),
+	createContentPanel(8, "topic-members", "Topic Members (%SERVICE/%TOPIC)", "show topic members", topicMembersContent, topicsPanelData),
+	createContentPanel(8, "subscribers", "Topic Subscribers (%SERVICE/%TOPIC)", "show topic subscribers", topicSubscribersContent, topicsPanelData),
+	createContentPanel(8, "subscriber-channels", "Subscriber Channels (%SERVICE/%TOPIC/%SUBSCRIBER)", "show topic subscriber channels", topicSubscriberChannelsContent, topicsPanelData),
+	createContentPanel(8, "subscriber-groups", "Subscriber Channels (%SERVICE/%TOPIC)", "show subscriber groups", topicSubscriberGroupsContent, topicsPanelData),
+	createContentPanel(8, "topics", "Topics", "show topics", topicsContent, topicsPanelData),
+	createContentPanel(8, "view-caches", "View Caches", "show view caches", viewCachesContent, servicesPanelData),
 }
 
 // monitorClusterCmd represents the monitor cluster command
@@ -162,6 +166,8 @@ Use --show-panels to show all available panels.`,
 		if err != nil {
 			return err
 		}
+
+		allBaseData = getAllBaseData(parsedLayout)
 
 		// retrieve cluster details first so if we are connected
 		// to WLS or need authentication, this can be done first
@@ -280,13 +286,17 @@ func increaseMaxHeight() {
 	for i := range validPanels {
 		validPanels[i].MaxHeight++
 	}
+	heightAdjust++
 }
 
 func decreaseMaxHeight() {
-	for i := range validPanels {
-		if validPanels[i].MaxHeight > validPanels[i].OriginalMaxHeight {
-			validPanels[i].MaxHeight--
+	if heightAdjust > 0 {
+		for i := range validPanels {
+			if validPanels[i].MaxHeight > validPanels[i].OriginalMaxHeight {
+				validPanels[i].MaxHeight--
+			}
 		}
+		heightAdjust--
 	}
 }
 
@@ -294,6 +304,7 @@ func resetMaxHeight() {
 	for i := range validPanels {
 		validPanels[i].MaxHeight = validPanels[i].OriginalMaxHeight
 	}
+	heightAdjust = 0
 }
 
 func refresh(screen tcell.Screen, dataFetcher fetcher.Fetcher, parsedLayout []string, refresh bool) error {
@@ -357,7 +368,7 @@ func updateScreen(screen tcell.Screen, dataFetcher fetcher.Fetcher, parsedLayout
 			screen.Show()
 			initialRefresh = false
 		}
-		lastClusterSummaryInfo, errorList = retrieveClusterSummary(dataFetcher)
+		lastClusterSummaryInfo, errorList = retrieveClusterSummary(dataFetcher, allBaseData...)
 		lastDuration = time.Since(startTime)
 
 		if lastDuration > time.Second {
@@ -764,6 +775,35 @@ var cacheStorageContent = func(dataFetcher fetcher.Fetcher, clusterSummary clust
 	return getCacheContent(dataFetcher, "storage")
 }
 
+var cacheStoresContent = func(dataFetcher fetcher.Fetcher, clusterSummary clusterSummaryInfo) ([]string, error) {
+	var (
+		cacheStoreResult  []byte
+		cacheStoreDetails = config.CacheStoreDetails{}
+		err               error
+	)
+
+	if selectedCache == "" {
+		return emptyStringArray, errSelectCache
+	}
+
+	if serviceName, err = findServiceForCacheOrTopic(dataFetcher, selectedCache, "cache"); err != nil {
+		return emptyStringArray, err
+	}
+
+	cacheStoreResult, err = dataFetcher.GetCacheMembers(serviceName, selectedCache)
+	if err != nil {
+		return emptyStringArray, err
+	}
+
+	if err = json.Unmarshal(cacheStoreResult, &cacheStoreDetails); err != nil {
+		return emptyStringArray, err
+	}
+
+	finalDetails := ensureTierBack(cacheStoreDetails.Details)
+
+	return strings.Split(FormatCacheStoreDetails(finalDetails, selectedCache, serviceName, false), "\n"), nil
+}
+
 var cachePartitionContent = func(dataFetcher fetcher.Fetcher, clusterSummary clusterSummaryInfo) ([]string, error) {
 	return getCacheContent(dataFetcher, partitionDisplayType)
 }
@@ -782,7 +822,7 @@ func getCacheContent(dataFetcher fetcher.Fetcher, displayType string) ([]string,
 	}
 
 	if selectedCache == "" {
-		return emptyStringArray, errors.New("you must select a cache using the -C option")
+		return emptyStringArray, errSelectCache
 	}
 
 	if displayType == partitionDisplayType {
@@ -961,6 +1001,7 @@ type panelImpl struct {
 	Title             string
 	ContentFunction   contentFunction
 	Description       string
+	BaseData          []string
 }
 
 func (cs panelImpl) GetPanelName() string {
@@ -984,7 +1025,7 @@ func (cs panelImpl) GetContentFunction() contentFunction {
 }
 
 // createContentPanel creates a standard content panel.
-func createContentPanel(maxHeight int, panelName, title, description string, f contentFunction) panelImpl {
+func createContentPanel(maxHeight int, panelName, title, description string, f contentFunction, baseData ...string) panelImpl {
 	return panelImpl{
 		MaxHeight:         maxHeight,
 		OriginalMaxHeight: maxHeight,
@@ -992,6 +1033,7 @@ func createContentPanel(maxHeight int, panelName, title, description string, f c
 		Title:             title,
 		ContentFunction:   f,
 		Description:       description,
+		BaseData:          baseData,
 	}
 }
 
@@ -1037,6 +1079,25 @@ func validatePanels(layout []string) error {
 	return nil
 }
 
+func getAllBaseData(layout []string) []string {
+	allPanelData := make([]string, 0)
+
+	for _, v := range layout {
+		// split by "," for multiple per line
+		s := strings.Split(v, ",")
+
+		for _, vv := range s {
+			panel := getPanel(vv)
+			for _, b := range panel.BaseData {
+				if !utils.SliceContains(allPanelData, b) {
+					allPanelData = append(allPanelData, b)
+				}
+			}
+		}
+	}
+	return allPanelData
+}
+
 // drawContent draws content and returns the height it drew
 func drawContent(screen tcell.Screen, dataFetcher fetcher.Fetcher, panel panelImpl, x, y, w int, code rune) (int, error) {
 	h := panel.GetMaxHeight()
@@ -1045,7 +1106,7 @@ func drawContent(screen tcell.Screen, dataFetcher fetcher.Fetcher, panel panelIm
 	content, err := panel.GetContentFunction()(dataFetcher, lastClusterSummaryInfo)
 	if err != nil {
 		if ignoreRESTErrors {
-			content = []string{"  ", noContent, ""}
+			content = []string{"  ", noContent, " "}
 		} else {
 			return 0, err
 		}
@@ -1128,13 +1189,25 @@ func trimBlankContent(content []string) []string {
 
 // drawHeader draws the screen header with cluster information.
 func drawHeader(screen tcell.Screen, w, h int, cluster config.Cluster, dataFetcher fetcher.Fetcher) {
-	var title string
+	var (
+		title   string
+		padding = " "
+		height  = "0"
+	)
 	if cluster.ClusterName == "" && ignoreRESTErrors {
 		title = errorContent + " from " + dataFetcher.GetURL()
 	} else {
 		version := strings.Split(cluster.Version, " ")
-		title = fmt.Sprintf("Coherence CLI: %s - Monitoring cluster %s (%s) ESC to quit %s. (%v)",
-			time.Now().Format(time.DateTime), cluster.ClusterName, version[0], additionalMonitorMsg, lastDuration)
+		if padMaxHeightParam {
+			padding = "P"
+		}
+		if heightAdjust <= 0 {
+			height = " 0 "
+		} else if heightAdjust > 0 {
+			height = fmt.Sprintf("+%v ", heightAdjust)
+		}
+		title = fmt.Sprintf("Coherence CLI: %s - Monitoring cluster %s (%s) ESC to quit %s. %s%s(%v)",
+			time.Now().Format(time.DateTime), cluster.ClusterName, version[0], additionalMonitorMsg, padding, height, lastDuration)
 	}
 	drawText(screen, 1, 0, w-1, h-1, tcell.StyleDefault.Reverse(true), title)
 }

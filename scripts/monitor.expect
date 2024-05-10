@@ -1,0 +1,19 @@
+#!/usr/bin/expect -f
+#
+# Copyright (c) 2024, Oracle and/or its affiliates.
+# Licensed under the Universal Permissive License v 1.0 as shown at
+# https://oss.oracle.com/licenses/upl.
+#
+set env(TERM) vt100
+set timeout 10
+spawn $env(DIR)/bin/cohctl --config-dir $env(CONFIG_DIR) monitor cluster local
+expect {
+    "Coherence CLI" {
+        sleep 10
+        send \003
+    }
+    timeout {
+        send_user "Failed to receive expected output: 'Coherence CLI'\n"
+        exit 1
+    }
+ }
