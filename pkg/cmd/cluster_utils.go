@@ -746,8 +746,27 @@ type clusterSummaryInfo struct {
 	executors                  config.Executors
 }
 
+// the following constants determine if the retrieveClusterSummary should retrieve the data
+const (
+	memberPanelData       = "members"
+	cachesPanelData       = "caches"
+	elasticDataPanelData  = "elastic-data"
+	executorsPanelData    = "executors"
+	healthPanelData       = "health"
+	federationPanelData   = "federation"
+	proxiesPanelData      = "proxies"
+	storagePanelData      = "storage"
+	servicesPanelData     = "services"
+	reportersPanelData    = "reporters"
+	topicsPanelData       = "topics"
+	httpSessionsPanelData = "http-sessions"
+)
+
 // retrieveClusterSummary retrieves all the required information used by various commands.
-func retrieveClusterSummary(dataFetcher fetcher.Fetcher) (clusterSummaryInfo, []error) {
+// panelData contains an array of data items to retrieve. If len(panelData) == 0 then this
+// means to retrieve all data, otherwise only retrieve data which is contained in data array.
+// this is to lessen the load on management HTTP server when using monitor cluster command.
+func retrieveClusterSummary(dataFetcher fetcher.Fetcher, panelData ...string) (clusterSummaryInfo, []error) {
 	var (
 		errorSink      = createErrorSink()
 		waitGroupCount = 13
@@ -773,14 +792,16 @@ func retrieveClusterSummary(dataFetcher fetcher.Fetcher) (clusterSummaryInfo, []
 			err  error
 			data []byte
 		)
-		data, err = dataFetcher.GetMemberDetailsJSON(false)
-		if err != nil {
-			errorSink.AppendError(err)
-			return
+		if shouldRetrieve(memberPanelData, panelData) {
+			data, err = dataFetcher.GetMemberDetailsJSON(false)
+			if err != nil {
+				errorSink.AppendError(err)
+				return
+			}
+			mutexRetrieve.Lock()
+			defer mutexRetrieve.Unlock()
+			result.membersResult = data
 		}
-		mutexRetrieve.Lock()
-		defer mutexRetrieve.Unlock()
-		result.membersResult = data
 	}()
 
 	go func() {
@@ -789,28 +810,30 @@ func retrieveClusterSummary(dataFetcher fetcher.Fetcher) (clusterSummaryInfo, []
 			data     []byte
 			machines []config.Machine
 		)
-		machinesMap, err := GetMachineList(dataFetcher)
-		if err != nil {
-			errorSink.AppendError(err)
-			return
-		}
+		if shouldRetrieve(memberPanelData, panelData) {
+			machinesMap, err := GetMachineList(dataFetcher)
+			if err != nil {
+				errorSink.AppendError(err)
+				return
+			}
 
-		machines, err = getMachines(machinesMap, dataFetcher)
-		if err != nil {
-			errorSink.AppendError(err)
-			return
-		}
+			machines, err = getMachines(machinesMap, dataFetcher)
+			if err != nil {
+				errorSink.AppendError(err)
+				return
+			}
 
-		data, err = getOSJson(machinesMap, dataFetcher)
-		if err != nil {
-			errorSink.AppendError(err)
-			return
-		}
+			data, err = getOSJson(machinesMap, dataFetcher)
+			if err != nil {
+				errorSink.AppendError(err)
+				return
+			}
 
-		mutexRetrieve.Lock()
-		defer mutexRetrieve.Unlock()
-		result.machines = machines
-		result.machinesData = data
+			mutexRetrieve.Lock()
+			defer mutexRetrieve.Unlock()
+			result.machines = machines
+			result.machinesData = data
+		}
 	}()
 
 	go func() {
@@ -821,93 +844,103 @@ func retrieveClusterSummary(dataFetcher fetcher.Fetcher) (clusterSummaryInfo, []
 			return
 		}
 
-		var services = config.ServicesSummaries{}
-		err = json.Unmarshal(data, &services)
-		if err != nil {
-			errorSink.AppendError(err)
-			return
+		if shouldRetrieve(servicesPanelData, panelData) {
+			var services = config.ServicesSummaries{}
+			err = json.Unmarshal(data, &services)
+			if err != nil {
+				errorSink.AppendError(err)
+				return
+			}
+
+			serviceList := GetListOfCacheServices(services)
+
+			allCachesSummary, err := getCaches(serviceList, dataFetcher)
+			if err != nil {
+				errorSink.AppendError(err)
+				return
+			}
+
+			mutexRetrieve.Lock()
+			defer mutexRetrieve.Unlock()
+			result.servicesResult = data
+			result.cacheSummaryDetail = allCachesSummary
+			result.serviceList = serviceList
 		}
-
-		serviceList := GetListOfCacheServices(services)
-
-		allCachesSummary, err := getCaches(serviceList, dataFetcher)
-		if err != nil {
-			errorSink.AppendError(err)
-			return
-		}
-
-		mutexRetrieve.Lock()
-		defer mutexRetrieve.Unlock()
-		result.servicesResult = data
-		result.cacheSummaryDetail = allCachesSummary
-		result.serviceList = serviceList
 	}()
 
 	go func() {
 		defer wg.Done()
 
-		topicsDetails, err := getTopics(dataFetcher, serviceName)
-		if err != nil {
-			errorSink.AppendError(err)
-			return
+		if shouldRetrieve(topicsPanelData, panelData) {
+			topicsDetails, err := getTopics(dataFetcher, serviceName)
+			if err != nil {
+				errorSink.AppendError(err)
+				return
+			}
+
+			topicsMemberDetails, err := getTopicsMembers(dataFetcher, topicsDetails)
+			if err != nil {
+				errorSink.AppendError(err)
+				return
+			}
+
+			topicsSubscriberDetails, err := getTopicsSubscribers(dataFetcher, topicsDetails)
+			if err != nil {
+				errorSink.AppendError(err)
+				return
+			}
+
+			enrichTopicsSummary(&topicsDetails, topicsMemberDetails, topicsSubscriberDetails)
+
+			mutexRetrieve.Lock()
+			defer mutexRetrieve.Unlock()
+			result.topicsDetails = topicsDetails
+			result.topicsMemberDetails = topicsMemberDetails
+			result.topicsSubscriberDetails = topicsSubscriberDetails
 		}
-
-		topicsMemberDetails, err := getTopicsMembers(dataFetcher, topicsDetails)
-		if err != nil {
-			errorSink.AppendError(err)
-			return
-		}
-
-		topicsSubscriberDetails, err := getTopicsSubscribers(dataFetcher, topicsDetails)
-		if err != nil {
-			errorSink.AppendError(err)
-			return
-		}
-
-		enrichTopicsSummary(&topicsDetails, topicsMemberDetails, topicsSubscriberDetails)
-
-		mutexRetrieve.Lock()
-		defer mutexRetrieve.Unlock()
-		result.topicsDetails = topicsDetails
-		result.topicsMemberDetails = topicsMemberDetails
-		result.topicsSubscriberDetails = topicsSubscriberDetails
 	}()
 
 	go func() {
 		defer wg.Done()
-		data, err := dataFetcher.GetMembersHealth()
-		if err != nil {
-			errorSink.AppendError(err)
-			return
-		}
+		if shouldRetrieve(healthPanelData, panelData) {
+			data, err := dataFetcher.GetMembersHealth()
+			if err != nil {
+				errorSink.AppendError(err)
+				return
+			}
 
-		mutexRetrieve.Lock()
-		defer mutexRetrieve.Unlock()
-		result.healthResult = data
+			mutexRetrieve.Lock()
+			defer mutexRetrieve.Unlock()
+			result.healthResult = data
+		}
 	}()
 
 	go func() {
 		defer wg.Done()
-		data, err := dataFetcher.GetStorageDetailsJSON()
-		if err != nil {
-			errorSink.AppendError(err)
-		}
+		if shouldRetrieve(storagePanelData, panelData) {
+			data, err := dataFetcher.GetStorageDetailsJSON()
+			if err != nil {
+				errorSink.AppendError(err)
+			}
 
-		mutexRetrieve.Lock()
-		defer mutexRetrieve.Unlock()
-		result.storageData = data
+			mutexRetrieve.Lock()
+			defer mutexRetrieve.Unlock()
+			result.storageData = data
+		}
 	}()
 
 	go func() {
 		defer wg.Done()
-		data, err := dataFetcher.GetProxySummaryJSON()
-		if err != nil {
-			errorSink.AppendError(err)
-		}
+		if shouldRetrieve(proxiesPanelData, panelData) {
+			data, err := dataFetcher.GetProxySummaryJSON()
+			if err != nil {
+				errorSink.AppendError(err)
+			}
 
-		mutexRetrieve.Lock()
-		defer mutexRetrieve.Unlock()
-		result.proxyResults = data
+			mutexRetrieve.Lock()
+			defer mutexRetrieve.Unlock()
+			result.proxyResults = data
+		}
 	}()
 
 	go func() {
@@ -915,91 +948,111 @@ func retrieveClusterSummary(dataFetcher fetcher.Fetcher) (clusterSummaryInfo, []
 		if !verboseOutput && !monitorCluster {
 			return
 		}
-		data, err := dataFetcher.GetReportersJSON()
-		if err != nil {
-			errorSink.AppendError(err)
-		}
+		if shouldRetrieve(reportersPanelData, panelData) {
+			data, err := dataFetcher.GetReportersJSON()
+			if err != nil {
+				errorSink.AppendError(err)
+			}
 
-		mutexRetrieve.Lock()
-		defer mutexRetrieve.Unlock()
-		result.reportersResult = data
+			mutexRetrieve.Lock()
+			defer mutexRetrieve.Unlock()
+			result.reportersResult = data
+		}
 	}()
 
 	go func() {
 		defer wg.Done()
-		federatedServices, err := GetFederatedServices(dataFetcher)
-		if err != nil {
-			errorSink.AppendError(err)
-			return
-		}
-		finalSummariesDestinations, err := getFederationSummaries(federatedServices, outgoing, dataFetcher)
-		if err != nil {
-			errorSink.AppendError(err)
-			return
-		}
-		finalSummariesOrigins, err := getFederationSummaries(federatedServices, incoming, dataFetcher)
-		if err != nil {
-			errorSink.AppendError(err)
-			return
-		}
+		if shouldRetrieve(federationPanelData, panelData) {
+			federatedServices, err := GetFederatedServices(dataFetcher)
+			if err != nil {
+				errorSink.AppendError(err)
+				return
+			}
+			finalSummariesDestinations, err := getFederationSummaries(federatedServices, outgoing, dataFetcher)
+			if err != nil {
+				errorSink.AppendError(err)
+				return
+			}
+			finalSummariesOrigins, err := getFederationSummaries(federatedServices, incoming, dataFetcher)
+			if err != nil {
+				errorSink.AppendError(err)
+				return
+			}
 
-		mutexRetrieve.Lock()
-		defer mutexRetrieve.Unlock()
-		result.federatedServices = federatedServices
-		result.finalSummariesDestinations = finalSummariesDestinations
-		result.finalSummariesOrigins = finalSummariesOrigins
+			mutexRetrieve.Lock()
+			defer mutexRetrieve.Unlock()
+			result.federatedServices = federatedServices
+			result.finalSummariesDestinations = finalSummariesDestinations
+			result.finalSummariesOrigins = finalSummariesOrigins
+		}
 	}()
 
 	go func() {
 		defer wg.Done()
-		data, err := dataFetcher.GetElasticDataDetails("flash")
-		if err != nil {
-			errorSink.AppendError(err)
-		}
+		if shouldRetrieve(elasticDataPanelData, panelData) {
+			data, err := dataFetcher.GetElasticDataDetails("flash")
+			if err != nil {
+				errorSink.AppendError(err)
+			}
 
-		mutexRetrieve.Lock()
-		defer mutexRetrieve.Unlock()
-		result.flashResult = data
+			mutexRetrieve.Lock()
+			defer mutexRetrieve.Unlock()
+			result.flashResult = data
+		}
 	}()
 
 	go func() {
 		defer wg.Done()
-		data, err := dataFetcher.GetElasticDataDetails("ram")
-		if err != nil {
-			errorSink.AppendError(err)
-		}
+		if shouldRetrieve(elasticDataPanelData, panelData) {
+			data, err := dataFetcher.GetElasticDataDetails("ram")
+			if err != nil {
+				errorSink.AppendError(err)
+			}
 
-		mutexRetrieve.Lock()
-		defer mutexRetrieve.Unlock()
-		result.ramResult = data
+			mutexRetrieve.Lock()
+			defer mutexRetrieve.Unlock()
+			result.ramResult = data
+		}
 	}()
 
 	go func() {
 		defer wg.Done()
-		data, err := dataFetcher.GetHTTPSessionDetailsJSON()
-		if err != nil {
-			errorSink.AppendError(err)
-		}
+		if shouldRetrieve(httpSessionsPanelData, panelData) {
+			data, err := dataFetcher.GetHTTPSessionDetailsJSON()
+			if err != nil {
+				errorSink.AppendError(err)
+			}
 
-		mutexRetrieve.Lock()
-		defer mutexRetrieve.Unlock()
-		result.http = data
+			mutexRetrieve.Lock()
+			defer mutexRetrieve.Unlock()
+			result.http = data
+		}
 	}()
 
 	go func() {
 		defer wg.Done()
-		data, err := getExecutorDetails(dataFetcher, true)
-		if err != nil {
-			errorSink.AppendError(err)
-		}
+		if shouldRetrieve(executorsPanelData, panelData) {
+			data, err := getExecutorDetails(dataFetcher, true)
+			if err != nil {
+				errorSink.AppendError(err)
+			}
 
-		mutexRetrieve.Lock()
-		defer mutexRetrieve.Unlock()
-		result.executors = data
+			mutexRetrieve.Lock()
+			defer mutexRetrieve.Unlock()
+			result.executors = data
+		}
 	}()
 
 	// wait for all data fetchers requests to complete
 	wg.Wait()
 
 	return result, errorSink.GetErrors()
+}
+
+// shouldRetrieve returned a boolean indicating if the data for panel should be retrieved.
+func shouldRetrieve(panel string, panelData []string) bool {
+	if len(panelData) == 0 {
+		return true
+	}
+	return utils.SliceContains(panelData, panel)
 }
