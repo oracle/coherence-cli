@@ -1106,7 +1106,7 @@ func drawContent(screen tcell.Screen, dataFetcher fetcher.Fetcher, panel panelIm
 	content, err := panel.GetContentFunction()(dataFetcher, lastClusterSummaryInfo)
 	if err != nil {
 		if ignoreRESTErrors {
-			content = []string{"  ", noContent, ""}
+			content = []string{"  ", noContent, " "}
 		} else {
 			return 0, err
 		}
