@@ -36,7 +36,7 @@ const (
 
 var (
 	defaultMap = map[string]string{
-		"default":            "members,healthSummary:services,caches:proxies,http-servers:network-stats",
+		"default":            "members,healthSummary:services,caches:proxies,http-servers:machines,network-stats",
 		"default-service":    "services:service-members:service-distributions",
 		"default-cache":      "caches,cache-indexes:cache-access:cache-storage:cache-stores:cache-partitions",
 		"default-topic":      "topics:topic-members:subscribers:subscriber-groups",
@@ -85,7 +85,7 @@ var validPanels = []panelImpl{
 	createContentPanel(5, "federation-origins", "Federation Origins", "show federation origins", federationOriginsContent, federationPanelData),
 	createContentPanel(8, "http-servers", "HTTP Servers", "show HTTP servers", httpServersContent, proxiesPanelData),
 	createContentPanel(8, "http-sessions", "HTTP Sessions", "show HTTP sessions", httpSessionsContent, httpSessionsPanelData),
-	createContentPanel(5, "machines", "Machines", "show machines", machinesContent, memberPanelData, storagePanelData),
+	createContentPanel(8, "machines", "Machines", "show machines", machinesContent, memberPanelData, storagePanelData),
 	createContentPanel(7, "membersSummary", "Members Summary", "show members summary", membersSummaryContent, memberPanelData, storagePanelData),
 	createContentPanel(10, "members", "Members", "show members", membersContent, memberPanelData, storagePanelData),
 	createContentPanel(7, "membersShort", "Members (Short)", "show members (short)", membersOnlyContent, memberPanelData, storagePanelData),
