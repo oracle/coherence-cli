@@ -66,6 +66,8 @@ jobs:
     - name: Test Monitor Cluster
       shell: bash
       run: |
+        sudo apt-add-repository universe -y
+        sudo apt-get install expect -y
         COHERENCE_VERSION=${{ matrix.coherenceVersion }} make test-monitor-cluster
 
     - uses: actions/upload-artifact@v4
