@@ -66,6 +66,7 @@ var (
 	selectedCache  string
 	selectedTopic  string
 	allBaseData    []string
+	heightAdjust   int
 )
 
 var validPanels = []panelImpl{
@@ -285,13 +286,17 @@ func increaseMaxHeight() {
 	for i := range validPanels {
 		validPanels[i].MaxHeight++
 	}
+	heightAdjust++
 }
 
 func decreaseMaxHeight() {
-	for i := range validPanels {
-		if validPanels[i].MaxHeight > validPanels[i].OriginalMaxHeight {
-			validPanels[i].MaxHeight--
+	if heightAdjust > 0 {
+		for i := range validPanels {
+			if validPanels[i].MaxHeight > validPanels[i].OriginalMaxHeight {
+				validPanels[i].MaxHeight--
+			}
 		}
+		heightAdjust--
 	}
 }
 
@@ -299,6 +304,7 @@ func resetMaxHeight() {
 	for i := range validPanels {
 		validPanels[i].MaxHeight = validPanels[i].OriginalMaxHeight
 	}
+	heightAdjust = 0
 }
 
 func refresh(screen tcell.Screen, dataFetcher fetcher.Fetcher, parsedLayout []string, refresh bool) error {
@@ -1183,17 +1189,25 @@ func trimBlankContent(content []string) []string {
 
 // drawHeader draws the screen header with cluster information.
 func drawHeader(screen tcell.Screen, w, h int, cluster config.Cluster, dataFetcher fetcher.Fetcher) {
-	var title string
+	var (
+		title   string
+		padding = " "
+		height  = "0"
+	)
 	if cluster.ClusterName == "" && ignoreRESTErrors {
 		title = errorContent + " from " + dataFetcher.GetURL()
 	} else {
 		version := strings.Split(cluster.Version, " ")
-		padding := " "
 		if padMaxHeightParam {
 			padding = "P"
 		}
-		title = fmt.Sprintf("Coherence CLI: %s - Monitoring cluster %s (%s) ESC to quit %s. %s (%v)",
-			time.Now().Format(time.DateTime), cluster.ClusterName, version[0], additionalMonitorMsg, padding, lastDuration)
+		if heightAdjust <= 0 {
+			height = " 0 "
+		} else if heightAdjust > 0 {
+			height = fmt.Sprintf("+%v ", heightAdjust)
+		}
+		title = fmt.Sprintf("Coherence CLI: %s - Monitoring cluster %s (%s) ESC to quit %s. %s%s(%v)",
+			time.Now().Format(time.DateTime), cluster.ClusterName, version[0], additionalMonitorMsg, padding, height, lastDuration)
 	}
 	drawText(screen, 1, 0, w-1, h-1, tcell.StyleDefault.Reverse(true), title)
 }
