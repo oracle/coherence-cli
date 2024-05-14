@@ -58,16 +58,14 @@ jobs:
     - name: TLS Tests
       shell: bash
       run: |
-        export PATH=`pwd`/bin:$PATH
-        make cohctl
         export COHERENCE_TLS_CERTS_PATH=`pwd`/test/test_utils/certs/guardians-ca.crt
         export COHERENCE_TLS_CLIENT_CERT=`pwd`/test/test_utils/certs/star-lord.crt
         export COHERENCE_TLS_CLIENT_KEY=`pwd`/test/test_utils/certs/star-lord.key
         COHERENCE_BASE_IMAGE=gcr.io/distroless/java17 COHERENCE_VERSION=24.03 PROFILES=,secure make clean certs build-test-images test-cluster-startup
         echo "Sleeping 30..."
         sleep 30
-        pwd
-        ls -l bin
+        export PATH=`pwd`/bin:$PATH
+        make cohctl
         cohctl set ignore-certs true
         cohctl add cluster tls -u https://127.0.0.1:30000/management/coherence/cluster
         cohctl get clusters
