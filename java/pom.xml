@@ -66,6 +66,8 @@
 
     <com.sun.xml.bind.version>2.3.0</com.sun.xml.bind.version>
     <javax.activation.version>1.1.1</javax.activation.version>
+
+    <management.socket.provider></management.socket.provider>
   </properties>
 
   <dependencyManagement>
@@ -168,6 +170,17 @@
   </build>
 
   <profiles>
+    <!-- secure management over REST with tls -->
+    <profile>
+      <id>secure</id>
+      <properties>
+        <management.socket.provider>tls-files</management.socket.provider>
+        <coherence.security.key>/certs/star-lord.pem</coherence.security.key>
+        <coherence.security.cert>/certs/star-lord.crt</coherence.security.cert>
+        <coherence.security.ca.cert>/certs/guardians-ca.crt</coherence.security.ca.cert>
+      </properties>
+    </profile>
+
     <profile>
       <id>commercial</id>
       <properties>
@@ -255,6 +268,10 @@
                   <jvmFlag>-Dcoherence.metrics.http.port=9612</jvmFlag>
                   <jvmFlag>-Dcoherence.log.level=9</jvmFlag>
                   <jvmFlag>-Dcoherence.distributed.localstorage=true</jvmFlag>
+                  <jvmFlag>-Dcoherence.management.http.provider=${management.socket.provider}</jvmFlag>
+                  <jvmFlag>-Dcoherence.security.key=${coherence.security.key}</jvmFlag>
+                  <jvmFlag>-Dcoherence.security.cert=${coherence.security.cert}</jvmFlag>
+                  <jvmFlag>-Dcoherence.security.ca.cert=${coherence.security.ca.cert}</jvmFlag>
                   <jvmFlag>-Dcoherence.management.refresh.expiry=1s</jvmFlag>
                   <jvmFlag>-Dcoherence.cacheconfig=${coherence.cache.config}</jvmFlag>
                   <jvmFlag>-Dcoherence.override=${coherence.override}</jvmFlag>
@@ -295,6 +312,10 @@
                   <jvmFlag>-Dcoherence.metrics.http.port=9613</jvmFlag>
                   <jvmFlag>-Dcoherence.management.refresh.expiry=1s</jvmFlag>
                   <jvmFlag>-Dcoherence.distributed.localstorage=true</jvmFlag>
+                  <jvmFlag>-Dcoherence.management.http.provider=${management.socket.provider}</jvmFlag>
+                  <jvmFlag>-Dcoherence.security.key=${coherence.security.key}</jvmFlag>
+                  <jvmFlag>-Dcoherence.security.cert=${coherence.security.cert}</jvmFlag>
+                  <jvmFlag>-Dcoherence.security.ca.cert=${coherence.security.ca.cert}</jvmFlag>
                   <jvmFlag>-Dcoherence.cacheconfig=${coherence.cache.config}</jvmFlag>
                   <jvmFlag>-Dcoherence.override=${coherence.override}</jvmFlag>
                 </jvmFlags>

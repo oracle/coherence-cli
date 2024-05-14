@@ -62,6 +62,7 @@ override PKG_DIR             := $(BINARIES_DIR)
 override INSTALLER_DIR       := ./installer
 override BUILD_SHARED        := $(CURRDIR)/test/test_utils/shared
 override ENV_FILE            := test/test_utils/.env
+override BUILD_CERTS         := $(CURRDIR)/test/test_utils/certs
 override COPYRIGHT_JAR       := glassfish-copyright-maven-plugin-2.4.jar
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -163,6 +164,8 @@ clean: ## Cleans the build
 	-rm -rf build/_output
 	-rm -rf bin
 	-rm -rf $(BUILD_SHARED)
+	-rm -rf $(BUILD_CERTS)
+	@mkdir -p $(BUILD_CERTS)
 ifeq ($(PROFILES),,commercial)
 	mvn -B -f java clean -DskipTests $(MAVEN_BUILD_OPTS) -P commercial
 else ifeq ($(PROFILES),,federation)
@@ -191,6 +194,12 @@ $(BUILD_PROPS):
 	@mkdir -p $(TOOLS_BIN)
 	@mkdir -p $(COVERAGE_DIR)
 	@mkdir -p $(BUILD_SHARED)
+
+
+.PHONY: certs
+certs: ## Generates certificates for TLS tests
+	@echo "Generating certs"
+	./scripts/keys.sh $(BUILD_CERTS)
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Build the Coherence CLI Test Image

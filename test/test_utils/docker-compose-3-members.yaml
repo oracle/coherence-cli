@@ -20,6 +20,7 @@ services:
       - 9612:9612
     volumes:
       - ./shared:/shared
+      - ./certs:/certs
     user: ${CURRENT_UID}
 
   coherence2:
@@ -37,6 +38,7 @@ services:
       - 9613:9613
     volumes:
       - ./shared:/shared
+      - ./certs:/certs
     user: ${CURRENT_UID}
 
   view1:

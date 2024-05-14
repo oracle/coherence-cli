@@ -1,4 +1,4 @@
-# Copyright 2021, 2023 Oracle Corporation and/or its affiliates.
+# Copyright 2021, 2024 Oracle Corporation and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at
 # https://oss.oracle.com/licenses/upl.
 
@@ -20,6 +20,7 @@ services:
       - 9612:9612
     volumes:
       - ./shared:/shared
+      - ./certs:/certs
     user: ${CURRENT_UID}
 
   coherence2:
@@ -37,6 +38,7 @@ services:
       - 9613:9613
     volumes:
       - ./shared:/shared
+      - ./certs:/certs
     user: ${CURRENT_UID}
 
 networks:
