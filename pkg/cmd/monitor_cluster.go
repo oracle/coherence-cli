@@ -1158,7 +1158,7 @@ func drawContent(screen tcell.Screen, dataFetcher fetcher.Fetcher, panel panelIm
 		trimmedText = fmt.Sprintf("%v%s", string(tcell.RuneHLine), "(trimmed)")
 	}
 
-	drawBox(screen, x, y, x+w-1, y+h, tcell.StyleDefault, fmt.Sprintf("%s [%v]%s", parseTitle(title), string(code), trimmedText))
+	drawBox(screen, x, y, x+w-1, y+h, tcell.StyleDefault, fmt.Sprintf("%s[%v]%s", parseTitle(title), string(code), trimmedText))
 
 	for line := 1; line <= rows; line++ {
 		drawText(screen, x+1, y+line, x+w-1, y+h-1, tcell.StyleDefault, content[line-1])
