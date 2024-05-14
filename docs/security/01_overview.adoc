@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 
-    Copyright (c) 2021, 2023 Oracle and/or its affiliates.
+    Copyright (c) 2021, 2024 Oracle and/or its affiliates.
     Licensed under the Universal Permissive License v 1.0 as shown at
     https://oss.oracle.com/licenses/upl.
 
@@ -25,13 +25,54 @@ To enable basic authentication for Management over REST, please follow the instr
 {commercial-docs-base-url}/secure/securing-oracle-oracle-http-management-rest-server.html#GUID-816E45C4-2F52-4576-BC09-CF0B6E873CBA[basic authentication] section
 of the Coherence documentation.
 
-=== Enabling SSL Authentication
+=== Enabling TLS For Management over REST Access
 
-To enable SSL to provide authentication for Management over REST, please follow the instructions in the
+To enable TLS to provide authentication for Management over REST, please follow the instructions in the
 {commercial-docs-base-url}/secure/securing-oracle-oracle-http-management-rest-server.html#GUID-7FC70A65-FC2F-4CBE-8F7D-7CBC3CDAA10A[SSL authentication]
 section of the Coherence documentation.
 
-=== Working with secured REST endpoints
+
+=== Connecting to a TLS enabled cluster
+
+Once you have enabled TLS you can configure the following environment variables if you need to add client certificates or additional trust stores.
+
+[source,bash]
+----
+export COHERENCE_TLS_CLIENT_CERT=/path/to/client/certificate
+export COHERENCE_TLS_CLIENT_KEY=/path/path/to/client/key
+export COHERENCE_TLS_CERTS_PATH=/path/to/cert/to/be/added/for/trust
+----
+
+If you are connecting a cluster with self-signed certificates, you must set the following to ignore invalid certificates:
+
+[source,bash]
+----
+cohctl set ignore-certs true
+----
+
+Output:
+[source,bash]
+----
+Value is now set to true
+----
+
+NOTE: This is not recommended and should not be used for production systems.
+
+You can then add your cluster via specifying HTTPS as the protocol:
+
+[source,bash]
+----
+cohctl add cluster tls -u https://host:30000/management/coherence/cluster
+----
+
+You will receive the following message every time you run a command if you ignore certificate errors:
+
+[source,bash]
+----
+WARNING: SSL Certificate validation has been explicitly disabled
+----
+
+=== Working with basic authentication REST endpoints
 
 If you have enabled basic authentication for your Management over REST endpoint, or you are connecting to a WebLogic Server cluster, you must
 provide the `-U username` option on all `cohctl` commands.

@@ -10,6 +10,7 @@ import (
 	"bufio"
 	"bytes"
 	"crypto/tls"
+	"crypto/x509"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -30,9 +31,16 @@ import (
 
 // required to ensure HTTPFetcher implements Fetcher
 var (
-	_        Fetcher = HTTPFetcher{}
-	username string
-	password string
+	_                 Fetcher = HTTPFetcher{}
+	username          string
+	password          string
+	caCertPath        string
+	clientCertPath    string
+	clientCertKeyPath string
+
+	certPool     *x509.CertPool
+	certData     []byte
+	certificates = make([]tls.Certificate, 0)
 )
 
 const (
@@ -54,6 +62,10 @@ const (
 	disconnectAll        = "/disconnectAll"
 	descriptionPath      = "/description?links="
 	errorCode404         = "404"
+
+	envTLSCertPath   = "COHERENCE_TLS_CERTS_PATH"
+	envTLSClientCert = "COHERENCE_TLS_CLIENT_CERT"
+	envTLSClientKey  = "COHERENCE_TLS_CLIENT_KEY"
 )
 
 // HTTPFetcher is an implementation of a Fetcher to retrieve data from Management over REST.
@@ -63,6 +75,57 @@ type HTTPFetcher struct {
 	WebLogicServer bool
 	Username       string
 	ClusterName    string
+}
+
+func (h HTTPFetcher) Init() error {
+	var err error
+	caCertPath = getStringValueFromEnvVarOrDefault(envTLSCertPath, "")
+	clientCertPath = getStringValueFromEnvVarOrDefault(envTLSClientCert, "")
+	clientCertKeyPath = getStringValueFromEnvVarOrDefault(envTLSClientKey, "")
+
+	if caCertPath != "" {
+		certPool = x509.NewCertPool()
+
+		if err = validateFilePath(caCertPath); err != nil {
+			return err
+		}
+
+		certData, err = os.ReadFile(caCertPath)
+		if err != nil {
+			return err
+		}
+
+		if !certPool.AppendCertsFromPEM(certData) {
+			return errors.New("credentials: failed to append certificates")
+		}
+	}
+
+	if clientCertPath != "" && clientCertKeyPath != "" {
+		if err = validateFilePath(clientCertPath); err != nil {
+			return err
+		}
+		if err = validateFilePath(clientCertKeyPath); err != nil {
+			return err
+		}
+		var clientCert tls.Certificate
+		clientCert, err = tls.LoadX509KeyPair(clientCertPath, clientCertKeyPath)
+		if err != nil {
+			return err
+		}
+		certificates = []tls.Certificate{clientCert}
+	}
+
+	if DebugEnabled {
+		fields := []zapcore.Field{
+			zap.String("TLS", fmt.Sprintf("%v", certPool != nil)),
+			zap.String("caCertPath", caCertPath),
+			zap.String("clientCertPath", clientCertPath),
+			zap.String("clientCertKeyPath", clientCertKeyPath),
+		}
+		Logger.Info("Init", fields...)
+	}
+
+	return nil
 }
 
 // GetClusterDetailsJSON returns cluster details in raw json.
@@ -1238,7 +1301,10 @@ func httpRequest(h HTTPFetcher, requestType, urlAppend string, absolute bool, co
 	cookies, _ := cookiejar.New(nil)
 
 	tr := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: IgnoreInvalidCerts}, //nolint
+		TLSClientConfig: &tls.Config{
+			InsecureSkipVerify: IgnoreInvalidCerts, //nolint
+			Certificates:       certificates,
+			RootCAs:            certPool},
 	}
 
 	if httpProxy != "" {
@@ -1261,11 +1327,12 @@ func httpRequest(h HTTPFetcher, requestType, urlAppend string, absolute bool, co
 	if err != nil {
 		return constants.EmptyByte, err
 	}
+
 	if h.IsWebLogicServer() {
 		// required for WLS REST requests
 		req.Header.Set("X-Requested-By", "Coherence-CLI")
-
 	}
+
 	if username != "" {
 		req.SetBasicAuth(username, password)
 	}
@@ -1362,6 +1429,13 @@ func httpRequest(h HTTPFetcher, requestType, urlAppend string, absolute bool, co
 	return body, err
 }
 
+func getStringValueFromEnvVarOrDefault(envVar string, defaultValue string) string {
+	if val := os.Getenv(envVar); val != "" {
+		return val
+	}
+	return defaultValue
+}
+
 // GetLinkData returns the data from the absolute url.
 func getLinkData(h HTTPFetcher, url string) ([]byte, error) {
 	result, err := httpGetRequest(h, url)
@@ -1389,4 +1463,13 @@ func isValidJSON(data []byte) bool {
 	}
 
 	return true
+}
+
+// validateFilePath checks to see if a file path is valid.
+func validateFilePath(file string) error {
+	if _, err := os.Stat(file); err == nil {
+		return nil
+	}
+
+	return fmt.Errorf("%s is not a valid file", file)
 }

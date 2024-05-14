@@ -1,28 +1,23 @@
-# Copyright 2022, 2024, Oracle Corporation and/or its affiliates.
+# Copyright 2024 Oracle Corporation and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at
 # https://oss.oracle.com/licenses/upl.
 
 # ---------------------------------------------------------------------------
-# Coherence CLI GitHub Actions Stress build
+# Coherence CLI GitHub Actions CI build TLS.
 # ---------------------------------------------------------------------------
-name: Stress
+name: CI - TLS
 
 on:
   workflow_dispatch:
-    inputs:
-      iterations:
-         description: 'Number of iterations'
-         required: true
-         default: '1000'
-  schedule:
-    # Every day at midnight
-    - cron: '0 0 * * *'
+  push:
+    branches-ignore:
+      - gh-pages
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
-#   Checkout the source, we need a depth of zero to fetch all the history otherwise
+#   Checkout the source, we need a depth of zero to fetch all of the history otherwise
 #   the copyright check cannot work out the date of the files from Git.
     steps:
     - uses: actions/checkout@v4
@@ -41,7 +36,7 @@ jobs:
         distribution: 'zulu'
 
     - name: Cache Go Modules
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ~/go/pkg/mod
         key: ${{ runner.os }}-go-mods-${{ hashFiles('**/go.sum') }}
@@ -60,30 +55,25 @@ jobs:
       with:
         go-version: '1.20'
 
-    - name: Build Test Images
+    - name: TLS Tests
       shell: bash
-      run: COHERENCE_BASE_IMAGE=gcr.io/distroless/java17 PROFILES=,executor COHERENCE_VERSION=24.03 make clean build-test-images
-
-    - name: Run Stress Test
-      shell: bash
-      run:  |
-        make cohctl test-cohctl
-        make test-cluster-startup 
-        ITERS="${{ github.event.inputs.iterations }}"
-        if [ -z "$ITERS" ] ; then
-            ITERS=1000
-        fi
-        # Sleep for 20 seconds to allow management startup
-        sleep 20
-        ./scripts/run-stress-test.sh `pwd`/bin/cohctl $ITERS `pwd`/build/_output
-        ret=$?
-        make test-cluster-shutdown
-        exit $ret
+      run: |
+        export COHERENCE_TLS_CERTS_PATH=`pwd`/test/test_utils/certs/guardians-ca.crt
+        export COHERENCE_TLS_CLIENT_CERT=`pwd`/test/test_utils/certs/star-lord.crt
+        export COHERENCE_TLS_CLIENT_KEY=`pwd`/test/test_utils/certs/star-lord.key
+        COHERENCE_BASE_IMAGE=gcr.io/distroless/java17 COHERENCE_VERSION=24.03 PROFILES=,secure make clean certs build-test-images test-cluster-startup
+        echo "Sleeping 30..."
+        sleep 30
+        export PATH=`pwd`/bin:$PATH
+        make cohctl
+        cohctl set ignore-certs true
+        cohctl add cluster tls -u https://127.0.0.1:30000/management/coherence/cluster
+        cohctl get clusters
+        cohctl get members
+        cohctl remove cluster tls -y
 
     - uses: actions/upload-artifact@v4
       if: failure()
       with:
         name: test-output
-        path: |
-          build/_output/stress.log
-          build/_output/config
+        path: build/_output/test-logs

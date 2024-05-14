@@ -75,6 +75,7 @@ type Fetcher interface {
 	GetType() string
 	IsWebLogicServer() bool
 	GetUsername() string
+	Init() error
 
 	// GetClusterDetailsJSON returns cluster details in raw json.
 	GetClusterDetailsJSON() ([]byte, error)
@@ -288,8 +289,9 @@ type Fetcher interface {
 // GetFetcherOrError returns a fetcher and error
 func GetFetcherOrError(connectionType, url, username, clusterName string) (Fetcher, error) {
 	if connectionType == HTTP {
-		return HTTPFetcher{URL: url, ConnectionType: connectionType, WebLogicServer: IsWebLogicServer(url),
-			Username: username, ClusterName: clusterName}, nil
+		f := HTTPFetcher{URL: url, ConnectionType: connectionType, WebLogicServer: IsWebLogicServer(url),
+			Username: username, ClusterName: clusterName}
+		return f, f.Init()
 	}
 
 	return nil, errors.New("invalid connection type of " + connectionType)
