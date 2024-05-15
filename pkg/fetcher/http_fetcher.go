@@ -115,9 +115,8 @@ func (h HTTPFetcher) Init() error {
 		certificates = []tls.Certificate{clientCert}
 	}
 
-	if DebugEnabled {
+	if DebugEnabled && (clientCertPath != "" || clientCertKeyPath != "" || caCertPath != "") {
 		fields := []zapcore.Field{
-			zap.String("TLS", fmt.Sprintf("%v", certPool != nil)),
 			zap.String("caCertPath", caCertPath),
 			zap.String("clientCertPath", clientCertPath),
 			zap.String("clientCertKeyPath", clientCertKeyPath),
