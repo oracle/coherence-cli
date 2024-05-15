@@ -351,6 +351,7 @@ copyright: getcopyright ## Check copyright headers
 	  org.glassfish.copyright.Copyright -C scripts/copyright.txt \
 	  -X bin/ \
 	  -X ./test/test_utils/shared/ \
+	  -X ./test/test_utils/certs/ \
 	  -X ./test/test_utils/test_utils.go \
 	  -X dependency-reduced-pom.xml \
 	  -X binaries/ \
