@@ -677,7 +677,11 @@ func parseHealthEndpoints(endpointCSV string) ([]string, error) {
 		endpoints      = strings.Split(endpointCSV, ",")
 	)
 
-	// validate them
+	if endpointCSV == "[]" {
+		return validEndpoints, nil
+	}
+
+	// validate the endpoints
 	for _, v := range endpoints {
 		_, err := url.ParseRequestURI(v)
 		if err != nil {
