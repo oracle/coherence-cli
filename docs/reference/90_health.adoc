@@ -208,6 +208,7 @@ http://127.0.0.1:52136/        2      200   200    200   200        4
 All health endpoints are safe reached in 21 seconds
 ----
 
+NOTE: You can add `-I` option when using the `-n` name service option, to ignore errors connecting to the name service.
 
 === See Also
 
