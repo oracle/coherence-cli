@@ -27,6 +27,7 @@ var (
 	nslookupAddress string
 	healthEndpoints string
 	getNodeID       bool
+	ignoreNSErrors  bool
 	healthTimeout   int32
 )
 
@@ -199,12 +200,11 @@ You may also specify -T option to wait until all health endpoints are safe.`,
 		}
 
 		if getNodeID {
-			// get the dataf etcher if we are wanting the node ID
+			// get the data fetcher if we are wanting the node ID
 			_, dataFetcher, err = GetConnectionAndDataFetcher()
 			if err != nil {
 				return err
 			}
-
 		}
 
 		// retrieve the list of endpoints using either of the 3 methods
@@ -224,34 +224,41 @@ You may also specify -T option to wait until all health endpoints are safe.`,
 		startTime := time.Now()
 
 		for {
+			var emptyData = false
 			if nslookupAddress != "" {
 				// use nslookup to look up the health endpoint of the cluster
 				ns, err = discovery.Open(nslookupAddress, timeout)
 				if err != nil {
-					return fmt.Errorf("unable to use nslookup against %s: %v", nslookupAddress, err)
+					if ignoreNSErrors {
+						emptyData = true
+						clusterName = "Not available"
+					} else {
+						return fmt.Errorf("unable to use nslookup against %s: %v", nslookupAddress, err)
+					}
 				}
 
-				result, err = ns.Lookup("NameService/string/health/HTTPHealthURL")
-				if err != nil {
-					return err
-				}
+				if !emptyData {
+					result, err = ns.Lookup("NameService/string/health/HTTPHealthURL")
+					if err != nil {
+						return err
+					}
 
-				clusterName, err = ns.Lookup("Cluster/name")
-				if err != nil {
-					return err
-				}
+					clusterName, err = ns.Lookup("Cluster/name")
+					if err != nil {
+						return err
+					}
 
-				_ = ns.Close()
+					_ = ns.Close()
+				}
 
 				// format returned is [http://127.0.0.1:6676/, http://127.0.0.1:6677/]
 				result = strings.Replace(result, "[", "", 1)
 				result = strings.Replace(result, "]", "", 1)
 				result = strings.Replace(result, " ", "", -1)
 				endpoints, err = parseHealthEndpoints(result)
-				if err != nil {
+				if err != nil && !emptyData {
 					return err
 				}
-
 			}
 
 			monitoringData := gatherMonitorData(dataFetcher, endpoints)
@@ -297,6 +304,10 @@ You may also specify -T option to wait until all health endpoints are safe.`,
 }
 
 func isMonitoringDataSafe(monitoringData []config.HealthMonitoring) bool {
+	if len(monitoringData) == 0 {
+		return false
+	}
+
 	for _, v := range monitoringData {
 		if v.Safe != http200 || v.Ready != http200 || v.Live != http200 || v.Started != http200 {
 			return false
@@ -388,6 +399,7 @@ func init() {
 	getHealthCmd.Flags().BoolVarP(&healthSummary, "summary", "S", false, "if true, returns a summary across nodes")
 
 	monitorHealthCmd.Flags().BoolVarP(&getNodeID, "node-id", "N", false, "if true, returns the node id using the current context")
+	monitorHealthCmd.Flags().BoolVarP(&ignoreNSErrors, "ignore-errors", "I", false, "if true, ignores nslookup errors")
 	monitorHealthCmd.Flags().Int32VarP(&timeout, "timeout", "t", 30, timeoutMessage)
 	monitorHealthCmd.Flags().StringVarP(&healthEndpoints, "endpoints", "e", "", "csv list of health endpoints")
 	monitorHealthCmd.Flags().StringVarP(&nslookupAddress, "nslookup", "n", "", "host:port to connect to to lookup health endpoints")
