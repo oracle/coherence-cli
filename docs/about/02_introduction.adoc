@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 
-    Copyright (c) 2021, 2023 Oracle and/or its affiliates.
+    Copyright (c) 2021, 2024 Oracle and/or its affiliates.
     Licensed under the Universal Permissive License v 1.0 as shown at
     https://oss.oracle.com/licenses/upl.
 
@@ -26,10 +26,10 @@ NOTE: The CLI does not replace current management and monitoring tools such as t
 https://docs.oracle.com/cd/E24628_01/install.121/e24215/coherence_getstarted.htm#GSSOA10121[Enterprise Manager], or https://oracle.github.io/coherence-operator/docs/latest/#/docs/metrics/040_dashboards[Grafana Dashboards], but complements and
 provides a lightweight and scriptable alternative.
 
-*Experimental Features*
+*Current Experimental Features*
 
-This version introduces an *experimental* set of commands to allow you to create and scale local only, development based clusters.
-See <<docs/reference/98_create_clusters.adoc,Creating Clusters>> section for more details.
+1. Create, start stop and scale local only development based clusters - <<docs/reference/98_create_clusters.adoc,more information>>.
+2. Monitor clusters using a text based UI to show multiple panels - <<docs/reference/99_monitor_clusters.adoc,more information>>.
 
 == Why use the Coherence CLI?
 
