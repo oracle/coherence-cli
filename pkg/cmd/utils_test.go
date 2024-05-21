@@ -67,7 +67,7 @@ func TestDecodeMemberDetails(t *testing.T) {
 func TestParseHealthEndpoints(t *testing.T) {
 	g := NewGomegaWithT(t)
 	_, err := parseHealthEndpoints("")
-	g.Expect(err).To(HaveOccurred())
+	g.Expect(err).To(Not(HaveOccurred())) // special empty case
 
 	_, err = parseHealthEndpoints("rubbish")
 	g.Expect(err).To(HaveOccurred())

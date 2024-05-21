@@ -685,6 +685,10 @@ func parseHealthEndpoints(endpointCSV string) ([]string, error) {
 	for _, v := range endpoints {
 		_, err := url.ParseRequestURI(v)
 		if err != nil {
+			if v == "" {
+				// ignore invalid URLS
+				continue
+			}
 			return validEndpoints, fmt.Errorf("url [%s] is not valid", v)
 		}
 		validEndpoints = append(validEndpoints, v)
