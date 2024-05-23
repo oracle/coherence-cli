@@ -79,7 +79,7 @@ jobs:
         echo "size"
         sleep 10
         echo "bye"
-        ) | cohctl start console
+        ) | bin/cohctl start console
         echo "Kill storage-2"
         cohctl get members | grep 'storage-2' | awk '{print $4}'
         echo "Waiting for cluster to be safe"
