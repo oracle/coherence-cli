@@ -164,6 +164,17 @@ var trueBoolFormatter = func(s string) string {
 	return s
 }
 
+// falseBoolFormatter formats a column value when false will be displayed in red.
+var falseBoolFormatter = func(s string) string {
+	if monitorCluster {
+		return s
+	}
+	if s == stringFalse {
+		return red(s)
+	}
+	return s
+}
+
 // yesBoolFormatter formats a column value when yes will be displayed in red.
 var yesBoolFormatter = func(s string) string {
 	if monitorCluster {

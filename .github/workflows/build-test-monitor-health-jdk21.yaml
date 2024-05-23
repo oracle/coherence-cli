@@ -1,0 +1,98 @@
+# Copyright 2021, 2024 Oracle Corporation and/or its affiliates.
+# Licensed under the Universal Permissive License v 1.0 as shown at
+# https://oss.oracle.com/licenses/upl.
+
+# ---------------------------------------------------------------------------
+# Coherence CLI GitHub Actions CI build - Test Monitor Health JDK21
+# ---------------------------------------------------------------------------
+name: CI Test Monitor Health JDK21
+
+on:
+  workflow_dispatch:
+  push:
+    branches-ignore:
+      - gh-pages
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        coherenceVersion:
+          - 22.06.8
+          - 24.03
+        javaVersion:
+          - 21
+
+#   Checkout the source, we need a depth of zero to fetch all of the history otherwise
+#   the copyright check cannot work out the date of the files from Git.
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Set up JDK
+      uses: actions/setup-java@v4
+      with:
+        java-version: ${{ matrix.javaVersion }}
+        distribution: 'zulu'
+
+    - name: Cache Go Modules
+      uses: actions/cache@v4
+      with:
+        path: ~/go/pkg/mod
+        key: ${{ runner.os }}-go-mods-${{ hashFiles('**/go.sum') }}
+        restore-keys: |
+          ${{ runner.os }}-go-mods-
+
+    - name: Cache Maven packages
+      uses: actions/cache@v4
+      with:
+        path: ~/.m2
+        key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+        restore-keys: ${{ runner.os }}-m2
+
+    - name: Set up Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: '1.20'
+
+    - name: Build cohctl
+      shell: bash
+      run: make cohctl
+
+    - name: Test Monitor Cluster
+      shell: bash
+      run: |
+        bin/cohctl create cluster local -v ${{ matrix.coherenceVersion }} -s active -M 2g -y
+        echo "Waiting for cluster to be ready"
+        bin/cohctl monitor health -n localhost:7574 -I -T 120 -w
+        echo "Adding data"
+        (
+        sleep 10
+        echo "cache test"
+        sleep 10
+        echo "bulkput 1000000 1000 0 1000"
+        sleep 60
+        echo "size"
+        sleep 10
+        echo "bye"
+        ) | bin/cohctl start console
+        echo "Kill storage-2"
+        bin/cohctl get members | grep 'storage-2' | awk '{print $4}'
+        echo "Waiting for cluster to be safe"
+        bin/cohctl monitor health -n localhost:7574 -I -T 120 -w
+        echo "Scale the cluster"
+        bin/cohctl scale cluster local -r4 -M2g
+        echo "Waiting for cluster to be safe"
+        sleep 15
+        bin/cohctl monitor health -n localhost:7574 -I -T 120 -w
+        bin/cohctl stop cluster local -y
+        bin/cohctl remove cluster local -y
+    - uses: actions/upload-artifact@v4
+      if: failure()
+      with:
+        name: test-output-${{ matrix.coherenceVersion }}-${{ matrix.javaVersion }}
+        path: build/_output/test-logs

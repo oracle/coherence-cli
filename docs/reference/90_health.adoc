@@ -126,14 +126,18 @@ Output:
 ----
 HEALTH MONITORING
 ------------------
-Name Service:  localhost:7574
-Cluster Name:  local
+Name Service:    localhost:7574
+Cluster Name:    local
+All Nodes Safe:  true
 
 URL                      NODE ID  STARTED  LIVE  READY  SAFE  OVERALL
 http://127.0.0.1:63765/      n/a      200   200    200   200        4
 http://127.0.0.1:63766/      n/a      200   200    200   200        4
 http://127.0.0.1:63768/      n/a      200   200    200   200        4
 ----
+
+NOTE: All Nodes Safe will indicate if all the health checks all returned HTTP 200. If you are monitoring a rolling
+restart, this is an indication that it is safe to continue.
 
 Use the `-N` option to display the node id from the current context.
 
@@ -146,8 +150,10 @@ Output:
 ----
 HEALTH MONITORING
 ------------------
-Name Service:  localhost:7574
-Cluster Name:  local
+Name Service:    localhost:7574
+Cluster Name:    local
+All Nodes Safe:  true
+
 
 URL                      NODE ID  STARTED  LIVE  READY  SAFE  OVERALL
 http://127.0.0.1:63765/        2      200   200    200   200        4
@@ -197,8 +203,9 @@ Output:
 ----
 HEALTH MONITORING
 ------------------
-Name Service:  localhost:7574
-Cluster Name:  local
+Name Service:    localhost:7574
+Cluster Name:    local
+All Nodes Safe:  true
 
 URL                      NODE ID  STARTED  LIVE  READY  SAFE  OVERALL
 http://127.0.0.1:52133/        1      200   200    200   200        4

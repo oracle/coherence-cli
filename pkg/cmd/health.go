@@ -268,12 +268,13 @@ You may also specify -T option to wait until all health endpoints are safe.`,
 			cmd.Println("\nHEALTH MONITORING")
 			cmd.Println("------------------")
 			if nslookupAddress != "" {
-				cmd.Println("Name Service: ", nslookupAddress)
-				cmd.Println("Cluster Name: ", clusterName)
+				cmd.Println("Name Service:   ", nslookupAddress)
+				cmd.Println("Cluster Name:   ", clusterName)
 
 			} else {
-				cmd.Println("Endpoints: ", endpoints)
+				cmd.Println("Endpoints:     ", endpoints)
 			}
+			cmd.Println("All Nodes Safe: ", falseBoolFormatter(fmt.Sprintf("%v", isMonitoringDataSafe(monitoringData))))
 
 			cmd.Println()
 
