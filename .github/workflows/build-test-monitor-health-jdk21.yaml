@@ -81,7 +81,7 @@ jobs:
         echo "bye"
         ) | bin/cohctl start console
         echo "Kill storage-2"
-        cohctl get members | grep 'storage-2' | awk '{print $4}'
+        bin/cohctl get members | grep 'storage-2' | awk '{print $4}'
         echo "Waiting for cluster to be safe"
         bin/cohctl monitor health -n localhost:7574 -I -T 120 -w
         echo "Scale the cluster"
