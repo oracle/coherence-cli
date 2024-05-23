@@ -946,7 +946,7 @@ var retrieveThreadDumpsCmd = &cobra.Command{
 	Use:   "thread-dumps [node-ids]",
 	Short: "generate and retrieve thread dumps for all or selected members",
 	Long: `The 'get thead-dumps' command generates and retrieves thread dumps for all or selected 
-members and places them in the specified output directory. You are also able to specify 
+members and places them in the specified (local) output directory. You are also able to specify 
 a role to retrieve thread dumps for.`,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if threadDumpRole == all && len(args) != 1 {
@@ -1174,7 +1174,7 @@ func init() {
 
 	retrieveThreadDumpsCmd.Flags().Int32VarP(&numThreadDumps, "number", "n", 5, "number of thread dumps to retrieve")
 	retrieveThreadDumpsCmd.Flags().Int32VarP(&delayBetweenDumps, "dump-delay", "D", 10, "delay between each thread dump")
-	retrieveThreadDumpsCmd.Flags().StringVarP(&outputDirectory, "output-dir", "O", "", "existing directory to output thread dumps to")
+	retrieveThreadDumpsCmd.Flags().StringVarP(&outputDirectory, "output-dir", "O", "", "existing local directory to output thread dumps to")
 	retrieveThreadDumpsCmd.Flags().StringVarP(&threadDumpRole, "role", "r", all, roleDescription)
 	_ = retrieveThreadDumpsCmd.MarkFlagRequired("output-dir")
 	retrieveThreadDumpsCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
