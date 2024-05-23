@@ -86,7 +86,7 @@ jobs:
         bin/cohctl monitor health -n localhost:7574 -I -T 120 -w
         echo "Scale the cluster"
         bin/cohctl scale cluster local -r4 -M2g
-        echo "Waiting for cluster to be safe
+        echo "Waiting for cluster to be safe"
         bin/cohctl monitor health -n localhost:7574 -I -T 120 -w
         bin/cohctl stop cluster local -y
         bin/cohctl remove cluster local -y
