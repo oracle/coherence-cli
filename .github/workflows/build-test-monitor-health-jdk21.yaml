@@ -66,7 +66,7 @@ jobs:
     - name: Test Monitor Cluster
       shell: bash
       run: |
-        bin/cohctl create cluster local -v ${{ matrix.coherenceVersion }} -s active -M 2g
+        bin/cohctl create cluster local -v ${{ matrix.coherenceVersion }} -s active -M 2g -y
         echo "Waiting for cluster to be ready"
         bin/cohctl monitor health -n localhost:7574 -I -T 120 -w
         echo "Adding data"
