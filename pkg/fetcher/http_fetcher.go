@@ -1247,9 +1247,6 @@ func httpRequest(h HTTPFetcher, requestType, urlAppend string, absolute bool, co
 		body            []byte
 		unsanitizedBody []byte
 		buffer          bytes.Buffer
-		URL             = url.URL{}
-		httpProxy       = os.Getenv("HTTP_PROXY")
-		proxy           *url.URL
 		isJSON          = true
 	)
 
@@ -1300,19 +1297,11 @@ func httpRequest(h HTTPFetcher, requestType, urlAppend string, absolute bool, co
 	cookies, _ := cookiejar.New(nil)
 
 	tr := &http.Transport{
+		Proxy: http.ProxyFromEnvironment,
 		TLSClientConfig: &tls.Config{
 			InsecureSkipVerify: IgnoreInvalidCerts, //nolint
 			Certificates:       certificates,
 			RootCAs:            certPool},
-	}
-
-	if httpProxy != "" {
-		proxy, err = URL.Parse(httpProxy)
-		if err != nil {
-			return constants.EmptyByte, fmt.Errorf("unable to parse HTTP_PROXY environment variable: %s, %v", httpProxy, err)
-		}
-		tr.Proxy = http.ProxyURL(proxy)
-		Logger.Info("Using HTTP Proxy", []zapcore.Field{zap.String("URL", httpProxy)}...)
 	}
 
 	client := &http.Client{Transport: tr,
