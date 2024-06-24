@@ -505,25 +505,16 @@ func (b *ByteArraySink) AppendByteArray(bytes []byte) {
 // GetURLContents returns the contents at the given url as a []byte.
 func GetURLContents(resourceURL string) ([]byte, error) {
 	var (
-		err       error
-		req       *http.Request
-		resp      *http.Response
-		body      []byte
-		buffer    bytes.Buffer
-		URL       = url.URL{}
-		httpProxy = os.Getenv("HTTP_PROXY")
+		err    error
+		req    *http.Request
+		resp   *http.Response
+		body   []byte
+		buffer bytes.Buffer
 	)
 	cookies, _ := cookiejar.New(nil)
 	tr := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: false, MinVersion: tls.VersionTLS12},
-	}
-
-	if httpProxy != "" {
-		proxy, err := URL.Parse(httpProxy)
-		if err != nil {
-			return body, errors.New("unable to parse HTTP_PROXY environment variable")
-		}
-		tr.Proxy = http.ProxyURL(proxy)
+		Proxy:           http.ProxyFromEnvironment,
 	}
 
 	client := &http.Client{Transport: tr,
