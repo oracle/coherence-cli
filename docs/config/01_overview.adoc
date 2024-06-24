@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 
-    Copyright (c) 2021, 2023 Oracle and/or its affiliates.
+    Copyright (c) 2021, 2024 Oracle and/or its affiliates.
     Licensed under the Universal Permissive License v 1.0 as shown at
     https://oss.oracle.com/licenses/upl.
 
@@ -46,7 +46,14 @@ Changing how bytes values are displayed.
 .Get Config
 [link=docs/config/09_get_config.adoc]
 --
-Display the Config in .cohctl.yaml in a human readible format.
+Display the Config in .cohctl.yaml in a human-readable format.
+--
+
+[CARD]
+.Using Proxy Servers
+[link=docs/config/20_using_proxy_servers.adoc]
+--
+Configure proxy servers to access clusters.
 --
 
 ====
