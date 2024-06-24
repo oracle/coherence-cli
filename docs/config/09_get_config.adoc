@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 
-    Copyright (c) 2023, Oracle and/or its affiliates.
+    Copyright (c) 2023, 2024 Oracle and/or its affiliates.
     Licensed under the Universal Permissive License v 1.0 as shown at
     https://oss.oracle.com/licenses/upl.
 
@@ -19,11 +19,11 @@ include::../../build/_output/docs-gen/get_config.adoc[tag=text]
 cohctl get config
 ----
 Output:
-[source,bash]
+[source,bash,subs="attributes"]
 ----
 CONFIG
 ------
-Version             :  1.5.0
+Version             :  {cli-version}
 Current Context     :  fp1
 Debug               :  true
 Color               :  on

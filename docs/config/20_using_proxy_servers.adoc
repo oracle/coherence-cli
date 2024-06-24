@@ -1,0 +1,20 @@
+///////////////////////////////////////////////////////////////////////////////
+
+    Copyright (c) 2024 Oracle and/or its affiliates.
+    Licensed under the Universal Permissive License v 1.0 as shown at
+    https://oss.oracle.com/licenses/upl.
+
+///////////////////////////////////////////////////////////////////////////////
+
+= Using Proxy Servers
+
+== Using Proxy Servers
+
+There may be cases where you wish to configure a proxy server to access the HTTP endpoints for your cluster.
+
+The CLI honors the following standard environment variable settings, by internally using https://pkg.go.dev/net/http#ProxyFromEnvironment[Proxy.ProxyFromEnvironment], for proxy server configration:
+
+* `HTTP_PROXY` or `http_proxy`
+* `HTTPS_PROXY` or `https_proxy`
+* `NO_PROXY` or `no_proxy`
+
