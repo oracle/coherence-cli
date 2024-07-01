@@ -50,7 +50,7 @@ var (
 	lastClusterSummaryInfo clusterSummaryInfo
 	emptyStringArray       = make([]string, 0)
 	layoutParam            string
-	padMaxHeightParam      bool
+	padMaxHeightParam      = true
 	showAllPanels          bool
 	ignoreRESTErrors       bool
 	monitorCluster         bool
