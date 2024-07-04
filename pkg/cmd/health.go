@@ -205,6 +205,13 @@ You may also specify -T option to wait until all health endpoints are safe.`,
 			if err != nil {
 				return err
 			}
+
+			// retrieve cluster details first so if we are connected
+			// to WLS or need authentication, this can be done first
+			_, err1 := dataFetcher.GetClusterDetailsJSON()
+			if err1 != nil {
+				return err1
+			}
 		}
 
 		// retrieve the list of endpoints using either of the 3 methods
