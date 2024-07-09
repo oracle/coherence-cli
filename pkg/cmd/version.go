@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, 2023 Oracle and/or its affiliates.
+ * Copyright (c) 2021, 2024 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -26,7 +26,7 @@ var versionCmd = &cobra.Command{
 	Long: `The 'get version' command displays version and build details for the Coherence-CLI.
 Use the '-u' option to check for updates.`,
 	Args: cobra.ExactArgs(0),
-	Run: func(cmd *cobra.Command, args []string) {
+	Run: func(cmd *cobra.Command, _ []string) {
 		var (
 			err           error
 			latestVersion string

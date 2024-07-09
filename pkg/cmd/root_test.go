@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, 2023 Oracle and/or its affiliates.
+ * Copyright (c) 2021, 2024 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -8,7 +8,7 @@ package cmd
 
 import (
 	"fmt"
-	. "github.com/onsi/gomega"
+	"github.com/onsi/gomega"
 	"github.com/oracle/coherence-cli/pkg/config"
 	"github.com/oracle/coherence-cli/pkg/fetcher"
 	"github.com/oracle/coherence-cli/test/test_utils"
@@ -26,25 +26,25 @@ const (
 )
 
 func TestVersionCommand(t *testing.T) {
-	g := NewGomegaWithT(t)
+	g := gomega.NewGomegaWithT(t)
 	cliCmd := Initialize(nil)
 	test_utils.EnsureCommandContains(g, t, cliCmd, cliVersion, "version")
 }
 
 func TestSettingConfigDirectoryOnly(t *testing.T) {
 	cliCmd := Initialize(nil)
-	g := NewGomegaWithT(t)
+	g := gomega.NewGomegaWithT(t)
 	dir := test_utils.CreateTempDirectory("temp")
 
 	test_utils.EnsureCommandContains(g, t, cliCmd, cliVersion, "--config-dir", dir, "version")
 
 	// we should see a file in the temp directory with the name of cohctl.yaml
-	g.Expect(test_utils.FileExistsInDirectory(dir, configName+"."+configType)).To(Equal(true))
+	g.Expect(test_utils.FileExistsInDirectory(dir, configName+"."+configType)).To(gomega.Equal(true))
 }
 
 func TestSettingConfigFileOnly(t *testing.T) {
 	cliCmd := Initialize(nil)
-	g := NewGomegaWithT(t)
+	g := gomega.NewGomegaWithT(t)
 	dir := test_utils.CreateTempDirectory("temp")
 	err := os.Mkdir(dir, 0755)
 	if err != nil {
@@ -56,13 +56,13 @@ func TestSettingConfigFileOnly(t *testing.T) {
 	test_utils.EnsureCommandContains(g, t, cliCmd, cliVersion, configOption, file, "version")
 
 	// we should see a file in the temp directory with the name of cohctl.yaml
-	g.Expect(test_utils.FileExistsInDirectory(dir, "my-config.yaml")).To(Equal(true))
+	g.Expect(test_utils.FileExistsInDirectory(dir, "my-config.yaml")).To(gomega.Equal(true))
 }
 
 // TestContextCommands tests the get, set and clear context commands
 func TestContextCommands(t *testing.T) {
 	cliCmd := Initialize(nil)
-	g := NewGomegaWithT(t)
+	g := gomega.NewGomegaWithT(t)
 
 	file, err := test_utils.CreateNewConfigYaml(configYaml)
 	if err != nil {
@@ -86,18 +86,18 @@ func TestContextCommands(t *testing.T) {
 	// set the context
 	test_utils.EnsureCommandOutputEquals(g, t, cliCmd, setContextMsg+"cluster1\n", configOption, file, "set", "context", "cluster1")
 
-	g.Expect(viper.GetString(currentContextKey)).To(Equal("cluster1"))
+	g.Expect(viper.GetString(currentContextKey)).To(gomega.Equal("cluster1"))
 
 	// clear the context
 	test_utils.EnsureCommandOutputEquals(g, t, cliCmd, clearContextMessage+"\n", configOption, file, "clear", "context")
 
-	g.Expect(viper.GetString(currentContextKey)).To(Equal(""))
+	g.Expect(viper.GetString(currentContextKey)).To(gomega.Equal(""))
 }
 
 // TestDebugCommands tests the get and set debug commands
 func TestDebugCommands(t *testing.T) {
 	cliCmd := Initialize(nil)
-	g := NewGomegaWithT(t)
+	g := gomega.NewGomegaWithT(t)
 
 	file, err := test_utils.CreateNewConfigYaml(configYaml)
 	if err != nil {
@@ -125,7 +125,7 @@ func TestDebugCommands(t *testing.T) {
 // TestColoCommands tests the get and set color commands.
 func TestColoCommands(t *testing.T) {
 	cliCmd := Initialize(nil)
-	g := NewGomegaWithT(t)
+	g := gomega.NewGomegaWithT(t)
 
 	file, err := test_utils.CreateNewConfigYaml(configYaml)
 	if err != nil {
@@ -155,7 +155,7 @@ func TestIgnoreCertsCommands(t *testing.T) {
 
 	var (
 		cliCmd      = Initialize(nil)
-		g           = NewGomegaWithT(t)
+		g           = gomega.NewGomegaWithT(t)
 		ignoreCerts = "ignore-certs"
 	)
 
@@ -186,7 +186,7 @@ func TestIgnoreCertsCommands(t *testing.T) {
 // TestGetLogsCommands tests the get logs command
 func TestGetLogsCommands(t *testing.T) {
 	cliCmd := Initialize(nil)
-	g := NewGomegaWithT(t)
+	g := gomega.NewGomegaWithT(t)
 
 	file, err := test_utils.CreateNewConfigYaml(configYaml)
 	if err != nil {
@@ -207,7 +207,7 @@ func TestGetLogsCommands(t *testing.T) {
 // TestTimeoutCommands tests the get and set timeout commands
 func TestTimeoutCommands(t *testing.T) {
 	cliCmd := Initialize(nil)
-	g := NewGomegaWithT(t)
+	g := gomega.NewGomegaWithT(t)
 
 	file, err := test_utils.CreateNewConfigYaml(configYaml)
 	if err != nil {
@@ -233,27 +233,27 @@ func TestTimeoutCommands(t *testing.T) {
 
 func TestIsStatusHASaferThan(t *testing.T) {
 	var (
-		g           = NewGomegaWithT(t)
+		g           = gomega.NewGomegaWithT(t)
 		machineSafe = "MACHINE-SAFE"
 		nodeSafe    = "NODE-SAFE"
 		siteSafe    = "SITE-SAFE"
 		rackSafe    = "RACK-SAFE"
 	)
 
-	g.Expect(isStatusHASaferThan(nodeSafe, nodeSafe)).Should(Equal(true))
-	g.Expect(isStatusHASaferThan(nodeSafe, machineSafe)).Should(Equal(false))
-	g.Expect(isStatusHASaferThan(machineSafe, siteSafe)).Should(Equal(false))
-	g.Expect(isStatusHASaferThan(rackSafe, siteSafe)).Should(Equal(false))
-	g.Expect(isStatusHASaferThan(nodeSafe, "ENDANGERED")).Should(Equal(true))
-	g.Expect(isStatusHASaferThan(machineSafe, nodeSafe)).Should(Equal(true))
-	g.Expect(isStatusHASaferThan(rackSafe, machineSafe)).Should(Equal(true))
-	g.Expect(isStatusHASaferThan(siteSafe, machineSafe)).Should(Equal(true))
-	g.Expect(isStatusHASaferThan(siteSafe, rackSafe)).Should(Equal(true))
+	g.Expect(isStatusHASaferThan(nodeSafe, nodeSafe)).Should(gomega.Equal(true))
+	g.Expect(isStatusHASaferThan(nodeSafe, machineSafe)).Should(gomega.Equal(false))
+	g.Expect(isStatusHASaferThan(machineSafe, siteSafe)).Should(gomega.Equal(false))
+	g.Expect(isStatusHASaferThan(rackSafe, siteSafe)).Should(gomega.Equal(false))
+	g.Expect(isStatusHASaferThan(nodeSafe, "ENDANGERED")).Should(gomega.Equal(true))
+	g.Expect(isStatusHASaferThan(machineSafe, nodeSafe)).Should(gomega.Equal(true))
+	g.Expect(isStatusHASaferThan(rackSafe, machineSafe)).Should(gomega.Equal(true))
+	g.Expect(isStatusHASaferThan(siteSafe, machineSafe)).Should(gomega.Equal(true))
+	g.Expect(isStatusHASaferThan(siteSafe, rackSafe)).Should(gomega.Equal(true))
 }
 
 func TestGetDataFetcher(t *testing.T) {
 	var (
-		g           = NewGomegaWithT(t)
+		g           = gomega.NewGomegaWithT(t)
 		err         error
 		dataFetcher fetcher.Fetcher
 		ok          bool
@@ -262,18 +262,18 @@ func TestGetDataFetcher(t *testing.T) {
 	setConfig(g)
 
 	dataFetcher, err = GetDataFetcher("one")
-	g.Expect(err).To(BeNil())
-	g.Expect(dataFetcher).To(Not(BeNil()))
+	g.Expect(err).To(gomega.BeNil())
+	g.Expect(dataFetcher).To(gomega.Not(gomega.BeNil()))
 	_, ok = interface{}(dataFetcher).(fetcher.HTTPFetcher)
-	g.Expect(ok).To(BeTrue())
+	g.Expect(ok).To(gomega.BeTrue())
 
 	_, err = GetDataFetcher("not-here")
-	g.Expect(err).To(Not(BeNil()))
+	g.Expect(err).To(gomega.Not(gomega.BeNil()))
 }
 
 func TestGetClusterConnection(t *testing.T) {
 	var (
-		g          = NewGomegaWithT(t)
+		g          = gomega.NewGomegaWithT(t)
 		found      bool
 		connection ClusterConnection
 	)
@@ -281,20 +281,20 @@ func TestGetClusterConnection(t *testing.T) {
 	setConfig(g)
 
 	found, connection = GetClusterConnection("one")
-	g.Expect(found).To(Equal(true))
-	g.Expect(connection.Name).To(Equal("one"))
+	g.Expect(found).To(gomega.Equal(true))
+	g.Expect(connection.Name).To(gomega.Equal("one"))
 
 	found, connection = GetClusterConnection("two")
-	g.Expect(found).To(Equal(true))
-	g.Expect(connection.Name).To(Equal("two"))
+	g.Expect(found).To(gomega.Equal(true))
+	g.Expect(connection.Name).To(gomega.Equal("two"))
 
 	found, connection = GetClusterConnection("three")
-	g.Expect(found).To(Equal(false))
+	g.Expect(found).To(gomega.Equal(false))
 }
 
 func TestGetConnectionNameFromContextOrArg(t *testing.T) {
 	var (
-		g       = NewGomegaWithT(t)
+		g       = gomega.NewGomegaWithT(t)
 		err     error
 		cluster string
 	)
@@ -305,33 +305,33 @@ func TestGetConnectionNameFromContextOrArg(t *testing.T) {
 	Config.CurrentContext = ""
 	clusterConnection = "local"
 	cluster, err = GetConnectionNameFromContextOrArg()
-	g.Expect(err).To(BeNil())
-	g.Expect(cluster).To(Equal("local"))
+	g.Expect(err).To(gomega.BeNil())
+	g.Expect(cluster).To(gomega.Equal("local"))
 
 	// test with -c local and context set to "context". -c should win
 	Config.CurrentContext = "context"
 	cluster, err = GetConnectionNameFromContextOrArg()
-	g.Expect(err).To(BeNil())
-	g.Expect(cluster).To(Equal("local"))
+	g.Expect(err).To(gomega.BeNil())
+	g.Expect(cluster).To(gomega.Equal("local"))
 
 	// test with no -c and the context
 	Config.CurrentContext = "local"
 	clusterConnection = ""
 	cluster, err = GetConnectionNameFromContextOrArg()
-	g.Expect(err).To(BeNil())
-	g.Expect(cluster).To(Equal("local"))
+	g.Expect(err).To(gomega.BeNil())
+	g.Expect(cluster).To(gomega.Equal("local"))
 
 	// test with neither -c or context
 	// test with no -c and the context
 	Config.CurrentContext = ""
 	clusterConnection = ""
 	_, err = GetConnectionNameFromContextOrArg()
-	g.Expect(err).To(Not(BeNil()))
+	g.Expect(err).To(gomega.Not(gomega.BeNil()))
 }
 
 func TestDeduplicateServices(t *testing.T) {
 	var (
-		g               = NewGomegaWithT(t)
+		g               = gomega.NewGomegaWithT(t)
 		servicesSummary = config.ServicesSummaries{}
 	)
 
@@ -341,15 +341,15 @@ func TestDeduplicateServices(t *testing.T) {
 	servicesSummary.Services = append(services1, services2...)
 
 	result := DeduplicateServices(servicesSummary, "all")
-	g.Expect(len(result)).To(Equal(2))
+	g.Expect(len(result)).To(gomega.Equal(2))
 
 	result = DeduplicateServices(servicesSummary, "FederatedCache")
-	g.Expect(len(result)).To(Equal(1))
+	g.Expect(len(result)).To(gomega.Equal(1))
 }
 
 func TestDeduplicateSessions(t *testing.T) {
 	var (
-		g         = NewGomegaWithT(t)
+		g         = gomega.NewGomegaWithT(t)
 		summaries = config.HTTPSessionSummaries{}
 	)
 
@@ -359,33 +359,33 @@ func TestDeduplicateSessions(t *testing.T) {
 	summaries.HTTPSessions = append(session1, session2...)
 
 	result := DeduplicateSessions(summaries)
-	g.Expect(len(result)).To(Equal(2))
+	g.Expect(len(result)).To(gomega.Equal(2))
 
 	for _, value := range result {
 		if value.AppID == "app1" {
-			g.Expect(value.SessionUpdates).To(Equal(int64(3)))
-			g.Expect(value.ReapedSessionsTotal).To(Equal(int64(30)))
-			g.Expect(value.SessionAverageSize).To(Equal(int32(100)))
-			g.Expect(value.AverageReapDuration).To(Equal(int64(100)))
+			g.Expect(value.SessionUpdates).To(gomega.Equal(int64(3)))
+			g.Expect(value.ReapedSessionsTotal).To(gomega.Equal(int64(30)))
+			g.Expect(value.SessionAverageSize).To(gomega.Equal(int32(100)))
+			g.Expect(value.AverageReapDuration).To(gomega.Equal(int64(100)))
 		} else if value.AppID == "app2" {
-			g.Expect(value.SessionUpdates).To(Equal(int64(1)))
-			g.Expect(value.ReapedSessionsTotal).To(Equal(int64(10)))
-			g.Expect(value.SessionAverageSize).To(Equal(int32(100)))
-			g.Expect(value.AverageReapDuration).To(Equal(int64(100)))
+			g.Expect(value.SessionUpdates).To(gomega.Equal(int64(1)))
+			g.Expect(value.ReapedSessionsTotal).To(gomega.Equal(int64(10)))
+			g.Expect(value.SessionAverageSize).To(gomega.Equal(int32(100)))
+			g.Expect(value.AverageReapDuration).To(gomega.Equal(int64(100)))
 		}
 	}
 }
 
-func setConfig(g *WithT) {
+func setConfig(g *gomega.WithT) {
 	Config.Clusters = make([]ClusterConnection, 0)
 	Config.Clusters = append(Config.Clusters, ClusterConnection{Name: "one", ConnectionType: "http", ConnectionURL: "url-one"})
 	Config.Clusters = append(Config.Clusters, ClusterConnection{Name: "two", ConnectionType: "http", ConnectionURL: "url-two"})
-	g.Expect(len(Config.Clusters)).To(Equal(2))
+	g.Expect(len(Config.Clusters)).To(gomega.Equal(2))
 }
 
 func TestErrorSink(t *testing.T) {
 	var (
-		g          = NewGomegaWithT(t)
+		g          = gomega.NewGomegaWithT(t)
 		errorCount = 10000
 		wg         sync.WaitGroup
 		errorSink  = createErrorSink()
@@ -401,7 +401,7 @@ func TestErrorSink(t *testing.T) {
 
 	wg.Wait()
 	errorList := errorSink.GetErrors()
-	g.Expect(len(errorList)).To(Equal(errorCount))
+	g.Expect(len(errorList)).To(gomega.Equal(errorCount))
 
 	// check to see that we have the data we expect
 	valuesMap := make(map[string]string)
@@ -414,12 +414,12 @@ func TestErrorSink(t *testing.T) {
 	}
 
 	// ensure we have the exact number of unique values
-	g.Expect(len(valuesMap)).To(Equal(len(errorList)))
+	g.Expect(len(valuesMap)).To(gomega.Equal(len(errorList)))
 }
 
 func TestDeduplicatePersistenceServices(t *testing.T) {
 	var (
-		g               = NewGomegaWithT(t)
+		g               = gomega.NewGomegaWithT(t)
 		servicesSummary = config.ServicesSummaries{}
 	)
 
@@ -430,20 +430,20 @@ func TestDeduplicatePersistenceServices(t *testing.T) {
 	servicesSummary.Services = append(services1, services2...)
 	servicesSummary.Services = append(servicesSummary.Services, services3...)
 	result := DeduplicatePersistenceServices(servicesSummary)
-	g.Expect(len(result)).To(Equal(2))
+	g.Expect(len(result)).To(gomega.Equal(2))
 
 	for _, value := range result {
 		if value.ServiceName == "DistributedCache1" {
-			g.Expect(value.PersistenceActiveSpaceUsed).To(Equal(int64(30)))
-			g.Expect(value.PersistenceBackupSpaceUsed).To(Equal(int64(15)))
-			g.Expect(value.PersistenceLatencyAverageTotal).To(Equal(1.0))
-			g.Expect(value.PersistenceLatencyMax).To(Equal(int64(3)))
+			g.Expect(value.PersistenceActiveSpaceUsed).To(gomega.Equal(int64(30)))
+			g.Expect(value.PersistenceBackupSpaceUsed).To(gomega.Equal(int64(15)))
+			g.Expect(value.PersistenceLatencyAverageTotal).To(gomega.Equal(1.0))
+			g.Expect(value.PersistenceLatencyMax).To(gomega.Equal(int64(3)))
 		} else {
 			// federated
-			g.Expect(value.PersistenceActiveSpaceUsed).To(Equal(int64(10)))
-			g.Expect(value.PersistenceBackupSpaceUsed).To(Equal(int64(5)))
-			g.Expect(value.PersistenceLatencyAverageTotal).To(Equal(1.0))
-			g.Expect(value.PersistenceLatencyMax).To(Equal(int64(1)))
+			g.Expect(value.PersistenceActiveSpaceUsed).To(gomega.Equal(int64(10)))
+			g.Expect(value.PersistenceBackupSpaceUsed).To(gomega.Equal(int64(5)))
+			g.Expect(value.PersistenceLatencyAverageTotal).To(gomega.Equal(1.0))
+			g.Expect(value.PersistenceLatencyMax).To(gomega.Equal(int64(1)))
 		}
 	}
 

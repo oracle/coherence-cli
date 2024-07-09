@@ -23,8 +23,8 @@ jobs:
       fail-fast: false
       matrix:
         coherenceVersion:
-          - 23.09.3-SNAPSHOT
-          - 22.06.8-SNAPSHOT
+          - 24.03.1-SNAPSHOT
+          - 22.06.9-SNAPSHOT
 
 #   Checkout the source, we need a depth of zero to fetch all of the history otherwise
 #   the copyright check cannot work out the date of the files from Git.
@@ -62,7 +62,7 @@ jobs:
     - name: Set up Go
       uses: actions/setup-go@v5
       with:
-        go-version: '1.20'
+        go-version: '1.21'
 
     - name: Verify Coherence CLI
       env:

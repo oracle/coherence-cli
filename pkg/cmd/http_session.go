@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, 2023 Oracle and/or its affiliates.
+ * Copyright (c) 2021, 2024 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -24,7 +24,7 @@ var getHTTPSessionsCmd = &cobra.Command{
 	Short: "display Coherence*Web Http session information for a cluster",
 	Long:  `The 'get http-sessions' command displays Coherence*Web Http session information for a cluster.`,
 	Args:  cobra.ExactArgs(0),
-	RunE: func(cmd *cobra.Command, args []string) error {
+	RunE: func(cmd *cobra.Command, _ []string) error {
 		var (
 			jsonResult   string
 			httpSessions = config.HTTPSessionSummaries{}

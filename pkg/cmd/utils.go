@@ -427,8 +427,8 @@ func IssueFederationCommand(cmd *cobra.Command, serviceName, command, participan
 	return nil
 }
 
-// GetNodeIds returns the node ids for the current cluster.
-func GetNodeIds(dataFetcher fetcher.Fetcher) ([]string, error) {
+// GetClusterNodeIDs returns the node ids for the current cluster.
+func GetClusterNodeIDs(dataFetcher fetcher.Fetcher) ([]string, error) {
 	var (
 		members       = config.Members{}
 		membersResult []byte
@@ -520,7 +520,7 @@ func GetURLContents(resourceURL string) ([]byte, error) {
 	client := &http.Client{Transport: tr,
 		Timeout: time.Duration(fetcher.RequestTimeout) * time.Second,
 		Jar:     cookies,
-		CheckRedirect: func(req *http.Request, via []*http.Request) error {
+		CheckRedirect: func(_ *http.Request, _ []*http.Request) error {
 			return http.ErrUseLastResponse
 		}}
 

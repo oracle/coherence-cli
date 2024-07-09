@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Oracle and/or its affiliates.
+ * Copyright (c) 2023, 2024 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -18,7 +18,7 @@ var getConfigCmd = &cobra.Command{
 	Long: `The 'get config' command displays the config stored in the '.cohctl.yaml' config file
 in a human readable format.`,
 	Args: cobra.ExactArgs(0),
-	RunE: func(cmd *cobra.Command, args []string) error {
+	RunE: func(cmd *cobra.Command, _ []string) error {
 		data, err := json.Marshal(Config)
 		if err != nil {
 			return err

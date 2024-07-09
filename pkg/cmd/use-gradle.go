@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, 2023 Oracle and/or its affiliates.
+ * Copyright (c) 2022, 2024 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -58,7 +58,7 @@ var getUseGradleCmd = &cobra.Command{
 	Long: `The 'get use-gradle' command displays the current setting for whether to 
 use gradle for dependency management. If set to false, the default of Maven is used.`,
 	Args: cobra.ExactArgs(0),
-	RunE: func(cmd *cobra.Command, args []string) error {
+	RunE: func(cmd *cobra.Command, _ []string) error {
 		cmd.Printf("%s%v\n", getUseGradleMsg, Config.UseGradle)
 		return nil
 	},

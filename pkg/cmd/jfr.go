@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, 2023 Oracle and/or its affiliates.
+ * Copyright (c) 2021, 2024 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -37,7 +37,7 @@ var getJfrsCmd = &cobra.Command{
 	Short: "display Java Flight Recordings for a cluster",
 	Long:  `The 'get jfrs' command displays the Java Flight Recordings for a cluster.`,
 	Args:  cobra.ExactArgs(0),
-	RunE: func(cmd *cobra.Command, args []string) error {
+	RunE: func(cmd *cobra.Command, _ []string) error {
 		var (
 			dataFetcher fetcher.Fetcher
 			connection  string
@@ -99,7 +99,7 @@ of 0 to make the recording continuous.`,
 			dataFetcher fetcher.Fetcher
 			connection  string
 			err         error
-			nodeIds     []string
+			nodeIDs     []string
 			jfrName     = args[0]
 			jfrType     string
 			jfrMessage  string
@@ -126,12 +126,12 @@ of 0 to make the recording continuous.`,
 				return fmt.Errorf("invalid node id %s", NodeID)
 			}
 
-			nodeIds, err = GetNodeIds(dataFetcher)
+			nodeIDs, err = GetClusterNodeIDs(dataFetcher)
 			if err != nil {
 				return err
 			}
 
-			if !utils.SliceContains(nodeIds, NodeID) {
+			if !utils.SliceContains(nodeIDs, NodeID) {
 				return fmt.Errorf("node id %s does not exist on this cluster", NodeID)
 			}
 			jfrMessage = "node id " + NodeID
@@ -143,11 +143,11 @@ of 0 to make the recording continuous.`,
 		} else {
 			// must be cluster wide
 			jfrType = fetcher.JfrTypeCluster
-			nodeIds, err = GetNodeIds(dataFetcher)
+			nodeIDs, err = GetClusterNodeIDs(dataFetcher)
 			if err != nil {
 				return err
 			}
-			jfrMessage = fmt.Sprintf("all %d members", len(nodeIds))
+			jfrMessage = fmt.Sprintf("all %d members", len(nodeIDs))
 		}
 
 		// confirm the operation
@@ -231,7 +231,7 @@ A JFR command mut be in progress for this to succeed.`,
 func executeJFROperation(cmd *cobra.Command, jfrName, operation string, dataFetcher fetcher.Fetcher, filename, connection string) error {
 	var (
 		err         error
-		NodeIds     []string
+		NodeIDs     []string
 		jfrType     string
 		jfrMessage  string
 		target      = ""
@@ -246,12 +246,12 @@ func executeJFROperation(cmd *cobra.Command, jfrName, operation string, dataFetc
 			return fmt.Errorf("invalid node id %s", NodeID)
 		}
 
-		NodeIds, err = GetNodeIds(dataFetcher)
+		NodeIDs, err = GetClusterNodeIDs(dataFetcher)
 		if err != nil {
 			return err
 		}
 
-		if !utils.SliceContains(NodeIds, NodeID) {
+		if !utils.SliceContains(NodeIDs, NodeID) {
 			return fmt.Errorf("node id %s does not exist on this cluster", NodeID)
 		}
 		jfrMessage = "node id " + NodeID
@@ -259,11 +259,11 @@ func executeJFROperation(cmd *cobra.Command, jfrName, operation string, dataFetc
 	} else {
 		// must be cluster wide
 		jfrType = fetcher.JfrTypeCluster
-		NodeIds, err = GetNodeIds(dataFetcher)
+		NodeIDs, err = GetClusterNodeIDs(dataFetcher)
 		if err != nil {
 			return err
 		}
-		jfrMessage = fmt.Sprintf("all %d members", len(NodeIds))
+		jfrMessage = fmt.Sprintf("all %d members", len(NodeIDs))
 	}
 
 	if operation != fetcher.CheckJFR && !automaticallyConfirm {
