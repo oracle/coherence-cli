@@ -8,7 +8,7 @@
 <p>Experimental command to monitor clusters with text UI to show multiple panels.</p>
 
 <div class="admonition note">
-<p class="admonition-inline">The <code>monitor cluster</code> command is current experimental only and may be changed or removed in the future</p>
+<p class="admonition-inline">The <code>monitor cluster</code> command is currently experimental only and may be changed or removed in the future</p>
 </div>
 <ul class="ulist">
 <li>
