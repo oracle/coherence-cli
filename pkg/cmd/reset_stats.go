@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, 2023 Oracle and/or its affiliates.
+ * Copyright (c) 2022, 2024 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -165,7 +165,7 @@ func issueResetStatsCommand(cmd *cobra.Command, args []string, operation string)
 		dataFetcher    fetcher.Fetcher
 		connection     string
 		nodeIDArray    []string
-		nodeIds        []string
+		nodeIDs        []string
 		message        string
 	)
 
@@ -176,17 +176,17 @@ func issueResetStatsCommand(cmd *cobra.Command, args []string, operation string)
 	}
 
 	// validate the nodes
-	nodeIDArray, err = GetNodeIds(dataFetcher)
+	nodeIDArray, err = GetClusterNodeIDs(dataFetcher)
 	if err != nil {
 		return err
 	}
 
 	if resetNodeIDs == all {
-		nodeIds = append(nodeIds, nodeIDArray...)
-		confirmMessage = fmt.Sprintf("all %d nodes", len(nodeIds))
+		nodeIDs = append(nodeIDs, nodeIDArray...)
+		confirmMessage = fmt.Sprintf("all %d nodes", len(nodeIDs))
 	} else {
-		nodeIds = strings.Split(resetNodeIDs, ",")
-		for _, value := range nodeIds {
+		nodeIDs = strings.Split(resetNodeIDs, ",")
+		for _, value := range nodeIDs {
 			if !utils.IsValidInt(value) {
 				return fmt.Errorf("invalid value for node id of %s", value)
 			}
@@ -195,7 +195,7 @@ func issueResetStatsCommand(cmd *cobra.Command, args []string, operation string)
 				return fmt.Errorf("no node with node id %s exists in this cluster", value)
 			}
 		}
-		confirmMessage = fmt.Sprintf("%d node(s)", len(nodeIds))
+		confirmMessage = fmt.Sprintf("%d node(s)", len(nodeIDs))
 	}
 
 	cmd.Println(FormatCurrentCluster(connection))
@@ -333,9 +333,9 @@ func issueResetStatsCommand(cmd *cobra.Command, args []string, operation string)
 			wg        sync.WaitGroup
 		)
 
-		wg.Add(len(nodeIds))
+		wg.Add(len(nodeIDs))
 
-		for _, value := range nodeIds {
+		for _, value := range nodeIDs {
 			go func(nodeId string) {
 				var err1 error
 				defer wg.Done()

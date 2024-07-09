@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, 2023 Oracle and/or its affiliates.
+ * Copyright (c) 2022, 2024 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -58,7 +58,7 @@ var getBytesFormatCmd = &cobra.Command{
 	Short: "display the current format for displaying memory or disk based sizes",
 	Long:  `The 'get bytes-format' displays the current format for displaying memory or disk based sizes.`,
 	Args:  cobra.ExactArgs(0),
-	RunE: func(cmd *cobra.Command, args []string) error {
+	RunE: func(cmd *cobra.Command, _ []string) error {
 		cmd.Printf("%s%v\n", getDefaultBytesMsg, Config.DefaultBytesFormat)
 		return nil
 	},
@@ -70,7 +70,7 @@ var clearBytesFormatCmd = &cobra.Command{
 	Short: "clear the current format for displaying memory or disk based sizes",
 	Long:  `The 'clear bytes-format' clears the current format for displaying memory or disk based sizes.`,
 	Args:  cobra.ExactArgs(0),
-	RunE: func(cmd *cobra.Command, args []string) error {
+	RunE: func(cmd *cobra.Command, _ []string) error {
 		viper.Set(defaultBytesFormatKey, "")
 		err := WriteConfig()
 		if err != nil {

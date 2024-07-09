@@ -24,7 +24,7 @@ var getPersistenceCmd = &cobra.Command{
 	Short: "display persistence details for a cluster",
 	Long:  `The 'get persistence' command displays persistence information for a cluster.`,
 	Args:  cobra.ExactArgs(0),
-	RunE: func(cmd *cobra.Command, args []string) error {
+	RunE: func(cmd *cobra.Command, _ []string) error {
 		var (
 			err         error
 			dataFetcher fetcher.Fetcher

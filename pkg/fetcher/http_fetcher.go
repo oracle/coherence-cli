@@ -964,9 +964,8 @@ func (h HTTPFetcher) InvokeSnapshotOperation(serviceName, snapshotName, operatio
 			return constants.EmptyByte, fmt.Errorf("unable to archive snapshot. Please ensure you have an archiver setup for your service. %v", err)
 		}
 		return constants.EmptyByte, err
-	} else {
-		return constants.EmptyByte, fmt.Errorf("invalid snapshot operation %s", operation)
 	}
+	return constants.EmptyByte, fmt.Errorf("invalid snapshot operation %s", operation)
 }
 
 // InvokeStorageOperation invokes a storage manager operation against a service and cache
@@ -1307,7 +1306,7 @@ func httpRequest(h HTTPFetcher, requestType, urlAppend string, absolute bool, co
 	client := &http.Client{Transport: tr,
 		Timeout: time.Duration(RequestTimeout) * time.Second,
 		Jar:     cookies,
-		CheckRedirect: func(req *http.Request, via []*http.Request) error {
+		CheckRedirect: func(_ *http.Request, _ []*http.Request) error {
 			return http.ErrUseLastResponse
 		}}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, 2023 Oracle and/or its affiliates.
+ * Copyright (c) 2021, 2024 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -40,7 +40,7 @@ var getElasticDataCmd = &cobra.Command{
 	Long: `The 'get elastic-data' command displays the Flash Journal and RAM
 Journal details for the cluster.`,
 	Args: cobra.ExactArgs(0),
-	RunE: func(cmd *cobra.Command, args []string) error {
+	RunE: func(cmd *cobra.Command, _ []string) error {
 		var (
 			dataFetcher fetcher.Fetcher
 			finalResult string
@@ -224,7 +224,7 @@ for all or specific nodes. ` + `The allowable values are ` + ram + ` or ` + flas
 			connection     string
 			journalType    = args[0]
 			nodeIDArray    []string
-			nodeIds        []string
+			nodeIDs        []string
 			confirmMessage string
 			errorSink      = createErrorSink()
 			wg             sync.WaitGroup
@@ -254,20 +254,20 @@ for all or specific nodes. ` + `The allowable values are ` + ram + ` or ` + flas
 		}
 
 		// validate the nodes
-		nodeIDArray, err = GetNodeIds(dataFetcher)
+		nodeIDArray, err = GetClusterNodeIDs(dataFetcher)
 		if err != nil {
 			return err
 		}
 
 		if nodeIDsED == all {
-			nodeIds = append(nodeIds, nodeIDArray...)
-			confirmMessage = fmt.Sprintf("all %d nodes", len(nodeIds))
+			nodeIDs = append(nodeIDs, nodeIDArray...)
+			confirmMessage = fmt.Sprintf("all %d nodes", len(nodeIDs))
 		} else {
-			if nodeIds, err = getNodeIDs(nodeIDsED, nodeIDArray); err != nil {
+			if nodeIDs, err = getNodeIDs(nodeIDsED, nodeIDArray); err != nil {
 				return err
 			}
 
-			confirmMessage = fmt.Sprintf("%d node(s)", len(nodeIds))
+			confirmMessage = fmt.Sprintf("%d node(s)", len(nodeIDs))
 		}
 
 		cmd.Println(FormatCurrentCluster(connection))
@@ -278,9 +278,9 @@ for all or specific nodes. ` + `The allowable values are ` + ram + ` or ` + flas
 			return nil
 		}
 
-		wg.Add(len(nodeIds))
+		wg.Add(len(nodeIDs))
 
-		for _, value := range nodeIds {
+		for _, value := range nodeIDs {
 			go func(nodeId string) {
 				var err1 error
 				defer wg.Done()

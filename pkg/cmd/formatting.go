@@ -325,9 +325,8 @@ func FormatFederationSummary(federationSummaries []config.FederationSummary, tar
 			return true
 		} else if federationSummaries[p].ServiceName > federationSummaries[q].ServiceName {
 			return false
-		} else {
-			return federationSummaries[p].ParticipantName < federationSummaries[q].ParticipantName
 		}
+		return federationSummaries[p].ParticipantName < federationSummaries[q].ParticipantName
 	})
 
 	table = newFormattedTable().WithAlignment(finalAlignment...)
@@ -434,9 +433,8 @@ func FormatCacheSummary(cacheSummaries []config.CacheSummaryDetail) string {
 			return true
 		} else if cacheSummaries[p].ServiceName > cacheSummaries[q].ServiceName {
 			return false
-		} else {
-			return cacheSummaries[p].CacheName < cacheSummaries[q].CacheName
 		}
+		return cacheSummaries[p].CacheName < cacheSummaries[q].CacheName
 	})
 
 	// get summary details
@@ -496,9 +494,8 @@ func FormatViewCacheSummary(cacheSummaries []config.ViewCacheSummaryDetail) stri
 			return true
 		} else if cacheSummaries[p].ServiceName > cacheSummaries[q].ServiceName {
 			return false
-		} else {
-			return cacheSummaries[p].ViewName < cacheSummaries[q].ViewName
 		}
+		return cacheSummaries[p].ViewName < cacheSummaries[q].ViewName
 	})
 
 	// get summary details
@@ -567,9 +564,8 @@ func FormatTopicsSummary(topicDetails []config.TopicDetail) string {
 			return true
 		} else if topicDetails[p].ServiceName > topicDetails[q].ServiceName {
 			return false
-		} else {
-			return topicDetails[p].TopicName < topicDetails[q].TopicName
 		}
+		return topicDetails[p].TopicName < topicDetails[q].TopicName
 	})
 
 	table := newFormattedTable().WithAlignment(L, L, R, R, R, R).

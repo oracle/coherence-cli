@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, 2023 Oracle and/or its affiliates.
+ * Copyright (c) 2021, 2024 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -58,7 +58,7 @@ var getContextCmd = &cobra.Command{
 	Short: "display the current context",
 	Long:  `The 'get context' command displays the current context.`,
 	Args:  cobra.ExactArgs(0),
-	RunE: func(cmd *cobra.Command, args []string) error {
+	RunE: func(cmd *cobra.Command, _ []string) error {
 		cmd.Println(getContextMsg + Config.CurrentContext)
 		return nil
 	},
@@ -70,7 +70,7 @@ var clearContextCmd = &cobra.Command{
 	Short: "clear the current context",
 	Long:  `The 'clear context' command clears the current context for running commands in.`,
 	Args:  cobra.ExactArgs(0),
-	RunE: func(cmd *cobra.Command, args []string) error {
+	RunE: func(cmd *cobra.Command, _ []string) error {
 		return clearContext(cmd)
 	},
 }

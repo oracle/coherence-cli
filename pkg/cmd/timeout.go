@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, 2023 Oracle and/or its affiliates.
+ * Copyright (c) 2021, 2024 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -50,7 +50,7 @@ var getTimeoutCmd = &cobra.Command{
 	Short: "display the current request timeout",
 	Long:  `The 'get timeout' command displays the current request timeout (in seconds) for any HTTP requests.`,
 	Args:  cobra.ExactArgs(0),
-	RunE: func(cmd *cobra.Command, args []string) error {
+	RunE: func(cmd *cobra.Command, _ []string) error {
 		cmd.Printf("%s%v\n", getTimeoutMessage, Config.RequestTimeout)
 		return nil
 	},

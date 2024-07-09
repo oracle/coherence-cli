@@ -543,7 +543,7 @@ var servicesContent = func(_ fetcher.Fetcher, clusterSummary clusterSummaryInfo)
 	return strings.Split(FormatServices(DeduplicateServices(services, "all")), "\n"), nil
 }
 
-var serviceMembersContent = func(dataFetcher fetcher.Fetcher, clusterSummary clusterSummaryInfo) ([]string, error) {
+var serviceMembersContent = func(dataFetcher fetcher.Fetcher, _ clusterSummaryInfo) ([]string, error) {
 	var membersDetails = config.ServiceMemberDetails{}
 	if serviceName == "" {
 		return emptyStringArray, errSelectService
@@ -562,7 +562,7 @@ var serviceMembersContent = func(dataFetcher fetcher.Fetcher, clusterSummary clu
 	return strings.Split(FormatServiceMembers(membersDetails.Services), "\n"), nil
 }
 
-var serviceDistributionsContent = func(dataFetcher fetcher.Fetcher, clusterSummary clusterSummaryInfo) ([]string, error) {
+var serviceDistributionsContent = func(dataFetcher fetcher.Fetcher, _ clusterSummaryInfo) ([]string, error) {
 	var (
 		distributionsData []byte
 		distributions     config.Distributions
@@ -598,7 +598,7 @@ var serviceDistributionsContent = func(dataFetcher fetcher.Fetcher, clusterSumma
 	return strings.Split(distributions.ScheduledDistributions, "\n"), nil
 }
 
-var serviceStorageContent = func(dataFetcher fetcher.Fetcher, clusterSummary clusterSummaryInfo) ([]string, error) {
+var serviceStorageContent = func(dataFetcher fetcher.Fetcher, _ clusterSummaryInfo) ([]string, error) {
 	storageSummary, err := getServiceStorageDetails(dataFetcher)
 
 	if err != nil {
@@ -647,7 +647,7 @@ var persistenceContent = func(dataFetcher fetcher.Fetcher, clusterSummary cluste
 	return strings.Split(FormatPersistenceServices(deDuplicatedServices, true), "\n"), nil
 }
 
-var reportersContent = func(dataFetcher fetcher.Fetcher, clusterSummary clusterSummaryInfo) ([]string, error) {
+var reportersContent = func(_ fetcher.Fetcher, clusterSummary clusterSummaryInfo) ([]string, error) {
 	var reporters = config.Reporters{}
 	if len(clusterSummary.reportersResult) > 0 {
 		err := json.Unmarshal(clusterSummary.reportersResult, &reporters)
@@ -661,7 +661,7 @@ var reportersContent = func(dataFetcher fetcher.Fetcher, clusterSummary clusterS
 	return []string{}, nil
 }
 
-var networkStatsContent = func(dataFetcher fetcher.Fetcher, clusterSummary clusterSummaryInfo) ([]string, error) {
+var networkStatsContent = func(_ fetcher.Fetcher, clusterSummary clusterSummaryInfo) ([]string, error) {
 	var members = config.Members{}
 
 	err := json.Unmarshal(clusterSummary.membersResult, &members)
@@ -672,7 +672,7 @@ var networkStatsContent = func(dataFetcher fetcher.Fetcher, clusterSummary clust
 	return strings.Split(FormatNetworkStatistics(members.Members), "\n"), nil
 }
 
-var httpSessionsContent = func(dataFetcher fetcher.Fetcher, clusterSummary clusterSummaryInfo) ([]string, error) {
+var httpSessionsContent = func(_ fetcher.Fetcher, clusterSummary clusterSummaryInfo) ([]string, error) {
 	var httpSessions = config.HTTPSessionSummaries{}
 
 	if len(clusterSummary.http) == 0 {
@@ -687,7 +687,7 @@ var httpSessionsContent = func(dataFetcher fetcher.Fetcher, clusterSummary clust
 	return strings.Split(FormatHTTPSessions(DeduplicateSessions(httpSessions), true), "\n"), nil
 }
 
-var federationAllContent = func(dataFetcher fetcher.Fetcher, clusterSummary clusterSummaryInfo) ([]string, error) {
+var federationAllContent = func(_ fetcher.Fetcher, clusterSummary clusterSummaryInfo) ([]string, error) {
 	if len(clusterSummary.finalSummariesDestinations) > 0 || len(clusterSummary.finalSummariesOrigins) > 0 {
 		var sb strings.Builder
 		if len(clusterSummary.finalSummariesDestinations) > 0 {
@@ -703,7 +703,7 @@ var federationAllContent = func(dataFetcher fetcher.Fetcher, clusterSummary clus
 	return []string{}, nil
 }
 
-var federationDestinationsContent = func(dataFetcher fetcher.Fetcher, clusterSummary clusterSummaryInfo) ([]string, error) {
+var federationDestinationsContent = func(_ fetcher.Fetcher, clusterSummary clusterSummaryInfo) ([]string, error) {
 	if len(clusterSummary.finalSummariesDestinations) > 0 {
 		return strings.Split(FormatFederationSummary(clusterSummary.finalSummariesDestinations, destinations), "\n"), nil
 	}
@@ -711,7 +711,7 @@ var federationDestinationsContent = func(dataFetcher fetcher.Fetcher, clusterSum
 	return []string{}, nil
 }
 
-var federationOriginsContent = func(dataFetcher fetcher.Fetcher, clusterSummary clusterSummaryInfo) ([]string, error) {
+var federationOriginsContent = func(_ fetcher.Fetcher, clusterSummary clusterSummaryInfo) ([]string, error) {
 	if len(clusterSummary.finalSummariesOrigins) > 0 {
 		return strings.Split(FormatFederationSummary(clusterSummary.finalSummariesOrigins, origins), "\n"), nil
 	}
@@ -750,7 +750,7 @@ var proxiesContentInternal = func(protocol string, clusterSummary clusterSummary
 	return strings.Split(FormatProxyServers(proxiesSummary.Proxies, protocol), "\n"), nil
 }
 
-var proxyConnectionsContent = func(dataFetcher fetcher.Fetcher, clusterSummary clusterSummaryInfo) ([]string, error) {
+var proxyConnectionsContent = func(dataFetcher fetcher.Fetcher, _ clusterSummaryInfo) ([]string, error) {
 	if serviceName == "" {
 		return emptyStringArray, errSelectService
 	}
@@ -763,19 +763,19 @@ var proxyConnectionsContent = func(dataFetcher fetcher.Fetcher, clusterSummary c
 	return strings.Split(FormatProxyConnections(connectionDetailsFinal), "\n"), nil
 }
 
-var cacheAccessContent = func(dataFetcher fetcher.Fetcher, clusterSummary clusterSummaryInfo) ([]string, error) {
+var cacheAccessContent = func(dataFetcher fetcher.Fetcher, _ clusterSummaryInfo) ([]string, error) {
 	return getCacheContent(dataFetcher, "access")
 }
 
-var cacheIndexesContent = func(dataFetcher fetcher.Fetcher, clusterSummary clusterSummaryInfo) ([]string, error) {
+var cacheIndexesContent = func(dataFetcher fetcher.Fetcher, _ clusterSummaryInfo) ([]string, error) {
 	return getCacheContent(dataFetcher, "index")
 }
 
-var cacheStorageContent = func(dataFetcher fetcher.Fetcher, clusterSummary clusterSummaryInfo) ([]string, error) {
+var cacheStorageContent = func(dataFetcher fetcher.Fetcher, _ clusterSummaryInfo) ([]string, error) {
 	return getCacheContent(dataFetcher, "storage")
 }
 
-var cacheStoresContent = func(dataFetcher fetcher.Fetcher, clusterSummary clusterSummaryInfo) ([]string, error) {
+var cacheStoresContent = func(dataFetcher fetcher.Fetcher, _ clusterSummaryInfo) ([]string, error) {
 	var (
 		cacheStoreResult  []byte
 		cacheStoreDetails = config.CacheStoreDetails{}
@@ -804,7 +804,7 @@ var cacheStoresContent = func(dataFetcher fetcher.Fetcher, clusterSummary cluste
 	return strings.Split(FormatCacheStoreDetails(finalDetails, selectedCache, serviceName, false), "\n"), nil
 }
 
-var cachePartitionContent = func(dataFetcher fetcher.Fetcher, clusterSummary clusterSummaryInfo) ([]string, error) {
+var cachePartitionContent = func(dataFetcher fetcher.Fetcher, _ clusterSummaryInfo) ([]string, error) {
 	return getCacheContent(dataFetcher, partitionDisplayType)
 }
 
@@ -868,11 +868,11 @@ var cachesContent = func(dataFetcher fetcher.Fetcher, clusterSummary clusterSumm
 	return strings.Split(cachesData, "\n"), nil
 }
 
-var topicsContent = func(dataFetcher fetcher.Fetcher, clusterSummary clusterSummaryInfo) ([]string, error) {
+var topicsContent = func(_ fetcher.Fetcher, clusterSummary clusterSummaryInfo) ([]string, error) {
 	return strings.Split(FormatTopicsSummary(clusterSummary.topicsDetails.Details), "\n"), nil
 }
 
-var topicMembersContent = func(dataFetcher fetcher.Fetcher, clusterSummary clusterSummaryInfo) ([]string, error) {
+var topicMembersContent = func(dataFetcher fetcher.Fetcher, _ clusterSummaryInfo) ([]string, error) {
 	var (
 		err                 error
 		selectedDetails     config.TopicDetails
@@ -896,7 +896,7 @@ var topicMembersContent = func(dataFetcher fetcher.Fetcher, clusterSummary clust
 	return strings.Split(FormatTopicsMembers(topicsMemberDetails), "\n"), nil
 }
 
-var topicSubscribersContent = func(dataFetcher fetcher.Fetcher, clusterSummary clusterSummaryInfo) ([]string, error) {
+var topicSubscribersContent = func(dataFetcher fetcher.Fetcher, _ clusterSummaryInfo) ([]string, error) {
 	var (
 		err                     error
 		selectedDetails         config.TopicDetails
@@ -920,7 +920,7 @@ var topicSubscribersContent = func(dataFetcher fetcher.Fetcher, clusterSummary c
 	return strings.Split(FormatTopicsSubscribers(topicsSubscriberDetails), "\n"), nil
 }
 
-var topicSubscriberGroupsContent = func(dataFetcher fetcher.Fetcher, clusterSummary clusterSummaryInfo) ([]string, error) {
+var topicSubscriberGroupsContent = func(dataFetcher fetcher.Fetcher, _ clusterSummaryInfo) ([]string, error) {
 	var (
 		err                    error
 		selectedDetails        config.TopicDetails
@@ -944,7 +944,7 @@ var topicSubscriberGroupsContent = func(dataFetcher fetcher.Fetcher, clusterSumm
 	return strings.Split(FormatTopicsSubscriberGroups(subscriberGroupDetails), "\n"), nil
 }
 
-var topicSubscriberChannelsContent = func(dataFetcher fetcher.Fetcher, clusterSummary clusterSummaryInfo) ([]string, error) {
+var topicSubscriberChannelsContent = func(dataFetcher fetcher.Fetcher, _ clusterSummaryInfo) ([]string, error) {
 	var (
 		err                     error
 		selectedDetails         config.TopicDetails

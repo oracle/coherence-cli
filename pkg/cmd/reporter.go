@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, 2023 Oracle and/or its affiliates.
+ * Copyright (c) 2021, 2024 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -41,7 +41,7 @@ var getReportersCmd = &cobra.Command{
 	Short: "display reporters for a cluster",
 	Long:  `The 'get reporters' command displays the reporters for the cluster.`,
 	Args:  cobra.ExactArgs(0),
-	RunE: func(cmd *cobra.Command, args []string) error {
+	RunE: func(cmd *cobra.Command, _ []string) error {
 		var (
 			dataFetcher fetcher.Fetcher
 			connection  string
@@ -208,12 +208,12 @@ configFile, currentBatch, intervalSeconds or outputPath.`,
 			dataFetcher     fetcher.Fetcher
 			connection      string
 			err             error
-			nodeIds         []string
+			nodeIDs         []string
 			nodeIDArray     []string
 			confirmMessage  string
 			errorSink       = createErrorSink()
 			wg              sync.WaitGroup
-			reporterNodeIds = args[0]
+			reporterNodeIDs = args[0]
 			actualValue     interface{}
 			intValue        int
 		)
@@ -247,17 +247,17 @@ configFile, currentBatch, intervalSeconds or outputPath.`,
 
 		cmd.Println(FormatCurrentCluster(connection))
 
-		nodeIDArray, err = GetNodeIds(dataFetcher)
+		nodeIDArray, err = GetClusterNodeIDs(dataFetcher)
 		if err != nil {
 			return err
 		}
 
-		if reporterNodeIds == all {
-			nodeIds = append(nodeIds, nodeIDArray...)
-			confirmMessage = fmt.Sprintf("all %d reporter nodes", len(nodeIds))
+		if reporterNodeIDs == all {
+			nodeIDs = append(nodeIDs, nodeIDArray...)
+			confirmMessage = fmt.Sprintf("all %d reporter nodes", len(nodeIDs))
 		} else {
-			nodeIds = strings.Split(reporterNodeIds, ",")
-			for _, value := range nodeIds {
+			nodeIDs = strings.Split(reporterNodeIDs, ",")
+			for _, value := range nodeIDs {
 				if !utils.IsValidInt(value) {
 					return fmt.Errorf("invalid value for reporter node id of %s", value)
 				}
@@ -266,7 +266,7 @@ configFile, currentBatch, intervalSeconds or outputPath.`,
 					return fmt.Errorf("no node with node id %s exists in this cluster", value)
 				}
 			}
-			confirmMessage = fmt.Sprintf("%d node(s)", len(nodeIds))
+			confirmMessage = fmt.Sprintf("%d node(s)", len(nodeIDs))
 		}
 
 		// confirm the operation
@@ -275,10 +275,10 @@ configFile, currentBatch, intervalSeconds or outputPath.`,
 			return nil
 		}
 
-		nodeCount := len(nodeIds)
+		nodeCount := len(nodeIDs)
 		wg.Add(nodeCount)
 
-		for _, value := range nodeIds {
+		for _, value := range nodeIDs {
 			go func(nodeId string) {
 				var err1 error
 				defer wg.Done()
