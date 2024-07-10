@@ -132,17 +132,17 @@ can also specify '-o wide' to display addition information.`,
 			if statusHAType != "none" {
 				elapsedSeconds := int32(time.Since(startTime).Seconds())
 				if len(statusHAValues) == 1 && isStatusHASaferThan(statusHAValues[0], statusHAType) {
-					cmd.Printf("Status HA value of %s or better reached in %d seconds for all service types of %s\n",
+					cmd.Printf("Status HA value of %s or better reached in %d seconds for service types of '%s'\n",
 						statusHAType, elapsedSeconds, serviceType)
 					return nil
 				}
 
 				if elapsedSeconds > statusHATimeout {
-					return fmt.Errorf("status HA value of %s or better NOT reached in %d seconds for all service types of %s",
+					return fmt.Errorf("status HA value of %s or better NOT reached in %d seconds for service types of '%s'",
 						statusHAType, elapsedSeconds, serviceType)
 				}
 
-				cmd.Printf("Waiting for Status HA value %s or better for all service type %s within %d seconds",
+				cmd.Printf("Waiting for Status HA value %s or better for service type '%s' within %d seconds",
 					statusHAType, serviceType, statusHATimeout)
 			}
 
