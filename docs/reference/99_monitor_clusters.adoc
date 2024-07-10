@@ -13,7 +13,7 @@
 === Overview
 Experimental command to monitor clusters with text UI to show multiple panels.
 
-NOTE: The `monitor cluster` command is current experimental only and may be changed or removed in the future
+NOTE: The `monitor cluster` command is currently experimental only and may be changed or removed in the future
 
 * <<monitor-cluster, `cohctl monitor cluster`>> - monitors the cluster using text based UI
 * <<monitor-cluster-panels, `cohctl monitor cluster --show-panels`>> - shows all available panels
