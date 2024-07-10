@@ -1206,7 +1206,7 @@ func drawHeader(screen tcell.Screen, w, h int, cluster config.Cluster, dataFetch
 		} else if heightAdjust > 0 {
 			height = fmt.Sprintf("+%v ", heightAdjust)
 		}
-		title = fmt.Sprintf("Coherence CLI: %s - Monitoring cluster %s (%s) ESC to quit %s. %s%s(%v)",
+		title = fmt.Sprintf("Coherence CLI: %s - %s (%s) ESC to quit %s. %s%s(%v)",
 			time.Now().Format(time.DateTime), cluster.ClusterName, version[0], additionalMonitorMsg, padding, height, lastDuration)
 	}
 	drawText(screen, 1, 0, w-1, h-1, tcell.StyleDefault.Reverse(true), title)
