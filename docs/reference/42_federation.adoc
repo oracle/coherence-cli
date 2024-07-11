@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 
-    Copyright (c) 2021, 2023 Oracle and/or its affiliates.
+    Copyright (c) 2021, 2024 Oracle and/or its affiliates.
     Licensed under the Universal Permissive License v 1.0 as shown at
     https://oss.oracle.com/licenses/upl.
 
@@ -153,7 +153,7 @@ NOTE: This indicates to display data being sent `from` the destination `secondar
 
 [source,bash]
 ----
-cohctl describe federation -c local FederatedPartitionedPofCache -p secondary-cluster -T origins -o wide
+cohctl describe federation -c local FederatedPartitionedPofCache -p secondary-cluster -T origins
 ----
 Output:
 [source,bash]
