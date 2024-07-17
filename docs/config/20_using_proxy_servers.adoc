@@ -10,9 +10,9 @@
 
 == Using Proxy Servers
 
-There may be cases where you wish to configure a proxy server to access the HTTP endpoints for your cluster.
+There may be cases where you wish to configure a proxy server to access the HTTP endpoint for your cluster.
 
-The CLI honors the following standard environment variable settings, by internally using https://pkg.go.dev/net/http#ProxyFromEnvironment[Proxy.ProxyFromEnvironment], for proxy server configration:
+The CLI honors the following standard environment variable settings, by internally using https://pkg.go.dev/net/http#ProxyFromEnvironment[Proxy.ProxyFromEnvironment], for proxy server configuration:
 
 * `HTTP_PROXY` or `http_proxy`
 * `HTTPS_PROXY` or `https_proxy`
