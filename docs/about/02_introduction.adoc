@@ -44,9 +44,6 @@ The CLI complements your existing Coherence management tools and allows you to:
 . Retrieve thread dumps and Java Flight Recordings across members
 . Make changes to various modifiable JMX attributes on services, caches and members
 
-NOTE: There are *experimental* features in this release which allow you to create/ start/ stop/ scale Coherence clusters for development
-purposes only. See <<docs/reference/98_create_clusters.adoc,Creating Clusters documentation>> for more information.
-
 == Next Steps
 
 * <<docs/installation/01_installation.adoc,Install the Coherence CLI>>
