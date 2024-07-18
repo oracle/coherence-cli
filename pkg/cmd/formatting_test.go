@@ -58,13 +58,6 @@ func TestFormatting(t *testing.T) {
 
 }
 
-func TestMax(t *testing.T) {
-	g := gomega.NewGomegaWithT(t)
-
-	g.Expect(max(123, 124)).To(gomega.Equal(int64(124)))
-	g.Expect(max(-1, 124)).To(gomega.Equal(int64(124)))
-}
-
 func TestFormattingPercent(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
 

@@ -2153,14 +2153,6 @@ func getFormattingFunction() func(bytesValue int64) string {
 	return formatBytesOnly
 }
 
-// maxInt returns the maximum of two values.
-func max(v1 int64, v2 int64) int64 {
-	if v1 >= v2 {
-		return v1
-	}
-	return v2
-}
-
 // formatSmallInteger formats a small integer.
 func formatSmallInteger(value int32) string {
 	return printer.Sprintf("%d", value)
