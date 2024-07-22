@@ -759,6 +759,7 @@ var (
 	heapMemoryParam          string
 	useCommercialParam       bool
 	extendClientParam        bool
+	grpcClientParam          bool
 	profileFirstParam        bool
 	skipMavenDepsParam       bool
 	backupLogFilesParam      bool
@@ -1503,11 +1504,13 @@ func init() {
 	startCohQLCmd.Flags().StringVarP(&statementParam, "statement", "S", "", "statement to execute enclosed in double quotes")
 	startCohQLCmd.Flags().Int32VarP(&logLevelParam, logLevelArg, "l", 5, logLevelMessage)
 	startCohQLCmd.Flags().BoolVarP(&extendClientParam, "extend", "X", false, "start CohQL as Extend client. Only works for default cache config")
+	startCohQLCmd.Flags().BoolVarP(&grpcClientParam, "grpc", "G", false, "start CohQL as gRPC client. Only works for default cache config")
 	startCohQLCmd.Flags().StringVarP(&profileValueParam, profileArg, "P", "", profileMessage)
 
 	startClassCmd.Flags().StringVarP(&heapMemoryParam, heapMemoryArg, "M", defaultHeap, heapMemoryMessage)
 	startClassCmd.Flags().Int32VarP(&logLevelParam, logLevelArg, "l", 5, logLevelMessage)
 	startClassCmd.Flags().BoolVarP(&extendClientParam, "extend", "X", false, "start a class as Extend client. Only works for default cache config")
+	startClassCmd.Flags().BoolVarP(&grpcClientParam, "grpc", "G", false, "start a class as gRPC client. Only works for default cache config")
 	startClassCmd.Flags().StringVarP(&profileValueParam, profileArg, "P", "", profileMessage)
 
 	scaleClusterCmd.Flags().Int32VarP(&replicaCountParam, "replicas", "r", 3, serverCountMessage)

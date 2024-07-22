@@ -355,6 +355,10 @@ func startClient(cmd *cobra.Command, connection ClusterConnection, class string)
 		arguments = append(arguments, profileArgs...)
 	}
 
+	if extendClientParam && grpcClientParam {
+		return fmt.Errorf("-X and -G options are exclusive")
+	}
+
 	arguments = append(arguments, getClientArgs(class, class)...)
 
 	cmd.Printf("Starting client %s...\n", class)
@@ -439,6 +443,10 @@ func getClientArgs(member, class string) []string {
 	if extendClientParam {
 		// only works with default Cache config
 		baseArgs = append(baseArgs, "-Dcoherence.client=remote", "-Dcoherence.tcmpenabled=false")
+	}
+	if grpcClientParam {
+		// only works with default Cache config
+		baseArgs = append(baseArgs, "-Dcoherence.profile=thin", "-Dcoherence.client=grpc", "-Dcoherence.tcmpenabled=false")
 	}
 
 	baseArgs = append(baseArgs, getMemberProperty(member), "-Dcoherence.distributed.localstorage=false", class)
