@@ -169,15 +169,18 @@ cat > $SCRIPT <<EOF
 insert into test key(1) value('one')
 EOF
 
-runCommand create cluster local -y -v $VERSION $COM -a coherence-grpc-proxy,coherence-java-client
-wait_for_ready
-runCommand start cohql -X -f $SCRIPT
-runCommand start cohql -X -f $SCRIPT
-runCommand start cohql -G -f $SCRIPT
-runCommand start cohql -G -f $SCRIPT
-runCommand stop cluster local -y
-runCommand remove cluster local -y
-rm $SCRIPT || true
+# Don't run concurrent test for commercial or if we have a snapshot
+if [ -z "$COM" -a -z "`echo $VERSION | grep SNAPSHOT`" ] ; then
+  runCommand create cluster local -y -v $VERSION $COM -a coherence-grpc-proxy,coherence-java-client
+  wait_for_ready
+  runCommand start cohql -X -f $SCRIPT
+  runCommand start cohql -X -f $SCRIPT
+  runCommand start cohql -G -f $SCRIPT
+  runCommand start cohql -G -f $SCRIPT
+  runCommand stop cluster local -y
+  runCommand remove cluster local -y
+  rm $SCRIPT || true
+fi
 
 pause && pause && pause
 
