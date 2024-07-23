@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #
-# Copyright (c) 2022, 2023 Oracle and/or its affiliates.
+# Copyright (c) 2022, 2024 Oracle and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at
 # https://oss.oracle.com/licenses/upl.
 #
@@ -162,6 +162,27 @@ if [ -z "$COM" -a -z "`echo $VERSION | grep SNAPSHOT`" ] ; then
 
   pause && pause && pause
 fi
+
+message "Test CohQL commands via extend and gRPC Proxy via NS"
+SCRIPT=`mktemp`
+cat > $SCRIPT <<EOF
+insert into test key(1) value('one')
+EOF
+
+# Don't run concurrent test for commercial or if we have a snapshot
+if [ -z "$COM" -a -z "`echo $VERSION | grep SNAPSHOT`" ] ; then
+  runCommand create cluster local -y -v $VERSION $COM -a coherence-grpc-proxy,coherence-java-client
+  wait_for_ready
+  runCommand start cohql -X -f $SCRIPT
+  runCommand start cohql -X -f $SCRIPT
+  runCommand start cohql -G -f $SCRIPT
+  runCommand start cohql -G -f $SCRIPT
+  runCommand stop cluster local -y
+  runCommand remove cluster local -y
+  rm $SCRIPT || true
+fi
+
+pause && pause && pause
 
 LOGS_DEST=$(mktemp -d)
 message "Test different log location - ${LOGS_DEST}"
