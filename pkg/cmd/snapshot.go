@@ -249,11 +249,33 @@ var retrieveSnapshotCmd = &cobra.Command{
 	},
 }
 
+// forceRecoveryCmd represents the force recovery command.
+var forceRecoveryCmd = &cobra.Command{
+	Use:   "recovery service-name",
+	Short: "proceed with persistence recovery despite the dynamic quorum policy objections.",
+	Long: `The 'force recovery' command proceeds with persistence recovery despite the dynamic quorum policy objections
+This may lead to the partial or full data loss of the corresponding cache service.`,
+	ValidArgsFunction: completionPersistenceService,
+	Args: func(cmd *cobra.Command, args []string) error {
+		if len(args) != 1 {
+			displayErrorAndExit(cmd, provideServiceName)
+		}
+		return nil
+	},
+	RunE: func(cmd *cobra.Command, args []string) error {
+		// we pass in the serviceName as the snapshot name and replace this in the
+		// subsequent call in invokePersistenceOperation
+		return invokePersistenceOperation(cmd, fetcher.ForceRecovery, args[0], true)
+	},
+}
+
 func init() {
 	setPersistenceFlags(createSnapshotCmd)
 	setPersistenceFlags(recoverSnapshotCmd)
 	setPersistenceFlags(archiveSnapshotCmd)
 	setPersistenceFlags(retrieveSnapshotCmd)
+
+	forceRecoveryCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
 
 	getSnapshotsCmd.Flags().StringVarP(&serviceName, serviceNameOption, serviceNameOptionShort, "", serviceNameDescription)
 	getSnapshotsCmd.Flags().BoolVarP(&ArchivedSnapshots, "archived", "a", false, archiveMessage)
@@ -283,8 +305,8 @@ func invokePersistenceOperation(cmd *cobra.Command, operation, snapshotName stri
 		servicesResult []string
 	)
 
-	if snapshotName == "" {
-		return errors.New("you must supply a snapshot name")
+	if snapshotName == "" && operation != fetcher.ForceRecovery {
+		return errors.New(provideSnapshot)
 	}
 
 	snapshotName = utils.SanitizeSnapshotName(snapshotName)
@@ -300,6 +322,10 @@ func invokePersistenceOperation(cmd *cobra.Command, operation, snapshotName stri
 		return err
 	}
 
+	if operation == fetcher.ForceRecovery {
+		serviceName = snapshotName
+	}
+
 	if serviceName == "" {
 		return errors.New("you must supply a service name")
 	}
@@ -308,50 +334,61 @@ func invokePersistenceOperation(cmd *cobra.Command, operation, snapshotName stri
 		return fmt.Errorf("cannot find persistence service named %s", serviceName)
 	}
 
-	// depending upon the operation, check if the snapshot exists
-	if ArchivedSnapshots {
-		snapshotList, err = GetArchivedSnapshots(dataFetcher, serviceName)
-		prefix = "an archived"
-	} else {
-		snapshotList, err = GetSnapshots(dataFetcher, serviceName)
-	}
-	if err != nil {
-		return err
-	}
-
-	if operation == fetcher.RetrieveSnapshot {
-		// do extra check to ensure a local snapshot does not exist if we are trying to retrieve
-		localSnapshots, err = GetSnapshots(dataFetcher, serviceName)
+	// only check snapshots if we are not forcing recovery
+	if operation != fetcher.ForceRecovery {
+		// depending upon the operation, check if the snapshot exists
+		if ArchivedSnapshots {
+			snapshotList, err = GetArchivedSnapshots(dataFetcher, serviceName)
+			prefix = "an archived"
+		} else {
+			snapshotList, err = GetSnapshots(dataFetcher, serviceName)
+		}
 		if err != nil {
 			return err
 		}
-		if utils.SliceContains(localSnapshots, snapshotName) {
-			return fmt.Errorf("a local snapshot named %s exists. You must remove if before you can retrieve", snapshotName)
+
+		if operation == fetcher.RetrieveSnapshot {
+			// do extra check to ensure a local snapshot does not exist if we are trying to retrieve
+			localSnapshots, err = GetSnapshots(dataFetcher, serviceName)
+			if err != nil {
+				return err
+			}
+			if utils.SliceContains(localSnapshots, snapshotName) {
+				return fmt.Errorf("a local snapshot named %s exists. You must remove if before you can retrieve", snapshotName)
+			}
 		}
-	}
 
-	if !mustExist && utils.SliceContains(snapshotList, snapshotName) {
-		return fmt.Errorf("%s snapshot named %s already exists for service %s", prefix, snapshotName, serviceName)
-	}
+		if !mustExist && utils.SliceContains(snapshotList, snapshotName) {
+			return fmt.Errorf("%s snapshot named %s already exists for service %s", prefix, snapshotName, serviceName)
+		}
 
-	if mustExist && !utils.SliceContains(snapshotList, snapshotName) {
-		return fmt.Errorf("%s snapshot named %s does not exist for service %s", prefix, snapshotName, serviceName)
-	}
+		if mustExist && !utils.SliceContains(snapshotList, snapshotName) {
+			return fmt.Errorf("%s snapshot named %s does not exist for service %s", prefix, snapshotName, serviceName)
+		}
 
-	if ArchivedSnapshots {
-		if operation == fetcher.RemoveSnapshot {
-			msg = fetcher.RemoveArchivedSnapshot
-		} else if operation == fetcher.RetrieveSnapshot {
-			msg = fetcher.RetrieveSnapshot
+		if ArchivedSnapshots {
+			if operation == fetcher.RemoveSnapshot {
+				msg = fetcher.RemoveArchivedSnapshot
+			} else if operation == fetcher.RetrieveSnapshot {
+				msg = fetcher.RetrieveSnapshot
+			}
 		}
 	}
 
 	cmd.Println(FormatCurrentCluster(connection))
 
-	// confirm the operation
-	if !confirmOperation(cmd, fmt.Sprintf("Are you sure you want to perform %s for snapshot %s and service %s? (y/n) ",
-		msg, snapshotName, serviceName)) {
-		return nil
+	if operation == fetcher.ForceRecovery {
+		cmd.Println("Warning: This may lead to the partial or full data loss of the corresponding cache service.")
+		if !confirmOperation(cmd, fmt.Sprintf("Are you sure you want to perform %s for service %s? (y/n) ",
+			msg, serviceName)) {
+			return nil
+		}
+	} else {
+		// confirm the operation
+		if !confirmOperation(cmd, fmt.Sprintf("Are you sure you want to perform %s for snapshot %s and service %s? (y/n) ",
+			msg, snapshotName, serviceName)) {
+			return nil
+		}
 	}
 
 	result, err = dataFetcher.InvokeSnapshotOperation(serviceName, snapshotName, operation, ArchivedSnapshots)
@@ -365,8 +402,12 @@ func invokePersistenceOperation(cmd *cobra.Command, operation, snapshotName stri
 		resultString = string(result)
 	}
 
-	cmd.Printf("Operation %s for snapshot %s on service %s invoked %s\n",
-		msg, snapshotName, serviceName, resultString)
+	if operation == fetcher.ForceRecovery {
+		cmd.Printf("Operation %s on service %s invoked %s\n", msg, serviceName, resultString)
+	} else {
+		cmd.Printf("Operation %s for snapshot %s on service %s invoked %s\n",
+			msg, snapshotName, serviceName, resultString)
+	}
 	cmd.Println("Please use 'cohctl get persistence' to check for idle status to ensure the operation completed")
 
 	return nil

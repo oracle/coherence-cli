@@ -20,6 +20,7 @@ const (
 	RecoverSnapshot        = "recover snapshot"
 	ArchiveSnapshot        = "archive snapshot"
 	RetrieveSnapshot       = "retrieve snapshot"
+	ForceRecovery          = "force recovery"
 
 	SuspendService  = "suspend service"
 	ResumeService   = "resume service"

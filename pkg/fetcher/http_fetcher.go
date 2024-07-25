@@ -964,6 +964,12 @@ func (h HTTPFetcher) InvokeSnapshotOperation(serviceName, snapshotName, operatio
 			return constants.EmptyByte, fmt.Errorf("unable to archive snapshot. Please ensure you have an archiver setup for your service. %v", err)
 		}
 		return constants.EmptyByte, err
+	} else if operation == ForceRecovery {
+		_, err = httpPostRequest(h, finalURL+"forceRecovery", constants.EmptyByte)
+		if err != nil {
+			return constants.EmptyByte, fmt.Errorf("unable to force recovery. %v", err)
+		}
+		return constants.EmptyByte, err
 	}
 	return constants.EmptyByte, fmt.Errorf("invalid snapshot operation %s", operation)
 }
