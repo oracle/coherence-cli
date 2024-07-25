@@ -261,6 +261,7 @@ create_doc $DOCS_DIR/remove_snapshot "${COHCTL} remove snapshot --help"
 create_doc $DOCS_DIR/recover_snapshot "${COHCTL} recover snapshot --help"
 create_doc $DOCS_DIR/archive_snapshot "${COHCTL} archive snapshot --help"
 create_doc $DOCS_DIR/retrieve_snapshot "${COHCTL} retrieve snapshot --help"
+create_doc $DOCS_DIR/force_recovery "${COHCTL} force recovery --help"
 
 # Config
 create_doc $DOCS_DIR/get_config "${COHCTL} get config --help"

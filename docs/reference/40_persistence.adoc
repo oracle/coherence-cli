@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 
-    Copyright (c) 2021, 2023 Oracle and/or its affiliates.
+    Copyright (c) 2021, 2024 Oracle and/or its affiliates.
     Licensed under the Universal Permissive License v 1.0 as shown at
     https://oss.oracle.com/licenses/upl.
 
@@ -22,6 +22,7 @@ There are various commands that allow you to work with and issue Persistence com
 * <<retrieve-snapshot, `cohctl retrieve snapshot`>> - retrieve an archived snapshot for a service
 * <<suspend-service, `cohctl suspend service`>> - suspends a specific service in all the members of a cluster
 * <<resume-service, `cohctl resume service`>> - resumes a specific service in all the members of a cluster
+* <<force-recovery, `cohctl force recovery`>> -proceeds with persistence recovery despite the dynamic quorum policy objections
 
 See the {commercial-docs-base-url}/administer/persisting-caches.html[Coherence Documentation] for
 more information on Persistence.
@@ -284,6 +285,25 @@ Output:
 ----
 Are you sure you want to perform resume service for service PartitionedCache? (y/n) y
 operation completed
+----
+
+[#force-recovery]
+==== Force Recovery
+
+include::../../build/_output/docs-gen/force_recovery.adoc[tag=text]
+
+*Examples*
+
+[source,bash]
+----
+cohctl force recovery PartitionedCache -c local
+----
+Output:
+[source,bash]
+----
+Warning: This may lead to the partial or full data loss of the corresponding cache service.
+Are you sure you want to perform force recovery for service PartitionedCache? (y/n) y
+operation force recovery on service PartitionedCache invoked
 ----
 
 === See Also
