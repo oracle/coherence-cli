@@ -1376,7 +1376,7 @@ func RunTestPersistenceCommands(t *testing.T) {
 		file, "get", "persistence", "-c", context.ClusterName, "-o", "jsonpath=$.items[*].persistenceEnvironment")
 
 	// force recovery
-	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "invoked,"+snapshotName+",force recovery", configArg,
+	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "invoked,"+serviceName+",force recovery", configArg,
 		file, "force", "recovery", "-c", context.ClusterName, "-y", serviceName)
 
 	// remove the cluster entries
