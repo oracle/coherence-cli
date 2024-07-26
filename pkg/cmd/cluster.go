@@ -1212,7 +1212,7 @@ var stopClusterCmd = &cobra.Command{
 	},
 }
 
-// startConsoleCmd represents the start console command
+// startConsoleCmd represents the start console command.
 var startConsoleCmd = &cobra.Command{
 	Use:   "console",
 	Short: "start a console client against a cluster that was manually created",
@@ -1224,7 +1224,7 @@ cluster using the current context or a cluster specified by using '-c'.`,
 	},
 }
 
-// startCohQL represents the start cohql command
+// startCohQL represents the start cohql command.
 var startCohQLCmd = &cobra.Command{
 	Use:   "cohql",
 	Short: "start a CohQL client against a cluster that was manually created",
@@ -1236,7 +1236,7 @@ cluster using the current context or a cluster specified by using '-c'..`,
 	},
 }
 
-// startClassCmd represents the start class command
+// startClassCmd represents the start class command.
 var startClassCmd = &cobra.Command{
 	Use:   "class",
 	Short: "start a specific Java class against a cluster that was manually created",
