@@ -1155,7 +1155,6 @@ func FormatClusterConnections(clusters []ClusterConnection) string {
 		clusterCount   = len(clusters)
 		currentContext string
 		manualCluster  string
-		running        string
 	)
 	if clusterCount == 0 {
 		return ""
@@ -1166,9 +1165,6 @@ func FormatClusterConnections(clusters []ClusterConnection) string {
 	})
 
 	table := newFormattedTable().WithHeader("CONNECTION", "TYPE", "URL", "VERSION", "CLUSTER NAME", "TYPE", "CTX", "LOCAL")
-	if OutputFormat == constants.WIDE {
-		table.AddHeaderColumns("RUNNING")
-	}
 
 	for _, value := range clusters {
 		currentContext = ""
@@ -1183,13 +1179,6 @@ func FormatClusterConnections(clusters []ClusterConnection) string {
 
 		columns := []string{value.Name, value.ConnectionType, value.ConnectionURL,
 			value.ClusterVersion, value.ClusterName, value.ClusterType, currentContext, manualCluster}
-		if OutputFormat == constants.WIDE {
-			running = stringFalse
-			if value.ManagementAvailable {
-				running = stringTrue
-			}
-			columns = append(columns, running)
-		}
 
 		table.AddRow(columns...)
 	}

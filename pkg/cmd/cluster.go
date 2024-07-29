@@ -156,12 +156,10 @@ cluster is running.`,
 	Args: cobra.ExactArgs(0),
 	RunE: func(cmd *cobra.Command, _ []string) error {
 		var (
-			err           error
-			result        []byte
-			jsonResult    []byte
-			clusterResult []byte
-			stringResult  string
-			dataFetcher   fetcher.Fetcher
+			err          error
+			result       []byte
+			jsonResult   []byte
+			stringResult string
 		)
 		outputFormat, _ := cmd.Flags().GetString("output")
 
@@ -188,33 +186,6 @@ cluster is running.`,
 			}
 			cmd.Println(string(result))
 		} else {
-			if outputFormat == constants.WIDE {
-				// go through each of the connections and see if the management URL responds with
-				// a http 200, which would at least indicating the management node is up.
-				// it is not a true test of if the cluster is actually fully functional, but just an indicator
-				// Manually set request timeout for this operation, so we don't wait for too long if endpoints cannot be reached
-				if Config.RequestTimeout > 5 {
-					fetcher.RequestTimeout = 5
-				}
-
-				for i, v := range Config.Clusters {
-					// see if we can contact the management node
-					var running = false
-					dataFetcher, err = GetDataFetcher(v.Name)
-					if err == nil {
-						var cluster = config.Cluster{}
-						// must be a valid connection
-						clusterResult, err = dataFetcher.GetClusterDetailsJSON()
-						if err == nil && len(clusterResult) > 0 {
-							// unmarshall and only set true if the cluster names match
-							err = json.Unmarshal(clusterResult, &cluster)
-							running = err == nil && cluster.ClusterName == v.ClusterName
-						}
-					}
-
-					Config.Clusters[i].ManagementAvailable = running
-				}
-			}
 			cmd.Println(FormatClusterConnections(clusters))
 		}
 		return nil
