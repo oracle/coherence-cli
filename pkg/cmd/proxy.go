@@ -32,7 +32,7 @@ var getProxiesCmd = &cobra.Command{
 	Long: `The 'get proxies' command displays the list of Coherence*Extend proxy
 servers for a cluster. You can specify '-o wide' to display addition information.`,
 	Args: cobra.ExactArgs(0),
-	RunE: func(cmd *cobra.Command, args []string) error {
+	RunE: func(cmd *cobra.Command, _ []string) error {
 		var (
 			err         error
 			dataFetcher fetcher.Fetcher
@@ -100,9 +100,9 @@ all nodes running the proxy service as well as detailed connection information.`
 		}
 
 		// get a list of node Id's while we search for the service name
-		nodeIds := getProxyNodeIDs(serviceName, proxiesSummary)
+		nodeIDs := getProxyNodeIDs(serviceName, proxiesSummary)
 
-		if len(nodeIds) == 0 {
+		if len(nodeIDs) == 0 {
 			return fmt.Errorf("%s '%s'", proxyErrorMsg, serviceName)
 		}
 
@@ -113,11 +113,11 @@ all nodes running the proxy service as well as detailed connection information.`
 		}
 
 		// retrieve all connection details from JSON
-		connectionDetails := make([]config.GenericDetails, len(nodeIds))
+		connectionDetails := make([]config.GenericDetails, len(nodeIDs))
 
-		for i := range nodeIds {
+		for i := range nodeIDs {
 			connectionDetails[i] = config.GenericDetails{}
-			data, err := dataFetcher.GetProxyConnectionsJSON(serviceName, nodeIds[i])
+			data, err := dataFetcher.GetProxyConnectionsJSON(serviceName, nodeIDs[i])
 			if err != nil {
 				return err
 			}
@@ -246,17 +246,17 @@ func getProxyConnections(dataFetcher fetcher.Fetcher, proxyService string) ([]co
 		return connectionDetailsFinal, err
 	}
 
-	nodeIds := getProxyNodeIDs(proxyService, proxiesSummary)
-	nodeIdsLen := len(nodeIds)
+	nodeIDs := getProxyNodeIDs(proxyService, proxiesSummary)
+	nodeIDsLen := len(nodeIDs)
 
-	if nodeIdsLen == 0 {
+	if nodeIDsLen == 0 {
 		return connectionDetailsFinal, fmt.Errorf("%s '%s'", proxyErrorMsg, proxyService)
 	}
 
-	wg.Add(nodeIdsLen)
+	wg.Add(nodeIDsLen)
 
 	// retrieve all connection details from JSON
-	for i := range nodeIds {
+	for i := range nodeIDs {
 		go func(nodeID string) {
 			defer wg.Done()
 			connectionDetails := config.ProxyConnections{}
@@ -274,7 +274,7 @@ func getProxyConnections(dataFetcher fetcher.Fetcher, proxyService string) ([]co
 			m.Lock()
 			defer m.Unlock()
 			connectionDetailsFinal = append(connectionDetailsFinal, connectionDetails.Proxies...)
-		}(nodeIds[i])
+		}(nodeIDs[i])
 	}
 
 	// wait for the results

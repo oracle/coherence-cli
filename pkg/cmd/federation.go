@@ -331,7 +331,7 @@ service, type and participant. Specify -T to set type outgoing or incoming and -
 		}
 
 		// get all node Id's
-		nodeIDArray, err = GetNodeIds(dataFetcher)
+		nodeIDArray, err = GetNodeIDs(dataFetcher)
 		if err != nil {
 			return err
 		}

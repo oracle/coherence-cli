@@ -154,7 +154,7 @@ The 'LOCAL' column is set to 'true' if the cluster has been created using the
 'cohctl create cluster' command. You can also use the '-o wide' option to see if the
 cluster is running.`,
 	Args: cobra.ExactArgs(0),
-	RunE: func(cmd *cobra.Command, args []string) error {
+	RunE: func(cmd *cobra.Command, _ []string) error {
 		var (
 			err           error
 			result        []byte
@@ -1075,7 +1075,7 @@ var getClusterConfigCmd = &cobra.Command{
 cluster using the current context or a cluster specified by using '-c'. Only available
 in most recent Coherence versions`,
 	Args: cobra.ExactArgs(0),
-	RunE: func(cmd *cobra.Command, args []string) error {
+	RunE: func(cmd *cobra.Command, _ []string) error {
 		var (
 			err         error
 			connection  string
@@ -1108,7 +1108,7 @@ var getClusterDescription = &cobra.Command{
 	Long: `The 'get cluster-description' command displays information regarding a cluster and it's members.
 Only available in most recent Coherence versions.`,
 	Args: cobra.ExactArgs(0),
-	RunE: func(cmd *cobra.Command, args []string) error {
+	RunE: func(cmd *cobra.Command, _ []string) error {
 		var (
 			err         error
 			dataFetcher fetcher.Fetcher
@@ -1218,7 +1218,7 @@ var startConsoleCmd = &cobra.Command{
 	Long: `The 'start console' command starts a console client which connects to a
 cluster using the current context or a cluster specified by using '-c'.`,
 	Args: cobra.ExactArgs(0),
-	RunE: func(cmd *cobra.Command, args []string) error {
+	RunE: func(cmd *cobra.Command, _ []string) error {
 		return runStartClientOperation(cmd, consoleClass)
 	},
 }
@@ -1230,7 +1230,7 @@ var startCohQLCmd = &cobra.Command{
 	Long: `The 'start cohql' command starts a CohQL client which connects to a
 cluster using the current context or a cluster specified by using '-c'..`,
 	Args: cobra.ExactArgs(0),
-	RunE: func(cmd *cobra.Command, args []string) error {
+	RunE: func(cmd *cobra.Command, _ []string) error {
 		return runStartClientOperation(cmd, cohQLClass)
 	},
 }

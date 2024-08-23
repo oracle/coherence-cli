@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, 2023 Oracle and/or its affiliates.
+ * Copyright (c) 2021, 2024 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -35,7 +35,7 @@ var getManagementCmd = &cobra.Command{
 	Short: "display management information for a cluster",
 	Long:  `The 'get management' command displays the management information for a cluster.`,
 	Args:  cobra.ExactArgs(0),
-	RunE: func(cmd *cobra.Command, args []string) error {
+	RunE: func(cmd *cobra.Command, _ []string) error {
 		var (
 			dataFetcher fetcher.Fetcher
 			jsonData    []byte
@@ -95,7 +95,7 @@ var setManagementCmd = &cobra.Command{
 	Long: `The 'set management' command sets a management attribute for the cluster.
 The following attribute names are allowed: expiryDelay and refreshPolicy.`,
 	Args: cobra.ExactArgs(0),
-	RunE: func(cmd *cobra.Command, args []string) error {
+	RunE: func(cmd *cobra.Command, _ []string) error {
 		var (
 			dataFetcher fetcher.Fetcher
 			connection  string

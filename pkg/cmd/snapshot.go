@@ -60,7 +60,7 @@ var getSnapshotsCmd = &cobra.Command{
 no service name is specified then all services are queried. By default 
 local snapshots are shown, but you can use the -a option to show archived snapshots.`,
 	Args: cobra.ExactArgs(0),
-	RunE: func(cmd *cobra.Command, args []string) error {
+	RunE: func(cmd *cobra.Command, _ []string) error {
 		var (
 			err         error
 			connection  string

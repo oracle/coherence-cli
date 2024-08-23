@@ -56,7 +56,7 @@ name is specified then all services are queried. You can specify '-o wide' to
 display addition information. Use '-I' to ignore internal caches such as those
 used by Federation.`,
 	Args: cobra.ExactArgs(0),
-	RunE: func(cmd *cobra.Command, args []string) error {
+	RunE: func(cmd *cobra.Command, _ []string) error {
 		var (
 			err         error
 			connection  string
@@ -519,7 +519,7 @@ var getViewCachesCmd = &cobra.Command{
 	Long: `The 'get view-caches' command displays view caches for a cluster. If no service
 name is specified then all services are queried.`,
 	Args: cobra.ExactArgs(0),
-	RunE: func(cmd *cobra.Command, args []string) error {
+	RunE: func(cmd *cobra.Command, _ []string) error {
 		var (
 			err         error
 			connection  string
@@ -810,7 +810,7 @@ batchFactor, refreshFactor or requeueThreshold.`,
 			dataFetcher    fetcher.Fetcher
 			connection     string
 			err            error
-			nodeIds        []string
+			nodeIDs        []string
 			nodeIDArray    []string
 			confirmMessage string
 			errorSink      = createErrorSink()
@@ -866,19 +866,19 @@ batchFactor, refreshFactor or requeueThreshold.`,
 		}
 
 		// validate the nodes
-		nodeIDArray, err = GetNodeIds(dataFetcher)
+		nodeIDArray, err = GetNodeIDs(dataFetcher)
 		if err != nil {
 			return err
 		}
 
 		if nodeIDCache == all {
-			nodeIds = append(nodeIds, nodeIDArray...)
-			confirmMessage = fmt.Sprintf("all %d nodes", len(nodeIds))
+			nodeIDs = append(nodeIDs, nodeIDArray...)
+			confirmMessage = fmt.Sprintf("all %d nodes", len(nodeIDs))
 		} else {
-			if nodeIds, err = getNodeIDs(nodeIDCache, nodeIDArray); err != nil {
+			if nodeIDs, err = getNodeIDs(nodeIDCache, nodeIDArray); err != nil {
 				return err
 			}
-			confirmMessage = fmt.Sprintf("%d node(s)", len(nodeIds))
+			confirmMessage = fmt.Sprintf("%d node(s)", len(nodeIDs))
 		}
 
 		cmd.Println(FormatCurrentCluster(connection))
@@ -890,10 +890,10 @@ batchFactor, refreshFactor or requeueThreshold.`,
 			return nil
 		}
 
-		nodeCount := len(nodeIds)
+		nodeCount := len(nodeIDs)
 		wg.Add(nodeCount)
 
-		for _, value := range nodeIds {
+		for _, value := range nodeIDs {
 			go func(nodeId string) {
 				var err1 error
 				defer wg.Done()

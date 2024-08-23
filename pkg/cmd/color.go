@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Oracle and/or its affiliates.
+ * Copyright (c) 2023, 2024 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -58,7 +58,7 @@ var getColorCmd = &cobra.Command{
 	Long: `The 'get color' command displays the current color formatting setting. If 'on' then formatting
 of output when using a terminal highlights columns requiring attention.`,
 	Args: cobra.ExactArgs(0),
-	RunE: func(cmd *cobra.Command, args []string) error {
+	RunE: func(cmd *cobra.Command, _ []string) error {
 		var color string
 		if Config.Color == "" || Config.Color == on {
 			color = on

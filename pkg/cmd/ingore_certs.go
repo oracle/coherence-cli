@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, 2023 Oracle and/or its affiliates.
+ * Copyright (c) 2021, 2024 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -29,7 +29,7 @@ var getIgnoreCertsCmd = &cobra.Command{
 invalid SSL Certificates. If 'true' then invalid certificates such as self signed will be allowed. 
 You should only use this option when you are sure of the identify of the target server.`,
 	Args: cobra.ExactArgs(0),
-	RunE: func(cmd *cobra.Command, args []string) error {
+	RunE: func(cmd *cobra.Command, _ []string) error {
 		var value string
 		if Config.IgnoreInvalidCerts {
 			value = stringTrue

@@ -12,7 +12,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	. "github.com/onsi/gomega"
+	"github.com/onsi/gomega"
 	"github.com/oracle/coherence-cli/pkg/config"
 	"github.com/oracle/coherence-cli/pkg/fetcher"
 	"github.com/spf13/cobra"
@@ -98,35 +98,35 @@ func CreateNewConfigYaml(name string) (string, error) {
 }
 
 // EnsureCommandContains executes a command and checks that it contains the output expected.
-func EnsureCommandContains(g *WithT, t *testing.T, command *cobra.Command, expected string, args ...string) {
+func EnsureCommandContains(g *gomega.WithT, t *testing.T, command *cobra.Command, expected string, args ...string) {
 	_, output, err := ExecuteCommand(t, command, args...)
 	t.Log("Actual Output=[" + output + "], expected to contain=[" + expected + "]")
 	if err != nil {
 		t.Fatal(failedToExecute, errMessage, err)
 	}
-	g.Expect(strings.Contains(output, expected)).To(Equal(true))
+	g.Expect(strings.Contains(output, expected)).To(gomega.Equal(true))
 }
 
 // EnsureCommandNotContains executes a command and checks that it does not contain the output expected.
-func EnsureCommandNotContains(g *WithT, t *testing.T, command *cobra.Command, expected string, args ...string) {
+func EnsureCommandNotContains(g *gomega.WithT, t *testing.T, command *cobra.Command, expected string, args ...string) {
 	_, output, err := ExecuteCommand(t, command, args...)
 	t.Log("Actual Output=[" + output + "], expected NOT to contain=[" + expected + "]")
 	if err != nil {
 		t.Fatal(failedToExecute, errMessage, err)
 	}
-	g.Expect(strings.Contains(output, expected)).To(Equal(false))
+	g.Expect(strings.Contains(output, expected)).To(gomega.Equal(false))
 }
 
 // EnsureCommandContainsAll executes a command and checks that it contains all the comma
 // separated values in expectedCSV.
-func EnsureCommandContainsAll(g *WithT, t *testing.T, command *cobra.Command, expectedCSV string, args ...string) {
+func EnsureCommandContainsAll(g *gomega.WithT, t *testing.T, command *cobra.Command, expectedCSV string, args ...string) {
 	_, output, err := ExecuteCommand(t, command, args...)
 	t.Log("Actual Output=[" + output + "], expected to contain=[" + expectedCSV + "]")
 	if err != nil {
 		t.Fatal(failedToExecute, errMessage, err)
 	}
 	for _, value := range strings.Split(expectedCSV, ",") {
-		g.Expect(strings.Contains(output, value)).To(Equal(true))
+		g.Expect(strings.Contains(output, value)).To(gomega.Equal(true))
 	}
 }
 
@@ -140,22 +140,22 @@ func GetCommandOutput(t *testing.T, command *cobra.Command, args ...string) stri
 }
 
 // EnsureCommandErrorContains executes a command and checks that the error contains expected output.
-func EnsureCommandErrorContains(g *WithT, t *testing.T, command *cobra.Command, expected string, args ...string) {
+func EnsureCommandErrorContains(g *gomega.WithT, t *testing.T, command *cobra.Command, expected string, args ...string) {
 	_, output, err := ExecuteCommand(t, command, args...)
-	g.Expect(err).NotTo(BeNil())
+	g.Expect(err).NotTo(gomega.BeNil())
 	errString := err.Error()
 	t.Log("Error=[" + errString + "], output=[" + output + "]")
-	g.Expect(strings.Contains(errString, expected)).To(Equal(true))
+	g.Expect(strings.Contains(errString, expected)).To(gomega.Equal(true))
 }
 
 // EnsureCommandOutputEquals executes a command and checks that it equals the output expected.
-func EnsureCommandOutputEquals(g *WithT, t *testing.T, command *cobra.Command, expected string, args ...string) {
+func EnsureCommandOutputEquals(g *gomega.WithT, t *testing.T, command *cobra.Command, expected string, args ...string) {
 	_, output, err := ExecuteCommand(t, command, args...)
 	t.Log("Actual Output=[" + output + "], expected=[" + expected + "]")
 	if err != nil {
 		t.Fatal(failedToExecute, errMessage, err)
 	}
-	g.Expect(output == expected).To(Equal(true))
+	g.Expect(output == expected).To(gomega.Equal(true))
 }
 
 // ExecuteCommand executes a given command with the arguments provided.

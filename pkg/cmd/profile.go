@@ -135,7 +135,7 @@ var getProfilesCmd = &cobra.Command{
 	Short: "display the profiles that have been created",
 	Long:  `The 'get profiles' displays the profiles that have been created.`,
 	Args:  cobra.ExactArgs(0),
-	RunE: func(cmd *cobra.Command, args []string) error {
+	RunE: func(cmd *cobra.Command, _ []string) error {
 		cmd.Println(FormatProfiles(Config.Profiles))
 		return nil
 	},

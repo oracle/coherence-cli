@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, 2023 Oracle and/or its affiliates.
+ * Copyright (c) 2022, 2024 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -49,7 +49,7 @@ var getDefaultHeapCmd = &cobra.Command{
 	Short: "display the default heap for creating and starting clusters",
 	Long:  `The 'get default-heap' displays the default heap for creating and starting clusters.`,
 	Args:  cobra.ExactArgs(0),
-	RunE: func(cmd *cobra.Command, args []string) error {
+	RunE: func(cmd *cobra.Command, _ []string) error {
 		cmd.Printf("%s%v\n", getDefaultHeapMsg, Config.DefaultHeap)
 		return nil
 	},
@@ -61,7 +61,7 @@ var clearDefaultHeapCmd = &cobra.Command{
 	Short: "clear the current default heap for creating and starting clusters",
 	Long:  `The 'clear default-heap' clears the default heap for creating and starting clusters.`,
 	Args:  cobra.ExactArgs(0),
-	RunE: func(cmd *cobra.Command, args []string) error {
+	RunE: func(cmd *cobra.Command, _ []string) error {
 		viper.Set(defaultHeapKey, "")
 		err := WriteConfig()
 		if err != nil {

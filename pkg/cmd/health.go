@@ -37,7 +37,7 @@ var getHealthCmd = &cobra.Command{
 	Short: "display health information for a cluster",
 	Long:  `The 'get health' command displays the health for members of a cluster.`,
 	Args:  cobra.ExactArgs(0),
-	RunE: func(cmd *cobra.Command, args []string) error {
+	RunE: func(cmd *cobra.Command, _ []string) error {
 		var (
 			err         error
 			dataFetcher fetcher.Fetcher
@@ -184,7 +184,7 @@ var monitorHealthCmd = &cobra.Command{
 	Long: `The 'get monitor' command monitors the health of nodes for a cluster or set of health endpoints.
 Specify -n and a host:port to lookup or -e and a list of http endpoints without the path.
 You may also specify -T option to wait until all health endpoints are safe.`,
-	RunE: func(cmd *cobra.Command, args []string) error {
+	RunE: func(cmd *cobra.Command, _ []string) error {
 		var (
 			err         error
 			endpoints   []string

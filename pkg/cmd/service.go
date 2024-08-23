@@ -55,7 +55,7 @@ var getServicesCmd = &cobra.Command{
 You may specify the service type as well a status-ha value to wait for. You
 can also specify '-o wide' to display addition information.`,
 	Args: cobra.ExactArgs(0),
-	RunE: func(cmd *cobra.Command, args []string) error {
+	RunE: func(cmd *cobra.Command, _ []string) error {
 		var (
 			err            error
 			statusHAValues []string
@@ -161,7 +161,7 @@ var getServiceStorageCmd = &cobra.Command{
 	Long: `The 'get service-storage' command displays partitioned services storage for a cluster including
 information regarding partition sizes.`,
 	Args: cobra.ExactArgs(0),
-	RunE: func(cmd *cobra.Command, args []string) error {
+	RunE: func(cmd *cobra.Command, _ []string) error {
 		var (
 			err         error
 			dataFetcher fetcher.Fetcher
@@ -845,7 +845,7 @@ taskHungThresholdMillis or requestTimeoutMillis.`,
 			dataFetcher     fetcher.Fetcher
 			connection      string
 			nodeIDArray     []string
-			nodeIds         []string
+			nodeIDs         []string
 			confirmMessage  string
 			intValue        int
 			errorSink       = createErrorSink()
@@ -895,19 +895,19 @@ taskHungThresholdMillis or requestTimeoutMillis.`,
 		}
 
 		// validate the nodes
-		nodeIDArray, err = GetNodeIds(dataFetcher)
+		nodeIDArray, err = GetNodeIDs(dataFetcher)
 		if err != nil {
 			return err
 		}
 
 		if nodeIDService == all {
-			nodeIds = append(nodeIds, nodeIDArray...)
-			confirmMessage = fmt.Sprintf("all %d nodes", len(nodeIds))
+			nodeIDs = append(nodeIDs, nodeIDArray...)
+			confirmMessage = fmt.Sprintf("all %d nodes", len(nodeIDs))
 		} else {
-			if nodeIds, err = getNodeIDs(nodeIDService, nodeIDArray); err != nil {
+			if nodeIDs, err = getNodeIDs(nodeIDService, nodeIDArray); err != nil {
 				return err
 			}
-			confirmMessage = fmt.Sprintf("%d node(s)", len(nodeIds))
+			confirmMessage = fmt.Sprintf("%d node(s)", len(nodeIDs))
 		}
 
 		cmd.Println(FormatCurrentCluster(connection))
@@ -919,9 +919,9 @@ taskHungThresholdMillis or requestTimeoutMillis.`,
 			return nil
 		}
 
-		wg.Add(len(nodeIds))
+		wg.Add(len(nodeIDs))
 
-		for _, value := range nodeIds {
+		for _, value := range nodeIDs {
 			go func(nodeId string) {
 				var err1 error
 				defer wg.Done()
@@ -1065,7 +1065,7 @@ func issueServiceNodeCommand(cmd *cobra.Command, serviceName, operation string) 
 	}
 
 	// validate the nodes
-	nodeIDArray, err = GetNodeIds(dataFetcher)
+	nodeIDArray, err = GetNodeIDs(dataFetcher)
 	if err != nil {
 		return err
 	}

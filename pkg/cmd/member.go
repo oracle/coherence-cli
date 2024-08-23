@@ -68,7 +68,7 @@ var getMembersCmd = &cobra.Command{
 	Long: `The 'get members' command displays the members for a cluster. You
 can specify '-o wide' to display addition information.`,
 	Args: cobra.ExactArgs(0),
-	RunE: func(cmd *cobra.Command, args []string) error {
+	RunE: func(cmd *cobra.Command, _ []string) error {
 		return getMembers(cmd, false)
 	},
 }
@@ -214,7 +214,7 @@ Only available in most recent Coherence versions.`,
 			return err
 		}
 
-		nodeIDArray, err = GetNodeIds(dataFetcher)
+		nodeIDArray, err = GetNodeIDs(dataFetcher)
 		if err != nil {
 			return err
 		}
@@ -266,7 +266,7 @@ var getNetworkStatsCmd = &cobra.Command{
 	Short: "display all member network statistics for a cluster",
 	Long:  `The 'get network-stats' command displays all member network statistic for a cluster.`,
 	Args:  cobra.ExactArgs(0),
-	RunE: func(cmd *cobra.Command, args []string) error {
+	RunE: func(cmd *cobra.Command, _ []string) error {
 		return getMembers(cmd, true)
 	},
 }
@@ -621,12 +621,12 @@ or loggingFormat.`,
 			dataFetcher    fetcher.Fetcher
 			connection     string
 			err            error
-			nodeIds        []string
+			nodeIDs        []string
 			nodeIDArray    []string
 			confirmMessage string
 			errorSink      = createErrorSink()
 			wg             sync.WaitGroup
-			loggingNodeIds = args[0]
+			loggingNodeIDs = args[0]
 			actualValue    interface{}
 			intValue       int
 		)
@@ -663,19 +663,19 @@ or loggingFormat.`,
 
 		cmd.Println(FormatCurrentCluster(connection))
 
-		nodeIDArray, err = GetNodeIds(dataFetcher)
+		nodeIDArray, err = GetNodeIDs(dataFetcher)
 		if err != nil {
 			return err
 		}
 
-		if loggingNodeIds == all {
-			nodeIds = append(nodeIds, nodeIDArray...)
-			confirmMessage = fmt.Sprintf("all %d nodes", len(nodeIds))
+		if loggingNodeIDs == all {
+			nodeIDs = append(nodeIDs, nodeIDArray...)
+			confirmMessage = fmt.Sprintf("all %d nodes", len(nodeIDs))
 		} else {
-			if nodeIds, err = getNodeIDs(loggingNodeIds, nodeIDArray); err != nil {
+			if nodeIDs, err = getNodeIDs(loggingNodeIDs, nodeIDArray); err != nil {
 				return err
 			}
-			confirmMessage = fmt.Sprintf("%d node(s)", len(nodeIds))
+			confirmMessage = fmt.Sprintf("%d node(s)", len(nodeIDs))
 		}
 
 		// confirm the operation
@@ -684,10 +684,10 @@ or loggingFormat.`,
 			return nil
 		}
 
-		nodeCount := len(nodeIds)
+		nodeCount := len(nodeIDs)
 		wg.Add(nodeCount)
 
-		for _, value := range nodeIds {
+		for _, value := range nodeIDs {
 			go func(nodeId string) {
 				var err1 error
 				defer wg.Done()
@@ -717,7 +717,7 @@ var dumpClusterHeapCmd = &cobra.Command{
 	Long: `The 'dump cluster-heap' command issues a heap dump for all members or the selected role
 by using the -r flag.`,
 	Args: cobra.ExactArgs(0),
-	RunE: func(cmd *cobra.Command, args []string) error {
+	RunE: func(cmd *cobra.Command, _ []string) error {
 		return issueClusterCommand(cmd, dumpClusterHeap)
 	},
 }
@@ -729,7 +729,7 @@ var configureTracingCmd = &cobra.Command{
 	Long: `The 'configure tracing' command configures tracing for all members or the selected role
 by using the -r flag. You can specify a tracingRatio of -1 to turn off tracing.`,
 	Args: cobra.ExactArgs(0),
-	RunE: func(cmd *cobra.Command, args []string) error {
+	RunE: func(cmd *cobra.Command, _ []string) error {
 		return issueClusterCommand(cmd, configureTracing)
 	},
 }
@@ -740,7 +740,7 @@ var getTracingCmd = &cobra.Command{
 	Short: "display tracing for all members",
 	Long:  `The 'get tracing' command displays tracing status for all members.`,
 	Args:  cobra.ExactArgs(0),
-	RunE: func(cmd *cobra.Command, args []string) error {
+	RunE: func(cmd *cobra.Command, _ []string) error {
 		var (
 			dataFetcher fetcher.Fetcher
 			connection  string
@@ -799,7 +799,7 @@ var logClusterStateCmd = &cobra.Command{
 	Long: `The 'log cluster-state' command logs a full thread dump and outstanding
 polls, in the logs files, for all members or the selected role by using the -r flag.`,
 	Args: cobra.ExactArgs(0),
-	RunE: func(cmd *cobra.Command, args []string) error {
+	RunE: func(cmd *cobra.Command, _ []string) error {
 		return issueClusterCommand(cmd, logClusterState)
 	},
 }
@@ -835,7 +835,7 @@ DefaultCacheServer, then they will be restarted.`,
 
 		cmd.Println(FormatCurrentCluster(connection))
 
-		nodeIDArray, err = GetNodeIds(dataFetcher)
+		nodeIDArray, err = GetNodeIDs(dataFetcher)
 		if err != nil {
 			return err
 		}
@@ -959,7 +959,7 @@ a role to retrieve thread dumps for.`,
 			dataFetcher   fetcher.Fetcher
 			connection    string
 			err           error
-			nodeIds       []string
+			nodeIDs       []string
 			nodesToDump   string
 			wg            sync.WaitGroup
 			errorSink     = createErrorSink()
@@ -990,14 +990,14 @@ a role to retrieve thread dumps for.`,
 		}
 
 		// retrieve the nodes to validate against
-		nodeIDArray, err = GetNodeIds(dataFetcher)
+		nodeIDArray, err = GetNodeIDs(dataFetcher)
 		if err != nil {
 			return err
 		}
 
 		// retrieve and validate the members
 		if nodesToDump == all {
-			nodeIds = append(nodeIds, nodeIDArray...)
+			nodeIDs = append(nodeIDs, nodeIDArray...)
 		} else {
 			if threadDumpRole != all {
 				// a role other than "all" has been specified so get all the nodes
@@ -1014,15 +1014,15 @@ a role to retrieve thread dumps for.`,
 
 				for _, member := range members.Members {
 					if member.RoleName == threadDumpRole {
-						nodeIds = append(nodeIds, member.NodeID)
+						nodeIDs = append(nodeIDs, member.NodeID)
 					}
 				}
-				if len(nodeIds) == 0 {
+				if len(nodeIDs) == 0 {
 					return fmt.Errorf("unable to find any nodes with role %s", threadDumpRole)
 				}
 			} else {
-				nodeIds = strings.Split(nodesToDump, ",")
-				for _, value := range nodeIds {
+				nodeIDs = strings.Split(nodesToDump, ",")
+				for _, value := range nodeIDs {
 					if !utils.IsValidInt(value) {
 						return fmt.Errorf(invalidNodeID, value)
 					}
@@ -1034,7 +1034,7 @@ a role to retrieve thread dumps for.`,
 			}
 		}
 
-		var numNodes = len(nodeIds)
+		var numNodes = len(nodeIDs)
 
 		if numNodes >= 4 {
 			cmd.Printf("Warning: running thread dump in parallel across %d nodes may cause excessive load.\n",
@@ -1045,15 +1045,15 @@ a role to retrieve thread dumps for.`,
 
 		// confirm the operation
 		if !confirmOperation(cmd, fmt.Sprintf("Are you sure you want to retrieve %d thread dumps, each %d seconds apart for %d node(s)? (y/n) ",
-			numThreadDumps, delayBetweenDumps, len(nodeIds))) {
+			numThreadDumps, delayBetweenDumps, len(nodeIDs))) {
 			return nil
 		}
 
 		// run the thread dump captures in parallel for each node
-		nodeCount := len(nodeIds)
+		nodeCount := len(nodeIDs)
 
 		wg.Add(nodeCount)
-		for i, value := range nodeIds {
+		for i, value := range nodeIDs {
 			go func(n string, last bool) {
 				defer wg.Done()
 				err1 := generateThreadDumps(n, dataFetcher, cmd, last)

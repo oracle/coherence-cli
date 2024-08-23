@@ -200,7 +200,7 @@ func completionNodeID(_ *cobra.Command, _ []string, _ string) ([]string, cobra.S
 		return emptySlice, cobra.ShellCompDirectiveNoFileComp
 	}
 
-	nodeIDArray, err := GetNodeIds(dataFetcher)
+	nodeIDArray, err := GetNodeIDs(dataFetcher)
 	if err != nil {
 		return emptySlice, cobra.ShellCompDirectiveNoFileComp
 	}
