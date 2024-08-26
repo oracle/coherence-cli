@@ -36,8 +36,7 @@ cohctl monitor cluster local
 Output:
 [source,bash,subs="attributes"]
 ----
- Coherence CLI: 2024-05-06 13:25:17 - Monitoring cluster local (22.06.8) ESC to quit (press key in [] to toggle expand, ? = help).
-  (75.289463ms)
+ Coherence CLI: 2024-05-06 13:25:17 - Monitoring cluster local (22.06.8) ESC to quit (press key in [] or mouse to toggle expand, ? = help). (75.289463ms)
 ┌─Members [1]─(trimmed)──────────────────────────────────────────┐┌─Health Summary [2]────────────────────────────────────────────┐
 │Total cluster members: 3                                        ││NAME                  SUB TYPE   MEMBERS  STARTED  LIVE  READY │
 │Storage enabled count: 3                                        ││$SYS:Config           Service          3        3     3      3 │
@@ -91,15 +90,15 @@ You can press `?` to display the help which is shown below:
  - '+' to increase max height of all panels
  - '-' to decrease max height of all panels
  - '0' to reset max height of all panels
- - Key in [] to expand that panel
+ - Key in [] or click mouse to expand that panel
  - ESC / CTRL-C to exit monitoring
 
 Press any key to exit help.
 ----
 
 NOTE: If the title of a panel includes "trimmed" it means there are more rows to display.
-You can press the key indicated in the `[]` to expand that panel.
-
+You can press the key indicated in the `[]` to expand that panel. You can also click the mouse
+in the panel you wish to expand.
 
 **Monitor the cluster and specify the panels for services and caches on one line and then members on the next**
 
@@ -110,7 +109,7 @@ cohctl monitor cluster local -l services,caches:members
 Output:
 [source,bash]
 ----
-Coherence CLI: 2024-05-06 13:26:47 - Monitoring cluster local (22.06.8) ESC to quit (press key in [] to toggle expand, ? = help).
+Coherence CLI: 2024-05-06 13:26:47 - Monitoring cluster local (22.06.8) ESC to quit (press key in [] or mouse to toggle expand, ? = help).
 
 ┌─Services [1]─(trimmed)─────────────────────────────────────────┐┌─Caches [2]────────────────────────────────────────────────────┐
 │SERVICE NAME            TYPE              MEMBERS  STATUS HA  ST││Total Caches: 3, Total primary storage: 4 MB                   │
@@ -145,7 +144,7 @@ cohctl monitor cluster local -l default-cache -C test1
 Output:
 [source,bash]
 ----
-Coherence CLI: 2024-05-06 11:13:59 - Monitoring cluster local (22.06.8) ESC to quit (press key in [] to toggle expand, ? = help).
+Coherence CLI: 2024-05-06 11:13:59 - Monitoring cluster local (22.06.8) ESC to quit (press key in [] or mouse to toggle expand, ? = help).
 
 ┌─Caches [1]─────────────────────────────────────────────────────┐┌─Cache Indexes (PartitionedCache/test1) [2]────────────────────┐
 │Total Caches: 3, Total primary storage: 4 MB                    ││Total Indexing Bytes:  0                                       │
