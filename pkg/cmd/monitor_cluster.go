@@ -41,6 +41,7 @@ var (
 		"default-cache":      "caches,cache-indexes:cache-access:cache-storage:cache-stores:cache-partitions",
 		"default-topic":      "topics:topic-members:subscribers:subscriber-groups",
 		"default-subscriber": "topics:subscribers:subscriber-channels",
+		"default-federation": "federation-all:federation-dest,federation-origins:caches:elastic-data",
 	}
 	errSelectService       = errors.New("you must provide a service name via -S option")
 	errSelectCache         = errors.New("you must provide a cache using the -C option")
@@ -67,6 +68,7 @@ var (
 	selectedTopic  string
 	allBaseData    []string
 	heightAdjust   int
+	noContentArray = []string{"  ", noContent, " "}
 	drawnPositions map[rune]position
 )
 
@@ -733,7 +735,7 @@ var federationAllContent = func(_ fetcher.Fetcher, clusterSummary clusterSummary
 		return strings.Split(sb.String(), "\n"), nil
 	}
 
-	return []string{}, nil
+	return noContentArray, nil
 }
 
 var federationDestinationsContent = func(_ fetcher.Fetcher, clusterSummary clusterSummaryInfo) ([]string, error) {
@@ -741,7 +743,7 @@ var federationDestinationsContent = func(_ fetcher.Fetcher, clusterSummary clust
 		return strings.Split(FormatFederationSummary(clusterSummary.finalSummariesDestinations, destinations), "\n"), nil
 	}
 
-	return []string{}, nil
+	return noContentArray, nil
 }
 
 var federationOriginsContent = func(_ fetcher.Fetcher, clusterSummary clusterSummaryInfo) ([]string, error) {
@@ -749,7 +751,7 @@ var federationOriginsContent = func(_ fetcher.Fetcher, clusterSummary clusterSum
 		return strings.Split(FormatFederationSummary(clusterSummary.finalSummariesOrigins, origins), "\n"), nil
 	}
 
-	return []string{}, nil
+	return noContentArray, nil
 }
 
 var healthSummaryContent = func(_ fetcher.Fetcher, clusterSummary clusterSummaryInfo) ([]string, error) {
@@ -1139,7 +1141,7 @@ func drawContent(screen tcell.Screen, dataFetcher fetcher.Fetcher, panel panelIm
 	content, err := panel.GetContentFunction()(dataFetcher, lastClusterSummaryInfo)
 	if err != nil {
 		if ignoreRESTErrors {
-			content = []string{"  ", noContent, " "}
+			content = noContentArray
 		} else {
 			return 0, err
 		}
@@ -1148,7 +1150,7 @@ func drawContent(screen tcell.Screen, dataFetcher fetcher.Fetcher, panel panelIm
 	l := len(content)
 
 	if (l == 0 || l == 1) && content[0] == "" {
-		content = []string{" ", noContent, " "}
+		content = noContentArray
 		l = len(content)
 	}
 
