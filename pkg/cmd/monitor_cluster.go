@@ -23,8 +23,8 @@ import (
 
 const (
 	defaultLayoutName    = "default"
-	pressAdditional      = "(press key in [] to toggle expand, ? = help)"
-	pressAdditionalReset = "(press key in [] to exit expand)"
+	pressAdditional      = "(press key in [] or mouse to toggle expand, ? = help)"
+	pressAdditionalReset = "(press key in [] or mouse to exit expand)"
 	noContent            = "  No Content"
 	errorContent         = "Unable to retrieve data"
 	unableToFindPanel    = "unable to find panel [%v], use --help or --show-panels to see all options"
@@ -36,7 +36,7 @@ const (
 
 var (
 	defaultMap = map[string]string{
-		"default":            "members:services,caches:proxies,http-servers:machines,network-stats",
+		"default":            "members,healthSummary:services,caches:proxies,http-servers:machines,network-stats",
 		"default-service":    "services:service-members:service-distributions",
 		"default-cache":      "caches,cache-indexes:cache-access:cache-storage:cache-stores:cache-partitions",
 		"default-topic":      "topics:topic-members:subscribers:subscriber-groups",
@@ -69,6 +69,7 @@ var (
 	allBaseData    []string
 	heightAdjust   int
 	noContentArray = []string{"  ", noContent, " "}
+	drawnPositions map[rune]position
 )
 
 var validPanels = []panelImpl{
@@ -106,6 +107,13 @@ var validPanels = []panelImpl{
 	createContentPanel(8, "subscriber-groups", "Subscriber Channels (%SERVICE/%TOPIC)", "show subscriber groups", topicSubscriberGroupsContent, topicsPanelData),
 	createContentPanel(8, "topics", "Topics", "show topics", topicsContent, topicsPanelData),
 	createContentPanel(8, "view-caches", "View Caches", "show view caches", viewCachesContent, servicesPanelData),
+}
+
+type position struct {
+	x      int
+	y      int
+	width  int
+	height int
 }
 
 // monitorClusterCmd represents the monitor cluster command
@@ -186,6 +194,7 @@ Use --show-panels to show all available panels.`,
 			return err
 		}
 		defer screen.Fini()
+		screen.EnableMouse(tcell.MouseButtonEvents)
 
 		screen.SetStyle(tcell.StyleDefault)
 
@@ -234,6 +243,20 @@ Use --show-panels to show all available panels.`,
 					panic(err)
 				}
 				screen.Sync()
+			case *tcell.EventMouse:
+				if ev.Buttons() == tcell.Button1 {
+					if expandedPanel == "" {
+						x, y := ev.Position()
+						for r, pos := range drawnPositions {
+							if x >= pos.x && x < pos.x+pos.width && y >= pos.y && y < pos.y+pos.height {
+								updateExpanded(r, screen, dataFetcher, parsedLayout)
+								break
+							}
+						}
+					} else {
+						updateExpanded(rune('0'), screen, dataFetcher, parsedLayout)
+					}
+				}
 			case *tcell.EventKey:
 				pressedKey := ev.Rune()
 				// Exit for 'q', ESC, or CTRL-C
@@ -268,20 +291,24 @@ Use --show-panels to show all available panels.`,
 					}
 				} else if (pressedKey >= '1' && pressedKey <= '9' && pressedKey <= lastPanelCode) ||
 					(pressedKey >= 'a' && pressedKey <= 'z' && pressedKey <= lastPanelCode) {
-					if expandedPanel != "" {
-						expandedPanel = ""
-						additionalMonitorMsg = pressAdditional
-					} else {
-						expandedPanel = string(pressedKey)
-						additionalMonitorMsg = pressAdditionalReset
-					}
-					if err := refresh(screen, dataFetcher, parsedLayout, false); err != nil {
-						panic(err)
-					}
+					updateExpanded(pressedKey, screen, dataFetcher, parsedLayout)
 				}
 			}
 		}
 	},
+}
+
+func updateExpanded(pressedKey rune, screen tcell.Screen, dataFetcher fetcher.Fetcher, parsedLayout []string) {
+	if expandedPanel != "" {
+		expandedPanel = ""
+		additionalMonitorMsg = pressAdditional
+	} else {
+		expandedPanel = string(pressedKey)
+		additionalMonitorMsg = pressAdditionalReset
+	}
+	if err := refresh(screen, dataFetcher, parsedLayout, false); err != nil {
+		panic(err)
+	}
 }
 
 func increaseMaxHeight() {
@@ -327,7 +354,7 @@ func showHelp(screen tcell.Screen) {
 		"  - '+' to increase max height of all panels",
 		"  - '-' to decrease max height of all panels",
 		"  - '0' to reset max height of all panels",
-		"  - Key in [] to expand that panel",
+		"  - Key in [] or click mouse to expand that panel",
 		"  - ESC / CTRL-C to exit monitoring",
 		"  ",
 		"  Press any key to exit help.",
@@ -341,7 +368,7 @@ func showHelp(screen tcell.Screen) {
 	x := w/2 - 25
 	y := h/2 - lenHelp
 
-	drawBox(screen, x, y, x+50, y+lenHelp+2, tcell.StyleDefault, "Help")
+	drawBox(screen, x, y, x+53, y+lenHelp+2, tcell.StyleDefault, "Help")
 
 	for line := 1; line <= lenHelp; line++ {
 		drawText(screen, x+1, y+line, x+w-1, y+h-1, tcell.StyleDefault, help[line-1])
@@ -392,6 +419,9 @@ func updateScreen(screen tcell.Screen, dataFetcher fetcher.Fetcher, parsedLayout
 	}
 
 	drawHeader(screen, w, h, cluster, dataFetcher)
+
+	// re-create the list of drawn positions, so we can determine mouse click location
+	drawnPositions = make(map[rune]position, 0)
 
 	var (
 		widths      []int
@@ -452,6 +482,9 @@ func updateScreen(screen tcell.Screen, dataFetcher fetcher.Fetcher, parsedLayout
 				if rows > maxHeight {
 					maxHeight = rows
 				}
+
+				// save the position of the panel
+				drawnPositions[panelCode] = position{x: realStartX, y: realStartY, width: realWidth, height: maxHeight}
 			}
 			panelNumber++
 		}
@@ -1210,6 +1243,10 @@ func drawHeader(screen tcell.Screen, w, h int, cluster config.Cluster, dataFetch
 		}
 		title = fmt.Sprintf("Coherence CLI: %s - %s (%s) ESC to quit %s. %s%s(%v)",
 			time.Now().Format(time.DateTime), cluster.ClusterName, version[0], additionalMonitorMsg, padding, height, lastDuration)
+		titleLen := len(title)
+		if titleLen < w-2 {
+			title = fmt.Sprintf("%s%-*s", title, w-titleLen-2, " ")
+		}
 	}
 	drawText(screen, 1, 0, w-1, h-1, tcell.StyleDefault.Reverse(true), title)
 }
