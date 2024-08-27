@@ -336,7 +336,7 @@ func startCluster(cmd *cobra.Command, connection ClusterConnection, serverCount,
 func getCommonArguments(connection ClusterConnection) []string {
 	splitArguments := strings.Split(connection.Arguments, " ")
 	return append(splitArguments, "-cp", connection.BaseClasspath, getPersistenceProperty(connection.PersistenceMode),
-		getLogLevelProperty(logLevelParam))
+		getLogLevelProperty(logLevelParam), "-Dcom.oracle.coherence.common.util.Threads.dumpLocks=FULL")
 }
 
 func startClient(cmd *cobra.Command, connection ClusterConnection, class string) error {
