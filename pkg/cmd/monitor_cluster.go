@@ -54,6 +54,7 @@ var (
 	padMaxHeightParam      = true
 	showAllPanels          bool
 	ignoreRESTErrors       bool
+	disablePadding         bool
 	monitorCluster         bool
 	additionalMonitorMsg   = pressAdditional
 	expandedPanel          = ""
@@ -159,6 +160,10 @@ Use --show-panels to show all available panels.`,
 		dataFetcher, err = GetDataFetcher(clusterName)
 		if err != nil {
 			return err
+		}
+
+		if disablePadding {
+			padMaxHeightParam = false
 		}
 
 		// check for default layouts
@@ -1338,6 +1343,7 @@ func init() {
 	monitorClusterCmd.Flags().StringVarP(&layoutParam, "layout", "l", defaultLayoutName, "layout to use")
 	monitorClusterCmd.Flags().BoolVarP(&showAllPanels, "show-panels", "", false, "show all available panels")
 	monitorClusterCmd.Flags().BoolVarP(&ignoreRESTErrors, "ignore-errors", "I", false, "ignore errors after initial refresh")
+	monitorClusterCmd.Flags().BoolVarP(&disablePadding, "disable-padding", "D", false, "disable padding of panels by default")
 	monitorClusterCmd.Flags().StringVarP(&serviceName, serviceNameOption, "S", "", serviceNameDescription)
 	monitorClusterCmd.Flags().StringVarP(&selectedCache, "cache-name", "C", "", "cache name")
 	monitorClusterCmd.Flags().StringVarP(&selectedTopic, "topic-name", "T", "", "topic name")
