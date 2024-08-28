@@ -44,7 +44,7 @@ func TestValidatePanels(t *testing.T) {
 	err := validatePanels([]string{"members"})
 	g.Expect(err).To(gomega.Not(gomega.HaveOccurred()))
 
-	err = validatePanels([]string{"membersSummary"})
+	err = validatePanels([]string{"members-summary"})
 	g.Expect(err).To(gomega.Not(gomega.HaveOccurred()))
 
 	err = validatePanels([]string{"caches"})
