@@ -36,12 +36,13 @@ const (
 
 var (
 	defaultMap = map[string]string{
-		"default":            "members,healthSummary:services,caches:proxies,http-servers:machines,network-stats",
+		"default":            "members:services,caches:proxies,http-servers:machines,network-stats",
 		"default-service":    "services:service-members:service-distributions",
 		"default-cache":      "caches,cache-indexes:cache-access:cache-storage:cache-stores:cache-partitions",
 		"default-topic":      "topics:topic-members:subscribers:subscriber-groups",
 		"default-subscriber": "topics:subscribers:subscriber-channels",
 		"default-federation": "federation-all:federation-dest,federation-origins:caches:elastic-data",
+		"default-members":    "members:machines,departed-members:network-stats",
 	}
 	errSelectService       = errors.New("you must provide a service name via -S option")
 	errSelectCache         = errors.New("you must provide a cache using the -C option")
@@ -80,19 +81,19 @@ var validPanels = []panelImpl{
 	createContentPanel(8, "cache-storage", "Cache Storage (%SERVICE/%CACHE)", "show cache storage", cacheStorageContent, cachesPanelData, servicesPanelData),
 	createContentPanel(8, "cache-stores", "Cache Stores (%SERVICE/%CACHE)", "show cache stores", cacheStoresContent),
 	createContentPanel(8, "cache-partitions", "Cache Partitions (%SERVICE/%CACHE)", "show cache partitions", cachePartitionContent, cachesPanelData, servicesPanelData),
-	createContentPanel(8, "departedMembers", "Departed Members", "show departed members", departedMembersContent, memberPanelData, storagePanelData),
+	createContentPanel(8, "departed-members", "Departed Members", "show departed members", departedMembersContent, memberPanelData, storagePanelData),
 	createContentPanel(5, "elastic-data", "Elastic Data", "show elastic data", elasticDataContent, elasticDataPanelData),
 	createContentPanel(8, "executors", "Executors", "show Executors", executorsContent, executorsPanelData),
-	createContentPanel(10, "healthSummary", "Health Summary", "show health summary", healthSummaryContent, healthPanelData),
+	createContentPanel(10, "health-summary", "Health Summary", "show health summary", healthSummaryContent, healthPanelData),
 	createContentPanel(5, "federation-all", "Federation All", "show all federation details", federationAllContent, federationPanelData),
 	createContentPanel(5, "federation-dest", "Federation Destinations", "show federation destinations", federationDestinationsContent, federationPanelData),
 	createContentPanel(5, "federation-origins", "Federation Origins", "show federation origins", federationOriginsContent, federationPanelData),
 	createContentPanel(8, "http-servers", "HTTP Servers", "show HTTP servers", httpServersContent, proxiesPanelData),
 	createContentPanel(8, "http-sessions", "HTTP Sessions", "show HTTP sessions", httpSessionsContent, httpSessionsPanelData),
 	createContentPanel(8, "machines", "Machines", "show machines", machinesContent, memberPanelData, storagePanelData),
-	createContentPanel(7, "membersSummary", "Members Summary", "show members summary", membersSummaryContent, memberPanelData, storagePanelData),
+	createContentPanel(7, "members-summary", "Members Summary", "show members summary", membersSummaryContent, memberPanelData, storagePanelData),
 	createContentPanel(10, "members", "Members", "show members", membersContent, memberPanelData, storagePanelData),
-	createContentPanel(7, "membersShort", "Members (Short)", "show members (short)", membersOnlyContent, memberPanelData, storagePanelData),
+	createContentPanel(7, "members-short", "Members (Short)", "show members (short)", membersOnlyContent, memberPanelData, storagePanelData),
 	createContentPanel(8, "network-stats", "Network Stats", "show network stats", networkStatsContent, memberPanelData, storagePanelData),
 	createContentPanel(8, "persistence", "Persistence", "show persistence", persistenceContent, servicesPanelData),
 	createContentPanel(8, "proxies", "Proxy Servers", "show proxy servers", proxiesContent, proxiesPanelData),
