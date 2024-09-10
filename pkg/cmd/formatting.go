@@ -603,7 +603,7 @@ func FormatPartitionOwnership(partitionDetails map[int]*config.PartitionOwnershi
 	backupCount := utils.GetBackupCount(partitionDetails)
 
 	if OutputFormat == constants.WIDE {
-		header = []string{MemberColumn, machineColumn, rackColumn, siteColumn, "PRIMARIES", "BACKUPS", "PRIMARY PARTITIONS"}
+		header = []string{MemberColumn, machineColumn, rackColumn, siteColumn, "PRIMARIES", "BACKUPS", "PRIMARY"}
 	}
 
 	// build the header for the backups
