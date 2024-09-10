@@ -85,6 +85,9 @@ const (
 	healthPortMessage        = "starting port for health"
 	jmxPortMessage           = "remote JMX port for management member"
 	jmxHostMessage           = "remote JMX RMI host for management member"
+	machineMessage           = "the machine name to use"
+	rackMessage              = "the rack name to use"
+	siteMessage              = "the site name to use"
 	cacheConfigMessage       = "cache configuration file"
 	operationalConfigMessage = "override override file"
 	cacheConfigArg           = "cache-config"
@@ -94,6 +97,9 @@ const (
 	healthPortArg            = "health-port"
 	jmxPortArg               = "jmx-port"
 	jmxHostArg               = "jmx-host"
+	machineArg               = "machine"
+	rackArg                  = "rack"
+	siteArg                  = "site"
 	logLevelMessage          = "coherence log level"
 	profileMessage           = "profile to add to cluster startup command line"
 	backupLogFilesMessage    = "backup old cache server log files"
@@ -507,6 +513,7 @@ func Initialize(command *cobra.Command) *cobra.Command {
 	getCmd.AddCommand(getProxyConnectionsCmd)
 	getCmd.AddCommand(getUseGradleCmd)
 	getCmd.AddCommand(getServiceStorageCmd)
+	getCmd.AddCommand(getServiceOwnershipCmd)
 	getCmd.AddCommand(getCacheStoresCmd)
 	getCmd.AddCommand(getColorCmd)
 	getCmd.AddCommand(getNetworkStatsCmd)

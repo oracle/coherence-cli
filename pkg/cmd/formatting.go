@@ -55,6 +55,9 @@ const (
 	NameColumn            = "NAME"
 	publisherColumn       = "PUBLISHER"
 	receiverColumn        = "RECEIVER"
+	machineColumn         = "MACHINE"
+	rackColumn            = "RACK"
+	siteColumn            = "SITE"
 	avgSize               = "AVG SIZE"
 	avgApply              = "AVG APPLY"
 	avgBacklogDelay       = "AVG BACKLOG DELAY"
@@ -577,6 +580,76 @@ func FormatTopicsSummary(topicDetails []config.TopicDetail) string {
 	}
 
 	return table.String()
+}
+
+// FormatPartitionOwnership returns the partition ownership in column formatted output.
+func FormatPartitionOwnership(partitionDetails map[int]*config.PartitionOwnership) string {
+	var (
+		ownershipCount = len(partitionDetails)
+		keys           = make([]int, 0)
+		header         = []string{MemberColumn, "PRIMARIES", "BACKUPS", "PRIMARY PARTITIONS"}
+	)
+	if ownershipCount == 0 {
+		return ""
+	}
+
+	// get and sort the keys
+	for k := range partitionDetails {
+		keys = append(keys, k)
+	}
+	sort.Ints(keys)
+
+	// get the backup-count
+	backupCount := utils.GetBackupCount(partitionDetails)
+
+	if OutputFormat == constants.WIDE {
+		header = []string{MemberColumn, machineColumn, rackColumn, siteColumn, "PRIMARIES", "BACKUPS", "PRIMARY PARTITIONS"}
+	}
+
+	// build the header for the backups
+	for i := 0; i < backupCount; i++ {
+		header = append(header, fmt.Sprintf("BACKUP %d", i+1))
+	}
+
+	table := newFormattedTable().WithAlignment(generateColumnFormats(backupCount)...).WithHeader(header...)
+
+	for j := 0; j < len(keys); j++ {
+		key := keys[j]
+		value := partitionDetails[key]
+
+		memberID := "Orphaned"
+		if value.MemberID != -1 {
+			memberID = fmt.Sprintf("%v", value.MemberID)
+		}
+
+		table.AddRow(memberID)
+
+		if OutputFormat == constants.WIDE {
+			table.AddColumnsToRow(value.Machine, value.Rack, value.Site)
+		}
+
+		table.AddColumnsToRow(formatSmallInteger(int32(value.PrimaryPartitions)),
+			formatSmallInteger(int32(value.BackupPartitions)))
+
+		// add primaries and backups
+		for i := 0; i <= backupCount; i++ {
+			table.AddColumnsToRow(utils.FormatPartitions(value.PartitionMap[i]))
+		}
+	}
+
+	return table.String()
+}
+
+func generateColumnFormats(count int) []string {
+	result := []string{R, R, R, L}
+	if OutputFormat == constants.WIDE {
+		result = []string{R, L, L, L, R, R, L}
+	}
+
+	for i := 0; i < count; i++ {
+		result = append(result, L)
+	}
+	return result
 }
 
 // FormatTopicsSubscribers returns the topics subscriber details in column formatted output
@@ -1388,7 +1461,7 @@ func FormatMembers(members []config.Member, verbose bool, storageMap map[int]boo
 		WithAlignment(finalAlignment...)
 
 	if OutputFormat == constants.WIDE {
-		table.AddHeaderColumns("MACHINE", "RACK", "SITE", publisherColumn, receiverColumn)
+		table.AddHeaderColumns(machineColumn, rackColumn, siteColumn, publisherColumn, receiverColumn)
 		table.AddFormattingFunction(9, networkStatsFormatter)
 		table.AddFormattingFunction(10, networkStatsFormatter)
 	}
@@ -1813,7 +1886,7 @@ func FormatMachines(machines []config.Machine) string {
 		return strings.Compare(machines[p].MachineName, machines[q].MachineName) < 0
 	})
 
-	table := newFormattedTable().WithHeader("MACHINE", "PROCESSORS", "LOAD", "TOTAL MEMORY", "FREE MEMORY",
+	table := newFormattedTable().WithHeader(machineColumn, "PROCESSORS", "LOAD", "TOTAL MEMORY", "FREE MEMORY",
 		"% FREE", "OS", "ARCH", "VERSION").WithAlignment(L, R, R, R, R, R, L, L, L)
 	table.AddFormattingFunction(5, machineMemoryFormatting)
 

@@ -109,6 +109,9 @@ type Fetcher interface {
 	// GetScheduledDistributionsJSON returns scheduled distributions for a service.
 	GetScheduledDistributionsJSON(serviceName string) ([]byte, error)
 
+	// GetServiceOwnershipJSON returns service ownership for a service.
+	GetServiceOwnershipJSON(serviceName string, nodeID string) ([]byte, error)
+
 	// GetServiceDescriptionJSON returns service description.
 	GetServiceDescriptionJSON(serviceName string) ([]byte, error)
 

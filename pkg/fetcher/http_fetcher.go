@@ -447,6 +447,16 @@ func (h HTTPFetcher) GetScheduledDistributionsJSON(serviceName string) ([]byte, 
 	return result, nil
 }
 
+// GetServiceOwnershipJSON returns service ownership for a service.
+func (h HTTPFetcher) GetServiceOwnershipJSON(serviceName string, nodeID string) ([]byte, error) {
+	result, err := httpGetRequest(h, servicesPath+getSafeServiceName(h, serviceName)+
+		"/members/"+nodeID+"/ownership?links=&verbose=true")
+	if err != nil && !strings.Contains(err.Error(), errorCode404) {
+		return constants.EmptyByte, utils.GetError("cannot get service ownership for service "+serviceName, err)
+	}
+	return result, nil
+}
+
 // GetServiceDescriptionJSON returns service description.
 func (h HTTPFetcher) GetServiceDescriptionJSON(serviceName string) ([]byte, error) {
 	result, err := httpGetRequest(h, servicesPath+getSafeServiceName(h, serviceName)+descriptionPath)

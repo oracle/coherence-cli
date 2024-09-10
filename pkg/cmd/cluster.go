@@ -732,6 +732,9 @@ var (
 	extendClientParam        bool
 	grpcClientParam          bool
 	profileFirstParam        bool
+	machineParam             string
+	rackParam                string
+	siteParam                string
 	skipMavenDepsParam       bool
 	backupLogFilesParam      bool
 	validPersistenceModes    = []string{"on-demand", "active", "active-backup", "active-async"}
@@ -1450,6 +1453,9 @@ func init() {
 	createClusterCmd.Flags().Int32VarP(&jmxRemotePortParam, jmxPortArg, "J", 0, jmxPortMessage)
 	createClusterCmd.Flags().StringVarP(&jmxRemoteHostParam, jmxHostArg, "j", "", jmxHostMessage)
 	createClusterCmd.Flags().BoolVarP(&profileFirstParam, profileFirstArg, "F", false, profileFirstMessage)
+	createClusterCmd.Flags().StringVarP(&machineParam, machineArg, "", "", machineMessage)
+	createClusterCmd.Flags().StringVarP(&rackParam, rackArg, "", "", rackMessage)
+	createClusterCmd.Flags().StringVarP(&siteParam, siteArg, "", "", siteMessage)
 
 	stopClusterCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
 
@@ -1465,6 +1471,9 @@ func init() {
 	startClusterCmd.Flags().StringVarP(&jmxRemoteHostParam, jmxHostArg, "j", "", jmxHostMessage)
 	startClusterCmd.Flags().BoolVarP(&profileFirstParam, profileFirstArg, "F", false, profileFirstMessage)
 	startClusterCmd.Flags().BoolVarP(&backupLogFilesParam, backupLogFilesArg, "B", false, backupLogFilesMessage)
+	startClusterCmd.Flags().StringVarP(&machineParam, machineArg, "", "", machineMessage)
+	startClusterCmd.Flags().StringVarP(&rackParam, rackArg, "", "", rackMessage)
+	startClusterCmd.Flags().StringVarP(&siteParam, siteArg, "", "", siteMessage)
 
 	startConsoleCmd.Flags().StringVarP(&heapMemoryParam, heapMemoryArg, "M", defaultHeap, heapMemoryMessage)
 	startConsoleCmd.Flags().Int32VarP(&logLevelParam, logLevelArg, "l", 5, logLevelMessage)
@@ -1493,6 +1502,9 @@ func init() {
 	scaleClusterCmd.Flags().StringVarP(&profileValueParam, profileArg, "P", "", profileMessage)
 	scaleClusterCmd.Flags().StringVarP(&serverStartClassParam, startClassArg, "S", "", startClassMessage)
 	scaleClusterCmd.Flags().BoolVarP(&backupLogFilesParam, backupLogFilesArg, "B", false, backupLogFilesMessage)
+	scaleClusterCmd.Flags().StringVarP(&machineParam, machineArg, "", "", machineMessage)
+	scaleClusterCmd.Flags().StringVarP(&rackParam, rackArg, "", "", rackMessage)
+	scaleClusterCmd.Flags().StringVarP(&siteParam, siteArg, "", "", siteMessage)
 }
 
 // sanitizeConnectionName sanitizes a cluster connection

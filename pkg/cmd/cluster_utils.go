@@ -412,6 +412,18 @@ func getCacheServerArgs(connection ClusterConnection, member string, httpPort in
 		}
 	}
 
+	if machineParam != "" {
+		baseArgs = append(baseArgs, fmt.Sprintf("-Dcoherence.machine=%s", machineParam))
+	}
+
+	if rackParam != "" {
+		baseArgs = append(baseArgs, fmt.Sprintf("-Dcoherence.rack=%s", rackParam))
+	}
+
+	if siteParam != "" {
+		baseArgs = append(baseArgs, fmt.Sprintf("-Dcoherence.site=%s", siteParam))
+	}
+
 	// if default heap is overridden, then use this
 	if heapMemoryParam != defaultHeap {
 		heap = heapMemoryParam

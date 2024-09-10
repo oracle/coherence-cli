@@ -367,6 +367,156 @@ var getServiceDistributionsCmd = &cobra.Command{
 	},
 }
 
+// getServiceOwnershipCmd represents the get service-ownership command.
+var getServiceOwnershipCmd = &cobra.Command{
+	Use:   "service-ownership service-name",
+	Short: "display partition ownership information for a service",
+	Long:  `The 'get service-ownership' command displays partition ownership for a service.`,
+	Args: func(cmd *cobra.Command, args []string) error {
+		if len(args) != 1 {
+			displayErrorAndExit(cmd, provideServiceName)
+		}
+		return nil
+	},
+	ValidArgsFunction: completionDistributedService,
+	RunE: func(cmd *cobra.Command, args []string) error {
+		var (
+			err            error
+			dataFetcher    fetcher.Fetcher
+			connection     string
+			membersResult  []byte
+			membersDetails = config.ServiceMemberDetails{}
+			memberNodeID   string
+		)
+
+		connection, dataFetcher, err = GetConnectionAndDataFetcher()
+		if err != nil {
+			return err
+		}
+
+		servicesResult, err := GetDistributedServices(dataFetcher)
+		if err != nil {
+			return err
+		}
+
+		if !utils.SliceContains(servicesResult, args[0]) {
+			return fmt.Errorf(unableToFindService, args[0])
+		}
+
+		// find storage member node
+		membersResult, err = dataFetcher.GetServiceMembersDetailsJSON(args[0])
+		if err != nil {
+			return err
+		}
+
+		err = json.Unmarshal(membersResult, &membersDetails)
+		if err != nil {
+			return utils.GetError("unable to unmarshall members result", err)
+		}
+
+		// find the first node
+		for _, v := range membersDetails.Services {
+			memberNodeID = v.NodeID
+			break
+		}
+
+		if memberNodeID == "" {
+			return fmt.Errorf("cannot find a node for service %s", args[0])
+		}
+
+		for {
+			var ownershipData []byte
+
+			ownershipData, err = dataFetcher.GetServiceOwnershipJSON(args[0], memberNodeID)
+			if err != nil {
+				return err
+			}
+
+			if strings.Contains(OutputFormat, constants.JSONPATH) || OutputFormat == constants.JSON {
+				if strings.Contains(OutputFormat, constants.JSONPATH) {
+					result, err := utils.GetJSONPathResults(ownershipData, OutputFormat)
+					if err != nil {
+						return err
+					}
+					cmd.Println(result)
+				} else {
+					cmd.Println(string(ownershipData))
+				}
+			} else {
+				printWatchHeader(cmd)
+
+				result, err := getOwnershipData(dataFetcher, ownershipData)
+				if err != nil {
+					return err
+				}
+				cmd.Println(FormatCurrentCluster(connection))
+				cmd.Println(FormatPartitionOwnership(result))
+			}
+
+			// check to see if we should exit if we are not watching
+			if !isWatchEnabled() {
+				break
+			}
+
+			// we are watching so sleep and then repeat until CTRL-C
+			time.Sleep(time.Duration(watchDelay) * time.Second)
+		}
+
+		return nil
+	},
+}
+
+func getOwnershipData(dataFetcher fetcher.Fetcher, ownershipData []byte) (map[int]*config.PartitionOwnership, error) {
+	var ownership config.Ownership
+
+	if len(ownershipData) != 0 {
+		err := json.Unmarshal(ownershipData, &ownership)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		ownership.Details = ""
+	}
+
+	results, err := utils.ParsePartitionOwnership(ownership.Details)
+	if err != nil {
+		return nil, err
+	}
+
+	if OutputFormat == constants.WIDE {
+		var (
+			members       = config.Members{}
+			membersResult []byte
+		)
+
+		membersResult, err = dataFetcher.GetMemberDetailsJSON(OutputFormat != constants.TABLE && OutputFormat != constants.WIDE)
+		if err != nil {
+			return nil, err
+		}
+
+		err = json.Unmarshal(membersResult, &members)
+		if err != nil {
+			return nil, utils.GetError(unableToDecode, err)
+		}
+
+		// retrieve the machine, rack and site for display in wide mode
+		for _, v := range results {
+			v.Machine, v.Rack, v.Site = getMachineRackSite(fmt.Sprintf("%v", v.MemberID), members.Members)
+		}
+	}
+
+	return results, nil
+}
+
+func getMachineRackSite(nodeID string, members []config.Member) (string, string, string) {
+	for _, v := range members {
+		if v.NodeID == nodeID {
+			return v.MachineName, v.RackName, v.SiteName
+		}
+	}
+	return "", "", ""
+}
+
 // getServiceDescriptionCmd represents the get service-description command.
 var getServiceDescriptionCmd = &cobra.Command{
 	Use:   "service-description service-name",
