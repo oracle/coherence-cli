@@ -45,6 +45,7 @@ const (
 	provideServiceName  = "you must provide a service name"
 	unableToFindService = "unable to find service with service name '%s'"
 	noDistributionsData = "No distributions data is available"
+	serviceUnmarshall   = "unable to unmarshall members result"
 )
 
 // getServicesCmd represents the get services command.
@@ -411,7 +412,7 @@ var getServiceOwnershipCmd = &cobra.Command{
 
 		err = json.Unmarshal(membersResult, &membersDetails)
 		if err != nil {
-			return utils.GetError("unable to unmarshall members result", err)
+			return utils.GetError(serviceUnmarshall, err)
 		}
 
 		// find the first node
@@ -665,7 +666,7 @@ var getServiceMembersCmd = &cobra.Command{
 
 				err = json.Unmarshal(membersResult, &membersDetails)
 				if err != nil {
-					return utils.GetError("unable to unmarshall members result", err)
+					return utils.GetError(serviceUnmarshall, err)
 				}
 
 				var finalDetails []config.ServiceMemberDetail
@@ -847,7 +848,7 @@ service is a cache service.`,
 
 			err = json.Unmarshal(membersResult, &membersDetails)
 			if err != nil {
-				return utils.GetError("unable to unmarshall members result", err)
+				return utils.GetError(serviceUnmarshall, err)
 			}
 
 			err = json.Unmarshal(membersResult, &persistenceDetails)
