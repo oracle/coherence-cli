@@ -103,7 +103,7 @@ runCommand set debug on
 
 # Create a cluster
 message "Create Cluster"
-runCommand create cluster local -y -v $VERSION $COM -S com.tangosol.net.Coherence
+runCommand create cluster local -y -v $VERSION $COM -S com.tangosol.net.Coherence --machine machine1
 
 wait_for_ready
 
@@ -118,7 +118,7 @@ grep "[3,3,3]" $OUTPUT
 
 # Scale the cluster to 6 members
 message "Scale Cluster to 6 members and delay each by 5 seconds"
-runCommand scale cluster local -r 6 -D 5s
+runCommand scale cluster local -r 6 -D 5s --machine machine2
 pause && pause && pause
 
 # Check the members of PartitionedCache
@@ -131,7 +131,7 @@ grep "[6,6,6]" $OUTPUT
 runCommand stop cluster local -y
 
 message "Startup cluster with 5 members"
-runCommand start cluster local -r 5
+runCommand start cluster local -r 5 --site site1
 wait_for_ready
 
 runCommand get services -o jsonpath="$.items[?(@.name=='PartitionedCache')].memberCount"
@@ -186,7 +186,7 @@ pause && pause && pause
 
 LOGS_DEST=$(mktemp -d)
 message "Test different log location - ${LOGS_DEST}"
-runCommand create cluster local -y -M 512m -I $COM -v $VERSION -L ${LOGS_DEST}
+runCommand create cluster local -y -M 512m -I $COM -v $VERSION -L ${LOGS_DEST} --rack rack1
 wait_for_ready
 
 # check to see a storage-0.log file exists

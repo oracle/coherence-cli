@@ -158,7 +158,7 @@ func (h HTTPFetcher) GetMemberDetailsJSON(verbose bool) ([]byte, error) {
 
 // GetNetworkStatsJSON returns network stats in raw json.
 func (h HTTPFetcher) GetNetworkStatsJSON(nodeID string) ([]byte, error) {
-	result, err := httpGetRequest(h, "/members/"+nodeID+"/networkStats"+links)
+	result, err := httpGetRequest(h, membersPath+nodeID+"/networkStats"+links)
 	if err != nil {
 		return constants.EmptyByte, utils.GetError("cannot get get networkStats information", err)
 	}
@@ -443,6 +443,16 @@ func (h HTTPFetcher) GetScheduledDistributionsJSON(serviceName string) ([]byte, 
 		"/partition/scheduledDistributions?links=")
 	if err != nil && !strings.Contains(err.Error(), errorCode404) {
 		return constants.EmptyByte, utils.GetError("cannot get scheduled distributions for service "+serviceName, err)
+	}
+	return result, nil
+}
+
+// GetServiceOwnershipJSON returns service ownership for a service.
+func (h HTTPFetcher) GetServiceOwnershipJSON(serviceName string, nodeID string) ([]byte, error) {
+	result, err := httpGetRequest(h, servicesPath+getSafeServiceName(h, serviceName)+
+		membersPath+nodeID+"/ownership?links=&verbose=true")
+	if err != nil && !strings.Contains(err.Error(), errorCode404) {
+		return constants.EmptyByte, utils.GetError("cannot get service ownership for service "+serviceName, err)
 	}
 	return result, nil
 }

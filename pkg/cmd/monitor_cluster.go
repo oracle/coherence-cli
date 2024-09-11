@@ -102,6 +102,7 @@ var validPanels = []panelImpl{
 	createContentPanel(8, "services", "Services", "show services", servicesContent, servicesPanelData),
 	createContentPanel(8, "service-members", "Service Members (%SERVICE)", "show service members", serviceMembersContent, servicesPanelData),
 	createContentPanel(8, "service-distributions", "Service Distributions (%SERVICE)", "show service distributions", serviceDistributionsContent, servicesPanelData),
+	createContentPanel(8, "service-ownership", "Service Ownership (%SERVICE)", "show service ownership", serviceOwnershipContent, servicesPanelData),
 	createContentPanel(8, "service-storage", "Service Storage", "show service storage", serviceStorageContent, servicesPanelData),
 	createContentPanel(8, "topic-members", "Topic Members (%SERVICE/%TOPIC)", "show topic members", topicMembersContent, topicsPanelData),
 	createContentPanel(8, "subscribers", "Topic Subscribers (%SERVICE/%TOPIC)", "show topic subscribers", topicSubscribersContent, topicsPanelData),
@@ -637,6 +638,61 @@ var serviceDistributionsContent = func(dataFetcher fetcher.Fetcher, _ clusterSum
 	}
 
 	return strings.Split(distributions.ScheduledDistributions, "\n"), nil
+}
+
+var serviceOwnershipContent = func(dataFetcher fetcher.Fetcher, _ clusterSummaryInfo) ([]string, error) {
+	var (
+		membersResult  []byte
+		memberNodeID   string
+		membersDetails = config.ServiceMemberDetails{}
+	)
+
+	if serviceName == "" {
+		return emptyStringArray, errSelectService
+	}
+
+	servicesResult, err := GetDistributedServices(dataFetcher)
+	if err != nil {
+		return emptyStringArray, err
+	}
+
+	if !utils.SliceContains(servicesResult, serviceName) {
+		return emptyStringArray, fmt.Errorf(unableToFindService, serviceName)
+	}
+
+	// find storage member node
+	membersResult, err = dataFetcher.GetServiceMembersDetailsJSON(serviceName)
+	if err != nil {
+		return emptyStringArray, err
+	}
+
+	if len(membersResult) != 0 {
+		err = json.Unmarshal(membersResult, &membersDetails)
+		if err != nil {
+			return emptyStringArray, utils.GetError("unable to unmarshall members ownership", err)
+		}
+
+		for _, v := range membersDetails.Services {
+			memberNodeID = v.NodeID
+			break
+		}
+
+		var ownershipData []byte
+
+		ownershipData, err = dataFetcher.GetServiceOwnershipJSON(serviceName, memberNodeID)
+		if err != nil {
+			return emptyStringArray, err
+		}
+
+		result, err := getOwnershipData(dataFetcher, ownershipData)
+		if err != nil {
+			return emptyStringArray, err
+		}
+
+		return strings.Split(FormatPartitionOwnership(result), "\n"), nil
+	}
+
+	return noContentArray, nil
 }
 
 var serviceStorageContent = func(dataFetcher fetcher.Fetcher, _ clusterSummaryInfo) ([]string, error) {

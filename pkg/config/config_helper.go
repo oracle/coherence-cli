@@ -775,7 +775,29 @@ type Distributions struct {
 	ScheduledDistributions string `json:"scheduledDistributions"`
 }
 
+// Ownership contains partition ownership distributions.
+type Ownership struct {
+	Details string `json:"ownership"`
+}
+
 // Description contains description for an item.
 type Description struct {
 	Description string `json:"description"`
+}
+
+// PartitionOwnership contains partition ownership for a service.
+type PartitionOwnership struct {
+	MemberID          int
+	TotalPartitions   int
+	PrimaryPartitions int
+	BackupPartitions  int
+	// a map of partition ownership keyed by int where
+	// 0 = primary, 1 = first backup, 2 = second backup....
+	// and value are the owned partitions
+	PartitionMap map[int][]int
+
+	// -o wide options
+	Machine string
+	Rack    string
+	Site    string
 }

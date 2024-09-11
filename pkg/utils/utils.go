@@ -17,7 +17,9 @@ import (
 	"go.uber.org/zap/zapcore"
 	"os"
 	"path/filepath"
+	"regexp"
 	"runtime"
+	"sort"
 	"strconv"
 	"strings"
 	"unicode"
@@ -302,4 +304,146 @@ func GetStartupDelayInMillis(startupDelay string) (int64, error) {
 		return 0, fmt.Errorf("invalid startup delay value of %s", startupDelay)
 	}
 	return int64(millis), nil
+}
+
+var (
+	backupPattern  = regexp.MustCompile(`\[(\d+)\]`)
+	replacePattern = regexp.MustCompile(`^.*?:\s`)
+	memberPattern  = regexp.MustCompile(`\*\*\* Member:\s+(\d+)\s+total=(\d+)\s+\(primary=(\d+),\s+backup=(\d+)\)`)
+)
+
+func extractBackup(sBackupString string) int {
+	matches := backupPattern.FindStringSubmatch(sBackupString)
+	if len(matches) > 1 {
+		if backup, err := strconv.Atoi(matches[1]); err == nil {
+			return backup
+		}
+	}
+	return -1
+}
+
+func removePrefix(s string) string {
+	if !strings.Contains(s, ":") {
+		return ""
+	}
+	return replacePattern.ReplaceAllString(s, "")
+}
+
+func extractPartitions(spart string) []int {
+	var partitions []int
+	s := strings.ReplaceAll(spart, "+", " ")
+	parts := strings.Split(removePrefix(s), ", ")
+
+	for _, part := range parts {
+		if part != "" {
+			if num, err := strconv.Atoi(part); err == nil {
+				partitions = append(partitions, num)
+			}
+		}
+	}
+
+	return partitions
+}
+
+func newPartitionOwnership(memberID, totalPartitions, primaryPartitions, backupPartitions int) *config.PartitionOwnership {
+	return &config.PartitionOwnership{
+		MemberID:          memberID,
+		TotalPartitions:   totalPartitions,
+		PrimaryPartitions: primaryPartitions,
+		BackupPartitions:  backupPartitions,
+		PartitionMap:      make(map[int][]int),
+	}
+}
+
+func ParsePartitionOwnership(sOwnership string) (map[int]*config.PartitionOwnership, error) {
+	mapOwnership := make(map[int]*config.PartitionOwnership)
+
+	if len(sOwnership) == 0 {
+		return mapOwnership, nil
+	}
+
+	var (
+		parts         = strings.Split(sOwnership, "<br/>")
+		currentMember = -2
+		ownership     = &config.PartitionOwnership{}
+	)
+
+	for _, line := range parts {
+		switch {
+		case strings.Contains(line, "*** Member:"):
+			matches := memberPattern.FindStringSubmatch(line)
+			if len(matches) > 1 {
+				memberID, _ := strconv.Atoi(matches[1])
+				totalPartitions, _ := strconv.Atoi(matches[2])
+				primaryPartitions, _ := strconv.Atoi(matches[3])
+				backupPartitions, _ := strconv.Atoi(matches[4])
+
+				ownership = newPartitionOwnership(memberID, totalPartitions, primaryPartitions, backupPartitions)
+				mapOwnership[memberID] = ownership
+				currentMember = memberID
+			} else {
+				return nil, fmt.Errorf("unable to parse line [%s]", line)
+			}
+
+		case strings.Contains(line, "*** Orphans"):
+			currentMember = -1
+			ownership = newPartitionOwnership(-1, 0, 0, 0)
+			mapOwnership[-1] = ownership
+
+		case strings.Contains(line, "Primary["):
+			ownership = mapOwnership[currentMember]
+			ownership.PartitionMap[0] = extractPartitions(line)
+
+		case strings.Contains(line, "Backup["):
+			backup := extractBackup(line)
+			if backup == -1 {
+				return nil, fmt.Errorf("negative backup from %s", line)
+			}
+			ownership = mapOwnership[currentMember]
+			ownership.PartitionMap[backup] = extractPartitions(line)
+		}
+	}
+
+	return mapOwnership, nil
+}
+
+func FormatPartitions(partitions []int) string {
+	if len(partitions) == 0 {
+		return "-"
+	}
+
+	sort.Ints(partitions)
+
+	var result []string
+	start := partitions[0]
+	prev := partitions[0]
+
+	for i := 1; i < len(partitions); i++ {
+		if partitions[i] == prev+1 {
+			prev = partitions[i]
+		} else {
+			if start == prev {
+				result = append(result, strconv.Itoa(start))
+			} else {
+				result = append(result, fmt.Sprintf("%d..%d", start, prev))
+			}
+			start = partitions[i]
+			prev = partitions[i]
+		}
+	}
+
+	if start == prev {
+		result = append(result, strconv.Itoa(start))
+	} else {
+		result = append(result, fmt.Sprintf("%d..%d", start, prev))
+	}
+
+	return strings.Join(result, ", ")
+}
+
+func GetBackupCount(ownership map[int]*config.PartitionOwnership) int {
+	for _, v := range ownership {
+		return len(v.PartitionMap) - 1
+	}
+	return 1
 }
