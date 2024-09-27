@@ -22,6 +22,7 @@ jobs:
       matrix:
         coherenceVersion:
           - 24.03.1
+          - 24.09
         javaVersion:
           - 21
 
