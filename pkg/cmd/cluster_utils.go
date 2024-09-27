@@ -69,14 +69,14 @@ var (
 	defaultJars = []*config.DefaultDependency{
 		{GroupID: ceGroupID, Artifact: "coherence", IsCoherence: true},
 		{GroupID: ceGroupID, Artifact: "coherence-json", IsCoherence: true},
-		{GroupID: "org.jline", Artifact: "jline", IsCoherence: false, Version: "3.25.0"},
+		{GroupID: "org.jline", Artifact: "jline", IsCoherence: false, Version: "3.26.3"},
 	}
 
 	// list of additional coherence artifacts
 	validCoherenceArtifacts = []string{"coherence-cdi-server", "coherence-cdi", "coherence-concurrent", "coherence-grpc-proxy",
 		"coherence-grpc", "coherence-helidon-client", "coherence-helidon-grpc-proxy", "coherence-http-netty", "coherence-java-client",
 		"coherence-jcache", "coherence-jpa", "coherence-management", "coherence-micrometer", "coherence-mp-config", "coherence-metrics",
-		"coherence-mp-metrics", "coherence-rest"}
+		"coherence-mp-metrics", "coherence-rest", "coherence-hnsw", "coherence-mp-health"}
 )
 
 // checkCreateRequirements validates that all the necessary requirements are fulfilled
