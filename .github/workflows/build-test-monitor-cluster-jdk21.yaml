@@ -23,6 +23,7 @@ jobs:
         coherenceVersion:
           - 22.06.9
           - 24.03.1
+          - 24.09
         javaVersion:
           - 21
 
