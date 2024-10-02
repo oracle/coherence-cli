@@ -1129,17 +1129,16 @@ func RunTestCachesCommands(t *testing.T) {
 	_, err = test_utils.IssueGetRequest(restUrl + "/populateCacheStore")
 	g.Expect(err).To(BeNil())
 
-	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "SERVICE,COUNT,SIZE,cache-1,cache-2", configArg, file,
-		"get", "caches", "-c", context.ClusterName)
+	expected := "SERVICE,COUNT,SIZE,cache-1,cache-2"
+
+	test_utils.EnsureCommandContainsAll(g, t, cliCmd, expected, configArg, file, "get", "caches", "-c", context.ClusterName)
 
 	// test table sorting
-	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "SERVICE,COUNT,SIZE,cache-1,cache-2", configArg, file,
-		"get", "caches", "-c", context.ClusterName, "--sort", "COUNT")
+	test_utils.EnsureCommandContainsAll(g, t, cliCmd, expected, configArg, file, "get", "caches", "-c", context.ClusterName, "--sort", "COUNT")
 
-	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "SERVICE,COUNT,SIZE,cache-1,cache-2", configArg, file,
-		"get", "caches", "-c", context.ClusterName, "--sort", "COUNT", "--desc")
+	test_utils.EnsureCommandContainsAll(g, t, cliCmd, expected, configArg, file, "get", "caches", "-c", context.ClusterName, "--sort", "COUNT", "--desc")
 
-	// reset the table soring
+	// reset the table sorting
 	cmd.ResetTableSorting()
 
 	// test cache-storage
