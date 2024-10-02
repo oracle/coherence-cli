@@ -73,7 +73,7 @@ const (
 var (
 	KB int64 = 1024
 	MB       = KB * KB
-	GB       = MB * MB
+	GB       = MB * KB
 )
 
 type KeyValues struct {
@@ -2524,6 +2524,21 @@ func (t *formattedTable) String() string {
 		stringFormats[i] = align
 	}
 
+	if tableSorting != "" {
+		// apply table sorting, this is in the format of column number or name
+
+		column, err := t.parseSorting(tableSorting)
+		if err != nil {
+			_, _ = fmt.Fprintf(os.Stderr, "%v", err)
+		} else {
+			if column > numberColumns {
+				_, _ = fmt.Fprintf(os.Stderr, "sorting column must be not be greater than %v", numberColumns)
+			} else {
+				t.sortRows(column, !descendingFlag)
+			}
+		}
+	}
+
 	for r, row := range t.getCombined() {
 		// format each individual column entry
 		for i, e := range row {
@@ -2548,6 +2563,105 @@ func (t *formattedTable) String() string {
 		sb.WriteString("\n")
 	}
 	return sb.String()
+}
+
+// sortRows sorts rows in a table based upon the column and sort type.
+func (t *formattedTable) sortRows(column int, ascending bool) {
+	sort.SliceStable(t.rows, func(i, j int) bool {
+		// Extract the values in the specified column for each of the rows, replacing any commas
+		val1 := strings.ReplaceAll(t.rows[i][column-1], ",", "")
+		val2 := strings.ReplaceAll(t.rows[j][column-1], ",", "")
+
+		// if we have values with suffix such as "KB", "MB", "GB", or "TB", then remove them and adjust
+		// the value accordingly
+		val1 = expandValues(val1)
+		val2 = expandValues(val2)
+
+		// Attempt to convert both values to float for numeric comparison
+		num1, err1 := strconv.ParseFloat(val1, 64)
+		num2, err2 := strconv.ParseFloat(val2, 64)
+
+		if err1 == nil && err2 == nil {
+			// if both are valid floats then compare as strings
+			if ascending {
+				return num1 < num2
+			}
+			return num1 > num2
+		}
+
+		// Fallback to string comparison
+		if ascending {
+			return val1 < val2
+		}
+		return val1 > val2
+	})
+}
+
+var replacementMap = map[string]int64{
+	" KB": KB,
+	" MB": MB,
+	" GB": GB,
+	" TB": GB * KB,
+	"%":   1,
+	"ms":  1,
+}
+
+// expandValues expands "KB", "MB", "GB", or "TB".
+func expandValues(s string) string {
+	var (
+		factor      int64 = 1
+		stringValue string
+	)
+
+	for k, v := range replacementMap {
+		if strings.Contains(s, k) {
+			stringValue = strings.ReplaceAll(s, k, "")
+			factor = v
+			break
+		}
+	}
+
+	f, err := strconv.ParseFloat(stringValue, 64)
+	if err == nil {
+		return fmt.Sprintf("%.f", f*float64(factor))
+	}
+
+	return s
+
+}
+
+// ParseSorting parses a sorting string. The sorting string should have a
+// column number, where the column will be sorted ascending numerically, if possible,
+// or a column number and 'd' where it will be sorted descendingFlag.
+// the column string could also be a name of a column.
+func (t *formattedTable) parseSorting(sorting string) (int, error) {
+	return parseSortingInternal(t.header, sorting)
+}
+
+func parseSortingInternal(headers []string, sorting string) (int, error) {
+	var (
+		column int
+		err    error
+	)
+
+	// convert the array to an int
+	column, err = strconv.Atoi(sorting)
+
+	// if the conversion failed we assume it's a column name and find the name in the header
+	if err != nil {
+		for i, v := range headers {
+			if sorting == v {
+				column = i + 1
+				err = nil
+				break
+			}
+		}
+		if column == 0 {
+			err = fmt.Errorf("warning: invalid sorting string: %v", sorting)
+		}
+	}
+
+	return column, err
 }
 
 // getMaxColumnLen returns an array representing the max lengths of columns.

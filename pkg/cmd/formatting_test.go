@@ -139,6 +139,67 @@ func TestFormattingAllStringsWithAlignmentMax3(t *testing.T) {
 `))
 }
 
+// TestFormattedTableSorting tests table formatting.
+func TestFormattedTableSorting(_ *testing.T) {
+	mbFormat = true
+	formattingFunction := getFormattingFunction()
+
+	table := newFormattedTable().WithAlignment(R, L, R).WithHeader("ONE", "TWO", "THREE")
+
+	tableSorting = "3"
+	table.AddRow("1", "AAA", formattingFunction(10000234230))
+	table.AddRow("2", "BBB", formattingFunction(10400000))
+	table.AddRow("3", "CCC", formattingFunction(10405554000))
+	table.AddRow("4", "CCD", formattingFunction(10400000))
+
+	result := table.String()
+	fmt.Println(result)
+}
+
+// TestExpandValues tests the expandValues function.
+func TestExpandValues(t *testing.T) {
+	g := gomega.NewGomegaWithT(t)
+
+	g.Expect(expandValues("0")).To(gomega.Equal("0"))
+	g.Expect(expandValues("1 KB")).To(gomega.Equal("1024"))
+	g.Expect(expandValues("1000 KB")).To(gomega.Equal("1024000"))
+	g.Expect(expandValues("1 MB")).To(gomega.Equal("1048576"))
+	g.Expect(expandValues("1 GB")).To(gomega.Equal("1073741824"))
+	g.Expect(expandValues("1 TB")).To(gomega.Equal("1099511627776"))
+	g.Expect(expandValues("1.1 GB")).To(gomega.Equal("1181116006.4"))
+}
+
+func TestParseSorting(t *testing.T) {
+
+	var (
+		headers = []string{"COL1", "COL2", "COL3"}
+		g       = gomega.NewGomegaWithT(t)
+	)
+
+	descendingFlag = false
+	_, err := parseSortingInternal(headers, "")
+	g.Expect(err).To(gomega.HaveOccurred())
+
+	_, err = parseSortingInternal(headers, "1f1")
+	g.Expect(err).To(gomega.HaveOccurred())
+
+	_, err = parseSortingInternal(headers, "1333x")
+	g.Expect(err).To(gomega.HaveOccurred())
+
+	assertResult(g, headers, "1", 1)
+	assertResult(g, headers, "2", 2)
+	descendingFlag = true
+	assertResult(g, headers, "2", 2)
+	assertResult(g, headers, "COL1", 1)
+	assertResult(g, headers, "COL2", 2)
+}
+
+func assertResult(g *gomega.WithT, headers []string, sorting string, column int) {
+	result, err := parseSortingInternal(headers, sorting)
+	g.Expect(err).To(gomega.BeNil())
+	g.Expect(result).To(gomega.Equal(column))
+}
+
 // TestFormatConnectionMillis tests formatting connection millis
 func TestFormatConnectionMillis(t *testing.T) {
 	var (

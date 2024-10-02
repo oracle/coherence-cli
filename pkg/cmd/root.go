@@ -46,7 +46,7 @@ var (
 
 // various command constants
 const (
-	clusterConnectionDescription = "cluster connection name. (not required if context is set)"
+	clusterConnectionDescription = "cluster connection name (not required if context is set)"
 	connectionNameOption         = "connection"
 	clusterNameOptionShort       = "c"
 
@@ -142,6 +142,12 @@ var (
 	// path to the logfile
 	logFilePath string
 
+	// global sorting
+	tableSorting string
+
+	// global sort direction
+	descendingFlag bool
+
 	Logger *zap.Logger
 
 	// Version is the cohctl version injected by the Go linker at build time.
@@ -233,6 +239,8 @@ func SetRootCommandFlags(command *cobra.Command) {
 	command.PersistentFlags().Int32VarP(&watchDelay, "delay", "d", 5, "delay for watching in seconds")
 	command.PersistentFlags().StringVarP(&Username, usernameOption, usernameShort, "", userNameDescription)
 	command.PersistentFlags().StringVarP(&clusterConnection, connectionNameOption, clusterNameOptionShort, "", clusterConnectionDescription)
+	command.PersistentFlags().StringVarP(&tableSorting, "sort", "", "", "specify a sorting column name or number for tables")
+	command.PersistentFlags().BoolVarP(&descendingFlag, "desc", "", false, "indicates descending sort for tables, default is ascending")
 
 	command.PersistentFlags().BoolVarP(&kbFormat, "kb", "k", false, "show sizes in kilobytes (default is bytes)")
 	command.PersistentFlags().BoolVarP(&mbFormat, "mb", "m", false, "show sizes in megabytes (default is bytes)")

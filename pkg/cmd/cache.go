@@ -1181,9 +1181,9 @@ func init() {
 	getCacheIndexesCmd.Flags().StringVarP(&serviceName, serviceNameOption, serviceNameOptionShort, "", serviceNameDescription)
 	getCachePartitionsCmd.Flags().StringVarP(&serviceName, serviceNameOption, serviceNameOptionShort, "", serviceNameDescription)
 	getCachePartitionsCmd.Flags().BoolVarP(&cacheSummary, "summary", "S", false, "show a cache summary")
-	getCachePartitionsCmd.Flags().BoolVarP(&partitionSortSize, "sort-size", "", false, "sort by size descending")
-	getCachePartitionsCmd.Flags().BoolVarP(&partitionSortCount, "sort-count", "", false, "sort by count descending")
-	getCachePartitionsCmd.Flags().BoolVarP(&partitionSortMaxSize, "sort-max", "", false, "sort by maximum entry descending")
+	getCachePartitionsCmd.Flags().BoolVarP(&partitionSortSize, "sort-size", "", false, "sort by size descendingFlag")
+	getCachePartitionsCmd.Flags().BoolVarP(&partitionSortCount, "sort-count", "", false, "sort by count descendingFlag")
+	getCachePartitionsCmd.Flags().BoolVarP(&partitionSortMaxSize, "sort-max", "", false, "sort by maximum entry descendingFlag")
 
 	getViewCachesCmd.Flags().StringVarP(&serviceName, serviceNameOption, serviceNameOptionShort, "", serviceNameDescription)
 

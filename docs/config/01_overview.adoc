@@ -43,6 +43,13 @@ Changing how bytes values are displayed.
 --
 
 [CARD]
+.Sorting Table Output
+[link=docs/config/08_sorting_table_output.adoc]
+--
+Changing the sort order of any table output.
+--
+
+[CARD]
 .Get Config
 [link=docs/config/09_get_config.adoc]
 --

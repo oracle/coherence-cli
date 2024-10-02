@@ -1132,6 +1132,16 @@ func RunTestCachesCommands(t *testing.T) {
 	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "SERVICE,COUNT,SIZE,cache-1,cache-2", configArg, file,
 		"get", "caches", "-c", context.ClusterName)
 
+	// test table sorting
+	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "SERVICE,COUNT,SIZE,cache-1,cache-2", configArg, file,
+		"get", "caches", "-c", context.ClusterName, "--sort", "COUNT")
+
+	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "SERVICE,COUNT,SIZE,cache-1,cache-2", configArg, file,
+		"get", "caches", "-c", context.ClusterName, "--sort", "COUNT", "--desc")
+
+	// reset the table soring
+	cmd.ResetTableSorting()
+
 	// test cache-storage
 	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "LOCKS GRANTED,", configArg, file,
 		"get", "cache-storage", cacheName, "-c", context.ClusterName)
