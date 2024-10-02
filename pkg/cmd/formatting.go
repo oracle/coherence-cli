@@ -1095,15 +1095,6 @@ func FormatCachePartitions(cacheDetails []config.CachePartitionDetail, summary b
 	}
 
 	sort.Slice(cacheDetails, func(p, q int) bool {
-		if partitionSortSize {
-			return cacheDetails[p].TotalSize > cacheDetails[q].TotalSize
-		}
-		if partitionSortCount {
-			return cacheDetails[p].Count > cacheDetails[q].Count
-		}
-		if partitionSortMaxSize {
-			return cacheDetails[p].MaxEntrySize > cacheDetails[q].MaxEntrySize
-		}
 		return cacheDetails[p].PartitionID < cacheDetails[q].PartitionID
 	})
 
@@ -2630,7 +2621,7 @@ func expandValues(s string) string {
 
 }
 
-// ParseSorting parses a sorting string. The sorting string should have a
+// prseSorting parses a sorting string. The sorting string should have a
 // column number, where the column will be sorted ascending numerically, if possible,
 // or a column number and 'd' where it will be sorted descendingFlag.
 // the column string could also be a name of a column.

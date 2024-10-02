@@ -166,7 +166,7 @@ func TestExpandValues(t *testing.T) {
 	g.Expect(expandValues("1 MB")).To(gomega.Equal("1048576"))
 	g.Expect(expandValues("1 GB")).To(gomega.Equal("1073741824"))
 	g.Expect(expandValues("1 TB")).To(gomega.Equal("1099511627776"))
-	g.Expect(expandValues("1.1 GB")).To(gomega.Equal("1181116006.4"))
+	g.Expect(expandValues("1.1 GB")).To(gomega.Equal("1181116006"))
 }
 
 func TestParseSorting(t *testing.T) {
