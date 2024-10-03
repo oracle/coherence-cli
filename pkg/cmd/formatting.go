@@ -31,6 +31,7 @@ const (
 	ServiceColumn         = "SERVICE"
 	CacheColumn           = "CACHE"
 	CountColumn           = "COUNT"
+	PartitionColumn       = "PARTITION"
 	PolledColumn          = "POLLED"
 	HeadColumn            = "HEAD"
 	HitProbColumn         = "HIT PROB"
@@ -73,7 +74,7 @@ const (
 var (
 	KB int64 = 1024
 	MB       = KB * KB
-	GB       = MB * MB
+	GB       = MB * KB
 )
 
 type KeyValues struct {
@@ -187,12 +188,6 @@ func FormatFederationDetails(federationDetails []config.FederationDescription, t
 		return ""
 	}
 
-	sort.Slice(federationDetails, func(p, q int) bool {
-		nodeID1, _ := strconv.Atoi(federationDetails[p].NodeID)
-		nodeID2, _ := strconv.Atoi(federationDetails[q].NodeID)
-		return nodeID1 < nodeID2
-	})
-
 	if OutputFormat == constants.TABLE {
 		if target == destinations {
 			finalAlignment = []string{R, L, R, R, R, R}
@@ -207,7 +202,7 @@ func FormatFederationDetails(federationDetails []config.FederationDescription, t
 		}
 	}
 
-	table = newFormattedTable().WithAlignment(finalAlignment...)
+	table = newFormattedTable().WithAlignment(finalAlignment...).WithSortingColumn(NodeIDColumn)
 
 	if target == destinations {
 		table.WithHeader(NodeIDColumn, "STATE", "DATA "+suffix, "MSG "+suffix, "REC "+suffix, "CURR BWIDTH")
@@ -525,15 +520,8 @@ func FormatViewCacheDetail(cacheDetails []config.ViewCacheDetail) string {
 		return ""
 	}
 
-	sort.Slice(cacheDetails, func(p, q int) bool {
-		nodeID1, _ := strconv.Atoi(cacheDetails[p].NodeID)
-		nodeID2, _ := strconv.Atoi(cacheDetails[q].NodeID)
-		return nodeID1 < nodeID2
-	})
-
 	table := newFormattedTable().WithHeader(NodeIDColumn, "VIEW SIZE", "RECONNECT", "FILTER",
-		"TRANSFORMED", "TRANSFORMER", "READ ONLY")
-	table.WithAlignment(R, R, R, L, L, L, L)
+		"TRANSFORMED", "TRANSFORMER", "READ ONLY").WithSortingColumn(NodeIDColumn).WithAlignment(R, R, R, L, L, L, L)
 
 	for _, value := range cacheDetails {
 		var (
@@ -756,21 +744,15 @@ func FormatTopicsSubscriberGroups(subscriberGroups []config.TopicsSubscriberGrou
 
 // FormatTopicsMembers returns the topics member details in column formatted output.
 func FormatTopicsMembers(topicsMembers []config.TopicsMemberDetail) string {
-	var (
-		memberCount = len(topicsMembers)
-	)
+	var memberCount = len(topicsMembers)
+
 	if memberCount == 0 {
 		return ""
 	}
 
-	sort.Slice(topicsMembers, func(p, q int) bool {
-		nodeID1, _ := strconv.Atoi(topicsMembers[p].NodeID)
-		nodeID2, _ := strconv.Atoi(topicsMembers[q].NodeID)
-		return nodeID1 < nodeID2
-	})
-
 	table := newFormattedTable().WithHeader(NodeIDColumn, ChannelsColumn, PublishedColumn, MeanColumn, OneMinuteColumn,
-		FiveMinuteColumn, FifteenMinuteColumn)
+		FiveMinuteColumn, FifteenMinuteColumn).WithSortingColumn(NodeIDColumn)
+
 	if OutputFormat == constants.WIDE {
 		table.WithAlignment(R, R, R, R, R, R, R, R, R, R, R)
 		table.AddHeaderColumns("SUB TIMEOUT", "RECON TIMEOUT", "WAIT", "PAGE CAPACITY")
@@ -803,12 +785,8 @@ func FormatChannelStats(channelStats []config.ChannelStats) string {
 		return ""
 	}
 
-	sort.Slice(channelStats, func(p, q int) bool {
-		return channelStats[p].Channel < channelStats[q].Channel
-	})
-
 	table := newFormattedTable().WithHeader(ChannelColumn, PublishedColumn, MeanColumn, OneMinuteColumn,
-		FiveMinuteColumn, FifteenMinuteColumn, "TAIL").WithAlignment(R, R, R, R, R, R, L)
+		FiveMinuteColumn, FifteenMinuteColumn, "TAIL").WithAlignment(R, R, R, R, R, R, L).WithSortingColumn(ChannelColumn)
 
 	for _, value := range channelStats {
 		table.AddRow(formatLargeInteger(value.Channel),
@@ -833,7 +811,7 @@ func FormatSubscriberChannelStats(channelStats []config.SubscriberChannelStats) 
 	})
 
 	table := newFormattedTable().WithHeader(ChannelColumn, "EMPTY", "LAST COMMIT",
-		"LAST REC", "OWNED", HeadColumn).WithAlignment(R, L, L, L, L, L)
+		"LAST REC", "OWNED", HeadColumn).WithAlignment(R, L, L, L, L, L).WithSortingColumn(ChannelColumn)
 
 	for _, value := range channelStats {
 		table.AddRow(formatLargeInteger(value.Channel),
@@ -851,11 +829,7 @@ func FormatHeadsStats(channelStats []config.HeadStats) string {
 		return ""
 	}
 
-	sort.Slice(channelStats, func(p, q int) bool {
-		return channelStats[p].Channel < channelStats[q].Channel
-	})
-
-	table := newFormattedTable().WithHeader(ChannelColumn, "POSITION").WithAlignment(R, L)
+	table := newFormattedTable().WithHeader(ChannelColumn, "POSITION").WithAlignment(R, L).WithSortingColumn(ChannelColumn)
 
 	for _, value := range channelStats {
 		table.AddRow(formatLargeInteger(value.Channel), value.Position)
@@ -866,20 +840,14 @@ func FormatHeadsStats(channelStats []config.HeadStats) string {
 
 // FormatSubscriberGroupChannelStats returns the subscriber channel stats in column formatted output.
 func FormatSubscriberGroupChannelStats(channelStats []config.SubscriberGroupChannelStats) string {
-	var (
-		memberCount = len(channelStats)
-	)
+	var memberCount = len(channelStats)
 
 	if memberCount == 0 {
 		return ""
 	}
 
-	sort.Slice(channelStats, func(p, q int) bool {
-		return channelStats[p].Channel < channelStats[q].Channel
-	})
-
 	table := newFormattedTable().WithHeader(ChannelColumn, "OWNING SUB", MemberColumn, PolledColumn, MeanColumn,
-		OneMinuteColumn, FiveMinuteColumn, FifteenMinuteColumn, HeadColumn)
+		OneMinuteColumn, FiveMinuteColumn, FifteenMinuteColumn, HeadColumn).WithSortingColumn(ChannelColumn)
 	if OutputFormat == constants.WIDE {
 		table.WithAlignment(R, R, R, R, R, R, R, R, L, L, L, L)
 		table.AddHeaderColumns("LAST COMMIT", "LAST TIMESTAMP", "LAST POLLED")
@@ -904,20 +872,15 @@ func FormatSubscriberGroupChannelStats(channelStats []config.SubscriberGroupChan
 
 // FormatServiceMembers returns the service member details in column formatted output.
 func FormatServiceMembers(serviceMembers []config.ServiceMemberDetail) string {
-	var (
-		memberCount = len(serviceMembers)
-	)
+	var memberCount = len(serviceMembers)
+
 	if memberCount == 0 {
 		return ""
 	}
 
-	sort.Slice(serviceMembers, func(p, q int) bool {
-		nodeID1, _ := strconv.Atoi(serviceMembers[p].NodeID)
-		nodeID2, _ := strconv.Atoi(serviceMembers[q].NodeID)
-		return nodeID1 < nodeID2
-	})
+	table := newFormattedTable().WithHeader(NodeIDColumn, "THREADS", "IDLE", "THREAD UTIL", "MIN THREADS", "MAX THREADS").
+		WithSortingColumn(NodeIDColumn)
 
-	table := newFormattedTable().WithHeader(NodeIDColumn, "THREADS", "IDLE", "THREAD UTIL", "MIN THREADS", "MAX THREADS")
 	if OutputFormat == constants.WIDE {
 		table.WithAlignment(R, R, R, R, R, R, R, R, R, R, R, R)
 		table.AddHeaderColumns("TASK COUNT", "TASK BACKLOG", "PRIMARY OWNED",
@@ -961,14 +924,9 @@ func FormatCacheDetailsSizeAndAccess(cacheDetails []config.CacheDetail) string {
 		return ""
 	}
 
-	sort.Slice(cacheDetails, func(p, q int) bool {
-		nodeID1, _ := strconv.Atoi(cacheDetails[p].NodeID)
-		nodeID2, _ := strconv.Atoi(cacheDetails[q].NodeID)
-		return nodeID1 < nodeID2
-	})
-
 	table := newFormattedTable().WithHeader(NodeIDColumn, "TIER", CountColumn, "SIZE",
-		"PUTS", "GETS", "REMOVES", "CLEARS", "EVICTIONS")
+		"PUTS", "GETS", "REMOVES", "CLEARS", "EVICTIONS").WithSortingColumn(NodeIDColumn)
+
 	if OutputFormat == constants.WIDE {
 		table.WithAlignment(R, L, R, R, R, R, R, R, R, R, R, R, R, R, R)
 		table.AddHeaderColumns("HITS", "MISSES", HitProbColumn, "STORE READS",
@@ -1047,14 +1005,8 @@ func FormatCacheDetailsStorage(cacheDetails []config.CacheDetail) string {
 		return ""
 	}
 
-	sort.Slice(cacheDetails, func(p, q int) bool {
-		nodeID1, _ := strconv.Atoi(cacheDetails[p].NodeID)
-		nodeID2, _ := strconv.Atoi(cacheDetails[q].NodeID)
-		return nodeID1 < nodeID2
-	})
-
 	table := newFormattedTable().WithHeader(NodeIDColumn, "TIER", "LOCKS GRANTED", "LOCKS PENDING", "KEY LISTENERS",
-		"FILTER LISTENERS", "MAX QUERY MS", "MAX QUERY DESC").MaxLength(40)
+		"FILTER LISTENERS", "MAX QUERY MS", "MAX QUERY DESC").MaxLength(40).WithSortingColumn(NodeIDColumn)
 
 	if OutputFormat == constants.WIDE {
 		table.AddHeaderColumns("NO OPT AVG", "OPT AVG", "INDEX SIZE", "INDEXING MILLIS")
@@ -1094,20 +1046,8 @@ func FormatCachePartitions(cacheDetails []config.CachePartitionDetail, summary b
 		return ""
 	}
 
-	sort.Slice(cacheDetails, func(p, q int) bool {
-		if partitionSortSize {
-			return cacheDetails[p].TotalSize > cacheDetails[q].TotalSize
-		}
-		if partitionSortCount {
-			return cacheDetails[p].Count > cacheDetails[q].Count
-		}
-		if partitionSortMaxSize {
-			return cacheDetails[p].MaxEntrySize > cacheDetails[q].MaxEntrySize
-		}
-		return cacheDetails[p].PartitionID < cacheDetails[q].PartitionID
-	})
-
-	table := newFormattedTable().WithHeader("PARTITION", "OWNING MEMBER", CountColumn, "SIZE", "MAX ENTRY SIZE").WithAlignment(R, R, R, R, R)
+	table := newFormattedTable().WithHeader(PartitionColumn, "OWNING MEMBER", CountColumn, "SIZE", "MAX ENTRY SIZE").
+		WithAlignment(R, R, R, R, R).WithSortingColumn(PartitionColumn)
 
 	for _, value := range cacheDetails {
 		table.AddRow(formatSmallInteger(value.PartitionID), formatSmallInteger(value.MemberID), formatSmallInteger(value.Count),
@@ -1144,14 +1084,8 @@ func FormatCacheStoreDetails(cacheDetails []config.CacheStoreDetail, cache, serv
 		return ""
 	}
 
-	sort.Slice(cacheDetails, func(p, q int) bool {
-		nodeID1, _ := strconv.Atoi(cacheDetails[p].NodeID)
-		nodeID2, _ := strconv.Atoi(cacheDetails[q].NodeID)
-		return nodeID1 < nodeID2
-	})
-
 	table := newFormattedTable().WithHeader(NodeIDColumn, "QUEUE SIZE", "WRITES", "AVG BATCH", "AVG WRITE", "FAILURES",
-		"READS", "AVG READ").WithAlignment(R, R, R, R, R, R, R, R)
+		"READS", "AVG READ").WithAlignment(R, R, R, R, R, R, R, R).WithSortingColumn(NodeIDColumn)
 
 	for _, value := range cacheDetails {
 		var nodeID, _ = strconv.Atoi(value.NodeID)
@@ -1233,11 +1167,8 @@ func FormatClusterConnections(clusters []ClusterConnection) string {
 		return ""
 	}
 
-	sort.Slice(clusters, func(p, q int) bool {
-		return strings.Compare(clusters[p].Name, clusters[q].Name) < 0
-	})
-
-	table := newFormattedTable().WithHeader("CONNECTION", "TYPE", "URL", "VERSION", "CLUSTER NAME", "TYPE", "CTX", "LOCAL")
+	table := newFormattedTable().WithHeader("CONNECTION", "TYPE", "URL", "VERSION", "CLUSTER NAME", "TYPE", "CTX", "LOCAL").
+		WithSortingColumn("CONNECTION")
 
 	for _, value := range clusters {
 		currentContext = ""
@@ -1267,14 +1198,8 @@ func FormatTracing(members []config.Member) string {
 		return ""
 	}
 
-	sort.Slice(members, func(p, q int) bool {
-		nodeID1, _ := strconv.Atoi(members[p].NodeID)
-		nodeID2, _ := strconv.Atoi(members[q].NodeID)
-		return nodeID1 < nodeID2
-	})
-
 	table := newFormattedTable().WithHeader(NodeIDColumn, AddressColumn, PortColumn, ProcessColumn, MemberColumn, RoleColumn,
-		"TRACING ENABLED", "SAMPLING RATIO").WithAlignment(R, L, R, R, L, L, L, R)
+		"TRACING ENABLED", "SAMPLING RATIO").WithAlignment(R, L, R, R, L, L, L, R).WithSortingColumn(NodeIDColumn)
 
 	for _, value := range members {
 		var (
@@ -1301,12 +1226,8 @@ func FormatHealthSummary(health []config.HealthSummaryShort) string {
 		return ""
 	}
 
-	sort.Slice(health, func(p, q int) bool {
-		return strings.Compare(health[p].Name, health[q].Name) < 0
-	})
-
-	table := newFormattedTable().WithHeader("NAME", "SUB TYPE", MembersColumn, "STARTED", "LIVE", "READY", "SAFE").
-		WithAlignment(L, L, R, R, R, R, R)
+	table := newFormattedTable().WithHeader(NameColumn, "SUB TYPE", MembersColumn, "STARTED", "LIVE", "READY", "SAFE").
+		WithAlignment(L, L, R, R, R, R, R).WithSortingColumn(NameColumn)
 	for i := 3; i <= 6; i++ {
 		table.AddFormattingFunction(i, healthSummaryFormatter)
 	}
@@ -1322,18 +1243,14 @@ func FormatHealthSummary(health []config.HealthSummaryShort) string {
 	return table.String()
 }
 
-// FormatHealthMonitoring returns the healt HTTP endpoints..
+// FormatHealthMonitoring returns the health HTTP endpoints..
 func FormatHealthMonitoring(health []config.HealthMonitoring) string {
 	if len(health) == 0 {
 		return ""
 	}
 
-	sort.Slice(health, func(p, q int) bool {
-		return strings.Compare(health[p].Endpoint, health[q].Endpoint) < 0
-	})
-
 	table := newFormattedTable().WithHeader("URL", NodeIDColumn, "STARTED", "LIVE", "READY", "SAFE", "OVERALL").
-		WithAlignment(L, R, R, R, R, R, R)
+		WithAlignment(L, R, R, R, R, R, R).WithSortingColumn("URL")
 	for i := 2; i <= 6; i++ {
 		table.AddFormattingFunction(i, healthMonitoringFormatter)
 	}
@@ -1400,7 +1317,7 @@ func FormatMemberHealth(health []config.HealthSummary) string {
 		return nodeID1 < nodeID2
 	})
 
-	table := newFormattedTable().WithHeader(NodeIDColumn, "NAME", "SUB TYPE", "STARTED", "LIVE", "READY", "SAFE",
+	table := newFormattedTable().WithHeader(NodeIDColumn, NameColumn, "SUB TYPE", "STARTED", "LIVE", "READY", "SAFE",
 		"MEMBER HEALTH", "DESCRIPTION").WithAlignment(finalAlignment...)
 	for i := 3; i <= 7; i++ {
 		table.AddFormattingFunction(i, healthFormatter)
@@ -1443,12 +1360,6 @@ func FormatMembers(members []config.Member, verbose bool, storageMap map[int]boo
 		finalAlignment = alignmentWide
 	}
 
-	sort.Slice(members, func(p, q int) bool {
-		nodeID1, _ := strconv.Atoi(members[p].NodeID)
-		nodeID2, _ := strconv.Atoi(members[q].NodeID)
-		return nodeID1 < nodeID2
-	})
-
 	var (
 		totalMaxMemoryMB          int32
 		totalAvailMemoryMB        int32
@@ -1458,7 +1369,7 @@ func FormatMembers(members []config.Member, verbose bool, storageMap map[int]boo
 	)
 
 	table := newFormattedTable().WithHeader(NodeIDColumn, AddressColumn, PortColumn, ProcessColumn, MemberColumn, RoleColumn).
-		WithAlignment(finalAlignment...)
+		WithAlignment(finalAlignment...).WithSortingColumn(NodeIDColumn)
 
 	if OutputFormat == constants.WIDE {
 		table.AddHeaderColumns(machineColumn, rackColumn, siteColumn, publisherColumn, receiverColumn)
@@ -1542,12 +1453,8 @@ func FormatMembers(members []config.Member, verbose bool, storageMap map[int]boo
 
 // FormatDepartedMembers returns the departed member's information in a column formatted output.
 func FormatDepartedMembers(members []config.DepartedMembers) string {
-	sort.Slice(members, func(p, q int) bool {
-		return members[p].TimeStamp > members[q].TimeStamp
-	})
-
 	table := newFormattedTable().WithHeader(NodeIDColumn, "TIMESTAMP", AddressColumn, "MACHINE ID", "LOCATION", RoleColumn).
-		WithAlignment([]string{R, L, L, L, L, L}...)
+		WithAlignment([]string{R, L, L, L, L, L}...).WithSortingColumn(NodeIDColumn)
 
 	for _, value := range members {
 		table.AddRow(value.NodeID, value.TimeStamp, value.Address, value.MachineID, value.Location, value.Role)
@@ -1571,15 +1478,9 @@ func FormatNetworkStatistics(members []config.Member) string {
 		finalAlignment = alignmentWide
 	}
 
-	sort.Slice(members, func(p, q int) bool {
-		nodeID1, _ := strconv.Atoi(members[p].NodeID)
-		nodeID2, _ := strconv.Atoi(members[q].NodeID)
-		return nodeID1 < nodeID2
-	})
-
 	table := newFormattedTable().WithHeader(NodeIDColumn, AddressColumn, PortColumn, ProcessColumn, MemberColumn, RoleColumn,
 		"PKT SENT", "PKT REC", "RESENT", "EFFICIENCY", "SEND Q", dataSent, dataRec, "WEAKEST").
-		WithAlignment(finalAlignment...)
+		WithAlignment(finalAlignment...).WithSortingColumn(NodeIDColumn)
 	table.AddFormattingFunction(9, networkStatsFormatter)
 	table.AddFormattingFunction(10, errorFormatter)
 
@@ -1614,12 +1515,8 @@ func FormatExecutors(executors []config.Executor, summary bool) string {
 		header = MemberColumn
 	}
 
-	sort.Slice(executors, func(p, q int) bool {
-		return strings.Compare(executors[p].Name, executors[q].Name) < 0
-	})
-
 	table := newFormattedTable().WithHeader(NameColumn, header, "IN PROGRESS", "COMPLETED", "REJECTED", "DESCRIPTION").
-		WithAlignment(L, R, R, R, R, L)
+		WithAlignment(L, R, R, R, R, L).WithSortingColumn(NameColumn)
 	table.AddFormattingFunction(4, errorFormatter)
 
 	var (
@@ -1659,12 +1556,6 @@ func FormatElasticData(edData []config.ElasticData, summary bool) string {
 		alignment = []string{L, R, R, R, R, R, R, R, R, R}
 	)
 
-	sort.Slice(edData, func(p, q int) bool {
-		nodeID1, _ := strconv.Atoi(edData[p].NodeID)
-		nodeID2, _ := strconv.Atoi(edData[q].NodeID)
-		return nodeID1 < nodeID2
-	})
-
 	// if we are not a summary then change column 1
 	if !summary {
 		column1 = NodeIDColumn
@@ -1672,7 +1563,8 @@ func FormatElasticData(edData []config.ElasticData, summary bool) string {
 	}
 
 	table := newFormattedTable().WithHeader(column1, "USED FILES", "TOTAL FILES", "% USED", "MAX FILE SIZE",
-		"USED SPACE", "COMMITTED", "HIGHEST LOAD", "COMPACTIONS", "EXHAUSTIVE").WithAlignment(L, R, R, R, R, R, R, R, R, R)
+		"USED SPACE", "COMMITTED", "HIGHEST LOAD", "COMPACTIONS", "EXHAUSTIVE").WithAlignment(L, R, R, R, R, R, R, R, R, R).
+		WithSortingColumn(column1)
 
 	for _, data := range edData {
 		var (
@@ -1699,29 +1591,15 @@ func FormatElasticData(edData []config.ElasticData, summary bool) string {
 
 // FormatNetworkStats formats the network stats.
 func FormatNetworkStats(details []config.NetworkStatsDetails) string {
-	var (
-		edCount = len(details)
-		//	formattingFunction = getFormattingFunction()
-	)
-	if edCount == 0 {
+	var statsCount = len(details)
+
+	if statsCount == 0 {
 		return ""
 	}
 
-	sort.Slice(details, func(p, q int) bool {
-		if p2pSortByPublisher {
-			return details[p].PublisherSuccessRate < details[q].PublisherSuccessRate
-		} else if p2pSortByReceiver {
-			return details[p].ReceiverSuccessRate < details[q].ReceiverSuccessRate
-		}
-
-		nodeID1, _ := strconv.Atoi(details[p].NodeID)
-		nodeID2, _ := strconv.Atoi(details[q].NodeID)
-		return nodeID1 < nodeID2
-	})
-
-	table := newFormattedTable().WithHeader(MemberColumn, publisherColumn, receiverColumn, "PAUSE RATE", "THRESHOLD",
+	table := newFormattedTable().WithHeader(NodeIDColumn, publisherColumn, receiverColumn, "PAUSE RATE", "THRESHOLD",
 		"PAUSED", "DEFERRING", "DEFERRED", "OUTSTANDING", "READY", "LAST IN", "LAST OUT", "LAST SLOW", "LAST DEATH").
-		WithAlignment(R, R, R, R, R, L, L, R, R, R, R, R, R, R)
+		WithAlignment(R, R, R, R, R, L, L, R, R, R, R, R, R, R).WithSortingColumn(NodeIDColumn)
 
 	table.AddFormattingFunction(1, networkStatsFormatter)
 	table.AddFormattingFunction(2, networkStatsFormatter)
@@ -1750,19 +1628,13 @@ func FormatReporters(reporters []config.Reporter) string {
 		return ""
 	}
 
-	sort.Slice(reporters, func(p, q int) bool {
-		nodeID1, _ := strconv.Atoi(reporters[p].NodeID)
-		nodeID2, _ := strconv.Atoi(reporters[q].NodeID)
-		return nodeID1 < nodeID2
-	})
-
 	if OutputFormat == constants.WIDE {
 		maxLength = 0
 	}
 
 	table := newFormattedTable().WithHeader(NodeIDColumn, "STATE", "CONFIG FILE", "OUTPUT PATH",
 		"BATCH#", "LAST REPORT", "LAST RUN", "AVG RUN", "INTERVAL", "AUTOSTART").
-		WithAlignment(R, L, L, L, R, L, R, R, R, L).MaxLength(maxLength)
+		WithAlignment(R, L, L, L, R, L, R, R, R, L).MaxLength(maxLength).WithSortingColumn(NodeIDColumn)
 
 	table.AddFormattingFunction(1, reporterFormatter)
 
@@ -1784,12 +1656,8 @@ func FormatServices(services []config.ServiceSummary) string {
 		return ""
 	}
 
-	sort.Slice(services, func(p, q int) bool {
-		return strings.Compare(services[p].ServiceName, services[q].ServiceName) < 0
-	})
-
 	table := newFormattedTable().WithHeader(ServiceNameColumn, "TYPE", MembersColumn, "STATUS HA", "STORAGE",
-		"SENIOR", partitions, "STATUS")
+		"SENIOR", partitions, "STATUS").WithSortingColumn(ServiceNameColumn)
 	if OutputFormat == constants.WIDE {
 		table.WithAlignment(L, L, R, L, R, R, R, L, R, R, R, L)
 		table.AddHeaderColumns(endangered, "VULNERABLE", "UNBALANCED", "SUSPENDED")
@@ -1850,12 +1718,8 @@ func FormatServicesStorage(services []config.ServiceStorageSummary) string {
 	}
 	var formattingFunction = getFormattingFunction()
 
-	sort.Slice(services, func(p, q int) bool {
-		return strings.Compare(services[p].ServiceName, services[q].ServiceName) < 0
-	})
-
 	table := newFormattedTable().WithHeader(ServiceNameColumn, partitions, "NODES", "AVG PARTITION", "MAX PARTITION",
-		"AVG STORAGE", "MAX STORAGE NODE", "MAX NODE").WithAlignment(L, R, R, R, R, R, R, R)
+		"AVG STORAGE", "MAX STORAGE NODE", "MAX NODE").WithAlignment(L, R, R, R, R, R, R, R).WithSortingColumn(ServiceNameColumn)
 
 	for _, value := range services {
 		var maxNode = "-"
@@ -1882,12 +1746,8 @@ func FormatMachines(machines []config.Machine) string {
 		percentFree        float64
 	)
 
-	sort.Slice(machines, func(p, q int) bool {
-		return strings.Compare(machines[p].MachineName, machines[q].MachineName) < 0
-	})
-
 	table := newFormattedTable().WithHeader(machineColumn, "PROCESSORS", "LOAD", "TOTAL MEMORY", "FREE MEMORY",
-		"% FREE", "OS", "ARCH", "VERSION").WithAlignment(L, R, R, R, R, R, L, L, L)
+		"% FREE", "OS", "ARCH", "VERSION").WithAlignment(L, R, R, R, R, R, L, L, L).WithSortingColumn(machineColumn)
 	table.AddFormattingFunction(5, machineMemoryFormatting)
 
 	for _, value := range machines {
@@ -2035,15 +1895,11 @@ func FormatSnapshots(serviceSnapshots []config.Snapshots, archived bool) string 
 	}
 	var snapshotHeader = "SNAPSHOT NAME"
 
-	sort.Slice(serviceSnapshots, func(p, q int) bool {
-		return strings.Compare(serviceSnapshots[p].ServiceName, serviceSnapshots[q].ServiceName) < 0
-	})
-
 	if archived {
 		snapshotHeader = "ARCHIVED " + snapshotHeader
 	}
 
-	table := newFormattedTable().WithHeader(ServiceColumn, snapshotHeader)
+	table := newFormattedTable().WithHeader(ServiceColumn, snapshotHeader).WithSortingColumn(ServiceColumn)
 
 	for _, service := range serviceSnapshots {
 		snapshots := service.Snapshots
@@ -2068,12 +1924,8 @@ func FormatProxyConnections(connections []config.ProxyConnection) string {
 		formattingFunction = getFormattingFunction()
 	)
 
-	sort.Slice(connections, func(p, q int) bool {
-		return connections[p].ConnectionTimeMillis < connections[q].ConnectionTimeMillis
-	})
-
 	table := newFormattedTable().WithHeader(NodeIDColumn, "CONN MS", "CONN TIME", "REMOTE ADDR/PORT",
-		dataSent, dataRec, "BACKLOG", "CLIENT PROCESS", "CLIENT ROLE")
+		dataSent, dataRec, "BACKLOG", "CLIENT PROCESS", "CLIENT ROLE").WithSortingColumn("CONN MS")
 	table.AddFormattingFunction(6, errorFormatter)
 
 	if OutputFormat == constants.WIDE {
@@ -2415,6 +2267,7 @@ type formatter func(string) string
 type FormattedTable interface {
 	WithAlignment(...string) FormattedTable
 	WithHeader(...string) FormattedTable
+	WithSortingColumn(column string) FormattedTable
 	MaxLength(int) FormattedTable
 	AddColumnsToRow(...string)
 	AddHeaderColumns(...string)
@@ -2425,11 +2278,12 @@ type FormattedTable interface {
 
 // formattedTable is an implementation of a FormattedTable.
 type formattedTable struct {
-	header           []string
-	rows             [][]string
-	alignment        []string
-	maxLen           int
-	columnFormatters map[int]formatter
+	header               []string
+	rows                 [][]string
+	alignment            []string
+	maxLen               int
+	columnFormatters     map[int]formatter
+	defaultSortingColumn string
 }
 
 // newFormattedTable returns a new formatted table.
@@ -2443,6 +2297,12 @@ func newFormattedTable() FormattedTable {
 // WithAlignment sets the alignment for the table.
 func (t *formattedTable) WithAlignment(alignment ...string) FormattedTable {
 	t.alignment = alignment
+	return t
+}
+
+// WithSortingColumn sets the default sorting column for the table when none is specified.
+func (t *formattedTable) WithSortingColumn(column string) FormattedTable {
+	t.defaultSortingColumn = column
 	return t
 }
 
@@ -2524,6 +2384,30 @@ func (t *formattedTable) String() string {
 		stringFormats[i] = align
 	}
 
+	if tableSorting != "" || t.defaultSortingColumn != "" {
+		// if tableSorting flag is empty this means we have defined a default sort for the table so
+		// apply this and then reset the tableSorting flag after this has completed
+		if tableSorting == "" {
+			tableSorting = t.defaultSortingColumn
+			defer func() {
+				// reset the table sorting after using the default
+				tableSorting = ""
+			}()
+		}
+		// apply table sorting, this is in the format of column number or name
+
+		column, err := t.parseSorting(tableSorting)
+		if err != nil {
+			_, _ = fmt.Fprintf(os.Stderr, "%v", err)
+		} else {
+			if column > numberColumns {
+				_, _ = fmt.Fprintf(os.Stderr, "sorting column must be not be greater than %v", numberColumns)
+			} else {
+				t.sortRows(column, !descendingFlag)
+			}
+		}
+	}
+
 	for r, row := range t.getCombined() {
 		// format each individual column entry
 		for i, e := range row {
@@ -2548,6 +2432,106 @@ func (t *formattedTable) String() string {
 		sb.WriteString("\n")
 	}
 	return sb.String()
+}
+
+// sortRows sorts rows in a table based upon the column and sort type.
+func (t *formattedTable) sortRows(column int, ascending bool) {
+	sort.SliceStable(t.rows, func(i, j int) bool {
+		// Extract the values in the specified column for each of the rows, replacing any commas
+		val1 := strings.ReplaceAll(t.rows[i][column-1], ",", "")
+		val2 := strings.ReplaceAll(t.rows[j][column-1], ",", "")
+
+		// if we have values with suffix such as "KB", "MB", "GB", or "TB", then remove them and adjust
+		// the value accordingly
+		val1 = expandValues(val1)
+		val2 = expandValues(val2)
+
+		// Attempt to convert both values to float for numeric comparison
+		num1, err1 := strconv.ParseFloat(val1, 64)
+		num2, err2 := strconv.ParseFloat(val2, 64)
+
+		if err1 == nil && err2 == nil {
+			// if both are valid floats then compare as strings
+			if ascending {
+				return num1 < num2
+			}
+			return num1 > num2
+		}
+
+		// Fallback to string comparison
+		if ascending {
+			return val1 < val2
+		}
+		return val1 > val2
+	})
+}
+
+var replacementMap = map[string]int64{
+	" KB": KB,
+	" MB": MB,
+	" GB": GB,
+	" TB": GB * KB,
+	"%":   100,
+	"ms":  1,
+	"s":   1,
+}
+
+// expandValues expands "KB", "MB", "GB", or "TB".
+func expandValues(s string) string {
+	var (
+		factor      int64 = 1
+		stringValue string
+	)
+
+	for k, v := range replacementMap {
+		if strings.Contains(s, k) {
+			stringValue = strings.ReplaceAll(s, k, "")
+			factor = v
+			break
+		}
+	}
+
+	f, err := strconv.ParseFloat(stringValue, 64)
+	if err == nil {
+		return fmt.Sprintf("%.f", f*float64(factor))
+	}
+
+	return s
+
+}
+
+// prseSorting parses a sorting string. The sorting string should have a
+// column number, where the column will be sorted ascending numerically, if possible,
+// or a column number and 'd' where it will be sorted descendingFlag.
+// the column string could also be a name of a column.
+func (t *formattedTable) parseSorting(sorting string) (int, error) {
+	return parseSortingInternal(t.header, sorting)
+}
+
+func parseSortingInternal(headers []string, sorting string) (int, error) {
+	var (
+		column int
+		err    error
+	)
+
+	// convert the array to an int
+	column, err = strconv.Atoi(sorting)
+
+	// if the conversion failed we assume it's a column name and find the name in the header
+	if err != nil {
+		for i, v := range headers {
+			if sorting == v {
+				column = i + 1
+				err = nil
+				break
+			}
+		}
+		if column == 0 {
+			err = fmt.Errorf("warning: invalid sorting string: %v", sorting)
+		}
+	}
+
+	return column, err
 }
 
 // getMaxColumnLen returns an array representing the max lengths of columns.

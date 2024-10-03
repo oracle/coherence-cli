@@ -83,12 +83,8 @@ var (
 // for creating a cluster. This includes mvn and java executables. Nil is returned to
 // indicate everything is ok, otherwise an error is returned.
 func checkRuntimeRequirements() error {
-	var (
-		err error
-	)
-
 	processJava := exec.Command(javaExec, "--version")
-	if err = processJava.Start(); err != nil {
+	if err := processJava.Start(); err != nil {
 		return utils.GetError(fmt.Sprintf("unable to get Java version using %s --version: %v", javaExec, processJava), err)
 	}
 

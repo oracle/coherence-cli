@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 
-    Copyright (c) 2021, Oracle and/or its affiliates.
+    Copyright (c) 2021, 2024 Oracle and/or its affiliates.
     Licensed under the Universal Permissive License v 1.0 as shown at
     https://oss.oracle.com/licenses/upl.
 
@@ -21,4 +21,5 @@ include::../../build/_output/docs-gen/global_flags.adoc[tag=text]
 
 * <<docs/config/10_changing_config_locations.adoc,Changing Config Locations>>
 * <<docs/examples/10_jsonpath.adoc, Using JsonPath>>
+* <<docs/config/08_sorting_table_output.adoc, Sorting Table Output>>
 

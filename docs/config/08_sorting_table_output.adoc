@@ -1,0 +1,96 @@
+///////////////////////////////////////////////////////////////////////////////
+
+    Copyright (c) 2024 Oracle and/or its affiliates.
+    Licensed under the Universal Permissive License v 1.0 as shown at
+    https://oss.oracle.com/licenses/upl.
+
+///////////////////////////////////////////////////////////////////////////////
+
+= Sorting Table Output
+
+== Sorting Table Output
+
+By default, the table output is sorted by a meaningful column based upon the context. For example,
+if we use the `cohctl get members` command, the output is sorted by the `NODE ID` column as shown below.
+
+[source,bash]
+----
+cohctl get members -c main
+
+Total cluster members: 3
+Storage enabled count: 3
+Departure count:       0
+
+Cluster Heap - Total: 768 MB Used: 192 MB Available: 576 MB (75.0%)
+Storage Heap - Total: 768 MB Used: 192 MB Available: 576 MB (75.0%)
+
+NODE ID  ADDRESS     PORT   PROCESS  MEMBER     ROLE             STORAGE  MAX HEAP  USED HEAP  AVAIL HEAP
+      1  /127.0.0.1  56125    34937  storage-2  CoherenceServer  true       256 MB      43 MB      213 MB
+      2  /127.0.0.1  56124    34936  storage-1  CoherenceServer  true       256 MB      46 MB      210 MB
+      3  /127.0.0.1  56126    34935  storage-0  CoherenceServer  true       256 MB     103 MB      153 MB
+----
+
+==== Specifying a custom sort column
+
+The CLI allows you to specify a custom sorting column for a table output by specifying the `--sort` option and
+providing a column header name such as `ROLE` or `'AVAIL HEAP'`, or a column number starting from 1.
+The sort is ascending by default, but can be chanegd to descending by specifying the `--desc` flag.
+
+If the column is numerical, then it will be sorted as a number otherwise it will be sorted as a string.
+
+NOTE: If a column name has a space in it, you must surround the column name with single quotes.
+
+**Example 1: Sort the members by Available Heap**
+
+[source,bash]
+----
+cohctl get members -c local --sort 'AVAIL HEAP'
+
+Total cluster members: 3
+Storage enabled count: 3
+Departure count:       0
+
+Cluster Heap - Total: 768 MB Used: 209 MB Available: 559 MB (72.8%)
+Storage Heap - Total: 768 MB Used: 209 MB Available: 559 MB (72.8%)
+
+NODE ID  ADDRESS     PORT   PROCESS  MEMBER     ROLE             STORAGE  MAX HEAP  USED HEAP  AVAIL HEAP
+      3  /127.0.0.1  56126    34935  storage-0  CoherenceServer  true       256 MB     112 MB      144 MB
+      1  /127.0.0.1  56125    34937  storage-2  CoherenceServer  true       256 MB      51 MB      205 MB
+      2  /127.0.0.1  56124    34936  storage-1  CoherenceServer  true       256 MB      46 MB      210 MB
+----
+
+**Example 2: Sort the members by Available Heap descending**
+
+[source,bash]
+----
+cohctl get members -c local --sort 'AVAIL HEAP' --desc
+
+Total cluster members: 3
+Storage enabled count: 3
+Departure count:       0
+
+Cluster Heap - Total: 768 MB Used: 225 MB Available: 543 MB (70.7%)
+Storage Heap - Total: 768 MB Used: 225 MB Available: 543 MB (70.7%)
+
+NODE ID  ADDRESS     PORT   PROCESS  MEMBER     ROLE             STORAGE  MAX HEAP  USED HEAP  AVAIL HEAP
+      1  /127.0.0.1  56125    34937  storage-2  CoherenceServer  true       256 MB      53 MB      203 MB
+      2  /127.0.0.1  56124    34936  storage-1  CoherenceServer  true       256 MB      55 MB      201 MB
+      3  /127.0.0.1  56126    34935  storage-0  CoherenceServer  true       256 MB     117 MB      139 MB
+----
+
+**Example 3: Sort the list of caches by COUNT descending**
+
+NOTE: In this example we specify the column number `3`, but you could also specify `COUNT`.
+
+[source,bash]
+----
+cohctl get caches --sort 3 --desc
+Using cluster connection 'main' from current context.
+
+Total Caches: 3, Total primary storage: 33 MB
+
+SERVICE           CACHE   COUNT   SIZE
+PartitionedCache  test2  30,300  33 MB
+PartitionedCache  test      100   0 MB
+PartitionedCache  test3      10   0 MB
+----
