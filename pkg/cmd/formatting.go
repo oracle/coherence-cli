@@ -84,12 +84,12 @@ type KeyValues struct {
 
 var printer = message.NewPrinter(language.English)
 
-// FormatCurrentCluster will display a message indicating a cluster context is being used.
+// FormatCurrentCluster will display a message indicating if a cluster context is being used.
 func FormatCurrentCluster(clusterName string) string {
 	if UsingContext {
 		return fmt.Sprintf("Using cluster connection '%s' from current context.\n", clusterName)
 	}
-	return ""
+	return fmt.Sprintf("Using specified cluster context '%s'\n", clusterConnection)
 }
 
 // FormatCluster returns a string representing a cluster.
@@ -1107,11 +1107,11 @@ func FormatCacheStoreDetails(cacheDetails []config.CacheStoreDetail, cache, serv
 	if includeHeader {
 		// create the header
 		header =
-			fmt.Sprintf("Service/Cache:        %s/%s\n", service, cache) +
-				fmt.Sprintf("Cache Store Type:     %s\n", cacheStoreType)
+			fmt.Sprintf("Service/Cache:             %s/%s\n", service, cache) +
+				fmt.Sprintf("Cache Store Type:          %s\n", cacheStoreType)
 	}
 	header += fmt.Sprintf("Total Queue TotalSize:     %s\n", formatLargeInteger(totalQueueSize)) +
-		fmt.Sprintf("Total Store Failures: %s\n", formatLargeInteger(totalFailures)) + "\n"
+		fmt.Sprintf("Total Store Failures:      %s\n", formatLargeInteger(totalFailures)) + "\n"
 
 	return header + table.String()
 }
