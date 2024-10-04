@@ -2467,13 +2467,14 @@ func (t *formattedTable) sortRows(column int, ascending bool) {
 }
 
 var replacementMap = map[string]int64{
-	" KB": KB,
-	" MB": MB,
-	" GB": GB,
-	" TB": GB * KB,
-	"%":   100,
-	"ms":  1,
-	"s":   1,
+	" KB":  KB,
+	" MB":  MB,
+	" GB":  GB,
+	" TB":  GB * KB,
+	"%":    100,
+	"ms":   1,
+	"Mbps": 1,
+	"s":    1,
 }
 
 // expandValues expands "KB", "MB", "GB", or "TB".

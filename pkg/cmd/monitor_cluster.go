@@ -41,7 +41,7 @@ var (
 		"default-cache":      "caches,cache-indexes:cache-access:cache-storage:cache-stores:cache-partitions",
 		"default-topic":      "topics:topic-members:subscribers:subscriber-groups",
 		"default-subscriber": "topics:subscribers:subscriber-channels",
-		"default-federation": "federation-all:federation-dest,federation-origins:caches:elastic-data",
+		"default-federation": "federation-all:services:caches:elastic-data",
 		"default-members":    "members:machines,departed-members:network-stats",
 	}
 	errSelectService       = errors.New("you must provide a service name via -S option")
