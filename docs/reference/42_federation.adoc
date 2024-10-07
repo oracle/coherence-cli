@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 
-    Copyright (c) 2021, 2023 Oracle and/or its affiliates.
+    Copyright (c) 2021, 2024 Oracle and/or its affiliates.
     Licensed under the Universal Permissive License v 1.0 as shown at
     https://oss.oracle.com/licenses/upl.
 
@@ -16,6 +16,7 @@ There are various commands that allow you to work with and issue Federation comm
 * <<get-federation, `cohctl get federation`>> - displays federation details for a cluster
 * <<set-federation, `cohctl set federation`>> - sets an attribute for a federated service
 * <<describe-federation, `cohctl describe federation`>> - displays federation details for a given service and participant
+* <<get-federation-incoming, `cohctl get federation-incoming`>> - displays incoming federation connections information for a given service and participant
 * <<start-federation, `cohctl start federation`>> - starts federation for a service
 * <<stop-federation, `cohctl stop federation`>> - stops federation for a service
 * <<pause-federation, `cohctl pause federation`>> - pauses federation for a service
@@ -168,6 +169,35 @@ NODE ID  CONNECTED  DATA SENT  MSG SENT  REC SENT  AVG APPLY  AVG BACKLOG DELAY
       1          1     83,029        67        67       15ms              440ms
       2          1     87,871        68        68       15ms              350ms
 ----
+
+[#get-federation-incoming]
+==== Get Federation Incoming Connections
+
+include::../../build/_output/docs-gen/get_federation_incoming.adoc[tag=text]
+
+*Examples*
+
+Get incoming federation connections for `FederatedCache` service and incoming participant `Sydney`:
+
+[source,bash]
+----
+cohctl get federation-incoming FederatedCache -p Sydney -c local
+----
+Output:
+[source,bash]
+----
+INCOMING FEDERATION CONNECTIONS
+------------------------------
+Service:     FederatedCache
+Type:        origins
+Participant: Sydney
+
+NODE ID  TIMESTAMP                ADDRESS          MACHINE ID  LOCATION                         ROLE
+      1  2024-10-07 12:51:03.624  127.0.0.1:62049  10131       machine:localhost,process:21341  CoherenceDemoServer
+      2  2024-10-07 13:25:02.737  127.0.0.1:63456  10131       machine:localhost,process:23893  CoherenceDemoServer
+      3  2024-10-07 13:25:06.468  127.0.0.1:63475  10131       machine:localhost,process:23894  CoherenceDemoServer
+----
+
 
 [#start-federation]
 ==== Start Federation

@@ -1744,9 +1744,20 @@ func RunTestFederationCommands(t *testing.T) {
 	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "cluster2,REPLICATE,100.00%", configArg, file,
 		"get", "federation", "destinations", "-o", "wide", "-c", context.ClusterName)
 
-	// test describe cluster
+	// test describe federation
 	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "AVG BACKLOG DELAY,AVG APPLY,cluster2", configArg, file,
 		"describe", "federation", "FederatedService", "-p", "cluster2", "-T", "destinations", "-o", "wide", "-c", context.ClusterName)
+
+	restUrl2 := strings.ReplaceAll(restUrl, "8080", "8081")
+	// populate data in second cluster
+	_, err = test_utils.IssueGetRequest(restUrl2 + "/populateFederation")
+	g.Expect(err).To(BeNil())
+
+	test_utils.Sleep(5)
+
+	// test get federation incoming
+	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "Service,Type,ADDRESS", configArg, file,
+		"get", "federation-incoming", "FederatedService", "-p", "cluster2", "-c", context.ClusterName)
 
 	// these commands are only available in the latest coherence versions - 14.1.1.2206.x and above
 	if isHealthEnabled(restUrl) {

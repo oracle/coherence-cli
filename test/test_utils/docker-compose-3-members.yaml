@@ -2,7 +2,6 @@
 # Licensed under the Universal Permissive License v 1.0 as shown at
 # https://oss.oracle.com/licenses/upl.
 
-version: "3.5"
 services:
   coherence1:
     hostname: server1
