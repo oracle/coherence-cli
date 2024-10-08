@@ -537,6 +537,7 @@ func Initialize(command *cobra.Command) *cobra.Command {
 	getCmd.AddCommand(getCacheIndexesCmd)
 	getCmd.AddCommand(getViewCachesCmd)
 	getCmd.AddCommand(getCachePartitionsCmd)
+	getCmd.AddCommand(getFederationIncomingCmd)
 
 	// set command
 	command.AddCommand(setCmd)

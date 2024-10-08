@@ -281,23 +281,17 @@ service, type and participant. Specify -T to set type outgoing or incoming and -
 	ValidArgsFunction: completionFederatedService,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
-			displayErrorAndExit(cmd, "you must provide a service name")
+			displayErrorAndExit(cmd, supplyService)
 		}
 		return nil
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var (
-			err               error
-			dataFetcher       fetcher.Fetcher
-			connection        string
-			federatedServices []string
-			service           = args[0]
-			nodeIDArray       []string
-			errorSink         = createErrorSink()
-			byteSink          = createByteArraySink()
-			wg                sync.WaitGroup
-			output            string
-			target            string
+			err         error
+			dataFetcher fetcher.Fetcher
+			connection  string
+			service     = args[0]
+			output      string
 		)
 
 		if participant == all {
@@ -310,100 +304,13 @@ service, type and participant. Specify -T to set type outgoing or incoming and -
 			return err
 		}
 
-		// filter the federated services only
-		federatedServices, err = GetFederatedServices(dataFetcher)
+		results, err := retrieveFederationDetails(dataFetcher, service, describeFederationType)
 		if err != nil {
 			return err
-		}
-
-		if len(federatedServices) == 0 {
-			return nil
-		}
-
-		// validate the federated service is valid
-		if !utils.SliceContains(federatedServices, service) {
-			return fmt.Errorf(federationServiceMsg, service)
-		}
-
-		// validate the type
-		if describeFederationType != destinations && describeFederationType != origins {
-			return fmt.Errorf("type must be %s or %s", destinations, origins)
-		}
-
-		// get all node Id's
-		nodeIDArray, err = GetClusterNodeIDs(dataFetcher)
-		if err != nil {
-			return err
-		}
-
-		var nodesLen = len(nodeIDArray)
-		if nodesLen == 0 {
-			return errors.New("no members found")
-		}
-
-		// retrieve federation details for all services and members for the participant
-		// http://127.0.0.1:8080/management/coherence/cluster/services/{service}/members/{member}/federation/statistics/{outgoing|incoming}/participants/{participant}?links=
-
-		wg.Add(nodesLen)
-
-		if describeFederationType == destinations {
-			target = outgoing
-		} else {
-			target = incoming
-		}
-		for _, value := range nodeIDArray {
-			go func(nodeID string) {
-				var (
-					err1   error
-					result []byte
-				)
-				defer wg.Done()
-				result, err1 = dataFetcher.GetFederationDetails(service, target, nodeID, participant)
-				if err1 != nil {
-					errorSink.AppendError(err1)
-				} else {
-					byteSink.AppendByteArray(result)
-				}
-			}(value)
-		}
-
-		wg.Wait()
-		errorList := errorSink.GetErrors()
-
-		if len(errorList) > 0 {
-			return utils.GetErrors(errorList)
-		}
-
-		// now we have the details
-		results := byteSink.GetByteArrays()
-		numResults := len(results)
-
-		// check to see if all results were empty and this will indicate no matches for participant and type
-		found := false
-		for _, v := range results {
-			if len(v) > 0 {
-				found = true
-				break
-			}
-		}
-
-		if !found {
-			return fmt.Errorf("unable to find participant %s for service %s and type %s", participant, service, describeFederationType)
 		}
 
 		if isJSONPathOrJSON() {
-			// encode for json output
-			finalData := make([]byte, 0)
-			finalData = append(finalData, []byte("{ \"items\": [")...)
-
-			for i, v := range byteSink.GetByteArrays() {
-				finalData = append(finalData, v...)
-				// only append "," if not last entry
-				if i < numResults-1 {
-					finalData = append(finalData, []byte(",")...)
-				}
-			}
-			finalData = append(finalData, []byte("]}")...)
+			finalData := encodeFinalData(results)
 
 			if err = processJSONOutput(cmd, finalData); err != nil {
 				return err
@@ -431,16 +338,9 @@ service, type and participant. Specify -T to set type outgoing or incoming and -
 				}
 			} else {
 				// not verbose output so unmarshall the original results
-				var federationData = make([]config.FederationDescription, 0)
-				for _, v := range results {
-					if len(v) > 0 {
-						var entry = config.FederationDescription{}
-						err = json.Unmarshal(v, &entry)
-						if err != nil {
-							return utils.GetError("unable to unmarshal federation details", err)
-						}
-						federationData = append(federationData, entry)
-					}
+				federationData, err := decodeFederationData(results)
+				if err != nil {
+					return err
 				}
 
 				sb.WriteString(FormatFederationDetails(federationData, describeFederationType))
@@ -451,6 +351,207 @@ service, type and participant. Specify -T to set type outgoing or incoming and -
 
 		return nil
 	},
+}
+
+func decodeFederationData(results [][]byte) ([]config.FederationDescription, error) {
+	var federationData = make([]config.FederationDescription, 0)
+	for _, v := range results {
+		if len(v) > 0 {
+			var entry = config.FederationDescription{}
+			err := json.Unmarshal(v, &entry)
+			if err != nil {
+				return federationData, utils.GetError("unable to unmarshal federation details", err)
+			}
+			federationData = append(federationData, entry)
+		}
+	}
+	return federationData, nil
+}
+
+// getFederationIncomingCmd represents the get federation-incoming command.
+var getFederationIncomingCmd = &cobra.Command{
+	Use:   "federation-incoming service-name",
+	Short: "get incoming federation connections information for a given service and participant",
+	Long: `The 'get federation-incoming' command displays the incoming connections for a given
+service and participant. Specify -p for participant.`,
+	ValidArgsFunction: completionFederatedService,
+	Args: func(cmd *cobra.Command, args []string) error {
+		if len(args) != 1 {
+			displayErrorAndExit(cmd, supplyService)
+		}
+		return nil
+	},
+	RunE: func(cmd *cobra.Command, args []string) error {
+		var (
+			err         error
+			dataFetcher fetcher.Fetcher
+			connection  string
+			service     = args[0]
+		)
+
+		if participant == all {
+			return errors.New("please provide a participant")
+		}
+		describeFederationType = origins
+
+		// retrieve the current context or the value from "-c"
+		connection, dataFetcher, err = GetConnectionAndDataFetcher()
+		if err != nil {
+			return err
+		}
+
+		results, err := retrieveFederationDetails(dataFetcher, service, origins)
+		if err != nil {
+			return err
+		}
+
+		if isJSONPathOrJSON() {
+			finalData := encodeFinalData(results)
+
+			if err = processJSONOutput(cmd, finalData); err != nil {
+				return err
+			}
+		} else {
+			var sb strings.Builder
+
+			sb.WriteString(FormatCurrentCluster(connection))
+
+			sb.WriteString("\nINCOMING FEDERATION CONNECTIONS\n")
+			sb.WriteString("------------------------------\n")
+
+			sb.WriteString(fmt.Sprintf("Service:     %s\n", service))
+			sb.WriteString(fmt.Sprintf("Type:        %s\n", describeFederationType))
+			sb.WriteString(fmt.Sprintf("Participant: %s\n\n", participant))
+
+			// encode the mapMembers
+			federationData, err := decodeFederationData(results)
+			if err != nil {
+				return err
+			}
+
+			mapAllIncoming := make([]string, 0)
+			for _, v := range federationData {
+				for _, v2 := range v.MapMembers {
+					mapAllIncoming = append(mapAllIncoming, v2)
+				}
+			}
+			incomingList, err1 := decodeDepartedMembers(mapAllIncoming)
+			if err1 != nil {
+				return err1
+			}
+
+			sb.WriteString(FormatDepartedMembers(incomingList))
+
+			cmd.Println(sb.String())
+		}
+
+		return nil
+	},
+}
+
+func encodeFinalData(results [][]byte) []byte {
+	numResults := len(results)
+
+	finalData := make([]byte, 0)
+	finalData = append(finalData, []byte("{ \"items\": [")...)
+
+	for i, v := range results {
+		finalData = append(finalData, v...)
+		// only append "," if not last entry
+		if i < numResults-1 {
+			finalData = append(finalData, []byte(",")...)
+		}
+	}
+	finalData = append(finalData, []byte("]}")...)
+
+	return finalData
+}
+
+func retrieveFederationDetails(dataFetcher fetcher.Fetcher, service string, target string) ([][]byte, error) {
+	var (
+		federatedServices []string
+		nodeIDArray       []string
+		errorSink         = createErrorSink()
+		byteSink          = createByteArraySink()
+		wg                sync.WaitGroup
+		err               error
+	)
+
+	// filter the federated services only
+	federatedServices, err = GetFederatedServices(dataFetcher)
+	if err != nil {
+		return constants.EmptyByteArray, err
+	}
+
+	if len(federatedServices) == 0 {
+		return constants.EmptyByteArray, nil
+	}
+
+	// validate the federated service is valid
+	if !utils.SliceContains(federatedServices, service) {
+		return constants.EmptyByteArray, fmt.Errorf(federationServiceMsg, service)
+	}
+
+	// get all node Id's
+	nodeIDArray, err = GetClusterNodeIDs(dataFetcher)
+	if err != nil {
+		return constants.EmptyByteArray, err
+	}
+
+	var nodesLen = len(nodeIDArray)
+	if nodesLen == 0 {
+		return constants.EmptyByteArray, errors.New("no members found")
+	}
+
+	// retrieve federation details for all services and members for the participant
+	// http://127.0.0.1:8080/management/coherence/cluster/services/{service}/members/{member}/federation/statistics/{outgoing|incoming}/participants/{participant}?links=
+
+	wg.Add(nodesLen)
+
+	if target == destinations {
+		target = outgoing
+	} else {
+		target = incoming
+	}
+	for _, value := range nodeIDArray {
+		go func(nodeID string) {
+			var (
+				err1   error
+				result []byte
+			)
+			defer wg.Done()
+			result, err1 = dataFetcher.GetFederationDetails(service, target, nodeID, participant)
+			if err1 != nil {
+				errorSink.AppendError(err1)
+			} else if len(result) > 0 {
+				byteSink.AppendByteArray(result)
+			}
+		}(value)
+	}
+
+	wg.Wait()
+	errorList := errorSink.GetErrors()
+
+	if len(errorList) > 0 {
+		return constants.EmptyByteArray, utils.GetErrors(errorList)
+	}
+
+	// check to see if all results were empty and this will indicate no matches for participant and type
+	found := false
+	results := byteSink.GetByteArrays()
+
+	for _, v := range results {
+		if len(v) > 0 {
+			found = true
+			break
+		}
+	}
+
+	if !found {
+		return constants.EmptyByteArray, fmt.Errorf("unable to find participant %s for service %s and type %s", participant, service, target)
+	}
+
+	return results, nil
 }
 
 func init() {
@@ -479,4 +580,6 @@ func init() {
 	describeFederationCmd.Flags().StringVarP(&describeFederationType, "type", "T", outgoing, "type to describe "+outgoing+" or "+incoming)
 	describeFederationCmd.Flags().BoolVarP(&verboseOutput, "verbose", "v", false,
 		"include verbose output including all attributes")
+
+	getFederationIncomingCmd.Flags().StringVarP(&participant, "participant", "p", "", participantMessage)
 }
