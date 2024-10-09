@@ -53,6 +53,7 @@ var (
 	emptyStringArray       = make([]string, 0)
 	layoutParam            string
 	setMaxHeight           int
+	originalMaxHeight      int
 	padMaxHeightParam      = true
 	showAllPanels          bool
 	ignoreRESTErrors       bool
@@ -221,6 +222,8 @@ Use --show-panels to show all available panels.`,
 
 		exit := make(chan struct{})
 
+		originalMaxHeight = setMaxHeight
+
 		// initial update
 		err = updateScreen(screen, dataFetcher, parsedLayout, true)
 		if err != nil {
@@ -327,6 +330,9 @@ func increaseMaxHeight() {
 		validPanels[i].MaxHeight++
 	}
 	heightAdjust++
+	if setMaxHeight != 0 {
+		setMaxHeight++
+	}
 }
 
 func decreaseMaxHeight() {
@@ -337,6 +343,9 @@ func decreaseMaxHeight() {
 			}
 		}
 		heightAdjust--
+		if setMaxHeight != 0 {
+			setMaxHeight--
+		}
 	}
 }
 
@@ -345,6 +354,7 @@ func resetMaxHeight() {
 		validPanels[i].MaxHeight = validPanels[i].OriginalMaxHeight
 	}
 	heightAdjust = 0
+	setMaxHeight = originalMaxHeight
 }
 
 func refresh(screen tcell.Screen, dataFetcher fetcher.Fetcher, parsedLayout []string, refresh bool) error {
