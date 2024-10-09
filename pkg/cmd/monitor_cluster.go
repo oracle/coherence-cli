@@ -36,7 +36,7 @@ const (
 
 var (
 	defaultMap = map[string]string{
-		"default":            "members:services,caches:proxies,http-servers:machines,network-stats",
+		"default":            "summary-cluster,summary-members,machines:services,caches:proxies,http-servers:health-summary,persistence:federation-all,elastic-data:network-stats",
 		"default-service":    "services:service-members:service-distributions",
 		"default-cache":      "caches,cache-indexes:cache-access:cache-storage:cache-stores:cache-partitions",
 		"default-topic":      "topics:topic-members:subscribers:subscriber-groups",
@@ -52,6 +52,8 @@ var (
 	lastClusterSummaryInfo clusterSummaryInfo
 	emptyStringArray       = make([]string, 0)
 	layoutParam            string
+	setMaxHeight           int
+	originalMaxHeight      int
 	padMaxHeightParam      = true
 	showAllPanels          bool
 	ignoreRESTErrors       bool
@@ -75,41 +77,44 @@ var (
 )
 
 var validPanels = []panelImpl{
-	createContentPanel(8, "caches", "Caches", "show caches", cachesContent, cachesPanelData, servicesPanelData),
-	createContentPanel(8, "cache-access", "Cache Access (%SERVICE/%CACHE)", "show cache access", cacheAccessContent, cachesPanelData, servicesPanelData),
-	createContentPanel(8, "cache-indexes", "Cache Indexes (%SERVICE/%CACHE)", "show cache indexes", cacheIndexesContent, cachesPanelData, servicesPanelData),
-	createContentPanel(8, "cache-storage", "Cache Storage (%SERVICE/%CACHE)", "show cache storage", cacheStorageContent, cachesPanelData, servicesPanelData),
-	createContentPanel(8, "cache-stores", "Cache Stores (%SERVICE/%CACHE)", "show cache stores", cacheStoresContent),
-	createContentPanel(8, "cache-partitions", "Cache Partitions (%SERVICE/%CACHE)", "show cache partitions", cachePartitionContent, cachesPanelData, servicesPanelData),
-	createContentPanel(8, "departed-members", "Departed Members", "show departed members", departedMembersContent, memberPanelData, storagePanelData),
-	createContentPanel(5, "elastic-data", "Elastic Data", "show elastic data", elasticDataContent, elasticDataPanelData),
-	createContentPanel(8, "executors", "Executors", "show Executors", executorsContent, executorsPanelData),
-	createContentPanel(10, "health-summary", "Health Summary", "show health summary", healthSummaryContent, healthPanelData),
-	createContentPanel(5, "federation-all", "Federation All", "show all federation details", federationAllContent, federationPanelData),
-	createContentPanel(5, "federation-dest", "Federation Destinations", "show federation destinations", federationDestinationsContent, federationPanelData),
-	createContentPanel(5, "federation-origins", "Federation Origins", "show federation origins", federationOriginsContent, federationPanelData),
-	createContentPanel(8, "http-servers", "HTTP Servers", "show HTTP servers", httpServersContent, proxiesPanelData),
-	createContentPanel(8, "http-sessions", "HTTP Sessions", "show HTTP sessions", httpSessionsContent, httpSessionsPanelData),
-	createContentPanel(8, "machines", "Machines", "show machines", machinesContent, memberPanelData, storagePanelData),
-	createContentPanel(7, "members-summary", "Members Summary", "show members summary", membersSummaryContent, memberPanelData, storagePanelData),
-	createContentPanel(10, "members", "Members", "show members", membersContent, memberPanelData, storagePanelData),
+	createContentPanel(7, "caches", "Caches", "show caches", cachesContent, cachesPanelData, servicesPanelData),
+	createContentPanel(7, "cache-access", "Cache Access (%SERVICE/%CACHE)", "show cache access", cacheAccessContent, cachesPanelData, servicesPanelData),
+	createContentPanel(7, "cache-indexes", "Cache Indexes (%SERVICE/%CACHE)", "show cache indexes", cacheIndexesContent, cachesPanelData, servicesPanelData),
+	createContentPanel(7, "cache-storage", "Cache Storage (%SERVICE/%CACHE)", "show cache storage", cacheStorageContent, cachesPanelData, servicesPanelData),
+	createContentPanel(7, "cache-stores", "Cache Stores (%SERVICE/%CACHE)", "show cache stores", cacheStoresContent),
+	createContentPanel(7, "cache-partitions", "Cache Partitions (%SERVICE/%CACHE)", "show cache partitions", cachePartitionContent, cachesPanelData, servicesPanelData),
+	createContentPanel(7, "departed-members", "Departed Members", "show departed members", departedMembersContent, memberPanelData, storagePanelData),
+	createContentPanel(4, "elastic-data", "Elastic Data", "show elastic data", elasticDataContent, elasticDataPanelData),
+	createContentPanel(7, "executors", "Executors", "show Executors", executorsContent, executorsPanelData),
+	createContentPanel(7, "health-summary", "Health Summary", "show health summary", healthSummaryContent, healthPanelData),
+	createContentPanel(4, "federation-all", "Federation All", "show all federation details", federationAllContent, federationPanelData),
+	createContentPanel(3, "federation-dest", "Federation Destinations", "show federation destinations", federationDestinationsContent, federationPanelData),
+	createContentPanel(3, "federation-origins", "Federation Origins", "show federation origins", federationOriginsContent, federationPanelData),
+	createContentPanel(7, "http-servers", "HTTP Servers", "show HTTP servers", httpServersContent, proxiesPanelData),
+	createContentPanel(7, "http-sessions", "HTTP Sessions", "show HTTP sessions", httpSessionsContent, httpSessionsPanelData),
+	createContentPanel(7, "machines", "Machines", "show machines", machinesContent, memberPanelData, storagePanelData),
+	createContentPanel(7, "members", "Members", "show members", membersContent, memberPanelData, storagePanelData),
 	createContentPanel(7, "members-short", "Members (Short)", "show members (short)", membersOnlyContent, memberPanelData, storagePanelData),
-	createContentPanel(8, "network-stats", "Network Stats", "show network stats", networkStatsContent, memberPanelData, storagePanelData),
-	createContentPanel(8, "persistence", "Persistence", "show persistence", persistenceContent, servicesPanelData),
-	createContentPanel(8, "proxies", "Proxy Servers", "show proxy servers", proxiesContent, proxiesPanelData),
-	createContentPanel(8, "proxy-connections", "Proxy Connections (%SERVICE)", "show proxy connections", proxyConnectionsContent, proxiesPanelData),
-	createContentPanel(8, "reporters", "Reporters", "show reporters", reportersContent, reportersPanelData),
-	createContentPanel(8, "services", "Services", "show services", servicesContent, servicesPanelData),
-	createContentPanel(8, "service-members", "Service Members (%SERVICE)", "show service members", serviceMembersContent, servicesPanelData),
-	createContentPanel(8, "service-distributions", "Service Distributions (%SERVICE)", "show service distributions", serviceDistributionsContent, servicesPanelData),
-	createContentPanel(8, "service-ownership", "Service Ownership (%SERVICE)", "show service ownership", serviceOwnershipContent, servicesPanelData),
-	createContentPanel(8, "service-storage", "Service Storage", "show service storage", serviceStorageContent, servicesPanelData),
-	createContentPanel(8, "topic-members", "Topic Members (%SERVICE/%TOPIC)", "show topic members", topicMembersContent, topicsPanelData),
-	createContentPanel(8, "subscribers", "Topic Subscribers (%SERVICE/%TOPIC)", "show topic subscribers", topicSubscribersContent, topicsPanelData),
-	createContentPanel(8, "subscriber-channels", "Subscriber Channels (%SERVICE/%TOPIC/%SUBSCRIBER)", "show topic subscriber channels", topicSubscriberChannelsContent, topicsPanelData),
-	createContentPanel(8, "subscriber-groups", "Subscriber Channels (%SERVICE/%TOPIC)", "show subscriber groups", topicSubscriberGroupsContent, topicsPanelData),
-	createContentPanel(8, "topics", "Topics", "show topics", topicsContent, topicsPanelData),
-	createContentPanel(8, "view-caches", "View Caches", "show view caches", viewCachesContent, servicesPanelData),
+	createContentPanel(7, "network-stats", "Network Stats", "show network stats", networkStatsContent, memberPanelData, storagePanelData),
+	createContentPanel(7, "persistence", "Persistence", "show persistence", persistenceContent, servicesPanelData),
+	createContentPanel(7, "proxies", "Proxy Servers", "show proxy servers", proxiesContent, proxiesPanelData),
+	createContentPanel(7, "proxy-connections", "Proxy Connections (%SERVICE)", "show proxy connections", proxyConnectionsContent, proxiesPanelData),
+	createContentPanel(7, "reporters", "Reporters", "show reporters", reportersContent, reportersPanelData),
+	createContentPanel(7, "services", "Services", "show services", servicesContent, servicesPanelData),
+	createContentPanel(7, "service-members", "Service Members (%SERVICE)", "show service members", serviceMembersContent, servicesPanelData),
+	createContentPanel(7, "service-distributions", "Service Distributions (%SERVICE)", "show service distributions", serviceDistributionsContent, servicesPanelData),
+	createContentPanel(7, "service-ownership", "Service Ownership (%SERVICE)", "show service ownership", serviceOwnershipContent, servicesPanelData),
+	createContentPanel(7, "service-storage", "Service Storage", "show service storage", serviceStorageContent, servicesPanelData),
+	createContentPanel(7, "topic-members", "Topic Members (%SERVICE/%TOPIC)", "show topic members", topicMembersContent, topicsPanelData),
+	createContentPanel(7, "subscribers", "Topic Subscribers (%SERVICE/%TOPIC)", "show topic subscribers", topicSubscribersContent, topicsPanelData),
+	createContentPanel(7, "subscriber-channels", "Subscriber Channels (%SERVICE/%TOPIC/%SUBSCRIBER)", "show topic subscriber channels", topicSubscriberChannelsContent, topicsPanelData),
+	createContentPanel(7, "subscriber-groups", "Subscriber Channels (%SERVICE/%TOPIC)", "show subscriber groups", topicSubscriberGroupsContent, topicsPanelData),
+	createContentPanel(7, "topics", "Topics", "show topics", topicsContent, topicsPanelData),
+	createContentPanel(7, "view-caches", "View Caches", "show view caches", viewCachesContent, servicesPanelData),
+	// cluster summary panels below
+	createContentPanel(7, "summary-cluster", "Cluster Information", "show cluster information", summaryClusterContent, memberPanelData, storagePanelData),
+	createContentPanel(7, "summary-members", "Members Summary", "show members summary", membersContent, memberPanelData, storagePanelData),
+	createContentPanel(7, "summary-caches", "Caches Summary", "show caches summary", cachesContent, cachesPanelData, servicesPanelData),
 }
 
 type position struct {
@@ -217,6 +222,8 @@ Use --show-panels to show all available panels.`,
 
 		exit := make(chan struct{})
 
+		originalMaxHeight = setMaxHeight
+
 		// initial update
 		err = updateScreen(screen, dataFetcher, parsedLayout, true)
 		if err != nil {
@@ -323,6 +330,9 @@ func increaseMaxHeight() {
 		validPanels[i].MaxHeight++
 	}
 	heightAdjust++
+	if setMaxHeight != 0 {
+		setMaxHeight++
+	}
 }
 
 func decreaseMaxHeight() {
@@ -333,6 +343,9 @@ func decreaseMaxHeight() {
 			}
 		}
 		heightAdjust--
+		if setMaxHeight != 0 {
+			setMaxHeight--
+		}
 	}
 }
 
@@ -341,6 +354,7 @@ func resetMaxHeight() {
 		validPanels[i].MaxHeight = validPanels[i].OriginalMaxHeight
 	}
 	heightAdjust = 0
+	setMaxHeight = originalMaxHeight
 }
 
 func refresh(screen tcell.Screen, dataFetcher fetcher.Fetcher, parsedLayout []string, refresh bool) error {
@@ -388,8 +402,8 @@ func updateScreen(screen tcell.Screen, dataFetcher fetcher.Fetcher, parsedLayout
 	var (
 		errorList []error
 		err       error
-		cluster   config.Cluster
 		rows      int
+		cluster   config.Cluster
 	)
 
 	mutex.Lock()
@@ -522,13 +536,6 @@ var membersOnlyContent = func(dataFetcher fetcher.Fetcher, clusterSummary cluste
 var departedMembersContent = func(dataFetcher fetcher.Fetcher, clusterSummary clusterSummaryInfo) ([]string, error) {
 	memberSummary = false
 	departedMembers = true
-	showMembersOnly = false
-	return clusterMembersSummaryInternal(dataFetcher, clusterSummary)
-}
-
-var membersSummaryContent = func(dataFetcher fetcher.Fetcher, clusterSummary clusterSummaryInfo) ([]string, error) {
-	memberSummary = true
-	departedMembers = false
 	showMembersOnly = false
 	return clusterMembersSummaryInternal(dataFetcher, clusterSummary)
 }
@@ -1084,6 +1091,21 @@ func getSelectedDetails(dataFetcher fetcher.Fetcher) (config.TopicDetails, error
 	return getTopicsDetails(dataFetcher, serviceName, selectedTopic)
 }
 
+// Cluster Summary
+
+var summaryClusterContent = func(_ fetcher.Fetcher, clusterSummary clusterSummaryInfo) ([]string, error) {
+	var cluster config.Cluster
+	err := json.Unmarshal(clusterSummary.clusterResult, &cluster)
+	if err != nil && !ignoreRESTErrors {
+		return emptyStringArray, err
+	}
+	summary := fmt.Sprintf("Cluster Name:  %s\nVersion:       %v\nLicense Mode:  %v\nMembers:       %v\nDeparted:      %v\nMachines:      %v",
+		cluster.ClusterName, cluster.Version, cluster.LicenseMode, cluster.ClusterSize,
+		cluster.MembersDepartureCount, len(clusterSummary.machines))
+
+	return strings.Split(summary, "\n"), nil
+}
+
 //
 // Panel utility functions and types
 //
@@ -1199,6 +1221,10 @@ func getAllBaseData(layout []string) []string {
 func drawContent(screen tcell.Screen, dataFetcher fetcher.Fetcher, panel panelImpl, x, y, w int, code rune) (int, error) {
 	h := panel.GetMaxHeight()
 	title := panel.GetTitle()
+
+	if setMaxHeight != 0 {
+		h = setMaxHeight
+	}
 
 	content, err := panel.GetContentFunction()(dataFetcher, lastClusterSummaryInfo)
 	if err != nil {
@@ -1405,4 +1431,5 @@ func init() {
 	monitorClusterCmd.Flags().StringVarP(&selectedCache, "cache-name", "C", "", "cache name")
 	monitorClusterCmd.Flags().StringVarP(&selectedTopic, "topic-name", "T", "", "topic name")
 	monitorClusterCmd.Flags().Int64VarP(&subscriber, "subscriber-id", "B", 0, "subscriber")
+	monitorClusterCmd.Flags().IntVarP(&setMaxHeight, "max-height", "M", 0, "override max height for all panels")
 }
