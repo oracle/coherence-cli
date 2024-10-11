@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, 2023 Oracle and/or its affiliates.
+ * Copyright (c) 2021, 2024 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -143,6 +143,11 @@ func TestCachesRequests(t *testing.T) {
 // TestProfileCommands tests profile command.
 func TestProfileCommands(t *testing.T) {
 	common.RunTestProfileCommands(t)
+}
+
+// TestPanelsCommands tests panels command.
+func TestPanelsCommands(t *testing.T) {
+	common.RunTestPanelsCommands(t)
 }
 
 // TestResetCommands tests reset commands.

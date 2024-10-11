@@ -40,6 +40,15 @@ func completionAllProfiles(_ *cobra.Command, _ []string, _ string) ([]string, co
 	return profiles, cobra.ShellCompDirectiveNoFileComp
 }
 
+// completionAllPanels provides a completion function to return all panels.
+func completionAllPanels(_ *cobra.Command, _ []string, _ string) ([]string, cobra.ShellCompDirective) {
+	panels := make([]string, 0)
+	for _, p := range Config.Panels {
+		panels = append(panels, p.Name)
+	}
+	return panels, cobra.ShellCompDirectiveNoFileComp
+}
+
 // completionCaches provides a completion function to return all cache names.
 func completionCaches(_ *cobra.Command, _ []string, _ string) ([]string, cobra.ShellCompDirective) {
 	var (

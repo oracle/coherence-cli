@@ -173,6 +173,14 @@ Use --show-panels to show all available panels.`,
 			padMaxHeightParam = false
 		}
 
+		// check for custom panel layouts added by "add panel"
+		if layoutParam != "" {
+			if l := getPanelLayout(layoutParam); l != "" {
+				layoutParam = l
+
+			}
+		}
+
 		// check for default layouts
 		if l, ok := defaultMap[layoutParam]; ok {
 			layoutParam = l
