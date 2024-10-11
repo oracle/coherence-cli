@@ -36,6 +36,7 @@ var (
 	watchClearEnabled bool
 	watchDelay        int32
 	readPassStdin     bool
+	limitOutput       bool
 
 	bFormat  bool
 	kbFormat bool
@@ -245,6 +246,7 @@ func SetRootCommandFlags(command *cobra.Command) {
 	command.PersistentFlags().BoolVarP(&watchEnabled, "watch", "w", false, "watch output (only available for get commands)")
 	command.PersistentFlags().BoolVarP(&watchClearEnabled, "watch-clear", "W", false, "watch output with clear")
 	command.PersistentFlags().BoolVarP(&readPassStdin, "stdin", "i", false, "read password from stdin")
+	command.PersistentFlags().BoolVarP(&limitOutput, "limit", "L", false, "limit table output to screen size")
 	command.PersistentFlags().Int32VarP(&watchDelay, "delay", "d", 5, "delay for watching in seconds")
 	command.PersistentFlags().StringVarP(&Username, usernameOption, usernameShort, "", userNameDescription)
 	command.PersistentFlags().StringVarP(&clusterConnection, connectionNameOption, clusterNameOptionShort, "", clusterConnectionDescription)
