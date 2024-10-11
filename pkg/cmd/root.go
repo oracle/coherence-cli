@@ -66,8 +66,10 @@ const (
 	ignoreCertsContextKey = "ignoreInvalidCerts"
 	requestTimeoutKey     = "requestTimeout"
 	defaultBytesFormatKey = "defaultBytesFormat"
+	defaultLayoutKey      = "defaultLayout"
 	defaultHeapKey        = "defaultHeap"
 	profilesKey           = "profiles"
+	panelsKey             = "panels"
 
 	confirmOptionMessage     = "automatically confirm the operation"
 	timeoutMessage           = "timeout in seconds for NS Lookup requests"
@@ -171,12 +173,19 @@ type CoherenceCLIConfig struct {
 	DefaultHeap        string              `json:"defaultHeap"`
 	UseGradle          bool                `json:"useGradle"`
 	Profiles           []ProfileValue      `mapstructure:"profiles"`
+	Panels             []Panel             `mapstructure:"panels"`
 }
 
 // ProfileValue describes a profile to be used for creating and starting clusters.
 type ProfileValue struct {
 	Name  string `json:"name"`
 	Value string `json:"value"`
+}
+
+// Panel describes a panel and layout that can be used by the monitor cluster command.
+type Panel struct {
+	Name   string `json:"name"`
+	Layout string `json:"layout"`
 }
 
 // ClusterConnection describes an individual connection to a cluster.
@@ -538,6 +547,7 @@ func Initialize(command *cobra.Command) *cobra.Command {
 	getCmd.AddCommand(getViewCachesCmd)
 	getCmd.AddCommand(getCachePartitionsCmd)
 	getCmd.AddCommand(getFederationIncomingCmd)
+	getCmd.AddCommand(getPanelsCmd)
 
 	// set command
 	command.AddCommand(setCmd)
@@ -572,6 +582,7 @@ func Initialize(command *cobra.Command) *cobra.Command {
 	// add
 	command.AddCommand(addCmd)
 	addCmd.AddCommand(addClusterCmd)
+	addCmd.AddCommand(addPanelCmd)
 
 	// replicate
 	command.AddCommand(replicateCmd)
@@ -618,6 +629,7 @@ func Initialize(command *cobra.Command) *cobra.Command {
 	removeCmd.AddCommand(removeClusterCmd)
 	removeCmd.AddCommand(removeSnapshotCmd)
 	removeCmd.AddCommand(removeProfileCmd)
+	removeCmd.AddCommand(removePanelCmd)
 
 	// describe
 	command.AddCommand(describeCmd)

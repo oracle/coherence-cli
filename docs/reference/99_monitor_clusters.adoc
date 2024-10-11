@@ -17,6 +17,9 @@ NOTE: The `monitor cluster` command is currently experimental only and may be ch
 
 * <<monitor-cluster, `cohctl monitor cluster`>> - monitors the cluster using text based UI
 * <<monitor-cluster-panels, `cohctl monitor cluster --show-panels`>> - shows all available panels
+* <<get-panels, `cohctl get panels`>> - displays the panels that have been created
+* <<add-panel, `cohctl add panel`>> - adds a panel to the list of panels that can be displayed
+* <<remove-panel, `cohctl remove panel`>> - removes a panel that has been created
 
 [#monitor-cluster]
 ==== Monitor Cluster
@@ -183,8 +186,6 @@ Coherence CLI: 2024-05-06 11:13:59 - Monitoring cluster local (22.06.8) ESC to q
 NOTE: Any of the panels or layouts that specify `cache-*` or `service-*` must have the cache or service specified using
 `-C` or `-S` respectively.
 
-
-
 [#monitor-cluster-panels]
 ==== Monitor Cluster Show Panels
 
@@ -195,6 +196,50 @@ cohctl monitor cluster --show-panels
 Output:
 
 include::../../build/_output/docs-gen/monitor_cluster_panels.adoc[tag=text]
+
+[#get-panels]
+==== Get Panels
+
+include::../../build/_output/docs-gen/get_panels.adoc[tag=text]
+
+[source,bash]
+----
+cohctl get panels
+
+PANEL    LAYOUT
+caches   caches:services
+test     caches,services:persistence
+----
+
+NOTE: Added panels cant be used by specifying the `-l` option in the `monitor cluster` command.
+
+[#add-panel]
+==== Add Panel
+
+include::../../build/_output/docs-gen/add_panel.adoc[tag=text]
+
+[source,bash]
+----
+cohctl add panel my-panel -l "caches:services,persistence"
+
+Are you sure you want to add the panel my-panel with layout of [caches:services,persistence]? (y/n) y
+panel my-panel was added with layout [caches:services,persistence]
+----
+
+NOTE: Added panels cant be used by specifying the `-l` option on `monitor cluster` command.
+
+[#remove-panel]
+==== Remove Panel
+
+include::../../build/_output/docs-gen/remove_panel.adoc[tag=text]
+
+[source,bash]
+----
+cohctl remove panel my-panel
+
+Are you sure you want to remove the panel my-panel? (y/n) y
+panel my-panel was removed
+----
 
 === See Also
 

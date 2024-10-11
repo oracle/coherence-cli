@@ -2060,6 +2060,43 @@ func RunTestProfileCommands(t *testing.T) {
 		"profile2", "-y")
 }
 
+// RunTestPanelsCommands tests panels commands.
+func RunTestPanelsCommands(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	file := initializeTestFile(t)
+
+	cliCmd := cmd.Initialize(nil)
+
+	// set the debug to true
+	test_utils.EnsureCommandContains(g, t, cliCmd, "on", configArg, file, "set", "debug", "on")
+
+	// get panels
+	test_utils.EnsureCommandContains(g, t, cliCmd, "", configArg, file, "get", "panels")
+
+	// add panels
+	test_utils.EnsureCommandContains(g, t, cliCmd, "panel test", configArg, file, "add", "panel",
+		"test", "-l", "caches", "-y")
+
+	// get panels
+	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "PANEL,LAYOUT,test,caches", configArg, file, "get", "panels")
+
+	// set a second panel
+	test_utils.EnsureCommandContains(g, t, cliCmd, "panel test2", configArg, file, "add", "panel",
+		"test2", "-l", "default-federation", "-y")
+
+	// get profiles
+	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "PANEL,LAYOUT,test,caches,test2", configArg, file, "get", "panels")
+
+	// add a panel that already exists
+	test_utils.EnsureCommandErrorContains(g, t, cliCmd, "already exists in the list", configArg, file, "add", "panel",
+		"caches", "-l", "default-federation", "-y")
+
+	// remove the panels
+	test_utils.EnsureCommandContains(g, t, cliCmd, "panel test was removed", configArg, file, "remove", "panel", "test", "-y")
+	test_utils.EnsureCommandContains(g, t, cliCmd, "panel test2 was removed", configArg, file, "remove", "panel", "test2", "-y")
+}
+
 // RunTestResetCommands tests various reset commands.
 func RunTestResetCommands(t *testing.T) {
 	var (

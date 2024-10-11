@@ -1140,17 +1140,33 @@ func FormatDiscoveredClusters(clusters []discovery.DiscoveredCluster) string {
 
 // FormatProfiles returns the profiles in a column formatted output.
 func FormatProfiles(profiles []ProfileValue) string {
-	var (
-		profileCount = len(profiles)
-	)
+	var profileCount = len(profiles)
+
 	if profileCount == 0 {
 		return ""
 	}
 
-	table := newFormattedTable().WithHeader("PROFILE", "VALUE")
+	table := newFormattedTable().WithHeader("PROFILE", "VALUE").WithSortingColumn("PROFILE")
 
 	for _, value := range profiles {
 		table.AddRow(value.Name, value.Value)
+	}
+
+	return table.String()
+}
+
+// FormatPanels returns the panels in a column formatted output.
+func FormatPanels(panels []Panel) string {
+	var panelCount = len(panels)
+
+	if panelCount == 0 {
+		return ""
+	}
+
+	table := newFormattedTable().WithHeader("PANEL", "LAYOUT").WithSortingColumn("PANEL")
+
+	for _, value := range panels {
+		table.AddRow(value.Name, value.Layout)
 	}
 
 	return table.String()

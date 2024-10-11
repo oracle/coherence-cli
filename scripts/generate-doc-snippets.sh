@@ -48,6 +48,11 @@ create_doc $DOCS_DIR/discover_clusters "${COHCTL} discover clusters --help"
 create_doc $DOCS_DIR/get_cluster_config "${COHCTL} get cluster-config --help"
 create_doc $DOCS_DIR/get_cluster_description "${COHCTL} get cluster-description --help"
 create_doc $DOCS_DIR/monitor_cluster "${COHCTL} monitor cluster --help"
+create_doc $DOCS_DIR/add_panel "${COHCTL} add panel --help"
+create_doc $DOCS_DIR/get_panels "${COHCTL} get panels --help"
+create_doc $DOCS_DIR/remove_panel "${COHCTL} remove panel --help"
+
+
 (
 echo "// # tag::text[]"
 echo "----"
