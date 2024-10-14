@@ -14,6 +14,7 @@ import (
 	"github.com/oracle/coherence-cli/pkg/constants"
 	"github.com/oracle/coherence-cli/pkg/utils"
 	"github.com/oracle/coherence-go-client/coherence/discovery"
+	"golang.org/x/term"
 	"golang.org/x/text/language"
 	"golang.org/x/text/message"
 	"os"
@@ -2447,6 +2448,35 @@ func (t *formattedTable) String() string {
 		}
 		sb.WriteString("\n")
 	}
+
+	if limitOutput && watchClearEnabled {
+		// we limit the output to the size of the screen
+		if term.IsTerminal(0) {
+			_, height, err := term.GetSize(0)
+			if err == nil {
+				// find out the number of lines
+				s := strings.Split(sb.String(), "\n")
+				l := len(s)
+				if l > height-6 {
+					// truncate the output
+					var sb2 strings.Builder
+					maxLines := height - 6
+					if maxLines > l {
+						maxLines = l
+					}
+					for i := 0; i < maxLines; i++ {
+						sb2.WriteString(s[i])
+						sb2.WriteString("\n")
+					}
+					remainingLines := l - maxLines
+					if remainingLines > 0 {
+						sb2.WriteString(fmt.Sprintf("... output truncated, %v more line(s)", remainingLines))
+					}
+					return sb2.String()
+				}
+			}
+		}
+	}
 	return sb.String()
 }
 
@@ -2517,7 +2547,7 @@ func expandValues(s string) string {
 
 }
 
-// prseSorting parses a sorting string. The sorting string should have a
+// parseSorting parses a sorting string. The sorting string should have a
 // column number, where the column will be sorted ascending numerically, if possible,
 // or a column number and 'd' where it will be sorted descendingFlag.
 // the column string could also be a name of a column.
