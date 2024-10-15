@@ -170,6 +170,7 @@ create_doc $DOCS_DIR/describe_reporter "${COHCTL} describe reporter --help"
 create_doc $DOCS_DIR/start_reporter "${COHCTL} start reporter --help"
 create_doc $DOCS_DIR/stop_reporter "${COHCTL} stop reporter --help"
 create_doc $DOCS_DIR/set_reporter "${COHCTL} set reporter --help"
+create_doc $DOCS_DIR/run_report "${COHCTL} run report --help"
 
 # JFRs
 create_doc $DOCS_DIR/get_jfrs "${COHCTL} get jfrs --help"

@@ -735,6 +735,7 @@ var (
 	machineParam             string
 	rackParam                string
 	siteParam                string
+	roleParam                string
 	skipMavenDepsParam       bool
 	backupLogFilesParam      bool
 	validPersistenceModes    = []string{"on-demand", "active", "active-backup", "active-async"}
@@ -1456,6 +1457,7 @@ func init() {
 	createClusterCmd.Flags().StringVarP(&machineParam, machineArg, "", "", machineMessage)
 	createClusterCmd.Flags().StringVarP(&rackParam, rackArg, "", "", rackMessage)
 	createClusterCmd.Flags().StringVarP(&siteParam, siteArg, "", "", siteMessage)
+	createClusterCmd.Flags().StringVarP(&roleParam, roleArg, "", "", roleMessage)
 
 	stopClusterCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
 
@@ -1474,6 +1476,7 @@ func init() {
 	startClusterCmd.Flags().StringVarP(&machineParam, machineArg, "", "", machineMessage)
 	startClusterCmd.Flags().StringVarP(&rackParam, rackArg, "", "", rackMessage)
 	startClusterCmd.Flags().StringVarP(&siteParam, siteArg, "", "", siteMessage)
+	startClusterCmd.Flags().StringVarP(&roleParam, roleArg, "", "", roleMessage)
 
 	startConsoleCmd.Flags().StringVarP(&heapMemoryParam, heapMemoryArg, "M", defaultHeap, heapMemoryMessage)
 	startConsoleCmd.Flags().Int32VarP(&logLevelParam, logLevelArg, "l", 5, logLevelMessage)
@@ -1505,6 +1508,7 @@ func init() {
 	scaleClusterCmd.Flags().StringVarP(&machineParam, machineArg, "", "", machineMessage)
 	scaleClusterCmd.Flags().StringVarP(&rackParam, rackArg, "", "", rackMessage)
 	scaleClusterCmd.Flags().StringVarP(&siteParam, siteArg, "", "", siteMessage)
+	scaleClusterCmd.Flags().StringVarP(&roleParam, roleArg, "", "", roleMessage)
 }
 
 // sanitizeConnectionName sanitizes a cluster connection

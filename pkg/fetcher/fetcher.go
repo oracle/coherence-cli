@@ -223,6 +223,9 @@ type Fetcher interface {
 	// GetReporterJSON returns reporter for a node in raw json.
 	GetReporterJSON(nodeID string) ([]byte, error)
 
+	// RunReportJSON runs a specified report.
+	RunReportJSON(report string, nodeID int) ([]byte, error)
+
 	// StartReporter starts the reporter on a member.
 	StartReporter(nodeID string) error
 

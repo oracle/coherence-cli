@@ -91,6 +91,7 @@ const (
 	machineMessage           = "the machine name to use"
 	rackMessage              = "the rack name to use"
 	siteMessage              = "the site name to use"
+	roleMessage              = "the role name to use"
 	cacheConfigMessage       = "cache configuration file"
 	operationalConfigMessage = "override override file"
 	cacheConfigArg           = "cache-config"
@@ -103,6 +104,7 @@ const (
 	machineArg               = "machine"
 	rackArg                  = "rack"
 	siteArg                  = "site"
+	roleArg                  = "role"
 	logLevelMessage          = "coherence log level"
 	profileMessage           = "profile to add to cluster startup command line"
 	backupLogFilesMessage    = "backup old cache server log files"
@@ -569,6 +571,10 @@ func Initialize(command *cobra.Command) *cobra.Command {
 	setCmd.AddCommand(setUseGradleCmd)
 	setCmd.AddCommand(setFederationCmd)
 	setCmd.AddCommand(setColorCmd)
+
+	// run command
+	command.AddCommand(runCmd)
+	runCmd.AddCommand(runReportCmd)
 
 	// clear
 	command.AddCommand(clearCmd)

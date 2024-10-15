@@ -33,6 +33,7 @@ var (
 	validReporterAttributes = []string{reporterConfigFile, reporterCurrentBatch, reporterIntervalSeconds, reporterOutputPath}
 	reporterAttributeName   string
 	reporterAttributeValue  string
+	reporterNodID           int
 )
 
 // getReportersCmd represents the get reporters command.
@@ -149,6 +150,73 @@ var describeReporterCmd = &cobra.Command{
 				return err
 			}
 			cmd.Println(value)
+		}
+
+		return nil
+	},
+}
+
+// runReportCmd represents the run report command.
+var runReportCmd = &cobra.Command{
+	Use:   "report report-name",
+	Short: "run a report and return the output",
+	Long: `The 'run report' command runs a report on a specific node and returns the report output in JSON. 
+The report name should not include the .xml extension and will have the 'report' prefix added. E.g. 
+'report-node' will expand to 'reports/report-node.xml'. A HTTP 400 will be returned if the report name is not valid.`,
+	Args: func(cmd *cobra.Command, args []string) error {
+		if len(args) != 1 {
+			displayErrorAndExit(cmd, "you must provide a report name")
+		}
+		return nil
+	},
+	RunE: func(cmd *cobra.Command, args []string) error {
+		var (
+			jsonData    []byte
+			err         error
+			dataFetcher fetcher.Fetcher
+			found       = false
+		)
+
+		// retrieve the current context or the value from "-c"
+		_, dataFetcher, err = GetConnectionAndDataFetcher()
+		if err != nil {
+			return err
+		}
+
+		// validate the nodeID
+		nodeIDArray, err := GetClusterNodeIDs(dataFetcher)
+		if err != nil {
+			return err
+		}
+		for _, v := range nodeIDArray {
+			i, _ := strconv.Atoi(v)
+			if i == reporterNodID {
+				found = true
+			}
+		}
+		if !found {
+			return fmt.Errorf("unable to find node id %v", reporterNodID)
+		}
+
+		jsonData, err = dataFetcher.RunReportJSON(args[0], reporterNodID)
+		if err != nil {
+			return err
+		}
+
+		// output format cannot be table
+		if OutputFormat == constants.TABLE {
+			OutputFormat = constants.JSON
+		}
+
+		if strings.Contains(OutputFormat, constants.JSONPATH) {
+			jsonPathResult, err := utils.GetJSONPathResults(jsonData, OutputFormat)
+			if err != nil {
+				return err
+			}
+			cmd.Println(jsonPathResult)
+			return nil
+		} else if OutputFormat == constants.JSON {
+			cmd.Println(string(jsonData))
 		}
 
 		return nil
@@ -309,4 +377,7 @@ func init() {
 	_ = setReporterCmd.MarkFlagRequired("attribute")
 	setReporterCmd.Flags().StringVarP(&reporterAttributeValue, "value", "v", "", "attribute value to set")
 	_ = setReporterCmd.MarkFlagRequired("value")
+
+	runReportCmd.Flags().IntVarP(&reporterNodID, "node", "n", 0, "node to run report on")
+	_ = runReportCmd.MarkFlagRequired("node")
 }

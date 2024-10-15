@@ -420,6 +420,10 @@ func getCacheServerArgs(connection ClusterConnection, member string, httpPort in
 		baseArgs = append(baseArgs, fmt.Sprintf("-Dcoherence.site=%s", siteParam))
 	}
 
+	if roleParam != "" {
+		baseArgs = append(baseArgs, fmt.Sprintf("-Dcoherence.role=%s", roleParam))
+	}
+
 	// if default heap is overridden, then use this
 	if heapMemoryParam != defaultHeap {
 		heap = heapMemoryParam
@@ -661,7 +665,7 @@ func runCommandBase(command, logFileName string, arguments []string) (string, er
 		Logger.Info("Run command", fields...)
 	}
 
-	start := time.Now()
+	startTime := time.Now()
 	process := exec.Command(command, arguments...)
 	if len(logFileName) > 0 {
 		// a log file was supplied, so we are assuming this command will be async and
@@ -684,7 +688,7 @@ func runCommandBase(command, logFileName string, arguments []string) (string, er
 
 	if Config.Debug {
 		fields := []zapcore.Field{
-			zap.String("time", fmt.Sprintf("%v", time.Since(start))),
+			zap.String("time", fmt.Sprintf("%v", time.Since(startTime))),
 		}
 		Logger.Info("Duration", fields...)
 	}
