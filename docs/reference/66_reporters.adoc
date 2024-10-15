@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 
-    Copyright (c) 2021, 2023 Oracle and/or its affiliates.
+    Copyright (c) 2021, 2024 Oracle and/or its affiliates.
     Licensed under the Universal Permissive License v 1.0 as shown at
     https://oss.oracle.com/licenses/upl.
 
@@ -18,6 +18,7 @@ There are various commands that allow you to work with and manage Reporters.
 * <<start-reporter, `cohctl start reporter`>> - starts a reporter on a specific node
 * <<stop-reporter, `cohctl stop reporter`>> - stops a reporter on a specific node
 * <<set-reporter, `cohctl set reporter`>> - sets a reporter attribute for one or more members
+* <<run-report, `cohctl run report`>> - runs a report on a specific node and returns the report output in JSON
 
 [#get-reporters]
 ==== Get Reporters
@@ -168,9 +169,34 @@ NODE ID  STATE    CONFIG FILE               OUTPUT PATH  BATCH#  LAST REPORT  LA
       2  Stopped  reports/report-group.xml  /tmp              0                    0ms  0.0000ms        60  false
 ----
 
+[#run-report]
+==== Run
+
+include::../../build/_output/docs-gen/run_report.adoc[tag=text]
+
+NOTE: The otuput will always be JSON. You can use `-o jsonpath=...` to use jsonpath expression or pipe through to a utility such as `jq`.
+
+This REST endpoint that this command uses is only available in the most recent Coherence releases.
+You will receive a HTTP 400 error if it is not supported in your Coherence version.
+
+[source,bash]
+----
+cohctl run report report-node -c local -n 1
+----
+Output:
+[source,bash]
+----
+{"items":[{"RefreshTime":"Tue Oct 15 09:07:55 AWST 2024","ReportTime":"Tue Oct 15 09:07:55 AWST 2024",
+...
+"RoleName":"CoherenceServer","Addres,"BatchCounter":"0","rowID":3}]}
+----
+
+NOTE: The output above is truncated for readability.
+
 === See Also
 
 * <<docs/reference/20_services.adoc,Services>>
+* <<docs/examples/10_jsonpath.adoc,Using JSONPath>>
 
 
 

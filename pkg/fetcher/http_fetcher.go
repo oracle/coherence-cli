@@ -764,6 +764,15 @@ func (h HTTPFetcher) GetReporterJSON(nodeID string) ([]byte, error) {
 	return result, nil
 }
 
+// RunReportJSON runs a specified report.
+func (h HTTPFetcher) RunReportJSON(report string, nodeID int) ([]byte, error) {
+	result, err := httpGetRequest(h, fmt.Sprintf("%s%d/runReport/%s%s", reportersPath, nodeID, report, links))
+	if err != nil {
+		return constants.EmptyByte, utils.GetError(fmt.Sprintf("cannot run report %v on node %v", report, nodeID), err)
+	}
+	return result, nil
+}
+
 // StartReporter starts the reporter on a member.
 func (h HTTPFetcher) StartReporter(nodeID string) error {
 	_, err := issueReporterCommand(h, nodeID, "start")

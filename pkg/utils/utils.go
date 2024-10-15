@@ -162,9 +162,7 @@ func IsValidInt(value string) bool {
 
 // SanitizeSnapshotName sanitizes a snapshot name by replacing any unwanted characters with '-'.
 func SanitizeSnapshotName(snapshotName string) string {
-	var (
-		sb = strings.Builder{}
-	)
+	var sb = strings.Builder{}
 
 	for _, c := range []byte(snapshotName) {
 		r := rune(c)
