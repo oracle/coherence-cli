@@ -959,11 +959,11 @@ func getCacheContent(dataFetcher fetcher.Fetcher, displayType string) ([]string,
 		return emptyStringArray, err
 	}
 
-	if displayType == "access" {
+	if displayType == access {
 		sb.WriteString(FormatCacheDetailsSizeAndAccess(cacheDetails.Details))
 	} else if displayType == "index" {
 		sb.WriteString(FormatCacheIndexDetails(cacheDetails.Details))
-	} else if displayType == "storage" {
+	} else if displayType == storage {
 		sb.WriteString(FormatCacheDetailsStorage(cacheDetails.Details))
 	} else if displayType == partitionDisplayType {
 		sb.WriteString(FormatCachePartitions(cachePartitionDetails.Details, cacheSummary))

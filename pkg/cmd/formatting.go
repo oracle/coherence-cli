@@ -1017,6 +1017,9 @@ func FormatCacheDetailsStorage(cacheDetails []config.CacheDetail) string {
 	}
 
 	for _, value := range cacheDetails {
+		if value.Tier != "back" {
+			continue
+		}
 		var nodeID, _ = strconv.Atoi(value.NodeID)
 
 		table.AddRow(formatSmallInteger(int32(nodeID)), value.Tier,

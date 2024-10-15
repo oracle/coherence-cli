@@ -42,6 +42,8 @@ const (
 	back                    = "back"
 	all                     = "all"
 	partitionDisplayType    = "partition"
+	access                  = "access"
+	storage                 = "storage"
 )
 
 // getCachesCmd represents the get caches command.
@@ -452,7 +454,7 @@ You can specify '-o wide' to display addition information.`,
 		return nil
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
-		return getCacheDetails(cmd, args, "access")
+		return getCacheDetails(cmd, args, access)
 	},
 }
 
@@ -470,7 +472,7 @@ You can specify '-o wide' to display addition information.`,
 		return nil
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
-		return getCacheDetails(cmd, args, "storage")
+		return getCacheDetails(cmd, args, storage)
 	},
 }
 
@@ -660,11 +662,11 @@ func getCacheDetails(cmd *cobra.Command, args []string, displayType string) erro
 				cmd.Printf("Cache: %s\n\n", args[0])
 			}
 
-			if displayType == "access" {
+			if displayType == access {
 				cmd.Println(FormatCacheDetailsSizeAndAccess(cacheDetails.Details))
 			} else if displayType == "index" {
 				cmd.Println(FormatCacheIndexDetails(cacheDetails.Details))
-			} else if displayType == "storage" {
+			} else if displayType == storage {
 				cmd.Println(FormatCacheDetailsStorage(cacheDetails.Details))
 			} else if displayType == partitionDisplayType {
 				cmd.Printf("Cache:            %s\n", args[0])
