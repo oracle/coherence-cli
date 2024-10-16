@@ -41,6 +41,7 @@ these commands to create production clusters.
 * <<scale-cluster, `cohctl scale cluster`>> - scales a cluster that was manually created
 * <<stop-cluster, `cohctl stop cluster`>> - stops a cluster that was manually created or started
 * <<start-cluster, `cohctl start cluster`>> - starts a cluster that was manually created
+* <<restart-cluster, `cohctl restart cluster`>> - restarts a cluster that was manually created or started
 * <<start-console, `cohctl start console`>> - starts a console client against a cluster that was manually created
 * <<start-cohql, `cohctl start cohql`>> - starts a CohQL client against a cluster that was manually created
 * <<start-class, `cohctl start class`>> - starts a specific Java class against a cluster that was manually created
@@ -292,6 +293,29 @@ cohctl start cluster local -J 9999 -j hostname
 * `-J` is the rmi port
 * `-j` is the rmi host. You should set this to the hostname the cluster is running on. It will default to WKA address if not set.
 
+
+[#restart-cluster]
+==== Restart Cluster
+
+include::../../build/_output/docs-gen/restart_cluster.adoc[tag=text]
+
+[source,bash]
+----
+cohctl restart cluster local -M 1g
+----
+Output:
+[source,bash]
+----
+Are you sure you want to stop 3 members for the cluster local? (y/n) y
+killed process 8522
+killed process 8524
+killed process 8523
+3 processes were stopped for cluster local
+Starting cluster member storage-0...
+Starting cluster member storage-1...
+Starting cluster member storage-2...
+Cluster local started
+----
 
 [#start-console]
 ==== Start Console

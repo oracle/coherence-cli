@@ -576,6 +576,10 @@ func Initialize(command *cobra.Command) *cobra.Command {
 	command.AddCommand(runCmd)
 	runCmd.AddCommand(runReportCmd)
 
+	// restart command
+	command.AddCommand(restartCmd)
+	restartCmd.AddCommand(restartClusterCmd)
+
 	// clear
 	command.AddCommand(clearCmd)
 	clearCmd.AddCommand(clearContextCmd)

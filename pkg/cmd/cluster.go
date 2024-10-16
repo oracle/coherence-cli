@@ -752,7 +752,7 @@ var (
 )
 
 const (
-	defaultCoherenceVersion = "22.06.9"
+	defaultCoherenceVersion = "22.06.10"
 	startClusterCommand     = "start cluster"
 	scaleClusterCommand     = "scale cluster"
 	stopClusterCommand      = "stop cluster"
@@ -1187,6 +1187,30 @@ var stopClusterCmd = &cobra.Command{
 	},
 }
 
+// restartClusterCmd represents the stop cluster command.
+var restartClusterCmd = &cobra.Command{
+	Use:               "cluster",
+	Short:             "restart a local Coherence cluster",
+	Long:              `The 'restart cluster' command stops and restart a cluster that was manually created or started.`,
+	ValidArgsFunction: completionAllManualClusters,
+	Args: func(cmd *cobra.Command, args []string) error {
+		if len(args) != 1 {
+			displayErrorAndExit(cmd, youMustProviderClusterMessage)
+		}
+		return nil
+	},
+	RunE: func(cmd *cobra.Command, args []string) error {
+		cluster := args[0]
+		if err := runClusterOperation(cmd, cluster, stopClusterCommand); err != nil {
+			cmd.Println(err)
+		}
+
+		time.Sleep(time.Duration(3) * time.Second)
+
+		return runClusterOperation(cmd, cluster, startClusterCommand)
+	},
+}
+
 // startConsoleCmd represents the start console command.
 var startConsoleCmd = &cobra.Command{
 	Use:   "console",
@@ -1461,23 +1485,6 @@ func init() {
 
 	stopClusterCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
 
-	startClusterCmd.Flags().Int32VarP(&replicaCountParam, "replicas", "r", 3, serverCountMessage)
-	startClusterCmd.Flags().Int32VarP(&metricsStartPortParam, metricsPortArg, "t", 0, metricsPortMessage)
-	startClusterCmd.Flags().Int32VarP(&healthStartPortParam, healthPortArg, "e", 0, healthPortMessage)
-	startClusterCmd.Flags().StringVarP(&heapMemoryParam, heapMemoryArg, "M", defaultHeap, heapMemoryMessage)
-	startClusterCmd.Flags().StringVarP(&profileValueParam, profileArg, "P", "", profileMessage)
-	startClusterCmd.Flags().Int32VarP(&logLevelParam, logLevelArg, "l", 5, logLevelMessage)
-	startClusterCmd.Flags().StringVarP(&startupDelayParam, startupDelayArg, "D", "0ms", startupDelayMessage)
-	startClusterCmd.Flags().StringVarP(&serverStartClassParam, startClassArg, "S", "", startClassMessage)
-	startClusterCmd.Flags().Int32VarP(&jmxRemotePortParam, jmxPortArg, "J", 0, jmxPortMessage)
-	startClusterCmd.Flags().StringVarP(&jmxRemoteHostParam, jmxHostArg, "j", "", jmxHostMessage)
-	startClusterCmd.Flags().BoolVarP(&profileFirstParam, profileFirstArg, "F", false, profileFirstMessage)
-	startClusterCmd.Flags().BoolVarP(&backupLogFilesParam, backupLogFilesArg, "B", false, backupLogFilesMessage)
-	startClusterCmd.Flags().StringVarP(&machineParam, machineArg, "", "", machineMessage)
-	startClusterCmd.Flags().StringVarP(&rackParam, rackArg, "", "", rackMessage)
-	startClusterCmd.Flags().StringVarP(&siteParam, siteArg, "", "", siteMessage)
-	startClusterCmd.Flags().StringVarP(&roleParam, roleArg, "", "", roleMessage)
-
 	startConsoleCmd.Flags().StringVarP(&heapMemoryParam, heapMemoryArg, "M", defaultHeap, heapMemoryMessage)
 	startConsoleCmd.Flags().Int32VarP(&logLevelParam, logLevelArg, "l", 5, logLevelMessage)
 	startConsoleCmd.Flags().StringVarP(&profileValueParam, profileArg, "P", "", profileMessage)
@@ -1496,19 +1503,30 @@ func init() {
 	startClassCmd.Flags().BoolVarP(&grpcClientParam, "grpc", "G", false, "start a class as gRPC client. Only works for default cache config")
 	startClassCmd.Flags().StringVarP(&profileValueParam, profileArg, "P", "", profileMessage)
 
-	scaleClusterCmd.Flags().Int32VarP(&replicaCountParam, "replicas", "r", 3, serverCountMessage)
-	scaleClusterCmd.Flags().StringVarP(&heapMemoryParam, heapMemoryArg, "M", defaultHeap, heapMemoryMessage)
-	scaleClusterCmd.Flags().Int32VarP(&logLevelParam, logLevelArg, "l", 5, logLevelMessage)
-	scaleClusterCmd.Flags().StringVarP(&startupDelayParam, startupDelayArg, "D", "0ms", startupDelayMessage)
-	scaleClusterCmd.Flags().Int32VarP(&metricsStartPortParam, metricsPortArg, "t", 0, metricsPortMessage)
-	scaleClusterCmd.Flags().Int32VarP(&healthStartPortParam, healthPortArg, "e", 0, healthPortMessage)
-	scaleClusterCmd.Flags().StringVarP(&profileValueParam, profileArg, "P", "", profileMessage)
-	scaleClusterCmd.Flags().StringVarP(&serverStartClassParam, startClassArg, "S", "", startClassMessage)
-	scaleClusterCmd.Flags().BoolVarP(&backupLogFilesParam, backupLogFilesArg, "B", false, backupLogFilesMessage)
-	scaleClusterCmd.Flags().StringVarP(&machineParam, machineArg, "", "", machineMessage)
-	scaleClusterCmd.Flags().StringVarP(&rackParam, rackArg, "", "", rackMessage)
-	scaleClusterCmd.Flags().StringVarP(&siteParam, siteArg, "", "", siteMessage)
-	scaleClusterCmd.Flags().StringVarP(&roleParam, roleArg, "", "", roleMessage)
+	applyStartParams(scaleClusterCmd)
+	applyStartParams(restartClusterCmd)
+	applyStartParams(startClusterCmd)
+
+	restartClusterCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
+}
+
+func applyStartParams(cmd *cobra.Command) {
+	cmd.Flags().Int32VarP(&replicaCountParam, "replicas", "r", 3, serverCountMessage)
+	cmd.Flags().Int32VarP(&metricsStartPortParam, metricsPortArg, "t", 0, metricsPortMessage)
+	cmd.Flags().Int32VarP(&healthStartPortParam, healthPortArg, "e", 0, healthPortMessage)
+	cmd.Flags().StringVarP(&heapMemoryParam, heapMemoryArg, "M", defaultHeap, heapMemoryMessage)
+	cmd.Flags().StringVarP(&profileValueParam, profileArg, "P", "", profileMessage)
+	cmd.Flags().Int32VarP(&logLevelParam, logLevelArg, "l", 5, logLevelMessage)
+	cmd.Flags().StringVarP(&startupDelayParam, startupDelayArg, "D", "0ms", startupDelayMessage)
+	cmd.Flags().StringVarP(&serverStartClassParam, startClassArg, "S", "", startClassMessage)
+	cmd.Flags().Int32VarP(&jmxRemotePortParam, jmxPortArg, "J", 0, jmxPortMessage)
+	cmd.Flags().StringVarP(&jmxRemoteHostParam, jmxHostArg, "j", "", jmxHostMessage)
+	cmd.Flags().BoolVarP(&profileFirstParam, profileFirstArg, "F", false, profileFirstMessage)
+	cmd.Flags().BoolVarP(&backupLogFilesParam, backupLogFilesArg, "B", false, backupLogFilesMessage)
+	cmd.Flags().StringVarP(&machineParam, machineArg, "", "", machineMessage)
+	cmd.Flags().StringVarP(&rackParam, rackArg, "", "", rackMessage)
+	cmd.Flags().StringVarP(&siteParam, siteArg, "", "", siteMessage)
+	cmd.Flags().StringVarP(&roleParam, roleArg, "", "", roleMessage)
 }
 
 // sanitizeConnectionName sanitizes a cluster connection
