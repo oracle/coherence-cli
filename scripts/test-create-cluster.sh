@@ -127,6 +127,12 @@ runCommand get services -o jsonpath="$.items[?(@.name=='PartitionedCache')].memb
 # must be 6 members
 grep "[6,6,6]" $OUTPUT
 
+# Restart the cluster
+runCommand restart cluster local -r 6 -y
+
+pause
+wait_for_ready
+
 # Shutdown
 runCommand stop cluster local -y
 
