@@ -1114,7 +1114,13 @@ func FormatCacheStoreDetails(cacheDetails []config.CacheStoreDetail, cache, serv
 			fmt.Sprintf("Service/Cache:             %s/%s\n", service, cache) +
 				fmt.Sprintf("Cache Store Type:          %s\n", cacheStoreType)
 	}
-	header += fmt.Sprintf("Total Queue TotalSize:     %s\n", formatLargeInteger(totalQueueSize)) +
+
+	queueSize := "N/A"
+	if totalQueueSize > 0 {
+		queueSize = formatLargeInteger(totalQueueSize)
+	}
+
+	header += fmt.Sprintf("Total Queue TotalSize:     %s\n", queueSize) +
 		fmt.Sprintf("Total Store Failures:      %s\n", formatLargeInteger(totalFailures)) + "\n"
 
 	return header + table.String()
