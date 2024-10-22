@@ -276,6 +276,11 @@ func initConfig() {
 		home string
 	)
 
+	// if cfgDirectory not specified then check for env variable COHCTL_HOME to override default
+	if cfgDirectory == "" {
+		cfgDirectory = os.Getenv("COHCTL_HOME")
+	}
+
 	if cfgDirectory != "" {
 		// --config-dir set so ensure we create the directory if it doesn't exist
 		if stat, err := os.Stat(cfgDirectory); err != nil {

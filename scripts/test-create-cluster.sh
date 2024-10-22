@@ -310,6 +310,10 @@ if [ -z "$COM" -a -z "`echo $VERSION | grep SNAPSHOT`" ] ; then
   runCommand remove cluster local -y
 fi
 
+# Test the environment variable for setting the home directory
+message "Setting COHCTL_HOME to ${CONFIG_DIR}"
+export COHCTL_HOME=${CONFIG_DIR}
+$DIR/bin/cohctl version
 
 
 
