@@ -24,7 +24,7 @@ import (
 const (
 	defaultLayoutName    = "default"
 	pressAdditional      = "(press key in [] or mouse to toggle expand, ? = help)"
-	pressAdditionalReset = "(press key in [] or mouse to exit expand)"
+	pressAdditionalReset = "(press key in [] or mouse/ESC to exit expand)"
 	noContent            = "  No Content"
 	errorContent         = "Unable to retrieve data"
 	unableToFindPanel    = "unable to find panel [%v], use --help or --show-panels to see all options"
@@ -282,7 +282,7 @@ Use --show-panels to show all available panels.`,
 			case *tcell.EventKey:
 				pressedKey := ev.Rune()
 				// Exit for 'q', ESC, or CTRL-C
-				if ev.Key() == tcell.KeyESC || ev.Key() == tcell.KeyCtrlC {
+				if (ev.Key() == tcell.KeyESC && expandedPanel == "") || ev.Key() == tcell.KeyCtrlC {
 					close(exit)
 					return nil
 				}
@@ -311,7 +311,7 @@ Use --show-panels to show all available panels.`,
 					if err := refresh(screen, dataFetcher, parsedLayout, false); err != nil {
 						panic(err)
 					}
-				} else if (pressedKey >= '1' && pressedKey <= '9' && pressedKey <= lastPanelCode) ||
+				} else if ((pressedKey >= '1' && pressedKey <= '9' && pressedKey <= lastPanelCode) || ev.Key() == tcell.KeyESC) ||
 					(pressedKey >= 'a' && pressedKey <= 'z' && pressedKey <= lastPanelCode) {
 					updateExpanded(pressedKey, screen, dataFetcher, parsedLayout)
 				}
