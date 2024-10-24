@@ -288,7 +288,7 @@ func FormatFederationSummary(federationSummaries []config.FederationSummary, tar
 		fedCount           = len(federationSummaries)
 		finalAlignment     []string
 		suffix             = "SENT"
-		participantCol     = "DESTINATION"
+		participantCol     = "OUTGOING"
 		memberCol          = MembersColumn
 		formattingFunction = getFormattingFunction()
 		table              FormattedTable
@@ -301,7 +301,7 @@ func FormatFederationSummary(federationSummaries []config.FederationSummary, tar
 	// setup columns and alignments
 	if target == origins {
 		suffix = "REC"
-		participantCol = "ORIGIN"
+		participantCol = "INCOMING"
 		memberCol = "MEMBERS RECEIVING"
 	}
 
@@ -1193,7 +1193,7 @@ func FormatClusterConnections(clusters []ClusterConnection) string {
 		return ""
 	}
 
-	table := newFormattedTable().WithHeader("CONNECTION", "TYPE", "URL", "VERSION", "CLUSTER NAME", "TYPE", "CTX", "LOCAL").
+	table := newFormattedTable().WithHeader("CONNECTION", "TYPE", "URL", "VERSION", "CLUSTER NAME", "TYPE", "CTX", "CREATED").
 		WithSortingColumn("CONNECTION")
 
 	for _, value := range clusters {
@@ -1713,6 +1713,10 @@ func FormatServices(services []config.ServiceSummary) string {
 			status = fmt.Sprintf("%d partitions are vulnerable", value.PartitionsVulnerable)
 		} else if value.PartitionsUnbalanced > 0 {
 			status = fmt.Sprintf("%d partitions are unbalanced", value.PartitionsUnbalanced)
+		}
+
+		if value.StorageEnabledCount == -1 {
+			value.StorageEnabledCount = 0
 		}
 
 		if value.QuorumStatus == "Suspended" {

@@ -34,9 +34,9 @@ var (
 )
 
 const (
-	clusterMessage                = "A cluster connection already exists with the name %s for %s\n"
-	ignoreErrorsMessage           = "ignore errors from NS lookup"
-	youMustProviderClusterMessage = "you must provide a cluster name"
+	clusterMessage                   = "A cluster connection already exists with the name %s for %s\n"
+	ignoreErrorsMessage              = "ignore errors from NS lookup"
+	youMustProviderConnectionMessage = "you must provide a single connection name"
 )
 
 // addClusterCmd represents the add cluster command
@@ -49,7 +49,7 @@ You can also specify host:port (for http connections) and the url will be automa
 populated constructed.`,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
-			displayErrorAndExit(cmd, "you must provide a connection name")
+			displayErrorAndExit(cmd, youMustProviderConnectionMessage)
 		}
 		return nil
 	},
@@ -62,7 +62,7 @@ populated constructed.`,
 		}
 
 		if connectionURL == "" {
-			return errors.New("you must supply a connection url")
+			return errors.New("you must provide a connection url")
 		}
 
 		if err = addCluster(cmd, connection, connectionURL, "manual", ""); err != nil {
@@ -81,7 +81,7 @@ var removeClusterCmd = &cobra.Command{
 	ValidArgsFunction: completionAllClusters,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
-			displayErrorAndExit(cmd, "you must provide a connection name")
+			displayErrorAndExit(cmd, youMustProviderConnectionMessage)
 		}
 		return nil
 	},
@@ -203,7 +203,7 @@ addition information as well as '-v' to displayed additional information.`,
 	ValidArgsFunction: completionAllClusters,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
-			displayErrorAndExit(cmd, "you must provide a cluster connection")
+			displayErrorAndExit(cmd, "you must provide a single cluster connection")
 		}
 		return nil
 	},
@@ -774,7 +774,7 @@ commercial 14.1.1.2206.1 and above. Default version is currently CE ` + defaultC
 NOTE: This is an experimental feature and my be altered or removed in the future.`,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
-			displayErrorAndExit(cmd, youMustProviderClusterMessage)
+			displayErrorAndExit(cmd, youMustProviderConnectionMessage)
 		}
 		return nil
 	},
@@ -1141,7 +1141,7 @@ var startClusterCmd = &cobra.Command{
 	ValidArgsFunction: completionAllManualClusters,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
-			displayErrorAndExit(cmd, youMustProviderClusterMessage)
+			displayErrorAndExit(cmd, youMustProviderConnectionMessage)
 		}
 		return nil
 	},
@@ -1161,7 +1161,7 @@ var scaleClusterCmd = &cobra.Command{
 	ValidArgsFunction: completionAllManualClusters,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
-			displayErrorAndExit(cmd, youMustProviderClusterMessage)
+			displayErrorAndExit(cmd, youMustProviderConnectionMessage)
 		}
 		return nil
 	},
@@ -1178,7 +1178,7 @@ var stopClusterCmd = &cobra.Command{
 	ValidArgsFunction: completionAllManualClusters,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
-			displayErrorAndExit(cmd, youMustProviderClusterMessage)
+			displayErrorAndExit(cmd, youMustProviderConnectionMessage)
 		}
 		return nil
 	},
@@ -1195,7 +1195,7 @@ var restartClusterCmd = &cobra.Command{
 	ValidArgsFunction: completionAllManualClusters,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
-			displayErrorAndExit(cmd, youMustProviderClusterMessage)
+			displayErrorAndExit(cmd, youMustProviderConnectionMessage)
 		}
 		return nil
 	},

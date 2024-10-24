@@ -778,7 +778,7 @@ func GetConnectionNameFromContextOrArg() (string, error) {
 	}
 
 	// otherwise, must be an error
-	return "", errors.New("you must supply a connection name if you have not set the current context")
+	return "", errors.New("you must provide a connection name if you have not set the current context")
 }
 
 // GetConnectionAndDataFetcher returns the connection and dataFetcher.

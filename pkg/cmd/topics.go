@@ -22,7 +22,7 @@ import (
 )
 
 const (
-	SupplyTopicMessage = "you must provide a topic"
+	SupplyTopicMessage = "you must provide a single topic"
 	NoTopicForService  = "there are no topics for service %s"
 	TopicDoesNotExist  = "a topic named %s does not exist for service %s"
 	nodeIDMessage      = "node id to show channels for"

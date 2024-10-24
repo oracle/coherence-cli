@@ -137,7 +137,7 @@ var describeHTTPSessionCmd = &cobra.Command{
 	ValidArgsFunction: completionHTTPSessions,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
-			displayErrorAndExit(cmd, "you must provide an application id")
+			displayErrorAndExit(cmd, "you must provide a single application id")
 		}
 		return nil
 	},

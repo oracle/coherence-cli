@@ -98,7 +98,7 @@ var resetServiceStatsCmd = &cobra.Command{
 	ValidArgsFunction: completionService,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
-			displayErrorAndExit(cmd, provideServiceName)
+			displayErrorAndExit(cmd, provideService)
 		}
 		return nil
 	},
@@ -115,7 +115,7 @@ var resetProxyStatsCmd = &cobra.Command{
 	ValidArgsFunction: completionProxies,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
-			displayErrorAndExit(cmd, provideServiceName)
+			displayErrorAndExit(cmd, provideService)
 		}
 		return nil
 	},
@@ -148,7 +148,7 @@ var resetFederationStatsCmd = &cobra.Command{
 	Long:  `The 'reset federation-stats' command resets federation statistics for all members or a comma separated list of member IDs.`,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
-			displayErrorAndExit(cmd, provideServiceName)
+			displayErrorAndExit(cmd, provideService)
 		}
 		return nil
 	},

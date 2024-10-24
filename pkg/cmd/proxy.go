@@ -20,7 +20,7 @@ import (
 )
 
 const (
-	provideProxyService = "you must provide a proxy service name"
+	provideProxyService = "you must provide a single proxy service name"
 	proxyErrorMsg       = "unable to find proxy service with service name"
 	tcpString           = "tcp"
 )

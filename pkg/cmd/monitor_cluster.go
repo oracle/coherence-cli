@@ -137,7 +137,7 @@ Use --show-panels to show all available panels.`,
 	ValidArgsFunction: completionAllClusters,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 && !showAllPanels {
-			displayErrorAndExit(cmd, youMustProviderClusterMessage)
+			displayErrorAndExit(cmd, youMustProviderConnectionMessage)
 		}
 		return nil
 	},

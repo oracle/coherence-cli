@@ -27,7 +27,7 @@ var (
 )
 
 const (
-	provideExecutorName = "you must provide an executor name"
+	provideExecutorName = "you must provide a single executor name"
 	cannotFindExecutors = "unable to find any executors in this cluster"
 	stringTrue          = "true"
 	stringFalse         = "false"

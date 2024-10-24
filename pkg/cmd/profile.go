@@ -14,7 +14,7 @@ import (
 	"regexp"
 )
 
-const provideProfileName = "you must provide a profile name"
+const provideProfileName = "you must provide a single profile name"
 
 var (
 	isValid      = regexp.MustCompile(`^[A-Za-z\d-]+$`).MatchString

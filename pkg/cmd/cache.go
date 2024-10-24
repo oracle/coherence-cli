@@ -37,8 +37,8 @@ var (
 )
 
 const (
-	provideCacheMessage     = "you must provide a cache name"
-	provideViewCacheMessage = "you must provide a view cache name"
+	provideCacheMessage     = "you must provide a single cache name"
+	provideViewCacheMessage = "you must provide a single view cache name"
 	back                    = "back"
 	all                     = "all"
 	partitionDisplayType    = "partition"
@@ -800,7 +800,7 @@ batchFactor, refreshFactor or requeueThreshold.`,
 	ValidArgsFunction: completionCaches,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
-			displayErrorAndExit(cmd, "you must provide a cache name")
+			displayErrorAndExit(cmd, provideCacheMessage)
 		}
 		return nil
 	},

@@ -164,7 +164,7 @@ var describeMachineCmd = &cobra.Command{
 	ValidArgsFunction: completionMachines,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
-			displayErrorAndExit(cmd, "you must provide a machine name")
+			displayErrorAndExit(cmd, "you must provide a single machine name")
 		}
 		return nil
 	},

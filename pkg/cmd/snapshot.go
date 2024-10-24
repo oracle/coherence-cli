@@ -31,7 +31,8 @@ var (
 )
 
 const (
-	provideSnapshot = "you must provide a snapshot name"
+	provideSnapshot = "you must provide a single snapshot name"
+	provideService  = "you must provide a single service name"
 	snapshotUse     = "snapshot snapshot-name"
 )
 
@@ -258,7 +259,7 @@ This may lead to the partial or full data loss of the corresponding cache servic
 	ValidArgsFunction: completionPersistenceService,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
-			displayErrorAndExit(cmd, provideServiceName)
+			displayErrorAndExit(cmd, provideService)
 		}
 		return nil
 	},
@@ -327,7 +328,7 @@ func invokePersistenceOperation(cmd *cobra.Command, operation, snapshotName stri
 	}
 
 	if serviceName == "" {
-		return errors.New("you must supply a service name")
+		return errors.New(provideService)
 	}
 	// if a service was specified then validate
 	if !utils.SliceContains(servicesResult, serviceName) {

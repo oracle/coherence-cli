@@ -26,7 +26,7 @@ const (
 	reporterIntervalSeconds = "intervalSeconds"
 	reporterOutputPath      = "outputPath"
 	reporterUse             = "reporter node-id"
-	provideNodeID           = "you must provide a node id"
+	provideNodeID           = "you must provide a single node id"
 )
 
 var (
@@ -165,7 +165,7 @@ The report name should not include the .xml extension and will have the 'report'
 'report-node' will expand to 'reports/report-node.xml'. A HTTP 400 will be returned if the report name is not valid.`,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
-			displayErrorAndExit(cmd, "you must provide a report name")
+			displayErrorAndExit(cmd, "you must provide a single report name")
 		}
 		return nil
 	},
