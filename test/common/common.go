@@ -1668,15 +1668,15 @@ func RunTestFederationCommands(t *testing.T) {
 
 	// Get federation and ensure it is idle or paused
 	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "cluster2", configArg, file,
-		"get", "federation", "destinations", "-c", context.ClusterName)
+		"get", "federation", "outgoing", "-c", context.ClusterName)
 
 	// Test JSON
-	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "\"cluster2\",destinations", configArg, file,
+	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "\"cluster2\",outgoing", configArg, file,
 		"get", "federation", "all", "-c", context.ClusterName, "-o", "json")
 
 	// Test JSONPAth
 	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "\"currentBandwidth\",FederatedService", configArg, file,
-		"get", "federation", "all", "-c", context.ClusterName, "-o", "jsonpath=$.destinations")
+		"get", "federation", "all", "-c", context.ClusterName, "-o", "jsonpath=$.outgoing")
 
 	// reset output format to default of TABLE
 	cmd.OutputFormat = constants.TABLE
@@ -1694,7 +1694,7 @@ func RunTestFederationCommands(t *testing.T) {
 	// Get federation and ensure it is IDLE as data should have been sent by now
 	// note we have to reset the output format
 	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "cluster2,IDLE", configArg, file,
-		"get", "federation", "destinations", "-c", context.ClusterName)
+		"get", "federation", "outgoing", "-c", context.ClusterName)
 
 	// ensure there is data in the destination cluster
 	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "SERVICE,CACHE,SIZE,federated-1,federated-2,federated-3",
@@ -1708,7 +1708,7 @@ func RunTestFederationCommands(t *testing.T) {
 
 	// Get federation and ensure it is paused
 	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "cluster2,PAUSED", configArg, file,
-		"get", "federation", "destinations", "-c", context.ClusterName)
+		"get", "federation", "outgoing", "-c", context.ClusterName)
 
 	// Stop federation
 	test_utils.EnsureCommandContainsAll(g, t, cliCmd, cmd.OperationCompleted, configArg, file,
@@ -1718,7 +1718,7 @@ func RunTestFederationCommands(t *testing.T) {
 
 	// Get federation and ensure it is stopped
 	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "cluster2,STOPPED", configArg, file,
-		"get", "federation", "destinations", "-c", context.ClusterName)
+		"get", "federation", "outgoing", "-c", context.ClusterName)
 
 	// Start federation
 	test_utils.EnsureCommandContainsAll(g, t, cliCmd, cmd.OperationCompleted, configArg, file,
@@ -1728,7 +1728,7 @@ func RunTestFederationCommands(t *testing.T) {
 
 	// Get federation and ensure it is IDLE as data should have been sent by now
 	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "cluster2,IDLE", configArg, file,
-		"get", "federation", "destinations", "-c", context.ClusterName)
+		"get", "federation", "outgoing", "-c", context.ClusterName)
 
 	// validate we cannot replicate all to an unknown participant
 	test_utils.EnsureCommandErrorContains(g, t, cliCmd, "unable to find participant", configArg, file,
@@ -1742,11 +1742,11 @@ func RunTestFederationCommands(t *testing.T) {
 
 	// get wide output and check for 100.00%
 	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "cluster2,REPLICATE,100.00%", configArg, file,
-		"get", "federation", "destinations", "-o", "wide", "-c", context.ClusterName)
+		"get", "federation", "outgoing", "-o", "wide", "-c", context.ClusterName)
 
 	// test describe federation
 	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "AVG BACKLOG DELAY,AVG APPLY,cluster2", configArg, file,
-		"describe", "federation", "FederatedService", "-p", "cluster2", "-T", "destinations", "-o", "wide", "-c", context.ClusterName)
+		"describe", "federation", "FederatedService", "-p", "cluster2", "-T", "outgoing", "-o", "wide", "-c", context.ClusterName)
 
 	restUrl2 := strings.ReplaceAll(restUrl, "8080", "8081")
 	// populate data in second cluster

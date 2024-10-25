@@ -35,7 +35,7 @@ var getHTTPProxiesCmd = &cobra.Command{
 			return err
 		}
 
-		details, err := returnGetProxiesDetails(cmd, httpString, dataFetcher, connection)
+		details, err := returnGetProxiesDetails(cmd, httpString, dataFetcher, connection, "")
 		if err != nil {
 			return err
 		}
@@ -55,7 +55,7 @@ var describeHTTPProxyCmd = &cobra.Command{
 	ValidArgsFunction: completionHTTPServers,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
-			displayErrorAndExit(cmd, "you must provide a service name")
+			displayErrorAndExit(cmd, provideService)
 		}
 		return nil
 	},
@@ -99,7 +99,7 @@ var describeHTTPProxyCmd = &cobra.Command{
 			return err
 		}
 
-		err = displayProxyDetails(cmd, dataFetcher, connection, httpString, serviceResult, proxyResults)
+		err = displayProxyDetails(cmd, dataFetcher, connection, httpString, serviceResult, proxyResults, serviceName)
 		if err != nil {
 			return err
 		}

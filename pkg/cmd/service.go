@@ -42,7 +42,6 @@ var (
 
 const (
 	serviceUse          = "service service-name"
-	provideServiceName  = "you must provide a service name"
 	unableToFindService = "unable to find service with service name '%s'"
 	noDistributionsData = "No distributions data is available"
 	serviceUnmarshall   = "unable to unmarshall members result"
@@ -293,7 +292,7 @@ var getServiceDistributionsCmd = &cobra.Command{
 	Long:  `The 'get service-distributions' command displays partition distributions for a service.`,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
-			displayErrorAndExit(cmd, provideServiceName)
+			displayErrorAndExit(cmd, provideService)
 		}
 		return nil
 	},
@@ -375,7 +374,7 @@ var getServiceOwnershipCmd = &cobra.Command{
 	Long:  `The 'get service-ownership' command displays partition ownership for a service.`,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
-			displayErrorAndExit(cmd, provideServiceName)
+			displayErrorAndExit(cmd, provideService)
 		}
 		return nil
 	},
@@ -526,7 +525,7 @@ var getServiceDescriptionCmd = &cobra.Command{
 Only available in most recent Coherence versions.`,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
-			displayErrorAndExit(cmd, provideServiceName)
+			displayErrorAndExit(cmd, provideService)
 		}
 		return nil
 	},
@@ -604,7 +603,7 @@ var getServiceMembersCmd = &cobra.Command{
 	ValidArgsFunction: completionService,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
-			displayErrorAndExit(cmd, provideServiceName)
+			displayErrorAndExit(cmd, provideService)
 		}
 		return nil
 	},
@@ -719,7 +718,7 @@ service is a cache service.`,
 	ValidArgsFunction: completionService,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
-			displayErrorAndExit(cmd, provideServiceName)
+			displayErrorAndExit(cmd, provideService)
 		}
 		return nil
 	},
@@ -984,7 +983,7 @@ taskHungThresholdMillis or requestTimeoutMillis.`,
 	ValidArgsFunction: completionService,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
-			displayErrorAndExit(cmd, provideServiceName)
+			displayErrorAndExit(cmd, provideService)
 		}
 		return nil
 	},
@@ -1103,7 +1102,7 @@ var suspendServiceCmd = &cobra.Command{
 	ValidArgsFunction: completionPersistenceService,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
-			displayErrorAndExit(cmd, provideServiceName)
+			displayErrorAndExit(cmd, provideService)
 		}
 		return nil
 	},
@@ -1120,7 +1119,7 @@ var resumeServiceCmd = &cobra.Command{
 	ValidArgsFunction: completionPersistenceService,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
-			displayErrorAndExit(cmd, provideServiceName)
+			displayErrorAndExit(cmd, provideService)
 		}
 		return nil
 	},
@@ -1138,7 +1137,7 @@ Use the shutdown service command for normal service termination.`,
 	ValidArgsFunction: completionPersistenceService,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
-			displayErrorAndExit(cmd, provideServiceName)
+			displayErrorAndExit(cmd, provideService)
 		}
 		return nil
 	},
@@ -1155,7 +1154,7 @@ var startServiceCmd = &cobra.Command{
 	ValidArgsFunction: completionPersistenceService,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
-			displayErrorAndExit(cmd, provideServiceName)
+			displayErrorAndExit(cmd, provideService)
 		}
 		return nil
 	},
@@ -1173,7 +1172,7 @@ on a cluster member. Shutting down a service is preferred over stopping a servic
 	ValidArgsFunction: completionPersistenceService,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
-			displayErrorAndExit(cmd, provideServiceName)
+			displayErrorAndExit(cmd, provideService)
 		}
 		return nil
 	},

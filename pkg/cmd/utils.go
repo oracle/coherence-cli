@@ -237,7 +237,7 @@ func GetMachineList(dataFetcher fetcher.Fetcher) (map[string]string, error) {
 	machinesMap := make(map[string]string)
 
 	for _, value := range members.Members {
-		machineName := value.UnicastAddress
+		machineName := value.MachineName
 		if _, ok := machinesMap[machineName]; !ok {
 			// does not exist to add it
 			machinesMap[machineName] = value.NodeID

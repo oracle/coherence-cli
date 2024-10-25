@@ -21,12 +21,12 @@ import (
 )
 
 const (
-	destinations       = "destinations"
-	origins            = "origins"
+	destinations       = "outgoing"
+	origins            = "incoming"
 	outgoing           = "outgoing"
 	incoming           = "incoming"
 	participantMessage = "participant to apply to"
-	supplyService      = "you must provide a service name"
+	supplyService      = "you must provide a single federated service name"
 	federationUse      = "federation service-name"
 	replicateAll       = "replicateAll"
 )
@@ -42,10 +42,10 @@ var (
 
 // getFederationCmd represents the get federation command.
 var getFederationCmd = &cobra.Command{
-	Use:   "federation {destinations|origins|all}",
+	Use:   "federation {outgoing|incoming|all}",
 	Short: "display federation details for a cluster",
 	Long: `The 'get federation' command displays the federation details for a cluster. 
-You must specify either destinations, origins or all to show both. You 
+You must specify either outgoing, incoming or all to show both. You 
 can also specify '-o wide' to display addition information.`,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
@@ -109,7 +109,7 @@ can also specify '-o wide' to display addition information.`,
 				jsonDataDest, _ := json.Marshal(finalSummariesDestinations)
 				jsonDataOrigins, _ := json.Marshal(finalSummariesOrigins)
 				finalData, err := utils.CombineByteArraysForJSON([][]byte{jsonDataDest, jsonDataOrigins},
-					[]string{"destinations", "origins"})
+					[]string{outgoing, incoming})
 				if err != nil {
 					return err
 				}

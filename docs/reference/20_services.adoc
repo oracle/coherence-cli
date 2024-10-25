@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 
-    Copyright (c) 2021, 2023 Oracle and/or its affiliates.
+    Copyright (c) 2021, 2024 Oracle and/or its affiliates.
     Licensed under the Universal Permissive License v 1.0 as shown at
     https://oss.oracle.com/licenses/upl.
 
@@ -238,11 +238,11 @@ Output:
 [source,bash]
 ----
 SERVICE NAME         TYPE              MEMBERS  STATUS HA  STORAGE  SENIOR PARTITIONS
-Proxy                Proxy                   2  n/a             -1       1         -1
+Proxy                Proxy                   2  n/a              0       1          -
 PartitionedTopic     DistributedCache        2  NODE-SAFE        2       2        257
 PartitionedCache2    DistributedCache        2  NODE-SAFE        2       2        257
 PartitionedCache     DistributedCache        2  NODE-SAFE        2       1        257
-ManagementHttpProxy  Proxy                   1  n/a             -1       1         -1
+ManagementHttpProxy  Proxy                   1  n/a              0       1          -
 ----
 
 [source,bash]

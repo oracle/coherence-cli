@@ -209,6 +209,7 @@ type ServiceSummary struct {
 	PartitionsEndangered int32  `json:"partitionsEndangered"`
 	PartitionsVulnerable int32  `json:"partitionsVulnerable"`
 	PartitionsUnbalanced int32  `json:"partitionsUnbalanced"`
+	RequestPendingCount  int32  `json:"requestPendingCount"`
 	StorageEnabled       bool   `json:"storageEnabled"`
 	QuorumStatus         string `json:"quorumStatus"`
 	SeniorMemberID       int32  `json:"seniorMemberId"`

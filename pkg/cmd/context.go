@@ -27,7 +27,7 @@ var setContextCmd = &cobra.Command{
 	ValidArgsFunction: completionAllClusters,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
-			displayErrorAndExit(cmd, "you must provide a connection name")
+			displayErrorAndExit(cmd, youMustProviderConnectionMessage)
 		}
 		return nil
 	},

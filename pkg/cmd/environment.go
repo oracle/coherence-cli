@@ -23,7 +23,7 @@ This includes details of the JVM as well as system properties.`,
 	ValidArgsFunction: completionNodeID,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
-			displayErrorAndExit(cmd, "you must provide a node id")
+			displayErrorAndExit(cmd, "you must provide a single node id")
 		}
 		return nil
 	},

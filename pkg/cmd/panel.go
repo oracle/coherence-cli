@@ -13,7 +13,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-const providePanelName = "you must provide a panel name"
+const providePanelName = "you must provide a single panel name"
 
 var panelLayout string
 
