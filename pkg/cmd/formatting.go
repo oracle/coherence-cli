@@ -236,7 +236,7 @@ func FormatFederationDetails(federationDetails []config.FederationDescription, t
 		var nodeID, _ = strconv.Atoi(value.NodeID)
 		table.AddRow(formatSmallInteger(int32(nodeID)))
 
-		if target == "destinations" {
+		if target == destinations {
 			bytes = value.TotalBytesSent
 			messages = value.TotalMsgSent
 			records = value.TotalRecordsSent
@@ -359,7 +359,7 @@ func FormatFederationSummary(federationSummaries []config.FederationSummary, tar
 	)
 
 	for _, value := range federationSummaries {
-		if target == "destinations" {
+		if target == destinations {
 			bytes = value.TotalBytesSent.Sum
 			messages = value.TotalMsgSent.Sum
 			records = value.TotalRecordsSent.Sum
@@ -956,8 +956,8 @@ func FormatCacheDetailsSizeAndAccess(cacheDetails []config.CacheDetail) string {
 		if OutputFormat == constants.WIDE {
 			table.AddColumnsToRow(formatLargeInteger(totalHits),
 				formatLargeInteger(value.CacheMisses), formatPercent(hitProb),
-				formatLargeInteger(value.StoreReads), formatLargeInteger(value.StoreWrites),
-				formatLargeInteger(value.StoreFailures))
+				formatLargeIntegerOrDash(value.StoreReads), formatLargeIntegerOrDash(value.StoreWrites),
+				formatLargeIntegerOrDash(value.StoreFailures))
 		}
 	}
 
@@ -1521,7 +1521,7 @@ func FormatNetworkStatistics(members []config.Member) string {
 		table.AddColumnsToRow(formatLargeInteger(value.PacketsSent), formatLargeInteger(value.PacketsReceived),
 			formatLargeInteger(value.PacketsResent), formatPercent(value.PacketDeliveryEfficiency),
 			formatLargeInteger(value.SendQueueSize), formattingFunction(value.TransportSentBytes),
-			formattingFunction(value.TransportReceivedBytes), formatSmallInteger(value.WeakestChannel))
+			formattingFunction(value.TransportReceivedBytes), formatSmallIntegerOrDash(value.WeakestChannel))
 	}
 
 	return table.String()
@@ -1685,18 +1685,18 @@ func FormatServices(services []config.ServiceSummary) string {
 	table := newFormattedTable().WithHeader(ServiceNameColumn, "TYPE", MembersColumn, "STATUS HA", "STORAGE",
 		"SENIOR", partitions, "STATUS").WithSortingColumn(ServiceNameColumn)
 	if OutputFormat == constants.WIDE {
-		table.WithAlignment(L, L, R, L, R, R, R, L, R, R, R, L)
-		table.AddHeaderColumns(endangered, "VULNERABLE", "UNBALANCED", "SUSPENDED")
+		table.WithAlignment(L, L, R, L, R, R, R, L, R, R, R, R, L)
+		table.AddHeaderColumns(endangered, "VULNERABLE", "UNBALANCED", "PENDING REQ", "SUSPENDED")
 		table.AddFormattingFunction(8, endangeredPartitionsFormatter)
 		table.AddFormattingFunction(9, vulnerablePartitionsFormatter)
 		table.AddFormattingFunction(10, vulnerablePartitionsFormatter)
 		table.AddFormattingFunction(11, yesBoolFormatter)
 	} else {
-		table.WithAlignment(L, L, R, L, R, R, R, L)
+		table.WithAlignment(L, L, R, L, R, R, R, R, L)
 	}
 
 	table.AddFormattingFunction(3, statusHAFormatter)
-	table.AddFormattingFunction(7, statusHAFormatter)
+	table.AddFormattingFunction(8, statusHAFormatter)
 
 	for _, value := range services {
 		var (
@@ -1729,12 +1729,13 @@ func FormatServices(services []config.ServiceSummary) string {
 
 		table.AddRow(value.ServiceName, value.ServiceType, formatSmallInteger(value.MemberCount),
 			value.StatusHA, formatSmallInteger(value.StorageEnabledCount), formatSmallInteger(value.SeniorMemberID),
-			formatSmallInteger(value.PartitionsAll), status)
+			formatSmallIntegerOrDash(value.PartitionsAll), status)
 
 		if OutputFormat == constants.WIDE {
-			table.AddColumnsToRow(formatSmallInteger(value.PartitionsEndangered),
-				formatSmallInteger(value.PartitionsVulnerable),
-				formatSmallInteger(value.PartitionsUnbalanced), suspended)
+			table.AddColumnsToRow(formatSmallIntegerOrDash(value.PartitionsEndangered),
+				formatSmallIntegerOrDash(value.PartitionsVulnerable),
+				formatSmallIntegerOrDash(value.PartitionsUnbalanced),
+				formatSmallInteger(value.RequestPendingCount), suspended)
 		}
 	}
 
@@ -2100,6 +2101,22 @@ func getFormattingFunction() func(bytesValue int64) string {
 // formatSmallInteger formats a small integer.
 func formatSmallInteger(value int32) string {
 	return printer.Sprintf("%d", value)
+}
+
+// formatSmallIntegerOrDash formats a small integer but if the value is -1 returns "n/a"
+func formatSmallIntegerOrDash(value int32) string {
+	if value == -1 {
+		return "-"
+	}
+	return formatSmallInteger(value)
+}
+
+// formatLargeIntegerOrDash formats a large integer but if the value is -1 returns "n/a"
+func formatLargeIntegerOrDash(value int64) string {
+	if value == -1 {
+		return "-"
+	}
+	return formatLargeInteger(value)
 }
 
 // formatPort formats a small integer with a max length.

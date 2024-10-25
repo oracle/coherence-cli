@@ -44,7 +44,7 @@ servers for a cluster. You can specify '-o wide' to display addition information
 			return err
 		}
 
-		details, err := returnGetProxiesDetails(cmd, tcpString, dataFetcher, connection)
+		details, err := returnGetProxiesDetails(cmd, tcpString, dataFetcher, connection, "")
 		if err != nil {
 			return err
 		}
@@ -127,7 +127,7 @@ all nodes running the proxy service as well as detailed connection information.`
 			}
 		}
 
-		err = displayProxyDetails(cmd, dataFetcher, connection, "tcp", serviceResult, proxyResults)
+		err = displayProxyDetails(cmd, dataFetcher, connection, "tcp", serviceResult, proxyResults, serviceName)
 		if err != nil {
 			return err
 		}
@@ -298,7 +298,7 @@ func getProxyNodeIDs(selectedService string, proxiesSummary config.ProxiesSummar
 	return nodeIDs
 }
 
-func displayProxyDetails(cmd *cobra.Command, dataFetcher fetcher.Fetcher, connection, protocol string, serviceResult, proxyResults []byte) error {
+func displayProxyDetails(cmd *cobra.Command, dataFetcher fetcher.Fetcher, connection, protocol string, serviceResult, proxyResults []byte, service string) error {
 	var (
 		err         error
 		finalResult []byte
@@ -342,7 +342,7 @@ func displayProxyDetails(cmd *cobra.Command, dataFetcher fetcher.Fetcher, connec
 
 	cmd.Print(member + "\n")
 	cmd.Print("--------------------" + header + "\n")
-	value, err = returnGetProxiesDetails(cmd, protocol, dataFetcher, connection)
+	value, err = returnGetProxiesDetails(cmd, protocol, dataFetcher, connection, service)
 	if err != nil {
 		return err
 	}
@@ -352,7 +352,7 @@ func displayProxyDetails(cmd *cobra.Command, dataFetcher fetcher.Fetcher, connec
 	return nil
 }
 
-func returnGetProxiesDetails(cmd *cobra.Command, protocol string, dataFetcher fetcher.Fetcher, connection string) (string, error) {
+func returnGetProxiesDetails(cmd *cobra.Command, protocol string, dataFetcher fetcher.Fetcher, connection string, service string) (string, error) {
 	var sb strings.Builder
 	for {
 		var proxiesSummary = config.ProxiesSummary{}
@@ -383,6 +383,16 @@ func returnGetProxiesDetails(cmd *cobra.Command, protocol string, dataFetcher fe
 			err = json.Unmarshal(proxyResults, &proxiesSummary)
 			if err != nil {
 				return "", utils.GetError("unable to unmarshall proxy result", err)
+			}
+			if service != "" {
+				// exclude any proxies that don't equal the service name
+				finalProxySummary := make([]config.ProxySummary, 0)
+				for _, v := range proxiesSummary.Proxies {
+					if v.ServiceName == service {
+						finalProxySummary = append(finalProxySummary, v)
+					}
+				}
+				proxiesSummary.Proxies = finalProxySummary
 			}
 			sb.WriteString(FormatProxyServers(proxiesSummary.Proxies, protocol))
 		}

@@ -35,7 +35,7 @@ var getHTTPProxiesCmd = &cobra.Command{
 			return err
 		}
 
-		details, err := returnGetProxiesDetails(cmd, httpString, dataFetcher, connection)
+		details, err := returnGetProxiesDetails(cmd, httpString, dataFetcher, connection, "")
 		if err != nil {
 			return err
 		}
@@ -99,7 +99,7 @@ var describeHTTPProxyCmd = &cobra.Command{
 			return err
 		}
 
-		err = displayProxyDetails(cmd, dataFetcher, connection, httpString, serviceResult, proxyResults)
+		err = displayProxyDetails(cmd, dataFetcher, connection, httpString, serviceResult, proxyResults, serviceName)
 		if err != nil {
 			return err
 		}
