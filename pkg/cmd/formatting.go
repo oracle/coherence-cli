@@ -1692,7 +1692,7 @@ func FormatServices(services []config.ServiceSummary) string {
 		table.AddFormattingFunction(10, vulnerablePartitionsFormatter)
 		table.AddFormattingFunction(11, yesBoolFormatter)
 	} else {
-		table.WithAlignment(L, L, R, L, R, R, R, R, L)
+		table.WithAlignment(L, L, R, L, R, R, R, L)
 	}
 
 	table.AddFormattingFunction(3, statusHAFormatter)
