@@ -217,13 +217,12 @@ addition information as well as '-v' to displayed additional information.`,
 			httpSessions    = config.HTTPSessionSummaries{}
 			executors       = config.Executors{}
 			healthSummaries = config.HealthSummaries{}
-			storage         = config.StorageDetails{}
+			storageInfo     = config.StorageDetails{}
 			dataFetcher     fetcher.Fetcher
 			edData          string
 			err             error
 			cachesData      string
 			topicsData      string
-			jsonPathOrJSON  = strings.Contains(OutputFormat, constants.JSONPATH) || OutputFormat == constants.JSON
 		)
 
 		connection := args[0]
@@ -256,7 +255,7 @@ addition information as well as '-v' to displayed additional information.`,
 			}
 		}
 
-		if jsonPathOrJSON {
+		if isJSONPathOrJSON() {
 			clusterSummary.cachesResult, err = dataFetcher.GetCachesSummaryJSONAllServices()
 			if err != nil {
 				return err
@@ -274,170 +273,163 @@ addition information as well as '-v' to displayed additional information.`,
 			if err != nil {
 				return err
 			}
-			if strings.Contains(OutputFormat, constants.JSONPATH) {
-				result, err := utils.GetJSONPathResults(finalResult, OutputFormat)
-				if err != nil {
-					return err
-				}
-				cmd.Println(result)
-				return nil
-			}
-			cmd.Println(string(finalResult))
-		} else {
-			// format the output for text
-			err = json.Unmarshal(clusterSummary.clusterResult, &cluster)
+
+			return processJSONOutput(cmd, finalResult)
+		}
+
+		// format the output for text
+		err = json.Unmarshal(clusterSummary.clusterResult, &cluster)
+		if err != nil {
+			return utils.GetError("unable to decode cluster details", err)
+		}
+
+		err = json.Unmarshal(clusterSummary.membersResult, &members)
+		if err != nil {
+			return utils.GetError("unable to decode members result", err)
+		}
+
+		err = json.Unmarshal(clusterSummary.servicesResult, &services)
+		if err != nil {
+			return utils.GetError("unable to decode services results", err)
+		}
+
+		err = json.Unmarshal(clusterSummary.storageData, &storageInfo)
+		if err != nil {
+			return utils.GetError("unable to decode storageInfo details", err)
+		}
+
+		storageMap := utils.GetStorageMap(storageInfo)
+
+		if len(clusterSummary.proxyResults) > 0 {
+			err = json.Unmarshal(clusterSummary.proxyResults, &proxiesSummary)
 			if err != nil {
-				return utils.GetError("unable to decode cluster details", err)
+				return utils.GetError("unable to decode proxy details", err)
 			}
+		}
 
-			err = json.Unmarshal(clusterSummary.membersResult, &members)
+		if len(clusterSummary.reportersResult) > 0 {
+			err = json.Unmarshal(clusterSummary.reportersResult, &reporters)
 			if err != nil {
-				return utils.GetError("unable to decode members result", err)
+				return utils.GetError("unable to unmarshall reporter result", err)
 			}
+		}
 
-			err = json.Unmarshal(clusterSummary.servicesResult, &services)
+		if len(clusterSummary.http) > 0 {
+			err = json.Unmarshal(clusterSummary.http, &httpSessions)
 			if err != nil {
-				return utils.GetError("unable to decode services results", err)
+				return utils.GetError("unable to decode Coherence*Web details", err)
 			}
+		}
 
-			err = json.Unmarshal(clusterSummary.storageData, &storage)
-			if err != nil {
-				return utils.GetError("unable to decode storage details", err)
-			}
-
-			storageMap := utils.GetStorageMap(storage)
-
-			if len(clusterSummary.proxyResults) > 0 {
-				err = json.Unmarshal(clusterSummary.proxyResults, &proxiesSummary)
-				if err != nil {
-					return utils.GetError("unable to decode proxy details", err)
-				}
-			}
-
-			if len(clusterSummary.reportersResult) > 0 {
-				err = json.Unmarshal(clusterSummary.reportersResult, &reporters)
-				if err != nil {
-					return utils.GetError("unable to unmarshall reporter result", err)
-				}
-			}
-
-			if len(clusterSummary.http) > 0 {
-				err = json.Unmarshal(clusterSummary.http, &httpSessions)
-				if err != nil {
-					return utils.GetError("unable to decode Coherence*Web details", err)
-				}
-			}
-
-			if len(clusterSummary.healthResult) > 0 {
-				err = json.Unmarshal(clusterSummary.healthResult, &healthSummaries)
-				if err != nil {
-					return err
-				}
-			}
-
-			var sb strings.Builder
-
-			sb.WriteString("CLUSTER\n")
-			sb.WriteString("-------\n")
-			sb.WriteString(FormatCluster(cluster))
-
-			sb.WriteString("\nMACHINES\n")
-			sb.WriteString("--------\n")
-			sb.WriteString(FormatMachines(clusterSummary.machines))
-
-			sb.WriteString("\nMEMBERS\n")
-			sb.WriteString("-------\n")
-			sb.WriteString(FormatMembers(members.Members, verboseOutput, storageMap, false, cluster.MembersDepartureCount))
-
-			sb.WriteString("\nSERVICES\n")
-			sb.WriteString("--------\n")
-			sb.WriteString(FormatServices(DeduplicateServices(services, "all")))
-
-			sb.WriteString("\nPERSISTENCE\n")
-			sb.WriteString("-----------\n")
-			deDuplicatedServices := DeduplicatePersistenceServices(services)
-
-			err = processPersistenceServices(deDuplicatedServices, dataFetcher)
+		if len(clusterSummary.healthResult) > 0 {
+			err = json.Unmarshal(clusterSummary.healthResult, &healthSummaries)
 			if err != nil {
 				return err
 			}
-			sb.WriteString(FormatPersistenceServices(deDuplicatedServices, true))
+		}
 
-			if len(clusterSummary.finalSummariesDestinations) > 0 || len(clusterSummary.finalSummariesOrigins) > 0 {
-				sb.WriteString("\nFEDERATION\n")
-				sb.WriteString("----------\n")
-				if len(clusterSummary.finalSummariesDestinations) > 0 {
-					sb.WriteString(FormatFederationSummary(clusterSummary.finalSummariesDestinations, destinations))
-				}
-				sb.WriteString("\n")
-				if len(clusterSummary.finalSummariesOrigins) > 0 {
-					sb.WriteString(FormatFederationSummary(clusterSummary.finalSummariesOrigins, origins))
-				}
+		var sb strings.Builder
+
+		sb.WriteString("CLUSTER\n")
+		sb.WriteString("-------\n")
+		sb.WriteString(FormatCluster(cluster))
+
+		sb.WriteString("\nMACHINES\n")
+		sb.WriteString("--------\n")
+		sb.WriteString(FormatMachines(clusterSummary.machines))
+
+		sb.WriteString("\nMEMBERS\n")
+		sb.WriteString("-------\n")
+		sb.WriteString(FormatMembers(members.Members, verboseOutput, storageMap, false, cluster.MembersDepartureCount))
+
+		sb.WriteString("\nSERVICES\n")
+		sb.WriteString("--------\n")
+		sb.WriteString(FormatServices(DeduplicateServices(services, "all")))
+
+		sb.WriteString("\nPERSISTENCE\n")
+		sb.WriteString("-----------\n")
+		deDuplicatedServices := DeduplicatePersistenceServices(services)
+
+		err = processPersistenceServices(deDuplicatedServices, dataFetcher)
+		if err != nil {
+			return err
+		}
+		sb.WriteString(FormatPersistenceServices(deDuplicatedServices, true))
+
+		if len(clusterSummary.finalSummariesDestinations) > 0 || len(clusterSummary.finalSummariesOrigins) > 0 {
+			sb.WriteString("\nFEDERATION\n")
+			sb.WriteString("----------\n")
+			if len(clusterSummary.finalSummariesDestinations) > 0 {
+				sb.WriteString(FormatFederationSummary(clusterSummary.finalSummariesDestinations, destinations))
 			}
-
-			cachesData, err = formatCachesSummary(clusterSummary.serviceList, dataFetcher)
-			if err != nil {
-				return err
+			sb.WriteString("\n")
+			if len(clusterSummary.finalSummariesOrigins) > 0 {
+				sb.WriteString(FormatFederationSummary(clusterSummary.finalSummariesOrigins, origins))
 			}
-			cachesData = "\nCACHES\n------\n" + cachesData
+		}
 
-			topicsData = "\nTOPICS\n------\n" + FormatTopicsSummary(clusterSummary.topicsDetails.Details)
+		cachesData, err = formatCachesSummary(clusterSummary.serviceList, dataFetcher)
+		if err != nil {
+			return err
+		}
+		cachesData = "\nCACHES\n------\n" + cachesData
 
-			sb.WriteString(cachesData + topicsData)
+		topicsData = "\nTOPICS\n------\n" + FormatTopicsSummary(clusterSummary.topicsDetails.Details)
 
-			if len(proxiesSummary.Proxies) > 0 {
-				sb.WriteString("\nPROXY SERVERS\n")
-				sb.WriteString("-------------\n")
-				sb.WriteString(FormatProxyServers(proxiesSummary.Proxies, "tcp"))
-			}
+		sb.WriteString(cachesData + topicsData)
 
-			if len(proxiesSummary.Proxies) > 0 {
-				sb.WriteString("\nHTTP SERVERS\n")
-				sb.WriteString("------------\n")
-				sb.WriteString(FormatProxyServers(proxiesSummary.Proxies, "http"))
-			}
+		if len(proxiesSummary.Proxies) > 0 {
+			sb.WriteString("\nPROXY SERVERS\n")
+			sb.WriteString("-------------\n")
+			sb.WriteString(FormatProxyServers(proxiesSummary.Proxies, "tcp"))
+		}
 
-			if verboseOutput {
-				sb.WriteString("\nREPORTERS\n")
+		if len(proxiesSummary.Proxies) > 0 {
+			sb.WriteString("\nHTTP SERVERS\n")
+			sb.WriteString("------------\n")
+			sb.WriteString(FormatProxyServers(proxiesSummary.Proxies, "http"))
+		}
+
+		if verboseOutput {
+			sb.WriteString("\nREPORTERS\n")
+			sb.WriteString("---------\n")
+			sb.WriteString(FormatReporters(reporters.Reporters))
+
+			if len(executors.Executors) > 0 {
+				sb.WriteString("\nEXECUTORS\n")
 				sb.WriteString("---------\n")
-				sb.WriteString(FormatReporters(reporters.Reporters))
-
-				if len(executors.Executors) > 0 {
-					sb.WriteString("\nEXECUTORS\n")
-					sb.WriteString("---------\n")
-					sb.WriteString(FormatExecutors(executors.Executors, true))
-				}
-
-				if len(healthSummaries.Summaries) > 0 {
-					sb.WriteString("\nHEALTH\n")
-					sb.WriteString("------\n")
-					sb.WriteString(FormatMemberHealth(healthSummaries.Summaries))
-				}
+				sb.WriteString(FormatExecutors(executors.Executors, true))
 			}
 
-			edData, err = getElasticDataResult(clusterSummary.flashResult, clusterSummary.ramResult)
-			if err != nil {
-				return err
+			if len(healthSummaries.Summaries) > 0 {
+				sb.WriteString("\nHEALTH\n")
+				sb.WriteString("------\n")
+				sb.WriteString(FormatMemberHealth(healthSummaries.Summaries))
 			}
-			if edData != "" {
-				sb.WriteString("\nELASTIC DATA\n")
-				sb.WriteString("------------\n")
-				sb.WriteString(edData)
-			}
+		}
 
-			if len(httpSessions.HTTPSessions) > 0 {
-				sb.WriteString("\nHTTP SESSION DETAILS\n")
-				sb.WriteString("--------------------\n")
-				sb.WriteString(FormatHTTPSessions(DeduplicateSessions(httpSessions), true))
-			}
+		edData, err = getElasticDataResult(clusterSummary.flashResult, clusterSummary.ramResult)
+		if err != nil {
+			return err
+		}
+		if edData != "" {
+			sb.WriteString("\nELASTIC DATA\n")
+			sb.WriteString("------------\n")
+			sb.WriteString(edData)
+		}
 
-			cmd.Println(sb.String())
+		if len(httpSessions.HTTPSessions) > 0 {
+			sb.WriteString("\nHTTP SESSION DETAILS\n")
+			sb.WriteString("--------------------\n")
+			sb.WriteString(FormatHTTPSessions(DeduplicateSessions(httpSessions), true))
+		}
 
-			if verboseOutput {
-				cmd.Println("\nFLIGHT RECORDINGS")
-				cmd.Println("-----------------")
-				_ = executeJFROperation(cmd, "", fetcher.GetJFRs, dataFetcher, "", connection)
-			}
+		cmd.Println(sb.String())
+
+		if verboseOutput {
+			cmd.Println("\nFLIGHT RECORDINGS")
+			cmd.Println("-----------------")
+			_ = executeJFROperation(cmd, "", fetcher.GetJFRs, dataFetcher, "", connection)
 		}
 
 		return nil

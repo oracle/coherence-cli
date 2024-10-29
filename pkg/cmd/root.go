@@ -886,12 +886,8 @@ func confirmOperation(cmd *cobra.Command, message string) bool {
 
 // processJSONOutput processes JSON output and either outputs the JSONPath or JSON results.
 func processJSONOutput(cmd *cobra.Command, jsonData []byte) error {
-	var (
-		err    error
-		result string
-	)
-	if OutputFormat == constants.JSONPATH {
-		result, err = utils.GetJSONPathResults(jsonData, OutputFormat)
+	if strings.Contains(OutputFormat, constants.JSONPATH) {
+		result, err := utils.GetJSONPathResults(jsonData, OutputFormat)
 		if err != nil {
 			return err
 		}

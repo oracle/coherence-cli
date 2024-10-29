@@ -104,7 +104,7 @@ can also specify '-o wide' to display addition information.`,
 				}
 			}
 
-			if strings.Contains(OutputFormat, constants.JSONPATH) || OutputFormat == constants.JSON {
+			if isJSONPathOrJSON() {
 				// encode for json output
 				jsonDataDest, _ := json.Marshal(finalSummariesDestinations)
 				jsonDataOrigins, _ := json.Marshal(finalSummariesOrigins)
@@ -113,26 +113,18 @@ can also specify '-o wide' to display addition information.`,
 				if err != nil {
 					return err
 				}
-				if strings.Contains(OutputFormat, constants.JSONPATH) {
-					result, err := utils.GetJSONPathResults(finalData, OutputFormat)
-					if err != nil {
-						return err
-					}
-					cmd.Println(result)
-				} else {
-					cmd.Println(string(finalData))
-				}
-			} else {
-				printWatchHeader(cmd)
 
-				cmd.Println(FormatCurrentCluster(connection))
+				return processJSONOutput(cmd, finalData)
+			}
 
-				if len(finalSummariesDestinations) > 0 {
-					cmd.Println(FormatFederationSummary(finalSummariesDestinations, destinations))
-				}
-				if len(finalSummariesOrigins) > 0 {
-					cmd.Println(FormatFederationSummary(finalSummariesOrigins, origins))
-				}
+			printWatchHeader(cmd)
+			cmd.Println(FormatCurrentCluster(connection))
+
+			if len(finalSummariesDestinations) > 0 {
+				cmd.Println(FormatFederationSummary(finalSummariesDestinations, destinations))
+			}
+			if len(finalSummariesOrigins) > 0 {
+				cmd.Println(FormatFederationSummary(finalSummariesOrigins, origins))
 			}
 
 			// check to see if we should exit if we are not watching

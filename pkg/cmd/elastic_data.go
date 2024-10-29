@@ -168,36 +168,29 @@ The allowable values are ` + ram + ` or ` + flash + `.`,
 			return errors.New(noElasticData)
 		}
 
-		if strings.Contains(OutputFormat, constants.JSONPATH) {
-			jsonPathResult, err := utils.GetJSONPathResults(result, OutputFormat)
-			if err != nil {
-				return err
-			}
-			cmd.Println(jsonPathResult)
-			return nil
-		} else if OutputFormat == constants.JSON {
-			cmd.Println(string(result))
-		} else {
-			if len(result) == 0 {
-				return nil
-			}
-
-			err = json.Unmarshal(result, &edValues)
-			if err != nil {
-				return utils.GetError("unable to elastic data details", err)
-			}
-			cmd.Println(FormatCurrentCluster(connection))
-
-			cmd.Println(header)
-			headerLen := len(header)
-			underline := make([]byte, headerLen)
-			for i := 0; i < headerLen; i++ {
-				underline[i] = '-'
-			}
-			cmd.Println(string(underline))
-
-			cmd.Println(FormatElasticData(edValues.ElasticData, false))
+		if isJSONPathOrJSON() {
+			return processJSONOutput(cmd, result)
 		}
+
+		if len(result) == 0 {
+			return nil
+		}
+
+		err = json.Unmarshal(result, &edValues)
+		if err != nil {
+			return utils.GetError("unable to elastic data details", err)
+		}
+		cmd.Println(FormatCurrentCluster(connection))
+
+		cmd.Println(header)
+		headerLen := len(header)
+		underline := make([]byte, headerLen)
+		for i := 0; i < headerLen; i++ {
+			underline[i] = '-'
+		}
+		cmd.Println(string(underline))
+
+		cmd.Println(FormatElasticData(edValues.ElasticData, false))
 
 		return nil
 	},

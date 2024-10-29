@@ -8,12 +8,10 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/oracle/coherence-cli/pkg/constants"
 	"github.com/oracle/coherence-cli/pkg/fetcher"
 	"github.com/oracle/coherence-cli/pkg/utils"
 	"github.com/spf13/cobra"
 	"strconv"
-	"strings"
 	"time"
 )
 
@@ -57,24 +55,17 @@ var getManagementCmd = &cobra.Command{
 				return err
 			}
 
-			if strings.Contains(OutputFormat, constants.JSONPATH) {
-				result, err := utils.GetJSONPathResults(jsonData, OutputFormat)
-				if err != nil {
-					return err
-				}
-				cmd.Println(result)
-			} else if OutputFormat == constants.JSON {
-				cmd.Println(string(jsonData))
-			} else {
-				cmd.Println(FormatCurrentCluster(connection))
-				value, err = FormatJSONForDescribe(jsonData, true,
-					"Refresh Policy", "Expiry Delay")
-				if err != nil {
-					return err
-				}
-
-				cmd.Println(value)
+			if isJSONPathOrJSON() {
+				return processJSONOutput(cmd, jsonData)
 			}
+
+			cmd.Println(FormatCurrentCluster(connection))
+			value, err = FormatJSONForDescribe(jsonData, true, "Refresh Policy", "Expiry Delay")
+			if err != nil {
+				return err
+			}
+
+			cmd.Println(value)
 
 			// check to see if we should exit if we are not watching
 			if !isWatchEnabled() {

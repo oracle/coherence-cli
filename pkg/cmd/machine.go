@@ -15,7 +15,6 @@ import (
 	"github.com/oracle/coherence-cli/pkg/fetcher"
 	"github.com/oracle/coherence-cli/pkg/utils"
 	"github.com/spf13/cobra"
-	"strings"
 	"time"
 )
 
@@ -54,26 +53,19 @@ var getMachinesCmd = &cobra.Command{
 				}
 			}
 
-			if strings.Contains(OutputFormat, constants.JSONPATH) {
-				result, err := utils.GetJSONPathResults(jsonData, OutputFormat)
-				if err != nil {
-					return err
-				}
-				cmd.Println(result)
-			} else if OutputFormat == constants.JSON {
-				cmd.Println(string(jsonData))
-			} else {
-				printWatchHeader(cmd)
-
-				cmd.Println(FormatCurrentCluster(connection))
-
-				machines, err = getMachines(machinesMap, dataFetcher)
-				if err != nil {
-					return err
-				}
-
-				cmd.Print(FormatMachines(machines))
+			if isJSONPathOrJSON() {
+				return processJSONOutput(cmd, jsonData)
 			}
+
+			printWatchHeader(cmd)
+			cmd.Println(FormatCurrentCluster(connection))
+
+			machines, err = getMachines(machinesMap, dataFetcher)
+			if err != nil {
+				return err
+			}
+
+			cmd.Print(FormatMachines(machines))
 
 			// check to see if we should exit if we are not watching
 			if !isWatchEnabled() {
@@ -214,42 +206,35 @@ var describeMachineCmd = &cobra.Command{
 			return err
 		}
 
-		if strings.Contains(OutputFormat, constants.JSONPATH) {
-			jsonPathResult, err := utils.GetJSONPathResults(jsonData, OutputFormat)
-			if err != nil {
-				return err
-			}
-			cmd.Println(jsonPathResult)
-			return nil
-		} else if OutputFormat == constants.JSON {
-			cmd.Println(string(jsonData))
-		} else {
-			cmd.Println(FormatCurrentCluster(connection))
-			cmd.Println("MACHINE DETAILS")
-			cmd.Println("---------------")
-
-			// we need to only get the items node
-			err = json.Unmarshal(jsonData, &entry)
-			if err != nil {
-				return err
-			}
-
-			if len(entry.Detail) != 1 {
-				return errors.New("unable to decode json entry: " + string(jsonData))
-			}
-
-			// re-marshal it so we can only see the details
-			newData, err = json.Marshal(entry.Detail[0])
-			if err != nil {
-				return err
-			}
-
-			value, err := FormatJSONForDescribe(newData, true, "Machine Name")
-			if err != nil {
-				return err
-			}
-			cmd.Println(value)
+		if isJSONPathOrJSON() {
+			return processJSONOutput(cmd, jsonData)
 		}
+
+		cmd.Println(FormatCurrentCluster(connection))
+		cmd.Println("MACHINE DETAILS")
+		cmd.Println("---------------")
+
+		// we need to only get the items node
+		err = json.Unmarshal(jsonData, &entry)
+		if err != nil {
+			return err
+		}
+
+		if len(entry.Detail) != 1 {
+			return errors.New("unable to decode json entry: " + string(jsonData))
+		}
+
+		// re-marshal it so we can only see the details
+		newData, err = json.Marshal(entry.Detail[0])
+		if err != nil {
+			return err
+		}
+
+		value, err := FormatJSONForDescribe(newData, true, "Machine Name")
+		if err != nil {
+			return err
+		}
+		cmd.Println(value)
 
 		return nil
 	},
