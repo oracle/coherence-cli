@@ -31,7 +31,7 @@ COHERENCE_BASE_IMAGE=gcr.io/distroless/java17 PROFILES=,views COHERENCE_VERSION=
 export COMPUTERNAME=server1
 export COHERENCE_TLS_CERTS_PATH=`pwd`/test/test_utils/certs/guardians-ca.crt
 export COHERENCE_TLS_CLIENT_CERT=`pwd`/test/test_utils/certs/star-lord.crt
-export COHERENCE_TLS_CLIENT_KEY=`pwd`/test/test_utils/certs/star-lord.key COHERENCE_BASE_IMAGE=gcr.io/distroless/java17 COHERENCE_VERSION=24.03 PROFILES=,secure make clean certs build-test-images test-cluster-startup
+export COHERENCE_TLS_CLIENT_KEY=`pwd`/test/test_utils/certs/star-lord.key COHERENCE_BASE_IMAGE=gcr.io/distroless/java17 COHERENCE_VERSION=24.09 PROFILES=,secure make clean certs build-test-images test-cluster-startup
 cohctl set ignore-certs true
 cohctl add cluster tls -u https://127.0.0.1:30000/management/coherence/cluster
 cohctl get members

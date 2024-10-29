@@ -330,7 +330,6 @@ of view of a member and all the members it connects to.`,
 
 		for {
 			var (
-				result       string
 				networkStats []byte
 				statistics   config.NetworkStats
 				details      []config.NetworkStatsDetails
@@ -341,37 +340,31 @@ of view of a member and all the members it connects to.`,
 				return err
 			}
 
-			if strings.Contains(OutputFormat, constants.JSONPATH) {
-				result, err = utils.GetJSONPathResults(networkStats, OutputFormat)
-				if err != nil {
-					return err
-				}
-				cmd.Println(result)
-			} else if OutputFormat == constants.JSON {
-				cmd.Println(string(networkStats))
-			} else {
-				err = json.Unmarshal(networkStats, &statistics)
-				if err != nil {
-					return utils.GetError("unable to decode networkStats", err)
-				}
-
-				// decode the network stats
-				details, err = decodeNetworkStats(statistics)
-				if err != nil {
-					return err
-				}
-
-				printWatchHeader(cmd)
-				cmd.Println(FormatCurrentCluster(connection))
-
-				var sb strings.Builder
-
-				sb.WriteString(fmt.Sprintf("Viewing Node Id:     %s\n", member.NodeID))
-				sb.WriteString(fmt.Sprintf("Viewing Member Name: %s\n\n", member.MemberName))
-				sb.WriteString(FormatNetworkStats(details))
-
-				cmd.Print(sb.String())
+			if isJSONPathOrJSON() {
+				return processJSONOutput(cmd, networkStats)
 			}
+
+			err = json.Unmarshal(networkStats, &statistics)
+			if err != nil {
+				return utils.GetError("unable to decode networkStats", err)
+			}
+
+			// decode the network stats
+			details, err = decodeNetworkStats(statistics)
+			if err != nil {
+				return err
+			}
+
+			printWatchHeader(cmd)
+			cmd.Println(FormatCurrentCluster(connection))
+
+			var sb strings.Builder
+
+			sb.WriteString(fmt.Sprintf("Viewing Node Id:     %s\n", member.NodeID))
+			sb.WriteString(fmt.Sprintf("Viewing Member Name: %s\n\n", member.MemberName))
+			sb.WriteString(FormatNetworkStats(details))
+
+			cmd.Print(sb.String())
 
 			// check to see if we should exit if we are not watching
 			if !isWatchEnabled() {
@@ -756,23 +749,17 @@ var getTracingCmd = &cobra.Command{
 				return err
 			}
 
-			if strings.Contains(OutputFormat, constants.JSONPATH) {
-				result, err := utils.GetJSONPathResults(membersResult, OutputFormat)
-				if err != nil {
-					return err
-				}
-				cmd.Println(result)
-			} else if OutputFormat == constants.JSON {
-				cmd.Println(string(membersResult))
-			} else {
-				cmd.Println(FormatCurrentCluster(connection))
-				err = json.Unmarshal(membersResult, &members)
-				if err != nil {
-					return utils.GetError(unableToDecode, err)
-				}
-
-				cmd.Print(FormatTracing(members.Members))
+			if isJSONPathOrJSON() {
+				return processJSONOutput(cmd, membersResult)
 			}
+
+			cmd.Println(FormatCurrentCluster(connection))
+			err = json.Unmarshal(membersResult, &members)
+			if err != nil {
+				return utils.GetError(unableToDecode, err)
+			}
+
+			cmd.Print(FormatTracing(members.Members))
 
 			// check to see if we should exit if we are not watching
 			if !isWatchEnabled() {

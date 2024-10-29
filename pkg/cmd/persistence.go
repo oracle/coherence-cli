@@ -9,11 +9,9 @@ package cmd
 import (
 	"encoding/json"
 	"github.com/oracle/coherence-cli/pkg/config"
-	"github.com/oracle/coherence-cli/pkg/constants"
 	"github.com/oracle/coherence-cli/pkg/fetcher"
 	"github.com/oracle/coherence-cli/pkg/utils"
 	"github.com/spf13/cobra"
-	"strings"
 	"sync"
 	"time"
 )
@@ -44,31 +42,26 @@ var getPersistenceCmd = &cobra.Command{
 			if err != nil {
 				return err
 			}
-			if strings.Contains(OutputFormat, constants.JSONPATH) {
-				result, err := utils.GetJSONPathResults(servicesResult, OutputFormat)
-				if err != nil {
-					return err
-				}
-				cmd.Println(result)
-			} else if OutputFormat == constants.JSON {
-				cmd.Println(string(servicesResult))
-			} else {
-				err = json.Unmarshal(servicesResult, &servicesSummary)
-				if err != nil {
-					return utils.GetError("unable to unmarshall service result", err)
-				}
 
-				deDuplicatedServices := DeduplicatePersistenceServices(servicesSummary)
-
-				err = processPersistenceServices(deDuplicatedServices, dataFetcher)
-				if err != nil {
-					return err
-				}
-
-				printWatchHeader(cmd)
-				cmd.Println(FormatCurrentCluster(connection))
-				cmd.Println(FormatPersistenceServices(deDuplicatedServices, true))
+			if isJSONPathOrJSON() {
+				return processJSONOutput(cmd, servicesResult)
 			}
+
+			err = json.Unmarshal(servicesResult, &servicesSummary)
+			if err != nil {
+				return utils.GetError("unable to unmarshall service result", err)
+			}
+
+			deDuplicatedServices := DeduplicatePersistenceServices(servicesSummary)
+
+			err = processPersistenceServices(deDuplicatedServices, dataFetcher)
+			if err != nil {
+				return err
+			}
+
+			printWatchHeader(cmd)
+			cmd.Println(FormatCurrentCluster(connection))
+			cmd.Println(FormatPersistenceServices(deDuplicatedServices, true))
 
 			// check to see if we should exit if we are not watching
 			if !isWatchEnabled() {

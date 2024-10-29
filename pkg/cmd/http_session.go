@@ -192,29 +192,22 @@ var describeHTTPSessionCmd = &cobra.Command{
 				return fmt.Errorf("unable to find application id %s", applicationID)
 			}
 
-			if strings.Contains(OutputFormat, constants.JSONPATH) {
-				jsonPathResult, err := utils.GetJSONPathResults(results, OutputFormat)
-				if err != nil {
-					return err
-				}
-				cmd.Println(jsonPathResult)
-				return nil
-			} else if OutputFormat == constants.JSON {
-				cmd.Println(string(results))
-			} else {
-				printWatchHeader(cmd)
-
-				cmd.Println(FormatCurrentCluster(connection))
-				cmd.Println("HTTP SESSION DETAILS")
-				cmd.Println("--------------------")
-				value, err := FormatJSONForDescribe(firstMember, false, "App Id", "Type",
-					"Session Cache Name", "Overflow Cache Name")
-				if err != nil {
-					return err
-				}
-				cmd.Println(value)
-				cmd.Print(FormatHTTPSessions(finalSessions, false))
+			if isJSONPathOrJSON() {
+				return processJSONOutput(cmd, results)
 			}
+
+			printWatchHeader(cmd)
+			cmd.Println(FormatCurrentCluster(connection))
+
+			cmd.Println("HTTP SESSION DETAILS")
+			cmd.Println("--------------------")
+			value, err := FormatJSONForDescribe(firstMember, false, "App Id", "Type",
+				"Session Cache Name", "Overflow Cache Name")
+			if err != nil {
+				return err
+			}
+			cmd.Println(value)
+			cmd.Print(FormatHTTPSessions(finalSessions, false))
 
 			// check to see if we should exit if we are not watching
 			if !isWatchEnabled() {

@@ -62,25 +62,19 @@ var getReportersCmd = &cobra.Command{
 				return err
 			}
 
-			if strings.Contains(OutputFormat, constants.JSONPATH) {
-				result, err := utils.GetJSONPathResults(reportersResult, OutputFormat)
-				if err != nil {
-					return err
-				}
-				cmd.Println(result)
-			} else if OutputFormat == constants.JSON {
-				cmd.Println(string(reportersResult))
-			} else {
-				printWatchHeader(cmd)
-
-				cmd.Println(FormatCurrentCluster(connection))
-				err = json.Unmarshal(reportersResult, &reporters)
-				if err != nil {
-					return utils.GetError("unable to unmarshall reporter result", err)
-				}
-
-				cmd.Print(FormatReporters(reporters.Reporters))
+			if isJSONPathOrJSON() {
+				return processJSONOutput(cmd, reportersResult)
 			}
+
+			printWatchHeader(cmd)
+			cmd.Println(FormatCurrentCluster(connection))
+
+			err = json.Unmarshal(reportersResult, &reporters)
+			if err != nil {
+				return utils.GetError("unable to unmarshall reporter result", err)
+			}
+
+			cmd.Print(FormatReporters(reporters.Reporters))
 
 			// check to see if we should exit if we are not watching
 			if !isWatchEnabled() {
@@ -131,26 +125,19 @@ var describeReporterCmd = &cobra.Command{
 			return err
 		}
 
-		if strings.Contains(OutputFormat, constants.JSONPATH) {
-			jsonPathResult, err := utils.GetJSONPathResults(jsonData, OutputFormat)
-			if err != nil {
-				return err
-			}
-			cmd.Println(jsonPathResult)
-			return nil
-		} else if OutputFormat == constants.JSON {
-			cmd.Println(string(jsonData))
-		} else {
-			cmd.Println(FormatCurrentCluster(connection))
-			cmd.Println("REPORTER DETAILS")
-			cmd.Println("---------------")
-
-			value, err := FormatJSONForDescribe(jsonData, true, "Node Id")
-			if err != nil {
-				return err
-			}
-			cmd.Println(value)
+		if isJSONPathOrJSON() {
+			return processJSONOutput(cmd, jsonData)
 		}
+
+		cmd.Println(FormatCurrentCluster(connection))
+		cmd.Println("REPORTER DETAILS")
+		cmd.Println("---------------")
+
+		value, err := FormatJSONForDescribe(jsonData, true, "Node Id")
+		if err != nil {
+			return err
+		}
+		cmd.Println(value)
 
 		return nil
 	},

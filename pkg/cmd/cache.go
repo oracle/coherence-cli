@@ -537,7 +537,7 @@ name is specified then all services are queried.`,
 		for {
 			var viewServicesSummary = config.ServicesSummaries{}
 
-			if strings.Contains(OutputFormat, constants.JSONPATH) || OutputFormat == constants.JSON {
+			if isJSONPathOrJSON() {
 				data, err := dataFetcher.GetViewsSummaryJSONAllServices()
 				if err != nil {
 					return err
@@ -621,7 +621,6 @@ func getCacheDetails(cmd *cobra.Command, args []string, displayType string) erro
 			cacheResult           []byte
 			cacheDetails          = config.CacheDetails{}
 			cachePartitionDetails = config.CachePartitionDetails{}
-			result                string
 		)
 
 		if displayType == partitionDisplayType {
@@ -637,41 +636,35 @@ func getCacheDetails(cmd *cobra.Command, args []string, displayType string) erro
 			return fmt.Errorf(cannotFindCache, cacheName, serviceName)
 		}
 
-		if strings.Contains(OutputFormat, constants.JSONPATH) {
-			result, err = utils.GetJSONPathResults(cacheResult, OutputFormat)
-			if err != nil {
-				return err
-			}
-			cmd.Println(result)
-		} else if OutputFormat == constants.JSON {
-			cmd.Println(string(cacheResult))
+		if isJSONPathOrJSON() {
+			return processJSONOutput(cmd, cacheResult)
+		}
+
+		if displayType == partitionDisplayType {
+			err = json.Unmarshal(cacheResult, &cachePartitionDetails)
 		} else {
-			if displayType == partitionDisplayType {
-				err = json.Unmarshal(cacheResult, &cachePartitionDetails)
-			} else {
-				err = json.Unmarshal(cacheResult, &cacheDetails)
-			}
-			if err != nil {
-				return utils.GetError("unable to unmarshall cache result", err)
-			}
+			err = json.Unmarshal(cacheResult, &cacheDetails)
+		}
+		if err != nil {
+			return utils.GetError("unable to unmarshall cache result", err)
+		}
 
-			printWatchHeader(cmd)
-			cmd.Println(FormatCurrentCluster(connection))
+		printWatchHeader(cmd)
+		cmd.Println(FormatCurrentCluster(connection))
 
-			if displayType != partitionDisplayType {
-				cmd.Printf("Cache: %s\n\n", args[0])
-			}
+		if displayType != partitionDisplayType {
+			cmd.Printf("Cache: %s\n\n", args[0])
+		}
 
-			if displayType == access {
-				cmd.Println(FormatCacheDetailsSizeAndAccess(cacheDetails.Details))
-			} else if displayType == "index" {
-				cmd.Println(FormatCacheIndexDetails(cacheDetails.Details))
-			} else if displayType == storage {
-				cmd.Println(FormatCacheDetailsStorage(cacheDetails.Details))
-			} else if displayType == partitionDisplayType {
-				cmd.Printf("Cache:            %s\n", args[0])
-				cmd.Println(FormatCachePartitions(cachePartitionDetails.Details, cacheSummary))
-			}
+		if displayType == access {
+			cmd.Println(FormatCacheDetailsSizeAndAccess(cacheDetails.Details))
+		} else if displayType == "index" {
+			cmd.Println(FormatCacheIndexDetails(cacheDetails.Details))
+		} else if displayType == storage {
+			cmd.Println(FormatCacheDetailsStorage(cacheDetails.Details))
+		} else if displayType == partitionDisplayType {
+			cmd.Printf("Cache:            %s\n", args[0])
+			cmd.Println(FormatCachePartitions(cachePartitionDetails.Details, cacheSummary))
 		}
 
 		// check to see if we should exit if we are not watching
