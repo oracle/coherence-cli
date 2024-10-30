@@ -21,7 +21,7 @@ const stopped = "stopped"
 
 // statusHAFormatter formats a column value and makes it Red if contains ENDANGERED.
 var statusHAFormatter = func(s string) string {
-	if monitorCluster {
+	if monitorCluster || isWindows() {
 		return s
 	}
 	if strings.Contains(s, endangered) {
@@ -33,7 +33,7 @@ var statusHAFormatter = func(s string) string {
 
 // hitRateFormatter formats a column value which represents a cache hit rate.
 var hitRateFormatter = func(s string) string {
-	if monitorCluster {
+	if monitorCluster || isWindows() {
 		return s
 	}
 	floatValue, err := strconv.ParseFloat(trimPercent(s), 32)
@@ -52,7 +52,7 @@ var hitRateFormatter = func(s string) string {
 
 // machineMemoryFormatting formats a column value which represents machine percent memory used.
 var machineMemoryFormatting = func(s string) string {
-	if monitorCluster {
+	if monitorCluster || isWindows() {
 		return s
 	}
 	floatValue, err := strconv.ParseFloat(trimPercent(s), 32)
@@ -71,7 +71,7 @@ var machineMemoryFormatting = func(s string) string {
 
 // errorFormatter formats a column value which represents an error or number that needs to be highlighted.
 var errorFormatter = func(s string) string {
-	if monitorCluster {
+	if monitorCluster || isWindows() {
 		return s
 	}
 	v, err := getInt64Value(s)
@@ -87,7 +87,7 @@ var errorFormatter = func(s string) string {
 
 // endangeredPartitionsFormatter formats a column value which represents the number of endangered partitions.
 var endangeredPartitionsFormatter = func(s string) string {
-	if monitorCluster {
+	if monitorCluster || isWindows() {
 		return s
 	}
 	v, err := getInt64Value(s)
@@ -100,7 +100,7 @@ var endangeredPartitionsFormatter = func(s string) string {
 
 // vulnerablePartitionsFormatter formats a column value which represents the number of vulnerable or unbalanced partitions.
 var vulnerablePartitionsFormatter = func(s string) string {
-	if monitorCluster {
+	if monitorCluster || isWindows() {
 		return s
 	}
 	v, err := getInt64Value(s)
@@ -113,7 +113,7 @@ var vulnerablePartitionsFormatter = func(s string) string {
 
 // packetFormatter formats a column value which represents packages where higher numbers need to be highlighted.
 var packetFormatter = func(s string) string {
-	if monitorCluster {
+	if monitorCluster || isWindows() {
 		return s
 	}
 	v, err := getInt64Value(s)
@@ -133,7 +133,7 @@ var packetFormatter = func(s string) string {
 
 // healthFormatter formats a column value when false will be displayed in red.
 var healthFormatter = func(s string) string {
-	if monitorCluster {
+	if monitorCluster || isWindows() {
 		return s
 	}
 	if s == stringFalse {
@@ -144,7 +144,7 @@ var healthFormatter = func(s string) string {
 
 // reporterFormatter formats a column value when "Stopped" will be displayed in red.
 var reporterFormatter = func(s string) string {
-	if monitorCluster {
+	if monitorCluster || isWindows() {
 		return s
 	}
 	if strings.Contains(strings.ToLower(s), stopped) {
@@ -155,7 +155,7 @@ var reporterFormatter = func(s string) string {
 
 // trueBoolFormatter formats a column value when true will be displayed in red.
 var trueBoolFormatter = func(s string) string {
-	if monitorCluster {
+	if monitorCluster || isWindows() {
 		return s
 	}
 	if s == stringTrue {
@@ -166,7 +166,7 @@ var trueBoolFormatter = func(s string) string {
 
 // falseBoolFormatter formats a column value when false will be displayed in red.
 var falseBoolFormatter = func(s string) string {
-	if monitorCluster {
+	if monitorCluster || isWindows() {
 		return s
 	}
 	if s == stringFalse {
@@ -177,7 +177,7 @@ var falseBoolFormatter = func(s string) string {
 
 // yesBoolFormatter formats a column value when yes will be displayed in red.
 var yesBoolFormatter = func(s string) string {
-	if monitorCluster {
+	if monitorCluster || isWindows() {
 		return s
 	}
 	if strings.Contains(s, "yes") {
@@ -188,7 +188,7 @@ var yesBoolFormatter = func(s string) string {
 
 // healthSummaryFormatter formats a column value for a health summary.
 var healthSummaryFormatter = func(s string) string {
-	if monitorCluster {
+	if monitorCluster || isWindows() {
 		return s
 	}
 	if !strings.Contains(s, "/") {
