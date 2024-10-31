@@ -397,7 +397,7 @@ golangci: $(TOOLS_BIN)/golangci-lint ## Go code review
 
 .PHONY: trivy-scan
 trivy-scan: gettrivy ## Scan the CLI using trivy
-	$(TOOLS_BIN)/trivy fs --exit-code 1 .
+	$(TOOLS_BIN)/trivy fs --cache-dir ${TRIVY_CACHE} --exit-code 1 .
 
 # ======================================================================================================================
 # Test targets
