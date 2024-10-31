@@ -56,5 +56,5 @@ jobs:
     - name: Trivy Scan
       shell: bash
       run: |
-        echo "${{ env.GHCR_TOKEN }}" | docker login ghcr.io -u "${{ env.GHCR_LOGIN }}" --password-stdin
+        echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u "${{ secrets.GHCR_LOGIN }}" --password-stdin
         make trivy-scan
