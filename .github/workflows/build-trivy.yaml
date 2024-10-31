@@ -61,4 +61,5 @@ jobs:
     - name: Trivy Scan
       shell: bash
       run: |
+        echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u $ --password-stdin
         make clean trivy-scan
