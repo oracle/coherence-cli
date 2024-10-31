@@ -27,11 +27,6 @@ jobs:
       with:
         fetch-depth: 0
 
-    - name: Get Docker Images
-      shell: bash
-      run: |
-        docker pull gcr.io/distroless/java17
-
     - name: Set up JDK
       uses: actions/setup-java@v4
       with:
@@ -61,5 +56,5 @@ jobs:
     - name: Trivy Scan
       shell: bash
       run: |
-        echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u $ --password-stdin
-        make clean trivy-scan
+        echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u "${{ secrets.GHCR_LOGIN }}" --password-stdin
+        make trivy-scan
