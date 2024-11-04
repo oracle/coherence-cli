@@ -24,7 +24,7 @@ jobs:
       matrix:
         coherenceVersion:
           - 24.09.1-SNAPSHOT
-          - 22.06.10-SNAPSHOT
+          - 22.06.11-SNAPSHOT
 
 #   Checkout the source, we need a depth of zero to fetch all of the history otherwise
 #   the copyright check cannot work out the date of the files from Git.
