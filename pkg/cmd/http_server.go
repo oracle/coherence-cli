@@ -35,12 +35,48 @@ var getHTTPProxiesCmd = &cobra.Command{
 			return err
 		}
 
-		details, err := returnGetProxiesDetails(cmd, httpString, dataFetcher, connection, "")
+		details, err := returnGetProxiesDetails(cmd, httpString, dataFetcher, connection, "", true)
 		if err != nil {
 			return err
 		}
 		if !isWatchEnabled() {
 			// don't display the value if watch was enabled as it was already output
+			cmd.Println(details)
+		}
+		return nil
+	},
+}
+
+// getHTTPServerMembersCmd represents the get http-members command.
+var getHTTPServerMembersCmd = &cobra.Command{
+	Use:   "http-server-members",
+	Short: "display http proxy server members for a http server",
+	Long: `The 'get http-servers' command displays the list of http proxy servers 
+members for a HTTP server.`,
+	ValidArgsFunction: completionHTTPServers,
+	Args: func(cmd *cobra.Command, args []string) error {
+		if len(args) != 1 {
+			displayErrorAndExit(cmd, provideService)
+		}
+		return nil
+	},
+	RunE: func(cmd *cobra.Command, args []string) error {
+		var (
+			err         error
+			dataFetcher fetcher.Fetcher
+			connection  string
+		)
+
+		connection, dataFetcher, err = GetConnectionAndDataFetcher()
+		if err != nil {
+			return err
+		}
+
+		details, err := returnGetProxiesDetails(cmd, httpString, dataFetcher, connection, args[0], false)
+		if err != nil {
+			return err
+		}
+		if !isWatchEnabled() {
 			cmd.Println(details)
 		}
 		return nil

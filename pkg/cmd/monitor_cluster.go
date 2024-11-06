@@ -858,8 +858,12 @@ var proxiesContentInternal = func(protocol string, clusterSummary clusterSummary
 	if err != nil {
 		return emptyStringArray, err
 	}
+	finalResult, err := summarizeProxies(proxiesSummary.Proxies, protocol)
+	if err != nil {
+		return emptyStringArray, err
+	}
 
-	return strings.Split(FormatProxyServers(proxiesSummary.Proxies, protocol), "\n"), nil
+	return strings.Split(FormatProxyServersSummary(finalResult, protocol), "\n"), nil
 }
 
 var proxyConnectionsContent = func(dataFetcher fetcher.Fetcher, _ clusterSummaryInfo) ([]string, error) {

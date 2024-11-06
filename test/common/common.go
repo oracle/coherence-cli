@@ -434,6 +434,9 @@ func RunTestProxyCommands(t *testing.T) {
 	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "PROXY SERVICE DETAILS,PROXY MEMBER DETAILS,PROXY CONNECTIONS", configArg, file,
 		"describe", "proxy", "Proxy", "-c", context.ClusterName)
 
+	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "NODE ID,HOST IP", configArg, file,
+		"get", "proxy-members", "Proxy", "-c", context.ClusterName)
+
 	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "PROXY SERVICE DETAILS,PROXY MEMBER DETAILS,PROXY CONNECTIONS", configArg, file,
 		"describe", "proxy", "Proxy")
 
@@ -1434,6 +1437,9 @@ func RunTestHttpProxyCommands(t *testing.T) {
 
 	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "SERVER TYPE,REQUESTS", configArg, file, "get", "http-servers",
 		"-c", context.ClusterName)
+
+	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "NODE ID,HOST IP", configArg, file,
+		"get", "http-server-members", "ManagementHttpProxy", "-c", context.ClusterName)
 
 	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "HTTP SERVER SERVICE DETAILS,HTTP SERVER MEMBER DETAILS", configArg, file,
 		"describe", "http-server", "ManagementHttpProxy", "-c", context.ClusterName)
