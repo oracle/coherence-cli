@@ -2041,26 +2041,30 @@ func FormatProxyServers(services []config.ProxySummary, protocol string) string 
 		// common values
 		table.AddRow(value.NodeID, value.HostIP, value.ServiceName)
 
-		if protocol == tcp {
-			table.AddColumnsToRow(formatLargeInteger(value.ConnectionCount),
-				formattingFunction(value.TotalBytesSent), formattingFunction(value.TotalBytesReceived))
-			if OutputFormat == constants.WIDE {
-				table.AddColumnsToRow(formatLargeInteger(value.TotalMessagesSent),
-					formatLargeInteger(value.TotalMessagesReceived), formatLargeInteger(value.OutgoingByteBacklog),
-					formatLargeInteger(value.OutgoingMessageBacklog), formatLargeInteger(value.UnAuthConnectionAttempts))
-			}
-		} else {
-			table.AddColumnsToRow(value.HTTPServerType,
-				formatLargeInteger(value.TotalRequestCount), formatLargeInteger(value.TotalErrorCount))
-			if OutputFormat == constants.WIDE {
-				table.AddColumnsToRow(formatLargeInteger(value.ResponseCount1xx),
-					formatLargeInteger(value.ResponseCount2xx), formatLargeInteger(value.ResponseCount3xx),
-					formatLargeInteger(value.ResponseCount4xx), formatLargeInteger(value.ResponseCount5xx))
-			}
-		}
+		addColumns(table, value, protocol, formattingFunction)
 	}
 
 	return table.String()
+}
+
+func addColumns(table FormattedTable, value config.ProxySummary, protocol string, formattingFunction func(bytesValue int64) string) {
+	if protocol == tcp {
+		table.AddColumnsToRow(formatLargeInteger(value.ConnectionCount),
+			formattingFunction(value.TotalBytesSent), formattingFunction(value.TotalBytesReceived))
+		if OutputFormat == constants.WIDE {
+			table.AddColumnsToRow(formatLargeInteger(value.TotalMessagesSent),
+				formatLargeInteger(value.TotalMessagesReceived), formatLargeInteger(value.OutgoingByteBacklog),
+				formatLargeInteger(value.OutgoingMessageBacklog), formatLargeInteger(value.UnAuthConnectionAttempts))
+		}
+	} else {
+		table.AddColumnsToRow(value.HTTPServerType,
+			formatLargeInteger(value.TotalRequestCount), formatLargeInteger(value.TotalErrorCount))
+		if OutputFormat == constants.WIDE {
+			table.AddColumnsToRow(formatLargeInteger(value.ResponseCount1xx),
+				formatLargeInteger(value.ResponseCount2xx), formatLargeInteger(value.ResponseCount3xx),
+				formatLargeInteger(value.ResponseCount4xx), formatLargeInteger(value.ResponseCount5xx))
+		}
+	}
 }
 
 // FormatProxyServersSummary returns the proxy servers' summary information in a column formatted output
@@ -2114,23 +2118,7 @@ func FormatProxyServersSummary(services []config.ProxySummary, protocol string) 
 		}
 		table.AddRow(value.ServiceName)
 
-		if protocol == tcp {
-			table.AddColumnsToRow(formatLargeInteger(value.ConnectionCount),
-				formattingFunction(value.TotalBytesSent), formattingFunction(value.TotalBytesReceived))
-			if OutputFormat == constants.WIDE {
-				table.AddColumnsToRow(formatLargeInteger(value.TotalMessagesSent),
-					formatLargeInteger(value.TotalMessagesReceived), formatLargeInteger(value.OutgoingByteBacklog),
-					formatLargeInteger(value.OutgoingMessageBacklog), formatLargeInteger(value.UnAuthConnectionAttempts))
-			}
-		} else {
-			table.AddColumnsToRow(value.HTTPServerType,
-				formatLargeInteger(value.TotalRequestCount), formatLargeInteger(value.TotalErrorCount))
-			if OutputFormat == constants.WIDE {
-				table.AddColumnsToRow(formatLargeInteger(value.ResponseCount1xx),
-					formatLargeInteger(value.ResponseCount2xx), formatLargeInteger(value.ResponseCount3xx),
-					formatLargeInteger(value.ResponseCount4xx), formatLargeInteger(value.ResponseCount5xx))
-			}
-		}
+		addColumns(table, value, protocol, formattingFunction)
 	}
 
 	return table.String()
