@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 
-    Copyright (c) 2021, 2023 Oracle and/or its affiliates.
+    Copyright (c) 2021, 2024 Oracle and/or its affiliates.
     Licensed under the Universal Permissive License v 1.0 as shown at
     https://oss.oracle.com/licenses/upl.
 
@@ -14,6 +14,7 @@
 There are various commands that allow you to work with and manage http servers.
 
 * <<get-http-servers, `cohctl get http-servers`>> - displays the http servers for a cluster
+* <<get-http-server-members, `cohctl get http-server-members`>> - displays the http proxy members for a specific http server
 * <<describe-http-server, `cohctl describe http-server`>> - shows information related to a specific http server
 
 [#get-http-servers]
@@ -32,10 +33,27 @@ cohctl get http-servers -c local
 Output:
 [source,bash]
 ----
-NODE ID  HOST IP        SERVICE NAME         SERVER TYPE                  REQUESTS  ERRORS
-1        0.0.0.0:0      ManagementHttpProxy  com..http.DefaultHttpServer         0       0
-2        0.0.0.0:30000  ManagementHttpProxy  com..http.DefaultHttpServer        52       0
-3        0.0.0.0:0      ManagementHttpProxy  com..http.DefaultHttpServer         0       0
+SERVICE NAME            SERVER TYPE                                 TOTAL REQUESTS  TOTAL ERRORS
+"$SYS:HealthHttpProxy"  com.tangosol.coherence.http.JavaHttpServer               0             0
+ManagementHttpProxy     com.tangosol.coherence.http.JavaHttpServer              52             0
+----
+
+NOTE: You can also use `-o wide` to display more columns.
+
+[#get-http-server-members]
+==== Get Http Members
+
+include::../../build/_output/docs-gen/get_http_server_members.adoc[tag=text]
+
+[source,bash]
+----
+cohctl get http-server-members ManagementHttpProxy -c local
+----
+Output:
+[source,bash]
+----
+NODE ID  HOST IP        SERVICE NAME         SERVER TYPE                                 REQUESTS  ERRORS
+4        0.0.0.0:30000  ManagementHttpProxy  com.tangosol.coherence.http.JavaHttpServer        59       0
 ----
 
 NOTE: You can also use `-o wide` to display more columns.

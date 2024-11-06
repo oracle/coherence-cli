@@ -158,11 +158,13 @@ create_doc $DOCS_DIR/nslookup "${COHCTL} nslookup --help"
 
 # Proxies
 create_doc $DOCS_DIR/get_proxies "${COHCTL} get proxies --help"
+create_doc $DOCS_DIR/get_proxy_members "${COHCTL} get proxy-members --help"
 create_doc $DOCS_DIR/get_proxy_connections "${COHCTL} get proxy-connections --help"
 create_doc $DOCS_DIR/describe_proxy "${COHCTL} describe proxy --help"
 
 # Http Servers
 create_doc $DOCS_DIR/get_http_servers "${COHCTL} get http-servers --help"
+create_doc $DOCS_DIR/get_http_server_members "${COHCTL} get http-server-members --help"
 create_doc $DOCS_DIR/describe_http_server "${COHCTL} describe http-server --help"
 
 # Reporters

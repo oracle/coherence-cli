@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 
-    Copyright (c) 2021, 2023 Oracle and/or its affiliates.
+    Copyright (c) 2021, 2024 Oracle and/or its affiliates.
     Licensed under the Universal Permissive License v 1.0 as shown at
     https://oss.oracle.com/licenses/upl.
 
@@ -14,6 +14,7 @@
 There are various commands that allow you to work with and manage proxy servers.
 
 * <<get-proxies, `cohctl get proxies`>> - displays the proxy servers for a cluster
+* <<get-proxy-members, `cohctl get proxy-members`>> - displays proxy members for a specific proxy server
 * <<get-proxy-connections, `cohctl get proxy-connections`>> - displays proxy server connections for a specific proxy server
 * <<describe-proxy, `cohctl describe proxy`>> - shows information related to a specific proxy server
 
@@ -33,10 +34,32 @@ cohctl get proxies -c local
 Output:
 [source,bash]
 ----
-NODE ID  HOST IP              SERVICE NAME  CONNECTIONS  BYTES SENT  BYTES REC
-1        0.0.0.0:53216.41408  Proxy                   0           0          0
-2        0.0.0.0:53215.47265  Proxy                   0           0          0
-3        0.0.0.0:53220.42214  Proxy                   0           0          0
+SERVICE NAME        TOTAL CONNECTIONS  TOTALDATA SENT  TOTALDATA REC
+"$SYS:SystemProxy"                  0            0 MB           0 MB
+Proxy                               2           13 MB           0 MB
+----
+
+NOTE: You can also use `-o wide` to display more columns.
+
+[#get-proxy-members]
+==== Get Proxy Members
+
+include::../../build/_output/docs-gen/get_proxy_members.adoc[tag=text]
+
+*Examples*
+
+[source,bash]
+----
+cohctl get proxy-members Proxy -c local
+----
+Output:
+[source,bash]
+----
+
+NODE ID  HOST IP              SERVICE NAME  CONNECTIONS  DATA SENT  DATA REC  MSG SENT  MSG RCV  BYTES BACKLOG  MSG BACKLOG  UNAUTH
+2        0.0.0.0:60488.38858  Proxy                   1       4 MB      0 MB        10       15              0            0       0
+3        0.0.0.0:60489.34448  Proxy                   0       0 MB      0 MB         0        1              0            0       0
+4        0.0.0.0:60490.43677  Proxy                   1       8 MB      0 MB        15       20              0            0       0
 ----
 
 NOTE: You can also use `-o wide` to display more columns.

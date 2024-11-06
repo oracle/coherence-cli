@@ -25,7 +25,7 @@ const (
 	tcpString           = "tcp"
 )
 
-// var getProxiesCmd = &cobra.Command{ represents the getProxies command.
+// var getProxiesCmd = getProxiesCmd represents the getProxies command.
 var getProxiesCmd = &cobra.Command{
 	Use:   "proxies",
 	Short: "display Coherence*Extend proxy services for a cluster",
@@ -44,12 +44,48 @@ servers for a cluster. You can specify '-o wide' to display addition information
 			return err
 		}
 
-		details, err := returnGetProxiesDetails(cmd, tcpString, dataFetcher, connection, "")
+		details, err := returnGetProxiesDetails(cmd, tcpString, dataFetcher, connection, "", true)
 		if err != nil {
 			return err
 		}
 		if !isWatchEnabled() {
 			// don't display the value if watch was enabled as it was already output
+			cmd.Println(details)
+		}
+		return nil
+	},
+}
+
+// var getProxyMembersCmd = getProxyMembersCmd represents the getProxies command.
+var getProxyMembersCmd = &cobra.Command{
+	Use:   "proxy-members",
+	Short: "display Coherence*Extend proxy members for a proxy service",
+	Long: `The 'get proxy-members' command displays the list of Coherence*Extend proxy
+servers for a service. You can specify '-o wide' to display addition information.`,
+	ValidArgsFunction: completionProxies,
+	Args: func(cmd *cobra.Command, args []string) error {
+		if len(args) != 1 {
+			displayErrorAndExit(cmd, provideProxyService)
+		}
+		return nil
+	},
+	RunE: func(cmd *cobra.Command, args []string) error {
+		var (
+			err         error
+			dataFetcher fetcher.Fetcher
+			connection  string
+		)
+
+		connection, dataFetcher, err = GetConnectionAndDataFetcher()
+		if err != nil {
+			return err
+		}
+
+		details, err := returnGetProxiesDetails(cmd, tcpString, dataFetcher, connection, args[0], false)
+		if err != nil {
+			return err
+		}
+		if !isWatchEnabled() {
 			cmd.Println(details)
 		}
 		return nil
@@ -342,7 +378,7 @@ func displayProxyDetails(cmd *cobra.Command, dataFetcher fetcher.Fetcher, connec
 
 	cmd.Print(member + "\n")
 	cmd.Print("--------------------" + header + "\n")
-	value, err = returnGetProxiesDetails(cmd, protocol, dataFetcher, connection, service)
+	value, err = returnGetProxiesDetails(cmd, protocol, dataFetcher, connection, service, false)
 	if err != nil {
 		return err
 	}
@@ -352,7 +388,7 @@ func displayProxyDetails(cmd *cobra.Command, dataFetcher fetcher.Fetcher, connec
 	return nil
 }
 
-func returnGetProxiesDetails(cmd *cobra.Command, protocol string, dataFetcher fetcher.Fetcher, connection string, service string) (string, error) {
+func returnGetProxiesDetails(cmd *cobra.Command, protocol string, dataFetcher fetcher.Fetcher, connection string, service string, summary bool) (string, error) {
 	var sb strings.Builder
 	for {
 		var proxiesSummary = config.ProxiesSummary{}
@@ -368,11 +404,11 @@ func returnGetProxiesDetails(cmd *cobra.Command, protocol string, dataFetcher fe
 		}
 
 		if strings.Contains(OutputFormat, constants.JSONPATH) {
-			result, err := utils.GetJSONPathResults(proxyResults, OutputFormat)
-			if err != nil {
-				return "", err
+			result, err1 := utils.GetJSONPathResults(proxyResults, OutputFormat)
+			if err1 != nil {
+				return "", err1
 			}
-			cmd.Println(result)
+			return result, nil
 		} else if OutputFormat == constants.JSON {
 			sb.WriteString(string(proxyResults))
 		} else {
@@ -394,7 +430,20 @@ func returnGetProxiesDetails(cmd *cobra.Command, protocol string, dataFetcher fe
 				}
 				proxiesSummary.Proxies = finalProxySummary
 			}
-			sb.WriteString(FormatProxyServers(proxiesSummary.Proxies, protocol))
+
+			var finalResult []config.ProxySummary
+
+			// reduce if we have a summary
+			if summary {
+				finalResult, err = summarizeProxies(proxiesSummary.Proxies, protocol)
+				if err != nil {
+					return "", err
+				}
+				sb.WriteString(FormatProxyServersSummary(finalResult, protocol))
+			} else {
+				sb.WriteString(FormatProxyServers(proxiesSummary.Proxies, protocol))
+			}
+
 		}
 
 		// check to see if we should exit if we are not watching
@@ -410,4 +459,50 @@ func returnGetProxiesDetails(cmd *cobra.Command, protocol string, dataFetcher fe
 	}
 
 	return sb.String(), nil
+}
+
+// summarizeProxies summarises the details based upon the input for new
+// get proxies and get http-servers command.
+func summarizeProxies(details []config.ProxySummary, protocol string) ([]config.ProxySummary, error) {
+	var result = make([]config.ProxySummary, 0)
+	for _, value := range details {
+		if value.Protocol != protocol {
+			continue
+		}
+
+		// check to see if this proxy service already exists
+		if len(result) == 0 {
+			result = append(result, value)
+		} else {
+			// try to find and update if it exists
+			var (
+				index = -1
+			)
+			for j, v := range result {
+				if v.ServiceName == value.ServiceName && v.Protocol == value.Protocol {
+					index = j
+					break
+				}
+			}
+			if index == -1 {
+				result = append(result, value)
+			} else {
+				// update the existing one
+				result[index].ConnectionCount += value.ConnectionCount
+				result[index].OutgoingByteBacklog += value.OutgoingByteBacklog
+				result[index].OutgoingMessageBacklog += value.OutgoingMessageBacklog
+				result[index].TotalBytesReceived += value.TotalBytesReceived
+				result[index].TotalBytesSent += value.TotalBytesSent
+				result[index].TotalMessagesReceived += value.TotalMessagesReceived
+				result[index].TotalMessagesSent += value.TotalMessagesSent
+				result[index].ResponseCount1xx += value.ResponseCount1xx
+				result[index].ResponseCount2xx += value.ResponseCount2xx
+				result[index].ResponseCount3xx += value.ResponseCount3xx
+				result[index].ResponseCount4xx += value.ResponseCount4xx
+				result[index].ResponseCount5xx += value.ResponseCount5xx
+				result[index].UnAuthConnectionAttempts += value.UnAuthConnectionAttempts
+			}
+		}
+	}
+	return result, nil
 }

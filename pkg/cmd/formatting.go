@@ -2041,23 +2041,84 @@ func FormatProxyServers(services []config.ProxySummary, protocol string) string 
 		// common values
 		table.AddRow(value.NodeID, value.HostIP, value.ServiceName)
 
-		if protocol == tcp {
-			table.AddColumnsToRow(formatLargeInteger(value.ConnectionCount),
-				formattingFunction(value.TotalBytesSent), formattingFunction(value.TotalBytesReceived))
-			if OutputFormat == constants.WIDE {
-				table.AddColumnsToRow(formatLargeInteger(value.TotalMessagesSent),
-					formatLargeInteger(value.TotalMessagesReceived), formatLargeInteger(value.OutgoingByteBacklog),
-					formatLargeInteger(value.OutgoingMessageBacklog), formatLargeInteger(value.UnAuthConnectionAttempts))
-			}
-		} else {
-			table.AddColumnsToRow(value.HTTPServerType,
-				formatLargeInteger(value.TotalRequestCount), formatLargeInteger(value.TotalErrorCount))
-			if OutputFormat == constants.WIDE {
-				table.AddColumnsToRow(formatLargeInteger(value.ResponseCount1xx),
-					formatLargeInteger(value.ResponseCount2xx), formatLargeInteger(value.ResponseCount3xx),
-					formatLargeInteger(value.ResponseCount4xx), formatLargeInteger(value.ResponseCount5xx))
-			}
+		addColumns(table, value, protocol, formattingFunction)
+	}
+
+	return table.String()
+}
+
+func addColumns(table FormattedTable, value config.ProxySummary, protocol string, formattingFunction func(bytesValue int64) string) {
+	if protocol == tcp {
+		table.AddColumnsToRow(formatLargeInteger(value.ConnectionCount),
+			formattingFunction(value.TotalBytesSent), formattingFunction(value.TotalBytesReceived))
+		if OutputFormat == constants.WIDE {
+			table.AddColumnsToRow(formatLargeInteger(value.TotalMessagesSent),
+				formatLargeInteger(value.TotalMessagesReceived), formatLargeInteger(value.OutgoingByteBacklog),
+				formatLargeInteger(value.OutgoingMessageBacklog), formatLargeInteger(value.UnAuthConnectionAttempts))
 		}
+	} else {
+		table.AddColumnsToRow(value.HTTPServerType,
+			formatLargeInteger(value.TotalRequestCount), formatLargeInteger(value.TotalErrorCount))
+		if OutputFormat == constants.WIDE {
+			table.AddColumnsToRow(formatLargeInteger(value.ResponseCount1xx),
+				formatLargeInteger(value.ResponseCount2xx), formatLargeInteger(value.ResponseCount3xx),
+				formatLargeInteger(value.ResponseCount4xx), formatLargeInteger(value.ResponseCount5xx))
+		}
+	}
+}
+
+// FormatProxyServersSummary returns the proxy servers' summary information in a column formatted output
+// protocol is either tcp or http and will display a different format based upon this.
+func FormatProxyServersSummary(services []config.ProxySummary, protocol string) string {
+	// get the number of proxies matching the protocol
+	var (
+		serviceCount       = 0
+		formattingFunction = getFormattingFunction()
+	)
+
+	for _, value := range services {
+		if protocol == value.Protocol {
+			serviceCount++
+		}
+	}
+
+	if serviceCount == 0 {
+		return ""
+	}
+
+	// common header
+	table := newFormattedTable().WithHeader(ServiceNameColumn).WithSortingColumn(ServiceNameColumn)
+
+	if protocol == tcp {
+		table.AddHeaderColumns("TOTAL CONNECTIONS", "TOTAL"+dataSent, "TOTAL"+dataRec)
+		if OutputFormat == constants.WIDE {
+			table.AddHeaderColumns("TOTAL MSG SENT", "TOTAL MSG RCV", "TOTAL BYTES BACKLOG", "TOTAL MSG BACKLOG", "TOTAL UNAUTH")
+			table.WithAlignment(L, R, R, R, R, R, R, R, R)
+			table.AddFormattingFunction(9, errorFormatter)
+			table.AddFormattingFunction(10, errorFormatter)
+		} else {
+			table.WithAlignment(L, R, R, R)
+		}
+	} else {
+		table.AddHeaderColumns("SERVER TYPE", "TOTAL REQUESTS", "TOTAL ERRORS")
+		table.AddFormattingFunction(5, errorFormatter)
+		if OutputFormat == constants.WIDE {
+			table.AddHeaderColumns("1xx", "2xx", "3xx", "4xx", "5xx")
+			table.WithAlignment(L, L, R, R, R, R, R, R, R)
+			table.AddFormattingFunction(9, errorFormatter)
+			table.AddFormattingFunction(10, errorFormatter)
+		} else {
+			table.WithAlignment(L, L, R, R)
+		}
+	}
+
+	for _, value := range services {
+		if protocol != value.Protocol {
+			continue
+		}
+		table.AddRow(value.ServiceName)
+
+		addColumns(table, value, protocol, formattingFunction)
 	}
 
 	return table.String()
