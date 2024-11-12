@@ -663,7 +663,7 @@ func getCacheDetails(cmd *cobra.Command, args []string, displayType string) erro
 		} else if displayType == storage {
 			cmd.Println(FormatCacheDetailsStorage(cacheDetails.Details))
 		} else if displayType == partitionDisplayType {
-			cmd.Printf("Cache:            %s\n", args[0])
+			cmd.Printf("Cache:              %s\n", args[0])
 			cmd.Println(FormatCachePartitions(cachePartitionDetails.Details, cacheSummary))
 		}
 
