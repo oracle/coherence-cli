@@ -1065,7 +1065,7 @@ func FormatCachePartitions(cacheDetails []config.CachePartitionDetail, summary b
 		}
 	}
 
-	header := fmt.Sprintf("Partitions:       %s\nTotal Count:      %s\nTotal Size:       %s\nMax Entry Size:   %s (bytes)\nOwning Partition: %s\n\n",
+	header := fmt.Sprintf("Partitions:         %s\nTotal Count:        %s\nTotal Size:         %s\nMax Entry Size:     %s (bytes)\nMax Size Partition: %s\n\n",
 		formatSmallInteger(int32(len(cacheDetails))), formatLargeInteger(totalEntries), formattingFunction(totalSize),
 		formatSmallInteger(maxEntrySize), formatSmallInteger(maxEntryRecord.PartitionID))
 
