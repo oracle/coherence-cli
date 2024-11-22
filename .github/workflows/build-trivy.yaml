@@ -32,3 +32,4 @@ jobs:
       with:
         scan-type: 'fs'
         skip-dirs: 'java'
+        exit-code: 1
