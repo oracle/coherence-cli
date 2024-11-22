@@ -395,10 +395,6 @@ golangci: $(TOOLS_BIN)/golangci-lint ## Go code review
 # ======================================================================================================================
 ##@ Miscellaneous
 
-.PHONY: trivy-scan
-trivy-scan: gettrivy ## Scan the CLI using trivy
-	$(TOOLS_BIN)/trivy fs --cache-dir ${TRIVY_CACHE} --exit-code 1 .
-
 # ======================================================================================================================
 # Test targets
 # ======================================================================================================================
@@ -589,14 +585,6 @@ gotestsum: ## Download gotestsum locally if necessary.
 getcopyright: ## Download copyright jar locally if necessary.
 	@test -f scripts/$(COPYRIGHT_JAR)  || curl -o scripts/$(COPYRIGHT_JAR) \
 		https://repo.maven.apache.org/maven2/org/glassfish/copyright/glassfish-copyright-maven-plugin/2.4/glassfish-copyright-maven-plugin-2.4.jar
-
-# ----------------------------------------------------------------------------------------------------------------------
-# Find or download trivy
-# ----------------------------------------------------------------------------------------------------------------------
-.PHONY: gettrivy
-gettrivy:
-	@mkdir -p $(TOOLS_BIN)
-	curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b $(TOOLS_BIN) v0.51.2
 
 # go-get-tool will 'go get' any package $2 and install it to $1.
 PROJECT_DIR := $(shell dirname $(abspath $(lastword $(MAKEFILE_LIST))))
