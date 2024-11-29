@@ -745,6 +745,10 @@ var elasticDataContent = func(_ fetcher.Fetcher, clusterSummary clusterSummaryIn
 var persistenceContent = func(dataFetcher fetcher.Fetcher, clusterSummary clusterSummaryInfo) ([]string, error) {
 	var services = config.ServicesSummaries{}
 
+	if contentIsEmpty(clusterSummary.servicesResult) {
+		return noContentArray, nil
+	}
+
 	err := json.Unmarshal(clusterSummary.servicesResult, &services)
 	if err != nil {
 		return emptyStringArray, err
@@ -761,7 +765,7 @@ var persistenceContent = func(dataFetcher fetcher.Fetcher, clusterSummary cluste
 
 var reportersContent = func(_ fetcher.Fetcher, clusterSummary clusterSummaryInfo) ([]string, error) {
 	var reporters = config.Reporters{}
-	if len(clusterSummary.reportersResult) > 0 {
+	if !contentIsEmpty(clusterSummary.reportersResult) {
 		err := json.Unmarshal(clusterSummary.reportersResult, &reporters)
 		if err != nil {
 			return emptyStringArray, err
@@ -834,6 +838,10 @@ var federationOriginsContent = func(_ fetcher.Fetcher, clusterSummary clusterSum
 var healthSummaryContent = func(_ fetcher.Fetcher, clusterSummary clusterSummaryInfo) ([]string, error) {
 	var healthSummaries = config.HealthSummaries{}
 
+	if contentIsEmpty(clusterSummary.healthResult) {
+		return noContentArray, nil
+	}
+
 	err := json.Unmarshal(clusterSummary.healthResult, &healthSummaries)
 	if err != nil {
 		return emptyStringArray, err
@@ -853,6 +861,10 @@ var httpServersContent = func(_ fetcher.Fetcher, clusterSummary clusterSummaryIn
 
 var proxiesContentInternal = func(protocol string, clusterSummary clusterSummaryInfo) ([]string, error) {
 	var proxiesSummary = config.ProxiesSummary{}
+
+	if contentIsEmpty(clusterSummary.proxyResults) {
+		return noContentArray, nil
+	}
 
 	err := json.Unmarshal(clusterSummary.proxyResults, &proxiesSummary)
 	if err != nil {
@@ -911,6 +923,10 @@ var cacheStoresContent = func(dataFetcher fetcher.Fetcher, _ clusterSummaryInfo)
 		return emptyStringArray, err
 	}
 
+	if contentIsEmpty(cacheStoreResult) {
+		return noContentArray, nil
+	}
+
 	if err = json.Unmarshal(cacheStoreResult, &cacheStoreDetails); err != nil {
 		return emptyStringArray, err
 	}
@@ -950,7 +966,7 @@ func getCacheContent(dataFetcher fetcher.Fetcher, displayType string) ([]string,
 		return emptyStringArray, err
 	}
 
-	if string(cacheResult) == "{}" || len(cacheResult) == 0 {
+	if contentIsEmpty(cacheResult) {
 		return emptyStringArray, fmt.Errorf(cannotFindCache, selectedCache, serviceName)
 	}
 
@@ -1432,6 +1448,10 @@ func getLengths(width, count int) []int {
 		}
 	}
 	return lens
+}
+
+func contentIsEmpty(data []byte) bool {
+	return len(data) == 0 || string(data) == "{}"
 }
 
 func init() {
