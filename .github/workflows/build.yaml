@@ -16,6 +16,12 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        go-version:
+          - 1.21
+          - 1.22
+          - 1.23
 
 #   Checkout the source, we need a depth of zero to fetch all of the history otherwise
 #   the copyright check cannot work out the date of the files from Git.
@@ -50,10 +56,10 @@ jobs:
         key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
         restore-keys: ${{ runner.os }}-m2
 
-    - name: Set up Go
+    - name: Set up Go '${{ matrix.go-version }}'
       uses: actions/setup-go@v5
       with:
-        go-version: '1.21'
+        go-version: '${{ matrix.go-version }}'
 
     - name: Code Review
       shell: bash
@@ -90,39 +96,39 @@ jobs:
       uses: actions/upload-artifact@v4
       if: success()
       with:
-        name: cohctl-linux-amd64
+        name: cohctl-linux-amd64-${{ matrix.go-version }}
         path: bin/linux/amd64/cohctl
 
     - name: Upload Linux arm64
       uses: actions/upload-artifact@v4
       if: success()
       with:
-        name: cohctl-linux-arm64
+        name: cohctl-linux-arm64-${{ matrix.go-version }}
         path: bin/linux/arm64/cohctl
 
     - name: Upload Linux 386
       uses: actions/upload-artifact@v4
       if: success()
       with:
-        name: cohctl-linux-386
+        name: cohctl-linux-386-${{ matrix.go-version }}
         path: bin/linux/386/cohctl
 
     - name: Upload Windows amd64
       uses: actions/upload-artifact@v4
       if: success()
       with:
-        name: cohctl-windows-amd64
+        name: cohctl-windows-amd64-${{ matrix.go-version }}
         path: bin/windows/amd64/cohctl.exe
 
     - name: Upload Windows arm
       uses: actions/upload-artifact@v4
       if: success()
       with:
-        name: cohctl-windows-arm
+        name: cohctl-windows-arm-${{ matrix.go-version }}
         path: bin/windows/arm/cohctl.exe
 
     - uses: actions/upload-artifact@v4
       if: failure()
       with:
-        name: test-output
+        name: test-output-${{ matrix.go-version }}
         path: build/_output/test-logs
