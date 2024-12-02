@@ -923,7 +923,7 @@ func formatCachesSummary(serviceList []string, dataFetcher fetcher.Fetcher) (str
 	if ignoreSpecialCaches {
 		finalList := make([]config.CacheSummaryDetail, 0)
 		for _, v := range allCachesSummary {
-			if !strings.Contains(v.CacheName, "$") {
+			if !isSpecialCache(v.CacheName) {
 				finalList = append(finalList, v)
 			}
 		}
@@ -934,6 +934,13 @@ func formatCachesSummary(serviceList []string, dataFetcher fetcher.Fetcher) (str
 		return "", err
 	}
 	return value, err
+}
+
+var specialCacheNames = []string{"executor-assignments", "executor-tasks", "executor-executors"}
+
+// isSpecialCache returns true if a cache is a "special" or internal cache
+func isSpecialCache(cacheName string) bool {
+	return strings.Contains(cacheName, "$") || utils.SliceContains(specialCacheNames, cacheName)
 }
 
 // formatViewCachesSummary returns the formatted view caches for the service list.
