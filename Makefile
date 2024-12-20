@@ -388,7 +388,7 @@ copyright: getcopyright ## Check copyright headers
 # ----------------------------------------------------------------------------------------------------------------------
 .PHONY: golangci
 golangci: $(TOOLS_BIN)/golangci-lint ## Go code review
-	$(TOOLS_BIN)/golangci-lint run -v --timeout=5m --max-same-issues 20 ./pkg/...
+	go mod tidy && $(TOOLS_BIN)/golangci-lint run -v --timeout=5m --max-same-issues 20 ./pkg/...
 
 # ======================================================================================================================
 # Miscellaneous targets
