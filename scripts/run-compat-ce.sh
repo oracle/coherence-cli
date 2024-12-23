@@ -12,6 +12,9 @@ set -e
 echo "Coherence CE 22.06.10"
 COHERENCE_BASE_IMAGE=gcr.io/distroless/java17 COHERENCE_VERSION=22.06.10 make clean build-test-images test-e2e-standalone
 
+echo "Coherence CE 14.1.2-0-0"
+COHERENCE_BASE_IMAGE=gcr.io/distroless/java17 COHERENCE_VERSION=14.1.2-0-0 make clean build-test-images test-e2e-standalone
+
 echo "Coherence CE 24.09"
 COHERENCE_BASE_IMAGE=gcr.io/distroless/java17 COHERENCE_VERSION=24.09 make clean build-test-images test-e2e-standalone
 
