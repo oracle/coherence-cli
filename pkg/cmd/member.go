@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, 2024 Oracle and/or its affiliates.
+ * Copyright (c) 2021, 2025 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -410,10 +410,10 @@ func decodeNetworkStats(statistics config.NetworkStats) ([]config.NetworkStatsDe
 		detail.ReadyPackets = getIn64Value(detailMap["ReadyPackets"])
 		detail.Paused = getBoolValue(detailMap["Paused"])
 		detail.Deferring = getBoolValue(detailMap["Deferring"])
-		detail.LastIn = detailMap["LastIn"]
-		detail.LastOut = detailMap["LastOut"]
-		detail.LastSlow = detailMap["LastSlow"]
-		detail.LastHeuristicDeath = detailMap["LastHeuristicDeath"]
+		detail.LastIn = strings.ReplaceAll(detailMap["LastIn"], "ms", "")
+		detail.LastOut = strings.ReplaceAll(detailMap["LastOut"], "ms", "")
+		detail.LastSlow = strings.ReplaceAll(detailMap["LastSlow"], "ms", "")
+		detail.LastHeuristicDeath = strings.ReplaceAll(detailMap["LastHeuristicDeath"], "ms", "")
 
 		details = append(details, detail)
 	}
