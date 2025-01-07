@@ -413,7 +413,7 @@ func decodeNetworkStats(statistics config.NetworkStats) ([]config.NetworkStatsDe
 		detail.LastIn = strings.ReplaceAll(detailMap["LastIn"], "ms", "")
 		detail.LastOut = strings.ReplaceAll(detailMap["LastOut"], "ms", "")
 		detail.LastSlow = strings.ReplaceAll(detailMap["LastSlow"], "ms", "")
-		detail.LastHeuristicDeath = detailMap["LastHeuristicDeath"]
+		detail.LastHeuristicDeath = strings.ReplaceAll(detailMap["LastHeuristicDeath"], "ms", "")
 
 		details = append(details, detail)
 	}
