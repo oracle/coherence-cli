@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, 2024 Oracle and/or its affiliates.
+ * Copyright (c) 2021, 2025 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -1624,7 +1624,7 @@ func FormatNetworkStats(details []config.NetworkStatsDetails) string {
 	}
 
 	table := newFormattedTable().WithHeader(NodeIDColumn, publisherColumn, receiverColumn, "PAUSE RATE", "THRESHOLD",
-		"PAUSED", "DEFERRING", "DEFERRED", "OUTSTANDING", "READY", "LAST IN", "LAST OUT", "LAST SLOW", "LAST DEATH").
+		"PAUSED", "DEFERRING", "DEFERRED", "OUTSTANDING", "READY", "LAST IN MS", "LAST OUT MS", "LAST SLOW MS", "LAST DEATH MS").
 		WithAlignment(R, R, R, R, R, L, L, R, R, R, R, R, R, R).WithSortingColumn(NodeIDColumn)
 
 	table.AddFormattingFunction(1, networkStatsFormatter)
