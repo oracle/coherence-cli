@@ -772,7 +772,7 @@ func ensureTierBack(cacheStoreDetails []config.CacheStoreDetail) []config.CacheS
 }
 
 // hasCacheStores returns true of the collected cache store detail contains cache stores
-// by checking the QueueSize. A value of -1 means no cache store configured.
+// by checking the PersistenceType. A value of "" means no cache store is configured.
 func hasCacheStores(cacheStoreDetails []config.CacheStoreDetail) bool {
 	for _, v := range cacheStoreDetails {
 		if v.PersistenceType == "" {
