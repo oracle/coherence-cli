@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, 2024 Oracle and/or its affiliates.
+ * Copyright (c) 2021, 2025 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -524,7 +524,7 @@ func GetURLContents(resourceURL string) ([]byte, error) {
 			return http.ErrUseLastResponse
 		}}
 
-	req, err = http.NewRequest("GET", stableURL, bytes.NewBuffer(constants.EmptyByte))
+	req, err = http.NewRequest("GET", resourceURL, bytes.NewBuffer(constants.EmptyByte))
 	if err != nil {
 		return body, err
 	}

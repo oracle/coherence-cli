@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, 2024 Oracle and/or its affiliates.
+ * Copyright (c) 2021, 2025 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -672,6 +672,7 @@ func Initialize(command *cobra.Command) *cobra.Command {
 	command.AddCommand(createCmd)
 	createCmd.AddCommand(createSnapshotCmd)
 	createCmd.AddCommand(createClusterCmd)
+	createCmd.AddCommand(createStarterCmd)
 
 	// recover
 	command.AddCommand(recoverCmd)
