@@ -148,7 +148,6 @@ func EnsureDirectory(directory string) error {
 func DirectoryExists(directory string) bool {
 	file, err := os.Stat(directory)
 	if err != nil {
-		fmt.Println(err)
 		return !os.IsNotExist(err)
 	}
 	return file.IsDir()

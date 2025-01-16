@@ -672,6 +672,7 @@ func Initialize(command *cobra.Command) *cobra.Command {
 	command.AddCommand(createCmd)
 	createCmd.AddCommand(createSnapshotCmd)
 	createCmd.AddCommand(createClusterCmd)
+	createCmd.AddCommand(createStarterCmd)
 
 	// recover
 	command.AddCommand(recoverCmd)

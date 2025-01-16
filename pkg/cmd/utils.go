@@ -524,7 +524,7 @@ func GetURLContents(resourceURL string) ([]byte, error) {
 			return http.ErrUseLastResponse
 		}}
 
-	req, err = http.NewRequest("GET", stableURL, bytes.NewBuffer(constants.EmptyByte))
+	req, err = http.NewRequest("GET", resourceURL, bytes.NewBuffer(constants.EmptyByte))
 	if err != nil {
 		return body, err
 	}
