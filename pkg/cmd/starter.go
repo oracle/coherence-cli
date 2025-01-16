@@ -148,7 +148,7 @@ will be created off the current directory with the same name as the project name
 			return fmt.Errorf("unable to get absolute path for directory %s: %w", projectName, err)
 		}
 
-		cmd.Println("\nCreate Starter Project\n")
+		cmd.Println("\nCreate Starter Project")
 		cmd.Printf("Project Name:       %s\n", projectName)
 		cmd.Printf("Framework Type:     %s\n", frameworkTypeParam)
 		cmd.Printf("Coherence Version:  %s\n", starterCoherenceVersion)
@@ -156,7 +156,7 @@ will be created off the current directory with the same name as the project name
 		cmd.Printf("Project Path        %s\n\n", absolutePath)
 
 		// confirm the operation
-		if !confirmOperation(cmd, fmt.Sprintf("Are you sure you want to create the starter project above? (y/n) ")) {
+		if !confirmOperation(cmd, "Are you sure you want to create the starter project above? (y/n) ") {
 			return nil
 		}
 
@@ -216,7 +216,7 @@ func saveFiles(cmd *cobra.Command, fileList []string, baseDir string, frameworkT
 		}
 
 		// Write the file contents to the destination
-		if err = os.WriteFile(destPath, response, 0644); err != nil {
+		if err = os.WriteFile(destPath, response, 0600); err != nil {
 			return fmt.Errorf("error writing file %s: %w", destPath, err)
 		}
 	}
@@ -228,7 +228,7 @@ func writeContentToFile(baseDir, fileName, content string) error {
 	filePath := filepath.Join(baseDir, fileName)
 
 	// Write the content to the file
-	err := os.WriteFile(filePath, []byte(content), 0644)
+	err := os.WriteFile(filePath, []byte(content), 0600)
 	if err != nil {
 		return fmt.Errorf("failed to write to file %s: %w", filePath, err)
 	}
