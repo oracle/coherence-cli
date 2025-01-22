@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, 2024 Oracle and/or its affiliates.
+ * Copyright (c) 2021, 2025 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -52,9 +52,9 @@ func TestGetMavenClasspath(t *testing.T) {
 	)
 	home, _ := os.UserHomeDir()
 
-	path, err := getMavenClasspath(ce, "coherence", "22.06.10", fileTypeJar)
+	path, err := getMavenClasspath(ce, "coherence", "22.06.11", fileTypeJar)
 	g.Expect(err).To(gomega.BeNil())
-	g.Expect(path).To(gomega.Equal(home + "/.m2/repository/com/oracle/coherence/ce/coherence/22.06.10/coherence-22.06.10.jar"))
+	g.Expect(path).To(gomega.Equal(home + "/.m2/repository/com/oracle/coherence/ce/coherence/22.06.11/coherence-22.06.11.jar"))
 
 	path, err = getMavenClasspath(ce, "coherence", "22.09", fileTypeJar)
 	g.Expect(err).To(gomega.BeNil())
