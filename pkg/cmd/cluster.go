@@ -741,6 +741,7 @@ var (
 	logDestinationParam      string
 	cacheConfigParam         string
 	operationalConfigParam   string
+	settingsFileParam        string
 )
 
 const (
@@ -1474,6 +1475,7 @@ func init() {
 	createClusterCmd.Flags().StringVarP(&rackParam, rackArg, "", "", rackMessage)
 	createClusterCmd.Flags().StringVarP(&siteParam, siteArg, "", "", siteMessage)
 	createClusterCmd.Flags().StringVarP(&roleParam, roleArg, "", "", roleMessage)
+	createClusterCmd.Flags().StringVarP(&settingsFileParam, "maven-settings", "", "", "full path to Maven settings file")
 
 	stopClusterCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
 
