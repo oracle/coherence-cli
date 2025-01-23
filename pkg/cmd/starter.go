@@ -20,9 +20,8 @@ const (
 )
 
 var (
-	starterCoherenceVersion string
-	frameworkTypeParam      string
-	validFrameworks         = []string{"helidon", "springboot", "micronaut"}
+	frameworkTypeParam string
+	validFrameworks    = []string{"helidon", "springboot", "micronaut"}
 
 	templateFiles = map[string][]string{
 		"helidon": {"pom.xml",
@@ -131,11 +130,6 @@ will be created off the current directory with the same name as the project name
 			return fmt.Errorf("framework must be one of %v", validFrameworks)
 		}
 
-		// validate coherence version
-		if err = validateCoherenceVersion(starterCoherenceVersion); err != nil {
-			return err
-		}
-
 		// check the directory does not exist
 		if utils.DirectoryExists(projectName) {
 			return fmt.Errorf("the directory %s already exists", projectName)
@@ -151,7 +145,6 @@ will be created off the current directory with the same name as the project name
 		cmd.Println("\nCreate Starter Project")
 		cmd.Printf("Project Name:       %s\n", projectName)
 		cmd.Printf("Framework Type:     %s\n", frameworkTypeParam)
-		cmd.Printf("Coherence Version:  %s\n", starterCoherenceVersion)
 		cmd.Printf("Framework Versions: %s\n", frameworkInfo)
 		cmd.Printf("Project Path        %s\n\n", absolutePath)
 
@@ -236,16 +229,7 @@ func writeContentToFile(baseDir, fileName, content string) error {
 	return nil
 }
 
-func validateCoherenceVersion(version string) error {
-	validVersions := []string{"24.09"}
-	if !utils.SliceContains(validVersions, version) {
-		return fmt.Errorf("coherence verison must be one of %v", validVersions)
-	}
-	return nil
-}
-
 func init() {
-	createStarterCmd.Flags().StringVarP(&starterCoherenceVersion, "version", "v", "24.09", "Coherence version")
 	createStarterCmd.Flags().StringVarP(&frameworkTypeParam, framework, "f", "", "the framework to create for: helidon, springboot or micronaut")
 	_ = createStarterCmd.MarkFlagRequired(framework)
 	createStarterCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
