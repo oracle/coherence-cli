@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, 2024 Oracle and/or its affiliates.
+ * Copyright (c) 2022, 2025 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -196,7 +196,11 @@ func getCoherenceMavenDependencies(cmd *cobra.Command) error {
 
 	for _, entry := range defaultJars {
 		cmd.Printf("- %s:%s:%s\n", entry.GroupID, entry.Artifact, entry.Version)
-		result, err = runCommand(mvnExec, getDependencyArgs(entry.GroupID, entry.Artifact, entry.Version))
+		args := getDependencyArgs(entry.GroupID, entry.Artifact, entry.Version)
+		if settingsFileParam != "" {
+			args = append(args, "-s", settingsFileParam)
+		}
+		result, err = runCommand(mvnExec, args)
 		if err != nil {
 			cmd.Println(result)
 			return err
