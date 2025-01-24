@@ -10,81 +10,32 @@ import (
 	"fmt"
 	"github.com/oracle/coherence-cli/pkg/utils"
 	"github.com/spf13/cobra"
+	"gopkg.in/yaml.v3"
 	"os"
 	"path/filepath"
 )
 
 const (
-	framework    = "framework"
-	frameworkURL = "https://raw.githubusercontent.com/tmiddlet2666/coherence-playground/main/frameworks"
+	framework         = "framework"
+	frameworkURL      = "https://raw.githubusercontent.com/tmiddlet2666/coherence-playground/main/frameworks"
+	frameworkTypesURL = "https://raw.githubusercontent.com/oracle/coherence-cli/refs/heads/template/templates/template.yaml"
 )
+
+// FrameworkTemplate contains the contents read from the coherence-cli repository.
+type FrameworkTemplate struct {
+	Name             string   `yaml:"name"`
+	FrameworkVersion string   `yaml:"frameworkVersion"`
+	Instructions     string   `yaml:"instructions"`
+	Files            []string `yaml:"files"`
+}
+
+type Templates struct {
+	Templates []FrameworkTemplate `yaml:"templates"`
+}
 
 var (
 	frameworkTypeParam string
 	validFrameworks    = []string{"helidon", "springboot", "micronaut"}
-
-	templateFiles = map[string][]string{
-		"helidon": {"pom.xml",
-			"src/main/resources/logging.properties",
-			"src/main/resources/META-INF/beans.xml",
-			"src/main/resources/META-INF/helidon/serial-config.properties",
-			"src/main/resources/META-INF/microprofile-config.properties",
-			"src/main/java/com/oracle/coherence/demo/frameworks/helidon/Customer.java",
-			"src/main/java/com/oracle/coherence/demo/frameworks/helidon/CustomerResource.java"},
-		"springboot": {"pom.xml",
-			"src/main/resources/application.properties",
-			"src/main/java/com/oracle/coherence/demo/frameworks/springboot/Customer.java",
-			"src/main/java/com/oracle/coherence/demo/frameworks/springboot/controller/DemoController.java",
-			"src/main/java/com/oracle/coherence/demo/frameworks/springboot/DemoApplication.java"},
-		"micronaut": {"pom.xml",
-			"src/main/resources/logback.xml",
-			"src/main/resources/application.yml",
-			"src/main/java/com/oracle/coherence/demo/frameworks/micronaut/Application.java",
-			"src/main/java/com/oracle/coherence/demo/frameworks/micronaut/Customer.java",
-			"src/main/java/com/oracle/coherence/demo/frameworks/micronaut/rest/ApplicationController.java"},
-	}
-
-	frameworkVersions = map[string]string{
-		"helidon":    "4.1.6",
-		"springboot": "spring-boot-starter 3.4.1, coherence-spring 4.3.0",
-		"micronaut":  "micronaut-parent: 4.7.3, micronaut-coherence: 5.0.4",
-	}
-	frameWorkInstructions = map[string]string{
-		"helidon": `
-To run the Helidon starter you must have JDK21+ and maven 3.8.5+.
-Change to the newly created directory and run the following to build:
-
-    mvn clean install
-
-To run single server:
-    java -jar target/helidon.jar
-
-To run additional server:
-    java -Dmain.class=com.tangosol.net.Coherence -Dcoherence.management.http=none -Dserver.port=-1 -jar target/helidon.jar
-`,
-		"springboot": `
-To run Spring Boot starter you must have JDK21+ and maven 3.8.5+.
-Change to the newly created directory and run the following to build:
-    mvn clean install
-
-To run single server:
-    java -jar target/springboot-1.0-SNAPSHOT.jar
-
-To run additional server:
-    java -Dserver.port=-1 -Dloader.main=com.tangosol.net.Coherence -Dcoherence.management.http=none -jar target/springboot-1.0-SNAPSHOT.jar
-`,
-		"micronaut": `
-To run Micronaut starter you must have JDK21+ and maven 3.8.5+.
-Change to the newly created directory and run the following to build:
-    mvn clean install
-
-To run single server:
-    java -jar target/micronaut-1.0-SNAPSHOT-shaded.jar
-
-To run additional server:
-    java -Dmicronaut.main.class=com.tangosol.net.Coherence -Dcoherence.management.http=none -Dmicronaut.server.port=-1 -jar target/micronaut-1.0-SNAPSHOT-shaded.jar
-`,
-	}
 
 	commonInstructions = `
 Add a customer:
@@ -135,7 +86,20 @@ will be created off the current directory with the same name as the project name
 			return fmt.Errorf("the directory %s already exists", projectName)
 		}
 
-		frameworkInfo := frameworkVersions[frameworkTypeParam]
+		cmd.Printf("checking for availability of template %v...\n", frameworkTypeParam)
+
+		// load the template files
+		templates, err := loadTemplateFiles()
+		if err != nil {
+			return err
+		}
+
+		// get the template for the framework
+		template := getTemplate(templates, frameworkTypeParam)
+
+		if template == nil {
+			return fmt.Errorf("unable to find files for framework %s", frameworkTypeParam)
+		}
 
 		absolutePath, err := filepath.Abs(projectName)
 		if err != nil {
@@ -145,7 +109,7 @@ will be created off the current directory with the same name as the project name
 		cmd.Println("\nCreate Starter Project")
 		cmd.Printf("Project Name:       %s\n", projectName)
 		cmd.Printf("Framework Type:     %s\n", frameworkTypeParam)
-		cmd.Printf("Framework Versions: %s\n", frameworkInfo)
+		cmd.Printf("Framework Versions: %s\n", template.FrameworkVersion)
 		cmd.Printf("Project Path        %s\n\n", absolutePath)
 
 		// confirm the operation
@@ -153,44 +117,59 @@ will be created off the current directory with the same name as the project name
 			return nil
 		}
 
-		return initProject(cmd, frameworkTypeParam, projectName, absolutePath)
+		return initProject(cmd, template, projectName, absolutePath)
 	},
 }
 
-func initProject(cmd *cobra.Command, frameworkType string, projectName string, absolutePath string) error {
-	var (
-		fileList []string
-		exists   bool
-		err      error
-	)
-
-	if fileList, exists = templateFiles[frameworkType]; !exists {
-		return fmt.Errorf("unable to find files for framework %s", frameworkType)
-	}
+func initProject(cmd *cobra.Command, template *FrameworkTemplate, projectName string, absolutePath string) error {
+	var err error
 
 	// create the directory
 	if err = utils.EnsureDirectory(projectName); err != nil {
 		return err
 	}
 
-	err = saveFiles(cmd, fileList, projectName, frameworkType)
+	err = saveFiles(template.Files, projectName, template.Name)
 	if err != nil {
 		return err
 	}
 
 	// output instructions for the framework
-	cmd.Printf("\nYour %s project has been saved to %s\n", frameworkType, absolutePath)
+	cmd.Printf("\nYour %s template project has been saved to %s\n", template.Name, absolutePath)
 
 	// get framework instructions
-	instructions := frameWorkInstructions[frameworkType]
+	instructions := template.Instructions
 
 	cmd.Printf("\nPlease see the file %s/readme.txt for instructions\n\n", projectName)
 	return writeContentToFile(projectName, "readme.txt", instructions+commonInstructions)
 }
 
-func saveFiles(cmd *cobra.Command, fileList []string, baseDir string, frameworkType string) error {
-	cmd.Println("Downloading template for", frameworkType)
+func loadTemplateFiles() (*Templates, error) {
+	var templates Templates
 
+	response, err := GetURLContents(frameworkTypesURL)
+	if err != nil {
+		return nil, err
+	}
+
+	err = yaml.Unmarshal(response, &templates)
+	if err != nil {
+		return nil, fmt.Errorf("unable to unmarshal %v, %v", frameworkTypesURL, err)
+	}
+
+	return &templates, nil
+}
+
+func getTemplate(templates *Templates, framework string) *FrameworkTemplate {
+	for _, template := range templates.Templates {
+		if template.Name == framework {
+			return &template
+		}
+	}
+	return nil
+}
+
+func saveFiles(fileList []string, baseDir string, frameworkType string) error {
 	for _, file := range fileList {
 		url := fmt.Sprintf("%s/%s/%s", frameworkURL, frameworkType, file)
 
