@@ -1,0 +1,109 @@
+///////////////////////////////////////////////////////////////////////////////
+
+    Copyright (c) 2025 Oracle and/or its affiliates.
+    Licensed under the Universal Permissive License v 1.0 as shown at
+    https://oss.oracle.com/licenses/upl.
+
+///////////////////////////////////////////////////////////////////////////////
+
+= Starter Projects
+
+== Starter Projects
+
+=== Overview
+This **experimental** feature allows you to create example Maven projects to show basic integration of Coherence with various frameworks.
+Currently, we support the following integrations:
+
+1. Helidon Microprofile - 4.1.6
+
+2. Spring Boot - spring-boot-starter 3.4.1, coherence-spring 4.3.0
+
+3. Micronaut - micronaut-parent: 4.7.3, micronaut-coherence: 5.0.4"
+
+The example projects generated expose a simple REST API where the data is stored in Coherence caches using each of the different frameworks.
+
+These examples are demo projects only and are meant to provide basic and first steps integrating Coherence with
+various frameworks. See the https://coherence.community/examples.html[Coherence Community] website for fully fledged examples using Coherence.
+
+You must have Maven 3.8.+ and JDK 21+ on your system in able to build and run the starter projects.
+
+> NOTE: This is an **experimental** feature that may be changed or removed in a future version.
+
+
+* <<create-starter, `cohctl create starter`>> - create a starter project with Coherence and various frameworks
+
+[#create-starter]
+==== Create Starter
+
+include::../../build/_output/docs-gen/create_starter.adoc[tag=text]
+
+*Examples*
+
+Create a starter project using https://helidon.io/[Helidon] Microprofile framework.
+
+[source,bash]
+----
+cohctl create starter helidon-starter -f helidon
+----
+
+Output:
+[source,bash]
+----
+checking for availability of template helidon...
+
+Create Starter Project
+Project Name:       helidon-starter
+Framework Type:     helidon
+Framework Versions: 4.1.6
+Project Path        /tmp/starters/helidon-starter
+
+Are you sure you want to create the starter project above? (y/n) y
+
+Your helidon template project has been saved to /tmp/starters/helidon-starter
+
+Please see the file helidon-starter/readme.txt for instructions
+----
+
+Inspect the readme.txt
+
+[source,bash]
+----
+cat helidon-starter/readme.txt
+----
+Output:
+[source,bash]
+----
+To run the Helidon starter you must have JDK21+ and maven 3.8.5+.
+Change to the newly created directory and run the following to build:
+
+    mvn clean install
+
+To run single server:
+    java -jar target/helidon.jar
+
+To run additional server:
+    java -Dmain.class=com.tangosol.net.Coherence -Dcoherence.management.http=none -Dserver.port=-1 -jar target/helidon.jar
+
+Add a customer:
+    curl -X POST -H "Content-Type: application/json" -d '{"id": 1, "name": "Tim", "balance": 1000}' http://localhost:8080/api/customers
+
+Get a customer:
+    curl -s http://localhost:8080/api/customers/1
+
+Get all customers:
+    curl -s http://localhost:8080/api/customers
+
+Delete a customer:
+    curl -X DELETE http://localhost:8080/api/customers/1
+----
+
+Follow the instructions above to build and run the example.
+
+=== See Also
+
+* https://helidon.io/[Helidon Framework]
+* https://github.com/coherence-community/coherence-spring[Coherence Spring Integration]
+* https://github.com/micronaut-projects/micronaut-coherence/[Coherence Micronaut Integration]
+
+
+

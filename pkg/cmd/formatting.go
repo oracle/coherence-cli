@@ -369,7 +369,8 @@ func FormatFederationSummary(federationSummaries []config.FederationSummary, tar
 			bytes = value.TotalBytesReceived.Sum
 			messages = value.TotalMsgReceived.Sum
 			records = value.TotalRecordsReceived.Sum
-			members = int32(len(value.Member))
+			// if each of the members value is "N/A" then none are receiving
+			members = utils.GetMemberCountReceiving(value.Member)
 			bandwidth = na
 		}
 

@@ -276,6 +276,9 @@ create_doc $DOCS_DIR/force_recovery "${COHCTL} force recovery --help"
 # Config
 create_doc $DOCS_DIR/get_config "${COHCTL} get config --help"
 
+# Starter
+create_doc $DOCS_DIR/create_starter "${COHCTL} create starter --help"
+
 # General Help
 ( echo "// # tag::text[]" && \
  ${COHCTL} --help && \

@@ -92,6 +92,16 @@ func GetUniqueValues(input []string) []string {
 	return result
 }
 
+func GetMemberCountReceiving(members []string) int32 {
+	var count int32
+	for _, v := range members {
+		if v != "N/A" {
+			count++
+		}
+	}
+	return count
+}
+
 // GetSliceIndex returns the index of the matching slice value.
 func GetSliceIndex(theSlice []string, value string) int {
 	if len(theSlice) != 0 {

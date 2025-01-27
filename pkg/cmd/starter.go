@@ -17,8 +17,8 @@ import (
 
 const (
 	framework         = "framework"
-	frameworkURL      = "https://raw.githubusercontent.com/oracle/coherence-cli/refs/heads/create-starter/templates"
-	frameworkTypesURL = "https://raw.githubusercontent.com/oracle/coherence-cli/refs/heads/create-starter/templates/template.yaml"
+	frameworkURL      = "https://raw.githubusercontent.com/oracle/coherence-cli/refs/heads/main/templates"
+	frameworkTypesURL = "https://raw.githubusercontent.com/oracle/coherence-cli/refs/heads/main/templates/templates.yaml"
 )
 
 // FrameworkTemplate contains the contents read from the coherence-cli repository.
@@ -58,7 +58,10 @@ var createStarterCmd = &cobra.Command{
 	Short: "creates a starter project for Coherence",
 	Long: `The 'create starter' command creates a starter Maven project to use Coherence 
 with various frameworks including Helidon, Spring Boot and Micronaut. A directory
-will be created off the current directory with the same name as the project name.`,
+will be created off the current directory with the same name as the project name.
+NOTE: This is an experimental feature only and the projects created are not fully
+completed applications. They are a demo/example of how to do basic integration with
+each of the frameworks.`,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
 			displayErrorAndExit(cmd, "you must provide a project name")

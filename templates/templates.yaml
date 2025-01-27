@@ -12,11 +12,15 @@ templates:
 
           mvn clean install
 
-      To run single server:
+      To run a single process with Helidon and Coherence:
           java -jar target/helidon.jar
 
-      To run additional server:
+      To run an additional storage-enabled Coherence server:
           java -Dmain.class=com.tangosol.net.Coherence -Dcoherence.management.http=none -Dserver.port=-1 -jar target/helidon.jar
+      
+      Note: If you run the storage-enabled server, you can add the argument "-Dcoherence.distributed.localstorage=false" to the single process
+      command, before the -jar option to start the Helidon application as a storage-disabled client, which is the prefered method 
+      as it allows for scaling of the Coherence tier separatley.
     files:
       - pom.xml
       - src/main/resources/logging.properties
@@ -34,11 +38,15 @@ templates:
 
           mvn clean install
 
-      To run single server:
+      To run a single process with Spring Boot and Coherence:
           java -jar target/springboot-1.0-SNAPSHOT.jar
 
-      To run additional server:
+      To run an additional storage-enabled Coherence server:
           java -Dserver.port=-1 -Dloader.main=com.tangosol.net.Coherence -Dcoherence.management.http=none -jar target/springboot-1.0-SNAPSHOT.jar
+      
+      Note: If you run the storage-enabled server, you can add the argument "-Dcoherence.distributed.localstorage=false" to the single process
+      command, before the -jar option to start the Spring Boot application as a storage-disabled client, which is the prefered method 
+      as it allows for scaling of the Coherence tier separatley.
     files:
       - pom.xml
       - src/main/resources/application.properties
@@ -54,11 +62,15 @@ templates:
 
           mvn clean install
 
-      To run single server:
+      To run a single server with Micronaut and Coherence:
           java -jar target/micronaut-1.0-SNAPSHOT-shaded.jar
 
-      To run additional server:
+      To run an additional storage-enabled Coherence server:
           java -Dmicronaut.main.class=com.tangosol.net.Coherence -Dcoherence.management.http=none -Dmicronaut.server.port=-1 -jar target/micronaut-1.0-SNAPSHOT-shaded.jar
+      
+      Note: If you run the storage-enabled server, you can add the argument "-Dcoherence.distributed.localstorage=false" to the single process
+      command, before the -jar option to start the Micronaut application as a storage-disabled client, which is the prefered method 
+      as it allows for scaling of the Coherence tier separatley.
     files:
       - pom.xml
       - src/main/resources/logback.xml

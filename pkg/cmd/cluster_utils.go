@@ -339,7 +339,7 @@ func getCommonArguments(connection ClusterConnection) []string {
 		getLogLevelProperty(logLevelParam), "-Dcom.oracle.coherence.common.util.Threads.dumpLocks=FULL")
 }
 
-func startClient(cmd *cobra.Command, connection ClusterConnection, class string) error {
+func startClient(cmd *cobra.Command, connection ClusterConnection, class string, extraArgs ...string) error {
 	var (
 		err            error
 		result         string
@@ -360,6 +360,9 @@ func startClient(cmd *cobra.Command, connection ClusterConnection, class string)
 	}
 
 	arguments = append(arguments, getClientArgs(class, class)...)
+	if len(extraArgs) != 0 {
+		arguments = append(arguments, extraArgs...)
+	}
 
 	cmd.Printf("Starting client %s...\n", class)
 	if Config.Debug {
