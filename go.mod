@@ -1,4 +1,4 @@
-// Copyright (c) 2021, 2024 Oracle and/or its affiliates.
+// Copyright (c) 2021, 2025 Oracle and/or its affiliates.
 // Licensed under the Universal Permissive License v 1.0 as shown at
 // https://oss.oracle.com/licenses/upl.
 //
@@ -17,6 +17,7 @@ require (
 	go.uber.org/zap v1.27.0
 	golang.org/x/term v0.27.0
 	golang.org/x/text v0.21.0
+	gopkg.in/yaml.v3 v3.0.1
 )
 
 require (
@@ -45,5 +46,4 @@ require (
 	golang.org/x/net v0.33.0 // indirect
 	golang.org/x/sys v0.28.0 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
-	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

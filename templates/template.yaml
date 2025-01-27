@@ -1,0 +1,68 @@
+#
+# Copyright (c) 2025 Oracle and/or its affiliates.
+# Licensed under the Universal Permissive License v 1.0 as shown at
+# https://oss.oracle.com/licenses/upl.
+#
+templates:
+  - name: helidon
+    frameworkVersion: "4.1.6"
+    instructions: |
+      To run the Helidon starter you must have JDK21+ and maven 3.8.5+.
+      Change to the newly created directory and run the following to build:
+
+          mvn clean install
+
+      To run single server:
+          java -jar target/helidon.jar
+
+      To run additional server:
+          java -Dmain.class=com.tangosol.net.Coherence -Dcoherence.management.http=none -Dserver.port=-1 -jar target/helidon.jar
+    files:
+      - pom.xml
+      - src/main/resources/logging.properties
+      - src/main/resources/META-INF/beans.xml
+      - src/main/resources/META-INF/helidon/serial-config.properties
+      - src/main/resources/META-INF/microprofile-config.properties
+      - src/main/java/com/oracle/coherence/demo/frameworks/helidon/Customer.java
+      - src/main/java/com/oracle/coherence/demo/frameworks/helidon/CustomerResource.java
+
+  - name: springboot
+    frameworkVersion: "spring-boot-starter 3.4.1, coherence-spring 4.3.0"
+    instructions: |
+      To run Spring Boot starter you must have JDK21+ and maven 3.8.5+.
+      Change to the newly created directory and run the following to build:
+
+          mvn clean install
+
+      To run single server:
+          java -jar target/springboot-1.0-SNAPSHOT.jar
+
+      To run additional server:
+          java -Dserver.port=-1 -Dloader.main=com.tangosol.net.Coherence -Dcoherence.management.http=none -jar target/springboot-1.0-SNAPSHOT.jar
+    files:
+      - pom.xml
+      - src/main/resources/application.properties
+      - src/main/java/com/oracle/coherence/demo/frameworks/springboot/Customer.java
+      - src/main/java/com/oracle/coherence/demo/frameworks/springboot/controller/DemoController.java
+      - src/main/java/com/oracle/coherence/demo/frameworks/springboot/DemoApplication.java
+
+  - name: micronaut
+    frameworkVersion: "micronaut-parent: 4.7.3, micronaut-coherence: 5.0.4"
+    instructions: |
+      To run Micronaut starter you must have JDK21+ and maven 3.8.5+.
+      Change to the newly created directory and run the following to build:
+
+          mvn clean install
+
+      To run single server:
+          java -jar target/micronaut-1.0-SNAPSHOT-shaded.jar
+
+      To run additional server:
+          java -Dmicronaut.main.class=com.tangosol.net.Coherence -Dcoherence.management.http=none -Dmicronaut.server.port=-1 -jar target/micronaut-1.0-SNAPSHOT-shaded.jar
+    files:
+      - pom.xml
+      - src/main/resources/logback.xml
+      - src/main/resources/application.yml
+      - src/main/java/com/oracle/coherence/demo/frameworks/micronaut/Application.java
+      - src/main/java/com/oracle/coherence/demo/frameworks/micronaut/Customer.java
+      - src/main/java/com/oracle/coherence/demo/frameworks/micronaut/rest/ApplicationController.java

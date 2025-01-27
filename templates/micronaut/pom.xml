@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (c) 2025 Oracle and/or its affiliates.
+    Licensed under the Universal Permissive License v 1.0 as shown at
+    https://oss.oracle.com/licenses/upl.
+
+-->
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>io.micronaut.platform</groupId>
+    <artifactId>micronaut-parent</artifactId>
+    <version>4.7.3</version> 
+    <relativePath/>
+  </parent>
+
+  <groupId>com.oracle.coherence.demo.frameworks</groupId>
+  <artifactId>micronaut</artifactId>
+  <version>1.0-SNAPSHOT</version>
+  <name>Demo project for Helidon and Coherence</name>
+
+  <properties>
+    <coherence.group.id>com.oracle.coherence.ce</coherence.group.id>
+    <coherence.version>24.09</coherence.version>
+    <jackson.version>2.18.2</jackson.version>
+    <java.version>21</java.version>
+
+    <!-- Micronaut properties -->
+    <micronaut.runtime>netty</micronaut.runtime>
+    <micronaut.version>${project.parent.version}</micronaut.version>
+    <micronaut.gql.version>4.3.0</micronaut.gql.version>
+
+    <!-- Coherence+Micronaut integration properties -->
+    <micronaut.coherence.version>5.0.4</micronaut.coherence.version>
+
+    <!-- Additional dependencies -->
+    <hamcrest.version>3.0</hamcrest.version>
+    <logback.version>1.5.12</logback.version>
+    <netty.version>4.1.115.Final</netty.version>
+    <jansi.version>2.4.1</jansi.version>
+
+    <!-- Maven plugin properties -->
+    <plugin.compiler.version>3.13.0</plugin.compiler.version>
+    <plugin.micronaut.version>4.7.1</plugin.micronaut.version>
+
+    <exec.mainClass>com.oracle.coherence.demo.frameworks.micronaut.Application</exec.mainClass>
+  </properties>
+
+  <dependencies>
+    <!-- Coherence+Micronaut integration dependencies -->
+    <!-- These are overridden dependencies from the Micronaut BOM;
+         This is to ensure we get the expected version -->
+    <dependency>
+      <groupId>${coherence.group.id}</groupId>
+      <artifactId>coherence</artifactId>
+      <version>${coherence.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>${coherence.group.id}</groupId>
+      <artifactId>coherence-json</artifactId>
+      <version>${coherence.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>io.micronaut.coherence</groupId>
+      <artifactId>micronaut-coherence</artifactId>
+      <version>${micronaut.coherence.version}</version>
+    </dependency>
+
+    <!-- Micronaut dependencies -->
+    <dependency>
+      <groupId>io.micronaut</groupId>
+      <artifactId>micronaut-jackson-databind</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.micronaut</groupId>
+      <artifactId>micronaut-http-server-netty</artifactId>
+      <exclusions>
+        <exclusion>
+          <artifactId>netty-common</artifactId>
+          <groupId>io.netty</groupId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+
+    <dependency>
+      <groupId>io.micronaut</groupId>
+      <artifactId>micronaut-runtime</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.yaml</groupId>
+      <artifactId>snakeyaml</artifactId>
+      <scope>runtime</scope>
+    </dependency>
+
+
+    <!-- netty-common override -->
+    <dependency>
+      <artifactId>netty-common</artifactId>
+      <groupId>io.netty</groupId>
+      <version>${netty.version}</version>
+    </dependency>
+
+    <!-- Misc dependencies -->
+    <dependency>
+      <groupId>ch.qos.logback</groupId>
+      <artifactId>logback-classic</artifactId>
+      <version>${logback.version}</version>
+      <scope>runtime</scope>
+    </dependency>
+    <dependency>
+      <groupId>ch.qos.logback</groupId>
+      <artifactId>logback-core</artifactId>
+      <version>${logback.version}</version>
+      <scope>runtime</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.fusesource.jansi</groupId>
+      <artifactId>jansi</artifactId>
+      <version>${jansi.version}</version>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <!-- Required for Micronaut -->
+      <plugin>
+        <groupId>io.micronaut.maven</groupId>
+        <artifactId>micronaut-maven-plugin</artifactId>
+        <version>${plugin.micronaut.version}</version>
+      </plugin>
+
+      <!-- Also required for Micronaut; the micronaut inject dependency
+           is included with micronaut-coherence-data -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>${plugin.compiler.version}</version>
+      </plugin>
+
+      <!-- exclude Coherence artifacts from shading -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-shade-plugin</artifactId>
+        <configuration>
+            <shadedArtifactAttached>true</shadedArtifactAttached>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>${coherence.group.id}</groupId>
+        <artifactId>pof-maven-plugin</artifactId>
+        <version>${coherence.version}</version>
+        <executions>
+          <execution>
+            <id>instrument</id>
+            <goals>
+              <goal>instrument</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>instrument-tests</id>
+            <goals>
+              <goal>instrument-tests</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+</project>

@@ -1,0 +1,28 @@
+#
+# Copyright (c) 2025, Oracle and/or its affiliates.
+# Licensed under the Universal Permissive License v 1.0 as shown at
+# https://oss.oracle.com/licenses/upl.
+#
+
+micronaut:
+  application:
+    name: micronaut-server
+  server:
+    port: 8080
+  router:
+    static-resources:
+      default:
+        enabled: true
+        mapping: "/**"
+        paths: "classpath:web"
+
+coherence:
+  cluster: demo-cluster
+  ttl: 0
+  wka: 127.0.0.1
+  serializer: pof
+  distributed:
+    localstorage: true
+  management:
+    http: all
+    all: true
