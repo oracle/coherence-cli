@@ -63,20 +63,24 @@ jobs:
       with:
         go-version: '1.22'
 
-    - name: Set up JDK 17 for Verify CLI
+    - name: Set up JDK 11 for Verify CLI
       uses: actions/setup-java@v4
       with:
-        java-version: '17'
+        java-version: '11'
         distribution: 'zulu'
 
-    - name: Verify Coherence CLI
+    - name: Verify Coherence CLI - Build
       env:
         COH_VERSION: ${{ matrix.coherenceVersion }}
       shell: bash
       run: |
-        echo "Running verify against $COH_VERSION"
+        COHERENCE_VERSION=$COH_VERSION make test-clean test-discovery
 
-        COHERENCE_BASE_IMAGE=gcr.io/distroless/java11 COHERENCE_VERSION=$COH_VERSION make clean build-test-images test-e2e-standalone
+    - name: Verify Coherence CLI - Test
+      env:
+        COH_VERSION: ${{ matrix.coherenceVersion }}
+      shell: bash
+      run: |
         COHERENCE_VERSION=$COH_VERSION make test-clean test-discovery
 
     - uses: actions/upload-artifact@v4
