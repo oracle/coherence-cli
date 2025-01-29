@@ -1,0 +1,70 @@
+///////////////////////////////////////////////////////////////////////////////
+
+    Copyright (c) 2021, 2025 Oracle and/or its affiliates.
+    Licensed under the Universal Permissive License v 1.0 as shown at
+    https://oss.oracle.com/licenses/upl.
+
+///////////////////////////////////////////////////////////////////////////////
+
+= Coherence CLI Installation
+
+== Coherence CLI Installation
+
+The Coherence CLI is installable on a variety of platforms and architectures including macOS, Linux and Windows.
+Refer to your operating system below:
+
+*The latest version of the CLI is {cli-version}*.
+
+* <<install-macos-linux, Install on macOS or Linux>>
+* <<install-windows, Install on Windows>>
+* <<uninstall, Removing the CLI>>
+
+See https://github.com/oracle/coherence-cli/releases[here] for all supported platforms.
+
+NOTE: If there is a platform you would like included, please submit an issue https://github.com/oracle/coherence-cli/issues/new/choose[here].
+
+[#install-macos-linux]
+=== macOS or Linux
+
+For macOS or Linux platforms, use the following to install the latest version of the CLI:
+
+[source,bash,subs="attributes"]
+----
+curl -sL https://raw.githubusercontent.com/oracle/coherence-cli/main/scripts/install.sh | bash
+----
+
+NOTE: When you install the CLI, administrative privileges are required as the `cohctl` executable is moved to the `/usr/local/bin` directory. You can move it out of this directory if you wish after installation.
+
+[#install-windows]
+=== Windows
+
+Install the latest version using the `curl` command below and copy to a directory in your `PATH`:
+Alternatively you can download the relevant exe from https://github.com/oracle/coherence-cli/releases[here].
+
+[source,bash,subs="attributes"]
+----
+curl -Lo cohctl.exe "https://github.com/oracle/coherence-cli/releases/download/{cli-version}/cohctl-{cli-version}-windows-amd64.exe"
+----
+
+NOTE: Change the `amd64` to `arm` for ARM based processor.
+
+[#uninstall]
+=== Removing the CLI
+
+To uninstall `cohctl`, for Mac, issue the following:
+[source,command]
+----
+sudo rm /usr/local/bin/cohctl
+----
+
+For all other platforms, remove the `cohctl` executable from where you copied it to.
+
+If you also wish to uninstall the hidden configuration directory, `.cohctl`, where `cohctl` stores its configuration,
+you will find this off the users home directory. See xref:../config/changing_config_locations.adoc[here] for more information.
+
+For example on macOS or Linux the directory is `$HOME/.cohctl`, for Windows it will be under `%HOME%\.cohctl`.
+
+
+=== Next Steps
+
+* xref:../about/quickstart.adoc[Run the Quick Start]

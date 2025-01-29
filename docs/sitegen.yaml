@@ -1,24 +1,26 @@
 #
-# Copyright (c) 2021, 2022 Oracle and/or its affiliates.
+# Copyright (c) 2021, 2025 Oracle and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at
 # https://oss.oracle.com/licenses/upl.
 #
 
 engine:
   asciidoctor:
-    images-dir: "./docs/images"
     libraries:
       - "asciidoctor-diagram"
     attributes:
       plantumlconfig: "_plantuml-config.txt"
       commercial-docs-base-url: "https://docs.oracle.com/en/middleware/standalone/coherence/14.1.1.2206"
-      cli-version: "${cli.version}"
-      coherence-version: "${coherence.version}"
-      coherence-default-version: "${coherence.version}"
+      cli-version: "1.8.1"
+      coherence-version: "22.06.11"
+      coherence-default-version: "22.06.11"
 assets:
   - target: "/"
     includes:
       - "docs/css/*.css"
+  - target: "/"
+    includes:
+      - "docs/images/**/*"
 header:
   favicon:
     path: "images/logo.png"
@@ -31,87 +33,119 @@ pages:
     - excludes:
 backend:
     name: "vuetify"
-    homePage: "docs/about/01_overview.adoc"
+    homePage: "docs/about/overview.adoc"
     releases:
-        - "${cli.version}"
+        - "1.8.1"
     navigation:
+      type: "ROOT"
       title: "Coherence CLI"
       glyph:
         type: "image"
-        value: "images/logo.png"
+        value: "/images/logo.png"
       items:
-        - title: "Core documentation"
+        - type: "PAGE"
+          title: "Core documentation"
+          source: "docs/about/overview.adoc"
           items:
-            - title: "About"
-              pathprefix: "/about"
-              glyph:
-                type: "icon"
-                value: "assistant"
-              items:
-                - includes:
-                    - "docs/about/*.adoc"
-            - title: "Installation"
-              pathprefix: "/installation"
-              glyph:
-                type: "icon"
-                value: "fa-save"
-              items:
-                - includes:
-                    - "docs/installation/*.adoc"
-            - title: "Configuration"
-              pathprefix: "/config"
-              glyph:
-                type: "icon"
-                value: "fa-cogs"
-              items:
-                - includes:
-                    - "docs/config/*.adoc"
-            - title: "Command Reference"
-              pathprefix: "/reference"
-              glyph:
-                type: "icon"
-                value: "find_in_page"
-              items:
-                - includes:
-                    - "docs/reference/*.adoc"
-            - title: "Security"
-              pathprefix: "/security"
-              glyph:
-                type: "icon"
-                value: "lock"
-              items:
-                - includes:
-                    - "docs/security/*.adoc"
-            - title: "Troubleshooting"
-              pathprefix: "/troubleshooting"
-              glyph:
-                type: "icon"
-                value: "fa-question-circle"
-              items:
-                - includes:
-                    - "docs/troubleshooting/*.adoc"
-            - title: "Examples"
-              pathprefix: "/examples"
-              glyph:
-                type: "icon"
-                value: "explore"
-              items:
-                - includes:
-                    - "docs/examples/*.adoc"
-        - title: "Additional resources"
-          items:
-            - title: "Slack"
-              glyph:
-                type: "icon"
-                value: "fa-slack"
-              href: "https://join.slack.com/t/oraclecoherence/shared_invite/enQtNzcxNTQwMTAzNjE4LTJkZWI5ZDkzNGEzOTllZDgwZDU3NGM2YjY5YWYwMzM3ODdkNTU2NmNmNDFhOWIxMDZlNjg2MzE3NmMxZWMxMWE"
-            - title: "Coherence Community"
-              glyph:
-                type: "icon"
-                value: "people"
-              href: "https://coherence.community"
-            - title: "GitHub"
-              glyph:
-                type: "icon"
-                value: "fa-github-square"
-              href: "https://github.com/oracle/coherence-cli"
+        - type: "MENU"
+          title: "About"
+          glyph:
+            type: "icon"
+            value: "assistant"
+          sources:
+            - "docs/about/overview.adoc"
+            - "docs/about/introduction.adoc"
+            - "docs/about/quickstart.adoc"
+        - type: "PAGE"
+          title: "Installation"
+          source: "docs/installation/installation.adoc"
+          glyph:
+            type: "icon"
+            value: "fa-save"
+        - type: "MENU"
+          title: "Configuration"
+          glyph:
+            type: "icon"
+            value: "fa-cogs"
+          sources:
+            - "docs/config/overview.adoc"
+            - "docs/config/global_flags.adoc"
+            - "docs/config/bytes_display_format.adoc"
+            - "docs/config/command_completion.adoc"
+            - "docs/config/sorting_table_output.adoc"
+            - "docs/config/get_config.adoc"
+            - "docs/config/changing_config_locations.adoc"
+            - "docs/config/using_proxy_servers.adoc"
+        - type: "MENU"
+          title: "Command Reference"
+          glyph:
+            type: "icon"
+            value: "find_in_page"
+          sources:
+            - "docs/reference/overview.adoc"
+            - "docs/reference/clusters.adoc"
+            - "docs/reference/contexts.adoc"
+            - "docs/reference/members.adoc"
+            - "docs/reference/machines.adoc"
+            - "docs/reference/services.adoc"
+            - "docs/reference/caches.adoc"
+            - "docs/reference/view_caches.adoc"
+            - "docs/reference/topics.adoc"
+            - "docs/reference/persistence.adoc"
+            - "docs/reference/federation.adoc"
+            - "docs/reference/nslookup.adoc"
+            - "docs/reference/proxies.adoc"
+            - "docs/reference/http_servers.adoc"
+            - "docs/reference/elastic_data.adoc"
+            - "docs/reference/http_sessions.adoc"
+            - "docs/reference/executors.adoc"
+            - "docs/reference/reporters.adoc"
+            - "docs/reference/diagnostics.adoc"
+            - "docs/reference/create_starter.adoc"
+            - "docs/reference/health.adoc"
+            - "docs/reference/reset.adoc"
+            - "docs/reference/misc.adoc"
+            - "docs/reference/create_clusters.adoc"
+            - "docs/reference/monitor_clusters.adoc"
+        - type: "PAGE"
+          title: "Security"
+          source: "docs/security/overview.adoc"
+          glyph:
+            type: "icon"
+            value: "lock"
+        - type: "PAGE"
+          title: "Troubleshooting"
+          glyph:
+            type: "icon"
+            value: "fa-question-circle"
+          source: "docs/troubleshooting/trouble-shooting.adoc"
+        - type: "MENU"
+          title: "Examples"
+          glyph:
+            type: "icon"
+            value: "explore"
+          sources:
+            - "docs/examples/overview.adoc"
+            - "docs/examples/rolling_restarts.adoc"
+            - "docs/examples/jsonpath.adoc"
+            - "docs/examples/set_cache_attrs.adoc"
+        - type: "HEADER"
+          title: "Additional resources"
+        - type: "LINK"
+          title: "Slack"
+          glyph:
+            type: "icon"
+            value: "fa-slack"
+          href: "https://join.slack.com/t/oraclecoherence/shared_invite/enQtNzcxNTQwMTAzNjE4LTJkZWI5ZDkzNGEzOTllZDgwZDU3NGM2YjY5YWYwMzM3ODdkNTU2NmNmNDFhOWIxMDZlNjg2MzE3NmMxZWMxMWE"
+        - type: "LINK"
+          title: "Coherence Community"
+          glyph:
+            type: "icon"
+            value: "people"
+          href: "https://coherence.community"
+        - type: "LINK"
+          title: "GitHub"
+          glyph:
+            type: "icon"
+            value: "fa-github-square"
+          href: "https://github.com/oracle/coherence-cli"

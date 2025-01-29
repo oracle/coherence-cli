@@ -1,0 +1,330 @@
+///////////////////////////////////////////////////////////////////////////////
+
+    Copyright (c) 2021, 2025 Oracle and/or its affiliates.
+    Licensed under the Universal Permissive License v 1.0 as shown at
+    https://oss.oracle.com/licenses/upl.
+
+///////////////////////////////////////////////////////////////////////////////
+
+= Federation
+
+== Federation
+
+=== Overview
+There are various commands that allow you to work with and issue Federation commands.
+
+* <<get-federation, `cohctl get federation`>> - displays federation details for a cluster
+* <<set-federation, `cohctl set federation`>> - sets an attribute for a federated service
+* <<describe-federation, `cohctl describe federation`>> - displays federation details for a given service and participant
+* <<get-federation-incoming, `cohctl get federation-incoming`>> - displays incoming federation connections information for a given service and participant
+* <<start-federation, `cohctl start federation`>> - starts federation for a service
+* <<stop-federation, `cohctl stop federation`>> - stops federation for a service
+* <<pause-federation, `cohctl pause federation`>> - pauses federation for a service
+* <<replicate-all, `cohctl replicate all`>> - initiates a replicate of all cache entries for a federated service
+
+NOTE: This is a Coherence Grid Edition feature only and is not available with Community Edition.
+
+See the {commercial-docs-base-url}/administer/federating-caches-clusters.html[Coherence Documentation] for
+more information on Federation.
+
+[#get-federation]
+==== Get Federation
+
+include::../../build/_output/docs-gen/get_federation.adoc[tag=text]
+
+*Examples*
+
+Display all destinations.
+
+NOTE: Destinations are clusters that this cluster is sending data to.
+
+[source,bash]
+----
+cohctl get federation destinations -c local -m
+----
+Output:
+[source,bash]
+----
+SERVICE         DESTINATION        MEMBERS  STATES    DATA SENT  MSG SENT  REC SENT  CURR AVG BWIDTH
+FederatedCache  secondary-cluster        2  [PAUSED]       0 MB         0         0          0.0Mbps
+----
+
+Display all destinations in wide format.
+
+[source,bash]
+----
+cohctl get federation destinations -c local -o wide -m
+----
+Output:
+[source,bash]
+----
+SERVICE         DESTINATION        MEMBERS  STATES  DATA SENT  MSG SENT  REC SENT  CURR AVG BWIDTH  AVG APPLY  AVG ROUND TRIP  AVG BACKLOG DELAY  REPLICATE  PARTITIONS  ERRORS  UNACKED
+FederatedCache  secondary-cluster        2  [IDLE]     204 MB     1,028     3,348          0.0Mbps      338ms         1,393ms           37,770ms    100.00%          31       0        0
+----
+
+Using the wide option, the following fields are available in regard to the current (or latest) replicate all operation:
+
+1. REPLICATE - the percent complete for the request
+2. PARTITIONS - the total number of partitions completed for the request
+3. ERRORS - the number of partitions with error responses for the request
+4. UNACKED - the total number of partitions that have been sent but have not yet been acknowledged for the request
+
+NOTE: The last three attributes are only available in the latest Commercial patches. Check your release notes.
+
+Display all origins.
+
+NOTE: Origins are clusters that this cluster is receiving data from.
+
+[source,bash]
+----
+cohctl get federation destinations -c local
+----
+Output:
+[source,bash]
+----
+cohctl get federation origins -c local -m
+
+SERVICE         ORIGIN             REMOTE CONNECTIONS  DATA REC  MSG REC  REC REC
+FederatedCache  secondary-cluster                   2     20 MB      755    2,577
+----
+
+Display all origins in wide format.
+
+[source,bash]
+----
+cohctl get federation origins -c local -o wide -m
+----
+Output:
+[source,bash]
+----
+SERVICE         ORIGIN             REMOTE CONNECTIONS  DATA REC  MSG REC  REC REC  AVG APPLY  AVG BACKLOG DELAY
+FederatedCache  secondary-cluster                   2     20 MB      755    2,577    1,456ms              248ms
+----
+
+[#set-federation]
+==== Set Federation
+
+include::../../build/_output/docs-gen/set_federation.adoc[tag=text]
+
+Set `traceLogging` to true for a federated service.
+
+[source,bash]
+----
+cohctl set federation FederatedPartitionedPofCache -a traceLogging -v true -c local
+----
+Output:
+[source,bash]
+----
+Are you sure you want to set the value of attribute traceLogging to true for service FederatedPartitionedPofCache? (y/n) y
+operation completed
+----
+
+[#describe-federation]
+==== Describe Federation
+
+include::../../build/_output/docs-gen/describe_federation.adoc[tag=text]
+
+*Examples*
+
+Describe federation destination details on a cluster for the participant secondary-cluster.
+
+NOTE: This indicates to display data being sent `to` the destination `secondary-cluster`.
+
+[source,bash]
+----
+cohctl describe federation -c local FederatedPartitionedPofCache -p secondary-cluster -T destinations
+----
+Output:
+[source,bash]
+----
+FEDERATION DETAILS
+------------------
+Service:     FederatedCache
+Type:        destinations
+Participant: secondary-cluster
+
+NODE ID  STATE  DATA SENT  MSG SENT  REC SENT  CURR BWIDTH
+      1  IDLE      43,205        40        40      0.0Mbps
+      2  IDLE      43,391        42        42      0.0Mbps
+----
+
+Describe federation origin details on a cluster for the participant secondary-cluster.
+
+NOTE: This indicates to display data being sent `from` the destination `secondary-cluster`.
+
+[source,bash]
+----
+cohctl describe federation -c local FederatedPartitionedPofCache -p secondary-cluster -T origins -o wide
+----
+Output:
+[source,bash]
+----
+FEDERATION DETAILS
+------------------
+Service:     FederatedPartitionedPofCache
+Type:        origins
+Participant: secondary-cluster
+
+NODE ID  CONNECTED  DATA SENT  MSG SENT  REC SENT  AVG APPLY  AVG BACKLOG DELAY
+      1          1     83,029        67        67       15ms              440ms
+      2          1     87,871        68        68       15ms              350ms
+----
+
+[#get-federation-incoming]
+==== Get Federation Incoming Connections
+
+include::../../build/_output/docs-gen/get_federation_incoming.adoc[tag=text]
+
+*Examples*
+
+Get incoming federation connections for `FederatedCache` service and incoming participant `Sydney`:
+
+[source,bash]
+----
+cohctl get federation-incoming FederatedCache -p Sydney -c local
+----
+Output:
+[source,bash]
+----
+INCOMING FEDERATION CONNECTIONS
+------------------------------
+Service:     FederatedCache
+Type:        origins
+Participant: Sydney
+
+NODE ID  TIMESTAMP                ADDRESS          MACHINE ID  LOCATION                         ROLE
+      1  2024-10-07 12:51:03.624  127.0.0.1:62049  10131       machine:localhost,process:21341  CoherenceDemoServer
+      2  2024-10-07 13:25:02.737  127.0.0.1:63456  10131       machine:localhost,process:23893  CoherenceDemoServer
+      3  2024-10-07 13:25:06.468  127.0.0.1:63475  10131       machine:localhost,process:23894  CoherenceDemoServer
+----
+
+
+[#start-federation]
+==== Start Federation
+
+include::../../build/_output/docs-gen/start_federation.adoc[tag=text]
+
+*Examples*
+
+Start Federation for all participants.
+
+[source,bash]
+----
+cohctl start federation FederatedCache -c local
+----
+Output:
+[source,bash]
+----
+Are you sure you want to start federation for service FederatedCache for participants [secondary-cluster] ? (y/n) y
+operation completed
+----
+
+Start Federation for a specific participant.
+
+[source,bash]
+----
+cohctl start federation FederatedCache -p secondary-cluster -c local
+----
+Output:
+[source,bash]
+----
+Are you sure you want to start federation for service FederatedCache for participants [secondary-cluster] ? (y/n) y
+operation completed
+----
+
+Start Federation for a specific participant with no backlog.
+
+[source,bash]
+----
+cohctl start federation FederatedCache -p secondary-cluster -m no-backlog -c local
+----
+Output:
+[source,bash]
+----
+Are you sure you want to start (no-backlog) federation for service FederatedCache for participants [secondary-cluster] ? (y/n) y
+operation completed
+----
+
+[#stop-federation]
+==== Stop Federation
+
+include::../../build/_output/docs-gen/stop_federation.adoc[tag=text]
+
+*Examples*
+
+Stop Federation for all participants.
+
+[source,bash]
+----
+cohctl stop federation FederatedCache -c local
+----
+Output:
+[source,bash]
+----
+Are you sure you want to stop federation for service FederatedCache for participants [secondary-cluster] ? (y/n) y
+operation completed
+----
+
+Stop Federation for a specific participant.
+
+[source,bash]
+----
+cohctl stop federation FederatedCache -p secondary-cluster -c local
+----
+Output:
+[source,bash]
+----
+Are you sure you want to start federation for service FederatedCache for participants [secondary-cluster] ? (y/n) y
+operation completed
+----
+
+[#pause-federation]
+==== Pause Federation
+
+include::../../build/_output/docs-gen/pause_federation.adoc[tag=text]
+
+*Examples*
+
+Pause Federation for all participants.
+
+[source,bash]
+----
+cohctl pause FederatedCache -c local
+----
+Output:
+[source,bash]
+----
+Are you sure you want to pause federation for service FederatedCache for participants [secondary-cluster] ? (y/n) y
+operation completed
+----
+
+[#replicate-all]
+==== Replicate All
+
+include::../../build/_output/docs-gen/replicate_all.adoc[tag=text]
+
+*Examples*
+
+Replicate all for a specific participant
+
+[source,bash]
+----
+cohctl replicate all FederatedCache -p secondary-cluster -c local
+----
+Output:
+[source,bash]
+----
+Are you sure you want to replicateAll federation for service FederatedCache for participants [secondary-cluster] ? (y/n) y
+operation complete
+----
+
+NOTE: When this command returns, the replicate all request has been sent to the cluster but may not yet be complete.
+You should use the command `cohctl get federation destinations -o wide` to show the replication percent complete.
+
+=== See Also
+
+* {commercial-docs-base-url}/administer/federating-caches-clusters.html[Federating Caches in the Coherence Documentation]
+* xref:services.adoc[Services]
+
+
+

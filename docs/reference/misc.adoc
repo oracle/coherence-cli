@@ -1,0 +1,309 @@
+///////////////////////////////////////////////////////////////////////////////
+
+    Copyright (c) 2021, 2025 Oracle and/or its affiliates.
+    Licensed under the Universal Permissive License v 1.0 as shown at
+    https://oss.oracle.com/licenses/upl.
+
+///////////////////////////////////////////////////////////////////////////////
+
+= Miscellaneous
+
+== Miscellaneous
+
+=== Overview
+This section contains miscellaneous commands for various settings.
+
+* <<version, `cohctl version`>> - displays the CLI version
+* <<get-ingore-certs, `cohctl get ignore-certs`>> - displays the current setting for ignoring invalid SSL certificates
+* <<set-ignore-certs, `cohctl set ignore-certs`>> - sets the current setting for ignoring invalid SSL certificates to true or false
+* <<get-logs, `cohctl get logs`>> - displays the cohctl logs
+* <<get-debug, `cohctl set debug`>> - displays the debug level
+* <<set-debug, `cohctl get debug`>> - sets the debug level on or off
+* <<get-management, `cohctl get management`>> - displays management information for a cluster
+* <<set-management, `cohctl set management`>> - sets management information for a cluster
+* <<get-timeout, `cohctl get timeout`>> - displays the current request timeout (in seconds) for any HTTP requests
+* <<set-timeout, `cohctl set timeout`>> - sets the request timeout (in seconds) for any HTTP requests
+* <<set-color, `cohctl set color`>> - sets color formatting to be on or off
+* <<get-color, `cohctl get color`>> - displays the current color formatting setting
+
+[#version]
+==== Version
+
+include::../../build/_output/docs-gen/version.adoc[tag=text]
+
+*Examples*
+
+[source,bash]
+----
+cohctl version
+----
+Output:
+[source,bash]
+----
+Coherence Command Line Interface
+CLI Version: 1.0.0
+Date:        2021-10-18T02:03:03Z
+Commit:      954a008eb87fc9312894d5bbb90edeec8f92bd3a
+OS:          darwin
+OS Version:  amd64
+----
+
+NOTE: You can also use the `-u` option to check for updates. If you are behind a proxy server, you must also
+set the environment variable HTTP_PROXY=http://proxy-host:proxy-port/ so that the update site may be contacted.
+
+[#get-ingore-certs]
+==== Get Ignore Certs
+
+include::../../build/_output/docs-gen/get_ignore_certs.adoc[tag=text]
+
+NOTE: WARNING: You should only use this option when you are sure of the identity of the target server
+
+*Examples*
+
+[source,bash]
+----
+cohctl get ignore-certs
+----
+Output:
+[source,bash]
+----
+Current setting: false
+----
+
+[#set-ignore-certs]
+==== Set Ignore Certs
+
+include::../../build/_output/docs-gen/set_ignore_certs.adoc[tag=text]
+
+*Examples*
+
+[source,bash]
+----
+cohctl set ignore-certs true
+----
+Output:
+[source,bash]
+----
+Value is now set to true
+----
+
+NOTE: When you have this option set you will get the following warning every time you execute the CLI
+so it is clear you have disabled SSL validation: `WARNING: SSL Certificate validation has been explicitly disabled`
+
+[#get-logs]
+==== Get Logs
+
+include::../../build/_output/docs-gen/get_logs.adoc[tag=text]
+
+*Examples*
+
+[source,bash]
+----
+cohctl get logs
+----
+
+NOTE: The default log file location is `$HOME/.cohctl/cohctl.log`.
+
+See the xref:../config/changing_config_locations.adoc[config] section for more details on changing the log file location.
+
+[#get-debug]
+==== Get Debug
+
+include::../../build/_output/docs-gen/get_debug.adoc[tag=text]
+
+*Examples*
+
+[source,bash]
+----
+cohctl get debug
+----
+Output:
+[source,bash]
+----
+Current debug level: off
+----
+
+[#set-debug]
+==== Set Debug
+
+include::../../build/_output/docs-gen/set_debug.adoc[tag=text]
+
+*Examples*
+
+[source,bash]
+----
+cohctl set debug on
+----
+Output:
+[source,bash]
+----
+Debug is now set to on
+----
+
+[#get-management]
+==== Get Management
+
+include::../../build/_output/docs-gen/get_management.adoc[tag=text]
+
+*Examples*
+
+[source,bash]
+----
+cohctl get management -c local
+----
+Output:
+[source,bash]
+----
+Refresh Policy           :  refresh-behind
+Expiry Delay             :  1000
+Refresh Count            :  500
+Refresh Excess Count     :  143
+Refresh On Query         :  false
+Refresh Prediction Count :  24389
+Refresh Time             :  2021-11-22T03:48:17.739Z
+Refresh Timeout Count    :  0
+Remote Notification Count:  0
+Type                     :  Management
+----
+
+[#set-management]
+==== Set Management
+
+include::../../build/_output/docs-gen/set_management.adoc[tag=text]
+
+*Examples*
+
+Set the expiryDelay to 5000ms for a cluster.
+
+[source,bash]
+----
+cohctl set management -a expiryDelay -v 5000 -c local
+----
+Output:
+[source,bash]
+----
+Are you sure you want to set the value of attribute expiryDelay to 6000? (y/n) y
+operation completed
+----
+
+[source,bash]
+----
+cohctl get management -c local
+----
+Output:
+[source,bash]
+----
+Refresh Policy           :  refresh-behind
+Expiry Delay             :  6000
+Refresh Count            :  500
+Refresh Excess Count     :  143
+Refresh On Query         :  false
+Refresh Prediction Count :  24389
+Refresh Time             :  2021-11-22T03:50:21.370Z
+Refresh Timeout Count    :  0
+Remote Notification Count:  0
+Type                     :  Management
+----
+
+Set the refreshPolicy to `refresh-ahead` for a cluster.
+
+[source,bash]
+----
+cohctl set management -a refreshPolicy -v refresh-ahead -c local
+----
+Output:
+[source,bash]
+----
+Are you sure you want to set the value of attribute refreshPolicy to refresh-ahead? (y/n) y
+----
+
+[source,bash]
+----
+cohctl get management -c local
+----
+Output:
+[source,bash]
+----
+Refresh Policy           :  refresh-ahead
+Expiry Delay             :  6000
+Refresh Count            :  500
+Refresh Excess Count     :  143
+Refresh On Query         :  false
+Refresh Prediction Count :  24389
+Refresh Time             :  2021-11-22T03:54:36.919Z
+Refresh Timeout Count    :  0
+Remote Notification Count:  0
+Type                     :  Management
+----
+
+[#get-timeout]
+==== get Timeout
+
+include::../../build/_output/docs-gen/get_timeout.adoc[tag=text]
+
+*Examples*
+
+Displays the current request timeout.
+
+[source,bash]
+----
+cohctl get timeout -c local
+----
+Output:
+[source,bash]
+----
+Current timeout: 15
+----
+
+[#set-timeout]
+==== Set Timeout
+
+include::../../build/_output/docs-gen/set_timeout.adoc[tag=text]
+
+*Examples*
+
+Set the request timeout ot 15 seconds.
+
+[source,bash]
+----
+cohctl set timeout 15 -c local
+----
+Output:
+[source,bash]
+----
+Timeout is now set to 15
+----
+
+[#get-color]
+==== Get Color
+
+include::../../build/_output/docs-gen/get_color.adoc[tag=text]
+
+*Examples*
+
+[source,bash]
+----
+cohctl get color
+----
+Output:
+[source,bash]
+----
+Color formatting is: off
+----
+
+[#set-color]
+==== Set Color
+
+include::../../build/_output/docs-gen/set_color.adoc[tag=text]
+
+*Examples*
+
+[source,bash]
+----
+cohctl set color on
+----
+Output:
+[source,bash]
+----
+Color formatting is now set to on
+----

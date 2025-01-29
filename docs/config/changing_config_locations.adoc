@@ -1,0 +1,50 @@
+///////////////////////////////////////////////////////////////////////////////
+
+    Copyright (c) 2021, 2025 Oracle and/or its affiliates.
+    Licensed under the Universal Permissive License v 1.0 as shown at
+    https://oss.oracle.com/licenses/upl.
+
+///////////////////////////////////////////////////////////////////////////////
+
+= Changing Config Locations
+
+== Changing Config Locations
+
+By default, the CLI creates a directory `.cohctl` off the user's home to store connection information,
+log files and various other information.
+
+NOTE: It is recommended to leave these values as default unless you have a good reason to change them.
+If you do want to change the location, setting the `COHCTL_HOME` environment variable is the best option
+otherwise you would need to specify the `--config` option on each command execution.
+
+If you wish to change this directory from the default, you can use the following options:
+
+=== Set COHCTL_HOME environment variable
+
+You can set the environment variable `COHCTL_HOME` to change the location of the directory where the CLI creates it's files.
+
+[source,bash]
+----
+export COHCTL_HOME=/u01/config
+----
+
+All subsequent command executions will use this directory. The directory will be created if it doesn't exist
+and will throw an error if you don't have permissions to create it.
+
+=== Specify the directory for each command
+
+[source,bash]
+----
+cohctl get clusters --config-dir /u01/config
+----
+
+You can also specify a different location for the `cohct.yaml` file that is generated.
+
+[source,bash]
+----
+cohctl get clusters --config /u01/my-config.yaml
+----
+
+
+
+

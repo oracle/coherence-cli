@@ -1,0 +1,261 @@
+///////////////////////////////////////////////////////////////////////////////
+
+    Copyright (c) 2021, 2025 Oracle and/or its affiliates.
+    Licensed under the Universal Permissive License v 1.0 as shown at
+    https://oss.oracle.com/licenses/upl.
+
+///////////////////////////////////////////////////////////////////////////////
+
+= Members
+
+== Members
+
+=== Overview
+There are various cluster commands that allow you to work with and manage cluster members.
+
+* <<get-members, `cohctl get members`>> - displays the members for a cluster
+* <<get-network-stats, `cohctl get network-stats`>> - displays all member network statistics for a cluster
+* <<get-p2p-stats, `cohctl get p2p-stats`>> - displays point-to-point network statistics for a specific member
+* <<describe-member, `cohctl describe member`>> - shows information related to a specific member
+* <<set-member, `cohctl set member`>> - sets a member attribute for one or more members
+* <<shutdown-member, `cohctl shutdown member`>> - shuts down a members services in a controlled manner
+* <<get-member-description, `cohctl get member-description`>> - displays member description
+
+[#get-members]
+==== Get Members
+
+include::../../build/_output/docs-gen/get_members.adoc[tag=text]
+
+*Examples*
+
+Display all members and specify to display memory sizes in MB using `-m` option.
+
+[source,bash]
+----
+cohctl get members -c local -m
+----
+Output:
+[source,bash]
+----
+Total cluster members: 3
+Storage enabled count: 2
+Departure count:       0
+
+Cluster Heap - Total: 4,352 MB Used: 250 MB Available: 4,102 MB (94.3%)
+Storage Heap - Total: 4,096 MB Used: 201 MB Available: 3,895 MB (95.1%)
+
+NODE ID  ADDRESS         PORT   PROCESS  MEMBER  ROLE                  STORAGE  MAX HEAP  USED HEAP  AVAIL HEAP
+      1  192.168.1.117  63984    35372  n/a     Management            true     2,048 MB      91 MB    1,957 MB
+      2  192.168.1.117  63995    35398  n/a     TangosolNetCoherence  true     2,048 MB     110 MB    1,938 MB
+      3  192.168.1.117  64013    35430  n/a     CoherenceConsole      false      256 MB      49 MB      207 MB
+----
+
+NOTE: The default memory display format is bytes but can be changed by using `-k`, `-m` or `-g`.
+
+Display all members with the role `CoherenceConsole`.
+
+[source,bash]
+----
+cohctl get members -c local -r CoherenceConsole -m
+----
+Output:
+[source,bash]
+----
+Total cluster members: 1
+Storage enabled count: 1
+Departure count:       0
+
+Cluster Heap - Total: 256 MB Used: 50 MB Available: 206 MB (80.5%)
+Storage Heap - Total: 0 MB Used: 0 MB Available: 0 MB ( 0.0%)
+
+NODE ID  ADDRESS         PORT   PROCESS  MEMBER  ROLE              STORAGE  MAX HEAP  USED HEAP  AVAIL HEAP
+      3  192.168.1.117  64013    35430  n/a      CoherenceConsole  false      256 MB      50 MB      206 MB
+----
+
+NOTE: You can also use `-o wide` to display more columns.
+
+Display all departed members.
+
+[source,bash]
+----
+cohctl get members -c local -D
+----
+Output:
+[source,bash]
+----
+NODE ID  TIMESTAMP                ADDRESS          MACHINE ID  LOCATION                                         ROLE
+      3  2024-03-26 09:28:12.65   127.0.0.1:49170  10131       machine:localhost,process:5892,member:storage-2  CoherenceServer
+      5  2024-03-26 09:26:22.24   127.0.0.1:50251  10131       machine:localhost,process:6600,member:storage-3  CoherenceServer
+      4  2024-03-26 08:11:00.537  127.0.0.1:50250  10131       machine:localhost,process:6601,member:storage-4  CoherenceServer
+----
+
+NOTE: Members are displayed in descending order of departure time.
+
+[#get-network-stats]
+==== Get Network Stats
+
+include::../../build/_output/docs-gen/get_network_stats.adoc[tag=text]
+
+*Examples*
+
+[source,bash]
+----
+cohctl get netwok-stats -c local
+----
+Output:
+[source,bash]
+----
+NODE ID  ADDRESS     PORT   PROCESS  MEMBER                         ROLE              PKT SENT  PKT REC  RESENT  EFFICIENCY  SEND Q  DATA SENT  DATA REC  WEAKEST
+      1  /127.0.0.1  50724    81363  storage-1                      CoherenceServer        531      586       2     100.00%       0       8 MB      9 MB        4
+      2  /127.0.0.1  50725    81364  storage-2                      CoherenceServer        181      152       0     100.00%       0       8 MB      8 MB        -
+      3  /127.0.0.1  50726    81362  storage-0                      CoherenceServer        182      148       0     100.00%       0       7 MB     10 MB        -
+      4  /127.0.0.1  50968    81733  com.tangosol.net.CacheFactory  CoherenceConsole        64       58       0     100.00%       0       3 MB      0 MB        -
+----
+
+[#get-p2p-stats]
+==== Get P2P Stats
+
+include::../../build/_output/docs-gen/get_p2p_stats.adoc[tag=text]
+
+*Examples*
+
+[source,bash]
+----
+cohctl get p2p-stats -c local
+----
+Output:
+[source,bash]
+----
+Viewing Node Id:     1
+Viewing Member Name: storage-2
+
+MEMBER  PUBLISHER  RECEIVER  PAUSE RATE  THRESHOLD  PAUSED  DEFERRING  DEFERRED  OUTSTANDING  READY  LAST IN  LAST OUT  LAST SLOW  LAST DEATH
+     2      0.990     1.000      0.0000      1,976  false   false             0            0      0  33223ms   33243ms        n/a         n/a
+     3      1.000     1.000      0.0000      2,080  false   false             0            0      0  28220ms   28240ms        n/a         n/a
+----
+
+[#describe-member]
+==== Describe Member
+
+include::../../build/_output/docs-gen/describe_member.adoc[tag=text]
+
+*Examples*
+
+Describe member and include heap dump.
+
+[source,bash]
+----
+cohctl describe member 1 -D
+----
+
+NOTE: When taking one or more thread dumps, if you want full deadlock analysis, you should set the following system property
+on your Coherence JVMS `-Dcom.oracle.coherence.common.util.Threads.dumpLocks=FULL`
+
+Describe member and include extended information on G1 garbage collection.
+
+[source,bash]
+----
+cohctl describe member 1 -Xg1
+----
+
+[#set-member]
+==== Set Member
+
+include::../../build/_output/docs-gen/set_member.adoc[tag=text]
+
+*Examples*
+
+Set the log level for all members, Check the log level first.
+
+[source,bash]
+----
+cohctl get members -o json | jq | grep loggingLevel
+----
+Output:
+[source,bash]
+----
+      "loggingLevel": 6,
+      "loggingLevel": 6,
+      "loggingLevel": 6,
+----
+[source,bash]
+----
+cohctl set member all -a loggingLevel -v 6 -c local
+----
+Output:
+[source,bash]
+----
+Are you sure you want to set the value of attribute loggingLevel to 6 for all 3 nodes? (y/n) y
+operation completed
+----
+
+[source,bash]
+----
+cohctl get members -o json | jq | grep loggingLevel
+----
+Output:
+[source,bash]
+----
+      "loggingLevel": 6,
+      "loggingLevel": 6,
+      "loggingLevel": 6,
+----
+
+Set the log level to 9 for node id 1.
+
+[source,bash]
+----
+cohctl set member 1 -a loggingLevel -v 9 -c local
+----
+Output:
+[source,bash]
+----
+
+Are you sure you want to set the value of attribute loggingLevel to 9 for 1 nodes? (y/n) y
+operation completed
+----
+
+[source,bash]
+----
+cohctl get members -o json | jq | grep loggingLevel
+----
+Output:
+[source,bash]
+----
+      "loggingLevel": 9,
+      "loggingLevel": 6,
+      "loggingLevel": 6,
+----
+
+[#shutdown-member]
+==== Shutdown Member
+
+include::../../build/_output/docs-gen/shutdown_member.adoc[tag=text]
+
+[source,bash]
+----
+cohctl shutdown member 1 -c local
+----
+Output:
+[source,bash]
+----
+Are you sure you want to shutdown member 1? (y/n) y
+operation completed
+----
+
+[#get-member-description]
+==== Get Member Description
+
+include::../../build/_output/docs-gen/get_member_description.adoc[tag=text]
+
+[source,bash]
+----
+cohctl get member-description 1 -c local
+----
+
+=== See Also
+
+* xref:diagnostics.adoc[Diagnostics]
+
+
+

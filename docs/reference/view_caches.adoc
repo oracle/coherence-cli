@@ -1,0 +1,72 @@
+///////////////////////////////////////////////////////////////////////////////
+
+    Copyright (c) 2024, 2025 Oracle and/or its affiliates.
+    Licensed under the Universal Permissive License v 1.0 as shown at
+    https://oss.oracle.com/licenses/upl.
+
+///////////////////////////////////////////////////////////////////////////////
+
+= View Caches
+
+== View Caches
+
+=== Overview
+There are various commands that allow you to work with and manage cluster view caches.
+
+* <<get-view-caches, `cohctl get view-caches`>> - displays the view caches for a cluster
+* <<describe-view-cache, `cohctl describe view-cache`>> - shows information related to a specific view cache and service
+
+[#get-view-caches]
+==== Get View Caches
+
+include::../../build/_output/docs-gen/get_view_caches.adoc[tag=text]
+
+*Examples*
+
+Display all view caches.
+
+[source,bash]
+----
+cohctl get view-caches -c local
+----
+Output:
+[source,bash]
+----
+Total View Caches: 2
+
+SERVICE                  VIEW NAME      MEMBERS
+DistributedCacheService  view-cache-1         3
+DistributedCacheService  view-cache-2         3
+
+----
+
+[#describe-view-cache]
+==== Describe View Cache
+
+include::../../build/_output/docs-gen/describe_view_cache.adoc[tag=text]
+
+*Examples*
+
+[source,bash]
+----
+cohctl describe view-cache view-cache-1 -c local
+----
+Output:
+[source,bash]
+----
+Service:    DistributedCacheService
+View Cache: view-cache-1
+
+NODE ID  VIEW SIZE  RECONNECT  FILTER        TRANSFORMED  TRANSFORMER  READ ONLY
+      3          5       0.0s  AlwaysFilter  false        n/a          false
+      4          5       0.0s  AlwaysFilter  false        n/a          false
+      5          5       0.0s  AlwaysFilter  false        n/a          false
+----
+
+NOTE: You may omit the service name option if the view cache name is unique.
+
+=== See Also
+
+* xref:caches.adoc[Caches]
+
+

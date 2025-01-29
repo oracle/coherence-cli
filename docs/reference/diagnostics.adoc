@@ -1,0 +1,449 @@
+///////////////////////////////////////////////////////////////////////////////
+
+    Copyright (c) 2021, 2025 Oracle and/or its affiliates.
+    Licensed under the Universal Permissive License v 1.0 as shown at
+    https://oss.oracle.com/licenses/upl.
+
+///////////////////////////////////////////////////////////////////////////////
+
+= Diagnostics
+
+== Diagnostics
+
+=== Overview
+There are various commands that allow you to obtain diagnostic output such as
+Java Flight Recordings or JFR's, heap dumps and thread dumps.
+
+* <<get-jfrs, `cohctl get jfrs`>> - display the JFR's for a cluster
+* <<start-jfr, `cohctl start jfr`>> - start a JFR for all or selected members
+* <<describe-jfr, `cohctl describe jfr`>> - describe a JFR
+* <<stop-jfr, `cohctl stop jfr`>> - stop a JFR for all or selected members
+* <<dump-jfr, `cohctl dump jfr`>> - dump a JFR that is running for all or selected members
+* <<dump-cluster-heap, `cohctl dump cluster-heap`>> - dumps the cluster heap for all or specific roles
+* <<log-cluster-state, `cohctl log cluster-state`>> - logs the cluster state via, a thread dump, for all or specific roles
+* <<retrieve-thread-dumps, `cohctl retrieve thread-dumps`>> - retrieves thread dumps for all or specific nodes
+* <<configure-tracing, `cohctl configure tracing`>> - configures tracing for all members or a specific role
+* <<get-tracing, `cohctl get tracing`>> - displays tracing status for all members
+* <<get-environment, `cohctl get environment`>> - displays the environment for a member
+
+
+[#get-jfrs]
+==== Get JFRS
+
+include::../../build/_output/docs-gen/get_jfrs.adoc[tag=text]
+
+*Examples*
+
+[source,bash]
+----
+cohctl get jfrs -c local
+----
+Output:
+[source,bash]
+----
+Member 2->
+    Recording 12: name=test-1 duration=1m (running)
+Member 3->
+    Recording 12: name=test-1 duration=1m (running)
+Member 4->
+    Recording 12: name=test-1 duration=1m (running)
+Member 6->
+    Recording 12: name=test-1 duration=1m (running)
+----
+
+[#start-jfr]
+==== Start JFR
+
+include::../../build/_output/docs-gen/start_jfr.adoc[tag=text]
+
+*Examples*
+
+Start a JFR for all members using the defaults (60 seconds duration) and write the results to the `/tmp` directory on each of the
+servers running Coherence members.
+
+NOTE: If you wish to continuously run a Flight Recording, then set the duration to 0 by using `-D 0`.
+
+[source,bash]
+----
+cohctl start jfr test-1 -O /tmp/ -c local
+----
+Output:
+[source,bash]
+----
+Are you sure you want to start a JFR named test-1 for all 4 members of duration: 60 seconds? (y/n) y
+Member 2->
+  Started recording 11. The result will be written to:
+  /tmp/2-test-1.jfr
+Member 3->
+  Started recording 11. The result will be written to:
+  /tmp/3-test-1.jfr
+Member 4->
+  Started recording 11. The result will be written to:
+  /tmp/4-test-1.jfr
+Member 6->
+  Started recording 11. The result will be written to:
+  /tmp/6-test-1.jfr
+----
+
+Start a JFR for an individual node.
+
+[source,bash]
+----
+cohctl start jfr test-1 -O /tmp/ -n 2 -c local
+----
+Output:
+[source,bash]
+----
+Are you sure you want to start a JFR named test-1 for node id 2 of duration: 60 seconds? (y/n) y
+Started recording 13.
+
+Use jcmd 11339 JFR.stop name=test-1 to copy recording data to file.
+----
+
+Start a JFR for all members of a specific role.
+[source,bash]
+----
+cohctl start jfr test-1 -O /tmp/ -r CoherenceServer -c local
+----
+Output:
+[source,bash]
+----
+Are you sure you want to start a JFR named test-1 for role CoherenceServer of duration: 60 seconds? (y/n) y
+Member 2->
+  Started recording 14. The result will be written to:
+  /tmp/2-test-1.jfr
+Member 3->
+  Started recording 13. The result will be written to:
+  /tmp/3-test-1.jfr
+----
+
+[#describe-jfr]
+==== Describe JFR
+
+include::../../build/_output/docs-gen/describe_jfr.adoc[tag=text]
+
+*Examples*
+
+[source,bash]
+----
+cohctl describe jfr test-1 -c local
+----
+Output:
+[source,bash]
+----
+Member 2->
+    Recording 12: name=test-1 duration=1m (running)
+Member 3->
+    Recording 12: name=test-1 duration=1m (running)
+Member 4->
+    Recording 12: name=test-1 duration=1m (running)
+Member 6->
+    Recording 12: name=test-1 duration=1m (running)
+----
+
+[#stop-jfr]
+==== Stop JFR
+
+include::../../build/_output/docs-gen/stop_jfr.adoc[tag=text]
+
+*Examples*
+
+[source,bash]
+----
+cohctl stop jfr test1 -c local
+----
+Output:
+[source,bash]
+----
+Are you sure you want to run jfrStop on a JFR named test-1 for all 4 members ? (y/n) y
+Member 2->
+    Can't stop an already stopped recording.
+Member 3->
+    Stopped recording "test-1".
+Member 4->
+    Stopped recording "test-1".
+Member 6->
+    Stopped recording "test-1".
+----
+
+[#dump-jfr]
+==== Dump JFR
+
+include::../../build/_output/docs-gen/dump_jfr.adoc[tag=text]
+
+Normally when a Flight Recording has been finished it will be dump to the output file. If you want to
+dump the JFR before it has completed, then you can use this command.
+
+*Examples*
+
+[source,bash]
+----
+cohctl dump jfr test1 -c local
+----
+Output:
+[source,bash]
+----
+Are you sure you want to run jfrDump on a JFR named test-1 for all 4 members ? (y/n) y
+Member 2->
+    Dumped recording "test-1", 590.9 kB written to:
+    /tmp/hotspot-pid-11339-id-13-2021_11_01_10_15_35.jfr
+Member 3->
+    Dumped recording "test-1", 420.2 kB written to:
+    /private/tmp/3-test-1.jfr
+Member 4->
+    Dumped recording "test-1", 383.4 kB written to:
+    /private/tmp/4-test-1.jfr
+Member 6->
+    Dumped recording "test-1", 466.1 kB written to:
+    /private/tmp/6-test-1.jfr
+----
+
+[#dump-cluster-heap]
+==== Dump Cluster Heap
+
+include::../../build/_output/docs-gen/dump_cluster_heap.adoc[tag=text]
+
+NOTE: Depending upon your Java heap size and usage, this command can create large files on your temporary file system.
+
+*Examples*
+
+Dump cluster heap for all members.
+
+[source,bash]
+----
+cohctl dump cluster-heap -c local
+----
+Output:
+[source,bash]
+----
+Are you sure you want to dump cluster heap for all 3 members? (y/n) y
+Operation completed. Please see cache server log file for more information
+----
+
+Dump cluster heap for a specific role.
+
+[source,bash]
+----
+cohctl dump cluster-heap -c local -r TangosolNetCoherence
+----
+Output:
+[source,bash]
+----
+Are you sure you want to dump cluster heap for 2 members with role TangosolNetCoherence? (y/n) y
+Operation completed. Please see cache server log file for more information
+----
+
+NOTE: View the Coherence log files for the location and names of the heap dumps.
+
+[#log-cluster-state]
+==== Log Cluster State
+
+include::../../build/_output/docs-gen/log_cluster_state.adoc[tag=text]
+
+*Examples*
+
+Log cluster state for all members into the cache server log files.
+
+[source,bash]
+----
+cohctl log cluster-state -c local
+----
+Output:
+[source,bash]
+----
+Are you sure you want to log cluster state for all 3 members? (y/n) y
+Operation completed. Please see cache server log file for more information
+----
+
+Log cluster state for a specific role into the cache server log files.
+
+[source,bash]
+----
+cohctl log cluster-state -c local -r TangosolNetCoherence
+----
+Output:
+[source,bash]
+----
+Are you sure you want to log cluster state for 2 members with role TangosolNetCoherence? (y/n) y
+Operation completed. Please see cache server log file for more information
+----
+
+[#retrieve-thread-dumps]
+==== Retrieve Thread Dumps
+
+include::../../build/_output/docs-gen/retrieve_thread_dumps.adoc[tag=text]
+
+When taking thread dumps, if you want full deadlock analysis, set the following system property
+on your Coherence JVM's:
+
+* 12.2.1.4.x:     `-Dcom.oracle.common.util.Threads.dumpLocks=FULL`
+* Later versions: `-Dcom.oracle.coherence.common.util.Threads.dumpLocks=FULL`
+
+*Examples*
+
+Retrieve thread dumps using the defaults of 5 thread dumps each 10 seconds for all members and place them in the `/tmp/` directory.
+
+[source,bash]
+----
+cohctl retrieve thread-dumps -O /tmp all -c local
+----
+Output:
+[source,bash]
+----
+This operation will take at least 40 seconds.
+Are you sure you want to retrieve 5 thread dumps, each 10 seconds apart for 4 nodes? (y/n) y
+Completed 5 of 5 (100.00%)All thread dumps completed and written to /tmp
+
+$ ls -l /tmp/thread-dump-node-*
+-rw-r--r--  1 user  wheel  42507 27 Oct 14:44 /tmp/thread-dump-node-1-1.log
+-rw-r--r--  1 user  wheel  45422 27 Oct 14:44 /tmp/thread-dump-node-1-2.log
+-rw-r--r--  1 user  wheel  45299 27 Oct 14:45 /tmp/thread-dump-node-1-3.log
+-rw-r--r--  1 user  wheel  45299 27 Oct 14:45 /tmp/thread-dump-node-1-4.log
+-rw-r--r--  1 user  wheel  45311 27 Oct 14:45 /tmp/thread-dump-node-1-5.log
+-rw-r--r--  1 user  wheel  35515 27 Oct 14:44 /tmp/thread-dump-node-2-1.log
+-rw-r--r--  1 user  wheel  35503 27 Oct 14:44 /tmp/thread-dump-node-2-2.log
+-rw-r--r--  1 user  wheel  35503 27 Oct 14:45 /tmp/thread-dump-node-2-3.log
+-rw-r--r--  1 user  wheel  35503 27 Oct 14:45 /tmp/thread-dump-node-2-4.log
+-rw-r--r--  1 user  wheel  35491 27 Oct 14:45 /tmp/thread-dump-node-2-5.log
+-rw-r--r--  1 user  wheel  31579 27 Oct 14:44 /tmp/thread-dump-node-3-1.log
+-rw-r--r--  1 user  wheel  31591 27 Oct 14:44 /tmp/thread-dump-node-3-2.log
+-rw-r--r--  1 user  wheel  31579 27 Oct 14:45 /tmp/thread-dump-node-3-3.log
+-rw-r--r--  1 user  wheel  31591 27 Oct 14:45 /tmp/thread-dump-node-3-4.log
+-rw-r--r--  1 user  wheel  31591 27 Oct 14:45 /tmp/thread-dump-node-3-5.log
+-rw-r--r--  1 user  wheel  31587 27 Oct 14:44 /tmp/thread-dump-node-4-1.log
+-rw-r--r--  1 user  wheel  31587 27 Oct 14:44 /tmp/thread-dump-node-4-2.log
+-rw-r--r--  1 user  wheel  31587 27 Oct 14:45 /tmp/thread-dump-node-4-3.log
+-rw-r--r--  1 user  wheel  31587 27 Oct 14:45 /tmp/thread-dump-node-4-4.log
+-rw-r--r--  1 user  wheel  31587 27 Oct 14:45 /tmp/thread-dump-node-4-5.log
+----
+
+NOTE: The files will be named `thread-dump-node-N-I.log`. Where `N` is the node id, and `I` is the iteration.
+
+Retrieve 5 thread dumps for members 1 and 3 every 15 seconds and place them in the `/tmp/` directory.
+
+[source,bash]
+----
+cohctl retrieve thread-dumps -O /tmp 1,3 -n 5 -D 15 -c local
+----
+Output:
+[source,bash]
+----
+This operation will take at least 60 seconds.
+Are you sure you want to retrieve 5 thread dumps, each 15 seconds apart for 2 nodes? (y/n) y
+Completed 5 of 5 (100.00%)
+All thread dumps completed and written to /tmp
+----
+
+Retrieve thread dumps for a given role:
+
+[source,bash]
+----
+cohctl retrieve thread-dumps  -O /tmp/ -r TangosolNetCoherence -c local
+----
+Output:
+[source,bash]
+----
+This operation will take at least 40 seconds.
+Are you sure you want to retrieve 5 thread dumps, each 10 seconds apart for 2 node(s)? (y/n)
+----
+
+[#configure-tracing]
+==== Configure Tracing
+
+include::../../build/_output/docs-gen/configure_tracing.adoc[tag=text]
+
+*Examples*
+
+Configure tracing for all members with tracing ratio of 0.
+
+[source,bash]
+----
+cohctl configure tracing -t 0 -c local
+----
+Output:
+[source,bash]
+----
+Are you sure you want to configure tracing to tracing ratio 0 for all 3 members? (y/n) y
+Operation completed. Please see cache server log file for more information
+----
+
+Configure tracing for a specific role with tracing ratio of 1.0
+
+[source,bash]
+----
+cohctl configure tracing -t 1.0 -r TangosolNetCoherence -c local
+----
+Output:
+[source,bash]
+----
+Are you sure you want to configure tracing to tracing ratio 1 for 2 members with role TangosolNetCoherence? (y/n) y
+Operation completed. Please see cache server log file for more information
+----
+
+Turn off tracing for all members by setting tracing ratio to -1.0.
+
+[source,bash]
+----
+cohctl configure tracing -t -1.0
+----
+Output:
+[source,bash]
+----
+Are you sure you want to configure tracing to tracing ratio -1 for all 3 members? (y/n) y
+Operation completed. Please see cache server log file for more information
+----
+
+[#get-tracing]
+==== Get Tracing
+
+include::../../build/_output/docs-gen/get_tracing.adoc[tag=text]
+
+*Examples*
+
+Display tracing for all members.
+
+[source,bash]
+----
+cohctl get tracing -c local
+----
+Output:
+[source,bash]
+----
+NODE ID  ADDRESS      PORT  PROCESS  MEMBER  ROLE                TRACING ENABLED  SAMPLING RATIO
+      1  /127.0.0.1  62255    13464  n/a     DefaultCacheServer  true                      1.000
+----
+
+[#get-environment]
+==== Get Environment
+
+include::../../build/_output/docs-gen/get_environment.adoc[tag=text]
+
+*Examples*
+
+Display the member environment for a member.
+
+[source,bash]
+----
+cohctl get environment 1 -c local
+----
+Output:
+[source,bash]
+----
+Java Version: 11.0.10
+Java Vendor:
+ - Name: Oracle Corporation
+ - Version: 18.9
+Java Virtual Machine:
+...
+----
+
+NOTE: Output has been truncated above.
+
+=== See Also
+
+* xref:members.adoc[Members]
+* {commercial-docs-base-url}/develop-applications/debugging-coherence.html[Distributed Tracing in Coherence]
+
+
+
+

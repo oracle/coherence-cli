@@ -1,0 +1,88 @@
+///////////////////////////////////////////////////////////////////////////////
+
+    Copyright (c) 2021, 2025 Oracle and/or its affiliates.
+    Licensed under the Universal Permissive License v 1.0 as shown at
+    https://oss.oracle.com/licenses/upl.
+
+///////////////////////////////////////////////////////////////////////////////
+
+= Elastic Data
+
+== Elastic Data
+
+=== Overview
+There are various commands that allow you to work with and manage Elastic Data.
+
+* <<get-elastic-data, `cohctl get elastic-data`>> - displays the elastic data details
+* <<describe-elastic-data, `cohctl describe elastic-data`>> - shows information related to a specific journal type
+* <<compact-elastic-data, `cohctl compact elastic-data`>> - compacts a flash or ram journal
+
+NOTE: This is a Coherence Grid Edition feature only and is not available with Community Edition.
+
+[#get-elastic-data]
+==== Get Elastic Data
+
+include::../../build/_output/docs-gen/get_elastic_data.adoc[tag=text]
+
+*Examples*
+
+Display elastic data.
+
+[source,bash]
+----
+cohctl get http-servers -c local -m
+----
+Output:
+[source,bash]
+----
+NAME            USED FILES  TOTAL FILES  % USED  MAX FILE SIZE  USED SPACE   COMMITTED  HIGHEST LOAD  COMPACTIONS  EXHAUSTIVE
+RamJournalRM            80       19,600   0.41%           1 MB        0 MB       80 MB        0.0041            0           0
+FlashJournalRM          81       41,391   0.20%        2,048 MB       0 MB  162,000 GB        0.0020            0           0
+----
+
+[#describe-elastic-data]
+==== Describe Elastic Data
+
+include::../../build/_output/docs-gen/describe_elastic_data.adoc[tag=text]
+
+*Examples*
+
+[source,bash]
+----
+cohctl describe elastic-data RamJournalRM -c local
+----
+
+[#compact-elastic-data]
+==== Compact Elastic Data
+
+include::../../build/_output/docs-gen/compact_elastic_data.adoc[tag=text]
+
+*Examples*
+
+Compact flash journal for all nodes.
+
+[source,bash]
+----
+cohctl compact elastic-data FlashJournalRM -c local
+----
+Output:
+[source,bash]
+----
+Are you sure you want to compact flash for all 2 nodes? (y/n) y
+operation completed
+----
+
+Compact ram journal for 1 node.
+
+[source,bash]
+----
+cohctl compact elastic-data RamJournalRM -n 1 -c local
+----
+Output:
+[source,bash]
+----
+Are you sure you want to compact ram for 1 node(s)? (y/n) y
+operation completed
+----
+
+
