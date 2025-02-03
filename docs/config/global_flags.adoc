@@ -1,0 +1,25 @@
+///////////////////////////////////////////////////////////////////////////////
+
+    Copyright (c) 2021, 2025 Oracle and/or its affiliates.
+    Licensed under the Universal Permissive License v 1.0 as shown at
+    https://oss.oracle.com/licenses/upl.
+
+///////////////////////////////////////////////////////////////////////////////
+
+= Global Flags
+
+== Global Flags
+
+The Coherence CLI provides a number of global flags that are available in all the commands. These flags are described below.
+
+[source,bash]
+----
+include::../../build/_output/docs-gen/global_flags.adoc[tag=text]
+----
+
+=== See Also
+
+* xref:changing_config_locations.adoc[Changing Config Locations]
+* xref:../examples/jsonpath.adoc[Using JsonPath]
+* xref:../config/sorting_table_output.adoc[Sorting Table Output]
+

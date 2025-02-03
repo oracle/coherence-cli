@@ -1,0 +1,125 @@
+///////////////////////////////////////////////////////////////////////////////
+
+    Copyright (c) 2021, 2025 Oracle and/or its affiliates.
+    Licensed under the Universal Permissive License v 1.0 as shown at
+    https://oss.oracle.com/licenses/upl.
+
+///////////////////////////////////////////////////////////////////////////////
+
+= NS Lookup
+
+== NS Lookup
+
+=== Overview
+The CLI provides an implementation of the Name Service lookup to query a clusters Name Service
+endpoint for various query values.
+
+You can provide zero or more host/port pairs to this command. If you do not provide a host, `localhost` will
+be used and if you do not provide a port, then the default port `7574` will be used.
+
+* <<nslookup, `cohctl nslookup`>> - looks up various Name Service endpoints for a cluster host/port
+
+[#nslookup]
+==== NS Lookup
+
+include::../../build/_output/docs-gen/nslookup.adoc[tag=text]
+
+*Examples*
+
+Display the name of the cluster on localhost port 7574.
+
+[source,bash]
+----
+cohctl nslookup -q Cluster/name
+----
+Output:
+[source,bash]
+----
+cluster1
+----
+
+Display the cluster information for the cluster on localhost:7574.
+
+[source,bash]
+----
+cohctl nslookup -q Cluster/info localhost:7574
+----
+Output:
+[source,bash]
+----
+Name=cluster1, ClusterPort=7574
+
+WellKnownAddressList(
+  172.18.0.2
+  )
+
+MasterMemberSet(
+  ThisMember=Member(Id=1, Timestamp=2021-11-05 00:15:21.501, Address=172.18.0.2:37697, MachineId=47438, Location=site:Site1,machine:server1,process:1,member:member1, Role=OracleCoherenceCliTestingRestServer)
+  OldestMember=Member(Id=1, Timestamp=2021-11-05 00:15:21.501, Address=172.18.0.2:37697, MachineId=47438, Location=site:Site1,machine:server1,process:1,member:member1, Role=OracleCoherenceCliTestingRestServer)
+  ActualMemberSet=MemberSet(Size=2
+    Member(Id=1, Timestamp=2021-11-05 00:15:21.501, Address=172.18.0.2:37697, MachineId=47438, Location=site:Site1,machine:server1,process:1,member:member1, Role=OracleCoherenceCliTestingRestServer)
+    Member(Id=2, Timestamp=2021-11-05 00:15:24.98, Address=172.18.0.3:42019, MachineId=47439, Location=site:Site1,machine:server2,process:1,member:member2, Role=OracleCoherenceCliTestingRestServer)
+    )
+  MemberId|ServiceJoined|MemberState|Version|Edition
+    1|2021-11-05 00:15:21.501|JOINED|14.1.1.0.6|GE,
+    2|2021-11-05 00:15:24.98|JOINED|14.1.1.0.6|GE
+  RecycleMillis=1200000
+  RecycleSet=MemberSet(Size=0
+    )
+  )
+
+TcpRing{Connections=[2]}
+IpMonitor{Addresses=1, Timeout=15s}
+----
+
+Display the local cluster and foreign clusters registered with the Name Service on localhost:7574.
+
+[source,bash]
+----
+cohctl nslookup -q Cluster/name
+----
+Output:
+[source,bash]
+----
+cluster1
+----
+[source,bash]
+----
+cohctl nslookup -q NameService/string/Cluster/foreign
+----
+Output:
+[source,bash]
+----
+[cluster3, cluster2]
+----
+
+Display the Management over REST endpoint for the local cluster.
+
+[source,bash]
+----
+cohctl nslookup -q NameService/string/management/HTTPManagementURL
+----
+Output:
+[source,bash]
+----
+[http://127.0.0.1:51078/management/coherence/cluster]
+----
+
+Display the local Name Serivce port for a foreign registered cluster.
+
+[source,bash]
+----
+cohctl nslookup -q NameService/string/Cluster/foreign/cluster2/NameService/localPort
+----
+Output:
+[source,bash]
+----
+51065
+----
+
+=== See Also
+
+* xref:clusters.adoc[Clusters]
+
+
+

@@ -1235,19 +1235,20 @@ var startClassCmd = &cobra.Command{
 	Long: `The 'start class' command starts a specific Java class which connects to a
 cluster using the current context or a cluster specified by using '-c'.
 The class name must include the full package and class name and must be included in
-an artefact included in the initial cluster creation.`,
+an artefact included in the initial cluster creation. You may pass additional arguments
+which will be passed to the called class.`,
 	Args: func(cmd *cobra.Command, args []string) error {
-		if len(args) != 1 {
+		if len(args) == 0 {
 			displayErrorAndExit(cmd, "you must provide a class to run")
 		}
 		return nil
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
-		return runStartClientOperation(cmd, args[0])
+		return runStartClientOperation(cmd, args[0], args[1:]...)
 	},
 }
 
-func runStartClientOperation(cmd *cobra.Command, class string) error {
+func runStartClientOperation(cmd *cobra.Command, class string, extraArgs ...string) error {
 	var (
 		err        error
 		connection string
@@ -1276,7 +1277,7 @@ func runStartClientOperation(cmd *cobra.Command, class string) error {
 
 	cmd.Println(FormatCurrentCluster(connection))
 
-	return startClient(cmd, clusterConn, class)
+	return startClient(cmd, clusterConn, class, extraArgs...)
 }
 
 func runClusterOperation(cmd *cobra.Command, connectionName, operation string) error {

@@ -332,8 +332,7 @@ docs: generate-docs ## Build the Documentation
 .PHONY: serve-docs
 serve-docs:   ## Serve the Documentation
 	@echo "Serving documentation on http://localhost:8888"
-	cd $(BUILD_OUTPUT)/docs; \
-	python -m SimpleHTTPServer 8888
+	cd java && mvn sitegen:serve -Dtop.parent.basedir=`pwd` -Dsitegen.sitePort=8888
 
 # ======================================================================================================================
 # General development related targets

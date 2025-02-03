@@ -1,0 +1,186 @@
+///////////////////////////////////////////////////////////////////////////////
+
+    Copyright (c) 2021, 2025 Oracle and/or its affiliates.
+    Licensed under the Universal Permissive License v 1.0 as shown at
+    https://oss.oracle.com/licenses/upl.
+
+///////////////////////////////////////////////////////////////////////////////
+
+= Overview
+
+== Reference
+
+The Coherence CLI contains many commands to manage and monitor Coherence clusters.
+
+[PILLARS]
+====
+
+[CARD]
+.Clusters
+[link=clusters.adoc]
+--
+Manage Cluster Connections.
+--
+
+[CARD]
+.Contexts
+[link=contexts.adoc]
+--
+Manage cluster connections you are working with.
+--
+
+[CARD]
+.Members
+[link=members.adoc]
+--
+Display and describe member information.
+--
+
+[CARD]
+.Machines
+[link=machines.adoc]
+--
+Display and describe machine information.
+--
+
+[CARD]
+.Services
+[link=services.adoc]
+--
+Display and describe service information.
+--
+
+[CARD]
+.Caches
+[link=caches.adoc]
+--
+Display and describe cache information.
+--
+
+[CARD]
+.View Caches
+[link=view_caches.adoc]
+--
+Display and describe view cache information.
+--
+
+[CARD]
+.Topics
+[link=topics.adoc]
+--
+Display Topics information.
+--
+
+[CARD]
+.Persistence
+[link=persistence.adoc]
+--
+Display and perform Persistence operations.
+--
+
+[CARD]
+.Federation
+[link=federation.adoc]
+--
+Display and perform Federation operations.
+--
+
+[CARD]
+.Proxy Servers
+[link=proxies.adoc]
+--
+Display and describe proxy server information.
+--
+
+[CARD]
+.Http Proxy Servers
+[link=http_servers.adoc]
+--
+Display and describe Http proxy server information.
+--
+
+[CARD]
+.Elastic Data
+[link=elastic_data.adoc]
+--
+Display and describe Elastic Data information.
+--
+
+[CARD]
+.Http Sessions
+[link=http_sessions.adoc]
+--
+Display and describe Coherence*Web Http session information.
+--
+
+[CARD]
+.Executors
+[link=executors.adoc]
+--
+Display and describe Executors.
+--
+
+[CARD]
+.Reporters
+[link=reporters.adoc]
+--
+Display and manage Coherence reporters.
+--
+
+[CARD]
+.Diagnostics
+[link=diagnostics.adoc]
+--
+Take multiple thread dumps, heap dumps or JFR's across members.
+--
+
+[CARD]
+.Create Starter
+[link=create_starter.adoc]
+--
+Create example starter Maven project integrating Coherence and various frameworks.
+--
+
+[CARD]
+.Health
+[link=health.adoc]
+--
+Display health information.
+--
+
+[CARD]
+.NS Lookup
+[link=nslookup.adoc]
+--
+Look up various Name Service endpoints for a cluster.
+--
+
+[CARD]
+.Reset MBean Statistics
+[link=reset.adoc]
+--
+Reset MBean Statistics for various resources.
+--
+
+[CARD]
+.Miscellaneous
+[link=misc.adoc]
+--
+Various settings related commands.
+--
+
+[CARD]
+.Create Clusters
+[link=create_clusters.adoc]
+--
+Experimental command to create development clusters.
+--
+
+[CARD]
+.Monitor Clusters
+[link=monitor_clusters.adoc]
+--
+Experimental command to monitor clusters with text UI.
+--
+
+====

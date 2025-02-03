@@ -1,0 +1,74 @@
+///////////////////////////////////////////////////////////////////////////////
+
+    Copyright (c) 2021, 2025 Oracle and/or its affiliates.
+    Licensed under the Universal Permissive License v 1.0 as shown at
+    https://oss.oracle.com/licenses/upl.
+
+///////////////////////////////////////////////////////////////////////////////
+
+= Overview
+:description: Coherence CLI documentation
+:keywords: oracle coherence, coherence-cli, documentation
+
+== Get Going
+
+[PILLARS]
+====
+
+[CARD]
+.Introduction
+[icon=assistant,link=introduction.adoc]
+--
+Introduction to the Coherence CLI.
+--
+
+[CARD]
+.Install
+[icon=fa-save,link=../installation/installation.adoc]
+--
+Installing the Coherence CLI for your platform.
+--
+
+[CARD]
+.Quick Start
+[icon=fa-rocket,link=quickstart.adoc]
+--
+Quick start guide to getting started with the Coherence CLI.
+--
+
+[CARD]
+.Configuration
+[icon=fa-cogs,link=../config/overview.adoc]
+--
+Configuration options.
+--
+
+[CARD]
+.Command Reference
+[icon=widgets,link=../reference/overview.adoc]
+--
+Coherence CLI Command Reference.
+--
+
+[CARD]
+.Security
+[icon=lock,link=../security/overview.adoc]
+--
+Securing CLI access.
+--
+
+[CARD]
+.Troubleshooting
+[icon=fa-question-circle,link=../troubleshooting/trouble-shooting.adoc]
+--
+Hints and tips to troubleshoot common issues.
+--
+
+[CARD]
+.Examples
+[icon=explore,link=../examples/overview.adoc]
+--
+A number of examples on how get the most out of the Coherence CLI.
+--
+
+====

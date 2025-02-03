@@ -1,0 +1,80 @@
+///////////////////////////////////////////////////////////////////////////////
+
+    Copyright (c) 2021, 2025 Oracle and/or its affiliates.
+    Licensed under the Universal Permissive License v 1.0 as shown at
+    https://oss.oracle.com/licenses/upl.
+
+///////////////////////////////////////////////////////////////////////////////
+
+= Contexts
+
+== Contexts
+
+=== Overview
+A context allows you to specify which cluster connection you are working with, so you do no have to specify the
+connection option, `-c`, with each command.
+
+These include:
+
+* <<set-context, `cohctl set context`>> - Sets the context
+* <<get-context, `cohctl get context`>> - Get the current context
+* <<clear-context, `cohctl clear context`>> - Clears the current context
+
+[#set-context]
+==== Set Context
+
+include::../../build/_output/docs-gen/set_context.adoc[tag=text]
+
+*Examples*
+
+[source,bash]
+----
+cohctl set context local
+----
+Output:
+[source,bash]
+----
+Current context is now local
+----
+
+[#get-context]
+==== Get Context
+
+include::../../build/_output/docs-gen/get_context.adoc[tag=text]
+
+*Examples*
+
+[source,bash]
+----
+cohctl get context
+----
+Output:
+[source,bash]
+----
+Current context: local
+----
+
+[#clear-context]
+==== Clear Context
+
+include::../../build/_output/docs-gen/clear_context.adoc[tag=text]
+
+*Examples*
+
+[source,bash]
+----
+cohctl clear context
+----
+Output:
+[source,bash]
+----
+Current context was cleared
+----
+
+=== See Also
+
+* xref:clusters.adoc[Clusters]
+
+
+
+

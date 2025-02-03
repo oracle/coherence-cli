@@ -1,0 +1,495 @@
+///////////////////////////////////////////////////////////////////////////////
+
+    Copyright (c) 2021, 2025 Oracle and/or its affiliates.
+    Licensed under the Universal Permissive License v 1.0 as shown at
+    https://oss.oracle.com/licenses/upl.
+
+///////////////////////////////////////////////////////////////////////////////
+
+= Topics
+
+== Topics
+
+=== Overview
+There are various commands that allow you to work with and manage cluster topics.
+
+* <<get-topics, `cohctl get topics`>> - displays topics for a cluster
+* <<describe-topic, `cohctl describe topic`>> - describe a topic
+* <<get-topic-members, `cohctl get topic-members`>> - displays members for a topic
+* <<get-topic-channels, `cohctl get topic-channels`>> - displays channel details for a topic, service and node
+* <<get-subscribers, `cohctl get subscribers`>> - displays subscribers for a topic and service
+* <<get-subscriber-channels, `cohctl get subscriber-channels`>> - displays channel details for a topic, service and subscriber
+* <<get-subscriber-groups, `cohctl get subscriber-groups`>> - displays subscriber-groups for a topic and service
+* <<get-sub-grp-channels, `cohctl get sub-grp-channels`>> - displays channel details for a topic, service, node and subscriber group
+* <<disconnect-all, `cohctl disconnect all`>> - instructs a topic to disconnect all subscribers for a topic or subscriber group
+
+Subscriber Specific Operations
+
+* <<connect-subscriber, `cohctl connect subscriber`>> - instructs a subscriber to ensure it is connected
+* <<disconnect-subscriber, `cohctl disconnect subscriber`>> - instructs a subscriber to disconnect and reset itself
+* <<retrieve-heads, `cohctl retrieve heads`>> - instructs a subscriber to retrieve the current head positions for each channel
+* <<retrieve-remaining, `cohctl retrieve remaining`>> - instructs a subscriber to retrieve the count of remaining messages for each channel
+* <<notify-populated, `cohctl notify populated`>> - instructs a subscriber to send a channel populated notification to this subscriber and channel
+
+NOTE: These topics commands are available to run against Coherence CE editions 22.06.4+, 23.03.+ and 24.03+ as well as
+Coherence Grid Edition 14.1.1.2206.4+.
+
+NOTE: In most commands you may omit the service name option if the topic name is unique.
+
+[#get-topics]
+==== Get Topics
+
+include::../../build/_output/docs-gen/get_topics.adoc[tag=text]
+
+*Examples*
+
+Display all topics.
+
+[source,bash]
+----
+cohctl get topics -c local
+----
+Output:
+[source,bash]
+----
+SERVICE           TOPIC             MEMBERS  CHANNELS  SUBSCRIBERS  PUBLISHED
+PartitionedTopic  private-messages        1        17            1          0
+PartitionedTopic  public-messages         1        17            1          0
+----
+
+[#describe-topic]
+==== Describe Topic
+
+include::../../build/_output/docs-gen/describe_topic.adoc[tag=text]
+
+[source,bash]
+----
+cohctl describe topic private-messages -s PartitionedTopic -c local
+----
+Output:
+[source,bash]
+----
+TOPIC DETAILS
+-------------
+Name           :  private-messages
+Service        :  PartitionedTopic
+Channels       :  17
+Members        :  1
+Published Count:  0
+Subscribers    :  1
+
+MEMBERS
+-------
+NODE ID  CHANNELS  PUBLISHED    MEAN   1 MIN   5 MIN  15 MIN
+      1        17          0  0.0000  0.0000  0.0000  0.0000
+
+SUBSCRIBERS
+-----------
+NODE ID  SUBSCRIBER ID  STATE      CHANNELS  SUBSCRIBER GROUP  RECEIVED  ERRORS  BACKLOG
+      1     5850459679  Connected        17  1                        0       0        0
+
+SUBSCRIBER GROUPS
+-----------------
+SUBSCRIBER GROUP  NODE ID  CHANNELS  POLLED    MEAN   1 MIN   5 MIN  15 MIN
+1                       1        17       0  0.0000  0.0000  0.0000  0.0000
+1                       2        17       0  0.0000  0.0000  0.0000  0.0000
+admin                   1        17       0  0.0000  0.0000  0.0000  0.0000
+admin                   2        17       0  0.0000  0.0000  0.0000  0.0000
+----
+
+[#get-topic-members]
+==== Get Topic Members
+
+include::../../build/_output/docs-gen/get_topic_members.adoc[tag=text]
+
+*Examples*
+
+Display all members for a topic using the wide option
+
+[source,bash]
+----
+cohctl get topic-members private-messages -s PartitionedTopic -o wide -c local
+----
+Output:
+[source,bash]
+----
+Service:  PartitionedTopic
+Topic:    private-messages
+
+NODE ID  CHANNELS  PUBLISHED    MEAN   1 MIN   5 MIN  15 MIN  SUB TIMEOUT  RECON TIMEOUT      WAIT  PAGE CAPACITY
+      1        17          0  0.0000  0.0000  0.0000  0.0000    300,000ms      300,000ms  10,000ms      1,048,576
+      2        17          0  0.0000  0.0000  0.0000  0.0000    300,000ms      300,000ms  10,000ms      1,048,576
+----
+
+[#get-topic-channels]
+==== Get Topic Channels
+
+include::../../build/_output/docs-gen/get_topic_channels.adoc[tag=text]
+
+*Examples*
+
+Display the channels for a topic, service and node.
+
+[source,bash]
+----
+cohctl get topic-members private-messages -s PartitionedTopic -c local
+----
+Output:
+[source,bash]
+----
+Service:  PartitionedTopic
+Topic:    private-messages
+
+NODE ID  CHANNELS  PUBLISHED    MEAN   1 MIN   5 MIN  15 MIN
+      4        17          0  0.0000  0.0000  0.0000  0.0000
+      5        17          0  0.0000  0.0000  0.0000  0.0000
+      6        17          0  0.0000  0.0000  0.0000  0.0000
+----
+
+[source,bash]
+----
+cohctl get topic-channels private-messages -s PartitionedTopic -n 4 -c local
+
+Service:      PartitionedTopic
+Topic:        private-messages
+Node ID:      4
+ChannelCount: 17
+
+CHANNEL  PUBLISHED    MEAN   1 MIN   5 MIN  15 MIN  TAIL
+      0          0  0.0000  0.0000  0.0000  0.0000  PagedPosition(page=-1, offset=2147483647)
+      1          0  0.0000  0.0000  0.0000  0.0000  PagedPosition(page=-1, offset=2147483647)
+      2          0  0.0000  0.0000  0.0000  0.0000  PagedPosition(page=-1, offset=2147483647)
+      3          0  0.0000  0.0000  0.0000  0.0000  PagedPosition(page=-1, offset=2147483647)
+      4          0  0.0000  0.0000  0.0000  0.0000  PagedPosition(page=-1, offset=2147483647)
+      5          0  0.0000  0.0000  0.0000  0.0000  PagedPosition(page=-1, offset=2147483647)
+      6          0  0.0000  0.0000  0.0000  0.0000  PagedPosition(page=-1, offset=2147483647)
+      7          0  0.0000  0.0000  0.0000  0.0000  PagedPosition(page=-1, offset=2147483647)
+      8          0  0.0000  0.0000  0.0000  0.0000  PagedPosition(page=-1, offset=2147483647)
+      9          0  0.0000  0.0000  0.0000  0.0000  PagedPosition(page=-1, offset=2147483647)
+     10          0  0.0000  0.0000  0.0000  0.0000  PagedPosition(page=-1, offset=2147483647)
+     11          0  0.0000  0.0000  0.0000  0.0000  PagedPosition(page=-1, offset=2147483647)
+     12          0  0.0000  0.0000  0.0000  0.0000  PagedPosition(page=-1, offset=2147483647)
+     13          0  0.0000  0.0000  0.0000  0.0000  PagedPosition(page=-1, offset=2147483647)
+     14          0  0.0000  0.0000  0.0000  0.0000  PagedPosition(page=-1, offset=2147483647)
+     15          0  0.0000  0.0000  0.0000  0.0000  PagedPosition(page=-1, offset=2147483647)
+     16          0  0.0000  0.0000  0.0000  0.0000  PagedPosition(page=-1, offset=2147483647)
+----
+
+[#get-subscribers]
+==== Get Subscribers
+
+include::../../build/_output/docs-gen/get_subscribers.adoc[tag=text]
+
+*Examples*
+
+Display the subscribers for a topic and service.
+
+[source,bash]
+----
+cohctl get subscribers private-messages -s PartitionedTopic -c local
+----
+Output:
+[source,bash]
+----
+Service:  PartitionedTopic
+Topic:    private-messages
+
+NODE ID  SUBSCRIBER ID  STATE      CHANNELS  SUBSCRIBER GROUP  RECEIVED  ERRORS  BACKLOG  TYPE     OWNED CHANNELS
+      4    17663538530  Connected      9/17  1                        0       0        0  Durable  0,1,2,3,4,5,6,7,16
+      5    23267662748  Connected      8/17  1                        0       0        0  Durable  8,9,10,11,12,13,14,15
+----
+
+
+[#get-subscriber-channels]
+==== Get Subscriber Channels
+
+include::../../build/_output/docs-gen/get_subscriber_channels.adoc[tag=text]
+
+*Examples*
+
+Display the subscribers channels for a topic, service and subscriber.
+
+[source,bash]
+----
+cohctl get subscribers private-messages -s PartitionedTopic -c local
+----
+Output:
+[source,bash]
+----
+Service:  PartitionedTopic
+Topic:    private-messages
+
+NODE ID  SUBSCRIBER ID  STATE      CHANNELS  SUBSCRIBER GROUP  RECEIVED  ERRORS  BACKLOG
+      4    17663538530  Connected        17  1                        0       0        0
+      5    23267662748  Connected        17  1                        0       0        0
+      6    26845397584  Connected        17  1                        0       0        0
+----
+
+[source,bash]
+----
+cohctl get subscriber-channels  private-messages -s PartitionedTopic -S 17663538530 -c local
+----
+Output:
+[source,bash]
+----
+Service:          PartitionedTopic
+Topic:            private-messages
+Node ID:          4
+ChannelCount:     17
+Subscriber Group: 17663538530
+
+CHANNEL  EMPTY  LAST COMMIT  LAST REC  OWNED  HEAD
+      0  true   null         null      true   PagedPosition(page=66, offset=0)
+      1  true   null         null      true   PagedPosition(page=66, offset=0)
+      2  true   null         null      true   PagedPosition(page=66, offset=0)
+      3  true   null         null      true   PagedPosition(page=66, offset=0)
+      4  true   null         null      true   PagedPosition(page=66, offset=0)
+      5  false  null         null      false  PagedPosition(page=66, offset=0)
+      6  false  null         null      false  PagedPosition(page=66, offset=0)
+      7  false  null         null      false  PagedPosition(page=66, offset=0)
+      8  false  null         null      false  PagedPosition(page=66, offset=0)
+      9  false  null         null      false  PagedPosition(page=66, offset=0)
+     10  false  null         null      false  PagedPosition(page=66, offset=0)
+     11  false  null         null      false  PagedPosition(page=66, offset=0)
+     12  false  null         null      false  PagedPosition(page=66, offset=0)
+     13  false  null         null      false  PagedPosition(page=66, offset=0)
+     14  false  null         null      false  PagedPosition(page=66, offset=0)
+     15  true   null         null      true   PagedPosition(page=66, offset=0)
+     16  false  null         null      false  PagedPosition(page=66, offset=0)
+----
+
+[#get-subscriber-groups]
+==== Get Subscriber Groups
+
+include::../../build/_output/docs-gen/get_subscriber_groups.adoc[tag=text]
+
+*Examples*
+
+Display the subscriber groups for a topic and service.
+
+[source,bash]
+----
+cohctl get subscriber-groups private-messages -s PartitionedTopic -c local
+----
+Output:
+[source,bash]
+----
+Service:  PartitionedTopic
+Topic:    private-messages
+
+SUBSCRIBER GROUP  NODE ID  CHANNELS  POLLED    MEAN   1 MIN   5 MIN  15 MIN
+1                       1        17       0  0.0000  0.0000  0.0000  0.0000
+1                       2        17       0  0.0000  0.0000  0.0000  0.0000
+1                       3        17       0  0.0000  0.0000  0.0000  0.0000
+admin                   1        17       0  0.0000  0.0000  0.0000  0.0000
+admin                   2        17       0  0.0000  0.0000  0.0000  0.0000
+admin                   3        17       0  0.0000  0.0000  0.0000  0.0000
+----
+
+[#get-sub-grp-channels]
+==== Get Subscriber Group Channels
+
+include::../../build/_output/docs-gen/get_sub_grp_channels.adoc[tag=text]
+
+*Examples*
+
+Display subscriber group channels a topic, service, node and subscriber group.
+
+[source,bash]
+----
+cohctl get sub-grp-channels private-messages -s PartitionedTopic -n 3 -G admin -c local
+----
+Output:
+[source,bash]
+----
+Service:          PartitionedTopic
+Topic:            private-messages
+Node ID:          3
+ChannelCount:     17
+Subscriber Group: admin
+
+CHANNEL  OWNING SUB  MEMBER  POLLED    MEAN   1 MIN   5 MIN  15 MIN  HEAD
+      0          -1      -1       0  0.0000  0.0000  0.0000  0.0000  PagedPosition(page=0, offset=0)
+      1          -1      -1       0  0.0000  0.0000  0.0000  0.0000  PagedPosition(page=0, offset=0)
+      2          -1      -1       0  0.0000  0.0000  0.0000  0.0000  PagedPosition(page=0, offset=0)
+      3          -1      -1       0  0.0000  0.0000  0.0000  0.0000  PagedPosition(page=0, offset=0)
+      4          -1      -1       0  0.0000  0.0000  0.0000  0.0000  PagedPosition(page=0, offset=0)
+      5          -1      -1       0  0.0000  0.0000  0.0000  0.0000  PagedPosition(page=0, offset=0)
+      6          -1      -1       0  0.0000  0.0000  0.0000  0.0000  PagedPosition(page=0, offset=0)
+      7          -1      -1       0  0.0000  0.0000  0.0000  0.0000  PagedPosition(page=0, offset=0)
+      8          -1      -1       0  0.0000  0.0000  0.0000  0.0000  PagedPosition(page=0, offset=0)
+      9          -1      -1       0  0.0000  0.0000  0.0000  0.0000  PagedPosition(page=0, offset=0)
+     10          -1      -1       0  0.0000  0.0000  0.0000  0.0000  PagedPosition(page=0, offset=0)
+     11          -1      -1       0  0.0000  0.0000  0.0000  0.0000  PagedPosition(page=0, offset=0)
+     12          -1      -1       0  0.0000  0.0000  0.0000  0.0000  PagedPosition(page=0, offset=0)
+     13          -1      -1       0  0.0000  0.0000  0.0000  0.0000  PagedPosition(page=0, offset=0)
+     14          -1      -1       0  0.0000  0.0000  0.0000  0.0000  PagedPosition(page=0, offset=0)
+     15          -1      -1       0  0.0000  0.0000  0.0000  0.0000  PagedPosition(page=0, offset=0)
+     16          -1      -1       0  0.0000  0.0000  0.0000  0.0000  PagedPosition(page=0, offset=0)
+----
+
+[#disconnect-all]
+==== Disconnect All
+
+include::../../build/_output/docs-gen/disconnect_all.adoc[tag=text]
+
+*Examples*
+
+Disconnect all subscribers for the topic 'sms-messages'.
+
+[source,bash]
+----
+cohctl disconnect all sms-messages -c local
+----
+Output:
+[source,bash]
+----
+Are you sure you want to issue 'disconnect all' for topic sms-messages and service PartitionedTopic? (y/n) y
+operation completed
+----
+
+Disconnect all subscribers for the topic 'sms-messages' and subscriber group 'sms-processor'.
+
+[source,bash]
+----
+cohctl disconnect all sms-messages -G sms-processor -c local
+----
+Output:
+[source,bash]
+----
+Are you sure you want to issue 'disconnect all' for topic sms-messages, service PartitionedTopic and subscriber group sms-processor? (y/n) y
+operation completed
+----
+
+[#connect-subscriber]
+==== Connect Subscriber
+
+include::../../build/_output/docs-gen/connect_subscriber.adoc[tag=text]
+
+*Example*
+
+[source,bash]
+----
+cohctl get subscribers public-messages -s PartitionedTopic -c local
+----
+Output:
+[source,bash]
+----
+Service:  PartitionedTopic
+Topic:    public-messages
+
+NODE ID  SUBSCRIBER ID  STATE      CHANNELS  SUBSCRIBER GROUP  RECEIVED  ERRORS  BACKLOG
+      4    17179869184  Connected        17  1                    7,406       0        0
+----
+
+[source,bash]
+----
+cohctl connect subscriber public-messages -s PartitionedTopic -S 17179869184 -c local
+----
+Output:
+[source,bash]
+----
+Are you sure you want to issue 'connect' for topic public-messages, service PartitionedTopic and subscriber 17179869184? (y/n) y
+operation completed
+----
+
+[#disconnect-subscriber]
+==== Disconnects Subscriber
+
+include::../../build/_output/docs-gen/disconnect_subscriber.adoc[tag=text]
+
+*Example*
+
+[source,bash]
+----
+cohctl dicconnect subscriber public-messages -s PartitionedTopic -S 17179869184 -c local
+----
+Output:
+[source,bash]
+----
+Are you sure you want to issue 'disconnect' for topic public-messages, service PartitionedTopic and subscriber 17179869184? (y/n) y
+operation completed
+----
+
+[#retrieve-heads]
+==== Retrieve Heads
+
+include::../../build/_output/docs-gen/retrieve_heads.adoc[tag=text]
+
+*Example*
+
+[source,bash]
+----
+cohctl retrieve heads public-messages -s PartitionedTopic -S 17179869184 -c local
+----
+Output:
+[source,bash]
+----
+Are you sure you want to issue 'retrieve current heads' for topic public-messages, service PartitionedTopic and subscriber 17179869184? (y/n) y
+
+Service:    PartitionedTopic
+Topic:      public-messages
+Subscriber: 17179869184
+
+CHANNEL  POSITION
+      0  PagedPosition(page=96, offset=3082)
+      1  PagedPosition(page=96, offset=3411)
+      2  PagedPosition(page=97, offset=0)
+      3  PagedPosition(page=97, offset=0)
+      4  PagedPosition(page=97, offset=0)
+      5  PagedPosition(page=97, offset=0)
+      6  PagedPosition(page=97, offset=0)
+      7  PagedPosition(page=97, offset=0)
+      8  PagedPosition(page=97, offset=0)
+      9  PagedPosition(page=97, offset=0)
+     10  PagedPosition(page=97, offset=0)
+     11  PagedPosition(page=97, offset=0)
+     12  PagedPosition(page=97, offset=0)
+     13  PagedPosition(page=96, offset=1953)
+     14  PagedPosition(page=96, offset=2037)
+     15  PagedPosition(page=96, offset=2405)
+     16  PagedPosition(page=96, offset=2625)
+----
+
+[#retrieve-remaining]
+==== Retrieve Remaining
+
+include::../../build/_output/docs-gen/retrieve_remaining.adoc[tag=text]
+
+*Example*
+
+[source,bash]
+----
+cohctl retrieve remaining public-messages -s  PartitionedTopic -S 17179869184 -c local
+----
+Output:
+[source,bash]
+----
+Are you sure you want to issue 'retrieve remaining messages' for topic public-messages, service PartitionedTopic and subscriber 17179869184? (y/n) y
+operation completed
+----
+
+[#notify-populated]
+==== Notify Populated
+
+include::../../build/_output/docs-gen/notify_populated.adoc[tag=text]
+
+*Example*
+[source,bash]
+----
+cohctl notify populated public-messages -s PartitionedTopic -S 17179869184 -C 16 -c local
+----
+Output:
+[source,bash]
+----
+Are you sure you want to issue 'notify populated' for topic public-messages, service PartitionedTopic, subscriber 17179869184 and channel 16? (y/n) y
+operation completed
+----
+
+=== See Also
+
+* xref:caches.adoc[Caches]
+* xref:services.adoc[Services]
+
+
+

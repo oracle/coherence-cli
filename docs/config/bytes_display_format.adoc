@@ -1,0 +1,82 @@
+///////////////////////////////////////////////////////////////////////////////
+
+    Copyright (c) 2022, 2025 Oracle and/or its affiliates.
+    Licensed under the Universal Permissive License v 1.0 as shown at
+    https://oss.oracle.com/licenses/upl.
+
+///////////////////////////////////////////////////////////////////////////////
+
+= Bytes Display Format
+
+== Bytes Display Format
+
+By default, any memory or disk based size value is displayed in bytes. You can use the following options on any command to change the display format:
+
+* `-k` or `--kb` - display in kilobytes (KB)
+* `-m` or `--mb` - display in megabytes (MB)
+* `-g` or `--gb` - display in gigabytes (GB)
+* `--tb` - display in terabytes (TB)
+
+For the purposes of display, units of 1024 are used to calculate the appropriate value. E.g. 1 KB = 1024 bytes.
+
+NOTE: Specifying the above options will override any default you have set below.
+
+=== Setting the Default Bytes Display Format
+
+If you prefer to always use a particular display format for output, you can use the following commands to control
+the default format:
+
+* <<set-bytes-format, `cohctl set bytes-format`>> - set the default bytes format
+* <<get-bytes-format, `cohctl get bytes-format`>> - display the current bytes format
+* <<clear-bytes-format, `cohctl clear bytes-format`>> - clear the current bytes format
+
+[#set-bytes-format]
+==== Set Default Bytes Format
+
+include::../../build/_output/docs-gen/set_bytes_format.adoc[tag=text]
+
+*Examples*
+
+[source,bash]
+----
+cohctl set bytes-format m
+----
+Output:
+[source,bash]
+----
+Bytes format is now set to m
+----
+
+[#get-bytes-format]
+==== Get Default Bytes Format
+
+include::../../build/_output/docs-gen/get_bytes_format.adoc[tag=text]
+
+*Examples*
+
+[source,bash]
+----
+cohctl get bytes-format
+----
+Output:
+[source,bash]
+----
+Current bytes format: m
+----
+
+[#clear-bytes-format]
+==== Clear Default Bytes Format
+
+include::../../build/_output/docs-gen/clear_bytes_format.adoc[tag=text]
+
+*Examples*
+
+[source,bash]
+----
+cohctl clear bytes-format
+----
+Output:
+[source,bash]
+----
+Default bytes format has been cleared
+----

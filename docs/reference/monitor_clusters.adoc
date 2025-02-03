@@ -1,0 +1,250 @@
+///////////////////////////////////////////////////////////////////////////////
+
+    Copyright (c) 2024, 2025 Oracle and/or its affiliates.
+    Licensed under the Universal Permissive License v 1.0 as shown at
+    https://oss.oracle.com/licenses/upl.
+
+///////////////////////////////////////////////////////////////////////////////
+
+= Monitor Clusters
+
+== Monitor Clusters
+
+=== Overview
+Experimental command to monitor clusters with text UI to show multiple panels.
+
+NOTE: The `monitor cluster` command is currently experimental only and may be changed or removed in the future
+
+* <<monitor-cluster, `cohctl monitor cluster`>> - monitors the cluster using text based UI
+* <<monitor-cluster-panels, `cohctl monitor cluster --show-panels`>> - shows all available panels
+* <<get-panels, `cohctl get panels`>> - displays the panels that have been created
+* <<add-panel, `cohctl add panel`>> - adds a panel to the list of panels that can be displayed
+* <<remove-panel, `cohctl remove panel`>> - removes a panel that has been created
+
+[#monitor-cluster]
+==== Monitor Cluster
+
+include::../../build/_output/docs-gen/monitor_cluster.adoc[tag=text]
+
+NOTE: You can also use `-o wide` to get wide output.
+
+*Examples*
+
+**Monitor a cluster using the default layout.**
+
+[source,bash,subs="attributes"]
+----
+cohctl monitor cluster local
+----
+Output:
+[source,bash,subs="attributes"]
+----
+ Coherence CLI: 2024-05-06 13:25:17 - Monitoring cluster local (22.06.8) ESC to quit (press key in [] or mouse to toggle expand, ? = help). (75.289463ms)
+┌─Members [1]─(trimmed)──────────────────────────────────────────┐┌─Health Summary [2]────────────────────────────────────────────┐
+│Total cluster members: 3                                        ││NAME                  SUB TYPE   MEMBERS  STARTED  LIVE  READY │
+│Storage enabled count: 3                                        ││$SYS:Config           Service          3        3     3      3 │
+│Departure count:       0                                        ││$SYS:HealthHttpProxy  Service          3        3     3      3 │
+│                                                                ││$SYS:SystemProxy      Service          3        3     3      3 │
+│Cluster Heap - Total: 768 MB Used: 221 MB Available: 547 MB (71.││Default               Coherence        3        3     3      3 │
+│Storage Heap - Total: 768 MB Used: 221 MB Available: 547 MB (71.││ManagementHttpProxy   Service          1        1     1      1 │
+│                                                                ││PartitionedCache      Service          3        3     3      3 │
+│NODE ID  ADDRESS     PORT   PROCESS  MEMBER     ROLE            ││PartitionedTopic      Service          3        3     3      3 │
+│      1  /127.0.0.1  50362    42980  storage-1  CoherenceServer ││Proxy                 Service          3        3     3      3 │
+│      2  /127.0.0.1  50363    42981  storage-2  CoherenceServer ││                                                               │
+└────────────────────────────────────────────────────────────────┘└───────────────────────────────────────────────────────────────┘
+┌─Services [3]─(trimmed)─────────────────────────────────────────┐┌─Caches [4]────────────────────────────────────────────────────┐
+│SERVICE NAME            TYPE              MEMBERS  STATUS HA  ST││                                                               │
+│"$SYS:Config"           DistributedCache        3  NODE-SAFE    ││  No Content                                                   │
+│"$SYS:HealthHttpProxy"  Proxy                   3  n/a          ││                                                               │
+│"$SYS:SystemProxy"      Proxy                   3  n/a          ││                                                               │
+│ManagementHttpProxy     Proxy                   1  n/a          ││                                                               │
+│PartitionedCache        DistributedCache        3  NODE-SAFE    ││                                                               │
+│PartitionedTopic        PagedTopic              3  NODE-SAFE    ││                                                               │
+│Proxy                   Proxy                   3  n/a          ││                                                               │
+└────────────────────────────────────────────────────────────────┘└───────────────────────────────────────────────────────────────┘
+┌─Proxy Servers [5]──────────────────────────────────────────────┐┌─HTTP Servers [6]──────────────────────────────────────────────┐
+│NODE ID  HOST IP              SERVICE NAME        CONNECTIONS  D││NODE ID  HOST IP        SERVICE NAME            SERVER TYPE    │
+│1        0.0.0.0:50362.40119  "$SYS:SystemProxy"            0   ││1        0.0.0.0:50402  "$SYS:HealthHttpProxy"  com.tangosol.co│
+│2        0.0.0.0:50363.49866  "$SYS:SystemProxy"            0   ││2        0.0.0.0:50401  "$SYS:HealthHttpProxy"  com.tangosol.co│
+│3        0.0.0.0:50364.59927  "$SYS:SystemProxy"            0   ││3        0.0.0.0:50406  "$SYS:HealthHttpProxy"  com.tangosol.co│
+│1        0.0.0.0:50362.34525  Proxy                         0   ││3        0.0.0.0:30000  ManagementHttpProxy     com.tangosol.co│
+│2        0.0.0.0:50363.58603  Proxy                         0   ││                                                               │
+│3        0.0.0.0:50364.55445  Proxy                         0   ││                                                               │
+│                                                                ││                                                               │
+└────────────────────────────────────────────────────────────────┘└───────────────────────────────────────────────────────────────┘
+┌─Network Stats [7]───────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│NODE ID  ADDRESS     PORT   PROCESS  MEMBER     ROLE             PKT SENT  PKT REC  RESENT  EFFICIENCY  SEND Q  DATA SENT  DATA R│
+│      1  /127.0.0.1  50362    42980  storage-1  CoherenceServer       259      314       2     100.00%       0       0 MB      0 │
+│      2  /127.0.0.1  50363    42981  storage-2  CoherenceServer       141      108       1     100.00%       0       0 MB      0 │
+│      3  /127.0.0.1  50364    42979  storage-0  CoherenceServer       149      113       0     100.00%       0       0 MB      0 │
+│                                                                                                                                 │
+│                                                                                                                                 │
+│                                                                                                                                 │
+│                                                                                                                                 │
+└─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+----
+
+You can press `?` to display the help which is shown below:
+[source,bash]
+----
+ Monitor Cluster CLI Help
+
+ - 'p' to toggle panel row padding
+ - '+' to increase max height of all panels
+ - '-' to decrease max height of all panels
+ - '0' to reset max height of all panels
+ - Key in [] or click mouse to expand that panel
+ - ESC / CTRL-C to exit monitoring
+
+Press any key to exit help.
+----
+
+NOTE: If the title of a panel includes "trimmed" it means there are more rows to display.
+You can press the key indicated in the `[]` to expand that panel. You can also click the mouse
+in the panel you wish to expand.
+
+**Monitor the cluster and specify the panels for services and caches on one line and then members on the next**
+
+[source,bash]
+----
+cohctl monitor cluster local -l services,caches:members
+----
+Output:
+[source,bash]
+----
+Coherence CLI: 2024-05-06 13:26:47 - Monitoring cluster local (22.06.8) ESC to quit (press key in [] or mouse to toggle expand, ? = help).
+
+┌─Services [1]─(trimmed)─────────────────────────────────────────┐┌─Caches [2]────────────────────────────────────────────────────┐
+│SERVICE NAME            TYPE              MEMBERS  STATUS HA  ST││Total Caches: 3, Total primary storage: 4 MB                   │
+│"$SYS:Config"           DistributedCache        3  NODE-SAFE    ││                                                               │
+│"$SYS:HealthHttpProxy"  Proxy                   3  n/a          ││SERVICE           CACHE  COUNT  SIZE                           │
+│"$SYS:SystemProxy"      Proxy                   3  n/a          ││PartitionedCache  test1    303  0 MB                           │
+│ManagementHttpProxy     Proxy                   1  n/a          ││PartitionedCache  test2     30  0 MB                           │
+│PartitionedCache        DistributedCache        4  NODE-SAFE    ││PartitionedCache  test3  4,004  4 MB                           │
+│PartitionedTopic        PagedTopic              3  NODE-SAFE    ││                                                               │
+│Proxy                   Proxy                   3  n/a          ││                                                               │
+└────────────────────────────────────────────────────────────────┘└───────────────────────────────────────────────────────────────┘
+┌─Members [3]─(trimmed)───────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│Total cluster members: 4                                                                                                         │
+│Storage enabled count: 3                                                                                                         │
+│Departure count:       0                                                                                                         │
+│                                                                                                                                 │
+│Cluster Heap - Total: 896 MB Used: 259 MB Available: 637 MB (71.1%)                                                              │
+│Storage Heap - Total: 768 MB Used: 237 MB Available: 531 MB (69.1%)                                                              │
+│                                                                                                                                 │
+│NODE ID  ADDRESS     PORT   PROCESS  MEMBER                         ROLE              STORAGE  MAX HEAP  USED HEAP  AVAIL HEAP   │
+│      1  /127.0.0.1  50362    42980  storage-1                      CoherenceServer   true       256 MB      44 MB      212 MB   │
+│      2  /127.0.0.1  50363    42981  storage-2                      CoherenceServer   true       256 MB      45 MB      211 MB   │
+└─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘----
+----
+
+**Monitor the cluster and specify the `default-cache` layout and specify the cache `test1`**
+
+[source,bash]
+----
+cohctl monitor cluster local -l default-cache -C test1
+----
+Output:
+[source,bash]
+----
+Coherence CLI: 2024-05-06 11:13:59 - Monitoring cluster local (22.06.8) ESC to quit (press key in [] or mouse to toggle expand, ? = help).
+
+┌─Caches [1]─────────────────────────────────────────────────────┐┌─Cache Indexes (PartitionedCache/test1) [2]────────────────────┐
+│Total Caches: 3, Total primary storage: 4 MB                    ││Total Indexing Bytes:  0                                       │
+│                                                                ││Total Indexing:        0 MB                                    │
+│SERVICE           CACHE  COUNT  SIZE                            ││Total Indexing Millis: 0                                       │
+│PartitionedCache  test1    303  0 MB                            │└───────────────────────────────────────────────────────────────┘
+│PartitionedCache  test2     30  0 MB                            │
+│PartitionedCache  test3  4,004  4 MB                            │
+└────────────────────────────────────────────────────────────────┘
+┌─Cache Access (PartitionedCache/test1) [3]───────────────────────────────────────────────────────────────────────────────────────┐
+│NODE ID  TIER   COUNT  SIZE  PUTS   GETS  REMOVES  CLEARS  EVICTIONS                                                             │
+│      1  back     102  0 MB   136  2,142        0       0          0                                                             │
+│      2  back     103  0 MB   135  2,163        0       0          0                                                             │
+│      3  back      98  0 MB   132  2,058        0       0          0                                                             │
+│      4  front      0  0 MB   403      0        0       0          0                                                             │
+└─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+┌─Cache Storage (PartitionedCache/test1) [4]──────────────────────────────────────────────────────────────────────────────────────┐
+│NODE ID  TIER   LOCKS GRANTED  LOCKS PENDING  KEY LISTENERS  FILTER LISTENERS  MAX QUERY MS  MAX QUERY DESC                      │
+│      1  back               0              0              0                 0             0                                      │
+│      2  back               0              0              0                 0             0                                      │
+│      3  back               0              0              0                 0             0                                      │
+│      4  front              0              0              0                 0             0                                      │
+└─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+┌─Cache Partitions (PartitionedCache/test1) [5]─(trimmed)─────────────────────────────────────────────────────────────────────────┐
+│Partitions:       167                                                                                                            │
+│Total Count:      303                                                                                                            │
+│Total Size:       0 MB                                                                                                           │
+│Max Entry Size:   1,160 (bytes)                                                                                                  │
+│Owning Partition: 0                                                                                                              │
+│                                                                                                                                 │
+│PARTITION  OWNING MEMBER  COUNT  SIZE  MAX ENTRY SIZE                                                                            │
+│        0              3      1  0 MB           1,160                                                                            │
+└─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+----
+
+NOTE: Any of the panels or layouts that specify `cache-*` or `service-*` must have the cache or service specified using
+`-C` or `-S` respectively.
+
+[#monitor-cluster-panels]
+==== Monitor Cluster Show Panels
+
+[source,bash]
+----
+cohctl monitor cluster --show-panels
+----
+Output:
+
+include::../../build/_output/docs-gen/monitor_cluster_panels.adoc[tag=text]
+
+[#get-panels]
+==== Get Panels
+
+include::../../build/_output/docs-gen/get_panels.adoc[tag=text]
+
+[source,bash]
+----
+cohctl get panels
+
+PANEL    LAYOUT
+caches   caches:services
+test     caches,services:persistence
+----
+
+NOTE: Added panels cant be used by specifying the `-l` option in the `monitor cluster` command.
+
+[#add-panel]
+==== Add Panel
+
+include::../../build/_output/docs-gen/add_panel.adoc[tag=text]
+
+[source,bash]
+----
+cohctl add panel my-panel -l "caches:services,persistence"
+
+Are you sure you want to add the panel my-panel with layout of [caches:services,persistence]? (y/n) y
+panel my-panel was added with layout [caches:services,persistence]
+----
+
+NOTE: Added panels cant be used by specifying the `-l` option on `monitor cluster` command.
+
+[#remove-panel]
+==== Remove Panel
+
+include::../../build/_output/docs-gen/remove_panel.adoc[tag=text]
+
+[source,bash]
+----
+cohctl remove panel my-panel
+
+Are you sure you want to remove the panel my-panel? (y/n) y
+panel my-panel was removed
+----
+
+=== See Also
+
+* xref:clusters.adoc[Clusters]
+
+
+
+

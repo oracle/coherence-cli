@@ -97,7 +97,9 @@ The CLI supports and is certified against the following Community and Commercial
 **Coherence Community Edition**
 * 24.09+
 * 22.06+
-* 14.1.1-0-12+
+* 14.1.2-0-+
+
+> Note: As CE 14.1.2-0-0 is out, CE 14.1.1-0+ is no longer supported or tested. Please use CE 14.1.2-0+
 
 **Coherence Grid/ Enterprise Edition**
 * 12.2.1.4.x - minimum patch level of 12.2.1.4.10+ required

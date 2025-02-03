@@ -1,0 +1,157 @@
+///////////////////////////////////////////////////////////////////////////////
+
+    Copyright (c) 2021, 2025 Oracle and/or its affiliates.
+    Licensed under the Universal Permissive License v 1.0 as shown at
+    https://oss.oracle.com/licenses/upl.
+
+///////////////////////////////////////////////////////////////////////////////
+
+= Using JSONPath
+
+== Using JSONPath
+
+JSONPath is a standard way to query elements of a JSON object. The Coherence CLI allows you to use JSONPath expressions
+to filter and select data when retrieving information.
+
+Below are some examples of how you could use JSONPath with the CLI. This is not an exhaustive list and the use is only limited by you imagination!
+
+NOTE: In the examples below, we are also using the https://github.com/stedolan/jq[jq] utility to format the JSON output.
+
+* <<cluster, Cluster Examples>>
+* <<services, Services Examples>>
+* <<members, Members Examples>>
+* <<caches, Caches Examples>>
+* <<http-proxy, Http Proxies Examples>>
+
+[#cluster]
+=== Cluster
+
+Retrieve the cluster name, version and cluster size from `cohctl describe cluster`.
+
+[source,bash]
+----
+cohctl describe cluster my-cluster -o jsonpath="$.cluster..['clusterName', 'version', 'clusterSize']"
+----
+Output:
+[source,bash]
+----
+["cluster1","21.12",2]
+----
+
+[#services]
+=== Services
+
+Get all service members where the requestAverageDuration > 10 millis.
+
+[source,bash]
+----
+cohctl get services -o jsonpath="$.items[?(@.requestAverageDuration > 10)]..['nodeId','name','requestAverageDuration']"  | jq
+----
+Output:
+[source,bash]
+----
+[
+  "6",
+  "PartitionedTopic",
+  11.815331,
+  "5",
+  "PartitionedTopic",
+  14.489567,
+  "10",
+  "PartitionedTopic",
+  11.648249,
+  "7",
+  "PartitionedCache",
+  13.946078
+]
+----
+
+[#members]
+=== Members
+
+Get all members where the available memory < 250MB
+
+[source,bash]
+----
+cohctl get members -o jsonpath="$.items[?(@.memoryAvailableMB < 250)]..['nodeId','memoryMaxMB','memoryAvailableMB']" | jq
+----
+Output:
+[source,bash]
+----
+[
+  "9",
+  256,
+  221
+]
+----
+
+[#caches]
+=== Caches
+
+Get caches where total puts > 10000.
+
+[source,bash]
+----
+cohctl get caches -o jsonpath="$.items[?(@.totalPuts > 10000)]..['service','name','totalPuts']" | jq
+----
+Output:
+[source,bash]
+----
+[
+  "PartitionedCache2",
+  "test-3",
+  2000000,
+  "PartitionedCache",
+  "test",
+  220000,
+  "PartitionedCache2",
+  "test-2",
+  23000
+]
+----
+
+[#http-proxy]
+=== Http Proxy Servers
+
+Get http proxy servers where total request count > 40.
+
+[source,bash]
+----
+cohctl get http-servers -o jsonpath="$.items[?(@.totalRequestCount > 15)]..['nodeId','name','totalRequestCount']"
+----
+Output:
+[source,bash]
+----
+["1","ManagementHttpProxy",45]
+----
+
+Get persistence where latency average > 0.020ms or 20 micros.
+
+[source,bash]
+----
+cohctl get persistence -o jsonpath="$.items[?(@.persistenceLatencyAverage > 0.020)]..['nodeId','name','persistenceLatencyAverage']" | jq
+----
+Output:
+[source,bash]
+----
+[
+  "4",
+  "PartitionedCache2",
+  0.027694767,
+  "3",
+  "PartitionedCache2",
+  0.029615732,
+  "2",
+  "PartitionedCache2",
+  0.027542727,
+  "1",
+  "PartitionedCache2",
+  0.02668317
+]
+----
+
+== See Also
+
+* https://earthly.dev/blog/jq-select/[An Introduction to JQ]
+* https://goessner.net/articles/JsonPath/[JSONPath examples]
+* xref:../about/quickstart.adoc[Run the Quick Start]
