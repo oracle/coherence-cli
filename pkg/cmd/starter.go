@@ -18,7 +18,7 @@ import (
 const (
 	framework         = "framework"
 	frameworkURL      = "https://raw.githubusercontent.com/oracle/coherence-cli/refs/heads/main/templates"
-	frameworkTypesURL = "https://raw.githubusercontent.com/oracle/coherence-cli/refs/heads/main/templates/templates.yaml"
+	frameworkTypesURL = frameworkURL + "/templates.yaml"
 )
 
 // FrameworkTemplate contains the contents read from the coherence-cli repository.

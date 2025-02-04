@@ -511,6 +511,13 @@ test-create-cluster: test-clean gotestsum $(BUILD_PROPS) ## Run create cluster t
 	./scripts/test-create-cluster.sh $(COHERENCE_VERSION)
 
 # ----------------------------------------------------------------------------------------------------------------------
+# Executes the Go create starter tests for standalone Coherence
+# ----------------------------------------------------------------------------------------------------------------------
+.PHONY: test-create-starter
+test-create-starter: test-clean $(BUILD_PROPS) ## Run create starter tests
+	./scripts/test-create-starter.sh
+
+# ----------------------------------------------------------------------------------------------------------------------
 # Executes the Go monitor cluster tests for standalone Coherence
 # ----------------------------------------------------------------------------------------------------------------------
 .PHONY: test-monitor-cluster
