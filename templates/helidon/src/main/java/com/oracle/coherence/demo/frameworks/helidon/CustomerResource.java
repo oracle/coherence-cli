@@ -30,7 +30,6 @@ import jakarta.ws.rs.core.Response;
 public class CustomerResource {
 
     @Inject
-    @Name("tasks")
     private NamedMap<Integer, Customer> customers;
 
     @POST
