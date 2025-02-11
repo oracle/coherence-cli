@@ -25,7 +25,7 @@
 
   <properties>
     <coherence.group.id>com.oracle.coherence.ce</coherence.group.id>
-    <coherence.version>24.09.2</coherence.version>
+    <coherence.version>24.09.3</coherence.version>
     <jackson.version>2.18.2</jackson.version>
     <java.version>21</java.version>
 
@@ -40,7 +40,7 @@
     <!-- Additional dependencies -->
     <hamcrest.version>3.0</hamcrest.version>
     <logback.version>1.5.15</logback.version>
-    <netty.version>4.1.115.Final</netty.version>
+    <netty.version>4.1.118.Final</netty.version>
     <jansi.version>2.4.1</jansi.version>
 
     <!-- Maven plugin properties -->
