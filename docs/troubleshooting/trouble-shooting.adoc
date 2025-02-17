@@ -23,6 +23,7 @@ This page will be updated and maintained over time to include common issues we s
 * <<windows, Issues setting reporter path on Windows>>
 * <<create, Issues creating or starting clusters using `cohctl create cluster`>>
 * <<completion, Issues using command completion with services, caches or topics with $ in the name>>
+* <<bash, Issues with command completion on Mac using bash>>
 
 [#bad]
 === Bad CPU type in executable on macOS
@@ -352,4 +353,30 @@ and enclose the name in single quote. For example:
 [source,bash]
 ----
 cohctl describe service '"$SYS:Config"'
+----
+
+
+[#bash]
+=== Issues with command completion on Mac using bash
+
+==== Problem
+
+When you are using `bash` and have setup command completion using instructions xref:../config/command_completion.adoc[here],
+and you receive this error:
+
+[source,bash]
+----
+bash: _get_comp_words_by_ref: command not found
+----
+
+==== Solution
+
+You should first install `bash-completion` using `brew`. See https://formulae.brew.sh/formula/bash-completion[https://formulae.brew.sh/formula/bash-completion].
+
+Then add the following to your `.bash_profile` which should resolve the issue:
+
+
+[source,bash]
+----
+[[ -r "$(brew --prefix)/etc/profile.d/bash_completion.sh" ]] && . "$(brew --prefix)/etc/profile.d/bash_completion.sh"
 ----
