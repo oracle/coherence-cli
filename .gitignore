@@ -39,3 +39,5 @@ build/
 shared/
 release/
 test/test_utils/certs/
+
+utils/linkcheck/go.sum

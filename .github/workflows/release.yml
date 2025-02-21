@@ -60,7 +60,12 @@ jobs:
 
     - name: Build Docs
       shell: bash
-      run: make docs
+      run: |
+        make docs
+        DIR=`pwd`
+        cd build/_output/docs
+        zip -r ../docs.zip *
+        cd $DIR
 
     - name: Build Binaries
       shell: bash
@@ -143,6 +148,16 @@ jobs:
         asset_path: ./bin/windows/arm/cohctl.exe
         asset_name: cohctl-${{ steps.version.outputs.version }}-windows-arm.exe
         asset_content_type: application/x-dosexec
+
+    - name: Upload docs.zip
+      uses: actions/upload-release-asset@v1
+      env:
+         GITHUB_TOKEN: ${{ github.token }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./build/_output/docs.zip
+        asset_name: docs.zip
+        asset_content_type: application/zip
 
     - uses: actions/upload-artifact@v4
       if: failure()
