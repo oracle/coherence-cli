@@ -36,6 +36,13 @@ Installing the Coherence CLI for your platform.
 Quick start guide to getting started with the Coherence CLI.
 --
 
+====
+
+== Configuration and Commands
+
+[PILLARS]
+====
+
 [CARD]
 .Configuration
 [icon=fa-cogs,link=../config/overview.adoc]
@@ -56,6 +63,13 @@ Coherence CLI Command Reference.
 --
 Securing CLI access.
 --
+
+====
+
+== Troubleshooting and Examples
+
+[PILLARS]
+====
 
 [CARD]
 .Troubleshooting
