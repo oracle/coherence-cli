@@ -23,10 +23,10 @@ jobs:
         coherenceVersion:
           - 22.06.10
           - 22.06.11
-          - 22.06.11-SNAPSHOT
+          - 22.06.12-SNAPSHOT
           - 14.1.2-0-1
-          - 14.1.2-0-1-SNAPSHOT
-          - 24.09.2
+          - 14.1.2-0-2-SNAPSHOT
+          - 24.09.3
         javaVersion:
           - 17
 

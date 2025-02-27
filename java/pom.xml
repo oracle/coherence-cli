@@ -45,7 +45,7 @@
     <!-- library dependency versions -->
     <version.lib.asciidoctor.diagram>2.2.1</version.lib.asciidoctor.diagram>
     <version.lib.commonjava.directory>1.0</version.lib.commonjava.directory>
-    <version.plugin.helidon-build-tools>4.0.15</version.plugin.helidon-build-tools>
+    <version.plugin.helidon-build-tools>4.0.16</version.plugin.helidon-build-tools>
     <version.plugin.jib>3.4.3</version.plugin.jib>
     <version.plugin.maven.assembly>3.3.0</version.plugin.maven.assembly>
     <version.plugin.maven.compiler>3.7.0</version.plugin.maven.compiler>
