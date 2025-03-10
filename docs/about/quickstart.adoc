@@ -113,10 +113,10 @@ Display the clusters
 cohctl get clusters
 ----
 Output:
-[source,bash]
+[source,bash,subs="attributes"]
 ----
-CONNECTION  TYPE  URL                                                  VERSION  CLUSTER NAME  CLUSTER TYPE  CTX  LOCAL
-local       http  http://localhost:30000/management/coherence/cluster  23.03    my-cluster    Standalone         false
+CONNECTION  TYPE  URL                                                  VERSION       CLUSTER NAME  CLUSTER TYPE  CTX  LOCAL
+local       http  http://localhost:30000/management/coherence/cluster  {coherence-version}    my-cluster    Standalone         false
 ----
 
 NOTE: If you are not using a Docker container, you can also use the `cohctl discover clusters` command to automatically discover clusters using the Name Service.
@@ -131,12 +131,12 @@ Now that the cluster connection is added, you can describe the cluster using the
 cohctl describe cluster local
 ----
 Output:
-[source,bash]
+[source,bash,subs="attributes"]
 ----
 CLUSTER
 -------
 Cluster Name:    my-cluster
-Version:         23.03
+Version:         {coherence-version}
 Cluster Size:    3
 License Mode:    Development
 Departure Count: 0
@@ -144,14 +144,14 @@ Running:         true
 
 MACHINES
 --------
-MACHINE        PROCESSORS    LOAD    TOTAL MEMORY    FREE MEMORY  % FREE  OS        ARCH    VERSION
-192.168.1.117           8  3.9067  34,359,738,368  1,671,991,296   4.87%  Mac OS X  x86_64  10.16
+MACHINE    PROCESSORS       LOAD    TOTAL MEMORY    FREE MEMORY  % FREE  OS        ARCH    VERSION
+localhost          12  3.1376953       49,152 MB         802 MB   1.63%  Mac OS X  aarch64  15.3.1
 
 MEMBERS
 -------
 Total cluster members: 3
-Cluster Heap - Total: 4,563,402,752 Used: 171,966,464 Available: 4,391,436,288 (96.2%)
-Storage Heap - Total: 4,294,967,296 Used: 117,440,512 Available: 4,177,526,784 (97.3%)
+Cluster Heap - Total: 768 MB Used: 170 MB Available: 598 MB (77.9%)
+Storage Heap - Total: 512 MB Used: 114 MB Available: 398 MB (77.7%)
 
 SERVICES
 --------
@@ -175,11 +175,11 @@ PartitionedCache               2  on-demand                    0      0.000ms   
 
 CACHES
 ------
-Total Caches: 2, Total primary storage: 19,030,328
+Total Caches: 2, Total primary storage: 13 MB
 
-SERVICE           CACHE       COUNT        SIZE
-PartitionedCache  customers  50,230  13,204,808
-PartitionedCache  orders      5,022   5,825,520
+SERVICE           CACHE       COUNT   SIZE
+PartitionedCache  customers  50,234  12 MB
+PartitionedCache  orders      1,234   1 MB
 
 TOPICS
 ------

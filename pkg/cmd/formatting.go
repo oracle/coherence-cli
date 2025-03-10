@@ -13,7 +13,7 @@ import (
 	"github.com/oracle/coherence-cli/pkg/config"
 	"github.com/oracle/coherence-cli/pkg/constants"
 	"github.com/oracle/coherence-cli/pkg/utils"
-	"github.com/oracle/coherence-go-client/coherence/discovery"
+	"github.com/oracle/coherence-go-client/v2/coherence/discovery"
 	"golang.org/x/term"
 	"golang.org/x/text/language"
 	"golang.org/x/text/message"

@@ -14,7 +14,7 @@ import (
 	"github.com/oracle/coherence-cli/pkg/constants"
 	"github.com/oracle/coherence-cli/pkg/fetcher"
 	"github.com/oracle/coherence-cli/pkg/utils"
-	"github.com/oracle/coherence-go-client/coherence/discovery"
+	"github.com/oracle/coherence-go-client/v2/coherence/discovery"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"os"
@@ -745,7 +745,7 @@ var (
 )
 
 const (
-	defaultCoherenceVersion = "22.06.11"
+	defaultCoherenceVersion = "14.1.2-0-1"
 	startClusterCommand     = "start cluster"
 	scaleClusterCommand     = "scale cluster"
 	stopClusterCommand      = "stop cluster"
