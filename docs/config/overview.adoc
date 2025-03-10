@@ -43,6 +43,10 @@ Changing configuration file locations.
 Changing how bytes values are displayed.
 --
 
+====
+
+[PILLARS]
+====
 [CARD]
 .Sorting Table Output
 [link=sorting_table_output.adoc]

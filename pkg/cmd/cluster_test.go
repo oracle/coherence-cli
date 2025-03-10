@@ -52,7 +52,7 @@ func TestGetMavenClasspath(t *testing.T) {
 	)
 	home, _ := os.UserHomeDir()
 
-	path, err := getMavenClasspath(ce, "coherence", "22.06.11", fileTypeJar)
+	path, err := getMavenClasspath(ce, "coherence", "14.1.2-0-1", fileTypeJar)
 	g.Expect(err).To(gomega.BeNil())
 	g.Expect(path).To(gomega.Equal(home + "/.m2/repository/com/oracle/coherence/ce/coherence/22.06.11/coherence-22.06.11.jar"))
 

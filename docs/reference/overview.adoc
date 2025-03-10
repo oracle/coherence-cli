@@ -43,6 +43,10 @@ Display and describe member information.
 Display and describe machine information.
 --
 
+====
+
+[PILLARS]
+====
 [CARD]
 .Services
 [link=services.adoc]
@@ -71,6 +75,11 @@ Display and describe view cache information.
 Display Topics information.
 --
 
+====
+
+[PILLARS]
+====
+
 [CARD]
 .Persistence
 [link=persistence.adoc]
@@ -98,6 +107,10 @@ Display and describe proxy server information.
 --
 Display and describe Http proxy server information.
 --
+====
+
+[PILLARS]
+====
 
 [CARD]
 .Elastic Data
@@ -127,18 +140,15 @@ Display and describe Executors.
 Display and manage Coherence reporters.
 --
 
+====
+
+[PILLARS]
+====
 [CARD]
 .Diagnostics
 [link=diagnostics.adoc]
 --
 Take multiple thread dumps, heap dumps or JFR's across members.
---
-
-[CARD]
-.Create Starter
-[link=create_starter.adoc]
---
-Create example starter Maven project integrating Coherence and various frameworks.
 --
 
 [CARD]
@@ -161,6 +171,10 @@ Look up various Name Service endpoints for a cluster.
 --
 Reset MBean Statistics for various resources.
 --
+====
+
+[PILLARS]
+====
 
 [CARD]
 .Miscellaneous
@@ -181,6 +195,13 @@ Experimental command to create development clusters.
 [link=monitor_clusters.adoc]
 --
 Experimental command to monitor clusters with text UI.
+--
+
+[CARD]
+.Create Starter
+[link=create_starter.adoc]
+--
+Experimental command to create example starter Maven project integrating Coherence and various frameworks.
 --
 
 ====

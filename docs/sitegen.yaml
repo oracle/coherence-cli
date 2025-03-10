@@ -10,10 +10,10 @@ engine:
       - "asciidoctor-diagram"
     attributes:
       plantumlconfig: "_plantuml-config.txt"
-      commercial-docs-base-url: "https://docs.oracle.com/en/middleware/standalone/coherence/14.1.1.2206"
+      commercial-docs-base-url: "https://docs.oracle.com/en/middleware/fusion-middleware/coherence/14.1.2"
       cli-version: "1.8.1"
-      coherence-version: "22.06.11"
-      coherence-default-version: "22.06.11"
+      coherence-version: "14.1.2-0-1"
+      coherence-default-version: "14.1.2-0-1"
 assets:
   - target: "/"
     includes:
@@ -104,12 +104,12 @@ backend:
             - "executors.adoc"
             - "reporters.adoc"
             - "diagnostics.adoc"
-            - "create_starter.adoc"
             - "health.adoc"
             - "reset.adoc"
             - "misc.adoc"
             - "create_clusters.adoc"
             - "monitor_clusters.adoc"
+            - "create_starter.adoc"
         - type: "PAGE"
           title: "Security"
           source: "docs/security/overview.adoc"
