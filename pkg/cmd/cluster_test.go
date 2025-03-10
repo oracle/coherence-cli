@@ -8,7 +8,7 @@ package cmd
 
 import (
 	"github.com/onsi/gomega"
-	"github.com/oracle/coherence-go-client/coherence/discovery"
+	"github.com/oracle/coherence-go-client/v2/coherence/discovery"
 	"os"
 	"testing"
 )

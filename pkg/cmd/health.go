@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, 2024 Oracle and/or its affiliates.
+ * Copyright (c) 2022, 2025 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -12,7 +12,7 @@ import (
 	"fmt"
 	"github.com/oracle/coherence-cli/pkg/config"
 	"github.com/oracle/coherence-cli/pkg/fetcher"
-	"github.com/oracle/coherence-go-client/coherence/discovery"
+	"github.com/oracle/coherence-go-client/v2/coherence/discovery"
 	"github.com/spf13/cobra"
 	"net/url"
 	"strings"
