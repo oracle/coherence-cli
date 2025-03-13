@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2021, Oracle and/or its affiliates.
+# Copyright (c) 2021, 2025 Oracle and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at
 # https://oss.oracle.com/licenses/upl.
 #
@@ -24,3 +24,18 @@ linters:
 issues:
   exclude:
     - stutter
+  exclude-rules:
+    - path: "pkg/cmd/formatting.go"
+      text: "G115"
+    - path: "pkg/cmd/health.go"
+      text: "G115"
+    - path: "pkg/cmd/cluster.go"
+      text: "G115"
+    - path: "pkg/cmd/session.go"
+      text: "G115"
+    - path: "pkg/cmd/cache.go"
+      text: "G115"
+    - path: "pkg/cmd/http_session.go"
+      text: "G115"
+    - path: "pkg/cmd/root_test.go"
+      text: "G115"

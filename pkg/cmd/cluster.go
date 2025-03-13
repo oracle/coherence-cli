@@ -1574,7 +1574,7 @@ func acceptConnection(cmd *cobra.Command, message string) (string, error) {
 }
 
 // acceptIntegerValue accepts and integer value in the range specified
-func acceptIntegerValue(cmd *cobra.Command, message string, min, max int) (int, error) {
+func acceptIntegerValue(cmd *cobra.Command, message string, minValue, maxValue int) (int, error) {
 	var (
 		response string
 		err      error
@@ -1587,8 +1587,8 @@ func acceptIntegerValue(cmd *cobra.Command, message string, min, max int) (int, 
 			return 0, err
 		}
 		value, err = strconv.Atoi(response)
-		if err != nil || value < min || value > max {
-			cmd.Printf("Please enter a value between %d and %d\n", min, max)
+		if err != nil || value < minValue || value > maxValue {
+			cmd.Printf("Please enter a value between %d and %d\n", minValue, maxValue)
 		} else {
 			return value, nil
 		}

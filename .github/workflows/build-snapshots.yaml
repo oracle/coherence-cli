@@ -1,4 +1,4 @@
-# Copyright 2021, 2024 Oracle Corporation and/or its affiliates.
+# Copyright 2021, 2025 Oracle Corporation and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at
 # https://oss.oracle.com/licenses/upl.
 
@@ -63,7 +63,7 @@ jobs:
     - name: Set up Go
       uses: actions/setup-go@v5
       with:
-        go-version: '1.22'
+        go-version: '1.23'
 
     - name: Verify Coherence CLI
       env:
