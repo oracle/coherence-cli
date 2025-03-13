@@ -70,6 +70,7 @@ const (
 	dataSent              = "DATA SENT"
 	dataRec               = "DATA REC"
 	http200               = "200"
+	backlogMillis         = "BACKLOG MS"
 )
 
 var (
@@ -197,7 +198,7 @@ func FormatFederationDetails(federationDetails []config.FederationDescription, t
 		}
 	} else { // WIDE
 		if target == destinations {
-			finalAlignment = []string{R, L, R, R, R, R, R, R, R, R, R, R, R, R}
+			finalAlignment = []string{R, L, R, R, R, R, R, R, R, R, R, R, R, R, R}
 		} else {
 			finalAlignment = []string{R, R, R, R, R, R, R}
 		}
@@ -216,10 +217,11 @@ func FormatFederationDetails(federationDetails []config.FederationDescription, t
 	if OutputFormat == constants.WIDE {
 		if target == destinations {
 			table.AddHeaderColumns(avgApply, "AVG ROUND TRIP", avgBacklogDelay, "REPLICATE",
-				partitions, "ERRORS", "UNACKED", "RETRIES")
+				partitions, "ERRORS", "UNACKED", "RETRIES", backlogMillis)
 			table.AddFormattingFunction(11, errorFormatter)
 			table.AddFormattingFunction(12, errorFormatter)
 			table.AddFormattingFunction(13, errorFormatter)
+			table.AddFormattingFunction(14, errorFormatter)
 		} else {
 			table.AddHeaderColumns(avgApply, avgBacklogDelay)
 		}
@@ -269,6 +271,7 @@ func FormatFederationDetails(federationDetails []config.FederationDescription, t
 					formatLargeInteger(value.ReplicateAllPartitionErrorCount),
 					formatLargeInteger(value.TotalReplicateAllPartitionsUnacked),
 					formatLargeInteger(value.TotalRetryResponses),
+					formatLargeInteger(value.TransportBackloggedTime),
 				)
 			} else {
 				table.AddColumnsToRow(
@@ -313,7 +316,7 @@ func FormatFederationSummary(federationSummaries []config.FederationSummary, tar
 		}
 	} else { // WIDE
 		if target == destinations {
-			finalAlignment = []string{L, L, R, L, R, R, R, R, R, R, R, R, R, R, R}
+			finalAlignment = []string{L, L, R, L, R, R, R, R, R, R, R, R, R, R, R, R}
 		} else {
 			finalAlignment = []string{L, L, R, R, R, R, R, R}
 		}
@@ -342,9 +345,10 @@ func FormatFederationSummary(federationSummaries []config.FederationSummary, tar
 	if OutputFormat == constants.WIDE {
 		if target == destinations {
 			table.AddHeaderColumns(avgApply, "AVG ROUND TRIP", avgBacklogDelay, "REPLICATE",
-				partitions, "ERRORS", "UNACKED")
+				partitions, "ERRORS", "UNACKED", backlogMillis)
 			table.AddFormattingFunction(13, errorFormatter)
 			table.AddFormattingFunction(14, errorFormatter)
+			table.AddFormattingFunction(15, errorFormatter)
 		} else {
 			table.AddHeaderColumns(avgApply, avgBacklogDelay)
 		}
@@ -396,6 +400,7 @@ func FormatFederationSummary(federationSummaries []config.FederationSummary, tar
 					formatLargeInteger(int64(value.ReplicateAllPartitionCount.Sum)),
 					formatLargeInteger(int64(value.ReplicateAllPartitionErrorCount.Sum)),
 					formatLargeInteger(int64(value.TotalReplicateAllPartitionsUnacked.Sum)),
+					formatLargeInteger(int64(value.TransportBackloggedTime.Sum)),
 				)
 			} else {
 				table.AddColumnsToRow(
