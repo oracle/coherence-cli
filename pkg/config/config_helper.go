@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, 2024 Oracle and/or its affiliates.
+ * Copyright (c) 2021, 2025 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -330,6 +330,9 @@ type FederationSummary struct {
 	ReplicateAllPartitionCount         StatsSummary `json:"replicateAllPartitionCount"`
 	ReplicateAllPartitionErrorCount    StatsSummary `json:"replicateAllPartitionErrorCount"`
 	TotalReplicateAllPartitionsUnacked StatsSummary `json:"totalReplicateAllPartitionsUnacked"`
+
+	// 15.1.1.0
+	TransportBackloggedTime StatsSummary `json:"transportBackloggedTime"`
 }
 
 // FederationDescription contains federation description details.
@@ -359,6 +362,9 @@ type FederationDescription struct {
 
 	// addition mapMembers from 14.1.2+
 	MapMembers map[string]string `json:"mapMembers"`
+
+	// 15.1.1.0
+	TransportBackloggedTime int64 `json:"transportBackloggedTime"`
 }
 
 // ServiceMemberDetails contains service members details.
