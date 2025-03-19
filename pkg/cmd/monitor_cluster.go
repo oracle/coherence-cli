@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Oracle and/or its affiliates.
+ * Copyright (c) 2024, 2025 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -1464,4 +1464,5 @@ func init() {
 	monitorClusterCmd.Flags().StringVarP(&selectedTopic, "topic-name", "T", "", "topic name")
 	monitorClusterCmd.Flags().Int64VarP(&subscriber, "subscriber-id", "B", 0, "subscriber")
 	monitorClusterCmd.Flags().IntVarP(&setMaxHeight, "max-height", "M", 0, "override max height for all panels")
+	monitorClusterCmd.Flags().BoolVarP(&ignoreSpecialCaches, "ignore-special", "", false, ignoreCachesDescription)
 }

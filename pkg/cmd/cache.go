@@ -930,13 +930,11 @@ func formatCachesSummary(serviceList []string, dataFetcher fetcher.Fetcher) (str
 		allCachesSummary = finalList
 	}
 	value := FormatCacheSummary(allCachesSummary)
-	if err != nil {
-		return "", err
-	}
-	return value, err
+	return value, nil
 }
 
-var specialCacheNames = []string{"executor-assignments", "executor-tasks", "executor-executors"}
+var specialCacheNames = []string{"executor-assignments", "executor-tasks", "executor-executors",
+	"locks-exclusive", "locks-read-write", "semaphores"}
 
 // isSpecialCache returns true if a cache is a "special" or internal cache
 func isSpecialCache(cacheName string) bool {
@@ -1169,7 +1167,7 @@ func findServiceForCacheOrTopic(dataFetcher fetcher.Fetcher, cacheName, serviceT
 
 func init() {
 	getCachesCmd.Flags().StringVarP(&serviceName, serviceNameOption, serviceNameOptionShort, "", serviceNameDescription)
-	getCachesCmd.Flags().BoolVarP(&ignoreSpecialCaches, "ignore-special", "I", false, "ignore caches with $ in name")
+	getCachesCmd.Flags().BoolVarP(&ignoreSpecialCaches, "ignore-special", "I", false, ignoreCachesDescription)
 
 	describeCacheCmd.Flags().StringVarP(&serviceName, serviceNameOption, serviceNameOptionShort, "", serviceNameDescription)
 	describeViewCacheCmd.Flags().StringVarP(&serviceName, serviceNameOption, serviceNameOptionShort, "", serviceNameDescription)

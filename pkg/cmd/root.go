@@ -51,9 +51,10 @@ const (
 	connectionNameOption         = "connection"
 	clusterNameOptionShort       = "c"
 
-	serviceNameDescription = "Service name"
-	serviceNameOption      = "service"
-	serviceNameOptionShort = "s"
+	serviceNameDescription  = "Service name"
+	serviceNameOption       = "service"
+	serviceNameOptionShort  = "s"
+	ignoreCachesDescription = "ignore system caches or caches with $"
 
 	userNameDescription = "basic auth username if authentication is required"
 	usernameOption      = "username"
