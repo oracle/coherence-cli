@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, 2024 Oracle and/or its affiliates.
+ * Copyright (c) 2021, 2025 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -159,38 +159,50 @@ The allowable values are ` + ram + ` or ` + flash + `.`,
 			return ErrInvalidType
 		}
 
-		result, err = dataFetcher.GetElasticDataDetails(queryType)
-		if err != nil {
-			return err
-		}
+		for {
+			result, err = dataFetcher.GetElasticDataDetails(queryType)
+			if err != nil {
+				return err
+			}
 
-		if len(result) == 0 {
-			return errors.New(noElasticData)
-		}
+			if len(result) == 0 {
+				return errors.New(noElasticData)
+			}
 
-		if isJSONPathOrJSON() {
-			return processJSONOutput(cmd, result)
-		}
+			if isJSONPathOrJSON() {
+				return processJSONOutput(cmd, result)
+			}
 
-		if len(result) == 0 {
-			return nil
-		}
+			if len(result) == 0 {
+				return nil
+			}
 
-		err = json.Unmarshal(result, &edValues)
-		if err != nil {
-			return utils.GetError("unable to elastic data details", err)
-		}
-		cmd.Println(FormatCurrentCluster(connection))
+			err = json.Unmarshal(result, &edValues)
+			if err != nil {
+				return utils.GetError("unable to elastic data details", err)
+			}
 
-		cmd.Println(header)
-		headerLen := len(header)
-		underline := make([]byte, headerLen)
-		for i := 0; i < headerLen; i++ {
-			underline[i] = '-'
-		}
-		cmd.Println(string(underline))
+			printWatchHeader(cmd)
+			cmd.Println(FormatCurrentCluster(connection))
 
-		cmd.Println(FormatElasticData(edValues.ElasticData, false))
+			cmd.Println(header)
+			headerLen := len(header)
+			underline := make([]byte, headerLen)
+			for i := 0; i < headerLen; i++ {
+				underline[i] = '-'
+			}
+			cmd.Println(string(underline))
+
+			cmd.Println(FormatElasticData(edValues.ElasticData, false))
+
+			// check to see if we should exit if we are not watching
+			if !isWatchEnabled() {
+				break
+			}
+
+			// we are watching so sleep and then repeat until CTRL-C
+			time.Sleep(time.Duration(watchDelay) * time.Second)
+		}
 
 		return nil
 	},

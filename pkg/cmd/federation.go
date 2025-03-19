@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, 2024 Oracle and/or its affiliates.
+ * Copyright (c) 2021, 2025 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -296,49 +296,60 @@ service, type and participant. Specify -T to set type outgoing or incoming and -
 			return err
 		}
 
-		results, err := retrieveFederationDetails(dataFetcher, service, describeFederationType)
-		if err != nil {
-			return err
-		}
-
-		if isJSONPathOrJSON() {
-			finalData := encodeFinalData(results)
-
-			if err = processJSONOutput(cmd, finalData); err != nil {
+		for {
+			results, err := retrieveFederationDetails(dataFetcher, service, describeFederationType)
+			if err != nil {
 				return err
 			}
-		} else {
-			var sb strings.Builder
 
-			sb.WriteString(FormatCurrentCluster(connection))
+			if isJSONPathOrJSON() {
+				finalData := encodeFinalData(results)
 
-			sb.WriteString("\nFEDERATION DETAILS\n")
-			sb.WriteString("------------------\n")
+				if err = processJSONOutput(cmd, finalData); err != nil {
+					return err
+				}
+			} else {
+				var sb strings.Builder
 
-			sb.WriteString(fmt.Sprintf("Service:     %s\n", service))
-			sb.WriteString(fmt.Sprintf("Type:        %s\n", describeFederationType))
-			sb.WriteString(fmt.Sprintf("Participant: %s\n\n", participant))
+				printWatchHeader(cmd)
+				sb.WriteString(FormatCurrentCluster(connection))
 
-			if verboseOutput {
-				for _, v := range results {
-					output, err = FormatJSONForDescribe(v, true,
-						"Node Id", "Service", "Name", "Type")
+				sb.WriteString("\nFEDERATION DETAILS\n")
+				sb.WriteString("------------------\n")
+
+				sb.WriteString(fmt.Sprintf("Service:     %s\n", service))
+				sb.WriteString(fmt.Sprintf("Type:        %s\n", describeFederationType))
+				sb.WriteString(fmt.Sprintf("Participant: %s\n\n", participant))
+
+				if verboseOutput {
+					for _, v := range results {
+						output, err = FormatJSONForDescribe(v, true,
+							"Node Id", "Service", "Name", "Type")
+						if err != nil {
+							return err
+						}
+						sb.WriteString(output + "\n")
+					}
+				} else {
+					// not verbose output so unmarshall the original results
+					federationData, err := decodeFederationData(results)
 					if err != nil {
 						return err
 					}
-					sb.WriteString(output + "\n")
-				}
-			} else {
-				// not verbose output so unmarshall the original results
-				federationData, err := decodeFederationData(results)
-				if err != nil {
-					return err
+
+					sb.WriteString(FormatFederationDetails(federationData, describeFederationType))
 				}
 
-				sb.WriteString(FormatFederationDetails(federationData, describeFederationType))
+				cmd.Println(sb.String())
+
+				// check to see if we should exit if we are not watching
+				if !isWatchEnabled() {
+					break
+				}
+
+				// we are watching so sleep and then repeat until CTRL-C
+				time.Sleep(time.Duration(watchDelay) * time.Second)
 			}
-
-			cmd.Println(sb.String())
 		}
 
 		return nil
