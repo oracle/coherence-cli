@@ -168,93 +168,105 @@ You can specify '-o wide' to display addition information.`,
 			return fmt.Errorf(cannotFindService, serviceName)
 		}
 
-		cacheResult, err = dataFetcher.GetCacheMembers(serviceName, cacheName)
-		if err != nil {
-			return err
-		}
-
-		if string(cacheResult) == "{}" || len(cacheResult) == 0 {
-			return fmt.Errorf(cannotFindCache, cacheName, serviceName)
-		}
-
-		if strings.Contains(OutputFormat, constants.JSONPATH) {
-			result, err := utils.GetJSONPathResults(cacheResult, OutputFormat)
-			if err != nil {
-				return err
-			}
-			cmd.Println(result)
-		} else if OutputFormat == constants.JSON {
-			cmd.Println(string(cacheResult))
-		} else {
-			var sb strings.Builder
-			sb.WriteString(FormatCurrentCluster(connection))
-
-			// retrieve some header information
-			err := json.Unmarshal(cacheResult, &cacheDetailsGeneric)
+		for {
+			cacheResult, err = dataFetcher.GetCacheMembers(serviceName, cacheName)
 			if err != nil {
 				return err
 			}
 
-			if len(cacheDetailsGeneric.Details) == 0 {
-				return fmt.Errorf("no members found for cache %s and service %s", cacheName, serviceName)
+			if string(cacheResult) == "{}" || len(cacheResult) == 0 {
+				return fmt.Errorf(cannotFindCache, cacheName, serviceName)
 			}
 
-			// retrieve a storage enabled back tier to retrieve header details from
-			for _, v := range cacheDetailsGeneric.Details {
-				vCast := v.(map[string]interface{})
-				if vCast["tier"] == back {
-					jsonData, err = json.Marshal(vCast)
-					if err != nil {
-						return utils.GetError("unable tun unmarshall back tier", err)
+			if strings.Contains(OutputFormat, constants.JSONPATH) {
+				result, err := utils.GetJSONPathResults(cacheResult, OutputFormat)
+				if err != nil {
+					return err
+				}
+				cmd.Println(result)
+			} else if OutputFormat == constants.JSON {
+				cmd.Println(string(cacheResult))
+			} else {
+				var sb strings.Builder
+
+				printWatchHeader(cmd)
+				sb.WriteString(FormatCurrentCluster(connection))
+
+				// retrieve some header information
+				err := json.Unmarshal(cacheResult, &cacheDetailsGeneric)
+				if err != nil {
+					return err
+				}
+
+				if len(cacheDetailsGeneric.Details) == 0 {
+					return fmt.Errorf("no members found for cache %s and service %s", cacheName, serviceName)
+				}
+
+				// retrieve a storage enabled back tier to retrieve header details from
+				for _, v := range cacheDetailsGeneric.Details {
+					vCast := v.(map[string]interface{})
+					if vCast["tier"] == back {
+						jsonData, err = json.Marshal(vCast)
+						if err != nil {
+							return utils.GetError("unable tun unmarshall back tier", err)
+						}
 					}
 				}
+
+				sb.WriteString("\nCACHE DETAILS\n")
+				sb.WriteString("-------------\n")
+				value, err := FormatJSONForDescribe(jsonData, false,
+					"Service", "Name", "Type", "Description", "Cache Store Type")
+				if err != nil {
+					return err
+				}
+
+				sb.WriteString(value)
+
+				err = json.Unmarshal(cacheResult, &cacheDetails)
+				if err != nil {
+					return utils.GetError("unable to unmarshall cache result", err)
+				}
+
+				value = FormatCacheDetailsSizeAndAccess(cacheDetails.Details)
+
+				sb.WriteString("\nCACHE SIZE AND ACCESS DETAILS\n")
+				sb.WriteString("-----------------------------\n")
+				sb.WriteString(value)
+
+				value = FormatCacheDetailsStorage(cacheDetails.Details)
+
+				sb.WriteString("\nCACHE STORAGE DETAILS\n")
+				sb.WriteString("---------------------\n")
+				sb.WriteString(value)
+
+				sb.WriteString("\nINDEX DETAILS\n")
+				sb.WriteString("-------------\n")
+				sb.WriteString(FormatCacheIndexDetails(cacheDetails.Details))
+
+				if err = json.Unmarshal(cacheResult, &cacheStoreDetails); err != nil {
+					return utils.GetError("unable to unmarshall storage result", err)
+				}
+
+				if hasCacheStores(cacheStoreDetails.Details) {
+					sb.WriteString("\nCACHE STORE DETAILS\n")
+					sb.WriteString("-------------------\n")
+
+					// remove any values where tier != "back"
+					finalDetails := ensureTierBack(cacheStoreDetails.Details)
+					sb.WriteString(FormatCacheStoreDetails(finalDetails, cacheName, serviceName, false))
+				}
+
+				cmd.Println(sb.String())
+
+				// check to see if we should exit if we are not watching
+				if !isWatchEnabled() {
+					break
+				}
+
+				// we are watching so sleep and then repeat until CTRL-C
+				time.Sleep(time.Duration(watchDelay) * time.Second)
 			}
-
-			sb.WriteString("\nCACHE DETAILS\n")
-			sb.WriteString("-------------\n")
-			value, err := FormatJSONForDescribe(jsonData, false,
-				"Service", "Name", "Type", "Description", "Cache Store Type")
-			if err != nil {
-				return err
-			}
-
-			sb.WriteString(value)
-
-			err = json.Unmarshal(cacheResult, &cacheDetails)
-			if err != nil {
-				return utils.GetError("unable to unmarshall cache result", err)
-			}
-
-			value = FormatCacheDetailsSizeAndAccess(cacheDetails.Details)
-
-			sb.WriteString("\nCACHE SIZE AND ACCESS DETAILS\n")
-			sb.WriteString("-----------------------------\n")
-			sb.WriteString(value)
-
-			value = FormatCacheDetailsStorage(cacheDetails.Details)
-
-			sb.WriteString("\nCACHE STORAGE DETAILS\n")
-			sb.WriteString("---------------------\n")
-			sb.WriteString(value)
-
-			sb.WriteString("\nINDEX DETAILS\n")
-			sb.WriteString("-------------\n")
-			sb.WriteString(FormatCacheIndexDetails(cacheDetails.Details))
-
-			if err = json.Unmarshal(cacheResult, &cacheStoreDetails); err != nil {
-				return utils.GetError("unable to unmarshall storage result", err)
-			}
-
-			if hasCacheStores(cacheStoreDetails.Details) {
-				sb.WriteString("\nCACHE STORE DETAILS\n")
-				sb.WriteString("-------------------\n")
-
-				// remove any values where tier != "back"
-				finalDetails := ensureTierBack(cacheStoreDetails.Details)
-				sb.WriteString(FormatCacheStoreDetails(finalDetails, cacheName, serviceName, false))
-			}
-
-			cmd.Println(sb.String())
 		}
 
 		return nil
