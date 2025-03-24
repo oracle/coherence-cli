@@ -18,9 +18,13 @@ fi
 
 VERSION=$1
 
-CONFIG_DIR=/tmp/$$.create
+# Use WORKSPACE directory if running under Jenkins
+TEMP_DIR=/tmp
+[ ! -z "$WORKSPACE" ] && TEMP_DIR=$WORKSPACE
+
+CONFIG_DIR=${TEMP_DIR}/$$.create
 DIR=`pwd`
-OUTPUT=/tmp/$$.output
+OUTPUT=${TEMP_DIR}/$$.output
 
 mkdir -p ${CONFIG_DIR}
 trap "rm -rf ${CONFIG_DIR} $OUTPUT" EXIT SIGINT

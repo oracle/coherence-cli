@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #
-# Copyright (c) 2024 Oracle and/or its affiliates.
+# Copyright (c) 2024, 2025 Oracle and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at
 # https://oss.oracle.com/licenses/upl.
 #
@@ -17,9 +17,13 @@ fi
 
 VERSION=$1
 
-export CONFIG_DIR=/tmp/$$.create
+# Use WORKSPACE directory if running under Jenkins
+TEMP_DIR=/tmp
+[ ! -z "$WORKSPACE" ] && TEMP_DIR=$WORKSPACE
+
+export CONFIG_DIR=${TEMP_DIR}/$$.create
 export DIR=`pwd`
-OUTPUT=/tmp/$$.output
+OUTPUT=${TEMP_DIR}/$$.output
 
 mkdir -p ${CONFIG_DIR}
 trap "rm -rf $CONFIG_DIR $OUTPUT" EXIT SIGINT

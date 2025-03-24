@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #
-# Copyright (c) 2022, 2024 Oracle and/or its affiliates.
+# Copyright (c) 2022, 2025 Oracle and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at
 # https://oss.oracle.com/licenses/upl.
 #
@@ -20,13 +20,17 @@ if [ $# -ne 1 ] ; then
    exit
 fi
 
+# Use WORKSPACE directory if running under Jenkins
+TEMP_DIR=/tmp
+[ ! -z "$WORKSPACE" ] && TEMP_DIR=$WORKSPACE
+
 URL=$1
-CONFIG_DIR=/tmp/$$.weblogic
+CONFIG_DIR=${TEMP_DIR}/$$.weblogic
 DIR=`pwd`
-OUTPUT=/tmp/$$.output
+OUTPUT=${TEMP_DIR}/$$.output
 
 mkdir -p ${CONFIG_DIR}
-trap "cp ${CONFIG_DIR}/cohctl.log /tmp; rm -rf ${CONFIG_DIR} $OUTPUT"  EXIT SIGINT
+trap "cp ${CONFIG_DIR}/cohctl.log /tmp; rm -rf ${CONFIG_DIR} $OUTPUT" EXIT SIGINT
 
 echo
 echo "Using URL:  ${URL}"
