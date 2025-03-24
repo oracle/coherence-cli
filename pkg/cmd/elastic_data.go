@@ -170,31 +170,33 @@ The allowable values are ` + ram + ` or ` + flash + `.`,
 			}
 
 			if isJSONPathOrJSON() {
-				return processJSONOutput(cmd, result)
+				err = processJSONOutput(cmd, result)
+				if err != nil {
+					return err
+				}
+			} else {
+				if len(result) == 0 {
+					return nil
+				}
+
+				err = json.Unmarshal(result, &edValues)
+				if err != nil {
+					return utils.GetError("unable to elastic data details", err)
+				}
+
+				printWatchHeader(cmd)
+				cmd.Println(FormatCurrentCluster(connection))
+
+				cmd.Println(header)
+				headerLen := len(header)
+				underline := make([]byte, headerLen)
+				for i := 0; i < headerLen; i++ {
+					underline[i] = '-'
+				}
+				cmd.Println(string(underline))
+
+				cmd.Println(FormatElasticData(edValues.ElasticData, false))
 			}
-
-			if len(result) == 0 {
-				return nil
-			}
-
-			err = json.Unmarshal(result, &edValues)
-			if err != nil {
-				return utils.GetError("unable to elastic data details", err)
-			}
-
-			printWatchHeader(cmd)
-			cmd.Println(FormatCurrentCluster(connection))
-
-			cmd.Println(header)
-			headerLen := len(header)
-			underline := make([]byte, headerLen)
-			for i := 0; i < headerLen; i++ {
-				underline[i] = '-'
-			}
-			cmd.Println(string(underline))
-
-			cmd.Println(FormatElasticData(edValues.ElasticData, false))
-
 			// check to see if we should exit if we are not watching
 			if !isWatchEnabled() {
 				break

@@ -19,7 +19,7 @@ STARTER_DIR=`mktemp -d`
 LOGS_DIR=$DIR/build/_output/test-logs
 
 mkdir -p ${CONFIG_DIR} ${STARTER_DIR} ${LOGS_DIR}
-trap "cp ${CONFIG_DIR}/cohctl.log /tmp && rm -rf ${CONFIG_DIR} $OUTPUT" 0 1 2 3
+trap "rm -rf $CONFIG_DIR $OUTPUT $STARTER_DIR" EXIT SIGINT
 
 echo
 echo "Config Dir:  ${CONFIG_DIR}"

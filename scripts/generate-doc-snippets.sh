@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #
-# Copyright (c) 2021, 2024 Oracle and/or its affiliates.
+# Copyright (c) 2021, 2025 Oracle and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at
 # https://oss.oracle.com/licenses/upl.
 #
@@ -17,7 +17,7 @@ BIN_DIR=$2
 COHCTL=${BIN_DIR}/cohctl
 TMP_FILE=/tmp/generate.$$
 
-trap "rm -f $TMP_FILE" 0 1 2 3
+trap "rm -f $TMP_FILE" EXIT SIGINT
 
 # Creates a adoc section for the given command help
 function create_doc {

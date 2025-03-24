@@ -22,7 +22,7 @@ export DIR=`pwd`
 OUTPUT=/tmp/$$.output
 
 mkdir -p ${CONFIG_DIR}
-trap "cp ${CONFIG_DIR}/cohctl.log /tmp && rm -rf ${CONFIG_DIR} $OUTPUT" 0 1 2 3
+trap "rm -rf $CONFIG_DIR $OUTPUT" EXIT SIGINT
 
 echo
 echo "Config Dir: ${CONFIG_DIR}"
