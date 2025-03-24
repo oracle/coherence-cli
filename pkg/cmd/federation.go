@@ -342,14 +342,15 @@ service, type and participant. Specify -T to set type outgoing or incoming and -
 
 				cmd.Println(sb.String())
 
-				// check to see if we should exit if we are not watching
-				if !isWatchEnabled() {
-					break
-				}
-
-				// we are watching so sleep and then repeat until CTRL-C
-				time.Sleep(time.Duration(watchDelay) * time.Second)
 			}
+
+			// check to see if we should exit if we are not watching
+			if !isWatchEnabled() {
+				break
+			}
+
+			// we are watching so sleep and then repeat until CTRL-C
+			time.Sleep(time.Duration(watchDelay) * time.Second)
 		}
 
 		return nil

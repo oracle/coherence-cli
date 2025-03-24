@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #
-# Copyright (c) 2022, 2024 Oracle and/or its affiliates.
+# Copyright (c) 2022, 2025 Oracle and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at
 # https://oss.oracle.com/licenses/upl.
 #
@@ -23,7 +23,7 @@ DIR=`pwd`
 OUTPUT=/tmp/$$.output
 
 mkdir -p ${CONFIG_DIR}
-trap "cp ${CONFIG_DIR}/cohctl.log /tmp && rm -rf ${CONFIG_DIR} $OUTPUT" 0 1 2 3
+trap "rm -rf ${CONFIG_DIR} $OUTPUT" EXIT SIGINT
 
 echo
 echo "Config Dir: ${CONFIG_DIR}"
