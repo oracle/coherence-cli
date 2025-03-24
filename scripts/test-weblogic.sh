@@ -26,7 +26,7 @@ DIR=`pwd`
 OUTPUT=/tmp/$$.output
 
 mkdir -p ${CONFIG_DIR}
-trap "rm -rf ${CONFIG_DIR} $OUTPUT" EXIT SIGINT
+trap "cp ${CONFIG_DIR}/cohctl.log /tmp; rm -rf ${CONFIG_DIR} $OUTPUT"  EXIT SIGINT
 
 echo
 echo "Using URL:  ${URL}"
