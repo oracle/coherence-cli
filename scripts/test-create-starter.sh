@@ -11,11 +11,14 @@
 
 pwd
 
+# Use WORKSPACE directory if running under Jenkins
+TEMP_DIR=/tmp
+[ ! -z "$WORKSPACE" ] && TEMP_DIR=$WORKSPACE
 
-CONFIG_DIR=/tmp/$$.create.starter
+CONFIG_DIR=${TEMP_DIR}/$$.create.starter
 DIR=`pwd`
-OUTPUT=/tmp/$$.output
-STARTER_DIR=`mktemp -d`
+OUTPUT=${TEMP_DIR}/$$.output
+STARTER_DIR=${TEMP_DIR}/$$.starter
 LOGS_DIR=$DIR/build/_output/test-logs
 
 mkdir -p ${CONFIG_DIR} ${STARTER_DIR} ${LOGS_DIR}
