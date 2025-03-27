@@ -11,7 +11,7 @@ engine:
     attributes:
       plantumlconfig: "_plantuml-config.txt"
       commercial-docs-base-url: "https://docs.oracle.com/en/middleware/fusion-middleware/coherence/14.1.2"
-      cli-version: "1.8.1"
+      cli-version: "1.9.0"
       coherence-version: "14.1.2-0-1"
       coherence-default-version: "14.1.2-0-1"
 assets:

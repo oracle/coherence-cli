@@ -30,6 +30,7 @@ provides a lightweight and scriptable alternative.
 
 1. Create, start stop and scale local only development based clusters - xref:../reference/create_clusters.adoc[more information].
 2. Monitor clusters using a text based UI to show multiple panels - xref:../reference/monitor_clusters.adoc[more information].
+3. Create starter projects with Coherence and various frameworks including Helidon, SpringBoot and Micronaut - xref:../reference/create_starter.adoc[more information].
 
 == Why use the Coherence CLI?
 
