@@ -35,7 +35,7 @@ backend:
     name: "vuetify"
     homePage: "docs/about/overview.adoc"
     releases:
-        - "1.8.1"
+        - "1.9.0"
     navigation:
       type: "ROOT"
       title: "Coherence CLI"
