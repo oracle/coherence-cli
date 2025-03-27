@@ -65,7 +65,8 @@ jobs:
         DIR=`pwd`
         cd build/_output/docs
         zip -r ../docs.zip *
-        cd $DIR
+        # Save the docs.zip
+        cp ../docs.zip /tmp
 
     - name: Build Binaries
       shell: bash
@@ -86,6 +87,9 @@ jobs:
         CLI_TMP_BIN=/tmp/coherence-cli-bin
         mkdir bin || true
         cp -R ${CLI_TMP_BIN}/* bin/
+        # Restore the docs.zip
+        mkdir -p ./build/_output
+        mv /tmp/docs.zip ./build/_output/docs.zip
 
     - name: Create Release
       uses: actions/create-release@v1
