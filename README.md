@@ -1,5 +1,5 @@
 <!--
-Copyright (c) 2021, 2024 Oracle and/or its affiliates.
+Copyright (c) 2021, 2025 Oracle and/or its affiliates.
 Licensed under the Universal Permissive License v 1.0 as shown at
 https://oss.oracle.com/licenses/upl.
 -->
@@ -80,15 +80,15 @@ curl -sLo cohctl.exe "https://github.com/oracle/coherence-cli/releases/download/
 
 > Note: Change the **amd64** to **arm** for ARM based processor in the URL above.
 
-See the [Install guide](https://oracle.github.io/coherence-cli/docs/latest/#/docs/installation/01_installation) for
+See the [Install guide](https://docs.coherence.community/coherence-cli/docs/latest/docs/installation/installation) for
 more information on downloading and installing the CLI.
 
 ## Getting Started
 
-Documentation for the Coherence CLI is available [here](https://oracle.github.io/coherence-cli/docs/latest)
+Documentation for the Coherence CLI is available [here](https://docs.coherence.community/coherence-cli/docs/latest)
 
 The fastest way to experience the Coherence CLI is to follow the
-[Quick Start guide](https://oracle.github.io/coherence-cli/docs/latest/#/docs/about/03_quickstart).
+[Quick Start guide](https://docs.coherence.community/coherence-cli/docs/latest/docs/about/quickstart).
 
 ## Supported Coherence Versions
 
