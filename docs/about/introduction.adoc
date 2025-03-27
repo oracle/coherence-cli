@@ -18,7 +18,7 @@ The CLI accesses clusters using the HTTP Management over REST interface and ther
 you want to monitor or manage. See the {commercial-docs-base-url}/rest-reference/quick-start.html[Coherence Documentation]
 for more information on setting up Management over REST.
 
-The CLI is certified with the latest Coherence Community Edition (CE) versions as well as Coherence Commercial versions 12.2.1.4, 14.1.1.0.x, 14.1.1.2206.x and above.
+The CLI is certified with the latest Coherence Community Edition (CE) versions as well as Coherence Commercial versions 12.2.1.4, 14.1.1.0.x, 14.1.1.2206.x, 14.1.2.0.x and above.
 
 To view the release notes for the latest version of the CLI ({cli-version}), see https://github.com/oracle/coherence-cli/releases[GitHub].
 
