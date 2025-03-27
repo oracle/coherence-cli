@@ -36,7 +36,7 @@ which can be scripted or used interactively to manage and monitor Coherence clus
 such as services, caches, members, etc, as well as perform various management operations against clusters.
 
 The CLI accesses clusters using the HTTP Management over REST interface and therefore requires this to be enabled on any clusters
-you want to monitor or manage. See the [Coherence Documentation](https://docs.oracle.com/en/middleware/standalone/coherence/14.1.1.2206/rest-reference/index.html)
+you want to monitor or manage. See the [Coherence Documentation](https://docs.oracle.com/en/middleware/fusion-middleware/coherence/14.1.2/rest-reference/index.html)
 for more information on setting up Management over REST.
 
 NOTE: The CLI does not replace current management and monitoring tools such as the [Coherence VisualVM Plugin](https://github.com/oracle/coherence-visualvm),
