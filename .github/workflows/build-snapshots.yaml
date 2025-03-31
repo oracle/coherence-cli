@@ -24,6 +24,7 @@ jobs:
       matrix:
         coherenceVersion:
           - 25.03.1-SNAPSHOT
+          - 25.09-SNAPSHOT
           - 22.06.12-SNAPSHOT
           - 14.1.2-0-2-SNAPSHOT
 
