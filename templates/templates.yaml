@@ -55,7 +55,7 @@ templates:
       - src/main/java/com/oracle/coherence/demo/frameworks/springboot/DemoApplication.java
 
   - name: micronaut
-    frameworkVersion: "micronaut-parent: 4.7.3, micronaut-coherence: 5.0.4"
+    frameworkVersion: "micronaut-parent: 4.7.3, micronaut-coherence: 5.0.5"
     instructions: |
       To run Micronaut starter you must have JDK21+ and maven 3.8.5+.
       Change to the newly created directory and run the following to build:
