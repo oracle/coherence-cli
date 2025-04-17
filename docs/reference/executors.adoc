@@ -7,6 +7,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 = Executors
+:description: Coherence CLI - Executors Commands
+:keywords: oracle coherence, coherence-cli, documentation, management, cli, Executors Commands
 
 == Executors
 

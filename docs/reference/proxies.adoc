@@ -7,6 +7,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 = Proxy Servers
+:description: Coherence CLI - Proxy Server Commands
+:keywords: oracle coherence, coherence-cli, documentation, management, cli, proxy servers commands, Cohernce Extend
 
 == Proxy Servers
 

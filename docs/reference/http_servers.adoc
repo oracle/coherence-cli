@@ -7,6 +7,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 = Http Servers
+:description: Coherence CLI - Http Servers Commands
+:keywords: oracle coherence, coherence-cli, documentation, management, cli, Http Servers Commands
 
 == Http Servers
 

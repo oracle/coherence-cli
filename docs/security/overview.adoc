@@ -7,6 +7,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 = Securing CLI Access
+:description: Coherence CLI - Securing CLI Access
+:keywords: oracle coherence, coherence-cli, documentation, management, cli, Securing CLI Access
 
 == Securing CLI Access
 

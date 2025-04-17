@@ -7,6 +7,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 = Command Completion
+:description: Coherence CLI - Command Completion
+:keywords: oracle coherence, coherence-cli, documentation, management, cli, Command Completion
 
 == Command Completion
 

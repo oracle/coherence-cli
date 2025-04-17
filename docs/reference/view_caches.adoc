@@ -7,6 +7,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 = View Caches
+:description: Coherence CLI - View Cache Commands
+:keywords: oracle coherence, coherence-cli, documentation, management, cli, view cache commands
 
 == View Caches
 

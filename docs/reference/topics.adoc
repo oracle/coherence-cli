@@ -7,6 +7,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 = Topics
+:description: Coherence CLI - Topics Commands
+:keywords: oracle coherence, coherence-cli, documentation, management, cli, topics commands
 
 == Topics
 

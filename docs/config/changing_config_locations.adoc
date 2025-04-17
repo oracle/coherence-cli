@@ -7,6 +7,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 = Changing Config Locations
+:description: Coherence CLI - Changing Config Locations
+:keywords: oracle coherence, coherence-cli, documentation, management, cli, Changing Config Locations
 
 == Changing Config Locations
 

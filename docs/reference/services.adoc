@@ -7,6 +7,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 = Services
+:description: Coherence CLI - Services Commands
+:keywords: oracle coherence, coherence-cli, documentation, management, cli, services commands
 
 == Services
 

@@ -7,6 +7,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 = Setting Cache Attributes
+:description: Coherence CLI - Setting Cache Attributes
+:keywords: oracle coherence, coherence-cli, documentation, management, cli, Setting Cache Attributes
 
 == Setting Cache Attributes
 

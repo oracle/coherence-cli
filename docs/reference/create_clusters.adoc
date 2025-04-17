@@ -7,6 +7,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 = Creating Clusters
+:description: Coherence CLI - Creating Clusters
+:keywords: oracle coherence, coherence-cli, documentation, management, cli, Creating Clusters, development, experimental
 
 == Creating Clusters
 

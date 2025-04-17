@@ -7,6 +7,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 = Global Flags
+:description: Coherence CLI - Global Flags
+:keywords: oracle coherence, coherence-cli, documentation, management, cli, Global Flags
+
 
 == Global Flags
 

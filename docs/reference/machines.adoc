@@ -7,6 +7,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 = Machines
+:description: Coherence CLI - Machines Commands
+:keywords: oracle coherence, coherence-cli, documentation, management, cli, Machines Commands
 
 == Machines
 
