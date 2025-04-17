@@ -7,6 +7,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 = Overview
+:description: Coherence CLI - Configuration Overview
+:keywords: oracle coherence, coherence-cli, documentation, management, cli, Configuration Overview
 
 == Configuration
 

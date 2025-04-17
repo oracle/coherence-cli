@@ -7,6 +7,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 = Miscellaneous
+:description: Coherence CLI - Miscellaneous Commands
+:keywords: oracle coherence, coherence-cli, documentation, management, cli, Miscellaneous Commands, timeout, debug, color
 
 == Miscellaneous
 

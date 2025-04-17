@@ -7,6 +7,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 = Bytes Display Format
+:description: Coherence CLI - Bytes Display Format
+:keywords: oracle coherence, coherence-cli, documentation, management, cli, Bytes Display Format
 
 == Bytes Display Format
 

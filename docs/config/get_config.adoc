@@ -7,6 +7,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 = Get Config
+:description: Coherence CLI - Get Config
+:keywords: oracle coherence, coherence-cli, documentation, management, cli, Get Config
+
 
 == Get Config
 

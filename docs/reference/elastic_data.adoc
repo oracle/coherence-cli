@@ -7,6 +7,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 = Elastic Data
+:description: Coherence CLI - Elastic Data Commands
+:keywords: oracle coherence, coherence-cli, documentation, management, cli, Elastic Data Commands
 
 == Elastic Data
 

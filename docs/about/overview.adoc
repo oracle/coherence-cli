@@ -7,7 +7,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 = Overview
-:description: Coherence CLI documentation
+:description: Coherence CLI Overview
 :keywords: oracle coherence, coherence-cli, documentation
 
 == Get Going

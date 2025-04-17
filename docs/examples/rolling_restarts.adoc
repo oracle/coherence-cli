@@ -7,6 +7,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 = Rolling Restarts
+:description: Coherence CLI - Rolling Restarts
+:keywords: oracle coherence, coherence-cli, documentation, management, cli, rolling, restarts
+
 
 == Rolling Restarts
 

@@ -7,6 +7,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 = Coherence CLI Introduction
+:description: Coherence CLI Introduction
+:keywords: oracle coherence, coherence-cli, documentation, management, cli
 
 == What is the Coherence CLI?
 

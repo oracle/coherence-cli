@@ -7,6 +7,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 = Reporters
+:description: Coherence CLI - Reporters Commands
+:keywords: oracle coherence, coherence-cli, documentation, management, cli, reporter commands,
 
 == Reporters
 

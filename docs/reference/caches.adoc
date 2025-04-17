@@ -7,6 +7,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 = Caches
+:description: Coherence CLI - Cache Commands
+:keywords: oracle coherence, coherence-cli, documentation, management, cli, Cache Commands
 
 == Caches
 

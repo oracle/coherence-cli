@@ -7,6 +7,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 = Using JSONPath
+:description: Coherence CLI - Using JSONPath
+:keywords: oracle coherence, coherence-cli, documentation, management, cli, jsonpath,
 
 == Using JSONPath
 

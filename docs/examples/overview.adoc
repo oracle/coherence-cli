@@ -7,6 +7,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 = Overview
+:description: Coherence CLI - Examples Overview
+:keywords: oracle coherence, coherence-cli, documentation, management, cli, CLI examples Overview
 
 == Examples
 

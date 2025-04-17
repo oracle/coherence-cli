@@ -7,6 +7,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 = Federation
+:description: Coherence CLI - Federation Commands
+:keywords: oracle coherence, coherence-cli, documentation, management, cli, Federation Commands
 
 == Federation
 

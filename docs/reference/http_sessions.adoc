@@ -7,6 +7,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 = Http Sessions
+:description: Coherence CLI - Http Sessions Commands
+:keywords: oracle coherence, coherence-cli, documentation, management, cli, Http Sessions Commands, Coherence Web
 
 == Http Sessions
 

@@ -7,6 +7,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 = Coherence CLI Installation
+:description: Coherence CLI - Coherence CLI Installation
+:keywords: oracle coherence, coherence-cli, documentation, management, cli, Coherence CLI Installation, Mac, Linux, Windows
 
 == Coherence CLI Installation
 

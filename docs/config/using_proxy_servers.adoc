@@ -7,6 +7,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 = Using Proxy Servers
+:description: Coherence CLI - Using Proxy Servers
+:keywords: oracle coherence, coherence-cli, documentation, management, cli, Using Proxy Servers
 
 == Using Proxy Servers
 
