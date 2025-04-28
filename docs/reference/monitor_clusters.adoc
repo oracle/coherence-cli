@@ -213,7 +213,7 @@ caches   caches:services
 test     caches,services:persistence
 ----
 
-NOTE: Added panels cant be used by specifying the `-l` option in the `monitor cluster` command.
+NOTE: Added panels can be used by specifying the `-l` option in the `monitor cluster` command.
 
 [#add-panel]
 ==== Add Panel
