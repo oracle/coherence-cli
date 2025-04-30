@@ -745,7 +745,7 @@ var (
 )
 
 const (
-	defaultCoherenceVersion = "14.1.2-0-1"
+	defaultCoherenceVersion = "14.1.2-0-2"
 	startClusterCommand     = "start cluster"
 	scaleClusterCommand     = "scale cluster"
 	stopClusterCommand      = "stop cluster"
