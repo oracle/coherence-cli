@@ -1007,13 +1007,18 @@ func FormatCacheDetailsStorage(cacheDetails []config.CacheDetail) string {
 	var (
 		detailsCount       = len(cacheDetails)
 		formattingFunction = getFormattingFunction()
+		maxLength          = 40
 	)
 	if detailsCount == 0 {
 		return ""
 	}
 
+	if showQueryParam {
+		maxLength = 250
+	}
+
 	table := newFormattedTable().WithHeader(NodeIDColumn, "TIER", "LOCKS GRANTED", "LOCKS PENDING", "KEY LISTENERS",
-		"FILTER LISTENERS", "MAX QUERY MS", "MAX QUERY DESC").MaxLength(40).WithSortingColumn(NodeIDColumn)
+		"FILTER LISTENERS", "MAX QUERY MS", "MAX QUERY DESC").MaxLength(maxLength).WithSortingColumn(NodeIDColumn)
 
 	if OutputFormat == constants.WIDE {
 		table.AddHeaderColumns("NO OPT AVG", "OPT AVG", "INDEX SIZE", "INDEXING MILLIS")

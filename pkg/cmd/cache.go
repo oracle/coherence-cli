@@ -34,6 +34,7 @@ var (
 	cannotFindCache     = "no cache named %s exists for service %s"
 	cannotFindViewCache = "no view cache named %s exists for service %s"
 	cacheSummary        bool
+	showQueryParam      bool
 )
 
 const (
@@ -1186,6 +1187,7 @@ func init() {
 	getCacheStoresCmd.Flags().StringVarP(&serviceName, serviceNameOption, serviceNameOptionShort, "", serviceNameDescription)
 	getCacheAccessCmd.Flags().StringVarP(&serviceName, serviceNameOption, serviceNameOptionShort, "", serviceNameDescription)
 	getCacheStorageCmd.Flags().StringVarP(&serviceName, serviceNameOption, serviceNameOptionShort, "", serviceNameDescription)
+	getCacheStorageCmd.Flags().BoolVarP(&showQueryParam, "query", "q", false, "show query details in full")
 	getCacheIndexesCmd.Flags().StringVarP(&serviceName, serviceNameOption, serviceNameOptionShort, "", serviceNameDescription)
 	getCachePartitionsCmd.Flags().StringVarP(&serviceName, serviceNameOption, serviceNameOptionShort, "", serviceNameDescription)
 	getCachePartitionsCmd.Flags().BoolVarP(&cacheSummary, "summary", "S", false, "show a cache summary")
