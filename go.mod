@@ -11,6 +11,7 @@ toolchain go1.23.7
 require (
 	github.com/fatih/color v1.18.0
 	github.com/gdamore/tcell/v2 v2.8.1
+	github.com/mattn/go-runewidth v0.0.16
 	github.com/ohler55/ojg v1.12.8
 	github.com/onsi/gomega v1.36.2
 	github.com/oracle/coherence-go-client/v2 v2.1.0
@@ -31,7 +32,6 @@ require (
 	github.com/lucasb-eyer/go-colorful v1.2.0 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
-	github.com/mattn/go-runewidth v0.0.16 // indirect
 	github.com/pelletier/go-toml/v2 v2.2.3 // indirect
 	github.com/rivo/uniseg v0.4.3 // indirect
 	github.com/sagikazarmark/locafero v0.7.0 // indirect

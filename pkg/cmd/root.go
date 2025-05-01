@@ -51,10 +51,11 @@ const (
 	connectionNameOption         = "connection"
 	clusterNameOptionShort       = "c"
 
-	serviceNameDescription  = "Service name"
-	serviceNameOption       = "service"
-	serviceNameOptionShort  = "s"
-	ignoreCachesDescription = "ignore system caches or caches with $"
+	serviceNameDescription    = "Service name"
+	serviceNameOption         = "service"
+	serviceNameOptionShort    = "s"
+	ignoreCachesDescription   = "ignore system caches or caches with $"
+	includePercentDescription = "show percentage as bar"
 
 	userNameDescription = "basic auth username if authentication is required"
 	usernameOption      = "username"
@@ -153,6 +154,12 @@ var (
 
 	// global sort direction
 	descendingFlag bool
+
+	// global, include percentage as bar
+	includePercentageBar bool
+
+	// global percentage bar width
+	percentageBarWidth int
 
 	Logger *zap.Logger
 
@@ -255,6 +262,8 @@ func SetRootCommandFlags(command *cobra.Command) {
 	command.PersistentFlags().StringVarP(&clusterConnection, connectionNameOption, clusterNameOptionShort, "", clusterConnectionDescription)
 	command.PersistentFlags().StringVarP(&tableSorting, "sort", "", "", "specify a sorting column name or number for tables")
 	command.PersistentFlags().BoolVarP(&descendingFlag, "desc", "", false, "indicates descending sort for tables, default is ascending")
+	command.PersistentFlags().BoolVarP(&includePercentageBar, "percent-bar", "", false, includePercentDescription)
+	command.PersistentFlags().IntVarP(&percentageBarWidth, "percent-bar-width", "", 30, "set percentage bar width")
 
 	command.PersistentFlags().BoolVarP(&kbFormat, "kb", "k", false, "show sizes in kilobytes (default is bytes)")
 	command.PersistentFlags().BoolVarP(&mbFormat, "mb", "m", false, "show sizes in megabytes (default is bytes)")
