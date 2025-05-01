@@ -10,6 +10,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/mattn/go-runewidth"
 	"github.com/oracle/coherence-cli/pkg/config"
 	"github.com/oracle/coherence-cli/pkg/constants"
 	"github.com/oracle/coherence-cli/pkg/utils"
@@ -1465,14 +1466,15 @@ func FormatMembers(members []config.Member, verbose bool, storageMap map[int]boo
 			fmt.Sprintf("Total cluster members: %d\n", memberCount) +
 				fmt.Sprintf("Storage enabled count: %d\n", storageCount) +
 				fmt.Sprintf("Departure count:       %d\n\n", departureCount) +
-				fmt.Sprintf("Cluster Heap - Total: %s Used: %s Available: %s (%4.1f%%)\n",
+				fmt.Sprintf("Cluster Heap - Total: %s Used: %s Available: %s - %s Avail\n",
 					strings.TrimSpace(formattingFunction(int64(totalMaxMemoryMB)*MB)),
 					strings.TrimSpace(formattingFunction(int64(totalUsedMB)*MB)),
-					strings.TrimSpace(formattingFunction(int64(totalAvailMemoryMB)*MB)), availablePercent) +
-				fmt.Sprintf("Storage Heap - Total: %s Used: %s Available: %s (%4.1f%%)\n\n",
+					strings.TrimSpace(formattingFunction(int64(totalAvailMemoryMB)*MB)),
+					formatPercent(float64(availablePercent/100))) +
+				fmt.Sprintf("Storage Heap - Total: %s Used: %s Available: %s - %s Avail\n\n",
 					strings.TrimSpace(formattingFunction(int64(totalMaxStorageMemoryMB)*MB)),
 					strings.TrimSpace(formattingFunction(int64(totalUsedStorageMB)*MB)),
-					strings.TrimSpace(formattingFunction(int64(totalAvailStorageMemoryMB)*MB)), availableStoragePercent)
+					strings.TrimSpace(formattingFunction(int64(totalAvailStorageMemoryMB)*MB)), formatPercent(float64(availableStoragePercent/100)))
 	}
 
 	if summary {
@@ -2236,6 +2238,12 @@ func formatPercent(value float64) string {
 	if value == -1 {
 		return na
 	}
+	if includePercentageBar {
+		if percentageBarWidth < 10 {
+			percentageBarWidth = 10
+		}
+		return generatePercentageBar(value*100, percentageBarWidth)
+	}
 	return strings.TrimSpace(printer.Sprintf("%6.2f%%", value*100))
 }
 
@@ -2696,7 +2704,7 @@ func (t *formattedTable) getMaxColumnLen() []int {
 	for _, value := range columns {
 		for j, entry := range value {
 			if len(entry) > lengths[j] {
-				lengths[j] = len(entry)
+				lengths[j] = runewidth.StringWidth(entry)
 			}
 		}
 	}
@@ -2710,4 +2718,17 @@ func (t *formattedTable) getCombined() [][]string {
 	columns = append(columns, t.rows...)
 
 	return columns
+}
+
+// generatePercentageBar generates a percentage bar.
+func generatePercentageBar(percent float64, width int) string {
+	if percent < 0 {
+		percent = 0
+	}
+	if percent > 100 {
+		percent = 100
+	}
+	full := int((percent / 100) * float64(width))
+	empty := width - full
+	return fmt.Sprintf("[%s%s] %6.2f%%", strings.Repeat("█", full), strings.Repeat("░", empty), percent)
 }
