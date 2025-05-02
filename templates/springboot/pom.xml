@@ -25,7 +25,7 @@
 
   <properties>
     <java.version>21</java.version>
-    <coherence.version>25.03</coherence.version>
+    <coherence.version>25.03.1</coherence.version>
     <coherence.group.id>com.oracle.coherence.ce</coherence.group.id>
     <coherence-spring.version>4.3.0</coherence-spring.version>
   </properties>

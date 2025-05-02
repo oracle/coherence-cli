@@ -25,7 +25,7 @@
 
   <properties>
     <coherence.group.id>com.oracle.coherence.ce</coherence.group.id>
-    <coherence.version>25.03</coherence.version>
+    <coherence.version>25.03.1</coherence.version>
     <jackson.version>2.18.2</jackson.version>
     <java.version>21</java.version>
 
