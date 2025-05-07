@@ -890,10 +890,11 @@ func FormatServiceMembers(serviceMembers []config.ServiceMemberDetail) string {
 		WithSortingColumn(NodeIDColumn)
 
 	if OutputFormat == constants.WIDE {
-		table.WithAlignment(R, R, R, R, R, R, R, R, R, R, R, R)
+		table.WithAlignment(R, R, R, R, R, R, R, R, R, R, R, R, R)
 		table.AddHeaderColumns("TASK COUNT", "TASK BACKLOG", "PRIMARY OWNED",
-			"BACKUP OWNED", "REQ AVG MS", "TASK AVG MS")
+			"BACKUP OWNED", "REQ AVG MS", "TASK AVG MS", "REQ PEND MS")
 		table.AddFormattingFunction(7, errorFormatter)
+		table.AddFormattingFunction(12, errorFormatter)
 	} else {
 		table.WithAlignment(R, R, R, R, R, R)
 	}
@@ -914,7 +915,8 @@ func FormatServiceMembers(serviceMembers []config.ServiceMemberDetail) string {
 			table.AddColumnsToRow(
 				formatSmallInteger(value.TaskCount), formatSmallInteger(value.TaskBacklog),
 				formatSmallInteger(value.OwnedPartitionsPrimary), formatSmallInteger(value.OwnedPartitionsBackup),
-				formatFloat(value.RequestAverageDuration), formatFloat(value.TaskAverageDuration))
+				formatFloat(value.RequestAverageDuration), formatFloat(value.TaskAverageDuration),
+				formatLargeInteger(int64(value.RequestPendingDuration)))
 		}
 	}
 
