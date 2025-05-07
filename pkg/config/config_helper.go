@@ -385,6 +385,7 @@ type ServiceMemberDetail struct {
 	OwnedPartitionsBackup  int32   `json:"ownedPartitionsBackup"`
 	RequestAverageDuration float32 `json:"requestAverageDuration"`
 	TaskAverageDuration    float32 `json:"taskAverageDuration"`
+	RequestPendingDuration float32 `json:"RequestPendingDuration"`
 }
 
 // CacheSummaries contains cache summary details.
