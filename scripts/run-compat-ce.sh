@@ -9,17 +9,17 @@
 # Run compatability tests
 set -e
 
-echo "Coherence CE 22.06.10"
-COHERENCE_BASE_IMAGE=gcr.io/distroless/java17-debian12 COHERENCE_VERSION=22.06.10 make clean build-test-images test-e2e-standalone
+echo "Coherence CE 22.06.12"
+COHERENCE_BASE_IMAGE=gcr.io/distroless/java17-debian12 COHERENCE_VERSION=22.06.12 make clean build-test-images test-e2e-standalone
 
-echo "Coherence CE 14.1.2-0-0"
-COHERENCE_BASE_IMAGE=gcr.io/distroless/java17-debian12 COHERENCE_VERSION=14.1.2-0-1 make clean build-test-images test-e2e-standalone
+echo "Coherence CE 14.1.2-0-2"
+COHERENCE_BASE_IMAGE=gcr.io/distroless/java17-debian12 COHERENCE_VERSION=14.1.2-0-2 make clean build-test-images test-e2e-standalone
 
-echo "Coherence CE 24.09.3"
-COHERENCE_BASE_IMAGE=gcr.io/distroless/java17-debian12 COHERENCE_VERSION=24.09.3 make clean build-test-images test-e2e-standalone
+echo "Coherence CE 25.09.1"
+COHERENCE_BASE_IMAGE=gcr.io/distroless/java17-debian12 COHERENCE_VERSION=25.09.1 make clean build-test-images test-e2e-standalone
 
-echo "Coherence CE 24.09 with Executor"
-COHERENCE_BASE_IMAGE=gcr.io/distroless/java17-debian12 PROFILES=,executor COHERENCE_VERSION=24.09 make clean build-test-images test-e2e-standalone
+echo "Coherence CE 25.09.1 with Executor"
+COHERENCE_BASE_IMAGE=gcr.io/distroless/java17-debian12 PROFILES=,executor COHERENCE_VERSION=25.09.1 make clean build-test-images test-e2e-standalone
 
 echo "Coherence CE 14.1.1-0-19"
 COHERENCE_VERSION=14.1.1-0-19 make clean build-test-images test-e2e-standalone
