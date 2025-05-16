@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, 2024 Oracle and/or its affiliates.
+ * Copyright (c) 2021, 2025 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -1088,13 +1088,15 @@ func (h HTTPFetcher) InvokeDisconnectAll(topicName, topicService, subscriberGrou
 	return nil
 }
 
-// GetResponseCode returns the response code for the URL as a string.
-func (h HTTPFetcher) GetResponseCode(requestedURL string) string {
-	result, err := httpGetRequestAbsolute(h, requestedURL)
+// GetResponseCodeAndNodeID returns the response code and NodeID for the URL as a string.
+// Only used for health endpoints.
+func (h HTTPFetcher) GetResponseCodeAndNodeID(requestedURL string) (string, string) {
+	result, header, err := httpGetRequestAbsoluteWithHeader(h, requestedURL)
 	if err != nil {
-		return "Refused"
+		return "Refused", ""
 	}
-	return string(result)
+
+	return string(result), header.Get("Coherence-Node-Id")
 }
 
 // InvokeSubscriberOperation invokes a subscriber operation against a topic subscriber.
@@ -1251,6 +1253,11 @@ func httpGetRequestAbsolute(h HTTPFetcher, urlAppend string) ([]byte, error) {
 	return httpRequest(h, "GET", urlAppend, true, constants.EmptyByte)
 }
 
+// httpGetRequestAbsoluteWithHeader issues a HTTP GET request for the given absolute url and returns the header.
+func httpGetRequestAbsoluteWithHeader(h HTTPFetcher, urlAppend string) ([]byte, http.Header, error) {
+	return httpRequestWithHeaders(h, "GET", urlAppend, true, constants.EmptyByte)
+}
+
 // HttpPostRequest issues a HTTP POST request for the given url.
 func httpPostRequest(h HTTPFetcher, urlAppend string, body []byte) ([]byte, error) {
 	return httpRequest(h, "POST", urlAppend, false, body)
@@ -1261,8 +1268,14 @@ func httpDeleteRequest(h HTTPFetcher, urlAppend string) ([]byte, error) {
 	return httpRequest(h, "DELETE", urlAppend, false, constants.EmptyByte)
 }
 
-// HttpRequest issues a HTTP request for the given url.
+// httpRequest issues a HTTP request for the given url.
 func httpRequest(h HTTPFetcher, requestType, urlAppend string, absolute bool, content []byte) ([]byte, error) {
+	data, _, err := httpRequestWithHeaders(h, requestType, urlAppend, absolute, content)
+	return data, err
+}
+
+// HttpRequest issues a HTTP request for the given url and return headers.
+func httpRequestWithHeaders(h HTTPFetcher, requestType, urlAppend string, absolute bool, content []byte) ([]byte, http.Header, error) {
 	var (
 		finalURL        string
 		err             error
@@ -1284,7 +1297,7 @@ func httpRequest(h HTTPFetcher, requestType, urlAppend string, absolute bool, co
 	if h.IsWebLogicServer() && (username == "" || password == "") {
 		err = setUsernamePassword()
 		if err != nil {
-			return constants.EmptyByte, err
+			return constants.EmptyByte, nil, err
 		}
 	}
 
@@ -1337,7 +1350,7 @@ func httpRequest(h HTTPFetcher, requestType, urlAppend string, absolute bool, co
 
 	req, err = http.NewRequest(requestType, finalURL, bytes.NewBuffer(content))
 	if err != nil {
-		return constants.EmptyByte, err
+		return constants.EmptyByte, nil, err
 	}
 
 	if h.IsWebLogicServer() {
@@ -1361,14 +1374,14 @@ func httpRequest(h HTTPFetcher, requestType, urlAppend string, absolute bool, co
 
 	resp, err = client.Do(req)
 	if err != nil {
-		return empty, err
+		return empty, nil, err
 	}
 
 	defer resp.Body.Close()
 
 	_, err = io.Copy(&buffer, resp.Body)
 	if err != nil {
-		return empty, err
+		return empty, nil, err
 	}
 
 	if DebugEnabled {
@@ -1388,26 +1401,16 @@ func httpRequest(h HTTPFetcher, requestType, urlAppend string, absolute bool, co
 		strings.HasSuffix(urlAppend, "/safe") || strings.HasSuffix(urlAppend, "/started") {
 
 		// just return the status code only
-		return []byte(fmt.Sprintf("%v", resp.StatusCode)), nil
+		return []byte(fmt.Sprintf("%v", resp.StatusCode)), resp.Header, nil
 	}
 
 	if resp.StatusCode != 200 {
-		return empty, fmt.Errorf("response=%s, url=%s, response=%s", resp.Status, finalURL, buffer.String())
+		return empty, nil, fmt.Errorf("response=%s, url=%s, response=%s", resp.Status, finalURL, buffer.String())
 	}
 
 	body = buffer.Bytes()
 	if len(body) > 0 && isJSON && !isValidJSON(body) {
-		return empty, errors.New("invalid JSON body")
-	}
-
-	if err != nil {
-		// always log error
-		Logger.Error("Http Request error", []zapcore.Field{
-			zap.String("url", finalURL),
-			zap.String("content", string(content)),
-			zap.Reflect("error", err),
-		}...)
-		return empty, err
+		return empty, nil, errors.New("invalid JSON body")
 	}
 
 	// WebLogic Server adds extra items nodes when there is no cluster, so we need to unpack
@@ -1415,14 +1418,14 @@ func httpRequest(h HTTPFetcher, requestType, urlAppend string, absolute bool, co
 		var result interface{}
 		err = json.Unmarshal(body, &result)
 		if err != nil {
-			return empty, err
+			return empty, nil, err
 		}
 
 		// result is a map[string]interface{} with first entry
 		wlsResult := result.(map[string]interface{})
 
 		if len(wlsResult) == 0 {
-			return empty, fmt.Errorf("unable to decode WLS response: %v", result)
+			return empty, nil, fmt.Errorf("unable to decode WLS response: %v", result)
 		}
 
 		// unpack items, which is an []interface{}
@@ -1430,15 +1433,15 @@ func httpRequest(h HTTPFetcher, requestType, urlAppend string, absolute bool, co
 
 		unsanitizedBody, err = json.Marshal(newBody[0])
 		if err != nil {
-			return empty, err
+			return empty, nil, err
 		}
 		if !isValidJSON(unsanitizedBody) {
-			return empty, errors.New("JSON body is invalid")
+			return empty, nil, errors.New("JSON body is invalid")
 		}
 		body = unsanitizedBody
 	}
 
-	return body, err
+	return body, resp.Header, err
 }
 
 func getStringValueFromEnvVarOrDefault(envVar string, defaultValue string) string {

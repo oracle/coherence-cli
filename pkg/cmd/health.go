@@ -325,6 +325,8 @@ func isMonitoringDataSafe(monitoringData []config.HealthMonitoring) bool {
 }
 
 func gatherMonitorData(dataFetcher fetcher.Fetcher, endpoints []string) []config.HealthMonitoring {
+	const na = "n/a"
+
 	var (
 		result      = make([]config.HealthMonitoring, len(endpoints))
 		httpFetcher fetcher.Fetcher
@@ -342,7 +344,8 @@ func gatherMonitorData(dataFetcher fetcher.Fetcher, endpoints []string) []config
 			wg           sync.WaitGroup
 			httpResult   = make([]string, 4)
 			routineCount = 4
-			nodeID       = "n/a"
+			nodeIDMutex  sync.Mutex
+			nodeID       = na
 		)
 
 		healthURLS := []string{
@@ -361,8 +364,17 @@ func gatherMonitorData(dataFetcher fetcher.Fetcher, endpoints []string) []config
 
 		for j := 0; j < 4; j++ {
 			go func(healthURL string, index int) {
+				var thisNodeID string
 				defer wg.Done()
-				httpResult[index] = httpFetcher.GetResponseCode(healthURL)
+				httpResult[index], thisNodeID = httpFetcher.GetResponseCodeAndNodeID(healthURL)
+				if thisNodeID != "" {
+					// if a node ID is returned from a health URL, and it has not yet been set, then set it
+					nodeIDMutex.Lock()
+					if nodeID == na && thisNodeID != "" {
+						nodeID = thisNodeID
+					}
+					nodeIDMutex.Unlock()
+				}
 			}(healthURLS[j], j)
 		}
 
