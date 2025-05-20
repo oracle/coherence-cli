@@ -20,6 +20,8 @@ The Coherence CLI provides a number of global flags that are available in all th
 include::../../build/_output/docs-gen/global_flags.adoc[tag=text]
 ----
 
+NOTE: When using `-c` option to specify a context, you can also specify a host:port for a cluster member, and the HTTP management URL will be looked up automatically.
+
 === See Also
 
 * xref:changing_config_locations.adoc[Changing Config Locations]

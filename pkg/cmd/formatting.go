@@ -92,6 +92,9 @@ func FormatCurrentCluster(clusterName string) string {
 	if UsingContext {
 		return fmt.Sprintf("Using cluster connection '%s' from current context.\n", clusterName)
 	}
+	if strings.Contains(clusterConnection, ":") {
+		return fmt.Sprintf("Using name service address '%s' (cluster=%s, URL=%s)\n", clusterConnection, httpManagementCluster, httpManagementURL)
+	}
 	return fmt.Sprintf("Using specified cluster context '%s'\n", clusterConnection)
 }
 
