@@ -37,6 +37,7 @@ const (
 	clusterMessage                   = "A cluster connection already exists with the name %s for %s\n"
 	ignoreErrorsMessage              = "ignore errors from NS lookup"
 	youMustProviderConnectionMessage = "you must provide a single connection name"
+	httpType                         = "http"
 )
 
 // addClusterCmd represents the add cluster command
@@ -387,7 +388,7 @@ addition information as well as '-v' to displayed additional information.`,
 		if len(proxiesSummary.Proxies) > 0 {
 			sb.WriteString("\nHTTP SERVERS\n")
 			sb.WriteString("------------\n")
-			sb.WriteString(FormatProxyServers(proxiesSummary.Proxies, "http"))
+			sb.WriteString(FormatProxyServers(proxiesSummary.Proxies, httpType))
 		}
 
 		if verboseOutput {
@@ -436,6 +437,94 @@ addition information as well as '-v' to displayed additional information.`,
 	},
 }
 
+// getDiscoveredClusters returns the discovered clusters and the count of clusters without HTTP management enabled.
+func getDiscoveredClusters(cmd *cobra.Command, hostPorts []string) ([]discovery.DiscoveredCluster, []int, error) {
+	var (
+		clustersWithoutHTTP = make([]int, 0)
+		numEndpoints        int
+		err                 error
+		ns                  *discovery.NSLookup
+		clusterPorts        []discovery.ClusterNSPort
+		finalClusterPorts   = make([]discovery.ClusterNSPort, 0)
+		discoveredClusters  = make([]discovery.DiscoveredCluster, 0)
+		discoveredCluster   discovery.DiscoveredCluster
+	)
+	for _, address := range hostPorts {
+		ns, err = discovery.Open(address, timeout)
+		if err != nil {
+			err = logErrorAndCheck(nil, "error connecting to host/port: "+address, err)
+			if err != nil {
+				return discoveredClusters, clustersWithoutHTTP, err
+			}
+			// skip to the next address
+			closeSilent(ns)
+			continue
+		}
+
+		// now ask the Name Service for local and remote clusters it knows about
+		clusterPorts, err = ns.DiscoverNameServicePorts()
+		err = logErrorAndCheck(cmd, "unable to discover clusters on "+address, err)
+		if err != nil {
+			return discoveredClusters, clustersWithoutHTTP, err
+		}
+
+		closeSilent(ns)
+		finalClusterPorts = append(finalClusterPorts, clusterPorts...)
+	}
+
+	// close the original lookup - possible optimization here
+	closeSilent(ns)
+
+	numEndpoints = len(finalClusterPorts)
+	if numEndpoints == 0 {
+		return discoveredClusters, clustersWithoutHTTP, errors.New("no valid Name Service endpoints found")
+	}
+
+	// now query each individual NS host/ port and gather the cluster information
+	for i, nsAddress := range finalClusterPorts {
+		var (
+			nsNew *discovery.NSLookup
+		)
+		addressPort := fmt.Sprintf("%s:%d", nsAddress.HostName, nsAddress.Port)
+		if cmd != nil {
+			cmd.Printf("Discovering Management URL for %s on %s ...\n", nsAddress.ClusterName, addressPort)
+		}
+
+		nsNew, err = discovery.Open(addressPort, timeout)
+		if err != nil {
+			err = logErrorAndCheck(cmd, "unable to connect to "+addressPort, err)
+			if err != nil {
+				return discoveredClusters, clustersWithoutHTTP, err
+			}
+			// skip to the next address
+
+			closeSilent(nsNew)
+			continue
+		}
+
+		// discover the cluster information
+		discoveredCluster, err = nsNew.DiscoverClusterInfo()
+		if err != nil {
+			err = logErrorAndCheck(cmd, "unable to get cluster information for to "+addressPort, err)
+			if err != nil {
+				return discoveredClusters, clustersWithoutHTTP, err
+			}
+			// skip to the next address
+			closeSilent(nsNew)
+			continue
+		}
+
+		// we discovered ok, so add to the list
+		discoveredClusters = append(discoveredClusters, discoveredCluster)
+		closeSilent(nsNew)
+		if len(discoveredCluster.ManagementURLs) == 0 {
+			clustersWithoutHTTP = append(clustersWithoutHTTP, i)
+		}
+	}
+
+	return discoveredClusters, clustersWithoutHTTP, nil
+}
+
 // discoverClustersCmd represents the discover clusters command.
 var discoverClustersCmd = &cobra.Command{
 	Use:   "clusters [host[:port]...]",
@@ -447,16 +536,9 @@ You will be presented with a list of clusters that have Management over REST con
 you can confirm if you wish to add the discovered clusters.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var (
-			count               = len(args)
-			clustersWithoutHTTP = make([]int, 0)
-			numEndpoints        int
-			hostPorts           []string
-			err                 error
-			ns                  *discovery.NSLookup
-			clusterPorts        []discovery.ClusterNSPort
-			finalClusterPorts   = make([]discovery.ClusterNSPort, 0)
-			discoveredClusters  = make([]discovery.DiscoveredCluster, 0)
-			discoveredCluster   discovery.DiscoveredCluster
+			count     = len(args)
+			err       error
+			hostPorts []string
 		)
 
 		err = validateTimeout(timeout)
@@ -472,74 +554,10 @@ you can confirm if you wish to add the discovered clusters.`,
 
 		cmd.Printf("Attempting to discover clusters using the following NameService addresses: %v\n", hostPorts)
 
-		for _, address := range hostPorts {
-			ns, err = discovery.Open(address, timeout)
-			if err != nil {
-				err = logErrorAndCheck(cmd, "unable to connect to "+address, err)
-				if err != nil {
-					return err
-				}
-				// skip to the next address
-				closeSilent(ns)
-				continue
-			}
+		discoveredClusters, clustersWithoutHTTP, err := getDiscoveredClusters(cmd, hostPorts)
 
-			// now ask the Name Service for local and remote clusters it knows about
-			clusterPorts, err = ns.DiscoverNameServicePorts()
-			err = logErrorAndCheck(cmd, "unable to discover clusters on "+address, err)
-			if err != nil {
-				return err
-			}
-
-			closeSilent(ns)
-			finalClusterPorts = append(finalClusterPorts, clusterPorts...)
-		}
-
-		// close the original lookup - possible optimization here
-		closeSilent(ns)
-
-		numEndpoints = len(finalClusterPorts)
-		if numEndpoints == 0 {
-			return errors.New("no valid Name Service endpoints found")
-		}
-
-		// now query each individual NS host/ port and gather the cluster information
-		for i, nsAddress := range finalClusterPorts {
-			var (
-				nsNew *discovery.NSLookup
-			)
-			addressPort := fmt.Sprintf("%s:%d", nsAddress.HostName, nsAddress.Port)
-			cmd.Printf("Discovering Management URL for %s on %s ...\n", nsAddress.ClusterName, addressPort)
-			nsNew, err = discovery.Open(addressPort, timeout)
-			if err != nil {
-				err = logErrorAndCheck(cmd, "unable to connect to "+addressPort, err)
-				if err != nil {
-					return err
-				}
-				// skip to the next address
-
-				closeSilent(nsNew)
-				continue
-			}
-
-			// discover the cluster information
-			discoveredCluster, err = nsNew.DiscoverClusterInfo()
-			if err != nil {
-				err = logErrorAndCheck(cmd, "unable to get cluster information for to "+addressPort, err)
-				if err != nil {
-					return err
-				}
-				// skip to the next address
-				closeSilent(nsNew)
-				continue
-			}
-
-			// we discovered ok, so add to the list
-			discoveredClusters = append(discoveredClusters, discoveredCluster)
-			closeSilent(nsNew)
-			if len(discoveredCluster.ManagementURLs) == 0 {
-				clustersWithoutHTTP = append(clustersWithoutHTTP, i)
-			}
+		if err != nil {
+			return err
 		}
 
 		var (
@@ -653,7 +671,7 @@ you can confirm if you wish to add the discovered clusters.`,
 func addCluster(cmd *cobra.Command, connection, connectionURL, discoveryType, nsAddress string) error {
 	// check to see if the url is just host:port and then build the full management URL using http as default
 	// otherwise let it fall through and get validated
-	if !strings.Contains(connectionURL, "http") {
+	if !strings.Contains(connectionURL, httpType) {
 		split := strings.Split(connectionURL, ":")
 		if len(split) == 2 {
 			// candidate, second value must be int
@@ -1004,7 +1022,7 @@ NOTE: This is an experimental feature and my be altered or removed in the future
 			getOperationalOverrideConfigProperty())
 
 		// add the new cluster
-		newCluster := ClusterConnection{Name: clusterName, ConnectionType: "http",
+		newCluster := ClusterConnection{Name: clusterName, ConnectionType: httpType,
 			ConnectionURL:   fmt.Sprintf("http://localhost:%d/management/coherence/cluster", httpPortParam),
 			ManuallyCreated: true, ClusterVersion: clusterVersionParam, ClusterName: clusterName,
 			ClusterType: "Standalone", BaseClasspath: strings.Join(classpath, getClasspathSeparator()),
@@ -1436,7 +1454,7 @@ func runClusterOperation(cmd *cobra.Command, connectionName, operation string) e
 func init() {
 	addClusterCmd.Flags().StringVarP(&connectionURL, "url", "u", "", "connection URL")
 	_ = addClusterCmd.MarkFlagRequired("url")
-	addClusterCmd.Flags().StringVarP(&connectionType, "type", "t", "http", "connection type, http")
+	addClusterCmd.Flags().StringVarP(&connectionType, "type", "t", httpType, "connection type, http")
 
 	describeClusterCmd.Flags().BoolVarP(&verboseOutput, "verbose", "v", false,
 		"include verbose output including individual members, reporters and executor details")
@@ -1606,7 +1624,10 @@ func logErrorAndCheck(cmd *cobra.Command, message string, err error) error {
 		return actualError
 	}
 	// log and continue
-	cmd.Println(actualError)
+	if cmd != nil {
+		cmd.Println(actualError)
+	}
+
 	return nil
 }
 

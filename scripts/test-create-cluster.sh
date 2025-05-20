@@ -114,6 +114,9 @@ wait_for_ready
 runCommand get clusters
 runCommand get members
 
+# Check the option to specify host:port for name service
+runCommand get members -c localhost:7574
+
 # Check the members of PartitionedCache
 runCommand get services -o jsonpath="$.items[?(@.name=='PartitionedCache')].memberCount"
 

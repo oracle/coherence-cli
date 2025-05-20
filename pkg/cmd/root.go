@@ -16,11 +16,13 @@ import (
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
+	"math/rand"
 	"net/url"
 	"os"
 	"path/filepath"
 	"runtime"
 	"strings"
+	"time"
 )
 
 //
@@ -29,25 +31,30 @@ import (
 // Global flags
 
 var (
-	OutputFormat      string
-	clusterConnection string
-	serviceName       string
-	watchEnabled      bool
-	watchClearEnabled bool
-	watchDelay        int32
-	readPassStdin     bool
-	limitOutput       bool
+	OutputFormat          string
+	clusterConnection     string
+	serviceName           string
+	watchEnabled          bool
+	watchClearEnabled     bool
+	watchDelay            int32
+	readPassStdin         bool
+	limitOutput           bool
+	httpManagementURL     string
+	httpManagementCluster string
 
 	bFormat  bool
 	kbFormat bool
 	mbFormat bool
 	gbFormat bool
 	tbFormat bool
+
+	// #nosec G404
+	rnd = rand.New(rand.NewSource(time.Now().UnixNano()))
 )
 
 // various command constants
 const (
-	clusterConnectionDescription = "cluster connection name (not required if context is set)"
+	clusterConnectionDescription = "cluster connection name or cluster host:port (not required if context is set)"
 	connectionNameOption         = "connection"
 	clusterNameOptionShort       = "c"
 
@@ -766,12 +773,61 @@ func Initialize(command *cobra.Command) *cobra.Command {
 
 // GetDataFetcher returns a Fetcher given a cluster name.
 func GetDataFetcher(clusterName string) (fetcher.Fetcher, error) {
-	found, connection := GetClusterConnection(clusterName)
-	if !found {
-		return nil, errors.New(UnableToFindClusterMsg + clusterName)
+	var (
+		finalClusterName, finalConnectionURL, finalConnectionType string
+	)
+
+	// check to see if we have a ':' in the cluster, then we assume this is a host:port of
+	// the cluster, and we look up the http url dynamically
+	if strings.Contains(clusterName, ":") {
+		discoveredClusters, _, err := getDiscoveredClusters(nil, []string{clusterName})
+		if err != nil {
+			return nil, err
+		}
+		if len(discoveredClusters) == 0 {
+			return nil, fmt.Errorf("no clusters on host/port %s", clusterName)
+		}
+		if len(discoveredClusters) > 1 {
+			return nil, fmt.Errorf("multiple clusters with HTTP management enabled found on host/port %s", clusterName)
+		}
+
+		// we have exactly one cluster found, so check if management over REST enabled.
+		managementURLs := discoveredClusters[0].ManagementURLs
+		discoveredClusterName := discoveredClusters[0].ClusterName
+		if len(managementURLs) == 0 {
+			return nil, fmt.Errorf("cluster %s does not have management over REST enabled", discoveredClusterName)
+		}
+
+		// extract one of the URLS randomly
+		finalConnectionURL = randomize(managementURLs)
+		finalClusterName = discoveredClusterName
+		finalConnectionType = httpType
+		httpManagementURL = finalConnectionURL
+		httpManagementCluster = finalClusterName
+	} else {
+		// normal path, retrieve from config
+		found, connection := GetClusterConnection(clusterName)
+		if !found {
+			return nil, errors.New(UnableToFindClusterMsg + clusterName)
+		}
+		finalClusterName = connection.ClusterName
+		finalConnectionType = connection.ConnectionType
+		finalConnectionURL = connection.ConnectionURL
+		httpManagementURL = ""
+		httpManagementCluster = ""
 	}
-	return fetcher.GetFetcherOrError(connection.ConnectionType, connection.ConnectionURL, Username,
-		connection.ClusterName)
+
+	return fetcher.GetFetcherOrError(finalConnectionType, finalConnectionURL, Username, finalClusterName)
+}
+
+func randomize(arr []string) string {
+	if len(arr) == 1 {
+		return arr[0]
+	}
+	if len(arr) == 0 {
+		return ""
+	}
+	return arr[rnd.Intn(len(arr))]
 }
 
 // GetConnectionNameFromContextOrArg returns the connection name from the '-c' option
