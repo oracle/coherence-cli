@@ -23,9 +23,9 @@ jobs:
         coherenceVersion:
           - 25.03.1
           - 22.06.12
-#          - 22.06.12-SNAPSHOT
+          - 22.06.13-SNAPSHOT
           - 14.1.2-0-2
-#          - 14.1.2-0-2-SNAPSHOT
+          - 14.1.2-0-3-SNAPSHOT
         javaImage:
           - gcr.io/distroless/java17
 
