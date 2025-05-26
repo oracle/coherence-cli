@@ -93,6 +93,7 @@ const (
 	logLevelArg              = "log-level"
 	startupDelayArg          = "startup-delay"
 	serverCountMessage       = "number of replicas"
+	dynamicHTTPMessage       = "enable dynamic http port for other members"
 	metricsPortMessage       = "starting port for metrics"
 	healthPortMessage        = "starting port for health"
 	jmxPortMessage           = "remote JMX port for management member"

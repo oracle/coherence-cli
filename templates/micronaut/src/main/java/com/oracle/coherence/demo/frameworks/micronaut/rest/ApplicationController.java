@@ -25,9 +25,6 @@ import io.micronaut.http.annotation.Post;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 
-/**
- * REST API for To Do list management.
- */
 @Controller("/api/customers")
 @Singleton
 public class ApplicationController {

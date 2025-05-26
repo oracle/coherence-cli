@@ -297,7 +297,11 @@ func startCluster(cmd *cobra.Command, connection ClusterConnection, serverCount,
 		arguments = append(arguments, getCacheServerArgs(connection, member, mgmtPort, connection.ClusterVersion)...)
 
 		// reset so only first member has management enabled
-		mgmtPort = -1
+		if dynamicHTTPParam {
+			mgmtPort = 0
+		} else {
+			mgmtPort = -1
+		}
 
 		memberLogFile, err = getLogFile(connection.Name, member)
 		if err != nil {

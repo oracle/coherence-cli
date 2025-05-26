@@ -144,7 +144,7 @@ wait_for_ready
 runCommand stop cluster local -y
 
 message "Startup cluster with 5 members"
-runCommand start cluster local -r 5 --site site1
+runCommand start cluster local -r 5 --site site1 -N
 wait_for_ready
 
 runCommand get services -o jsonpath="$.items[?(@.name=='PartitionedCache')].memberCount"
