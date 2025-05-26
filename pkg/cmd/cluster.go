@@ -760,6 +760,7 @@ var (
 	cacheConfigParam         string
 	operationalConfigParam   string
 	settingsFileParam        string
+	dynamicHTTPParam         bool
 )
 
 const (
@@ -1495,6 +1496,7 @@ func init() {
 	createClusterCmd.Flags().StringVarP(&siteParam, siteArg, "", "", siteMessage)
 	createClusterCmd.Flags().StringVarP(&roleParam, roleArg, "", "", roleMessage)
 	createClusterCmd.Flags().StringVarP(&settingsFileParam, "maven-settings", "", "", "full path to Maven settings file")
+	createClusterCmd.Flags().BoolVarP(&dynamicHTTPParam, "dynamic-http", "N", false, dynamicHTTPMessage)
 
 	stopClusterCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
 
@@ -1540,6 +1542,7 @@ func applyStartParams(cmd *cobra.Command) {
 	cmd.Flags().StringVarP(&rackParam, rackArg, "", "", rackMessage)
 	cmd.Flags().StringVarP(&siteParam, siteArg, "", "", siteMessage)
 	cmd.Flags().StringVarP(&roleParam, roleArg, "", "", roleMessage)
+	cmd.Flags().BoolVarP(&dynamicHTTPParam, "dynamic-http", "N", false, dynamicHTTPMessage)
 }
 
 // sanitizeConnectionName sanitizes a cluster connection
