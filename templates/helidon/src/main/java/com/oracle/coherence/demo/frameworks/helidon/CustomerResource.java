@@ -8,8 +8,6 @@ package com.oracle.coherence.demo.frameworks.helidon;
 
 import static jakarta.ws.rs.core.MediaType.APPLICATION_JSON;
 
-import com.oracle.coherence.cdi.Name;
-
 import com.tangosol.net.NamedMap;
 
 import jakarta.enterprise.context.ApplicationScoped;
