@@ -31,6 +31,14 @@ var (
 	verboseOutput  bool
 	ignoreErrors   bool
 	timeout        int32
+
+	validSetClusterAttributes = []string{
+		"bufferPublishSize", "bufferReceiveSize", "loggingLevel", "loggingLimit", "loggingFormat",
+		"multicastThreshold", "resendDelay", "sendAckDelay", "trafficJamCount", "trafficJamDelay",
+	}
+
+	attributeNameCluster  string
+	attributeValueCluster string
 )
 
 const (
@@ -1165,6 +1173,67 @@ var startClusterCmd = &cobra.Command{
 	},
 }
 
+// setClusterCmd represents the set cluster command.
+var setClusterCmd = &cobra.Command{
+	Use:   "cluster",
+	Short: "set attributes for all members in cluster",
+	Long: `The 'set cluster' command sets an attribute for all members across a cluster.
+The following attribute names are allowed: bufferPublishSize, bufferReceiveSize, loggingFormat,
+loggingLevel, loggingLimit, multicastThreshold, resendDelay, sendAckDelay, trafficJamCount or trafficJamDelay. 
+Note: Many of these are advanced cluster configuration values and setting them should be done 
+carefully and in consultation with Oracle Support.`,
+	ValidArgsFunction: completionAllManualClusters,
+	Args: func(cmd *cobra.Command, args []string) error {
+		if len(args) != 1 {
+			displayErrorAndExit(cmd, youMustProviderConnectionMessage)
+		}
+		return nil
+	},
+	RunE: func(cmd *cobra.Command, args []string) error {
+		var (
+			connectionName             = args[0]
+			valueToSet     interface{} = attributeValueCluster
+			dataFetcher    fetcher.Fetcher
+			err            error
+		)
+
+		if !utils.SliceContains(validSetClusterAttributes, attributeNameCluster) {
+			return fmt.Errorf("invalid attribute %s valid values are: %v", attributeNameCluster, validSetClusterAttributes)
+		}
+
+		// validate anything other than loggingFormat as an int
+		if attributeNameCluster != "loggingFormat" {
+			v, err := strconv.Atoi(attributeValueCluster)
+			if err != nil {
+				return fmt.Errorf("invalid value for %s attribute: %s", attributeNameCluster, attributeValueCluster)
+			}
+			valueToSet = v
+		}
+
+		found, _ := GetClusterConnection(connectionName)
+		if !found {
+			return errors.New(UnableToFindClusterMsg + connectionName)
+		}
+
+		dataFetcher, err = GetDataFetcher(connectionName)
+		if err != nil {
+			return err
+		}
+
+		if !confirmOperation(cmd, fmt.Sprintf("Are you sure you want to set the attribute %s to value %v on all members of cluster %s? (y/n) ", attributeNameCluster, valueToSet, connectionName)) {
+			return nil
+		}
+
+		_, err = dataFetcher.SetClusterAttribute(attributeNameCluster, valueToSet)
+		if err != nil {
+			return err
+		}
+		cmd.Println(OperationCompleted)
+
+		return nil
+	},
+}
+
 // scaleClusterCmd represents the start cluster command.
 var scaleClusterCmd = &cobra.Command{
 	Use:               "cluster",
@@ -1523,6 +1592,12 @@ func init() {
 	applyStartParams(startClusterCmd)
 
 	restartClusterCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
+
+	setClusterCmd.Flags().StringVarP(&attributeNameCluster, "attribute", "a", "", attrNameToSet)
+	_ = setClusterCmd.MarkFlagRequired("attribute")
+	setClusterCmd.Flags().StringVarP(&attributeValueCluster, "value", "v", "", attrValueToSet)
+	_ = setClusterCmd.MarkFlagRequired("value")
+	setClusterCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
 }
 
 func applyStartParams(cmd *cobra.Command) {

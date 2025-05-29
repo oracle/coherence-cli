@@ -187,6 +187,9 @@ type Fetcher interface {
 	// SetCacheAttribute sets the given attribute for a cache.
 	SetCacheAttribute(memberID, serviceName, cacheName, tier, attribute string, value interface{}) ([]byte, error)
 
+	// SetClusterAttribute sets the given attribute for all members of a cluster.
+	SetClusterAttribute(attribute string, value interface{}) ([]byte, error)
+
 	// SetServiceAttribute sets the given attribute for a service.
 	SetServiceAttribute(memberID, serviceName, attribute string, value interface{}) ([]byte, error)
 

@@ -596,6 +596,7 @@ func Initialize(command *cobra.Command) *cobra.Command {
 	setCmd.AddCommand(setUseGradleCmd)
 	setCmd.AddCommand(setFederationCmd)
 	setCmd.AddCommand(setColorCmd)
+	setCmd.AddCommand(setClusterCmd)
 
 	// run command
 	command.AddCommand(runCmd)
