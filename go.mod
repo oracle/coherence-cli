@@ -14,9 +14,9 @@ require (
 	github.com/mattn/go-runewidth v0.0.16
 	github.com/ohler55/ojg v1.12.8
 	github.com/onsi/gomega v1.36.2
-	github.com/oracle/coherence-go-client/v2 v2.1.0
+	github.com/oracle/coherence-go-client/v2 v2.2.0
 	github.com/spf13/cobra v1.9.1
-	github.com/spf13/viper v1.20.0
+	github.com/spf13/viper v1.20.1
 	go.uber.org/zap v1.27.0
 	golang.org/x/term v0.30.0
 	golang.org/x/text v0.23.0
