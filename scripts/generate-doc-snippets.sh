@@ -51,7 +51,7 @@ create_doc $DOCS_DIR/monitor_cluster "${COHCTL} monitor cluster --help"
 create_doc $DOCS_DIR/add_panel "${COHCTL} add panel --help"
 create_doc $DOCS_DIR/get_panels "${COHCTL} get panels --help"
 create_doc $DOCS_DIR/remove_panel "${COHCTL} remove panel --help"
-
+create_doc $DOCS_DIR/set_cluster "${COHCTL} set cluster --help"
 
 (
 echo "// # tag::text[]"

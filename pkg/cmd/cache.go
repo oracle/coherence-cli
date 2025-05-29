@@ -45,6 +45,8 @@ const (
 	partitionDisplayType    = "partition"
 	access                  = "access"
 	storage                 = "storage"
+	attrNameToSet           = "attribute name to set"
+	attrValueToSet          = "attribute value to set"
 )
 
 // getCachesCmd represents the get caches command.
@@ -1201,9 +1203,9 @@ func init() {
 	truncateCacheCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
 
 	setCacheCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
-	setCacheCmd.Flags().StringVarP(&attributeNameCache, "attribute", "a", "", "attribute name to set")
+	setCacheCmd.Flags().StringVarP(&attributeNameCache, "attribute", "a", "", attrNameToSet)
 	_ = setCacheCmd.MarkFlagRequired("attribute")
-	setCacheCmd.Flags().StringVarP(&attributeValueCache, "value", "v", "", "attribute value to set")
+	setCacheCmd.Flags().StringVarP(&attributeValueCache, "value", "v", "", attrValueToSet)
 	_ = setCacheCmd.MarkFlagRequired("value")
 	setCacheCmd.Flags().StringVarP(&serviceName, serviceNameOption, serviceNameOptionShort, "", serviceNameDescription)
 	setCacheCmd.Flags().StringVarP(&nodeIDCache, "node", "n", all, "comma separated node ids to target")

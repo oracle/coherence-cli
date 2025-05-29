@@ -22,6 +22,7 @@ There are various cluster commands that allow you to work with and manage cluste
 * <<describe-cluster, `cohctl describe cluster`>> - describes a cluster referred to by a cluster connection
 * <<get-cluster-config, `cohctl get cluster-config`>> - displays the cluster operational config
 * <<get-cluster-description, `cohctl get cluster-description`>> - displays the cluster description including members
+* <<set-cluster, `cohctl set cluster`>> - sets attributes for all members in cluster
 
 [#add-cluster]
 ==== Add Cluster
@@ -195,6 +196,28 @@ include::../../build/_output/docs-gen/get_cluster_description.adoc[tag=text]
 ----
 cohctl get cluster-description -c local
 ----
+
+[#set-cluster]
+==== Set Cluster Attributes
+
+include::../../build/_output/docs-gen/set_cluster.adoc[tag=text]
+
+*Examples*
+
+[source,bash]
+----
+cohctl set cluster main -a loggingLevel -v 9
+----
+Output:
+
+[source,bash]
+----
+Are you sure you want to set the attribute loggingLevel to value 9 on all members of cluster main? (y/n) y
+operation completed
+----
+
+NOTE: Many of these are advanced cluster configuration values and setting them should be done
+carefully and in consultation with Oracle Support.
 
 === See Also
 

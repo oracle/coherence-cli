@@ -15,11 +15,11 @@ COHERENCE_BASE_IMAGE=gcr.io/distroless/java17-debian12 COHERENCE_VERSION=22.06.1
 echo "Coherence CE 14.1.2-0-2"
 COHERENCE_BASE_IMAGE=gcr.io/distroless/java17-debian12 COHERENCE_VERSION=14.1.2-0-2 make clean build-test-images test-e2e-standalone
 
-echo "Coherence CE 25.09.1"
-COHERENCE_BASE_IMAGE=gcr.io/distroless/java17-debian12 COHERENCE_VERSION=25.09.1 make clean build-test-images test-e2e-standalone
+echo "Coherence CE 25.03.1"
+COHERENCE_BASE_IMAGE=gcr.io/distroless/java17-debian12 COHERENCE_VERSION=25.03.1 make clean build-test-images test-e2e-standalone
 
-echo "Coherence CE 25.09.1 with Executor"
-COHERENCE_BASE_IMAGE=gcr.io/distroless/java17-debian12 PROFILES=,executor COHERENCE_VERSION=25.09.1 make clean build-test-images test-e2e-standalone
+echo "Coherence CE 25.03.1 with Executor"
+COHERENCE_BASE_IMAGE=gcr.io/distroless/java17-debian12 PROFILES=,executor COHERENCE_VERSION=25.03.1 make clean build-test-images test-e2e-standalone
 
 echo "Coherence CE 14.1.1-0-19"
 COHERENCE_VERSION=14.1.1-0-19 make clean build-test-images test-e2e-standalone

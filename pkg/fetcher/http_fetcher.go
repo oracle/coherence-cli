@@ -400,6 +400,19 @@ func (h HTTPFetcher) SetCacheAttribute(memberID, serviceName, cacheName, tier, a
 	return result, nil
 }
 
+// SetClusterAttribute sets the given attribute for all members of a cluster.
+func (h HTTPFetcher) SetClusterAttribute(attribute string, value interface{}) ([]byte, error) {
+	var valueString = getJSONValueString(value)
+	payload := []byte(fmt.Sprintf(jsonStringFormat, attribute, valueString))
+
+	result, err := httpPostRequest(h, "", payload)
+	if err != nil {
+		return constants.EmptyByte, utils.GetError(
+			fmt.Sprintf("cannot set value [%v] for attribute [%s] for cluster", value, attribute), err)
+	}
+	return result, nil
+}
+
 // SetServiceAttribute sets the given attribute for a service.
 func (h HTTPFetcher) SetServiceAttribute(memberID, serviceName, attribute string, value interface{}) ([]byte, error) {
 	var valueString = getJSONValueString(value)

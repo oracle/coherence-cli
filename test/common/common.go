@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, 2024 Oracle and/or its affiliates.
+ * Copyright (c) 2021, 2025 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -98,8 +98,7 @@ func RunTestClusterCommands(t *testing.T) {
 	test_utils.EnsureCommandContains(g, t, cliCmd, "cluster2", configArg, file, "get", "clusters")
 
 	// try to delete a cluster that doesn't exist
-	test_utils.EnsureCommandErrorContains(g, t, cliCmd, "unable to find cluster with", configArg, file, "remove", "cluster",
-		"not-here")
+	test_utils.EnsureCommandErrorContains(g, t, cliCmd, "unable to find cluster with", configArg, file, "remove", "cluster", "not-here")
 
 	// test describe cluster command with verbose
 	test_utils.EnsureCommandContainsAll(g, t, cliCmd,
@@ -136,6 +135,23 @@ func RunTestClusterCommands(t *testing.T) {
 
 	// test get config with verbose option
 	test_utils.EnsureCommandContainsAll(g, t, cliCmd, "CONFIG,CLUSTER CONNECTIONS", configArg, file, "get", "config", "-v")
+
+	// test set cluster commands with invalid attribute
+	test_utils.EnsureCommandErrorContains(g, t, cliCmd, "invalid attribute", configArg, file,
+		"set", "cluster", "cluster1", "-a", "rubbish", "-v", "9", "-y")
+
+	// test set cluster commands with invalid value for attribute
+	test_utils.EnsureCommandErrorContains(g, t, cliCmd, "invalid value for loggingLevel", configArg, file,
+		"set", "cluster", "cluster1", "-a", "loggingLevel", "-v", "XYZ", "-y")
+
+	// test set the logging level to 8
+	test_utils.EnsureCommandContainsAll(g, t, cliCmd, cmd.OperationCompleted, configArg, file,
+		"set", "cluster", "cluster1", "-a", "loggingLevel", "-v", "8", "-y")
+
+	test_utils.Sleep(15)
+
+	// validate the value was set
+	test_utils.EnsureCommandContains(g, t, cliCmd, "\"loggingLevel\":8", configArg, file, "get", "members", "-o", "json", "-c", context.ClusterName)
 
 	// remove the cluster entries
 	test_utils.EnsureCommandContains(g, t, cliCmd, context.ClusterName, configArg, file, "remove", "cluster", "cluster1")
