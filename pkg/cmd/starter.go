@@ -49,6 +49,8 @@ Get all customers:
 
 Delete a customer:
     curl -X DELETE http://localhost:8080/api/customers/1
+
+Note: you will see log messages shown for registered event listeners for insert, update and delete events.
 `
 )
 

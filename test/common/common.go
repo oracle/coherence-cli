@@ -25,8 +25,8 @@ import (
 const (
 	configArg        = "--config"
 	addedCluster     = "Added cluster"
-	version1221      = "12.2.1"
-	version1411      = "14.1.1"
+	version1221      = "12.2.1.4"
+	version1411      = "14.1.1.1"
 	configYaml       = "config.yaml"
 	nodeID           = "NODE ID"
 	jsonPathServices = "jsonpath=$.services"
@@ -40,8 +40,14 @@ const (
 
 // RunTestClusterCommands tests add/remove/get/describe cluster commands.
 func RunTestClusterCommands(t *testing.T) {
-	context := test_utils.GetTestContext()
-	g := NewGomegaWithT(t)
+	var (
+		context = test_utils.GetTestContext()
+		restUrl = context.RestUrl
+		g       = NewGomegaWithT(t)
+	)
+
+	versionString, err := getVersion(restUrl)
+	g.Expect(err).To(BeNil())
 
 	file := initializeTestFile(t)
 	cliCmd := cmd.Initialize(nil)
@@ -144,14 +150,17 @@ func RunTestClusterCommands(t *testing.T) {
 	test_utils.EnsureCommandErrorContains(g, t, cliCmd, "invalid value for loggingLevel", configArg, file,
 		"set", "cluster", "cluster1", "-a", "loggingLevel", "-v", "XYZ", "-y")
 
-	// test set the logging level to 8
-	test_utils.EnsureCommandContainsAll(g, t, cliCmd, cmd.OperationCompleted, configArg, file,
-		"set", "cluster", "cluster1", "-a", "loggingLevel", "-v", "8", "-y")
+	// only skip test for 14.1.1.0 and 12.2.1.4
+	if !strings.Contains(versionString, version1221) && !strings.Contains(versionString, version1411) {
+		// test set the logging level to 8
+		test_utils.EnsureCommandContainsAll(g, t, cliCmd, cmd.OperationCompleted, configArg, file,
+			"set", "cluster", "cluster1", "-a", "loggingLevel", "-v", "8", "-y")
 
-	test_utils.Sleep(15)
+		test_utils.Sleep(15)
 
-	// validate the value was set
-	test_utils.EnsureCommandContains(g, t, cliCmd, "\"loggingLevel\":8", configArg, file, "get", "members", "-o", "json", "-c", context.ClusterName)
+		// validate the value was set
+		test_utils.EnsureCommandContains(g, t, cliCmd, "\"loggingLevel\":8", configArg, file, "get", "members", "-o", "json", "-c", context.ClusterName)
+	}
 
 	// remove the cluster entries
 	test_utils.EnsureCommandContains(g, t, cliCmd, context.ClusterName, configArg, file, "remove", "cluster", "cluster1")
