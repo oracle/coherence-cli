@@ -6,11 +6,22 @@
 
 package com.oracle.coherence.demo.frameworks.springboot.controller;
 
+import com.oracle.coherence.common.base.Logger;
+
 import com.oracle.coherence.demo.frameworks.springboot.Customer;
+
+import com.oracle.coherence.spring.annotation.WhereFilter;
+import com.oracle.coherence.spring.annotation.event.Deleted;
+import com.oracle.coherence.spring.annotation.event.Inserted;
+import com.oracle.coherence.spring.annotation.event.MapName;
+import com.oracle.coherence.spring.annotation.event.Updated;
 import com.oracle.coherence.spring.configuration.annotation.CoherenceCache;
+
+import com.oracle.coherence.spring.event.CoherenceEventListener;
 
 import com.tangosol.net.NamedCache;
 
+import com.tangosol.util.MapEvent;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,7 +29,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Collection;
@@ -55,4 +65,42 @@ public class DemoController {
         customers.remove(id);
     }
 
+    // --- Register Map Listeners
+
+    /**
+     * Event fired on inserting of a {@link Customer}.
+     * @param event event information
+     */
+    @CoherenceEventListener
+    private void onCustomerInserted(@Inserted @MapName("customers") MapEvent<Integer, Customer> event) {
+        Logger.info("Customer Inserted: id=" + event.getKey() + ", value=" + event.getNewValue());
+    }
+
+    /**
+     * Event fired on updating of a {@link Customer}.
+     * @param event event information
+     */
+    @CoherenceEventListener
+    private void onCustomerUpdated(@Updated @MapName("customers") MapEvent<Integer, Customer> event) {
+        Logger.info("Customer Updated: id=" + event.getKey() + ", new value=" + event.getNewValue() + ", old value=" + event.getOldValue());
+    }
+
+    /**
+     * Event fired on deletion a {@link Customer}.
+     * @param event event information
+     */
+    @CoherenceEventListener
+    private void onCustomerDeleted(@Deleted @MapName("customers") MapEvent<Integer, Customer> event) {
+        Logger.info("Customer Deleted: id=" + event.getKey() + ", old value=" + event.getOldValue());
+    }
+
+    /**
+     * Event fired on deleting of a {@link Customer} when they have a large balance > 5000.
+     * @param event event information
+     */
+    @CoherenceEventListener
+    @WhereFilter("balance > 5000.0d")
+    private void onCustomerDeletedLargeBalance(@Deleted @MapName("customers") MapEvent<Integer, Customer> event) {
+        Logger.info("Customer Updated: (Large Balance) id=" + event.getKey() + ", old value=" + event.getOldValue());
+    }
 }
