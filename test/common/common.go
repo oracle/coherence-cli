@@ -26,7 +26,7 @@ const (
 	configArg        = "--config"
 	addedCluster     = "Added cluster"
 	version1221      = "12.2.1.4"
-	version1411      = "14.1.1.1"
+	version1411      = "14.1.1.0"
 	configYaml       = "config.yaml"
 	nodeID           = "NODE ID"
 	jsonPathServices = "jsonpath=$.services"
@@ -150,6 +150,7 @@ func RunTestClusterCommands(t *testing.T) {
 	test_utils.EnsureCommandErrorContains(g, t, cliCmd, "invalid value for loggingLevel", configArg, file,
 		"set", "cluster", "cluster1", "-a", "loggingLevel", "-v", "XYZ", "-y")
 
+	t.Log("Testing cluster version", versionString)
 	// only skip test for 14.1.1.0 and 12.2.1.4
 	if !strings.Contains(versionString, version1221) && !strings.Contains(versionString, version1411) {
 		// test set the logging level to 8
