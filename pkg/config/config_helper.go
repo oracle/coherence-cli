@@ -362,6 +362,7 @@ type FederationDescription struct {
 
 	// addition mapMembers from 14.1.2+
 	MapMembers map[string]string `json:"mapMembers"`
+	Member     string            `json:"member"`
 
 	// 15.1.1.0
 	TransportBackloggedTime int64 `json:"transportBackloggedTime"`
