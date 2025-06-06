@@ -323,8 +323,7 @@ service, type and participant. Specify -T to set type outgoing or incoming and -
 
 				if verboseOutput {
 					for _, v := range results {
-						output, err = FormatJSONForDescribe(v, true,
-							"Node Id", "Service", "Name", "Type")
+						output, err = FormatJSONForDescribe(v, true, "Node Id", "Service", "Name", "Type")
 						if err != nil {
 							return err
 						}
@@ -341,7 +340,6 @@ service, type and participant. Specify -T to set type outgoing or incoming and -
 				}
 
 				cmd.Println(sb.String())
-
 			}
 
 			// check to see if we should exit if we are not watching
@@ -375,8 +373,8 @@ func decodeFederationData(results [][]byte) ([]config.FederationDescription, err
 // getFederationIncomingCmd represents the get federation-incoming command.
 var getFederationIncomingCmd = &cobra.Command{
 	Use:   "federation-incoming service-name",
-	Short: "get incoming federation connections information for a given service and participant",
-	Long: `The 'get federation-incoming' command displays the incoming connections for a given
+	Short: "get incoming federation connection member information for a given service and participant",
+	Long: `The 'get federation-incoming' command displays the incoming connection members for a given
 service and participant. Specify -p for participant.`,
 	ValidArgsFunction: completionFederatedService,
 	Args: func(cmd *cobra.Command, args []string) error {
@@ -386,25 +384,49 @@ service and participant. Specify -p for participant.`,
 		return nil
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
-		var (
-			err         error
-			dataFetcher fetcher.Fetcher
-			connection  string
-			service     = args[0]
-		)
+		return getFederationConnectionDetails(cmd, args[0], incoming)
+	},
+}
 
-		if participant == all {
-			return errors.New("please provide a participant")
+// getFederationOutgoing represents the get federation-outgoing command.
+var getFederationOutgoingCmd = &cobra.Command{
+	Use:   "federation-outgoing service-name",
+	Short: "get outgoing federation connection member information for a given service and participant",
+	Long: `The 'get federation-outgoing' command displays the outgoing connection members for a given
+service and participant. Specify -p for participant.`,
+	ValidArgsFunction: completionFederatedService,
+	Args: func(cmd *cobra.Command, args []string) error {
+		if len(args) != 1 {
+			displayErrorAndExit(cmd, supplyService)
 		}
-		describeFederationType = origins
+		return nil
+	},
+	RunE: func(cmd *cobra.Command, args []string) error {
+		return getFederationConnectionDetails(cmd, args[0], outgoing)
+	},
+}
 
-		// retrieve the current context or the value from "-c"
-		connection, dataFetcher, err = GetConnectionAndDataFetcher()
-		if err != nil {
-			return err
-		}
+func getFederationConnectionDetails(cmd *cobra.Command, service, federationType string) error {
+	var (
+		err         error
+		dataFetcher fetcher.Fetcher
+		connection  string
+	)
 
-		results, err := retrieveFederationDetails(dataFetcher, service, origins)
+	if participant == all {
+		return errors.New("please provide a participant")
+	}
+	describeFederationType = federationType
+
+	// retrieve the current context or the value from "-c"
+	connection, dataFetcher, err = GetConnectionAndDataFetcher()
+	if err != nil {
+		return err
+	}
+
+	for {
+		var results [][]byte
+		results, err = retrieveFederationDetails(dataFetcher, service, describeFederationType)
 		if err != nil {
 			return err
 		}
@@ -418,14 +440,21 @@ service and participant. Specify -p for participant.`,
 		} else {
 			var sb strings.Builder
 
+			printWatchHeader(cmd)
 			sb.WriteString(FormatCurrentCluster(connection))
 
-			sb.WriteString("\nINCOMING FEDERATION CONNECTIONS\n")
+			textDirection := "OUTGOING"
+			if describeFederationType == origins {
+				textDirection = "INCOMING"
+			}
+
+			sb.WriteString("\n" + textDirection + " FEDERATION CONNECTIONS\n")
 			sb.WriteString("------------------------------\n")
 
 			sb.WriteString(fmt.Sprintf("Service:     %s\n", service))
 			sb.WriteString(fmt.Sprintf("Type:        %s\n", describeFederationType))
-			sb.WriteString(fmt.Sprintf("Participant: %s\n\n", participant))
+			sb.WriteString(fmt.Sprintf("Participant: %s\n", participant))
+			sb.WriteString("** Showing destination member details\n\n")
 
 			// encode the mapMembers
 			federationData, err := decodeFederationData(results)
@@ -438,6 +467,9 @@ service and participant. Specify -p for participant.`,
 				for _, v2 := range v.MapMembers {
 					mapAllIncoming = append(mapAllIncoming, v2)
 				}
+				if v.Member != "" && v.Member != "N/A" {
+					mapAllIncoming = append(mapAllIncoming, v.Member)
+				}
 			}
 			incomingList, err1 := decodeDepartedMembers(mapAllIncoming)
 			if err1 != nil {
@@ -449,8 +481,16 @@ service and participant. Specify -p for participant.`,
 			cmd.Println(sb.String())
 		}
 
-		return nil
-	},
+		// check to see if we should exit if we are not watching
+		if !isWatchEnabled() {
+			break
+		}
+
+		// we are watching so sleep and then repeat until CTRL-C
+		time.Sleep(time.Duration(watchDelay) * time.Second)
+	}
+
+	return nil
 }
 
 func encodeFinalData(results [][]byte) []byte {
@@ -586,4 +626,5 @@ func init() {
 		"include verbose output including all attributes")
 
 	getFederationIncomingCmd.Flags().StringVarP(&participant, "participant", "p", "", participantMessage)
+	getFederationOutgoingCmd.Flags().StringVarP(&participant, "participant", "p", "", participantMessage)
 }

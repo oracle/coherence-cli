@@ -18,7 +18,8 @@ There are various commands that allow you to work with and issue Federation comm
 * <<get-federation, `cohctl get federation`>> - displays federation details for a cluster
 * <<set-federation, `cohctl set federation`>> - sets an attribute for a federated service
 * <<describe-federation, `cohctl describe federation`>> - displays federation details for a given service and participant
-* <<get-federation-incoming, `cohctl get federation-incoming`>> - displays incoming federation connections information for a given service and participant
+* <<get-federation-incoming, `cohctl get federation-incoming`>> - displays incoming federation connection member information for a given service and participant
+* <<get-federation-outgoing, `cohctl get federation-outgoing`>> - displays outgoing federation connection member information for a given service and participant
 * <<start-federation, `cohctl start federation`>> - starts federation for a service
 * <<stop-federation, `cohctl stop federation`>> - stops federation for a service
 * <<pause-federation, `cohctl pause federation`>> - pauses federation for a service
@@ -179,7 +180,7 @@ include::../../build/_output/docs-gen/get_federation_incoming.adoc[tag=text]
 
 *Examples*
 
-Get incoming federation connections for `FederatedCache` service and incoming participant `Sydney`:
+Get incoming federation connection member information for `FederatedCache` service and incoming participant `Sydney`:
 
 [source,bash]
 ----
@@ -193,11 +194,42 @@ INCOMING FEDERATION CONNECTIONS
 Service:     FederatedCache
 Type:        origins
 Participant: Sydney
+** Showing destination member details
 
 NODE ID  TIMESTAMP                ADDRESS          MACHINE ID  LOCATION                         ROLE
       1  2024-10-07 12:51:03.624  127.0.0.1:62049  10131       machine:localhost,process:21341  CoherenceDemoServer
       2  2024-10-07 13:25:02.737  127.0.0.1:63456  10131       machine:localhost,process:23893  CoherenceDemoServer
       3  2024-10-07 13:25:06.468  127.0.0.1:63475  10131       machine:localhost,process:23894  CoherenceDemoServer
+----
+
+
+[#get-federation-outgoing]
+==== Get Federation Outgoing Connections
+
+include::../../build/_output/docs-gen/get_federation_outgoing.adoc[tag=text]
+
+*Examples*
+
+Get outgoing federation connection member information for `FederatedCache` service and incoming participant `Sydney`:
+
+[source,bash]
+----
+cohctl get federation-outgoing FederatedCache -p Sydney -c local
+----
+Output:
+[source,bash]
+----
+OUTGOING FEDERATION CONNECTIONS
+------------------------------
+Service:     FederatedCache
+Type:        outgoing
+Participant: Sydney
+** Showing destination member details
+
+NODE ID  TIMESTAMP                ADDRESS          MACHINE ID  LOCATION                                          ROLE
+      2  2025-06-06 12:39:15.267  127.0.0.1:60976  10131       machine:localhost,process:27520,member:storage-1  CoherenceServer
+      3  2025-06-06 12:39:15.268  127.0.0.1:60977  10131       machine:localhost,process:27519,member:storage-0  CoherenceServer
+      3  2025-06-06 12:39:15.268  127.0.0.1:60977  10131       machine:localhost,process:27519,member:storage-0  CoherenceServer
 ----
 
 

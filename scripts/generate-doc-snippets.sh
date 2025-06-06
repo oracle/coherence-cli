@@ -101,6 +101,7 @@ create_doc $DOCS_DIR/stop_federation "${COHCTL} stop federation --help"
 create_doc $DOCS_DIR/pause_federation "${COHCTL} pause federation --help"
 create_doc $DOCS_DIR/replicate_all "${COHCTL} replicate all --help"
 create_doc $DOCS_DIR/get_federation_incoming "${COHCTL} get federation-incoming --help"
+create_doc $DOCS_DIR/get_federation_outgoing "${COHCTL} get federation-outgoing --help"
 
 # Services
 create_doc $DOCS_DIR/get_services "${COHCTL} get services --help"
