@@ -35,7 +35,9 @@ For macOS or Linux platforms, use the following to install the latest version of
 curl -sL https://raw.githubusercontent.com/oracle/coherence-cli/main/scripts/install.sh | bash
 ----
 
-NOTE: When you install the CLI, administrative privileges are required as the `cohctl` executable is moved to the `/usr/local/bin` directory. You can move it out of this directory if you wish after installation.
+NOTE: When you install the CLI, normally administrative privileges are required as the `cohctl` executable is moved to the `/usr/local/bin` directory.
+If you do not want to copy to `/usr/local/bin` automatically, you can set the following environment variable `export COPY=false`, before running the above to download only and then
+manually copy to your desired location.
 
 [#install-windows]
 === Windows
