@@ -38,7 +38,7 @@ public class CustomerResource {
     @Consumes(APPLICATION_JSON)
     public Response createCustomer(Customer customer) {
         customers.put(customer.getId(), customer);
-        return Response.accepted(customer).build();
+        return Response.accepted().build();
     }
 
     @GET

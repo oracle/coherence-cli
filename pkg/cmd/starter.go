@@ -38,8 +38,9 @@ var (
 	validFrameworks    = []string{"helidon", "springboot", "micronaut"}
 
 	commonInstructions = `
-Add a customer:
-    curl -X POST -H "Content-Type: application/json" -d '{"id": 1, "name": "Tim", "balance": 1000}' http://localhost:8080/api/customers
+Add customers:
+    curl -X POST -H "Content-Type: application/json" -d '{"id": 1, "name": "Tim",  "balance": 1000}'  http://localhost:8080/api/customers
+    curl -X POST -H "Content-Type: application/json" -d '{"id": 2, "name": "Jenny", "balance": 6000}' http://localhost:8080/api/customers
 
 Get a customer:
     curl -s http://localhost:8080/api/customers/1
