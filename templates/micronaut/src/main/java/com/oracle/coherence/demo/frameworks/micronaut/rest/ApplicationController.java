@@ -98,6 +98,6 @@ public class ApplicationController {
     @CoherenceEventListener
     @WhereFilter("balance > 5000.0d")
     public void onCustomerDeletedLargeBalance(@Deleted @MapName("customers") MapEvent<Integer, Customer> event) {
-        Logger.info("Customer Updated: (Large Balance) id=" + event.getKey() + ", old value=" + event.getOldValue());
+        Logger.info("Customer Deleted: (Large Balance) id=" + event.getKey() + ", old value=" + event.getOldValue());
     }
 }

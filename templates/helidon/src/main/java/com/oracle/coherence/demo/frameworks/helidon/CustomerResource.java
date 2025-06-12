@@ -96,6 +96,6 @@ public class CustomerResource {
      */
     @WhereFilter("balance > 5000.0d")
     private void onCustomerDeletedLargeBalance(@Observes @Deleted @MapName("customers") MapEvent<Integer, Customer> event) {
-        Logger.info("Customer Updated: (Large Balance) id=" + event.getKey() + ", old value=" + event.getOldValue());
+        Logger.info("Customer Deleted: (Large Balance) id=" + event.getKey() + ", old value=" + event.getOldValue());
     }
 }
