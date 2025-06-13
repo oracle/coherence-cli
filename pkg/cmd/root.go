@@ -775,6 +775,8 @@ func Initialize(command *cobra.Command) *cobra.Command {
 	command.AddCommand(initCmd)
 	initCmd.AddCommand(initObservabilityCmd)
 	getCmd.AddCommand(getObservabilityCmd)
+	startCmd.AddCommand(startObservabilityCmd)
+	stopCmd.AddCommand(stopObservabilityCmd)
 
 	return command
 }

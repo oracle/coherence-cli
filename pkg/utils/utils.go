@@ -7,6 +7,8 @@
 package utils
 
 import (
+	"crypto/tls"
+	"crypto/x509"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -40,6 +42,10 @@ const (
 	coherenceMain = "com.tangosol.net.Coherence"
 	coherenceDCS  = "com.tangosol.net.DefaultCacheServer"
 	cdiServer     = "com.oracle.coherence.cdi.server.Server"
+
+	envTLSCertPath   = "COHERENCE_TLS_CERTS_PATH"
+	envTLSClientCert = "COHERENCE_TLS_CLIENT_CERT"
+	envTLSClientKey  = "COHERENCE_TLS_CLIENT_KEY"
 )
 
 // GetError returns a formatted error and prints to log.
@@ -203,6 +209,13 @@ func GetErrors(errorList []error) error {
 		_ = GetError("error", value)
 	}
 	return errors.New("multiple errors retrieving data, please see log file")
+}
+
+func GetStringValueFromEnvVarOrDefault(envVar string, defaultValue string) string {
+	if val := os.Getenv(envVar); val != "" {
+		return val
+	}
+	return defaultValue
 }
 
 // CombineByteArraysForJSON combines byte arrays for json output
@@ -462,4 +475,60 @@ func GetBackupCount(ownership map[int]*config.PartitionOwnership) int {
 		return len(v.PartitionMap) - 1
 	}
 	return 1
+}
+
+func GetTLSDetails() ([]tls.Certificate, *x509.CertPool, string, string, string, error) {
+	var (
+		certPool     *x509.CertPool
+		certData     []byte
+		certificates = make([]tls.Certificate, 0)
+		err          error
+	)
+
+	caCertPath := GetStringValueFromEnvVarOrDefault(envTLSCertPath, "")
+	clientCertPath := GetStringValueFromEnvVarOrDefault(envTLSClientCert, "")
+	clientCertKeyPath := GetStringValueFromEnvVarOrDefault(envTLSClientKey, "")
+
+	if caCertPath != "" {
+		certPool = x509.NewCertPool()
+
+		if err = validateFilePath(caCertPath); err != nil {
+			return nil, nil, caCertPath, clientCertPath, clientCertKeyPath, err
+		}
+
+		certData, err = os.ReadFile(caCertPath)
+		if err != nil {
+			return nil, nil, caCertPath, clientCertPath, clientCertKeyPath, err
+		}
+
+		if !certPool.AppendCertsFromPEM(certData) {
+			return nil, nil, caCertPath, clientCertPath, clientCertKeyPath, errors.New("credentials: failed to append certificates")
+		}
+	}
+
+	if clientCertPath != "" && clientCertKeyPath != "" {
+		if err = validateFilePath(clientCertPath); err != nil {
+			return nil, nil, caCertPath, clientCertPath, clientCertKeyPath, err
+		}
+		if err = validateFilePath(clientCertKeyPath); err != nil {
+			return nil, nil, caCertPath, clientCertPath, clientCertKeyPath, err
+		}
+		var clientCert tls.Certificate
+		clientCert, err = tls.LoadX509KeyPair(clientCertPath, clientCertKeyPath)
+		if err != nil {
+			return nil, nil, caCertPath, clientCertPath, clientCertKeyPath, err
+		}
+		certificates = []tls.Certificate{clientCert}
+	}
+
+	return certificates, certPool, caCertPath, clientCertPath, clientCertKeyPath, nil
+}
+
+// validateFilePath checks to see if a file path is valid.
+func validateFilePath(file string) error {
+	if _, err := os.Stat(file); err == nil {
+		return nil
+	}
+
+	return fmt.Errorf("%s is not a valid file", file)
 }

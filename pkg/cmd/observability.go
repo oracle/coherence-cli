@@ -7,12 +7,17 @@
 package cmd
 
 import (
+	"bufio"
+	"encoding/json"
 	"fmt"
 	"github.com/oracle/coherence-cli/pkg/utils"
 	"github.com/spf13/cobra"
+	"io"
 	"os"
+	"os/exec"
 	"path"
 	"path/filepath"
+	"strings"
 )
 
 const (
@@ -21,6 +26,8 @@ const (
 	dashboardBaseURL       = "https://raw.githubusercontent.com/oracle/coherence-operator/refs/heads/main/dashboards/grafana"
 	configBaseURL          = "https://raw.githubusercontent.com/oracle/coherence-cli/refs/heads/observability/observability"
 	//configBaseURL          = "https://raw.githubusercontent.com/oracle/coherence-cli/refs/heads/main/observability"
+	grafanaPort    = 3000
+	prometheusPort = 9090
 )
 
 var (
@@ -103,19 +110,87 @@ monitor local Coherence clusters.`,
 			return err
 		}
 
-		cmd.Println(obs)
+		cmd.Println("Pulling docker images...")
+
+		err = obs.dockerCommand([]string{"pull", obs.prometheusImage})
+		if err != nil {
+			return err
+		}
+		err = obs.dockerCommand([]string{"pull", obs.grafanaImage})
+		if err != nil {
+			return err
+		}
 
 		cmd.Println(OperationCompleted)
 		return nil
 	},
 }
 
+type grafanaStatus struct {
+	Database string `json:"database"`
+	Version  string `json:"version"`
+}
+
 // getObservabilityCmd represents the get observability command.
 var getObservabilityCmd = &cobra.Command{
 	Use:   "observability",
 	Short: "returns observability status",
-	Long: `The 'get observability' gets teh observability status and ensures
+	Long: `The 'get observability' gets the observability status and ensures
 the environment is setup`,
+	Args: cobra.ExactArgs(0),
+	RunE: func(cmd *cobra.Command, _ []string) error {
+		// ensure the base directory
+		var (
+			obs              = newObservability(cmd)
+			grafanaOutput    string
+			promOutput       string
+			err              = obs.validateEnvironment()
+			promURL          = fmt.Sprintf("http://localhost:%v/", prometheusPort)
+			promHealthURL    = fmt.Sprintf("%s-/healthy", promURL)
+			grafanaURL       = fmt.Sprintf("http://localhost:%v/d/coh-main/coherence-dashboard-main", grafanaPort)
+			grafanaHealthURL = fmt.Sprintf("%sapi/health", grafanaURL)
+		)
+
+		if err != nil {
+			return err
+		}
+
+		promContent, err := GetURLContents(promHealthURL)
+		if err != nil {
+			promOutput = err.Error()
+		} else {
+			promOutput = string(promContent)
+		}
+
+		grafanaContent, err := GetURLContents(grafanaHealthURL)
+		if err != nil {
+			grafanaOutput = err.Error()
+		} else {
+			var status grafanaStatus
+			err = json.Unmarshal(grafanaContent, &status)
+			if err != nil {
+				grafanaOutput = err.Error()
+			} else {
+				grafanaOutput = fmt.Sprintf("%s, version=%s", status.Database, status.Version)
+			}
+		}
+
+		cmd.Println("Observability status")
+		cmd.Printf("Grafana:    %s\n", grafanaURL)
+		cmd.Printf("  Status:   %s\n", grafanaOutput)
+		cmd.Printf("Prometheus: %s\n", promURL)
+		cmd.Printf("  Status:   %s\n", promOutput)
+		cmd.Println("Docker")
+		return obs.dockerCommand([]string{"ps"})
+	},
+}
+
+// startObservabilityCmd represents the start observability command.
+var startObservabilityCmd = &cobra.Command{
+	Use:   "observability",
+	Short: "starts the observability stack",
+	Long: `The 'start observability' starts the observability stack, Grafana and 
+Prometheus using docker compose`,
 	Args: cobra.ExactArgs(0),
 	RunE: func(cmd *cobra.Command, _ []string) error {
 		// ensure the base directory
@@ -127,7 +202,42 @@ the environment is setup`,
 			return err
 		}
 
-		return nil
+		err = obs.dockerCommand([]string{"compose", "-f", path.Join(obs.observabilityDir, "docker-compose.yaml"), "up", "-d"})
+		if err != nil {
+			return err
+		}
+
+		return obs.dockerCommand([]string{"ps"})
+	},
+}
+
+// stopObservabilityCmd represents the stop command.
+var stopObservabilityCmd = &cobra.Command{
+	Use:   "observability",
+	Short: "stops the observability stack",
+	Long: `The 'stop observability' stops the observability stack, Grafana and Prometheus
+using docker compose`,
+	Args: cobra.ExactArgs(0),
+	RunE: func(cmd *cobra.Command, _ []string) error {
+		// ensure the base directory
+		obs := newObservability(cmd)
+
+		err := obs.validateEnvironment()
+
+		if err != nil {
+			return err
+		}
+
+		if !confirmOperation(cmd, "Are you sure you want to stop observability? (y/n) ") {
+			return nil
+		}
+
+		err = obs.dockerCommand([]string{"compose", "-f", path.Join(obs.observabilityDir, "docker-compose.yaml"), "down"})
+		if err != nil {
+			return err
+		}
+
+		return obs.dockerCommand([]string{"ps"})
 	},
 }
 
@@ -135,12 +245,16 @@ type observability struct {
 	observabilityDir string
 	dashboardsDir    string
 	cmd              *cobra.Command
+	grafanaImage     string
+	prometheusImage  string
 }
 
 func newObservability(cmd *cobra.Command) *observability {
 	obs := &observability{cmd: cmd}
 	obs.observabilityDir = path.Join(cfgDirectory, observabilityDirectory)
 	obs.dashboardsDir = path.Join(obs.observabilityDir, dashboardsDirectory)
+	obs.grafanaImage = "grafana/grafana:11.6.2"
+	obs.prometheusImage = "prom/prometheus:v2.53.4"
 	return obs
 }
 
@@ -232,6 +346,12 @@ func (o *observability) downloadDockerComposeFiles() error {
 	return nil
 }
 
+func (o *observability) dockerCommand(args []string) error {
+	o.cmd.Printf("Issuing docker %s\n", strings.Join(args, " "))
+
+	return executeHostCommand(o.cmd, "docker", args...)
+}
+
 func observabilityNotValid(message string) error {
 	return fmt.Errorf("unable to validate observability due to %s, please run 'cohctl init observability'", message)
 }
@@ -256,6 +376,42 @@ func ensureDirectory(directory string) error {
 	return nil
 }
 
+// executeHostCommand executes a host command.
+func executeHostCommand(cmd *cobra.Command, name string, arg ...string) error {
+	command := exec.Command(name, arg...)
+
+	stdout, err := command.StdoutPipe()
+	if err != nil {
+		return fmt.Errorf("failed to get stdout: %w", err)
+	}
+	stderr, err := command.StderrPipe()
+	if err != nil {
+		return fmt.Errorf("failed to get stderr: %w", err)
+	}
+
+	if err = command.Start(); err != nil {
+		return fmt.Errorf("failed to start command: %w", err)
+	}
+
+	// Use cobra's output writers
+	go streamOutput(stdout, cmd.OutOrStdout())
+	go streamOutput(stderr, cmd.ErrOrStderr())
+
+	if err = command.Wait(); err != nil {
+		return fmt.Errorf("command finished with error: %w", err)
+	}
+
+	return nil
+}
+
+func streamOutput(r io.Reader, w io.Writer) {
+	scanner := bufio.NewScanner(r)
+	for scanner.Scan() {
+		_, _ = fmt.Fprintln(w, scanner.Text())
+	}
+}
+
 func init() {
 	initObservabilityCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
+	stopObservabilityCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
 }
