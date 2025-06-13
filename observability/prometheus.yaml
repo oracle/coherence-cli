@@ -1,0 +1,13 @@
+# Copyright 2025 Oracle Corporation and/or its affiliates.
+# Licensed under the Universal Permissive License v 1.0 as shown at
+# https://oss.oracle.com/licenses/upl.
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: 'Prometheus'
+    static_configs:
+      - targets: ["localhost:9090"]
+  - job_name: 'coherence_cluster'
+    static_configs:
+      - targets: ["host.docker.internal:9612", "host.docker.internal:9613", "host.docker.internal:9614", "host.docker.internal:9615", "host.docker.internal:9616", "host.docker.internal:9617", "host.docker.internal:9618", "host.docker.internal:9619"]

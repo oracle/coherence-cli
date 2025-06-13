@@ -163,6 +163,15 @@ func DirectoryExists(directory string) bool {
 	return file.IsDir()
 }
 
+// FileExists returns a bool indicating if a file exists and is not a directory.
+func FileExists(path string) bool {
+	info, err := os.Stat(path)
+	if os.IsNotExist(err) {
+		return false
+	}
+	return err == nil && !info.IsDir()
+}
+
 // IsValidInt returns true or false indicating if a string int is a valid integer.
 func IsValidInt(value string) bool {
 	_, err := strconv.Atoi(value)

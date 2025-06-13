@@ -1,0 +1,29 @@
+# Copyright 2025 Oracle Corporation and/or its affiliates.
+# Licensed under the Universal Permissive License v 1.0 as shown at
+# https://oss.oracle.com/licenses/upl.
+services:
+  prometheus:
+    image: prom/prometheus:v2.53.4
+    networks:
+      coherence:
+    volumes:
+      - ./prometheus.yaml:/etc/prometheus/prometheus.yaml
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yaml'
+    ports:
+      - 9090:9090
+
+  grafana:
+    networks:
+      coherence:
+    image: grafana/grafana:11.6.2
+    volumes:
+      - ./grafana.ini:/etc/grafana/grafana.ini
+      - ./datasources.yaml:/etc/grafana/provisioning/datasources/datasources.yaml
+      - ./dashboards.yaml:/etc/grafana/provisioning/dashboards/dashboards.yaml
+      - ./dashboards:/etc/grafana/provisioning/dashboards/dashboards
+    ports:
+      - 3000:3000
+
+networks:
+  coherence:
