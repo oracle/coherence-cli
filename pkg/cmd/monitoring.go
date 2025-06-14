@@ -25,11 +25,10 @@ const (
 	monitoringDirectory = "monitoring"
 	dashboardsDirectory = "dashboards"
 	dashboardBaseURL    = "https://raw.githubusercontent.com/oracle/coherence-operator/refs/heads/main/dashboards/grafana"
-	//configBaseURL       = "https://raw.githubusercontent.com/oracle/coherence-cli/refs/heads/observability/monitoring"
-	configBaseURL     = "https://raw.githubusercontent.com/oracle/coherence-cli/refs/heads/main/monitoring"
-	grafanaPort       = 3000
-	prometheusPort    = 9090
-	dockerComposeYAML = "docker-compose.yaml"
+	configBaseURL       = "https://raw.githubusercontent.com/oracle/coherence-cli/refs/heads/main/monitoring"
+	grafanaPort         = 3000
+	prometheusPort      = 9090
+	dockerComposeYAML   = "docker-compose.yaml"
 )
 
 var (
