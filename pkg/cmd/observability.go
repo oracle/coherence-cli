@@ -127,6 +127,8 @@ monitor local Coherence clusters.`,
 		}
 
 		cmd.Println(OperationCompleted)
+		cmd.Println()
+		cmd.Printf("Note: You can change the grafana and prometheus image versions by editing: \n  %s\n\n", path.Join(mon.monitoringDir, dockerComposeYAML))
 		return nil
 	},
 }
