@@ -141,7 +141,7 @@ var getMonitoringCmd = &cobra.Command{
 	Use:   "monitoring",
 	Short: "returns monitoring status",
 	Long: `The 'get monitoring' gets the monitoring status and ensures
-the environment is setup`,
+the environment is setup correctly.`,
 	Args: cobra.ExactArgs(0),
 	RunE: func(cmd *cobra.Command, _ []string) error {
 		// ensure the base directory
@@ -198,7 +198,7 @@ var startMonitoringCmd = &cobra.Command{
 	Use:   "monitoring",
 	Short: "starts the monitoring stack",
 	Long: `The 'start monitoring' starts the monitoring stack, Grafana and 
-Prometheus using docker compose`,
+Prometheus using docker compose.`,
 	Args: cobra.ExactArgs(0),
 	RunE: func(cmd *cobra.Command, _ []string) error {
 		// ensure the base directory
@@ -215,6 +215,9 @@ Prometheus using docker compose`,
 			return err
 		}
 
+		grafanaURL := fmt.Sprintf("http://localhost:%v/d/coh-main/coherence-dashboard-main", grafanaPort)
+		cmd.Printf("\nOpen the Grafana dashboard at %s, using admin/admin\n\n", grafanaURL)
+
 		return mon.dockerCommand([]string{"ps"})
 	},
 }
@@ -224,7 +227,7 @@ var stopMonitoringCmd = &cobra.Command{
 	Use:   "monitoring",
 	Short: "stops the monitoring stack",
 	Long: `The 'stop monitoring' stops the monitoring stack, Grafana and Prometheus
-using docker compose`,
+using docker compose.`,
 	Args: cobra.ExactArgs(0),
 	RunE: func(cmd *cobra.Command, _ []string) error {
 		// ensure the base directory
