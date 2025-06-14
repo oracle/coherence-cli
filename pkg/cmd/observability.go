@@ -17,6 +17,7 @@ import (
 	"os/exec"
 	"path"
 	"path/filepath"
+	"regexp"
 	"strings"
 )
 
@@ -26,8 +27,9 @@ const (
 	dashboardBaseURL       = "https://raw.githubusercontent.com/oracle/coherence-operator/refs/heads/main/dashboards/grafana"
 	configBaseURL          = "https://raw.githubusercontent.com/oracle/coherence-cli/refs/heads/observability/observability"
 	//configBaseURL          = "https://raw.githubusercontent.com/oracle/coherence-cli/refs/heads/main/observability"
-	grafanaPort    = 3000
-	prometheusPort = 9090
+	grafanaPort       = 3000
+	prometheusPort    = 9090
+	dockerComposeYAML = "docker-compose.yaml"
 )
 
 var (
@@ -62,7 +64,7 @@ var (
 		"grafana.ini",
 		"dashboards.yaml",
 		"datasources.yaml",
-		"docker-compose.yaml",
+		dockerComposeYAML,
 		"prometheus.yaml",
 	}
 )
@@ -89,7 +91,6 @@ monitor local Coherence clusters.`,
 			return nil
 		}
 
-		// ensure the base directory
 		obs := newObservability(cmd)
 
 		cmd.Println("Ensuring directories...")
@@ -111,6 +112,10 @@ monitor local Coherence clusters.`,
 		}
 
 		cmd.Println("Pulling docker images...")
+		err = obs.discoverImages()
+		if err != nil {
+			return err
+		}
 
 		err = obs.dockerCommand([]string{"pull", obs.prometheusImage})
 		if err != nil {
@@ -177,9 +182,12 @@ the environment is setup`,
 
 		cmd.Println("Observability status")
 		cmd.Printf("Grafana:    %s\n", grafanaURL)
+		cmd.Printf("  Image:    %s\n", obs.grafanaImage)
 		cmd.Printf("  Status:   %s\n", grafanaOutput)
 		cmd.Printf("Prometheus: %s\n", promURL)
+		cmd.Printf("  Image:    %s\n", obs.prometheusImage)
 		cmd.Printf("  Status:   %s\n", promOutput)
+		cmd.Printf("Compose:    %s\n", path.Join(obs.observabilityDir, dockerComposeYAML))
 		cmd.Println("Docker")
 		return obs.dockerCommand([]string{"ps"})
 	},
@@ -202,7 +210,7 @@ Prometheus using docker compose`,
 			return err
 		}
 
-		err = obs.dockerCommand([]string{"compose", "-f", path.Join(obs.observabilityDir, "docker-compose.yaml"), "up", "-d"})
+		err = obs.dockerCommand([]string{"compose", "-f", path.Join(obs.observabilityDir, dockerComposeYAML), "up", "-d"})
 		if err != nil {
 			return err
 		}
@@ -232,7 +240,7 @@ using docker compose`,
 			return nil
 		}
 
-		err = obs.dockerCommand([]string{"compose", "-f", path.Join(obs.observabilityDir, "docker-compose.yaml"), "down"})
+		err = obs.dockerCommand([]string{"compose", "-f", path.Join(obs.observabilityDir, dockerComposeYAML), "down"})
 		if err != nil {
 			return err
 		}
@@ -253,8 +261,6 @@ func newObservability(cmd *cobra.Command) *observability {
 	obs := &observability{cmd: cmd}
 	obs.observabilityDir = path.Join(cfgDirectory, observabilityDirectory)
 	obs.dashboardsDir = path.Join(obs.observabilityDir, dashboardsDirectory)
-	obs.grafanaImage = "grafana/grafana:11.6.2"
-	obs.prometheusImage = "prom/prometheus:v2.53.4"
 	return obs
 }
 
@@ -305,7 +311,7 @@ func (o *observability) validateEnvironment() error {
 		}
 	}
 
-	return nil
+	return o.discoverImages()
 }
 
 // downloadDashboards downloads all Grafana dashboards.
@@ -321,6 +327,36 @@ func (o *observability) downloadDashboards() error {
 		if err = writeFileContents(o.dashboardsDir, file, response); err != nil {
 			return err
 		}
+	}
+
+	return nil
+}
+
+// discoverImages discovers the image names from docker-compose.yaml.
+func (o *observability) discoverImages() error {
+	var (
+		promRegex    = regexp.MustCompile(`(?m)^\s*image:\s*(prom/prometheus:[^\s]+)`)
+		grafanaRegex = regexp.MustCompile(`(?m)^\s*image:\s*(grafana/grafana:[^\s]+)`)
+		composeFile  = path.Join(o.observabilityDir, dockerComposeYAML)
+	)
+
+	contents, err := os.ReadFile(composeFile)
+	if err != nil {
+		return fmt.Errorf("unable to read file: %s %v", composeFile, err)
+	}
+
+	promLine := promRegex.FindSubmatch(contents)
+	grafanaLine := grafanaRegex.FindSubmatch(contents)
+
+	if promLine != nil {
+		o.prometheusImage = string(promLine[1])
+	} else {
+		return fmt.Errorf("unable to find promethues image in %s", dockerComposeYAML)
+	}
+	if grafanaLine != nil {
+		o.grafanaImage = string(grafanaLine[1])
+	} else {
+		return fmt.Errorf("unable to find grafana image in %s", dockerComposeYAML)
 	}
 
 	return nil
