@@ -505,16 +505,24 @@ func (b *ByteArraySink) AppendByteArray(bytes []byte) {
 // GetURLContents returns the contents at the given url as a []byte.
 func GetURLContents(resourceURL string) ([]byte, error) {
 	var (
-		err    error
 		req    *http.Request
 		resp   *http.Response
 		body   []byte
 		buffer bytes.Buffer
 	)
 	cookies, _ := cookiejar.New(nil)
+
+	certificates, certPool, _, _, _, err := utils.GetTLSDetails()
+	if err != nil {
+		return nil, err
+	}
+
 	tr := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: false, MinVersion: tls.VersionTLS12},
-		Proxy:           http.ProxyFromEnvironment,
+		Proxy: http.ProxyFromEnvironment,
+		TLSClientConfig: &tls.Config{
+			InsecureSkipVerify: Config.IgnoreInvalidCerts, //nolint
+			Certificates:       certificates,
+			RootCAs:            certPool},
 	}
 
 	client := &http.Client{Transport: tr,

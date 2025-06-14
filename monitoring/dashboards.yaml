@@ -1,0 +1,26 @@
+# Copyright 2025 Oracle Corporation and/or its affiliates.
+# Licensed under the Universal Permissive License v 1.0 as shown at
+# https://oss.oracle.com/licenses/upl.
+apiVersion: 1
+
+providers:
+  # <string> an unique provider name
+- name: 'a unique provider name'
+  # <int> org id. will default to orgId 1 if not specified
+  orgId: 1
+  # <string, required> name of the dashboard folder. Required
+  folder: ''
+  # <string> folder UID. will be automatically generated if not specified
+  folderUid: ''
+  # <string, required> provider type. Required
+  type: file
+  # <bool> disable dashboard deletion
+  disableDeletion: false
+  # <bool> enable dashboard editing
+  editable: true
+  # <int> how often Grafana will scan for changed dashboards
+  updateIntervalSeconds: 10
+  allowUiUpdates: true
+  options:
+    # <string, required> path to dashboard files on disk. Required
+    path: /etc/grafana/provisioning/dashboards

@@ -110,6 +110,7 @@ backend:
             - "create_clusters.adoc"
             - "monitor_clusters.adoc"
             - "create_starter.adoc"
+            - "monitoring.adoc"
         - type: "PAGE"
           title: "Security"
           source: "docs/security/overview.adoc"

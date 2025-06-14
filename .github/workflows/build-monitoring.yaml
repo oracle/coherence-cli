@@ -1,0 +1,75 @@
+# Copyright 2021, 2025 Oracle Corporation and/or its affiliates.
+# Licensed under the Universal Permissive License v 1.0 as shown at
+# https://oss.oracle.com/licenses/upl.
+
+# ---------------------------------------------------------------------------
+# Coherence CLI GitHub Actions CI Build Monitoring
+# ---------------------------------------------------------------------------
+name: Build Monitoring
+
+on:
+  workflow_dispatch:
+  push:
+    branches-ignore:
+      - gh-pages
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    #   Checkout the source, we need a depth of zero to fetch all of the history otherwise
+    #   the copyright check cannot work out the date of the files from Git.
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get Docker Images
+        shell: bash
+        run: |
+          docker pull gcr.io/distroless/java17
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'zulu'
+
+      - name: Cache Go Modules
+        uses: actions/cache@v4
+        with:
+          path: ~/go/pkg/mod
+          key: ${{ runner.os }}-go-mods-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-mods-
+
+      - name: Cache Maven packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.24'
+
+      - name: Build and Test Monitoring
+        shell: bash
+        run: |
+          make cohctl
+          export PATH=`pwd`/bin:$PATH
+          cohctl init monitoring -y
+          cohctl start monitoring 
+          sleep 30
+          cohctl get monitoring
+          curl -s http://localhost:9090/-/healthy
+          curl -s http://localhost:3000/api/health
+          cohctl stop monitoring
+
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: test-output
+          path: build/_output/test-logs

@@ -1,0 +1,10 @@
+# Copyright 2025 Oracle Corporation and/or its affiliates.
+# Licensed under the Universal Permissive License v 1.0 as shown at
+# https://oss.oracle.com/licenses/upl.
+apiVersion: 1
+
+datasources:
+  - name: prometheus
+    type: prometheus
+    url: http://172.17.0.1:9090
+    isDefault: true

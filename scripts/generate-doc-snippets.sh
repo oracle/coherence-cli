@@ -121,6 +121,12 @@ create_doc $DOCS_DIR/get_service_description "${COHCTL} get service-description 
 create_doc $DOCS_DIR/get_management "${COHCTL} get management --help"
 create_doc $DOCS_DIR/set_management "${COHCTL} set management --help"
 
+# Monitoring
+create_doc $DOCS_DIR/init_monitoring "${COHCTL} init monitoring --help"
+create_doc $DOCS_DIR/start_monitoring "${COHCTL} start monitoring --help"
+create_doc $DOCS_DIR/stop_monitoring "${COHCTL} stop monitoring --help"
+create_doc $DOCS_DIR/get_monitoring "${COHCTL} get monitoring --help"
+
 # Caches
 create_doc $DOCS_DIR/get_caches "${COHCTL} get caches --help"
 create_doc $DOCS_DIR/get_cache_stores "${COHCTL} get cache-stores --help"
