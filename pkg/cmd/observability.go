@@ -22,11 +22,11 @@ import (
 )
 
 const (
-	observabilityDirectory = "observability"
-	dashboardsDirectory    = "dashboards"
-	dashboardBaseURL       = "https://raw.githubusercontent.com/oracle/coherence-operator/refs/heads/main/dashboards/grafana"
-	configBaseURL          = "https://raw.githubusercontent.com/oracle/coherence-cli/refs/heads/observability/observability"
-	//configBaseURL          = "https://raw.githubusercontent.com/oracle/coherence-cli/refs/heads/main/observability"
+	monitoringDirectory = "monitoring"
+	dashboardsDirectory = "dashboards"
+	dashboardBaseURL    = "https://raw.githubusercontent.com/oracle/coherence-operator/refs/heads/main/dashboards/grafana"
+	configBaseURL       = "https://raw.githubusercontent.com/oracle/coherence-cli/refs/heads/observability/monitoring"
+	//configBaseURL          = "https://raw.githubusercontent.com/oracle/coherence-cli/refs/heads/main/monitoring"
 	grafanaPort       = 3000
 	prometheusPort    = 9090
 	dockerComposeYAML = "docker-compose.yaml"
@@ -69,59 +69,59 @@ var (
 	}
 )
 
-// initObservabilityCmd represents the init observability command.
-var initObservabilityCmd = &cobra.Command{
-	Use:   "observability",
-	Short: "initializes local observability for Coherence",
-	Long: `The 'init observability' initializes local observability for Coherence. 
+// initMonitoringCmd represents the init monitoring command.
+var initMonitoringCmd = &cobra.Command{
+	Use:   "monitoring",
+	Short: "initializes local monitoring for Coherence",
+	Long: `The 'init monitoring' initializes local monitoring for Coherence. 
 This involves downloading Grafana and Prometheus docker images and downloading
-docker compose files and related dashboards to ~/.cohctl/observability directory.
-Use the 'start observability' command to start local Grafana and Prometheus to 
+docker compose files and related dashboards to ~/.cohctl/monitoring directory.
+Use the 'start monitoring' command to start local Grafana and Prometheus to 
 monitor local Coherence clusters.`,
 	Args: cobra.ExactArgs(0),
 	RunE: func(cmd *cobra.Command, _ []string) error {
 		// confirm the operation
 		cmd.Println("This command will:")
-		cmd.Printf("1. Create a directory %s/%s\n", cfgDirectory, observabilityDirectory)
+		cmd.Printf("1. Create a directory %s/%s\n", cfgDirectory, monitoringDirectory)
 		cmd.Println("2. Download Grafana dashboards")
 		cmd.Println("2. Download docker compose files")
 		cmd.Println("3. Pull Grafana and Prometheus images")
 		cmd.Println()
-		if !confirmOperation(cmd, "Are you sure you want to initialize observability? (y/n) ") {
+		if !confirmOperation(cmd, "Are you sure you want to initialize monitoring? (y/n) ") {
 			return nil
 		}
 
-		obs := newObservability(cmd)
+		mon := newMonitoring(cmd)
 
 		cmd.Println("Ensuring directories...")
-		err := obs.ensureDirectories()
+		err := mon.ensureDirectories()
 		if err != nil {
 			return err
 		}
 
 		cmd.Println("Downloading Grafana dashboards...")
-		err = obs.downloadDashboards()
+		err = mon.downloadDashboards()
 		if err != nil {
 			return err
 		}
 
 		cmd.Println("Downloading docker compose files...")
-		err = obs.downloadDockerComposeFiles()
+		err = mon.downloadDockerComposeFiles()
 		if err != nil {
 			return err
 		}
 
 		cmd.Println("Pulling docker images...")
-		err = obs.discoverImages()
+		err = mon.discoverImages()
 		if err != nil {
 			return err
 		}
 
-		err = obs.dockerCommand([]string{"pull", obs.prometheusImage})
+		err = mon.dockerCommand([]string{"pull", mon.prometheusImage})
 		if err != nil {
 			return err
 		}
-		err = obs.dockerCommand([]string{"pull", obs.grafanaImage})
+		err = mon.dockerCommand([]string{"pull", mon.grafanaImage})
 		if err != nil {
 			return err
 		}
@@ -136,20 +136,20 @@ type grafanaStatus struct {
 	Version  string `json:"version"`
 }
 
-// getObservabilityCmd represents the get observability command.
-var getObservabilityCmd = &cobra.Command{
-	Use:   "observability",
-	Short: "returns observability status",
-	Long: `The 'get observability' gets the observability status and ensures
+// getMonitoringCmd represents the get monitoring command.
+var getMonitoringCmd = &cobra.Command{
+	Use:   "monitoring",
+	Short: "returns monitoring status",
+	Long: `The 'get monitoring' gets the monitoring status and ensures
 the environment is setup`,
 	Args: cobra.ExactArgs(0),
 	RunE: func(cmd *cobra.Command, _ []string) error {
 		// ensure the base directory
 		var (
-			obs              = newObservability(cmd)
+			mon              = newMonitoring(cmd)
 			grafanaOutput    string
 			promOutput       string
-			err              = obs.validateEnvironment()
+			err              = mon.validateEnvironment()
 			promURL          = fmt.Sprintf("http://localhost:%v/", prometheusPort)
 			promHealthURL    = fmt.Sprintf("%s-/healthy", promURL)
 			grafanaURL       = fmt.Sprintf("http://localhost:%v/d/coh-main/coherence-dashboard-main", grafanaPort)
@@ -180,103 +180,103 @@ the environment is setup`,
 			}
 		}
 
-		cmd.Println("Observability status")
+		cmd.Println("Monitoring status")
 		cmd.Printf("Grafana:    %s\n", grafanaURL)
-		cmd.Printf("  Image:    %s\n", obs.grafanaImage)
+		cmd.Printf("  Image:    %s\n", mon.grafanaImage)
 		cmd.Printf("  Status:   %s\n", grafanaOutput)
 		cmd.Printf("Prometheus: %s\n", promURL)
-		cmd.Printf("  Image:    %s\n", obs.prometheusImage)
+		cmd.Printf("  Image:    %s\n", mon.prometheusImage)
 		cmd.Printf("  Status:   %s\n", promOutput)
-		cmd.Printf("Compose:    %s\n", path.Join(obs.observabilityDir, dockerComposeYAML))
+		cmd.Printf("Compose:    %s\n", path.Join(mon.monitoringDir, dockerComposeYAML))
 		cmd.Println("Docker")
-		return obs.dockerCommand([]string{"ps"})
+		return mon.dockerCommand([]string{"ps"})
 	},
 }
 
-// startObservabilityCmd represents the start observability command.
-var startObservabilityCmd = &cobra.Command{
-	Use:   "observability",
-	Short: "starts the observability stack",
-	Long: `The 'start observability' starts the observability stack, Grafana and 
+// startMonitoringCmd represents the start monitoring command.
+var startMonitoringCmd = &cobra.Command{
+	Use:   "monitoring",
+	Short: "starts the monitoring stack",
+	Long: `The 'start monitoring' starts the monitoring stack, Grafana and 
 Prometheus using docker compose`,
 	Args: cobra.ExactArgs(0),
 	RunE: func(cmd *cobra.Command, _ []string) error {
 		// ensure the base directory
-		obs := newObservability(cmd)
+		mon := newMonitoring(cmd)
 
-		err := obs.validateEnvironment()
+		err := mon.validateEnvironment()
 
 		if err != nil {
 			return err
 		}
 
-		err = obs.dockerCommand([]string{"compose", "-f", path.Join(obs.observabilityDir, dockerComposeYAML), "up", "-d"})
+		err = mon.dockerCommand([]string{"compose", "-f", path.Join(mon.monitoringDir, dockerComposeYAML), "up", "-d"})
 		if err != nil {
 			return err
 		}
 
-		return obs.dockerCommand([]string{"ps"})
+		return mon.dockerCommand([]string{"ps"})
 	},
 }
 
-// stopObservabilityCmd represents the stop command.
-var stopObservabilityCmd = &cobra.Command{
-	Use:   "observability",
-	Short: "stops the observability stack",
-	Long: `The 'stop observability' stops the observability stack, Grafana and Prometheus
+// stopMonitoringCmd represents the stop command.
+var stopMonitoringCmd = &cobra.Command{
+	Use:   "monitoring",
+	Short: "stops the monitoring stack",
+	Long: `The 'stop monitoring' stops the monitoring stack, Grafana and Prometheus
 using docker compose`,
 	Args: cobra.ExactArgs(0),
 	RunE: func(cmd *cobra.Command, _ []string) error {
 		// ensure the base directory
-		obs := newObservability(cmd)
+		mon := newMonitoring(cmd)
 
-		err := obs.validateEnvironment()
+		err := mon.validateEnvironment()
 
 		if err != nil {
 			return err
 		}
 
-		if !confirmOperation(cmd, "Are you sure you want to stop observability? (y/n) ") {
+		if !confirmOperation(cmd, "Are you sure you want to stop monitoring? (y/n) ") {
 			return nil
 		}
 
-		err = obs.dockerCommand([]string{"compose", "-f", path.Join(obs.observabilityDir, dockerComposeYAML), "down"})
+		err = mon.dockerCommand([]string{"compose", "-f", path.Join(mon.monitoringDir, dockerComposeYAML), "down"})
 		if err != nil {
 			return err
 		}
 
-		return obs.dockerCommand([]string{"ps"})
+		return mon.dockerCommand([]string{"ps"})
 	},
 }
 
-type observability struct {
-	observabilityDir string
-	dashboardsDir    string
-	cmd              *cobra.Command
-	grafanaImage     string
-	prometheusImage  string
+type monitoring struct {
+	monitoringDir   string
+	dashboardsDir   string
+	cmd             *cobra.Command
+	grafanaImage    string
+	prometheusImage string
 }
 
-func newObservability(cmd *cobra.Command) *observability {
-	obs := &observability{cmd: cmd}
-	obs.observabilityDir = path.Join(cfgDirectory, observabilityDirectory)
-	obs.dashboardsDir = path.Join(obs.observabilityDir, dashboardsDirectory)
-	return obs
+func newMonitoring(cmd *cobra.Command) *monitoring {
+	mon := &monitoring{cmd: cmd}
+	mon.monitoringDir = path.Join(cfgDirectory, monitoringDirectory)
+	mon.dashboardsDir = path.Join(mon.monitoringDir, dashboardsDirectory)
+	return mon
 }
 
-func (o *observability) String() string {
-	return fmt.Sprintf("observabilityDir=%s, bashboardsDir=%s", o.observabilityDir, o.dashboardsDir)
+func (m *monitoring) String() string {
+	return fmt.Sprintf("monitoringDir=%s, bashboardsDir=%s", m.monitoringDir, m.dashboardsDir)
 }
 
-func (o *observability) ensureDirectories() error {
-	// setup observability directory
-	err := ensureDirectory(o.observabilityDir)
+func (m *monitoring) ensureDirectories() error {
+	// setup monitoring directory
+	err := ensureDirectory(m.monitoringDir)
 	if err != nil {
 		return err
 	}
 
 	// setup dashboard directory
-	err = ensureDirectory(o.dashboardsDir)
+	err = ensureDirectory(m.dashboardsDir)
 	if err != nil {
 		return err
 	}
@@ -284,47 +284,47 @@ func (o *observability) ensureDirectories() error {
 	return nil
 }
 
-// validateEnvironment validates that the environment is setup to start observability.
-func (o *observability) validateEnvironment() error {
-	if !utils.DirectoryExists(o.observabilityDir) {
-		return observabilityNotValid(o.observabilityDir + " does not exist")
+// validateEnvironment validates that the environment is setup to start monitoring.
+func (m *monitoring) validateEnvironment() error {
+	if !utils.DirectoryExists(m.monitoringDir) {
+		return monitoringNotValid(m.monitoringDir + " does not exist")
 	}
 
-	if !utils.DirectoryExists(o.dashboardsDir) {
-		return observabilityNotValid(o.dashboardsDir + " does not exist")
+	if !utils.DirectoryExists(m.dashboardsDir) {
+		return monitoringNotValid(m.dashboardsDir + " does not exist")
 	}
 
 	// check each of the dashboard files
 	for _, file := range dashboardFiles {
-		destPath := filepath.Join(o.dashboardsDir, file)
+		destPath := filepath.Join(m.dashboardsDir, file)
 
 		if !utils.FileExists(destPath) {
-			return observabilityNotValid(destPath + " does not exist, or is not a file")
+			return monitoringNotValid(destPath + " does not exist, or is not a file")
 		}
 	}
 
 	// check each of the docker compose files
 	for _, file := range dockerComposeFiles {
-		destPath := filepath.Join(o.observabilityDir, file)
+		destPath := filepath.Join(m.monitoringDir, file)
 		if !utils.FileExists(destPath) {
-			return observabilityNotValid(destPath + " does not exist, or is not a file")
+			return monitoringNotValid(destPath + " does not exist, or is not a file")
 		}
 	}
 
-	return o.discoverImages()
+	return m.discoverImages()
 }
 
 // downloadDashboards downloads all Grafana dashboards.
-func (o *observability) downloadDashboards() error {
+func (m *monitoring) downloadDashboards() error {
 	for _, file := range dashboardFiles {
-		o.cmd.Println(" - ", file)
+		m.cmd.Println(" - ", file)
 		url := fmt.Sprintf("%s/%s", dashboardBaseURL, file)
 		response, err := GetURLContents(url)
 		if err != nil {
 			return fmt.Errorf("error downloading file %s: %w", file, err)
 		}
 
-		if err = writeFileContents(o.dashboardsDir, file, response); err != nil {
+		if err = writeFileContents(m.dashboardsDir, file, response); err != nil {
 			return err
 		}
 	}
@@ -333,11 +333,11 @@ func (o *observability) downloadDashboards() error {
 }
 
 // discoverImages discovers the image names from docker-compose.yaml.
-func (o *observability) discoverImages() error {
+func (m *monitoring) discoverImages() error {
 	var (
 		promRegex    = regexp.MustCompile(`(?m)^\s*image:\s*(prom/prometheus:[^\s]+)`)
 		grafanaRegex = regexp.MustCompile(`(?m)^\s*image:\s*(grafana/grafana:[^\s]+)`)
-		composeFile  = path.Join(o.observabilityDir, dockerComposeYAML)
+		composeFile  = path.Join(m.monitoringDir, dockerComposeYAML)
 	)
 
 	contents, err := os.ReadFile(composeFile)
@@ -349,12 +349,12 @@ func (o *observability) discoverImages() error {
 	grafanaLine := grafanaRegex.FindSubmatch(contents)
 
 	if promLine != nil {
-		o.prometheusImage = string(promLine[1])
+		m.prometheusImage = string(promLine[1])
 	} else {
 		return fmt.Errorf("unable to find promethues image in %s", dockerComposeYAML)
 	}
 	if grafanaLine != nil {
-		o.grafanaImage = string(grafanaLine[1])
+		m.grafanaImage = string(grafanaLine[1])
 	} else {
 		return fmt.Errorf("unable to find grafana image in %s", dockerComposeYAML)
 	}
@@ -365,16 +365,16 @@ func (o *observability) discoverImages() error {
 // downloadDockerComposeFiles downloads files required by docker compose.
 // we specifically don't use docker libraries to start docker to minimize
 // dependencies and size of  the cohctl executable.
-func (o *observability) downloadDockerComposeFiles() error {
+func (m *monitoring) downloadDockerComposeFiles() error {
 	for _, file := range dockerComposeFiles {
-		o.cmd.Println(" - ", file)
+		m.cmd.Println(" - ", file)
 		url := fmt.Sprintf("%s/%s", configBaseURL, file)
 		response, err := GetURLContents(url)
 		if err != nil {
 			return fmt.Errorf("error downloading file %s: %w", file, err)
 		}
 
-		if err = writeFileContents(o.observabilityDir, file, response); err != nil {
+		if err = writeFileContents(m.monitoringDir, file, response); err != nil {
 			return err
 		}
 	}
@@ -382,14 +382,14 @@ func (o *observability) downloadDockerComposeFiles() error {
 	return nil
 }
 
-func (o *observability) dockerCommand(args []string) error {
-	o.cmd.Printf("Issuing docker %s\n", strings.Join(args, " "))
+func (m *monitoring) dockerCommand(args []string) error {
+	m.cmd.Printf("Issuing docker %s\n", strings.Join(args, " "))
 
-	return executeHostCommand(o.cmd, "docker", args...)
+	return executeHostCommand(m.cmd, "docker", args...)
 }
 
-func observabilityNotValid(message string) error {
-	return fmt.Errorf("unable to validate observability due to %s, please run 'cohctl init observability'", message)
+func monitoringNotValid(message string) error {
+	return fmt.Errorf("unable to validate monitoring due to %s, please run 'cohctl init monitoring'", message)
 }
 
 // writeFileContents writes file contents to the location.
@@ -448,6 +448,6 @@ func streamOutput(r io.Reader, w io.Writer) {
 }
 
 func init() {
-	initObservabilityCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
-	stopObservabilityCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
+	initMonitoringCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
+	stopMonitoringCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
 }

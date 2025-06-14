@@ -14,5 +14,5 @@ import (
 var initCmd = &cobra.Command{
 	Use:   "init",
 	Short: "initialize a resource",
-	Long:  `The 'init' command initializes various Coherence related resources such as observability.`,
+	Long:  `The 'init' command initializes various Coherence related resources such as monitoring.`,
 }

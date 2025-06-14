@@ -771,12 +771,12 @@ func Initialize(command *cobra.Command) *cobra.Command {
 	command.AddCommand(forceCmd)
 	forceCmd.AddCommand(forceRecoveryCmd)
 
-	// observability
+	// monitoring
 	command.AddCommand(initCmd)
-	initCmd.AddCommand(initObservabilityCmd)
-	getCmd.AddCommand(getObservabilityCmd)
-	startCmd.AddCommand(startObservabilityCmd)
-	stopCmd.AddCommand(stopObservabilityCmd)
+	initCmd.AddCommand(initMonitoringCmd)
+	getCmd.AddCommand(getMonitoringCmd)
+	startCmd.AddCommand(startMonitoringCmd)
+	stopCmd.AddCommand(stopMonitoringCmd)
 
 	return command
 }
