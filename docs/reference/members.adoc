@@ -15,7 +15,7 @@
 === Overview
 There are various cluster commands that allow you to work with and manage cluster members.
 
-* <<get-members, `cohctl get members`>> - displays the members for a cluster
+* <<get-members, `cohctl get members`>> - initializes local monitoring for Coherence
 * <<get-network-stats, `cohctl get network-stats`>> - displays all member network statistics for a cluster
 * <<get-p2p-stats, `cohctl get p2p-stats`>> - displays point-to-point network statistics for a specific member
 * <<describe-member, `cohctl describe member`>> - shows information related to a specific member

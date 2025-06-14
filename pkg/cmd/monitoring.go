@@ -25,8 +25,8 @@ const (
 	monitoringDirectory = "monitoring"
 	dashboardsDirectory = "dashboards"
 	dashboardBaseURL    = "https://raw.githubusercontent.com/oracle/coherence-operator/refs/heads/main/dashboards/grafana"
-	configBaseURL       = "https://raw.githubusercontent.com/oracle/coherence-cli/refs/heads/observability/monitoring"
-	//configBaseURL          = "https://raw.githubusercontent.com/oracle/coherence-cli/refs/heads/main/monitoring"
+	//configBaseURL       = "https://raw.githubusercontent.com/oracle/coherence-cli/refs/heads/observability/monitoring"
+	configBaseURL     = "https://raw.githubusercontent.com/oracle/coherence-cli/refs/heads/main/monitoring"
 	grafanaPort       = 3000
 	prometheusPort    = 9090
 	dockerComposeYAML = "docker-compose.yaml"
@@ -72,10 +72,10 @@ var (
 // initMonitoringCmd represents the init monitoring command.
 var initMonitoringCmd = &cobra.Command{
 	Use:   "monitoring",
-	Short: "initializes local monitoring for Coherence",
+	Short: "initialize local monitoring for Coherence",
 	Long: `The 'init monitoring' initializes local monitoring for Coherence. 
 This involves downloading Grafana and Prometheus docker images and downloading
-docker compose files and related dashboards to ~/.cohctl/monitoring directory.
+docker compose files and related dashboards to the ''~/.cohctl/monitoring' directory.
 Use the 'start monitoring' command to start local Grafana and Prometheus to 
 monitor local Coherence clusters.`,
 	Args: cobra.ExactArgs(0),
@@ -141,7 +141,7 @@ type grafanaStatus struct {
 // getMonitoringCmd represents the get monitoring command.
 var getMonitoringCmd = &cobra.Command{
 	Use:   "monitoring",
-	Short: "returns monitoring status",
+	Short: "return monitoring status",
 	Long: `The 'get monitoring' gets the monitoring status and ensures
 the environment is setup correctly.`,
 	Args: cobra.ExactArgs(0),
@@ -155,7 +155,7 @@ the environment is setup correctly.`,
 			promURL          = fmt.Sprintf("http://localhost:%v/", prometheusPort)
 			promHealthURL    = fmt.Sprintf("%s-/healthy", promURL)
 			grafanaURL       = fmt.Sprintf("http://localhost:%v/d/coh-main/coherence-dashboard-main", grafanaPort)
-			grafanaHealthURL = fmt.Sprintf("%sapi/health", grafanaURL)
+			grafanaHealthURL = fmt.Sprintf("http://localhost:%d/api/health", grafanaPort)
 		)
 
 		if err != nil {
@@ -198,8 +198,8 @@ the environment is setup correctly.`,
 // startMonitoringCmd represents the start monitoring command.
 var startMonitoringCmd = &cobra.Command{
 	Use:   "monitoring",
-	Short: "starts the monitoring stack",
-	Long: `The 'start monitoring' starts the monitoring stack, Grafana and 
+	Short: "start the local monitoring stack",
+	Long: `The 'start monitoring' starts the local monitoring stack, Grafana and 
 Prometheus using docker compose.`,
 	Args: cobra.ExactArgs(0),
 	RunE: func(cmd *cobra.Command, _ []string) error {
@@ -227,8 +227,8 @@ Prometheus using docker compose.`,
 // stopMonitoringCmd represents the stop command.
 var stopMonitoringCmd = &cobra.Command{
 	Use:   "monitoring",
-	Short: "stops the monitoring stack",
-	Long: `The 'stop monitoring' stops the monitoring stack, Grafana and Prometheus
+	Short: "stop the local monitoring stack",
+	Long: `The 'stop monitoring' stops the local monitoring stack, Grafana and Prometheus
 using docker compose.`,
 	Args: cobra.ExactArgs(0),
 	RunE: func(cmd *cobra.Command, _ []string) error {

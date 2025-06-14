@@ -1,0 +1,210 @@
+///////////////////////////////////////////////////////////////////////////////
+
+    Copyright (c) 2025 Oracle and/or its affiliates.
+    Licensed under the Universal Permissive License v 1.0 as shown at
+    https://oss.oracle.com/licenses/upl.
+
+///////////////////////////////////////////////////////////////////////////////
+
+= Local Monitoring
+:description: Coherence CLI - Local Monitoring
+:keywords: oracle coherence, coherence-cli, documentation, management, cli, monitoring, grafana, prometheus, metrics
+
+== Local Monitoring
+
+=== Overview
+There are various commands that allow you to initialize, start and stop a local monitoring stack using Grafana and Prometheus. This
+allows you gain insight into your local development clusters using the pre-built dashboards.
+
+After using `cohctl monitoring init`, the directory `/Users/timbo/.cohctl/monitoring` contains a complete `docker compose` project.
+You can manually start/ stop using `docker compose` from that directory, or use the <<start-monitoring,`start monitoring`>> or <<stop-monitoring,`stop monitoring`>> convenience commands. Prometheus scrapes local metrics ports from 9612 -> 9169 for any Coherence clusters with metrics enabled.
+
+After you start the monitoring you can start a local cluster using `cohctl start cluster my-cluster -t 9612` to enable metrics.
+
+See the Coherence documentation to {commercial-docs-base-url}/manage/using-coherence-metrics.html[setup up Coherence metrics] on your own cluster.
+
+NOTE: You must have a `docker` version installed and running on your machine that includes the updated `docker compose` command.
+
+* <<init-monitoring, `cohctl init monitoring`>> - initialize local monitoring for Coherence
+* <<start-monitoring, `cohctl start monitoring`>> - starts the local monitoring stack
+* <<stop-monitoring, `cohctl stop monitoring`>> - stops the local monitoring stack
+* <<get-monitoring, `cohctl get monitoring`>> - gets the current monitoring stack status
+
+
+[#init-monitoring]
+==== Initialize Monitoring Stack
+
+include::../../build/_output/docs-gen/init_monitoring.adoc[tag=text]
+
+[source,bash]
+----
+cohctl init monitoring
+----
+
+Output:
+[source,bash]
+----
+This command will:
+1. Create a directory /Users/timbo/.cohctl/monitoring
+2. Download Grafana dashboards
+2. Download docker compose files
+3. Pull Grafana and Prometheus images
+
+Are you sure you want to initialize monitoring? (y/n) y
+
+Ensuring directories...
+Downloading Grafana dashboards...
+ -  cache-details-dashboard.json
+ -  cache-store-details-dashboard.json
+ -  caches-summary-dashboard.json
+ -  coherence-dashboard-main.json
+ -  elastic-data-summary-dashboard.json
+ -  executor-details.json
+ -  executors-summary.json
+ -  federation-details-dashboard.json
+ -  federation-summary-dashboard.json
+ -  grpc-proxy-details-dashboard.json
+ -  grpc-proxy-summary-dashboard.json
+ -  http-servers-summary-dashboard.json
+ -  machines-summary-dashboard.json
+ -  member-details-dashboard.json
+ -  members-summary-dashboard.json
+ -  persistence-summary-dashboard.json
+ -  proxy-server-detail-dashboard.json
+ -  proxy-servers-summary-dashboard.json
+ -  service-details-dashboard.json
+ -  services-summary-dashboard.json
+ -  topic-details-dashboard.json
+ -  topic-subscriber-details.json
+ -  topic-subscriber-group-details.json
+ -  topics-summary-dashboard.json
+Downloading docker compose files...
+ -  grafana.ini
+ -  dashboards.yaml
+ -  datasources.yaml
+ -  docker-compose.yaml
+ -  prometheus.yaml
+Pulling docker images...
+Issuing docker pull prom/prometheus:v2.53.4
+v2.53.4: Pulling from prom/prometheus
+Digest: sha256:502ad90314c7485892ce696cb14a99fceab9fc27af29f4b427f41bd39701a199
+Status: Image is up to date for prom/prometheus:v2.53.4
+docker.io/prom/prometheus:v2.53.4
+Issuing docker pull grafana/grafana:11.6.2
+11.6.2: Pulling from grafana/grafana
+Digest: sha256:a3464c5dadc2e16aaeb813aead8c852e81cc7bbfa851c66d96f016d5257b9848
+Status: Image is up to date for grafana/grafana:11.6.2
+docker.io/grafana/grafana:11.6.2
+operation completed
+
+Note: You can change the grafana and prometheus image versions by editing:
+  /Users/timbo/.cohctl/monitoring/docker-compose.yaml
+----
+
+NOTE: The directory `/Users/timbo/.cohctl/monitoring` contains a complete `docker compose` project.
+You can manually start/ stop using `docker compose` from that directory, or use the `start monitoring` or `stop monitoring` convenience commands.
+You can also update the Grafana and Prometheus image versions in the `docker-compse.yaml` file in this directory.
+
+
+[#start-monitoring]
+==== Start Monitoring Stack
+
+include::../../build/_output/docs-gen/start_monitoring.adoc[tag=text]
+
+[source,bash]
+----
+cohctl start monitoring
+----
+
+Output:
+[source,bash]
+----
+Issuing docker compose -f /Users/timbo/.cohctl/monitoring/docker-compose.yaml up -d
+ Network monitoring_coherence  Creating
+ Network monitoring_coherence  Created
+ Container monitoring-prometheus-1  Creating
+ Container monitoring-grafana-1  Creating
+ Container monitoring-grafana-1  Created
+ Container monitoring-prometheus-1  Created
+ Container monitoring-grafana-1  Starting
+ Container monitoring-prometheus-1  Starting
+ Container monitoring-prometheus-1  Started
+ Container monitoring-grafana-1  Started
+
+Open the Grafana dashboard at http://localhost:3000/d/coh-main/coherence-dashboard-main, using admin/admin
+
+Issuing docker ps
+CONTAINER ID   IMAGE                     COMMAND                  CREATED                  STATUS                  PORTS                    NAMES
+03d14608f5e2   prom/prometheus:v2.53.4   "/bin/prometheus --c…"   Less than a second ago   Up Less than a second   0.0.0.0:9090->9090/tcp   monitoring-prometheus-1
+5dc519fd544b   grafana/grafana:11.6.2    "/run.sh"                Less than a second ago   Up Less than a second   0.0.0.0:3000->3000/tcp   monitoring-grafana-1
+----
+
+Wait for around 30 seconds, before accessing the Grafana dashboard at http://localhost:3000/d/coh-main/coherence-dashboard-main using the username/password mentioned above.
+
+NOTE: This is local only setup for monitoring your development clusters, is not meant for production use.
+
+[#stop-monitoring]
+==== Stop Monitoring Stack
+
+include::../../build/_output/docs-gen/stop_monitoring.adoc[tag=text]
+
+[source,bash]
+----
+cohctl stop monitoring
+----
+
+Output:
+[source,bash]
+----
+Are you sure you want to stop monitoring? (y/n) y
+Issuing docker compose -f /Users/timbo/.cohctl/monitoring/docker-compose.yaml down
+ Container monitoring-grafana-1  Stopping
+ Container monitoring-prometheus-1  Stopping
+ Container monitoring-prometheus-1  Stopped
+ Container monitoring-prometheus-1  Removing
+ Container monitoring-prometheus-1  Removed
+ Container monitoring-grafana-1  Stopped
+ Container monitoring-grafana-1  Removing
+ Container monitoring-grafana-1  Removed
+ Network monitoring_coherence  Removing
+ Network monitoring_coherence  Removed
+Issuing docker ps
+CONTAINER ID   IMAGE     COMMAND   CREATED   STATUS    PORTS     NAMES
+----
+
+[#get-monitoring]
+==== Get Monitoring Stack Status
+
+include::../../build/_output/docs-gen/get_monitoring.adoc[tag=text]
+
+[source,bash]
+----
+cohctl get monitoring
+----
+
+Output:
+[source,bash]
+----
+Monitoring status
+Grafana:    http://localhost:3000/d/coh-main/coherence-dashboard-main
+  Image:    grafana/grafana:11.6.2
+  Status:   ok, version=11.6.2
+Prometheus: http://localhost:9090/
+  Image:    prom/prometheus:v2.53.4
+  Status:   Prometheus Server is Healthy.
+
+Compose:    /Users/timbo/.cohctl/monitoring/docker-compose.yaml
+Docker
+Issuing docker ps
+CONTAINER ID   IMAGE                     COMMAND                  CREATED              STATUS              PORTS                    NAMES
+ac74f5b13702   prom/prometheus:v2.53.4   "/bin/prometheus --c…"   About a minute ago   Up About a minute   0.0.0.0:9090->9090/tcp   monitoring-prometheus-1
+6c550a1f58d1   grafana/grafana:11.6.2    "/run.sh"                About a minute ago   Up About a minute   0.0.0.0:3000->3000/tcp   monitoring-grafana-1
+----
+
+=== See Also
+
+* {commercial-docs-base-url}/manage/using-coherence-metrics.html[Setting up Coherence Metrics]
+* xref:create_clusters.adoc[Creating Development Clusters]
+
+
+
