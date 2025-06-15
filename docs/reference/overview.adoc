@@ -206,5 +206,16 @@ Experimental command to monitor clusters with text UI.
 --
 Experimental command to create example starter Maven project integrating Coherence and various frameworks.
 --
+====
+
+[PILLARS]
+====
+
+[CARD]
+.Local Monitoring
+[link=monitoring.adoc]
+--
+Initialize and run a local monitoring stack using Grafana, Prometheus and Docker.
+--
 
 ====
