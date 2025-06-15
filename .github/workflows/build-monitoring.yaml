@@ -5,7 +5,7 @@
 # ---------------------------------------------------------------------------
 # Coherence CLI GitHub Actions CI Build Monitoring
 # ---------------------------------------------------------------------------
-name: Build Monitoring
+name: CI Build Monitoring
 
 on:
   workflow_dispatch:
@@ -64,8 +64,10 @@ jobs:
           cohctl start monitoring 
           sleep 30
           cohctl get monitoring
-          curl -s http://localhost:9090/-/healthy
-          curl -s http://localhost:3000/api/health
+          netstat -an | grep 9090
+          netstat -an | grep 3000
+          curl -s http://127.0.0.1:9090/-/healthy
+          curl -s http://127.0.0.1:3000/api/health
           cohctl stop monitoring
 
       - uses: actions/upload-artifact@v4

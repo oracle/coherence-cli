@@ -22,13 +22,15 @@ import (
 )
 
 const (
-	monitoringDirectory = "monitoring"
-	dashboardsDirectory = "dashboards"
-	dashboardBaseURL    = "https://raw.githubusercontent.com/oracle/coherence-operator/refs/heads/main/dashboards/grafana"
-	configBaseURL       = "https://raw.githubusercontent.com/oracle/coherence-cli/refs/heads/main/monitoring"
-	grafanaPort         = 3000
-	prometheusPort      = 9090
-	dockerComposeYAML   = "docker-compose.yaml"
+	monitoringDirectory     = "monitoring"
+	dashboardsDirectory     = "dashboards"
+	dashboardBaseURL        = "https://raw.githubusercontent.com/oracle/coherence-operator/refs/heads/main/dashboards/grafana"
+	configBaseURL           = "https://raw.githubusercontent.com/oracle/coherence-cli/refs/heads/main/monitoring"
+	grafanaPort             = 3000
+	prometheusPort          = 9090
+	dockerComposeYAML       = "docker-compose.yaml"
+	localhost               = "127.0.0.1"
+	useDockerComposeMessage = "use docker-compose instead of docker compose"
 )
 
 var (
@@ -66,6 +68,8 @@ var (
 		dockerComposeYAML,
 		"prometheus.yaml",
 	}
+
+	useDockerCompose bool
 )
 
 // initMonitoringCmd represents the init monitoring command.
@@ -151,10 +155,10 @@ the environment is setup correctly.`,
 			grafanaOutput    string
 			promOutput       string
 			err              = mon.validateEnvironment()
-			promURL          = fmt.Sprintf("http://localhost:%v/", prometheusPort)
+			promURL          = fmt.Sprintf("http://%s:%v/", localhost, prometheusPort)
 			promHealthURL    = fmt.Sprintf("%s-/healthy", promURL)
-			grafanaURL       = fmt.Sprintf("http://localhost:%v/d/coh-main/coherence-dashboard-main", grafanaPort)
-			grafanaHealthURL = fmt.Sprintf("http://localhost:%d/api/health", grafanaPort)
+			grafanaURL       = fmt.Sprintf("http://%s:%v/d/coh-main/coherence-dashboard-main", localhost, grafanaPort)
+			grafanaHealthURL = fmt.Sprintf("http://%s:%d/api/health", localhost, grafanaPort)
 		)
 
 		if err != nil {
@@ -211,7 +215,7 @@ Prometheus using docker compose.`,
 			return err
 		}
 
-		err = mon.dockerCommand([]string{"compose", "-f", path.Join(mon.monitoringDir, dockerComposeYAML), "up", "-d"})
+		err = mon.dockerComposeCommand([]string{"-f", path.Join(mon.monitoringDir, dockerComposeYAML), "up", "-d"})
 		if err != nil {
 			return err
 		}
@@ -244,7 +248,7 @@ using docker compose.`,
 			return nil
 		}
 
-		err = mon.dockerCommand([]string{"compose", "-f", path.Join(mon.monitoringDir, dockerComposeYAML), "down"})
+		err = mon.dockerComposeCommand([]string{"-f", path.Join(mon.monitoringDir, dockerComposeYAML), "down"})
 		if err != nil {
 			return err
 		}
@@ -392,6 +396,22 @@ func (m *monitoring) dockerCommand(args []string) error {
 	return executeHostCommand(m.cmd, "docker", args...)
 }
 
+func (m *monitoring) dockerComposeCommand(args []string) error {
+	finalArgs := args
+	command := "docker"
+
+	if useDockerCompose {
+		command = "docker-compose"
+	} else {
+		updatedArgs := []string{"compose"}
+		finalArgs = append(updatedArgs, args...)
+	}
+
+	m.cmd.Printf("Issuing %s %s\n", command, strings.Join(finalArgs, " "))
+
+	return executeHostCommand(m.cmd, command, finalArgs...)
+}
+
 func monitoringNotValid(message string) error {
 	return fmt.Errorf("unable to validate monitoring due to %s, please run 'cohctl init monitoring'", message)
 }
@@ -454,4 +474,6 @@ func streamOutput(r io.Reader, w io.Writer) {
 func init() {
 	initMonitoringCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
 	stopMonitoringCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
+	stopMonitoringCmd.Flags().BoolVarP(&useDockerCompose, "docker-compose", "D", false, useDockerComposeMessage)
+	startMonitoringCmd.Flags().BoolVarP(&useDockerCompose, "docker-compose", "D", false, useDockerComposeMessage)
 }
