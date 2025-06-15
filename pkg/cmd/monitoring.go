@@ -420,7 +420,8 @@ func monitoringNotValid(message string) error {
 func writeFileContents(base, file string, content []byte) error {
 	destPath := filepath.Join(base, file)
 
-	if err := os.WriteFile(destPath, content, 0600); err != nil {
+	// #nosec G306 -- file is meant to be readable by docker on Linux
+	if err := os.WriteFile(destPath, content, 0644); err != nil {
 		return fmt.Errorf("error writing file %s: %w", destPath, err)
 	}
 
@@ -428,7 +429,7 @@ func writeFileContents(base, file string, content []byte) error {
 }
 
 func ensureDirectory(directory string) error {
-	err := utils.EnsureDirectory(directory)
+	err := utils.EnsureDirectoryWithPerms(directory, 0755)
 	if err != nil {
 		return fmt.Errorf("unable to create directory: %s, %v", directory, err)
 	}
