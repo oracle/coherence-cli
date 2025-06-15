@@ -15,7 +15,7 @@
 # ======================================================================================================================
 
 # The version of the CLI being build - this should be a valid SemVer format
-VERSION ?= 1.9.2
+VERSION ?= 1.10.0
 MILESTONE ?=
 SHELL := /bin/bash
 

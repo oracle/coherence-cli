@@ -17,6 +17,7 @@ import (
 	"github.com/oracle/coherence-cli/pkg/constants"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -149,9 +150,14 @@ func GetJSONPathResults(jsonData []byte, jsonPath string) (string, error) {
 
 // EnsureDirectory ensures a directory exists and if not then will create it.
 func EnsureDirectory(directory string) error {
+	return EnsureDirectoryWithPerms(directory, 0700)
+}
+
+// EnsureDirectoryWithPerms ensures a directory exists and if not then will create it with specific permissions.
+func EnsureDirectoryWithPerms(directory string, perm fs.FileMode) error {
 	if _, err := os.Stat(directory); err != nil {
 		if os.IsNotExist(err) {
-			err = os.Mkdir(directory, 0700)
+			err = os.Mkdir(directory, perm)
 			if err != nil {
 				return GetError("unable to create directory "+directory, err)
 			}
