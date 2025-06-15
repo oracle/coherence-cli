@@ -24,17 +24,6 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Get Docker Images
-        shell: bash
-        run: |
-          docker pull gcr.io/distroless/java17
-
-      - name: Set up JDK
-        uses: actions/setup-java@v4
-        with:
-          java-version: '17'
-          distribution: 'zulu'
-
       - name: Cache Go Modules
         uses: actions/cache@v4
         with:
@@ -63,9 +52,10 @@ jobs:
           cohctl init monitoring -y
           cohctl start monitoring 
           sleep 30
-          cohctl get monitoring
+          docker ps
           netstat -an | grep 9090
           netstat -an | grep 3000
+          cohctl get monitoring
           curl -s http://127.0.0.1:9090/-/healthy
           curl -s http://127.0.0.1:3000/api/health
           cohctl stop monitoring
