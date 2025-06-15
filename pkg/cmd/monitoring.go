@@ -31,6 +31,7 @@ const (
 	dockerComposeYAML       = "docker-compose.yaml"
 	localhost               = "127.0.0.1"
 	useDockerComposeMessage = "use docker-compose instead of docker compose"
+	dockerCompose           = "docker-compose"
 )
 
 var (
@@ -401,7 +402,7 @@ func (m *monitoring) dockerComposeCommand(args []string) error {
 	command := "docker"
 
 	if useDockerCompose {
-		command = "docker-compose"
+		command = dockerCompose
 	} else {
 		updatedArgs := []string{"compose"}
 		finalArgs = append(updatedArgs, args...)
@@ -475,6 +476,6 @@ func streamOutput(r io.Reader, w io.Writer) {
 func init() {
 	initMonitoringCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
 	stopMonitoringCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
-	stopMonitoringCmd.Flags().BoolVarP(&useDockerCompose, "docker-compose", "D", false, useDockerComposeMessage)
-	startMonitoringCmd.Flags().BoolVarP(&useDockerCompose, "docker-compose", "D", false, useDockerComposeMessage)
+	stopMonitoringCmd.Flags().BoolVarP(&useDockerCompose, dockerCompose, "D", false, useDockerComposeMessage)
+	startMonitoringCmd.Flags().BoolVarP(&useDockerCompose, dockerCompose, "D", false, useDockerComposeMessage)
 }
