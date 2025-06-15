@@ -52,6 +52,9 @@ jobs:
           cohctl init monitoring -y
           cohctl start monitoring 
           sleep 30
+          for container in `docker ps -a | sed 1d | awk '{print $1}'`; do
+             docker logs $container
+          done
           docker ps
           netstat -an | grep 9090
           netstat -an | grep 3000
