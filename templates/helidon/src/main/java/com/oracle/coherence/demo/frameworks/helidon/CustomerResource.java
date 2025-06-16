@@ -11,8 +11,7 @@ import static jakarta.ws.rs.core.MediaType.APPLICATION_JSON;
 import com.oracle.coherence.cdi.WhereFilter;
 import com.oracle.coherence.cdi.events.*;
 import com.oracle.coherence.common.base.Logger;
-import com.tangosol.net.NamedMap;
-
+import com.tangosol.net.NamedCache;
 import com.tangosol.util.MapEvent;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Observes;
@@ -32,7 +31,7 @@ import jakarta.ws.rs.core.Response;
 public class CustomerResource {
 
     @Inject
-    private NamedMap<Integer, Customer> customers;
+    private NamedCache<Integer, Customer> customers;
 
     @POST
     @Consumes(APPLICATION_JSON)
@@ -70,7 +69,7 @@ public class CustomerResource {
      * Event fired on inserting of a {@link Customer}.
      * @param event event information
      */
-    private void onCustomerInserted(@Observes @Inserted @MapName("customers") MapEvent<Integer, Customer> event) {
+    private void onCustomerInserted(@Observes @Inserted @CacheName("customers") MapEvent<Integer, Customer> event) {
         Logger.info("Customer Inserted: id=" + event.getKey() + ", value=" + event.getNewValue());
     }
 
@@ -78,7 +77,7 @@ public class CustomerResource {
      * Event fired on updating of a {@link Customer}.
      * @param event event information
      */
-    private void onCustomerUpdated(@Observes @Updated @MapName("customers") MapEvent<Integer, Customer> event) {
+    private void onCustomerUpdated(@Observes @Updated @CacheName("customers") MapEvent<Integer, Customer> event) {
         Logger.info("Customer Updated: id=" + event.getKey() + ", new value=" + event.getNewValue() + ", old value=" + event.getOldValue());
     }
 
@@ -86,7 +85,7 @@ public class CustomerResource {
      * Event fired on deletion a {@link Customer}.
      * @param event event information
      */
-    private void onCustomerDeleted(@Observes @Deleted @MapName("customers") MapEvent<Integer, Customer> event) {
+    private void onCustomerDeleted(@Observes @Deleted @CacheName("customers") MapEvent<Integer, Customer> event) {
         Logger.info("Customer Deleted: id=" + event.getKey() + ", old value=" + event.getOldValue());
     }
 
@@ -95,7 +94,7 @@ public class CustomerResource {
      * @param event event information
      */
     @WhereFilter("balance > 5000.0d")
-    private void onCustomerDeletedLargeBalance(@Observes @Deleted @MapName("customers") MapEvent<Integer, Customer> event) {
+    private void onCustomerDeletedLargeBalance(@Observes @Deleted @CacheName("customers") MapEvent<Integer, Customer> event) {
         Logger.info("Customer Deleted: (Large Balance) id=" + event.getKey() + ", old value=" + event.getOldValue());
     }
 }

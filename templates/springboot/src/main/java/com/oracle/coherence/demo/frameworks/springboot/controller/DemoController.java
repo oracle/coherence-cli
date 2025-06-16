@@ -11,10 +11,7 @@ import com.oracle.coherence.common.base.Logger;
 import com.oracle.coherence.demo.frameworks.springboot.Customer;
 
 import com.oracle.coherence.spring.annotation.WhereFilter;
-import com.oracle.coherence.spring.annotation.event.Deleted;
-import com.oracle.coherence.spring.annotation.event.Inserted;
-import com.oracle.coherence.spring.annotation.event.MapName;
-import com.oracle.coherence.spring.annotation.event.Updated;
+import com.oracle.coherence.spring.annotation.event.*;
 import com.oracle.coherence.spring.configuration.annotation.CoherenceCache;
 
 import com.oracle.coherence.spring.event.CoherenceEventListener;
@@ -72,7 +69,7 @@ public class DemoController {
      * @param event event information
      */
     @CoherenceEventListener
-    private void onCustomerInserted(@Inserted @MapName("customers") MapEvent<Integer, Customer> event) {
+    private void onCustomerInserted(@Inserted @CacheName("customers") MapEvent<Integer, Customer> event) {
         Logger.info("Customer Inserted: id=" + event.getKey() + ", value=" + event.getNewValue());
     }
 
@@ -81,7 +78,7 @@ public class DemoController {
      * @param event event information
      */
     @CoherenceEventListener
-    private void onCustomerUpdated(@Updated @MapName("customers") MapEvent<Integer, Customer> event) {
+    private void onCustomerUpdated(@Updated @CacheName("customers") MapEvent<Integer, Customer> event) {
         Logger.info("Customer Updated: id=" + event.getKey() + ", new value=" + event.getNewValue() + ", old value=" + event.getOldValue());
     }
 
@@ -90,7 +87,7 @@ public class DemoController {
      * @param event event information
      */
     @CoherenceEventListener
-    private void onCustomerDeleted(@Deleted @MapName("customers") MapEvent<Integer, Customer> event) {
+    private void onCustomerDeleted(@Deleted @CacheName("customers") MapEvent<Integer, Customer> event) {
         Logger.info("Customer Deleted: id=" + event.getKey() + ", old value=" + event.getOldValue());
     }
 
@@ -100,7 +97,7 @@ public class DemoController {
      */
     @CoherenceEventListener
     @WhereFilter("balance > 5000.0d")
-    private void onCustomerDeletedLargeBalance(@Deleted @MapName("customers") MapEvent<Integer, Customer> event) {
+    private void onCustomerDeletedLargeBalance(@Deleted @CacheName("customers") MapEvent<Integer, Customer> event) {
         Logger.info("Customer Deleted: (Large Balance) id=" + event.getKey() + ", old value=" + event.getOldValue());
     }
 }
