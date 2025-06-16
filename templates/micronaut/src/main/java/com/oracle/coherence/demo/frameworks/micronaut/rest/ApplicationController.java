@@ -69,7 +69,7 @@ public class ApplicationController {
      * @param event event information
      */
     @CoherenceEventListener
-    public void onCustomerInserted(@Inserted @MapName("customers") MapEvent<Integer, Customer> event) {
+    public void onCustomerInserted(@Inserted @CacheName("customers") MapEvent<Integer, Customer> event) {
         Logger.info("Customer Inserted: id=" + event.getKey() + ", value=" + event.getNewValue());
     }
 
@@ -78,7 +78,7 @@ public class ApplicationController {
      * @param event event information
      */
     @CoherenceEventListener
-    public void onCustomerUpdated(@Updated @MapName("customers") MapEvent<Integer, Customer> event) {
+    public void onCustomerUpdated(@Updated @CacheName("customers") MapEvent<Integer, Customer> event) {
         Logger.info("Customer Updated: id=" + event.getKey() + ", new value=" + event.getNewValue() + ", old value=" + event.getOldValue());
     }
 
@@ -87,7 +87,7 @@ public class ApplicationController {
      * @param event event information
      */
     @CoherenceEventListener
-    public void onCustomerDeleted(@Deleted @MapName("customers") MapEvent<Integer, Customer> event) {
+    public void onCustomerDeleted(@Deleted @CacheName("customers") MapEvent<Integer, Customer> event) {
         Logger.info("Customer Deleted: id=" + event.getKey() + ", old value=" + event.getOldValue());
     }
 
@@ -97,7 +97,7 @@ public class ApplicationController {
      */
     @CoherenceEventListener
     @WhereFilter("balance > 5000.0d")
-    public void onCustomerDeletedLargeBalance(@Deleted @MapName("customers") MapEvent<Integer, Customer> event) {
+    public void onCustomerDeletedLargeBalance(@Deleted @CacheName("customers") MapEvent<Integer, Customer> event) {
         Logger.info("Customer Deleted: (Large Balance) id=" + event.getKey() + ", old value=" + event.getOldValue());
     }
 }
