@@ -5,7 +5,7 @@
 # ---------------------------------------------------------------------------
 # Coherence CLI GitHub Actions CI Build Monitoring
 # ---------------------------------------------------------------------------
-name: Build Monitoring
+name: CI Build Monitoring
 
 on:
   workflow_dispatch:
@@ -23,17 +23,6 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-
-      - name: Get Docker Images
-        shell: bash
-        run: |
-          docker pull gcr.io/distroless/java17
-
-      - name: Set up JDK
-        uses: actions/setup-java@v4
-        with:
-          java-version: '17'
-          distribution: 'zulu'
 
       - name: Cache Go Modules
         uses: actions/cache@v4
@@ -62,10 +51,12 @@ jobs:
           export PATH=`pwd`/bin:$PATH
           cohctl init monitoring -y
           cohctl start monitoring 
-          sleep 30
+          sleep 15
+          netstat -an | grep 9090
+          netstat -an | grep 3000
           cohctl get monitoring
-          curl -s http://localhost:9090/-/healthy
-          curl -s http://localhost:3000/api/health
+          curl -s http://127.0.0.1:9090/-/healthy
+          curl -s http://127.0.0.1:3000/api/health
           cohctl stop monitoring
 
       - uses: actions/upload-artifact@v4
