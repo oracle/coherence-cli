@@ -954,7 +954,7 @@ func confirmOperation(cmd *cobra.Command, message string) bool {
 		return true
 	}
 
-	cmd.Printf(message)
+	cmd.Print(message)
 	_, err = fmt.Scanln(&response)
 	if response != "y" || err != nil {
 		cmd.Println(constants.NoOperation)
