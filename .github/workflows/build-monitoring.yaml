@@ -57,7 +57,7 @@ jobs:
           cohctl get monitoring
           curl -s http://127.0.0.1:9090/-/healthy
           curl -s http://127.0.0.1:3000/api/health
-          cohctl stop monitoring
+          cohctl stop monitoring -y
 
       - uses: actions/upload-artifact@v4
         if: failure()
