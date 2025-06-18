@@ -18,7 +18,9 @@ import (
 	"path"
 	"path/filepath"
 	"regexp"
+	"runtime"
 	"strings"
+	"time"
 )
 
 const (
@@ -70,7 +72,8 @@ var (
 		"prometheus.yaml",
 	}
 
-	useDockerCompose bool
+	useDockerComposeParam bool
+	openHomePageParam     bool
 )
 
 // initMonitoringCmd represents the init monitoring command.
@@ -224,7 +227,24 @@ Prometheus using docker compose.`,
 		grafanaURL := fmt.Sprintf("http://localhost:%v/d/coh-main/coherence-dashboard-main", grafanaPort)
 		cmd.Printf("\nOpen the Grafana dashboard at %s, using admin/admin\n\n", grafanaURL)
 
-		return mon.dockerCommand([]string{"ps"})
+		err = mon.dockerCommand([]string{"ps"})
+		if err != nil {
+			return err
+		}
+
+		if openHomePageParam {
+			time.Sleep(2 * time.Second)
+			if runtime.GOOS == "darwin" {
+				return exec.Command("open", grafanaURL).Run()
+			}
+			if isWindows() {
+				return exec.Command("rundll32", "url.dll,FileProtocolHandler", grafanaURL).Run()
+			}
+			// Linux
+			return exec.Command("xdg-open", grafanaURL).Run()
+		}
+
+		return nil
 	},
 }
 
@@ -401,7 +421,7 @@ func (m *monitoring) dockerComposeCommand(args []string) error {
 	finalArgs := args
 	command := "docker"
 
-	if useDockerCompose {
+	if useDockerComposeParam {
 		command = dockerCompose
 	} else {
 		updatedArgs := []string{"compose"}
@@ -476,6 +496,7 @@ func streamOutput(r io.Reader, w io.Writer) {
 func init() {
 	initMonitoringCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
 	stopMonitoringCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
-	stopMonitoringCmd.Flags().BoolVarP(&useDockerCompose, dockerCompose, "D", false, useDockerComposeMessage)
-	startMonitoringCmd.Flags().BoolVarP(&useDockerCompose, dockerCompose, "D", false, useDockerComposeMessage)
+	stopMonitoringCmd.Flags().BoolVarP(&useDockerComposeParam, dockerCompose, "D", false, useDockerComposeMessage)
+	startMonitoringCmd.Flags().BoolVarP(&useDockerComposeParam, dockerCompose, "D", false, useDockerComposeMessage)
+	startMonitoringCmd.Flags().BoolVarP(&openHomePageParam, "open", "O", false, "open the monitoring page after starting")
 }
