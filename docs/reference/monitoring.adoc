@@ -23,7 +23,14 @@ After you start the monitoring you can start a local cluster using `cohctl start
 
 See the Coherence documentation to {commercial-docs-base-url}/manage/using-coherence-metrics.html[setup up Coherence metrics] on your own cluster.
 
-NOTE: You must have a `docker` version installed and running on your machine that includes the updated `docker compose` command.
+If you are running a Coherence version before 14.1.2-0-0 or 25.03, you must set the following property on each
+cluster member to emit the new style metrics used by the latest dashboards.
+
+- `-Dcoherence.metrics.legacy.names=false`.
+
+If you  have a `docker` version installed and running on your machine that doesn't include the updated `docker compose` command,
+you can use the `-D` option for `cohctl start manitoring` to use `docker-compose`.
+
 
 * <<init-monitoring, `cohctl init monitoring`>> - initialize local monitoring for Coherence
 * <<start-monitoring, `cohctl start monitoring`>> - starts the local monitoring stack
