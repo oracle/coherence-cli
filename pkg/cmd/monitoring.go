@@ -226,6 +226,10 @@ Prometheus using docker compose.`,
 
 		grafanaURL := fmt.Sprintf("http://localhost:%v/d/coh-main/coherence-dashboard-main", grafanaPort)
 		cmd.Printf("\nOpen the Grafana dashboard at %s, using admin/admin\n\n", grafanaURL)
+		cmd.Println("Note: If you are running a Coherence version before 14.1.2-0-0 or 25.03, you must set the following")
+		cmd.Println("property on each cluster member to emit the new style metrics used by the latest dashboards:")
+		cmd.Println("  -Dcoherence.metrics.legacy.names=false")
+		cmd.Println()
 
 		err = mon.dockerCommand([]string{"ps"})
 		if err != nil {
