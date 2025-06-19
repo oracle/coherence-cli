@@ -65,6 +65,8 @@ jobs:
         DIR=`pwd`
         cd build/_output/docs
         zip -r ../docs.zip *
+        # Save the docs.zip
+        cp ../docs.zip /tmp
 
     - name: Build Binaries
       shell: bash
@@ -74,6 +76,20 @@ jobs:
         CLI_TMP_BIN=/tmp/coherence-cli-bin
         mkdir -p ${CLI_TMP_BIN} || true
         cp -R bin/* ${CLI_TMP_BIN}
+
+    - name: Release GitHub Pages Stable.txt
+      shell: bash
+      run: |
+        git config --local user.name "Github Action"
+        git config --local user.email "$GITHUB_ACTOR@users.noreply.github.com"
+        make release-ghpages
+        # Restore the Binaries directories
+        CLI_TMP_BIN=/tmp/coherence-cli-bin
+        mkdir bin || true
+        cp -R ${CLI_TMP_BIN}/* bin/
+        # Restore the docs.zip
+        mkdir -p ./build/_output
+        mv /tmp/docs.zip ./build/_output/docs.zip
 
     - name: Create Release
       uses: actions/create-release@v1

@@ -37,21 +37,14 @@ git checkout --track origin/gh-pages
 git config pull.rebase true
 git pull
 
-# Create docs directory
 pwd
-rm -rf docs/${VERSION}/ || true
-mkdir -p docs/${VERSION} || true
-ls ${BUILD_OUTPUT}/docs/
-cp -R ${BUILD_OUTPUT}/docs/* docs/${VERSION}/
 
 if [ -z "`echo $VERSION | grep RC`" ] ; then
     # Proper release so update stable.txt
     echo $VERSION > stable.txt
 
     # Update latest docs
-    rm -rf docs/latest || true
-    cp -R docs/${VERSION} docs/latest/
-    git add -A stable.txt docs/latest/* docs/${VERSION}/*
+    git add -A stable.txt
 else
     # Must be RC
     git add -A docs/${VERSION}/*
