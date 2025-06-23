@@ -63,8 +63,10 @@ sleep 30
 echo "Testing Python Starter"
 runCommand create starter python-starter -y -l python
 cd python-starter
-pip install -r requiements.txt
-python main.py > ${LOGS_DIR}/python.log 2>&1 &
+python3 -m venv ./venv
+. ./venv/bin/activate
+pip3 install -r requirements.txt
+python3 main.py > ${LOGS_DIR}/python.log 2>&1 &
 PID=$!
 echo "Sleeping for 30..."
 sleep 30
