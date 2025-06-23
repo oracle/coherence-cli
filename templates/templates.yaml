@@ -97,7 +97,7 @@ templates:
       - main.js
       - package.json
 
-  - name: javascript
+  - name: python
     frameworkVersion: "coherence-py-client: 2.0.3"
     instructions: |
       To run the Python starter, you must have Python 3.9.x or later.
@@ -114,8 +114,8 @@ templates:
     files:
       - main.py
 
-  - name: javascript
-    frameworkVersion: "coherence-go-client: 2.3.1"
+  - name: go
+    frameworkVersion: "coherence-go-client: v2.3.1"
     instructions: |
       To run the Go starter, you must have Go 1.23.x or later.
       
