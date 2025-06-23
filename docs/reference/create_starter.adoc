@@ -13,14 +13,22 @@
 == Starter Projects
 
 === Overview
-This **experimental** feature allows you to create example Maven projects to show basic integration of Coherence with various frameworks.
-Currently, we support the following integrations:
+This **experimental** feature allows you to create example projects to show basic integration of
+Coherence with various microservice frameworks and languages. Currently, we support the following integrations:
 
-1. Helidon Microprofile - 4.2.1
+**Java Microservice Integrations**
 
-2. Spring Boot - spring-boot-starter 3.4.5, coherence-spring 4.3.0
+-  Helidon Microprofile
+-  Spring Boot
+-  Micronaut
 
-3. Micronaut - micronaut-parent: 4.7.3, micronaut-coherence: 5.0.4
+**Other Microservice Languages**
+
+- Python
+- JavaScript
+- Go
+
+See <<see-also, here>> for links to the specific frameworks.
 
 NOTE: The framework versions may be updated from time to time.
 
@@ -57,7 +65,7 @@ checking for availability of template helidon...
 Create Starter Project
 Project Name:       helidon-starter
 Framework Type:     helidon
-Framework Versions: 4.2.1
+Framework Versions: 4.2.3
 Project Path        /tmp/starters/helidon-starter
 
 Are you sure you want to create the starter project above? (y/n) y
@@ -103,11 +111,15 @@ Delete a customer:
 
 Follow the instructions above to build and run the example.
 
+[#see-also]
 === See Also
 
 * https://helidon.io/[Helidon Framework]
 * https://github.com/coherence-community/coherence-spring[Coherence Spring Integration]
 * https://github.com/micronaut-projects/micronaut-coherence/[Coherence Micronaut Integration]
+* https://github.com/oracle/coherence-py-client[Coherence Python Client]
+* https://github.com/oracle/coherence-js-client[Coherence JavaScript Client]
+* https://github.com/oracle/coherence-go-client[Coherence Go Client]
 
 
 
