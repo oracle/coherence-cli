@@ -89,6 +89,7 @@ templates:
           npm install
 
       To run a Coherence server with port 1408 for gRPC:
+
           docker run -d -p 1408:1408 -p 30000:30000 ghcr.io/oracle/coherence-ce:25.03.1
       
       To run the application:
@@ -107,10 +108,11 @@ templates:
           pip install -r requirements.txt
 
       To run a Coherence server with port 1408 for gRPC:
+
           docker run -d -p 1408:1408 -p 30000:30000 ghcr.io/oracle/coherence-ce:25.03.1
       
       To run the application:
-          python main.js
+          python main.py
     files:
       - main.py
 
@@ -124,9 +126,12 @@ templates:
           go mod tidy
 
       To run a Coherence server with port 1408 for gRPC:
+
           docker run -d -p 1408:1408 -p 30000:30000 ghcr.io/oracle/coherence-ce:25.03.1
       
       To run the application:
           go run main.go
     files:
-      - main.py
+      - main.go
+      - go.mod
+      - go.sum
