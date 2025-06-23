@@ -40,8 +40,6 @@ function runCommand() {
     cat $OUTPUT
     if [ $ret -ne 0 ] ; then
       echo "Command failed"
-      # copy the log files
-      save_logs
       exit 1
     fi
 }
