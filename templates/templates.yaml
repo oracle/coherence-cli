@@ -31,7 +31,7 @@ templates:
       - src/main/java/com/oracle/coherence/demo/frameworks/helidon/CustomerResource.java
 
   - name: springboot
-    frameworkVersion: "spring-boot-starter 3.5.0, coherence-spring 4.3.1"
+    frameworkVersion: "spring-boot-starter 3.5.3, coherence-spring 4.3.1"
     instructions: |
       To run Spring Boot starter you must have JDK21+ and maven 3.8.5+.
       Change to the newly created directory and run the following to build:
@@ -78,3 +78,55 @@ templates:
       - src/main/java/com/oracle/coherence/demo/frameworks/micronaut/Application.java
       - src/main/java/com/oracle/coherence/demo/frameworks/micronaut/Customer.java
       - src/main/java/com/oracle/coherence/demo/frameworks/micronaut/rest/ApplicationController.java
+
+  - name: javascript
+    frameworkVersion: "coherence-js-client: 1.2.3"
+    instructions: |
+      To run the JavaScript starter, you must have Node 18.15.x or later and NPM 9.x or later.
+      
+      Change to the newly created directory and run the following to build:
+
+          npm install
+
+      To run a Coherence server with port 1408 for gRPC:
+          docker run -d -p 1408:1408 -p 30000:30000 ghcr.io/oracle/coherence-ce:25.03.1
+      
+      To run the application:
+          node main.js
+    files:
+      - main.js
+      - package.json
+
+  - name: javascript
+    frameworkVersion: "coherence-py-client: 2.0.3"
+    instructions: |
+      To run the Python starter, you must have Python 3.9.x or later.
+      
+      Change to the newly created directory and run the following to install depdencies.
+
+          pip install -r requirements.txt
+
+      To run a Coherence server with port 1408 for gRPC:
+          docker run -d -p 1408:1408 -p 30000:30000 ghcr.io/oracle/coherence-ce:25.03.1
+      
+      To run the application:
+          python main.js
+    files:
+      - main.py
+
+  - name: javascript
+    frameworkVersion: "coherence-go-client: 2.3.1"
+    instructions: |
+      To run the Go starter, you must have Go 1.23.x or later.
+      
+      Change to the newly created directory and run the following to install depdencies.
+
+          go mod tidy
+
+      To run a Coherence server with port 1408 for gRPC:
+          docker run -d -p 1408:1408 -p 30000:30000 ghcr.io/oracle/coherence-ce:25.03.1
+      
+      To run the application:
+          go run main.go
+    files:
+      - main.py

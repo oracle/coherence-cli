@@ -6,8 +6,7 @@
 # https://oss.oracle.com/licenses/upl.
 #
 
-# Test various command related to creating starter projects
-# environment variables COM and COHERENCE_VERSION accepted
+# Test various command related to creating starter projects using Polyglot clients
 
 pwd
 
@@ -56,11 +55,16 @@ function run_test() {
     curl -X DELETE http://localhost:8080/api/customers/1
 }
 
-echo "Testing Helidon Starter"
-runCommand create starter helidon-starter -y -f helidon
-cd helidon-starter
-mvn clean install
-java -jar target/helidon.jar > ${LOGS_DIR}/helidon.log 2>&1 &
+echo "Start Docker Image"
+docker run -d -p 1408:1408 -p 30000:30000 ghcr.io/oracle/coherence-ce:25.03.1
+echo "Sleeping 30..."
+sleep 30
+
+echo "Testing Python Starter"
+runCommand create starter python-starter -y -l python
+cd python-starter
+pip install -r requiements.txt
+python main.py > ${LOGS_DIR}/python.log 2>&1 &
 PID=$!
 echo "Sleeping for 30..."
 sleep 30
@@ -68,11 +72,11 @@ run_test
 kill -9 $PID
 cd ..
 
-echo "Testing Spring Boot Starter"
-runCommand create starter springboot-starter -y -f springboot
-cd springboot-starter
-mvn clean install
-java -jar target/springboot-1.0-SNAPSHOT.jar > ${LOGS_DIR}/springboot.log 2>&1 &
+echo "Testing JavaScript Starter"
+runCommand create starter javascript-starter -y -l javascript
+cd javascript-starter
+npm install
+node main.js > ${LOGS_DIR}/javascript.log 2>&1 &
 PID=$!
 echo "Sleeping for 30..."
 sleep 30
@@ -80,11 +84,11 @@ run_test
 kill -9 $PID
 cd ..
 
-echo "Testing Micronaut Starter"
-runCommand create starter micronaut-starter -y -f micronaut
-cd micronaut-starter
-mvn clean install
-java -jar target/micronaut-1.0-SNAPSHOT-shaded.jar > ${LOGS_DIR}/micronaut.log 2>&1 &
+echo "Testing Go Starter"
+runCommand create starter go-starter -y -l go
+cd go-starter
+go mod tidy
+go run main.go > ${LOGS_DIR}/go.log 2>&1 &
 PID=$!
 echo "Sleeping for 30..."
 sleep 30

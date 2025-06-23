@@ -7,6 +7,7 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"github.com/oracle/coherence-cli/pkg/utils"
 	"github.com/spf13/cobra"
@@ -37,6 +38,9 @@ var (
 	frameworkTypeParam string
 	validFrameworks    = []string{"helidon", "springboot", "micronaut"}
 
+	languageTypeParam string
+	validLanguages    = []string{"python", "javascript", "go"}
+
 	commonInstructions = `
 Add customers:
     curl -X POST -H "Content-Type: application/json" -d '{"id": 1, "name": "Tim",  "balance": 1000}'  http://localhost:8080/api/customers
@@ -59,12 +63,13 @@ Note: you will see log messages shown for registered event listeners for insert,
 var createStarterCmd = &cobra.Command{
 	Use:   "starter project-name",
 	Short: "creates a starter project for Coherence",
-	Long: `The 'create starter' command creates a starter Maven project to use Coherence 
-with various frameworks including Helidon, Spring Boot and Micronaut. A directory
+	Long: `The 'create starter' command creates a starter project to use Coherence 
+with various frameworks or languages. You can choose frameworks including: Helidon, Spring Boot and Micronaut,
+or languages including python, javascript or go. A directory
 will be created off the current directory with the same name as the project name.
 NOTE: This is an experimental feature only and the projects created are not fully
 completed applications. They are a demo/example of how to do basic integration with
-each of the frameworks.`,
+each of the frameworks or languages`,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
 			displayErrorAndExit(cmd, "you must provide a project name")
@@ -82,9 +87,19 @@ each of the frameworks.`,
 			return fmt.Errorf("invalid project name: %s", projectName)
 		}
 
+		if (frameworkTypeParam == "" && languageTypeParam == "") ||
+			(frameworkTypeParam != "" && languageTypeParam != "") {
+			return errors.New("you must provide either a framework type or a framework language")
+		}
+
 		// validate the framework
-		if !utils.SliceContains(validFrameworks, frameworkTypeParam) {
+		if frameworkTypeParam != "" && !utils.SliceContains(validFrameworks, frameworkTypeParam) {
 			return fmt.Errorf("framework must be one of %v", validFrameworks)
+		}
+
+		// validate the language
+		if languageTypeParam != "" && !utils.SliceContains(validLanguages, languageTypeParam) {
+			return fmt.Errorf("languages must be one of %v", validLanguages)
 		}
 
 		// check the directory does not exist
@@ -100,11 +115,18 @@ each of the frameworks.`,
 			return err
 		}
 
+		selectedValue := frameworkTypeParam
+		typeDescription := "framework"
+		if languageTypeParam != "" {
+			typeDescription = "language"
+			selectedValue = languageTypeParam
+		}
+
 		// get the template for the framework
-		template := getTemplate(templates, frameworkTypeParam)
+		template := getTemplate(templates, selectedValue)
 
 		if template == nil {
-			return fmt.Errorf("unable to find files for framework %s", frameworkTypeParam)
+			return fmt.Errorf("unable to find files for %s %s", typeDescription, selectedValue)
 		}
 
 		absolutePath, err := filepath.Abs(projectName)
@@ -114,7 +136,7 @@ each of the frameworks.`,
 
 		cmd.Println("\nCreate Starter Project")
 		cmd.Printf("Project Name:       %s\n", projectName)
-		cmd.Printf("Framework Type:     %s\n", frameworkTypeParam)
+		cmd.Printf("Type:               %s\n", selectedValue)
 		cmd.Printf("Framework Versions: %s\n", template.FrameworkVersion)
 		cmd.Printf("Project Path        %s\n\n", absolutePath)
 
@@ -216,6 +238,6 @@ func writeContentToFile(baseDir, fileName, content string) error {
 
 func init() {
 	createStarterCmd.Flags().StringVarP(&frameworkTypeParam, framework, "f", "", "the framework to create for: helidon, springboot or micronaut")
-	_ = createStarterCmd.MarkFlagRequired(framework)
+	createStarterCmd.Flags().StringVarP(&languageTypeParam, "language", "l", "", "the language to create for: python, javascript or go")
 	createStarterCmd.Flags().BoolVarP(&automaticallyConfirm, "yes", "y", false, confirmOptionMessage)
 }
