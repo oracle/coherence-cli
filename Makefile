@@ -358,6 +358,7 @@ copyright: getcopyright ## Check copyright headers
 	  -X /Dockerfile \
 	  -X .Dockerfile \
 	  -X go.sum \
+	  -X ./templates/javascript/node_modules \
 	  -X HEADER.txt \
 	  -X .iml \
 	  -X .jar \
@@ -512,11 +513,18 @@ test-create-cluster: test-clean gotestsum $(BUILD_PROPS) ## Run create cluster t
 	./scripts/test-create-cluster.sh $(COHERENCE_VERSION)
 
 # ----------------------------------------------------------------------------------------------------------------------
-# Executes the Go create starter tests for standalone Coherence
+# Executes the create starter tests for standalone Coherence
 # ----------------------------------------------------------------------------------------------------------------------
 .PHONY: test-create-starter
 test-create-starter: test-clean $(BUILD_PROPS) ## Run create starter tests
 	./scripts/test-create-starter.sh
+
+# ----------------------------------------------------------------------------------------------------------------------
+# Executes the create starter tests for Polyglot clients
+# ----------------------------------------------------------------------------------------------------------------------
+.PHONY: test-create-starter-polyglot
+test-create-starter-polyglot: test-clean $(BUILD_PROPS) ## Run create starter tests
+	./scripts/test-create-starter-polyglot.sh
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Executes the Go monitor cluster tests for standalone Coherence

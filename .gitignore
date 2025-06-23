@@ -41,3 +41,6 @@ release/
 test/test_utils/certs/
 
 utils/linkcheck/go.sum
+
+# Examples noise
+node_modules
