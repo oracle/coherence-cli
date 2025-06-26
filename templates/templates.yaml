@@ -115,6 +115,7 @@ templates:
           python main.py
     files:
       - main.py
+      - requirements.txt
 
   - name: go
     frameworkVersion: "coherence-go-client: v2.3.1"
