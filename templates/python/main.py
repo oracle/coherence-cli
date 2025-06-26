@@ -65,19 +65,24 @@ async def init():
 # Get all customers
 @app.route('/api/customers', methods=['GET'])
 async def get_customers():
-    customers_list: List[customers] = []
+    customers_list: List[Customer] = []
     async for customer in await customers.values():
         customers_list.append(customer)
 
     return quart.Response(jsonpickle.encode(customers_list, unpicklable=False), mimetype="application/json")
 
+
 # Create a person with JSON as body
 @app.route('/api/customers', methods=['POST'])
 async def create_customer():
-    data = await request.get_json(force=True)
-    name: str = data['name']
-    id: int = data['id']
-    balance: float = data['balance']
+    try:
+        data = await request.get_json(force=True)
+        name: str = data['name']
+        id: int = int(data['id'])
+        balance: float = float(data['balance'])
+    except:
+        return quart.Response(f"Invalid JSON", status=400)
+
     person: Customer = Customer(id, name, balance)
     await customers.put(person.id, person)
 
@@ -86,6 +91,7 @@ async def create_customer():
         status=202,
         mimetype='application/json'
     )
+
 
 # Get a single person
 @app.route('/api/customers/<id>', methods=['GET'])
@@ -118,7 +124,7 @@ def handle_event(e) -> None:
     oldValue = e.old
 
     print(
-        f"Event {e.type} for key={key}, new=${newValue}, old=${oldValue}")
+        f"Event {e.type} for key={key}, new={newValue}, old={oldValue}")
 
 
 def handle_delete_event(e) -> None:
@@ -131,7 +137,7 @@ def handle_delete_event(e) -> None:
     oldValue = e.old
 
     print(
-        f"Event delete large balance for key={key}, old=${oldValue}")
+        f"Event delete large balance for key={key}, old={oldValue}")
 
 
 # ----- main ----------------------------------------------------------------
