@@ -1020,7 +1020,7 @@ func FormatCacheDetailsStorage(cacheDetails []config.CacheDetail) string {
 	}
 
 	if showQueryParam {
-		maxLength = 250
+		maxLength = maxLengthParam
 	}
 
 	table := newFormattedTable().WithHeader(NodeIDColumn, "TIER", "LOCKS GRANTED", "LOCKS PENDING", "KEY LISTENERS",
