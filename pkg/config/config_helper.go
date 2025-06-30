@@ -620,7 +620,9 @@ type CacheDetail struct {
 	MaxQueryDurationMillis         int64    `json:"maxQueryDurationMillis"`
 	MaxQueryDescription            string   `json:"maxQueryDescription"`
 	NonOptimizedQueryAverageMillis float64  `json:"nonOptimizedQueryAverageMillis"`
+	NonOptimizedQueryCount         int64    `json:"nonOptimizedQueryCount"`
 	OptimizedQueryAverageMillis    float64  `json:"optimizedQueryAverageMillis"`
+	OptimizedQueryCount            int64    `json:"optimizedQueryCount"`
 	IndexTotalUnits                int64    `json:"indexTotalUnits"`
 	IndexingTotalMillis            int64    `json:"indexingTotalMillis"`
 	IndexInfo                      []string `json:"indexInfo"`

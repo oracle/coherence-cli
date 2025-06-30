@@ -1027,8 +1027,8 @@ func FormatCacheDetailsStorage(cacheDetails []config.CacheDetail) string {
 		"FILTER LISTENERS", "MAX QUERY MS", "MAX QUERY DESC").MaxLength(maxLength).WithSortingColumn(NodeIDColumn)
 
 	if OutputFormat == constants.WIDE {
-		table.AddHeaderColumns("NO OPT AVG", "OPT AVG", "INDEX SIZE", "INDEXING MILLIS")
-		table.WithAlignment(R, L, R, R, R, R, R, L, R, R, R, R)
+		table.AddHeaderColumns("NO OPT AVG", CountColumn, "OPT AVG", CountColumn, "INDEX SIZE", "INDEXING MILLIS")
+		table.WithAlignment(R, L, R, R, R, R, R, L, R, R, R, R, R, R)
 	} else {
 		table.WithAlignment(R, L, R, R, R, R, R, L)
 	}
@@ -1045,8 +1045,9 @@ func FormatCacheDetailsStorage(cacheDetails []config.CacheDetail) string {
 			formatLargeInteger(value.MaxQueryDurationMillis), value.MaxQueryDescription)
 		if OutputFormat == constants.WIDE {
 			table.AddColumnsToRow(formatFloat(float32(value.NonOptimizedQueryAverageMillis)),
-				formatFloat(float32(value.OptimizedQueryAverageMillis)),
-				formattingFunction(value.IndexTotalUnits), formatLargeInteger(value.IndexingTotalMillis))
+				formatLargeInteger(value.NonOptimizedQueryCount), formatFloat(float32(value.OptimizedQueryAverageMillis)),
+				formatLargeInteger(value.OptimizedQueryCount), formattingFunction(value.IndexTotalUnits),
+				formatLargeInteger(value.IndexingTotalMillis))
 		}
 	}
 
