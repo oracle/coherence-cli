@@ -25,7 +25,7 @@ import (
 const (
 	defaultLayoutName    = "default"
 	pressAdditional      = "(press key in [] to toggle expand, ? = help)"
-	pressAdditionalReset = "(press key in [] ESC to exit expand)"
+	pressAdditionalReset = "(press key in [] or ESC to exit expand)"
 	noContent            = "  No Content"
 	errorContent         = "Unable to retrieve data"
 	unableToFindPanel    = "unable to find panel [%v], use --help or --show-panels to see all options"
