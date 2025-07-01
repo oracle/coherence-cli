@@ -15,6 +15,7 @@ import (
 	"github.com/oracle/coherence-cli/pkg/fetcher"
 	"github.com/oracle/coherence-cli/pkg/utils"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 	"log"
 	"strings"
 	"sync"
@@ -23,8 +24,8 @@ import (
 
 const (
 	defaultLayoutName    = "default"
-	pressAdditional      = "(press key in [] or mouse to toggle expand, ? = help)"
-	pressAdditionalReset = "(press key in [] or mouse/ESC to exit expand)"
+	pressAdditional      = "(press key in [] to toggle expand, ? = help)"
+	pressAdditionalReset = "(press key in [] ESC to exit expand)"
 	noContent            = "  No Content"
 	errorContent         = "Unable to retrieve data"
 	unableToFindPanel    = "unable to find panel [%v], use --help or --show-panels to see all options"
@@ -32,6 +33,8 @@ const (
 	cacheNameToken       = "%CACHE"
 	topicNameToken       = "%TOPIC"
 	subscriberToken      = "%SUBSCRIBER"
+	setDefaultStyleMsg   = "Default style is now set to "
+	getDefaultStyleMsg   = "Default style is: "
 )
 
 var (
@@ -55,6 +58,7 @@ var (
 	setMaxHeight           int
 	originalMaxHeight      int
 	padMaxHeightParam      = true
+	colorStyleParam        string
 	showAllPanels          bool
 	ignoreRESTErrors       bool
 	disablePadding         bool
@@ -74,7 +78,61 @@ var (
 	heightAdjust   int
 	noContentArray = []string{"  ", noContent, " "}
 	drawnPositions map[rune]position
+
+	// color styles
+	boxStyle   = tcell.StyleDefault
+	titleStyle = tcell.StyleDefault
+	textStyle  = tcell.StyleDefault
 )
+
+type StyleConfig struct {
+	TextStyle  tcell.Style
+	TitleStyle tcell.Style
+	BoxStyle   tcell.Style
+}
+
+var styleConfigsMap = map[string]StyleConfig{
+	"default": {
+		TextStyle:  tcell.StyleDefault,
+		TitleStyle: tcell.StyleDefault,
+		BoxStyle:   tcell.StyleDefault,
+	},
+	"vintage": {
+		TextStyle:  tcell.StyleDefault.Foreground(tcell.ColorWheat),
+		TitleStyle: tcell.StyleDefault.Foreground(tcell.ColorCoral),
+		BoxStyle:   tcell.StyleDefault.Foreground(tcell.ColorWhite),
+	},
+	"oceanic": {
+		TextStyle:  tcell.StyleDefault.Foreground(tcell.ColorLightCyan),
+		TitleStyle: tcell.StyleDefault.Foreground(tcell.ColorTurquoise),
+		BoxStyle:   tcell.StyleDefault.Foreground(tcell.ColorNavy),
+	},
+	"tty": {
+		TextStyle:  tcell.StyleDefault.Foreground(tcell.ColorGreen),
+		TitleStyle: tcell.StyleDefault.Foreground(tcell.ColorWhite),
+		BoxStyle:   tcell.StyleDefault.Foreground(tcell.ColorGray),
+	},
+	"monokai": {
+		TextStyle:  tcell.StyleDefault.Foreground(tcell.ColorDarkKhaki),
+		TitleStyle: tcell.StyleDefault.Foreground(tcell.ColorOrangeRed),
+		BoxStyle:   tcell.StyleDefault.Foreground(tcell.ColorSlateGray),
+	},
+	"ice": {
+		TextStyle:  tcell.StyleDefault.Foreground(tcell.ColorLightSteelBlue),
+		TitleStyle: tcell.StyleDefault.Foreground(tcell.ColorCoral),
+		BoxStyle:   tcell.StyleDefault.Foreground(tcell.ColorSlateGray),
+	},
+	"high-contrast": {
+		TextStyle:  tcell.StyleDefault.Foreground(tcell.ColorWhite),
+		TitleStyle: tcell.StyleDefault.Foreground(tcell.ColorRed),
+		BoxStyle:   tcell.StyleDefault.Foreground(tcell.ColorWhite),
+	},
+	"light-mode": {
+		TextStyle:  tcell.StyleDefault.Foreground(tcell.ColorBlack),
+		TitleStyle: tcell.StyleDefault.Foreground(tcell.ColorDarkBlue),
+		BoxStyle:   tcell.StyleDefault.Foreground(tcell.ColorDarkGray),
+	},
+}
 
 var validPanels = []panelImpl{
 	createContentPanel(7, "caches", "Caches", "show caches", cachesContent, cachesPanelData, servicesPanelData),
@@ -169,6 +227,10 @@ Use --show-panels to show all available panels.`,
 			return err
 		}
 
+		if err = setColorStyle(); err != nil {
+			return err
+		}
+
 		if disablePadding {
 			padMaxHeightParam = false
 		}
@@ -214,7 +276,6 @@ Use --show-panels to show all available panels.`,
 			return err
 		}
 		defer screen.Fini()
-		screen.EnableMouse(tcell.MouseButtonEvents)
 
 		screen.SetStyle(tcell.StyleDefault)
 
@@ -265,20 +326,6 @@ Use --show-panels to show all available panels.`,
 					panic(err)
 				}
 				screen.Sync()
-			case *tcell.EventMouse:
-				if ev.Buttons() == tcell.Button1 {
-					if expandedPanel == "" {
-						x, y := ev.Position()
-						for r, pos := range drawnPositions {
-							if x >= pos.x && x < pos.x+pos.width && y >= pos.y && y < pos.y+pos.height {
-								updateExpanded(r, screen, dataFetcher, parsedLayout)
-								break
-							}
-						}
-					} else {
-						updateExpanded(rune('0'), screen, dataFetcher, parsedLayout)
-					}
-				}
 			case *tcell.EventKey:
 				pressedKey := ev.Rune()
 				// Exit for 'q', ESC, or CTRL-C
@@ -318,6 +365,72 @@ Use --show-panels to show all available panels.`,
 			}
 		}
 	},
+}
+
+// setDefaultStyleCmd represents the set default-style or command.
+var setDefaultStyleCmd = &cobra.Command{
+	Use:   "default-style style",
+	Short: "set default style for monitor clusters command",
+	Long:  `The 'set default-style' command sets the default style for monitor clusters command.`,
+	Args:  cobra.ExactArgs(1),
+	RunE: func(cmd *cobra.Command, args []string) error {
+		value := args[0]
+
+		_, err := getStyleValue(value)
+		if err != nil {
+			return err
+		}
+
+		viper.Set(defaultStyleKey, value)
+		err = WriteConfig()
+		if err != nil {
+			return err
+		}
+		cmd.Println(setDefaultStyleMsg + value)
+		return nil
+	},
+}
+
+// getDefaultStyleCmd represents the get default-style command.
+var getDefaultStyleCmd = &cobra.Command{
+	Use:   "default-style",
+	Short: "display the current default style for monitor clusters",
+	Long:  `The 'get default-style' command displays the current style for monitor clusters.`,
+	Args:  cobra.ExactArgs(0),
+	RunE: func(cmd *cobra.Command, _ []string) error {
+		cmd.Printf("%s%v\n", getDefaultStyleMsg, Config.DefaultStyle)
+		return nil
+	},
+}
+
+func setColorStyle() error {
+	// use default style if none specified
+	if colorStyleParam == "" {
+		colorStyleParam = Config.DefaultStyle
+	}
+	style, err := getStyleValue(colorStyleParam)
+	if err != nil {
+		return err
+	}
+
+	textStyle = style.TextStyle
+	titleStyle = style.TitleStyle
+	boxStyle = style.BoxStyle
+
+	return nil
+}
+
+func getStyleValue(styleValue string) (StyleConfig, error) {
+	style, ok := styleConfigsMap[styleValue]
+	if !ok {
+		valid := make([]string, 0, len(styleConfigsMap))
+		for k := range styleConfigsMap {
+			valid = append(valid, k)
+		}
+		return StyleConfig{}, fmt.Errorf("invalid color style %s, valid values are %v", colorStyleParam, valid)
+	}
+
+	return style, nil
 }
 
 func updateExpanded(pressedKey rune, screen tcell.Screen, dataFetcher fetcher.Fetcher, parsedLayout []string) {
@@ -383,7 +496,7 @@ func showHelp(screen tcell.Screen) {
 		"  - '+' to increase max height of all panels",
 		"  - '-' to decrease max height of all panels",
 		"  - '0' to reset max height of all panels",
-		"  - Key in [] or click mouse to expand that panel",
+		"  - Key in [] to expand that panel",
 		"  - ESC / CTRL-C to exit monitoring",
 		"  ",
 		"  Press any key to exit help.",
@@ -397,10 +510,10 @@ func showHelp(screen tcell.Screen) {
 	x := w/2 - 25
 	y := h/2 - lenHelp
 
-	drawBox(screen, x, y, x+53, y+lenHelp+2, tcell.StyleDefault, "Help")
+	drawBox(screen, x, y, x+53, y+lenHelp+2, boxStyle, "Help")
 
 	for line := 1; line <= lenHelp; line++ {
-		drawText(screen, x+1, y+line, x+w-1, y+h-1, tcell.StyleDefault, help[line-1])
+		drawText(screen, x+1, y+line, x+w-1, y+h-1, textStyle, help[line-1])
 	}
 	screen.Show()
 	_ = screen.PollEvent()
@@ -422,7 +535,7 @@ func updateScreen(screen tcell.Screen, dataFetcher fetcher.Fetcher, parsedLayout
 	if refresh {
 		startTime := time.Now()
 		if initialRefresh {
-			drawText(screen, w-20, 0, w, 0, tcell.StyleDefault, " Retrieving data...")
+			drawText(screen, w-20, 0, w, 0, textStyle, " Retrieving data...")
 			screen.Show()
 			initialRefresh = false
 		}
@@ -449,7 +562,7 @@ func updateScreen(screen tcell.Screen, dataFetcher fetcher.Fetcher, parsedLayout
 
 	drawHeader(screen, w, h, cluster, dataFetcher)
 
-	// re-create the list of drawn positions, so we can determine mouse click location
+	// re-create the list of drawn positions
 	drawnPositions = make(map[rune]position, 0)
 
 	var (
@@ -1309,10 +1422,10 @@ func drawContent(screen tcell.Screen, dataFetcher fetcher.Fetcher, panel panelIm
 		trimmedText = fmt.Sprintf("%v%s", string(tcell.RuneHLine), "(trimmed)")
 	}
 
-	drawBox(screen, x, y, x+w-1, y+h, tcell.StyleDefault, fmt.Sprintf("%s[%v]%s", parseTitle(title), string(code), trimmedText))
+	drawBox(screen, x, y, x+w-1, y+h, boxStyle, fmt.Sprintf("%s[%v]%s", parseTitle(title), string(code), trimmedText))
 
 	for line := 1; line <= rows; line++ {
-		drawText(screen, x+1, y+line, x+w-1, y+h-1, tcell.StyleDefault, content[line-1])
+		drawText(screen, x+1, y+line, x+w-1, y+h-1, textStyle, content[line-1])
 	}
 
 	return rows + 2, nil
@@ -1364,7 +1477,7 @@ func drawHeader(screen tcell.Screen, w, h int, cluster config.Cluster, dataFetch
 			title = fmt.Sprintf("%s%-*s", title, w-titleLen-2, " ")
 		}
 	}
-	drawText(screen, 1, 0, w-1, h-1, tcell.StyleDefault.Reverse(true), title)
+	drawText(screen, 1, 0, w-1, h-1, textStyle.Reverse(true), title)
 }
 
 // drawText draws text on the screen.
@@ -1416,7 +1529,7 @@ func drawBox(s tcell.Screen, x1, y1, x2, y2 int, style tcell.Style, title string
 		s.SetContent(x2, y2, tcell.RuneLRCorner, nil, style)
 	}
 
-	drawText(s, x1+2, y1, x2-1, y2-1, style, title)
+	drawText(s, x1+2, y1, x2-1, y2-1, titleStyle, title)
 }
 
 // getValidPanelTypes returns the list of panels for the --help command.
@@ -1462,6 +1575,7 @@ func init() {
 	monitorClusterCmd.Flags().StringVarP(&serviceName, serviceNameOption, "S", "", serviceNameDescription)
 	monitorClusterCmd.Flags().StringVarP(&selectedCache, "cache-name", "C", "", "cache name")
 	monitorClusterCmd.Flags().StringVarP(&selectedTopic, "topic-name", "T", "", "topic name")
+	monitorClusterCmd.Flags().StringVarP(&colorStyleParam, "style", "", "", "color style")
 	monitorClusterCmd.Flags().Int64VarP(&subscriber, "subscriber-id", "B", 0, "subscriber")
 	monitorClusterCmd.Flags().IntVarP(&setMaxHeight, "max-height", "M", 0, "override max height for all panels")
 	monitorClusterCmd.Flags().BoolVarP(&ignoreSpecialCaches, "ignore-special", "", false, ignoreCachesDescription)

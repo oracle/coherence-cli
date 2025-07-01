@@ -72,6 +72,7 @@ const (
 	currentContextKey     = "currentContext"
 	debugContextKey       = "debug"
 	colorContextKey       = "color"
+	defaultStyleKey       = "defaultStyle"
 	useGradleContextKey   = "useGradle"
 	ignoreCertsContextKey = "ignoreInvalidCerts"
 	requestTimeoutKey     = "requestTimeout"
@@ -193,6 +194,7 @@ type CoherenceCLIConfig struct {
 	UseGradle          bool                `json:"useGradle"`
 	Profiles           []ProfileValue      `mapstructure:"profiles"`
 	Panels             []Panel             `mapstructure:"panels"`
+	DefaultStyle       string              `json:"defaultStyle"`
 }
 
 // ProfileValue describes a profile to be used for creating and starting clusters.
@@ -366,7 +368,7 @@ func initConfig() {
 
 	viper.AutomaticEnv() // read in environment variables that match
 
-	if err := viper.ReadInConfig(); err != nil {
+	if err = viper.ReadInConfig(); err != nil {
 		_, foundError := err.(viper.ConfigFileNotFoundError)
 		_, pathError := err.(*os.PathError)
 
@@ -403,7 +405,7 @@ func initConfig() {
 		}
 	} else {
 		// load the config
-		if err := viper.Unmarshal(&Config); err != nil {
+		if err = viper.Unmarshal(&Config); err != nil {
 			rootCmd.Println(err)
 			os.Exit(1)
 		}
@@ -417,6 +419,11 @@ func initConfig() {
 			rootCmd.Println(err)
 			os.Exit(1)
 		}
+	}
+
+	// default defaultStyle
+	if Config.DefaultStyle == "" {
+		Config.DefaultStyle = "default"
 	}
 
 	// setup logs directory
@@ -578,6 +585,7 @@ func Initialize(command *cobra.Command) *cobra.Command {
 	getCmd.AddCommand(getFederationIncomingCmd)
 	getCmd.AddCommand(getFederationOutgoingCmd)
 	getCmd.AddCommand(getPanelsCmd)
+	getCmd.AddCommand(getDefaultStyleCmd)
 
 	// set command
 	command.AddCommand(setCmd)
@@ -598,6 +606,7 @@ func Initialize(command *cobra.Command) *cobra.Command {
 	setCmd.AddCommand(setFederationCmd)
 	setCmd.AddCommand(setColorCmd)
 	setCmd.AddCommand(setClusterCmd)
+	setCmd.AddCommand(setDefaultStyleCmd)
 
 	// run command
 	command.AddCommand(runCmd)

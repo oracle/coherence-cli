@@ -22,6 +22,8 @@ NOTE: The `monitor cluster` command is currently experimental only and may be ch
 * <<get-panels, `cohctl get panels`>> - displays the panels that have been created
 * <<add-panel, `cohctl add panel`>> - adds a panel to the list of panels that can be displayed
 * <<remove-panel, `cohctl remove panel`>> - removes a panel that has been created
+* <<set-default-style, `cohctl set default-style`>> - sets the default style for monitor clusters command
+* <<get-default-style, `cohctl get default-style`>> - gets the default style for monitor clusters command
 
 [#monitor-cluster]
 ==== Monitor Cluster
@@ -241,6 +243,28 @@ cohctl remove panel my-panel
 
 Are you sure you want to remove the panel my-panel? (y/n) y
 panel my-panel was removed
+----
+
+[#set-default-style]
+==== Set Default Style
+
+include::../../build/_output/docs-gen/set_default_style.adoc[tag=text]
+
+[source,bash]
+----
+cohctl set default style ice
+Default style is now set to ice
+----
+
+[#get-default-style]
+==== Get Default Style
+
+include::../../build/_output/docs-gen/get_default_style.adoc[tag=text]
+
+[source,bash]
+----
+cohctl get default style ice
+Default style is: ice
 ----
 
 === See Also
