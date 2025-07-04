@@ -486,7 +486,7 @@ func previewAllStyles() error {
 		row++
 	}
 
-	drawText(screen, 2, y+5, 40, y+40, tcell.StyleDefault, "Press any key to continue")
+	drawText(screen, 2, y+1, 40, y+40, tcell.StyleDefault, "Press any key to continue")
 
 	screen.Show()
 
