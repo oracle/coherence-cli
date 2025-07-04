@@ -17,6 +17,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"log"
+	"sort"
 	"strings"
 	"sync"
 	"time"
@@ -131,6 +132,31 @@ var styleConfigsMap = map[string]StyleConfig{
 		TextStyle:  tcell.StyleDefault.Foreground(tcell.ColorBlack),
 		TitleStyle: tcell.StyleDefault.Foreground(tcell.ColorDarkBlue),
 		BoxStyle:   tcell.StyleDefault.Foreground(tcell.ColorDarkGray),
+	},
+	"solarized-dark": {
+		TextStyle:  tcell.StyleDefault.Foreground(tcell.ColorLightSlateGray),
+		TitleStyle: tcell.StyleDefault.Foreground(tcell.ColorGoldenrod),
+		BoxStyle:   tcell.StyleDefault.Foreground(tcell.ColorTeal),
+	},
+	"sunset": {
+		TextStyle:  tcell.StyleDefault.Foreground(tcell.ColorOrange),
+		TitleStyle: tcell.StyleDefault.Foreground(tcell.ColorTomato),
+		BoxStyle:   tcell.StyleDefault.Foreground(tcell.ColorDarkRed),
+	},
+	"midnight": {
+		TextStyle:  tcell.StyleDefault.Foreground(tcell.ColorLightSlateGray),
+		TitleStyle: tcell.StyleDefault.Foreground(tcell.ColorMediumPurple),
+		BoxStyle:   tcell.StyleDefault.Foreground(tcell.ColorIndigo),
+	},
+	"dracula": {
+		TextStyle:  tcell.StyleDefault.Foreground(tcell.ColorMediumOrchid),
+		TitleStyle: tcell.StyleDefault.Foreground(tcell.ColorDeepPink),
+		BoxStyle:   tcell.StyleDefault.Foreground(tcell.ColorSlateBlue),
+	},
+	"clay": {
+		TextStyle:  tcell.StyleDefault.Foreground(tcell.ColorSandyBrown),
+		TitleStyle: tcell.StyleDefault.Foreground(tcell.ColorPeru),
+		BoxStyle:   tcell.StyleDefault.Foreground(tcell.ColorMaroon),
 	},
 }
 
@@ -427,6 +453,7 @@ func getStyleValue(styleValue string) (StyleConfig, error) {
 		for k := range styleConfigsMap {
 			valid = append(valid, k)
 		}
+		sort.Strings(valid)
 		return StyleConfig{}, fmt.Errorf("invalid color style %s, valid values are %v", colorStyleParam, valid)
 	}
 
