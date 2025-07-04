@@ -60,6 +60,7 @@ var (
 	originalMaxHeight      int
 	padMaxHeightParam      = true
 	colorStyleParam        string
+	previewStylesParam     bool
 	showAllPanels          bool
 	ignoreRESTErrors       bool
 	disablePadding         bool
@@ -158,6 +159,11 @@ var styleConfigsMap = map[string]StyleConfig{
 		TitleStyle: tcell.StyleDefault.Foreground(tcell.ColorPeru),
 		BoxStyle:   tcell.StyleDefault.Foreground(tcell.ColorMaroon),
 	},
+	"fog": {
+		TextStyle:  tcell.StyleDefault.Foreground(tcell.ColorGainsboro),
+		TitleStyle: tcell.StyleDefault.Foreground(tcell.ColorSlateGray),
+		BoxStyle:   tcell.StyleDefault.Foreground(tcell.ColorDarkSlateGray),
+	},
 }
 
 var validPanels = []panelImpl{
@@ -220,7 +226,7 @@ require you to specify cache, service, topic or subscriber.
 Use --show-panels to show all available panels.`,
 	ValidArgsFunction: completionAllClusters,
 	Args: func(cmd *cobra.Command, args []string) error {
-		if len(args) != 1 && !showAllPanels {
+		if len(args) != 1 && (!showAllPanels && !previewStylesParam) {
 			displayErrorAndExit(cmd, youMustProviderConnectionMessage)
 		}
 		return nil
@@ -236,6 +242,10 @@ Use --show-panels to show all available panels.`,
 		if showAllPanels {
 			cmd.Println(getValidPanelTypes())
 			return nil
+		}
+
+		if previewStylesParam {
+			return previewAllStyles()
 		}
 
 		clusterName = args[0]
@@ -429,6 +439,68 @@ var getDefaultStyleCmd = &cobra.Command{
 	},
 }
 
+func previewAllStyles() error {
+	screen, err := tcell.NewScreen()
+	if err != nil {
+		return err
+	}
+	if err = screen.Init(); err != nil {
+		return err
+	}
+	defer screen.Fini()
+
+	screen.SetStyle(tcell.StyleDefault)
+
+	// ensure we reset the screen on any panic
+	defer func() {
+		if r := recover(); r != nil {
+			screen.Clear()
+			screen.Show()
+			screen.Fini()
+			log.Println("Panic: ", r)
+		}
+	}()
+
+	sortedStyles := getAllSortedStyles()
+
+	y := 1
+	x := 2
+	row := 1
+	for _, styleKey := range sortedStyles {
+		if style, ok := styleConfigsMap[styleKey]; ok {
+			titleStyle = style.TitleStyle
+			drawBox(screen, x, y, x+40, y+4, style.BoxStyle, fmt.Sprintf("Example style: [%s]", styleKey))
+			drawText(screen, x+1, y+1, x+39, y+1, style.TextStyle, "NODE ID  ADDRESS     PORT   PROCESS")
+			drawText(screen, x+1, y+2, x+39, y+2, style.TextStyle, "      1  /127.0.0.1  58086    97529")
+			drawText(screen, x+1, y+3, x+39, y+3, style.TextStyle, "      2  /127.0.0.1  58044    66466")
+		}
+
+		if row%2 == 0 {
+			// move to next line
+			y += 5
+			x = 2
+		} else {
+			// move across
+			x += 45
+		}
+		row++
+	}
+
+	drawText(screen, 2, y+5, 40, y+40, tcell.StyleDefault, "Press any key to continue")
+
+	screen.Show()
+
+	// Wait for any key press
+	for {
+		ev := screen.PollEvent()
+		if _, ok := ev.(*tcell.EventKey); ok {
+			break
+		}
+	}
+
+	return nil
+}
+
 func setColorStyle() error {
 	// use default style if none specified
 	if colorStyleParam == "" {
@@ -449,15 +521,20 @@ func setColorStyle() error {
 func getStyleValue(styleValue string) (StyleConfig, error) {
 	style, ok := styleConfigsMap[styleValue]
 	if !ok {
-		valid := make([]string, 0, len(styleConfigsMap))
-		for k := range styleConfigsMap {
-			valid = append(valid, k)
-		}
-		sort.Strings(valid)
-		return StyleConfig{}, fmt.Errorf("invalid color style %s, valid values are %v", colorStyleParam, valid)
+		return StyleConfig{}, fmt.Errorf("invalid color style %s, valid values are %v", colorStyleParam, getAllSortedStyles())
 	}
 
 	return style, nil
+}
+
+func getAllSortedStyles() []string {
+	sortedList := make([]string, 0, len(styleConfigsMap))
+	for k := range styleConfigsMap {
+		sortedList = append(sortedList, k)
+	}
+	sort.Strings(sortedList)
+
+	return sortedList
 }
 
 func updateExpanded(pressedKey rune, screen tcell.Screen, dataFetcher fetcher.Fetcher, parsedLayout []string) {
@@ -1606,4 +1683,5 @@ func init() {
 	monitorClusterCmd.Flags().Int64VarP(&subscriber, "subscriber-id", "B", 0, "subscriber")
 	monitorClusterCmd.Flags().IntVarP(&setMaxHeight, "max-height", "M", 0, "override max height for all panels")
 	monitorClusterCmd.Flags().BoolVarP(&ignoreSpecialCaches, "ignore-special", "", false, ignoreCachesDescription)
+	monitorClusterCmd.Flags().BoolVarP(&previewStylesParam, "preview-styles", "", false, "preview all the styles")
 }

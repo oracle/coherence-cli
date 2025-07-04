@@ -25,6 +25,9 @@ NOTE: The `monitor cluster` command is currently experimental only and may be ch
 * <<set-default-style, `cohctl set default-style`>> - sets the default style for monitor clusters command
 * <<get-default-style, `cohctl get default-style`>> - gets the default style for monitor clusters command
 
+NOTE: You can set the color style used by setting the `--style` option, or preview all styles using `--preview-styles`.  To
+always use a style look at <<set-default-style, `cohctl set default-style`>> command.
+
 [#monitor-cluster]
 ==== Monitor Cluster
 
