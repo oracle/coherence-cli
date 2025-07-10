@@ -71,7 +71,7 @@ const (
 	dataSent              = "DATA SENT"
 	dataRec               = "DATA REC"
 	http200               = "200"
-	backlogMillis         = "BACKLOG MS"
+	backlogMillis         = "BACKLOG"
 )
 
 var (
@@ -275,7 +275,7 @@ func FormatFederationDetails(federationDetails []config.FederationDescription, t
 					formatLargeInteger(value.ReplicateAllPartitionErrorCount),
 					formatLargeInteger(value.TotalReplicateAllPartitionsUnacked),
 					formatLargeInteger(value.TotalRetryResponses),
-					formatLargeInteger(value.TransportBackloggedTime),
+					formatLatency0(float32(value.TransportBackloggedTime)),
 				)
 			} else {
 				table.AddColumnsToRow(
@@ -314,15 +314,15 @@ func FormatFederationSummary(federationSummaries []config.FederationSummary, tar
 
 	if OutputFormat == constants.TABLE {
 		if target == destinations {
-			finalAlignment = []string{L, L, R, L, R, R, R, R}
+			finalAlignment = []string{L, L, R, L, R, R, R, R, R}
 		} else {
-			finalAlignment = []string{L, L, R, R, R, R}
+			finalAlignment = []string{L, L, R, R, R, R, R}
 		}
 	} else { // WIDE
 		if target == destinations {
-			finalAlignment = []string{L, L, R, L, R, R, R, R, R, R, R, R, R, R, R, R}
+			finalAlignment = []string{L, L, R, L, R, R, R, R, R, R, R, R, R, R, R, R, R}
 		} else {
-			finalAlignment = []string{L, L, R, R, R, R, R, R}
+			finalAlignment = []string{L, L, R, R, R, R, R, R, R}
 		}
 	}
 
@@ -339,7 +339,7 @@ func FormatFederationSummary(federationSummaries []config.FederationSummary, tar
 
 	if target == destinations {
 		table.WithHeader(ServiceColumn, participantCol, memberCol, "STATES", "DATA "+suffix,
-			"MSG "+suffix, "REC "+suffix, "CURR AVG BWIDTH")
+			"MSG "+suffix, "REC "+suffix, "TOTAL B/WIDTH", "AVG B/WIDTH")
 		table.AddFormattingFunction(3, federationStateFormatter)
 	} else {
 		table.WithHeader(ServiceColumn, participantCol, memberCol, "DATA "+suffix,
@@ -350,20 +350,21 @@ func FormatFederationSummary(federationSummaries []config.FederationSummary, tar
 		if target == destinations {
 			table.AddHeaderColumns(avgApply, "AVG ROUND TRIP", avgBacklogDelay, "REPLICATE",
 				partitions, "ERRORS", "UNACKED", backlogMillis)
-			table.AddFormattingFunction(13, errorFormatter)
 			table.AddFormattingFunction(14, errorFormatter)
 			table.AddFormattingFunction(15, errorFormatter)
+			table.AddFormattingFunction(16, errorFormatter)
 		} else {
 			table.AddHeaderColumns(avgApply, avgBacklogDelay)
 		}
 	}
 
 	var (
-		bytes     float64
-		messages  float64
-		records   float64
-		members   int32
-		bandwidth string
+		bytes          float64
+		messages       float64
+		records        float64
+		members        int32
+		bandwidthAvg   string
+		bandwidthTotal string
 	)
 
 	for _, value := range federationSummaries {
@@ -372,21 +373,23 @@ func FormatFederationSummary(federationSummaries []config.FederationSummary, tar
 			messages = value.TotalMsgSent.Sum
 			records = value.TotalRecordsSent.Sum
 			members = int32(len(value.State))
-			bandwidth = formatMbps(float32(value.CurrentBandwidth.Average))
+			bandwidthAvg = formatMbps(float32(value.CurrentBandwidth.Average))
+			bandwidthTotal = formatMbps(float32(value.CurrentBandwidth.Sum))
 		} else {
 			bytes = value.TotalBytesReceived.Sum
 			messages = value.TotalMsgReceived.Sum
 			records = value.TotalRecordsReceived.Sum
 			// if each of the members value is "N/A" then none are receiving
 			members = utils.GetMemberCountReceiving(value.Member)
-			bandwidth = na
+			bandwidthAvg = na
+			bandwidthTotal = na
 		}
 
 		if target == destinations {
 			table.AddRow(value.ServiceName, value.ParticipantName,
 				formatSmallInteger(members), fmt.Sprintf("%v", utils.GetUniqueValues(value.State)),
 				formattingFunction(int64(bytes)), formatLargeInteger(int64(messages)),
-				formatLargeInteger(int64(records)), bandwidth)
+				formatLargeInteger(int64(records)), bandwidthTotal, bandwidthAvg)
 		} else {
 			table.AddRow(value.ServiceName, value.ParticipantName,
 				formatSmallInteger(members),
@@ -404,7 +407,7 @@ func FormatFederationSummary(federationSummaries []config.FederationSummary, tar
 					formatLargeInteger(int64(value.ReplicateAllPartitionCount.Sum)),
 					formatLargeInteger(int64(value.ReplicateAllPartitionErrorCount.Sum)),
 					formatLargeInteger(int64(value.TotalReplicateAllPartitionsUnacked.Sum)),
-					formatLargeInteger(int64(value.TransportBackloggedTime.Sum)),
+					formatLatency0(float32(value.TransportBackloggedTime.Sum)),
 				)
 			} else {
 				table.AddColumnsToRow(
@@ -2221,17 +2224,17 @@ func formatLargeFloat(value float64) string {
 
 // formatLatency formats a float latency.
 func formatLatency(value float32) string {
-	return printer.Sprintf("%.3fms", value)
+	return printer.Sprintf("%.3 fms", value)
 }
 
 // formatLatency formats a float latency.
 func formatLatency0(value float32) string {
-	return printer.Sprintf("%.0fms", value)
+	return printer.Sprintf("%.0f ms", value)
 }
 
 // formatMbps formats a Mbps.
 func formatMbps(value float32) string {
-	return printer.Sprintf("%.1fMbps", value)
+	return printer.Sprintf("%.1f Mbps", value)
 }
 
 // formatPublisherReceiver formats a packet publisher/ receiver.
