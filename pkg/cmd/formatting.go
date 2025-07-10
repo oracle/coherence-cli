@@ -1929,7 +1929,7 @@ func FormatPersistenceServices(services []config.ServiceSummary, isSummary bool)
 			formattingFunction(max(0, value.PersistenceActiveSpaceUsed)),
 			formattingFunction(max(0, value.PersistenceBackupSpaceUsed)),
 			formatLatency(float32(averageAverageLatency)),
-			formatLargeInteger(max(value.PersistenceLatencyMax, 0))+"ms")
+			formatLargeInteger(max(value.PersistenceLatencyMax, 0))+" ms")
 
 		if isSummary {
 			table.AddColumnsToRow(formatSmallInteger(int32(len(value.Snapshots))), value.OperationStatus)
@@ -2224,7 +2224,7 @@ func formatLargeFloat(value float64) string {
 
 // formatLatency formats a float latency.
 func formatLatency(value float32) string {
-	return printer.Sprintf("%.3 fms", value)
+	return printer.Sprintf("%.3f ms", value)
 }
 
 // formatLatency formats a float latency.
