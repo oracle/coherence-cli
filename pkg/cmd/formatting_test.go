@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, 2024 Oracle and/or its affiliates.
+ * Copyright (c) 2021, 2025 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -28,10 +28,10 @@ func TestCreateCamelCaseLabel(t *testing.T) {
 func TestFormattingLatency(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
 
-	g.Expect(formatLatency(123.333)).To(gomega.Equal("123.333ms"))
-	g.Expect(formatLatency(1)).To(gomega.Equal("1.000ms"))
-	g.Expect(formatLatency0(123)).To(gomega.Equal("123ms"))
-	g.Expect(formatMbps(123.2)).To(gomega.Equal("123.2Mbps"))
+	g.Expect(formatLatency(123.333)).To(gomega.Equal("123.333 ms"))
+	g.Expect(formatLatency(1)).To(gomega.Equal("1.000 ms"))
+	g.Expect(formatLatency0(123)).To(gomega.Equal("123 ms"))
+	g.Expect(formatMbps(123.2)).To(gomega.Equal("123.2 Mbps"))
 }
 
 func TestFormatting(t *testing.T) {
