@@ -253,6 +253,8 @@ Use --show-panels to show all available panels.`,
 		// set to tru to turn off incompatible color formatting
 		monitorCluster = true
 
+		setupColors()
+
 		found, _ := GetClusterConnection(clusterName)
 		if !found {
 			return errors.New(UnableToFindClusterMsg + clusterName)
@@ -1588,8 +1590,23 @@ func drawHeader(screen tcell.Screen, w, h int, cluster config.Cluster, dataFetch
 func drawText(s tcell.Screen, x1, y1, x2, y2 int, style tcell.Style, text string) {
 	row := y1
 	col := x1
+	currentStyle := style
+
 	for _, r := range text {
-		s.SetContent(col, row, r, nil, style)
+		switch r {
+		case '\x01': // startRed
+			currentStyle = currentStyle.Foreground(tcell.ColorRed)
+			continue
+		case '\x02': // startYellow
+			currentStyle = currentStyle.Foreground(tcell.ColorYellow)
+			continue
+		case '\x03': // endColor
+			// Reset to the originally passed style
+			currentStyle = style
+			continue
+		}
+
+		s.SetContent(col, row, r, nil, currentStyle)
 		col++
 		if col >= x2 {
 			row++
