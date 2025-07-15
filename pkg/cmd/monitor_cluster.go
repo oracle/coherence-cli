@@ -85,6 +85,9 @@ var (
 	boxStyle   = tcell.StyleDefault
 	titleStyle = tcell.StyleDefault
 	textStyle  = tcell.StyleDefault
+
+	currentScreenWidth  int
+	currentScreenHeight int
 )
 
 type StyleConfig struct {
@@ -612,17 +615,25 @@ func showHelp(screen tcell.Screen) {
 	defer func() { inHelp = false }()
 	lenHelp := len(help)
 
-	w, h := screen.Size()
-	x := w/2 - 25
-	y := h/2 - lenHelp
+	updateScreenSize(screen)
+
+	x := currentScreenWidth/2 - 25
+	y := currentScreenHeight/2 - lenHelp
 
 	drawBox(screen, x, y, x+53, y+lenHelp+2, boxStyle, "Help")
 
 	for line := 1; line <= lenHelp; line++ {
-		drawText(screen, x+1, y+line, x+w-1, y+h-1, textStyle, help[line-1])
+		drawText(screen, x+1, y+line, x+currentScreenWidth-1, y+currentScreenHeight-1, textStyle, help[line-1])
 	}
 	screen.Show()
 	_ = screen.PollEvent()
+}
+
+func updateScreenSize(screen tcell.Screen) {
+	w, h := screen.Size()
+	currentScreenWidth = w
+	currentScreenHeight = h
+
 }
 
 func updateScreen(screen tcell.Screen, dataFetcher fetcher.Fetcher, parsedLayout []string, refresh bool) error {
@@ -636,12 +647,12 @@ func updateScreen(screen tcell.Screen, dataFetcher fetcher.Fetcher, parsedLayout
 	mutex.Lock()
 	defer mutex.Unlock()
 
-	w, h := screen.Size()
+	updateScreenSize(screen)
 
 	if refresh {
 		startTime := time.Now()
 		if initialRefresh {
-			drawText(screen, w-20, 0, w, 0, textStyle, " Retrieving data...")
+			drawText(screen, currentScreenWidth-20, 0, currentScreenWidth, 0, textStyle, " Retrieving data...")
 			screen.Show()
 			initialRefresh = false
 		}
@@ -666,7 +677,7 @@ func updateScreen(screen tcell.Screen, dataFetcher fetcher.Fetcher, parsedLayout
 		return err
 	}
 
-	drawHeader(screen, w, h, cluster, dataFetcher)
+	drawHeader(screen, currentScreenWidth, currentScreenHeight, cluster, dataFetcher)
 
 	// re-create the list of drawn positions
 	drawnPositions = make(map[rune]position, 0)
@@ -684,9 +695,9 @@ func updateScreen(screen tcell.Screen, dataFetcher fetcher.Fetcher, parsedLayout
 
 		// from the panel count figure out the width
 		if panelCount == 1 {
-			widths = []int{w}
+			widths = []int{currentScreenWidth}
 		} else {
-			widths = getLengths(w, panelCount)
+			widths = getLengths(currentScreenWidth, panelCount)
 		}
 
 		startX := 0
@@ -719,7 +730,7 @@ func updateScreen(screen tcell.Screen, dataFetcher fetcher.Fetcher, parsedLayout
 				if singlePanel {
 					realStartX = 0
 					realStartY = 2
-					realWidth = w
+					realWidth = currentScreenWidth
 				}
 				// now we have the panel then draw it
 				rows, err = drawContent(screen, dataFetcher, *panel, realStartX, realStartY, realWidth, panelCode)
