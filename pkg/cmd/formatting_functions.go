@@ -46,6 +46,18 @@ var statusHAFormatter = func(s string) string {
 	return s
 }
 
+// persistenceStatusFormatter formats a column value containing persistence status.
+var persistenceStatusFormatter = func(s string) string {
+	if isWindows() {
+		return s
+	}
+	if strings.Contains(s, "in progress") || strings.Contains(s, "snapshot") {
+		return yellow(s)
+	}
+
+	return s
+}
+
 // hitRateFormatter formats a column value which represents a cache hit rate.
 var hitRateFormatter = func(s string) string {
 	if isWindows() {
@@ -229,7 +241,7 @@ var healthSummaryFormatter = func(s string) string {
 
 // healthMonitoringFormatter formats a column value for health monitoring summary.
 var healthMonitoringFormatter = func(s string) string {
-	if monitorCluster {
+	if isWindows() {
 		return s
 	}
 	if strings.Contains(s, http200) || strings.Contains(s, "4") {
@@ -246,7 +258,7 @@ var healthMonitoringFormatter = func(s string) string {
 
 // healthSummaryFormatter formats a column value for federation state.
 var federationStateFormatter = func(s string) string {
-	if monitorCluster {
+	if isWindows() {
 		return s
 	}
 	lowerCase := strings.ToLower(s)
@@ -262,7 +274,7 @@ var federationStateFormatter = func(s string) string {
 
 // networkStatsFormatter formats a column value representing publisher or receiver rates.
 var networkStatsFormatter = func(s string) string {
-	if monitorCluster {
+	if isWindows() {
 		return s
 	}
 	floatValue, err := strconv.ParseFloat(trimPercent(s), 32)
