@@ -1896,6 +1896,7 @@ func FormatPersistenceServices(services []config.ServiceSummary, isSummary bool)
 		table.WithAlignment(L, R, L, R, R, R, R, R, L)
 		table.WithHeader(ServiceNameColumn, "STORAGE COUNT", "PERSISTENCE MODE",
 			"ACTIVE SPACE", "BACKUP SPACE", "AVG LATENCY", "MAX LATENCY", "SNAPSHOTS", "STATUS")
+		table.AddFormattingFunction(8, persistenceStatusFormatter)
 	} else {
 		table.WithAlignment(R, L, R, R, R, R)
 		table.WithHeader(NodeIDColumn, "PERSISTENCE MODE", "ACTIVE SPACE", "BACKUP SPACE", "AVG LATENCY", "MAX LATENCY")
