@@ -5,7 +5,7 @@
 #
 templates:
   - name: helidon
-    frameworkVersion: "4.2.3"
+    frameworkVersion: "4.2.4"
     instructions: |
       To run the Helidon starter you must have JDK21+ and maven 3.8.5+.
       Change to the newly created directory and run the following to build:
