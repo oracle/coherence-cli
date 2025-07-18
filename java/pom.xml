@@ -374,7 +374,7 @@
             <version>${version.plugin.jib}</version>
             <configuration>
               <from>
-                <image>${coherence.test.base.image}</image>
+                <image>docker://${coherence.test.base.image}</image>
               </from>
               <container>
                 <jvmFlags>
@@ -418,7 +418,7 @@
             <version>${version.plugin.jib}</version>
             <configuration>
               <from>
-                <image>${coherence.test.base.image}</image>
+                <image>docker://${coherence.test.base.image}</image>
               </from>
               <container>
                 <jvmFlags>
