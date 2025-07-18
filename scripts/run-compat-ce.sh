@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #
-# Copyright (c) 2021, 2024 Oracle and/or its affiliates.
+# Copyright (c) 2021, 2025 Oracle and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at
 # https://oss.oracle.com/licenses/upl.
 #
@@ -24,11 +24,11 @@ COHERENCE_BASE_IMAGE=gcr.io/distroless/java17-debian12 PROFILES=,executor COHERE
 echo "Coherence CE 14.1.1-0-19"
 COHERENCE_VERSION=14.1.1-0-19 make clean build-test-images test-e2e-standalone
 
-echo "Coherence CE 24.09.3 with Topics"
-COHERENCE_BASE_IMAGE=gcr.io/distroless/java17-debian12 PROFILES=,topics COHERENCE_VERSION=24.09.3 make clean build-test-images test-e2e-topics
+echo "Coherence CE 25.03.1 with Topics"
+COHERENCE_BASE_IMAGE=gcr.io/distroless/java17-debian12 PROFILES=,topics COHERENCE_VERSION=25.03.1 make clean build-test-images test-e2e-topics
 
-echo "Coherence CE 24.09.3 with View Caches"
-COHERENCE_BASE_IMAGE=gcr.io/distroless/java17-debian12 PROFILES=,views COHERENCE_VERSION=24.09.3 make clean build-view-images test-e2e-views
+echo "Coherence CE 25.03.1 with View Caches"
+COHERENCE_BASE_IMAGE=gcr.io/distroless/java17-debian12 PROFILES=,views COHERENCE_VERSION=25.03.1 make clean build-view-images test-e2e-views
 
 # Security Enabled
 export COMPUTERNAME=server1
