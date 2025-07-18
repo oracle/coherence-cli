@@ -49,6 +49,7 @@ var (
 		"default-members":    "members:machines,departed-members:network-stats",
 	}
 	errSelectService       = errors.New("you must provide a service name via -S option")
+	errSelectParticipant   = errors.New("you must provide a participant name via -p option")
 	errSelectCache         = errors.New("you must provide a cache using the -C option")
 	errSelectTopic         = errors.New("you must provide a topic using the -T option")
 	errSelectSubscriber    = errors.New("you must provide a subscriber using the -B option")
@@ -183,6 +184,10 @@ var validPanels = []panelImpl{
 	createContentPanel(4, "federation-all", "Federation All", "show all federation details", federationAllContent, federationPanelData),
 	createContentPanel(3, "federation-dest", "Federation Destinations", "show federation destinations", federationDestinationsContent, federationPanelData),
 	createContentPanel(3, "federation-origins", "Federation Origins", "show federation origins", federationOriginsContent, federationPanelData),
+	createContentPanel(7, "federation-con-outgoing", "Federation Connections Outgoing (%SERVICE)", "show federation connections outgoing", federationOutgoing),
+	createContentPanel(7, "federation-con-incoming", "Federation Connections Incoming (%SERVICE)", "show federation connections incoming", federationIncoming),
+	createContentPanel(7, "federation-outgoing", "Federation Details Outgoing (%SERVICE)", "show federation details outgoing", federationDetailsOutgoing),
+	createContentPanel(7, "federation-incoming", "Federation Details Incoming (%SERVICE)", "show federation details incoming", federationDetailsIncoming),
 	createContentPanel(7, "http-servers", "HTTP Servers", "show HTTP servers", httpServersContent, proxiesPanelData),
 	createContentPanel(7, "http-sessions", "HTTP Sessions", "show HTTP sessions", httpSessionsContent, httpSessionsPanelData),
 	createContentPanel(7, "machines", "Machines", "show machines", machinesContent, memberPanelData, storagePanelData),
@@ -1049,6 +1054,70 @@ var federationAllContent = func(_ fetcher.Fetcher, clusterSummary clusterSummary
 	return noContentArray, nil
 }
 
+var federationOutgoing = func(dataFetcher fetcher.Fetcher, _ clusterSummaryInfo) ([]string, error) {
+	return federationOutgoingAndIncoming(dataFetcher, outgoing)
+}
+
+var federationIncoming = func(dataFetcher fetcher.Fetcher, _ clusterSummaryInfo) ([]string, error) {
+	return federationOutgoingAndIncoming(dataFetcher, incoming)
+}
+
+func federationOutgoingAndIncoming(dataFetcher fetcher.Fetcher, federationDirection string) ([]string, error) {
+	if serviceName == "" {
+		return emptyStringArray, errSelectService
+	}
+	if participant == all {
+		return emptyStringArray, errSelectParticipant
+	}
+
+	results, err := retrieveFederationDetails(dataFetcher, serviceName, federationDirection)
+	if err != nil {
+		return noContentArray, nil
+	}
+
+	output, err2 := getFederationConnectionData(results, serviceName, federationDirection, participant)
+	if err2 != nil {
+		return noContentArray, nil
+	}
+
+	return strings.Split(output, "\n"), nil
+}
+
+func federationDetailsOutgoingAndIncoming(dataFetcher fetcher.Fetcher, federationDirection string) ([]string, error) {
+	if serviceName == "" {
+		return emptyStringArray, errSelectService
+	}
+	if participant == all {
+		return emptyStringArray, errSelectParticipant
+	}
+
+	results, err := retrieveFederationDetails(dataFetcher, serviceName, federationDirection)
+	if err != nil {
+		return noContentArray, nil
+	}
+
+	var sb strings.Builder
+
+	sb.WriteString(getDescribeFederationHeader(serviceName, federationDirection, participant))
+
+	federationData, err := decodeFederationData(results)
+	if err != nil {
+		return noContentArray, nil
+	}
+
+	sb.WriteString(FormatFederationDetails(federationData, describeFederationType))
+
+	return strings.Split(sb.String(), "\n"), nil
+}
+
+var federationDetailsOutgoing = func(dataFetcher fetcher.Fetcher, _ clusterSummaryInfo) ([]string, error) {
+	return federationDetailsOutgoingAndIncoming(dataFetcher, outgoing)
+}
+
+var federationDetailsIncoming = func(dataFetcher fetcher.Fetcher, _ clusterSummaryInfo) ([]string, error) {
+	return federationDetailsOutgoingAndIncoming(dataFetcher, incoming)
+}
+
 var federationDestinationsContent = func(_ fetcher.Fetcher, clusterSummary clusterSummaryInfo) ([]string, error) {
 	if len(clusterSummary.finalSummariesDestinations) > 0 {
 		return strings.Split(FormatFederationSummary(clusterSummary.finalSummariesDestinations, destinations), "\n"), nil
@@ -1669,12 +1738,12 @@ func getValidPanelTypes() string {
 	var sb strings.Builder
 	sb.WriteString("Default panels\n--------------\n")
 	for k, v := range defaultMap {
-		sb.WriteString(fmt.Sprintf("%-22s: %s\n", k, v))
+		sb.WriteString(fmt.Sprintf("%-25s: %s\n", k, v))
 	}
 
 	sb.WriteString("\nIndividual panels\n-----------------\n")
 	for _, p := range validPanels {
-		sb.WriteString(fmt.Sprintf("%-22s: %s\n", p.GetPanelName(), p.GetDescription()))
+		sb.WriteString(fmt.Sprintf("%-25s: %s\n", p.GetPanelName(), p.GetDescription()))
 	}
 
 	return sb.String()
@@ -1705,6 +1774,7 @@ func init() {
 	monitorClusterCmd.Flags().BoolVarP(&ignoreRESTErrors, "ignore-errors", "I", false, "ignore errors after initial refresh")
 	monitorClusterCmd.Flags().BoolVarP(&disablePadding, "disable-padding", "D", false, "disable padding of panels by default")
 	monitorClusterCmd.Flags().StringVarP(&serviceName, serviceNameOption, "S", "", serviceNameDescription)
+	monitorClusterCmd.Flags().StringVarP(&participant, "participant", "p", all, participantMessage)
 	monitorClusterCmd.Flags().StringVarP(&selectedCache, "cache-name", "C", "", "cache name")
 	monitorClusterCmd.Flags().StringVarP(&selectedTopic, "topic-name", "T", "", "topic name")
 	monitorClusterCmd.Flags().StringVarP(&colorStyleParam, "style", "", "", "color style")

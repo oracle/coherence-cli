@@ -314,12 +314,7 @@ service, type and participant. Specify -T to set type outgoing or incoming and -
 				printWatchHeader(cmd)
 				sb.WriteString(FormatCurrentCluster(connection))
 
-				sb.WriteString("\nFEDERATION DETAILS\n")
-				sb.WriteString("------------------\n")
-
-				sb.WriteString(fmt.Sprintf("Service:     %s\n", service))
-				sb.WriteString(fmt.Sprintf("Type:        %s\n", describeFederationType))
-				sb.WriteString(fmt.Sprintf("Participant: %s\n\n", participant))
+				sb.WriteString(getDescribeFederationHeader(service, describeFederationType, participant))
 
 				if verboseOutput {
 					for _, v := range results {
@@ -353,6 +348,21 @@ service, type and participant. Specify -T to set type outgoing or incoming and -
 
 		return nil
 	},
+}
+
+func getDescribeFederationHeader(serviceName, federationType, participantName string) string {
+	var sb strings.Builder
+
+	if !monitorCluster {
+		sb.WriteString("\nFEDERATION DETAILS\n")
+		sb.WriteString("------------------\n")
+		sb.WriteString(fmt.Sprintf("Service:     %s\n", serviceName))
+	}
+
+	sb.WriteString(fmt.Sprintf("Type:        %s\n", federationType))
+	sb.WriteString(fmt.Sprintf("Participant: %s\n\n", participantName))
+
+	return sb.String()
 }
 
 func decodeFederationData(results [][]byte) ([]config.FederationDescription, error) {
@@ -438,47 +448,15 @@ func getFederationConnectionDetails(cmd *cobra.Command, service, federationType 
 				return err
 			}
 		} else {
-			var sb strings.Builder
-
 			printWatchHeader(cmd)
-			sb.WriteString(FormatCurrentCluster(connection))
+			cmd.Println(FormatCurrentCluster(connection))
 
-			textDirection := "OUTGOING"
-			if describeFederationType == origins {
-				textDirection = "INCOMING"
+			output, err2 := getFederationConnectionData(results, service, describeFederationType, participant)
+			if err2 != nil {
+				return err2
 			}
 
-			sb.WriteString("\n" + textDirection + " FEDERATION CONNECTIONS\n")
-			sb.WriteString("------------------------------\n")
-
-			sb.WriteString(fmt.Sprintf("Service:     %s\n", service))
-			sb.WriteString(fmt.Sprintf("Type:        %s\n", describeFederationType))
-			sb.WriteString(fmt.Sprintf("Participant: %s\n", participant))
-			sb.WriteString("** Showing destination member details\n\n")
-
-			// encode the mapMembers
-			federationData, err := decodeFederationData(results)
-			if err != nil {
-				return err
-			}
-
-			mapAllIncoming := make([]string, 0)
-			for _, v := range federationData {
-				for _, v2 := range v.MapMembers {
-					mapAllIncoming = append(mapAllIncoming, v2)
-				}
-				if v.Member != "" && v.Member != "N/A" {
-					mapAllIncoming = append(mapAllIncoming, v.Member)
-				}
-			}
-			incomingList, err1 := decodeDepartedMembers(mapAllIncoming)
-			if err1 != nil {
-				return err1
-			}
-
-			sb.WriteString(FormatDepartedMembers(incomingList))
-
-			cmd.Println(sb.String())
+			cmd.Println(output)
 		}
 
 		// check to see if we should exit if we are not watching
@@ -491,6 +469,49 @@ func getFederationConnectionDetails(cmd *cobra.Command, service, federationType 
 	}
 
 	return nil
+}
+
+func getFederationConnectionData(results [][]byte, service, federationType, participantName string) (string, error) {
+	var sb strings.Builder
+
+	textDirection := "OUTGOING"
+	if federationType == origins {
+		textDirection = "INCOMING"
+	}
+
+	if !monitorCluster {
+		sb.WriteString("\n" + textDirection + " FEDERATION CONNECTIONS\n")
+		sb.WriteString("-------------------------------\n")
+		sb.WriteString(fmt.Sprintf("Service:     %s\n", service))
+	}
+
+	sb.WriteString(fmt.Sprintf("Type:        %s\n", federationType))
+	sb.WriteString(fmt.Sprintf("Participant: %s\n", participantName))
+	sb.WriteString("** Showing destination member details\n\n")
+
+	// encode the mapMembers
+	federationData, err := decodeFederationData(results)
+	if err != nil {
+		return "", err
+	}
+
+	mapAllIncoming := make([]string, 0)
+	for _, v := range federationData {
+		for _, v2 := range v.MapMembers {
+			mapAllIncoming = append(mapAllIncoming, v2)
+		}
+		if v.Member != "" && v.Member != "N/A" {
+			mapAllIncoming = append(mapAllIncoming, v.Member)
+		}
+	}
+	incomingList, err1 := decodeDepartedMembers(mapAllIncoming)
+	if err1 != nil {
+		return "", err1
+	}
+
+	sb.WriteString(FormatDepartedMembers(incomingList))
+
+	return sb.String(), nil
 }
 
 func encodeFinalData(results [][]byte) []byte {

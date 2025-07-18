@@ -456,7 +456,7 @@
     <repository>
       <id>ossrh-staging</id>
       <name>OSS Sonatype Staging</name>
-      <url>https://oss.sonatype.org/content/groups/staging/</url>
+      <url>https://central.sonatype.com/</url>
       <snapshots>
         <enabled>false</enabled>
       </snapshots>
@@ -467,6 +467,17 @@
 
     <repository>
       <id>snapshots-repo</id>
+      <url>https://central.sonatype.com/repository/maven-snapshots</url>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+    </repository>
+
+    <repository>
+      <id>snapshots-repo-old</id>
       <url>https://oss.sonatype.org/content/repositories/snapshots</url>
       <releases>
         <enabled>false</enabled>
