@@ -21,12 +21,12 @@ jobs:
       fail-fast: false
       matrix:
         coherenceVersion:
-          - 25.03
-          - 25.03.1
-          - 22.06.12
-          - 22.06.13-SNAPSHOT
-          - 14.1.2-0-2
-          - 14.1.2-0-3-SNAPSHOT
+          - 25.03.2
+          - 25.03.3-SNAPSHOT
+          - 22.06.13
+          - 22.06.14-SNAPSHOT
+          - 14.1.2-0-3
+          - 14.1.2-0-4-SNAPSHOT
         javaImage:
           - gcr.io/distroless/java17
 
