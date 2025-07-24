@@ -21,6 +21,7 @@ import (
 	"strings"
 	"sync"
 	"time"
+	"unicode/utf8"
 )
 
 const (
@@ -89,6 +90,7 @@ var (
 
 	currentScreenWidth  int
 	currentScreenHeight int
+	screenOffsetX       int
 )
 
 type StyleConfig struct {
@@ -379,7 +381,20 @@ Use --show-panels to show all available panels.`,
 					close(exit)
 					return nil
 				}
-				if pressedKey == '?' {
+
+				if ev.Key() == tcell.KeyLeft {
+					if screenOffsetX > 0 {
+						screenOffsetX--
+						if err := refresh(screen, dataFetcher, parsedLayout, false); err != nil {
+							panic(err)
+						}
+					}
+				} else if ev.Key() == tcell.KeyRight {
+					screenOffsetX++
+					if err := refresh(screen, dataFetcher, parsedLayout, false); err != nil {
+						panic(err)
+					}
+				} else if pressedKey == '?' {
 					showHelp(screen)
 					if err := refresh(screen, dataFetcher, parsedLayout, true); err != nil {
 						panic(err)
@@ -408,6 +423,7 @@ Use --show-panels to show all available panels.`,
 					(pressedKey >= 'a' && pressedKey <= 'z' && pressedKey <= lastPanelCode) {
 					updateExpanded(pressedKey, screen, dataFetcher, parsedLayout)
 				}
+
 			}
 		}
 	},
@@ -604,16 +620,19 @@ func refresh(screen tcell.Screen, dataFetcher fetcher.Fetcher, parsedLayout []st
 func showHelp(screen tcell.Screen) {
 	help := []string{
 		"",
-		"  Monitor Cluster CLI Help ",
+		"   Monitor Cluster CLI Help ",
 		"",
-		"  - 'p' to toggle panel row padding",
-		"  - '+' to increase max height of all panels",
-		"  - '-' to decrease max height of all panels",
-		"  - '0' to reset max height of all panels",
-		"  - Key in [] to expand that panel",
-		"  - ESC / CTRL-C to exit monitoring",
+		"   - 'p'   toggle panel row padding",
+		"   - '+'   increase max height of all panels",
+		"   - '-'   decrease max height of all panels",
+		"   - '0'   reset max height of all panels",
+		"   - '->'  scroll right in text",
+		"   - '<-'  scroll left in text",
+		" ",
+		"   - Key in [] to expand that panel",
+		"   - ESC / CTRL-C to exit monitoring",
 		"  ",
-		"  Press any key to exit help.",
+		"   Press any key to exit help.",
 	}
 
 	inHelp = true
@@ -625,10 +644,10 @@ func showHelp(screen tcell.Screen) {
 	x := currentScreenWidth/2 - 25
 	y := currentScreenHeight/2 - lenHelp
 
-	drawBox(screen, x, y, x+53, y+lenHelp+2, boxStyle, "Help")
+	drawBox(screen, x, y, x+50, y+lenHelp+2, boxStyle, "Help")
 
 	for line := 1; line <= lenHelp; line++ {
-		drawText(screen, x+1, y+line, x+currentScreenWidth-1, y+currentScreenHeight-1, textStyle, help[line-1])
+		drawText(screen, x+1, y+line, x+currentScreenWidth-1, y+currentScreenHeight-1, textStyle, help[line-1], true)
 	}
 	screen.Show()
 	_ = screen.PollEvent()
@@ -1643,6 +1662,7 @@ func drawHeader(screen tcell.Screen, w, h int, cluster config.Cluster, dataFetch
 		title   string
 		padding = " "
 		height  = "0"
+		scroll  = "S0 "
 	)
 	if cluster.ClusterName == "" && ignoreRESTErrors {
 		title = errorContent + " from " + dataFetcher.GetURL()
@@ -1656,43 +1676,73 @@ func drawHeader(screen tcell.Screen, w, h int, cluster config.Cluster, dataFetch
 		} else if heightAdjust > 0 {
 			height = fmt.Sprintf("+%v ", heightAdjust)
 		}
-		title = fmt.Sprintf("Coherence CLI: %s - %s (%s) ESC to quit %s. %s%s(%v)",
-			time.Now().Format(time.DateTime), cluster.ClusterName, version[0], additionalMonitorMsg, padding, height, lastDuration)
+
+		if screenOffsetX > 0 {
+			scroll = fmt.Sprintf("S+%v ", screenOffsetX)
+		}
+
+		title = fmt.Sprintf("Coherence CLI: %s - %s %s %s ESC to quit. %s %s%s(%v)",
+			time.Now().Format(time.DateTime), cluster.ClusterName, version[0], additionalMonitorMsg, padding, height, scroll, lastDuration)
 		titleLen := len(title)
 		if titleLen < w-2 {
 			title = fmt.Sprintf("%s%-*s", title, w-titleLen-2, " ")
 		}
 	}
-	drawText(screen, 1, 0, w-1, h-1, textStyle.Reverse(true), title)
+	drawText(screen, 1, 0, w-1, h-1, textStyle.Reverse(true), title, true)
 }
 
 // drawText draws text on the screen.
-func drawText(s tcell.Screen, x1, y1, x2, y2 int, style tcell.Style, text string) {
+func drawText(s tcell.Screen, x1, y1, x2, y2 int, style tcell.Style, text string, header ...bool) {
+	var scrollX = screenOffsetX
+
+	if len(header) > 0 && header[0] {
+		scrollX = 0
+	}
+
 	row := y1
 	col := x1
 	currentStyle := style
 
-	for _, r := range text {
-		switch r {
+	visibleCols := x2 - x1
+	displayedCols := 0
+	charsSkipped := 0
+
+	for i := 0; i < len(text); {
+		// Handle control characters
+		switch text[i] {
 		case '\x01': // startRed
 			currentStyle = currentStyle.Foreground(tcell.ColorRed)
+			i++
 			continue
 		case '\x02': // startYellow
 			currentStyle = currentStyle.Foreground(tcell.ColorYellow)
+			i++
 			continue
-		case '\x03': // endColor
-			// Reset to the originally passed style
+		case '\x03': // end color
 			currentStyle = style
+			i++
 			continue
 		}
 
+		// Decode the next rune
+		r, size := utf8.DecodeRuneInString(text[i:])
+		i += size
+
+		if charsSkipped < scrollX {
+			charsSkipped++
+			continue
+		}
+
+		// Draw the character
 		s.SetContent(col, row, r, nil, currentStyle)
 		col++
+		displayedCols++
+
 		if col >= x2 {
 			row++
 			col = x1
 		}
-		if row > y2 {
+		if row > y2 || displayedCols >= visibleCols {
 			break
 		}
 	}
@@ -1730,7 +1780,7 @@ func drawBox(s tcell.Screen, x1, y1, x2, y2 int, style tcell.Style, title string
 		s.SetContent(x2, y2, tcell.RuneLRCorner, nil, style)
 	}
 
-	drawText(s, x1+2, y1, x2-1, y2-1, titleStyle, title)
+	drawText(s, x1+2, y1, x2-1, y2-1, titleStyle, title, true)
 }
 
 // getValidPanelTypes returns the list of panels for the --help command.
