@@ -15,7 +15,7 @@
 # ======================================================================================================================
 
 # The version of the CLI being build - this should be a valid SemVer format
-VERSION ?= 1.10.1-rc1
+VERSION ?= 1.10.1
 MILESTONE ?=
 SHELL := /bin/bash
 
@@ -23,7 +23,7 @@ SHELL := /bin/bash
 MVN_VERSION ?= 1.0.0
 
 # Coherence CE version to run base tests against
-COHERENCE_VERSION ?= 14.1.2-0-2
+COHERENCE_VERSION ?= 14.1.2-0-3
 COHERENCE_GROUP_ID ?= com.oracle.coherence.ce
 COHERENCE_WKA1 ?= server1
 COHERENCE_WKA2 ?= server1
