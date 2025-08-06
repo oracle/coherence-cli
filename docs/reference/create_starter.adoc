@@ -65,7 +65,7 @@ checking for availability of template helidon...
 Create Starter Project
 Project Name:       helidon-starter
 Framework Type:     helidon
-Framework Versions: 4.2.4
+Framework Versions: 4.2.5
 Project Path        /tmp/starters/helidon-starter
 
 Are you sure you want to create the starter project above? (y/n) y
