@@ -21,12 +21,12 @@
   <groupId>com.oracle.coherence.demo.frameworks</groupId>
   <artifactId>micronaut</artifactId>
   <version>1.0-SNAPSHOT</version>
-  <name>Demo project for Helidon and Coherence</name>
+  <name>Demo project for Micronaut and Coherence</name>
 
   <properties>
     <coherence.group.id>com.oracle.coherence.ce</coherence.group.id>
-    <coherence.version>25.03.1</coherence.version>
-    <jackson.version>2.18.2</jackson.version>
+    <coherence.version>25.03.2</coherence.version>
+    <jackson.version>2.19.2</jackson.version>
     <java.version>21</java.version>
 
     <!-- Micronaut properties -->

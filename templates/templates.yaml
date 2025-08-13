@@ -31,7 +31,7 @@ templates:
       - src/main/java/com/oracle/coherence/demo/frameworks/helidon/CustomerResource.java
 
   - name: springboot
-    frameworkVersion: "spring-boot-starter 3.5.3, coherence-spring 4.3.1"
+    frameworkVersion: "spring-boot-starter 3.5.4, coherence-spring 4.3.1"
     instructions: |
       To run Spring Boot starter you must have JDK21+ and maven 3.8.5+.
       Change to the newly created directory and run the following to build:
