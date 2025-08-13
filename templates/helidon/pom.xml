@@ -13,7 +13,7 @@
   <parent>
     <groupId>io.helidon.applications</groupId>
     <artifactId>helidon-mp</artifactId>
-    <version>4.2.4</version>
+    <version>4.2.5</version>
     <relativePath/>
   </parent>
 
@@ -24,8 +24,8 @@
 
   <properties>
     <coherence.group.id>com.oracle.coherence.ce</coherence.group.id>
-    <coherence.version>25.03.1</coherence.version>
-    <jackson.version>2.18.2</jackson.version>
+    <coherence.version>25.03.2</coherence.version>
+    <jackson.version>2.19.2</jackson.version>
     <java.version>21</java.version>
   </properties>
 
