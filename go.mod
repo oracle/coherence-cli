@@ -4,13 +4,13 @@
 //
 module github.com/oracle/coherence-cli
 
-go 1.24.5
+go 1.25.0
 
 require (
 	github.com/fatih/color v1.18.0
 	github.com/gdamore/tcell/v2 v2.8.1
 	github.com/mattn/go-runewidth v0.0.16
-	github.com/ohler55/ojg v1.26.8
+	github.com/ohler55/ojg v1.26.9
 	github.com/onsi/gomega v1.38.0
 	github.com/oracle/coherence-go-client/v2 v2.3.1
 	github.com/spf13/cobra v1.9.1
