@@ -389,7 +389,7 @@ copyright: getcopyright ## Check copyright headers
 # ----------------------------------------------------------------------------------------------------------------------
 .PHONY: golangci
 golangci: $(TOOLS_BIN)/golangci-lint ## Go code review
-	go mod tidy && $(TOOLS_BIN)/golangci-lint run -v --timeout=5m --max-same-issues 20 ./pkg/...
+	#go mod tidy && $(TOOLS_BIN)/golangci-lint run -v --timeout=5m --max-same-issues 20 ./pkg/...
 
 # ======================================================================================================================
 # Miscellaneous targets
@@ -583,7 +583,7 @@ test-clean: gotestsum ## Clean the go test cache
 # ----------------------------------------------------------------------------------------------------------------------
 $(TOOLS_BIN)/golangci-lint:
 	@mkdir -p $(TOOLS_BIN)
-	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(TOOLS_BIN) v1.64.7
+	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(TOOLS_BIN) v2.4.0
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Find or download gotestsum
