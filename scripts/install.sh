@@ -44,6 +44,8 @@ echo "Installing Coherence CLI ${VERSION} for ${OS}/${ARCH}"
 if [ "$OS" == "Darwin" ]; then
     set_arch
     TEMP=`mktemp -d`
+    # Default the version to the last know valid installer, until MacOS installer is re-instated
+    VERSION=1.10.1
     PKG="Oracle-Coherence-CLI-${VERSION}-darwin-${ARCH}.pkg"
     DEST=${TEMP}/${PKG}
     echo "Downloading and opening ${DEST}"
