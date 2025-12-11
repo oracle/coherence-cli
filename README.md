@@ -78,7 +78,7 @@ manually copy to your desired location.
 For Windows, use the curl command below, then copy `cohctl.exe` to a directory in your PATH:
 
 ```cmd
-curl -sLo cohctl.exe "https://github.com/oracle/coherence-cli/releases/download/1.10.4/cohctl-1.10.4-windows-amd64.exe"
+curl -sLo cohctl.exe "https://github.com/oracle/coherence-cli/releases/download/1.10.5/cohctl-1.10.5-windows-amd64.exe"
 ```
 
 > Note: Change the **amd64** to **arm** for ARM based processor in the URL above.
@@ -132,7 +132,7 @@ Please consult the [security guide](./SECURITY.md) for our responsible security 
 
 ## License
 
-Copyright (c) 2021, 2024 Oracle and/or its affiliates.
+Copyright (c) 2021, 2025 Oracle and/or its affiliates.
 
 Released under the Universal Permissive License v1.0 as shown at
 <https://oss.oracle.com/licenses/upl/>.
