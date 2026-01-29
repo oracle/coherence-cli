@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2025 Oracle and/or its affiliates.
+# Copyright (c) 2025, 2026 Oracle and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at
 # https://oss.oracle.com/licenses/upl.
 #
@@ -90,7 +90,7 @@ templates:
 
       To run a Coherence server with port 1408 for gRPC:
 
-          docker run -d -p 1408:1408 -p 30000:30000 ghcr.io/oracle/coherence-ce:25.03.1
+          docker run -d -p 1408:1408 -p 30000:30000 ghcr.io/oracle/coherence-ce:15.1.1-0-1
       
       To run the application:
           node main.js
@@ -109,7 +109,7 @@ templates:
 
       To run a Coherence server with port 1408 for gRPC:
 
-          docker run -d -p 1408:1408 -p 30000:30000 ghcr.io/oracle/coherence-ce:25.03.1
+          docker run -d -p 1408:1408 -p 30000:30000 ghcr.io/oracle/coherence-ce:15.1.1-0-1
       
       To run the application:
           python main.py
@@ -128,7 +128,7 @@ templates:
 
       To run a Coherence server with port 1408 for gRPC:
 
-          docker run -d -p 1408:1408 -p 30000:30000 ghcr.io/oracle/coherence-ce:25.03.1
+          docker run -d -p 1408:1408 -p 30000:30000 ghcr.io/oracle/coherence-ce:15.1.1-0-1
       
       To run the application:
           go run main.go

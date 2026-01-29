@@ -1,4 +1,4 @@
-# Copyright 2021, 2025 Oracle Corporation and/or its affiliates.
+# Copyright 2021, 2026 Oracle Corporation and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at
 # https://oss.oracle.com/licenses/upl.
 
@@ -21,9 +21,9 @@ jobs:
       fail-fast: false
       matrix:
         coherenceVersion:
-          - 22.06.13
-          - 14.1.2-0-3
-          - 25.03.2
+          - 22.06.15
+          - 14.1.2-0-5
+          - 15.1.1-0-1
         javaVersion:
           - 17
 

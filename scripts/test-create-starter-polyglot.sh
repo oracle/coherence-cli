@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #
-# Copyright (c) 2025 Oracle and/or its affiliates.
+# Copyright (c) 2025, 2026 Oracle and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at
 # https://oss.oracle.com/licenses/upl.
 #
@@ -56,7 +56,7 @@ function run_test() {
 }
 
 echo "Start Docker Image"
-docker run -d -p 1408:1408 -p 30000:30000 ghcr.io/oracle/coherence-ce:25.03.1
+docker run -d -p 1408:1408 -p 30000:30000 ghcr.io/oracle/coherence-ce:15.1.1-0-1
 echo "Sleeping 30..."
 sleep 30
 
