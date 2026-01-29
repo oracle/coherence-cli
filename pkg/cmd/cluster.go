@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, 2025 Oracle and/or its affiliates.
+ * Copyright (c) 2021, 2026 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -10,6 +10,13 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"os"
+	"path/filepath"
+	"sort"
+	"strconv"
+	"strings"
+	"time"
+
 	"github.com/oracle/coherence-cli/pkg/config"
 	"github.com/oracle/coherence-cli/pkg/constants"
 	"github.com/oracle/coherence-cli/pkg/fetcher"
@@ -17,12 +24,6 @@ import (
 	"github.com/oracle/coherence-go-client/v2/coherence/discovery"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"os"
-	"path/filepath"
-	"sort"
-	"strconv"
-	"strings"
-	"time"
 )
 
 var (
@@ -772,7 +773,7 @@ var (
 )
 
 const (
-	defaultCoherenceVersion = "14.1.2-0-3"
+	defaultCoherenceVersion = "14.1.2-0-5"
 	startClusterCommand     = "start cluster"
 	scaleClusterCommand     = "scale cluster"
 	stopClusterCommand      = "stop cluster"

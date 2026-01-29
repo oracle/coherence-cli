@@ -1,4 +1,4 @@
-# Copyright (c) 2021, 2025 Oracle and/or its affiliates.
+# Copyright (c) 2021, 2026 Oracle and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at
 # http://oss.oracle.com/licenses/upl.
 
@@ -52,7 +52,7 @@ jobs:
 
     - name: E2E Local Tests
       shell: bash
-      run: COHERENCE_BASE_IMAGE=gcr.io/distroless/java17 COHERENCE_VERSION=14.1.2-0-3 make clean build-test-images test-e2e-standalone
+      run: COHERENCE_BASE_IMAGE=gcr.io/distroless/java17 COHERENCE_VERSION=14.1.2-0-5 make clean build-test-images test-e2e-standalone
 
     - name: Discovery Tests
       shell: bash
