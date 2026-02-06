@@ -4,14 +4,14 @@
 //
 module github.com/oracle/coherence-cli
 
-go 1.25.6
+go 1.25.7
 
 require (
 	github.com/fatih/color v1.18.0
 	github.com/gdamore/tcell/v2 v2.13.8
 	github.com/mattn/go-runewidth v0.0.19
 	github.com/ohler55/ojg v1.28.0
-	github.com/onsi/gomega v1.39.0
+	github.com/onsi/gomega v1.39.1
 	github.com/oracle/coherence-go-client/v2 v2.3.1
 	github.com/spf13/cobra v1.10.2
 	github.com/spf13/viper v1.21.0
@@ -23,7 +23,7 @@ require (
 
 require (
 	github.com/clipperhouse/stringish v0.1.1 // indirect
-	github.com/clipperhouse/uax29/v2 v2.4.0 // indirect
+	github.com/clipperhouse/uax29/v2 v2.5.0 // indirect
 	github.com/fsnotify/fsnotify v1.9.0 // indirect
 	github.com/gdamore/encoding v1.0.1 // indirect
 	github.com/go-viper/mapstructure/v2 v2.5.0 // indirect
