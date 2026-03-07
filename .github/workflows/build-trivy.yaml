@@ -28,7 +28,7 @@ jobs:
         fetch-depth: 0
 
     - name: Run Trivy vulnerability scanner to scan repo
-      uses: aquasecurity/trivy-action@0.29.0
+      uses: aquasecurity/trivy-action@0.35.0
       with:
         scan-type: 'fs'
         skip-dirs: 'java'
