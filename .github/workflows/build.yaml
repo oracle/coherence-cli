@@ -118,8 +118,8 @@ jobs:
       uses: actions/upload-artifact@v4
       if: success()
       with:
-        name: cohctl-windows-arm
-        path: bin/windows/arm/cohctl.exe
+        name: cohctl-windows-arm64
+        path: bin/windows/arm64/cohctl.exe
 
     - uses: actions/upload-artifact@v4
       if: failure()

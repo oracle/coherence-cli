@@ -270,9 +270,9 @@ cohctl-all: $(BUILD_PROPS) $(GOS)  ## Build the Coherence CLI binary for all sup
 	mkdir -p $(BUILD_BIN)/windows/amd64 || true
 	CGO_ENABLED=0 GOOS=windows GOARCH=amd64 GO111MODULE=on go build -trimpath -ldflags "$(LDFLAGS)" -a -o $(BUILD_BIN)/windows/amd64/cohctl.exe ./cohctl
 
-	@echo "Windows arm"
-	mkdir -p $(BUILD_BIN)/windows/arm || true
-	CGO_ENABLED=0 GOOS=windows GOARCH=arm GO111MODULE=on go build -trimpath -ldflags "$(LDFLAGS)" -a -o $(BUILD_BIN)/windows/arm/cohctl.exe ./cohctl
+	@echo "Windows arm64"
+	mkdir -p $(BUILD_BIN)/windows/arm64 || true
+	CGO_ENABLED=0 GOOS=windows GOARCH=arm64 GO111MODULE=on go build -trimpath -ldflags "$(LDFLAGS)" -a -o $(BUILD_BIN)/windows/arm64/cohctl.exe ./cohctl
 
 	make cohctl-mac-amd cohctl-mac-arm
 
