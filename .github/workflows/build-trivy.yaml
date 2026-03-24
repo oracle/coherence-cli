@@ -1,4 +1,4 @@
-# Copyright 2021, 2025 Oracle Corporation and/or its affiliates.
+# Copyright 2021, 2026 Oracle Corporation and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at
 # https://oss.oracle.com/licenses/upl.
 
@@ -28,7 +28,7 @@ jobs:
         fetch-depth: 0
 
     - name: Run Trivy vulnerability scanner to scan repo
-      uses: aquasecurity/trivy-action@0.35.0
+      uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1 # v0.35.0
       with:
         scan-type: 'fs'
         skip-dirs: 'java'
