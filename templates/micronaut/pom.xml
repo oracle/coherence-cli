@@ -14,7 +14,7 @@
   <parent>
     <groupId>io.micronaut.platform</groupId>
     <artifactId>micronaut-parent</artifactId>
-    <version>4.8.3</version>
+    <version>4.10.11</version>
     <relativePath/>
   </parent>
 
@@ -40,7 +40,7 @@
     <!-- Additional dependencies -->
     <hamcrest.version>3.0</hamcrest.version>
     <logback.version>1.5.25</logback.version>
-    <netty.version>4.1.129.Final</netty.version>
+    <netty.version>4.1.132.Final</netty.version>
     <jansi.version>2.4.1</jansi.version>
 
     <!-- Maven plugin properties -->
@@ -56,6 +56,12 @@
         <groupId>io.netty</groupId>
         <artifactId>netty-codec</artifactId>
         <version>${netty.version}</version>
+      </dependency>
+<!--  there's no 2.21.1 version of jackson-annotations-->
+      <dependency>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-annotations</artifactId>
+        <version>2.21</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
