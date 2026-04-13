@@ -11,7 +11,7 @@ engine:
     attributes:
       plantumlconfig: "_plantuml-config.txt"
       commercial-docs-base-url: "https://docs.oracle.com/en/middleware/fusion-middleware/coherence/14.1.2"
-      cli-version: "1.10.8"
+      cli-version: "1.10.9"
       coherence-version: "14.1.2-0-5"
       coherence-default-version: "14.1.2-0-5"
 assets:
@@ -35,7 +35,7 @@ backend:
     name: "vuetify"
     homePage: "docs/about/overview.adoc"
     releases:
-        - "1.10.8"
+        - "1.10.9"
     navigation:
       type: "ROOT"
       title: "Coherence CLI"

@@ -6,7 +6,7 @@
 
 module main.go
 
-go 1.26.1
+go 1.26.2
 
 require github.com/oracle/coherence-go-client/v2 v2.3.1
 
