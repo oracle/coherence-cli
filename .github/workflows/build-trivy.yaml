@@ -16,6 +16,9 @@ on:
     # Every day at midnight
     - cron: '0 0 * * *'
 
+permissions:
+  contents: read
+
 jobs:
   build:
     runs-on: ubuntu-latest
