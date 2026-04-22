@@ -1,0 +1,39 @@
+name: Macaron check-github-actions
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/**"
+      - ".github/actions/**"
+  push:
+    branches:
+      - main
+      - master
+    paths:
+      - ".github/workflows/**"
+      - ".github/actions/**"
+  workflow_dispatch:
+  schedule:
+    - cron: "17 4 * * 1"
+
+permissions:
+  contents: read
+
+jobs:
+  macaron-check-github-actions:
+    name: Macaron policy verification
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+        with:
+          persist-credentials: false
+
+      - name: Run Macaron check-github-actions policy
+        uses: oracle/macaron@b31acfe389133a5587d9639063ec70cb84e7bc47
+        with:
+          repo_path: https://github.com/${{ github.repository }}
+          policy_file: check-github-actions
+          policy_purl: pkg:github.com/${{ github.repository }}@${{ github.sha }}
+
+
