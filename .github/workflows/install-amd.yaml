@@ -1,4 +1,4 @@
-# Copyright 2023 Oracle Corporation and/or its affiliates.
+# Copyright 2023, 2026 Oracle Corporation and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at
 # https://oss.oracle.com/licenses/upl.
 
@@ -20,8 +20,24 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Test Installing CLI via curl for Linux AMD
+    - name: Test Installing CLI via verified installer for Linux AMD
       shell: bash
       run: |
-        curl -sL https://raw.githubusercontent.com/oracle/coherence-cli/main/scripts/install.sh | bash
+        set -euo pipefail
+
+        INSTALL_SCRIPT_URL="https://raw.githubusercontent.com/oracle/coherence-cli/main/scripts/install.sh"
+        # Update this hash whenever scripts/install.sh changes intentionally.
+        EXPECTED_SHA256="45ac74a3d9e5fbe8e7f4d412e8a04a56d3cf6e0670f127d9ad0d8a71ce09e27c"
+        script_path="$(mktemp)"
+
+        curl -fsSL -o "${script_path}" "${INSTALL_SCRIPT_URL}"
+
+        actual_sha256="$(sha256sum "${script_path}" | awk '{print $1}')"
+        if [ "${actual_sha256}" != "${EXPECTED_SHA256}" ]; then
+          echo "Installer checksum mismatch: expected ${EXPECTED_SHA256}, got ${actual_sha256}"
+          exit 1
+        fi
+
+        chmod u+x "${script_path}"
+        bash "${script_path}"
         cohctl version
