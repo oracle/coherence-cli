@@ -1,17 +1,17 @@
 /*
- * Copyright (c) 2025 Oracle and/or its affiliates.
+ * Copyright (c) 2025, 2026 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
 
-const coh = require('@oracle/coherence')
+import coh from '@oracle/coherence'
+import express from 'express'
 
 const Session = coh.Session
 const MapListener = coh.event.MapListener
 const MapEventType = coh.event.MapEventType
 const Filters = coh.Filters
 
-const express = require('express');
 const port = process.env.PORT || 8080
 const api = express();
 
