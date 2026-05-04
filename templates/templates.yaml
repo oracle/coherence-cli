@@ -82,7 +82,7 @@ templates:
   - name: javascript
     frameworkVersion: "coherence-js-client: 1.2.3"
     instructions: |
-      To run the JavaScript starter, you must have Node 18.15.x or later and NPM 9.x or later.
+      To run the JavaScript starter, you must have Node 20.x or later and NPM 9.x or later.
       
       Change to the newly created directory and run the following to build:
 
