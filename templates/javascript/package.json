@@ -2,15 +2,16 @@
   "name": "customer-js",
   "version": "1.0.0",
   "private": true,
+  "type": "module",
   "overrides": {
     "path-to-regexp": "0.1.13"
   },
   "dependencies": {
     "@oracle/coherence": "^1.2.3",
-    "express": "^4.22.1",
     "classnames": "^2.2.6",
+    "express": "^4.22.1",
     "prop-types": "^15.7.2",
     "typescript": "^3.9.7",
-    "uuid": "^8.3.0"
+    "uuid": "^14.0.0"
   }
 }
