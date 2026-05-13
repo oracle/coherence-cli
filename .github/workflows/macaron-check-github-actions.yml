@@ -32,8 +32,10 @@ jobs:
       - name: Run Macaron check-github-actions policy
         uses: oracle/macaron@b31acfe389133a5587d9639063ec70cb84e7bc47
         with:
-          repo_path: https://github.com/${{ github.repository }}
+          # Analyze the checked-out ref so PR merge commits produce a component PURL that matches policy_purl;
+          # expected effect: Macaron can generate a VSA when the GitHub Actions vulnerability policy passes.
+          repo_path: ./
+          digest: ${{ github.sha }}
           policy_file: check-github-actions
           policy_purl: pkg:github.com/${{ github.repository }}@${{ github.sha }}
-
 
