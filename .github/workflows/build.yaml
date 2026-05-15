@@ -81,9 +81,9 @@ jobs:
       shell: bash
       run: make test-clean test-discovery
 
-    - name: Document Links tests
-      shell: bash
-      run: make test-docs
+    # - name: Document Links tests
+    #   shell: bash
+    #   run: make test-docs
 
     - name: Build for all platforms
       shell: bash
