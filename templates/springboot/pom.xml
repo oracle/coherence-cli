@@ -29,7 +29,8 @@
     <coherence.version>15.1.1-0-1</coherence.version>
     <coherence.group.id>com.oracle.coherence.ce</coherence.group.id>
     <coherence-spring.version>4.3.1</coherence-spring.version>
-    <jackson-bom.version>2.21.1</jackson-bom.version>
+    <jackson-bom.version>2.21.5</jackson-bom.version>
+    <logback.version>1.5.34</logback.version>
   </properties>
 
   <dependencies>
