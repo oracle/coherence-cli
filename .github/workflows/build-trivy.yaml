@@ -30,8 +30,39 @@ jobs:
       with:
         fetch-depth: 0
 
+    - name: Set up JDK
+      uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # v5.2.0
+      with:
+        java-version: '21'
+        distribution: 'zulu'
+
+    - name: Restore Maven packages
+      id: maven-cache
+      uses: actions/cache/restore@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+      with:
+        path: ~/.m2
+        key: ${{ runner.os }}-trivy-m2-${{ hashFiles('templates/**/pom.xml') }}
+        restore-keys: |
+          ${{ runner.os }}-trivy-m2-
+          ${{ runner.os }}-m2-
+
+    - name: Resolve Maven dependencies for Trivy
+      run: |
+        for pom in templates/helidon/pom.xml templates/micronaut/pom.xml templates/springboot/pom.xml; do
+          mvn --batch-mode --no-transfer-progress --file "${pom}" dependency:resolve
+        done
+
+    - name: Save Maven packages
+      if: steps.maven-cache.outputs.cache-hit != 'true'
+      uses: actions/cache/save@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+      with:
+        path: ~/.m2
+        key: ${{ steps.maven-cache.outputs.cache-primary-key }}
+
     - name: Run Trivy vulnerability scanner to scan repo
       uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+      env:
+        TRIVY_OFFLINE_SCAN: 'true'
       with:
         scan-type: 'fs'
         version: 'v0.72.0'
