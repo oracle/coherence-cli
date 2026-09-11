@@ -4,7 +4,8 @@
   "private": true,
   "type": "module",
   "overrides": {
-    "path-to-regexp": "0.1.13"
+    "path-to-regexp": "0.1.13",
+    "qs": "6.16.0"
   },
   "dependencies": {
     "@oracle/coherence": "^1.2.3",
