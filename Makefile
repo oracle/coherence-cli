@@ -362,7 +362,7 @@ copyright: getcopyright ## Check copyright headers
 	  -X HEADER.txt \
 	  -X .iml \
 	  -X .jar \
-	  -X .trivyignore \
+	  -X .trivyignore.yaml \
 	  -X jib-cache/ \
 	  -X .jks \
 	  -X .json \

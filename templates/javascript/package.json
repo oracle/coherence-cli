@@ -4,7 +4,9 @@
   "private": true,
   "type": "module",
   "overrides": {
+    "@grpc/grpc-js": "1.14.5",
     "path-to-regexp": "0.1.13",
+    "proxy-addr": "2.0.8",
     "qs": "6.16.0"
   },
   "dependencies": {
