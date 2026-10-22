@@ -67,5 +67,5 @@ jobs:
         scan-type: 'fs'
         version: 'v0.74.0'
         skip-dirs: 'java'
-        trivyignores: '.trivyignore'
+        trivyignores: '.trivyignore.yaml'
         exit-code: 1

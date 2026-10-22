@@ -31,6 +31,7 @@ dependency-reduced-pom.xml
 !.github
 !.gitignore
 !.mvn
+!.trivyignore.yaml
 
 # Go
 

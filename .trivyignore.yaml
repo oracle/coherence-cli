@@ -1,0 +1,30 @@
+# Copyright 2026 Oracle Corporation and/or its affiliates.
+# Licensed under the Universal Permissive License v 1.0 as shown at
+# https://oss.oracle.com/licenses/upl.
+
+vulnerabilities:
+  # Preserve the existing repository-wide exception.
+  - id: CVE-2025-25193
+
+  # Spring 6.2 fixes are enterprise-only (6.2.20). The public fix is 7.0.9,
+  # which requires migrating the template to Spring 7 / Spring Boot 4.
+  # Match the current package version and template only, so dependency upgrades
+  # and other templates continue to be scanned without these exceptions.
+  - id: CVE-2026-47884
+    paths:
+      - templates/springboot/pom.xml
+    purls:
+      - pkg:maven/org.springframework/spring-webmvc@6.2.19
+    statement: >-
+      Accept for spring-webmvc 6.2.19 in the Spring Boot 3 template because
+      the compatible fix, Spring 6.2.20, requires enterprise support.
+      See https://spring.io/security/cve-2026-47884/.
+  - id: CVE-2026-47890
+    paths:
+      - templates/springboot/pom.xml
+    purls:
+      - pkg:maven/org.springframework/spring-webmvc@6.2.19
+    statement: >-
+      Accept for spring-webmvc 6.2.19 in the Spring Boot 3 template because
+      the compatible fix, Spring 6.2.20, requires enterprise support.
+      See https://spring.io/security/cve-2026-47890/.
