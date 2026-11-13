@@ -17,6 +17,7 @@ $null = New-Item -ItemType Directory -Path $TestRoot
 $script:Count = 0
 
 function Invoke-WebRequest {
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('S8625', '', Justification = 'Intercepts literal README/guide downloads with local fixtures in a dedicated pwsh -NoProfile -File process.')]
     [CmdletBinding()]
     param([string]$Uri, [string]$OutFile, [switch]$UseBasicParsing)
     if ($Uri -eq 'https://oracle.github.io/coherence-cli/stable.txt') {
@@ -45,6 +46,7 @@ function Invoke-WebRequest {
 }
 
 function Get-FileHash {
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('S8625', '', Justification = 'Intercepts literal README/guide hashing for failure/order checks; delegates to the module-qualified cmdlet in a dedicated pwsh -NoProfile -File process.')]
     [CmdletBinding()]
     param([string]$LiteralPath, [string]$Algorithm)
     if ($script:Mode -eq 'hash-failure') {
@@ -56,6 +58,7 @@ function Get-FileHash {
 }
 
 function Copy-Item {
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('S8625', '', Justification = 'Intercepts literal README/guide installation for failure/order checks; delegates to the module-qualified cmdlet in a dedicated pwsh -NoProfile -File process.')]
     [CmdletBinding()]
     param([string]$LiteralPath, [string]$Destination)
     if ($script:Operations -notcontains 'hash') { throw 'Copy occurred before hashing' }
