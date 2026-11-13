@@ -91,7 +91,7 @@ def main():
                                                 f"-Dcoherence.management.http.port={port}"],
                                                env=dict(env, COHCTL_WINDOWS_MEMBER_DIR="old", COHCTL_WINDOWS_READY="1"),
                                                stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-                        eventually(lambda: (olddir / ("child-" + str(old.pid))).exists(), "original member starts")
+                        eventually(lambda: (olddir / ("child-" + str(old.pid))).exists(), "original member starts")  # NOSONAR(S1515) Synchronous polling finishes before old/olddir can be rebound.
                     conn = {"name": marker, "clusterName": marker, "manuallyCreated": True, "connectionType": "http",
                             "connectionurl": f"http://127.0.0.1:{port}/old", "managementPort": port, "clusterversion": "14.1.2-0-5",
                             "baseClasspath": "fixture-classpath", "arguments": f"-Dcoherence.cluster={marker}",
@@ -130,15 +130,15 @@ def main():
 
                         def reached():
                             nonlocal scale_armed
-                            if controller.poll() is not None and phase != "success":
+                            if controller.poll() is not None and phase != "success":  # NOSONAR(S1515) eventually completes before controller/phase can be rebound.
                                 raise QualificationError({
-                                    "cli": output(), "controller": (work / "controller.err").read_text(errors="replace")})
+                                    "cli": output(), "controller": (work / "controller.err").read_text(errors="replace")})  # NOSONAR(S1515) output/work are consumed synchronously within this case.
                             if phase == "confirmation":
                                 return "Are you sure you want to stop" in output()
                             if phase == "readiness":
-                                if operation == "scale" and any(work.glob("child-*")):
+                                if operation == "scale" and any(work.glob("child-*")):  # NOSONAR(S1515) operation is read before synchronous polling returns.
                                     if not scale_armed:
-                                        (olddir / "readiness").unlink(missing_ok=True)
+                                        (olddir / "readiness").unlink(missing_ok=True)  # NOSONAR(S1515) olddir belongs to the current synchronous polling case.
                                         scale_armed = True
                                     return (olddir / "readiness").exists()
                                 return (work / "readiness").exists()
@@ -171,7 +171,7 @@ def main():
                             if "context canceled" not in output():
                                 raise QualificationError("console event bypassed lifecycle cancellation")
                         expected = {old.pid} if old and (operation == "scale" or phase == "confirmation") else set()
-                        eventually(lambda: set(native.processes(marker)) == expected, "only original members survive cancellation")
+                        eventually(lambda: set(native.processes(marker)) == expected, "only original members survive cancellation")  # NOSONAR(S1515) marker/expected cannot be rebound until synchronous polling returns.
                         if old:
                             if (old.poll() is None) != bool(expected):
                                 raise QualificationError("original process ownership changed")
@@ -198,7 +198,7 @@ def main():
                     record["cleanup_requests"] = native.stop_owned(marker)
                     if old:
                         old.wait(timeout=5)  # Sole owner of original fixture's Wait.
-                    eventually(lambda: not native.processes(marker), "owned Windows cleanup")
+                    eventually(lambda: not native.processes(marker), "owned Windows cleanup")  # NOSONAR(S1515) Cleanup polling completes before the next case can rebind marker.
                     record["cleanup_survivors"] = native.processes(marker)
                     if record.get("controller_rescue"):
                         raise QualificationError("controller rescue leaves CLI ownership unresolved; qualification failed")
@@ -210,7 +210,7 @@ def main():
         evidence["failure"] = repr(error)
         raise
     finally:
-        args.output.write_text(json.dumps(evidence, indent=2) + "\n")
+        args.output.write_text(json.dumps(evidence, indent=2) + "\n")  # NOSONAR(S8707) Evidence destination is explicitly granted by the trusted test operator.
 
 
 if __name__ == "__main__":
