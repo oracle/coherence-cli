@@ -190,12 +190,13 @@ func TestFixtureStructuredIdentity(t *testing.T) {
 		}
 		var value struct {
 			ClusterName string
+			ClusterSize int
 			Items       []struct{ ProcessName string }
 		}
 		if err := json.Unmarshal(response.Body.Bytes(), &value); err != nil {
 			t.Fatal(err)
 		}
-		if path == clusterIdentityPath && value.ClusterName != cluster {
+		if path == clusterIdentityPath && (value.ClusterName != cluster || value.ClusterSize != 1) {
 			t.Fatalf("cluster identity lost: %+v", value)
 		}
 		if path != clusterIdentityPath && (len(value.Items) != 1 || value.Items[0].ProcessName != "123") {

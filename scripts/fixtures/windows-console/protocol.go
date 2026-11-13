@@ -193,7 +193,8 @@ func fixtureIdentityHandler(root *os.Root, memberDirectory, cluster string, pid 
 		}
 		var value any = struct {
 			ClusterName string `json:"clusterName"`
-		}{cluster}
+			ClusterSize int    `json:"clusterSize"`
+		}{cluster, 1}
 		if strings.Contains(r.URL.Path, "members") {
 			value = struct {
 				Items []map[string]string `json:"items"`
