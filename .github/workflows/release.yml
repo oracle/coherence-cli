@@ -58,6 +58,14 @@ jobs:
       shell: bash
       run: make copyright
 
+    - name: Download Policy Tests
+      shell: bash
+      run: make test-download-policy
+
+    - name: Windows Console Support Tests (host-side fault injection)
+      shell: bash
+      run: make test-windows-console-support
+
     - name: Installer integrity tests
       shell: bash
       run: make test-install test-checksums test-install-docs

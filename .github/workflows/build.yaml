@@ -72,6 +72,14 @@ jobs:
       shell: bash
       run: make test-local-management-support
 
+    - name: Download Policy Tests
+      shell: bash
+      run: make test-download-policy
+
+    - name: Windows Console Support Tests (host-side fault injection)
+      shell: bash
+      run: make test-windows-console-support
+
     - name: Unit Tests
       shell: bash
       run: make test-cohctl
