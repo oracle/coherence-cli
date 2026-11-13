@@ -69,7 +69,7 @@ On Linux, the installer downloads the release checksum manifest and verifies the
 <summary>Show automatic Linux installation commands</summary>
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/oracle/coherence-cli/main/scripts/install.sh | bash
+curl -fsSL --proto '=https' --proto-redir '=https' https://raw.githubusercontent.com/oracle/coherence-cli/main/scripts/install.sh | bash
 ```
 
 When you install the CLI, normally administrative privileges are required as the `cohctl` executable is moved to the `/usr/local/bin` directory.
@@ -87,7 +87,7 @@ Alternatively, download and verify the Linux artifact manually without running t
 ```bash
 (
 set -euo pipefail
-VERSION=$(curl -fsSL https://oracle.github.io/coherence-cli/stable.txt)
+VERSION=$(curl -fsSL --proto '=https' --proto-redir '=https' https://oracle.github.io/coherence-cli/stable.txt)
 while [[ "${VERSION}" == *$'\r' ]]; do VERSION=${VERSION%$'\r'}; done
 [[ "${VERSION}" =~ ^[0-9A-Za-z][0-9A-Za-z._-]*$ ]] || { echo "Invalid version" >&2; exit 1; }
 ARCH=amd64 # use arm64 on Arm systems
@@ -99,8 +99,8 @@ TEMP=$(mktemp -d)
 trap 'rm -rf -- "${TEMP}"' EXIT
 cd "${TEMP}"
 
-curl -fsSL -o "${ASSET}" "${RELEASE_URL}/${ASSET}"
-curl -fsSL -o "${MANIFEST}" "${RELEASE_URL}/${MANIFEST}"
+curl -fsSL --proto '=https' --proto-redir '=https' -o "${ASSET}" "${RELEASE_URL}/${ASSET}"
+curl -fsSL --proto '=https' --proto-redir '=https' -o "${MANIFEST}" "${RELEASE_URL}/${MANIFEST}"
 awk -v target="${ASSET}" '
     $2 == target {
         matches++
@@ -127,7 +127,7 @@ mv -- "${ASSET}" "${DESTINATION}"
 Download a Windows executable using the following command in Command Prompt or PowerShell, then copy `cohctl.exe` to a directory on your `PATH`:
 
 ```cmd
-curl.exe -fLo cohctl.exe "https://github.com/oracle/coherence-cli/releases/download/1.10.14/cohctl-1.10.14-windows-amd64.exe"
+curl.exe --proto "=https" --proto-redir "=https" -fLo cohctl.exe "https://github.com/oracle/coherence-cli/releases/download/1.10.14/cohctl-1.10.14-windows-amd64.exe"
 ```
 
 The example downloads `1.10.14` for x86-64. Replace `1.10.14` in both places with your desired [released version](https://github.com/oracle/coherence-cli/releases), or change `amd64` to `arm64` for Arm.

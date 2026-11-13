@@ -33,7 +33,7 @@ The Linux installer downloads the release checksum manifest and verifies the sel
 
 [source,bash,subs="attributes"]
 ----
-curl -fsSL https://raw.githubusercontent.com/oracle/coherence-cli/main/scripts/install.sh | bash
+curl -fsSL --proto '=https' --proto-redir '=https' https://raw.githubusercontent.com/oracle/coherence-cli/main/scripts/install.sh | bash
 ----
 
 NOTE: When you install the CLI, normally administrative privileges are required as the `cohctl` executable is moved to the `/usr/local/bin` directory.
@@ -58,8 +58,8 @@ TEMP=$(mktemp -d)
 trap 'rm -rf -- "${TEMP}"' EXIT
 cd "${TEMP}"
 
-curl -fsSL -o "${ASSET}" "${RELEASE_URL}/${ASSET}"
-curl -fsSL -o "${MANIFEST}" "${RELEASE_URL}/${MANIFEST}"
+curl -fsSL --proto '=https' --proto-redir '=https' -o "${ASSET}" "${RELEASE_URL}/${ASSET}"
+curl -fsSL --proto '=https' --proto-redir '=https' -o "${MANIFEST}" "${RELEASE_URL}/${MANIFEST}"
 awk -v target="${ASSET}" '
     $2 == target {
         matches++
@@ -86,7 +86,7 @@ The installer command remains available on macOS:
 
 [source,bash]
 ----
-curl -fsSL https://raw.githubusercontent.com/oracle/coherence-cli/main/scripts/install.sh | bash
+curl -fsSL --proto '=https' --proto-redir '=https' https://raw.githubusercontent.com/oracle/coherence-cli/main/scripts/install.sh | bash
 ----
 
 [#install-windows]

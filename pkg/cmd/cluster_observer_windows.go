@@ -17,7 +17,9 @@ import (
 type handleProcessObserver struct{ process *os.Process }
 
 func newProcessExitObserver(process *os.Process) (processExitObserver, error) {
-	if err := process.WithHandle(func(uintptr) {}); err != nil {
+	if err := process.WithHandle(func(uintptr) {
+		// Probe successful handle acquisition only; no handle operation is needed.
+	}); err != nil {
 		return nil, err
 	}
 	return handleProcessObserver{process}, nil

@@ -60,6 +60,11 @@ deferral. Review baseline or tool-version changes against that report and rerun
 `make golangci` to verify the retained occurrences. For workflow edits, also run
 `actionlint` on the changed workflow files.
 
+Run `make test-download-policy` to check the installer, release verifier, Gradle
+download and documented curl policies against trusted local TLS redirects.
+It requires curl, OpenSSL and permission to bind loopback ports; it does not
+download release artifacts.
+
 ### Local management tests
 
 Run the management harness regressions without a cluster:
@@ -78,6 +83,12 @@ JVM identity, lifecycle operations and cleanup. It requires Java, `javac`, Maven
 the existing Gradle test setup, and `lsof` on Unix or PowerShell on Windows.
 The management harness uses cached Coherence dependencies and a real local
 network interface for its positive TCP control.
+Run it without `-O`, `-OO` or `PYTHONOPTIMIZE`; optimized execution is rejected
+before resources start because its checks and inspection helpers use assertions.
+
+Run `make test-windows-console-support` on any host to fault-inject the console
+driver's case checks, aggregate result and cleanup paths under normal and
+optimized Python. This host-side fixture does not deliver Windows console events.
 
 On native Windows, with Go, Python 3, PowerShell and GNU Make/Bash available, run:
 

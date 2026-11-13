@@ -178,7 +178,7 @@ func TestGrafanaStoppedContainerPasswordRotation(t *testing.T) {
 	authenticate(oldPassword, http.StatusOK)
 	rejectInit()
 	compose("stop", "grafana")
-	if ids := strings.TrimSpace(string(compose("ps", "-q"))); ids != "" {
+	if strings.TrimSpace(string(compose("ps", "-q"))) != "" {
 		t.Fatal("running-only query unexpectedly found the stopped Grafana")
 	}
 	rejectInit()
@@ -188,7 +188,7 @@ func TestGrafanaStoppedContainerPasswordRotation(t *testing.T) {
 	if err = os.WriteFile(filepath.Join(mon.monitoringDir, grafanaPasswordFile), []byte(candidatePassword), 0600); err != nil {
 		t.Fatal(err)
 	}
-	if reusedID := start(); reusedID != originalID {
+	if start() != originalID {
 		t.Fatal("fixture did not reproduce stopped-container reuse")
 	}
 	authenticate(oldPassword, http.StatusOK)
@@ -220,7 +220,7 @@ func TestGrafanaStoppedContainerPasswordRotation(t *testing.T) {
 	if err = stopMonitoringCmd.RunE(command, nil); err != nil {
 		t.Fatal(err)
 	}
-	if ids := strings.TrimSpace(string(compose("ps", "--all", "-q"))); ids != "" {
+	if strings.TrimSpace(string(compose("ps", "--all", "-q"))) != "" {
 		t.Fatal("supported stop left monitoring containers")
 	}
 	if err = mon.ensureMonitoringIsStopped(); err != nil {
@@ -234,7 +234,7 @@ func TestGrafanaStoppedContainerPasswordRotation(t *testing.T) {
 	if err = mon.installStagedDirectory(directory); err != nil {
 		t.Fatal(err)
 	}
-	if newID := start(); newID == originalID {
+	if start() == originalID {
 		t.Fatal("supported removal/reinitialization reused the old container")
 	}
 	authenticate(newPassword, http.StatusOK)

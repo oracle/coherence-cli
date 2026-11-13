@@ -115,7 +115,7 @@ class Publisher:
         if output is None:
             try:
                 return json.loads(result)
-            except (ValueError, UnicodeError) as error:
+            except ValueError as error:
                 raise PublicationError(f"Malformed API response during {self.phase}.") from error
         return None
 

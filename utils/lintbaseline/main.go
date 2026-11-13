@@ -111,7 +111,7 @@ func checkReport(input io.Reader, baselineData, config []byte, version, platform
 	if err := reportDecoder.Decode(&report); err != nil {
 		return err
 	}
-	if err := reportDecoder.Decode(&struct{}{}); err != io.EOF {
+	if reportDecoder.Decode(&struct{}{}) != io.EOF {
 		return fmt.Errorf("lint report must contain exactly one JSON object")
 	}
 	rawIssues, exists := report["Issues"]
@@ -147,7 +147,7 @@ func checkReport(input io.Reader, baselineData, config []byte, version, platform
 	if err := decoder.Decode(&b); err != nil {
 		return err
 	}
-	if err := decoder.Decode(&struct{}{}); err != io.EOF {
+	if decoder.Decode(&struct{}{}) != io.EOF {
 		return fmt.Errorf("lint baseline must contain exactly one JSON object")
 	}
 	if err := validateBaseline(b, version, platform, config); err != nil {

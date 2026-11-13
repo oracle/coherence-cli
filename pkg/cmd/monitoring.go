@@ -66,7 +66,7 @@ var (
 	}
 
 	dockerComposeFiles = [...]string{
-		"grafana.ini",
+		grafanaINIFile,
 		"dashboards.yaml",
 		"datasources.yaml",
 		dockerComposeYAML,
@@ -395,7 +395,7 @@ func (m *monitoring) createGeneratedBundle(bindAddress string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	iniPath := filepath.Join(m.monitoringDir, "grafana.ini")
+	iniPath := filepath.Join(m.monitoringDir, grafanaINIFile)
 	iniContents, err := os.ReadFile(iniPath)
 	if err != nil {
 		return "", fmt.Errorf("unable to read staged Grafana configuration: %w", err)
@@ -559,7 +559,7 @@ func (m *monitoring) warnLegacyConfiguration() {
 	for _, warning := range legacyPortWarnings(compose) {
 		m.cmd.Println(warning)
 	}
-	ini, _ := os.ReadFile(filepath.Join(m.monitoringDir, "grafana.ini"))
+	ini, _ := os.ReadFile(filepath.Join(m.monitoringDir, grafanaINIFile))
 	if regexp.MustCompile(`(?im)^\s*admin_password\s*=\s*(admin)?\s*$`).Match(ini) || !regexp.MustCompile(`(?im)^\s*admin_password\s*=`).Match(ini) {
 		m.cmd.Println("WARNING: the legacy Grafana administrator password is missing, empty, or uses the default value.")
 	}

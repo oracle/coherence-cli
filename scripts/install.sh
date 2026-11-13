@@ -9,7 +9,7 @@
 # Usage:
 #  Run the following on Linux or Mac:
 #
-#   curl -L https://raw.githubusercontent.com/oracle/coherence-cli/main/scripts/install.sh | bash
+#   curl -fsSL --proto '=https' --proto-redir '=https' https://raw.githubusercontent.com/oracle/coherence-cli/main/scripts/install.sh | bash
 #
 # for Linux, export COPY=false, to just download the verified cohctl executable and not copy to the /usr/local/bin directory
 #
@@ -59,7 +59,7 @@ function install_linux() (
     command -v sha256sum >/dev/null 2>&1 ||
         fail "sha256sum is required to verify the Linux download"
 
-    version=$(curl -fsSL https://oracle.github.io/coherence-cli/stable.txt) ||
+    version=$(curl -fsSL --proto '=https' --proto-redir '=https' https://oracle.github.io/coherence-cli/stable.txt) ||
         fail "unable to retrieve the stable Coherence CLI version"
     while [[ "${version}" == *$'\r' ]]; do
         version=${version%$'\r'}
@@ -84,9 +84,9 @@ function install_linux() (
     release_url="https://github.com/oracle/coherence-cli/releases/download/${version}"
     checksum_entry="${asset}.sha256"
 
-    curl -fsSL -o "${temp}/${manifest}" "${release_url}/${manifest}" ||
+    curl -fsSL --proto '=https' --proto-redir '=https' -o "${temp}/${manifest}" "${release_url}/${manifest}" ||
         fail "unable to download checksum manifest ${manifest}"
-    curl -fsSL -o "${temp}/${asset}" "${release_url}/${asset}" ||
+    curl -fsSL --proto '=https' --proto-redir '=https' -o "${temp}/${asset}" "${release_url}/${asset}" ||
         fail "unable to download ${asset}"
 
     if ! awk -v target="${asset}" '
@@ -134,7 +134,7 @@ if [ "$OS" == "Darwin" ]; then
     echo "Installing Coherence CLI ${VERSION} for ${OS}/${ARCH}"
     echo "Downloading and opening ${DEST}"
     URL=https://github.com/oracle/coherence-cli/releases/download/${VERSION}/${PKG}
-    curl -sLo "${DEST}" "${URL}" && open "${DEST}" && installed
+    curl -fsSL --proto '=https' --proto-redir '=https' -o "${DEST}" "${URL}" && open "${DEST}" && installed
 elif [ "$OS" == "Linux" ]; then
     install_linux
 else

@@ -149,6 +149,7 @@ func TestMonitoringBindAddress(t *testing.T) {
 		{"127.0.0.1", "127.0.0.1", "", "http://127.0.0.1:3000/api/health"},
 		{"::1", "::1", "", "http://[::1]:3000/api/health"},
 		{"192.0.2.15", "192.0.2.15", "non-loopback", "http://192.0.2.15:3000/api/health"},
+		{"2001:db8::15", "2001:db8::15", "non-loopback", "http://[2001:db8::15]:3000/api/health"},
 		{"0.0.0.0", "0.0.0.0", "every network interface", "http://127.0.0.1:3000/api/health"},
 		{"::", "::", "every network interface", "http://[::1]:3000/api/health"},
 	}
@@ -164,6 +165,16 @@ func TestMonitoringBindAddress(t *testing.T) {
 			warning := monitoringExposureWarning(address)
 			if !strings.Contains(warning, test.wantWarning) {
 				t.Fatalf("got warning %q, want it to contain %q", warning, test.wantWarning)
+			}
+			if test.wantWarning == "" && warning != "" {
+				t.Fatalf("loopback unexpectedly warned: %q", warning)
+			}
+			if test.wantWarning != "" {
+				for _, detail := range []string{"Grafana credentials and session traffic unencrypted", "Prometheus has no authentication", "loopback", "SSH port forwarding"} {
+					if !strings.Contains(warning, detail) {
+						t.Fatalf("warning %q omits %q", warning, detail)
+					}
+				}
 			}
 			if url := monitoringURL(address, 3000, "/api/health"); url != test.wantURL {
 				t.Fatalf("got URL %q, want %q", url, test.wantURL)

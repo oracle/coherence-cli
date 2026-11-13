@@ -20,7 +20,9 @@ type pidfdProcessObserver struct{ process *os.Process }
 type absentProcessObserver struct{ process *os.Process }
 
 func newProcessExitObserver(process *os.Process) (processExitObserver, error) {
-	err := process.WithHandle(func(uintptr) {})
+	err := process.WithHandle(func(uintptr) {
+		// Probe successful handle acquisition only; no handle operation is needed.
+	})
 	switch {
 	case err == nil:
 		return pidfdProcessObserver{process}, nil

@@ -36,6 +36,16 @@ The generated stack requires Docker Compose V2 or newer.
 By default, Grafana and Prometheus bind only to `127.0.0.1`.
 Prometheus has no authentication, and this stack is not intended for production use.
 The monitoring commands do not configure TLS or Prometheus authentication.
+HTTP leaves Grafana login credentials and session traffic unencrypted, including when you use the printed dashboard URL.
+For remote access, keep the loopback binding and use SSH port forwarding:
+
+[source,bash]
+----
+ssh -N -L 127.0.0.1:3000:127.0.0.1:3000 -L 127.0.0.1:9090:127.0.0.1:9090 user@monitoring-host
+----
+
+Then open `http://127.0.0.1:3000` or `http://127.0.0.1:9090` locally.
+This protects the network hop through SSH; it does not add TLS or authentication to either service.
 
 If you are running a Coherence version before 14.1.2-0-0 or 25.03, set the following property on each cluster member so it emits the metric names used by the current dashboards:
 
@@ -221,7 +231,8 @@ For IPv4 loopback, use `127.0.0.1` instead.
 A specific non-loopback address produces an exposure warning.
 Explicit wildcards `0.0.0.0` and `::` are supported for development use, with a stronger warning.
 They expose both services on all matching interfaces; Prometheus still has no authentication.
-Restrict network access before using a non-loopback or wildcard listener.
+HTTP also exposes Grafana credentials and session traffic on those interfaces.
+Prefer loopback with SSH port forwarding; restrict network access if you deliberately select a development non-loopback or wildcard listener.
 For wildcard listeners, status and browser URLs use `127.0.0.1` or `[::1]` so you can connect locally.
 These local URLs do not reduce the listener's network exposure.
 

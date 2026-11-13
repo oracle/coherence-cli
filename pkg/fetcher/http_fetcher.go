@@ -73,8 +73,6 @@ type HTTPFetcher struct {
 	WebLogicServer bool
 	Username       string
 	ClusterName    string
-	// Context is optional; managed restart supplies it during shutdown waiting.
-	Context context.Context
 
 	// Bound at construction, independent of later changes to the exported URL.
 	connectionName string
@@ -1376,12 +1374,8 @@ func httpRequestWithHeaders(h HTTPFetcher, requestType, urlAppend string, absolu
 	var empty = make([]byte, 0)
 	start := time.Now()
 
-	requestContext := h.Context
-	if requestContext == nil {
-		requestContext = context.Background()
-	}
 	// #nosec G704 -- This CLI intentionally accepts user-selected management URLs; certificate exceptions are restricted to the bound origin.
-	req, err = http.NewRequestWithContext(requestContext, requestType, finalURL, bytes.NewBuffer(content))
+	req, err = http.NewRequestWithContext(context.Background(), requestType, finalURL, bytes.NewBuffer(content))
 	if err != nil {
 		return constants.EmptyByte, nil, err
 	}

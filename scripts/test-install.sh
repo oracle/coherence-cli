@@ -50,20 +50,31 @@ EOF
 
     cat > "${MOCK_BIN}/curl" <<'EOF'
 #!/bin/bash
+set -eu
 output=""
 url=""
+protocol=""
+redirect_protocol=""
 while [ "$#" -gt 0 ]; do
     case "$1" in
         -o)
             output=$2
             shift 2
             ;;
-        -sLo)
-            output=$2
+        --proto)
+            protocol=$2
             shift 2
             ;;
-        -*)
+        --proto-redir)
+            redirect_protocol=$2
+            shift 2
+            ;;
+        -fsSL)
             shift
+            ;;
+        -*)
+            echo "Unexpected curl option: $1" >&2
+            exit 97
             ;;
         *)
             url=$1
@@ -71,6 +82,10 @@ while [ "$#" -gt 0 ]; do
             ;;
     esac
 done
+[ "${protocol}" = '=https' ] && [ "${redirect_protocol}" = '=https' ] || {
+    echo "Every transfer must restrict initial and redirected protocols to HTTPS" >&2
+    exit 97
+}
 
 printf 'curl %s\n' "${url}" >> "${MOCK_LOG}"
 case "${url}" in
@@ -87,6 +102,9 @@ case "${url}" in
         cp "${MOCK_MANIFEST}" "${output}"
         ;;
     *Oracle-Coherence-CLI-*.pkg)
+        if [ "${MOCK_ARTIFACT_FAIL}" = "true" ]; then
+            exit 22
+        fi
         cp "${MOCK_ARTIFACT}" "${output}"
         ;;
     *)
@@ -141,6 +159,22 @@ EOF
 }
 
 create_mocks
+# Prove that the contract rejects missing/replaced policy flags and unknown
+# options, rather than merely skipping any option-like word.
+for bad_policy in missing-proto missing-redir replaced-proto replaced-redir unknown-option; do
+    policy_args=(--proto '=https' --proto-redir '=https')
+    case "${bad_policy}" in
+        missing-proto) policy_args=(--proto-redir '=https') ;;
+        missing-redir) policy_args=(--proto '=https') ;;
+        replaced-proto) policy_args=(--proto '=http' --proto-redir '=https') ;;
+        replaced-redir) policy_args=(--proto '=https' --proto-redir '=http') ;;
+        unknown-option) policy_args+=(--unknown-option) ;;
+    esac
+    if "${MOCK_BIN}/curl" -fsSL "${policy_args[@]}" https://example.invalid/stable.txt >/dev/null 2>&1; then
+        echo "FAIL: curl mock accepted ${bad_policy}" >&2
+        exit 1
+    fi
+done
 ln -s "${MOCK_BIN}/uname" "${MISSING_SHA_BIN}/uname"
 ln -s "$(command -v bash)" "${MISSING_SHA_BIN}/bash"
 
@@ -410,5 +444,15 @@ assert_file_contains "${LOG_FILE}" \
 assert_file_contains "${LOG_FILE}" "open "
 assert_file_contains "${STDOUT_FILE}" "Installing Coherence CLI 1.10.1 for Darwin/arm64"
 pass_test "unchanged pinned macOS package flow"
+
+reset_case
+TEST_OS=Darwin
+TEST_ARCH=arm64
+TEST_ARTIFACT_FAIL=true
+run_case
+[ "${CASE_STATUS}" -ne 0 ] || fail_test "macOS download failure reported success"
+if grep -q '^open ' "${LOG_FILE}"; then fail_test "failed macOS download opened the package"; fi
+assert_log_lacks_install_operations
+pass_test "macOS download failure never opens the package"
 
 echo "All ${TEST_COUNT} installer tests passed"

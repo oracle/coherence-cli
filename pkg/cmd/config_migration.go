@@ -223,7 +223,7 @@ func decodeConfigForUpdate(format string, contents []byte, data map[string]any) 
 			return err
 		}
 		// Match Unmarshal's refusal of trailing data, including a second value.
-		if err := decoder.Decode(new(any)); err != io.EOF {
+		if decoder.Decode(new(any)) != io.EOF {
 			return errors.New("unexpected trailing data in JSON configuration")
 		}
 		return nil
