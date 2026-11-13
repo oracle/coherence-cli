@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, 2025 Oracle and/or its affiliates.
+ * Copyright (c) 2021, 2026 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -63,7 +63,6 @@ const (
 
 var (
 	DebugEnabled           bool
-	IgnoreInvalidCerts     bool
 	RequestTimeout         int32
 	Logger                 *zap.Logger
 	UnableToFindClusterMsg string
@@ -296,11 +295,20 @@ type Fetcher interface {
 	GetResponseCodeAndNodeID(requestedURL string) (string, string)
 }
 
-// GetFetcherOrError returns a fetcher and error
+// GetFetcherOrError returns a fetcher with certificate verification enabled.
 func GetFetcherOrError(connectionType, url, username, clusterName string) (Fetcher, error) {
+	return GetFetcherForConnection(connectionType, url, username, clusterName, "", false)
+}
+
+// GetFetcherForConnection binds an optional certificate exception to this connection's
+// HTTPS origin. Invalid and non-HTTPS URLs never acquire an exception.
+func GetFetcherForConnection(connectionType, url, username, clusterName, connectionName string, ignoreInvalidCerts bool) (Fetcher, error) {
 	if connectionType == HTTP {
 		f := HTTPFetcher{URL: url, ConnectionType: connectionType, WebLogicServer: IsWebLogicServer(url),
-			Username: username, ClusterName: clusterName}
+			Username: username, ClusterName: clusterName, connectionName: connectionName}
+		if ignoreInvalidCerts {
+			f.insecureOrigin = parseHTTPSOrigin(url)
+		}
 		return f, f.Init()
 	}
 

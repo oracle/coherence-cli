@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, 2025 Oracle and/or its affiliates.
+ * Copyright (c) 2021, 2026 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -484,6 +484,24 @@ func GetBackupCount(ownership map[int]*config.PartitionOwnership) int {
 }
 
 func GetTLSDetails() ([]tls.Certificate, *x509.CertPool, string, string, string, error) {
+	return getTLSDetails(nil)
+}
+
+// GetDownloadTLSConfig always verifies downloads, adding configured CAs to system
+// trust. Cluster connections retain GetTLSDetails' replacement-pool semantics.
+func GetDownloadTLSConfig() (*tls.Config, error) {
+	return getDownloadTLSConfig(x509.SystemCertPool)
+}
+
+func getDownloadTLSConfig(loadSystemRoots func() (*x509.CertPool, error)) (*tls.Config, error) {
+	certificates, certPool, _, _, _, err := getTLSDetails(loadSystemRoots)
+	if err != nil {
+		return nil, err
+	}
+	return &tls.Config{Certificates: certificates, RootCAs: certPool}, nil
+}
+
+func getTLSDetails(loadSystemRoots func() (*x509.CertPool, error)) ([]tls.Certificate, *x509.CertPool, string, string, string, error) {
 	var (
 		certPool     *x509.CertPool
 		certData     []byte
@@ -497,6 +515,17 @@ func GetTLSDetails() ([]tls.Certificate, *x509.CertPool, string, string, string,
 
 	if caCertPath != "" {
 		certPool = x509.NewCertPool()
+		if loadSystemRoots != nil {
+			certPool, err = loadSystemRoots()
+			if err != nil {
+				return nil, nil, caCertPath, clientCertPath, clientCertKeyPath, fmt.Errorf("load system roots for downloads: %w", err)
+			}
+			// Equal distinguishes an empty pool from native system trust, whose
+			// roots may not be enumerated by CertPool.Subjects (macOS/Windows).
+			if certPool == nil || certPool.Equal(x509.NewCertPool()) {
+				return nil, nil, caCertPath, clientCertPath, clientCertKeyPath, errors.New("load system roots for downloads: empty certificate pool")
+			}
+		}
 
 		if err = validateFilePath(caCertPath); err != nil {
 			return nil, nil, caCertPath, clientCertPath, clientCertKeyPath, err

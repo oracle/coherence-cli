@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 
-    Copyright (c) 2022, 2025 Oracle and/or its affiliates.
+    Copyright (c) 2022, 2026 Oracle and/or its affiliates.
     Licensed under the Universal Permissive License v 1.0 as shown at
     https://oss.oracle.com/licenses/upl.
 
@@ -13,29 +13,77 @@
 == Creating Clusters
 
 === Overview
-There are various cluster commands that allow you to create and work with local development based clusters.
+Create, start, stop and scale local development clusters, then manage them using the usual CLI commands.
 
 These commands allow you to create local only development based clusters (scoped to localhost) for Coherence CE 22.06.x and
 Commercial 14.1.1.2206.x versions and above. You must have the following setup for this to work:
 
-1. Java 17+ executable on the PATH, if you are using the default Coherence CE {coherence-version} version.
+1. A Coherence-compatible Java executable on the PATH. CE 22.06.x uses Java 11 or later;
+commercial 14.1.1.2206.x requires Java 11.0.15 or later. CE 22.09 through 25.09 require Java 17 or later.
+The 14.1.2 and 15.1.1 lines document Java 17 and 21. Check the selected release's certification policy;
+passing a minimum-version check does not certify every newer JDK, platform or custom dependency.
 2. Maven 3.6+ or JDK compatible Gradle version 7.+ executable on the PATH.
 
 NOTE: Maven is used by default for dependency resolution and classpath generation, but if you prefer Gradle, then use the
-following: `cohctl set use-grade true`. You can revert to Maven by using `cohctl set use-gradle false`.
+following: `cohctl set use-gradle true`. You can revert to Maven by using `cohctl set use-gradle false`.
 
 Once you create a local cluster, you can manage and monitor these clusters in the same way as you can with discovered
 or manually added clusters. You can also run the Coherence console and CohQL (Query client) against these clusters.
 
+=== Management defaults
+
 When you create a cluster, the first node started will always have management over REST enabled.
+Management REST binds to `127.0.0.1` by default. The JDK remote JMX connector is disabled unless you select
+a positive `--jmx-port`; when enabled, both its registry and RMI connector bind to loopback by default.
+WKA controls cluster discovery and does not select management addresses.
 
-You may also specify a profile when you start a cluster using the `-P` option. The value of the profile
-, which is a string containing `-Dkey=value` pairs, will be included in the cache servers started.
+These endpoints have no authentication or encryption. Other users on the same host can access loopback endpoints.
+Metrics and health HTTP listeners, cluster transports, proxies and listeners created by user code are separate surfaces;
+the management bind flags do not restrict them.
+These management controls apply to the stock JDK and Coherence management configuration.
+The selected runtime, installed defaults, user code, agents and resources are trusted inputs. Custom startup classes,
+operational overrides, replacement management resources/providers and agent-created listeners need a separate review.
 
-On first creation of a Coherence cluster, if your Maven or Gradle repository is empty, it may take a short while to download the minimal depdencies.
+You may also select a saved JVM profile with `-P profile-name`. See <<set-profile,Set Profile>> and
+<<advanced-jvm-options,Advanced: JVM options and trusted inputs>> for supported settings.
+
+On first creation of a Coherence cluster, if your Maven or Gradle repository is empty, it may take a short while to download the minimal dependencies.
 
 NOTE: These commands are experimental only and may be changed or removed in the future. It is *not supported* to use
 these commands to create production clusters.
+
+[#upgrade-local-clusters]
+=== Upgrading existing clusters
+
+Endpoint settings and the matching CLI REST URL are saved only after startup/readiness and a successful configuration write.
+Start and restart reuse saved settings when endpoint flags are absent. Failed validation, cancelled confirmation, failed startup
+or failed persistence retain the old saved settings and URL. A failed replacement after stopping a cluster leaves it stopped;
+the CLI does not automatically restore the old running cluster. Stop works without Java and does not migrate old records.
+Legacy records have no saved JMX port: their next start defaults to loopback REST with JMX disabled; specify `--jmx-port`
+to enable JMX again. Existing running processes retain their old settings until restarted. Reverting to an older CLI may
+restore the old exposure and ignore the new saved settings.
+
+Restart requires a usable old-member snapshot from the saved REST URL, with a positive integer `clusterSize` matching
+the number of distinct member PIDs. An unavailable endpoint, malformed response, empty snapshot, invalid member PID
+or missing/inconsistent membership count stops restart before any stop or replacement. Failed discovery is not proof
+that the old JVMs exited. Use `cohctl start cluster NAME` for an actually stopped cluster. Restart still trusts the
+local PIDs reported by that REST endpoint; it does not maintain a PID registry or scan for undiscovered processes.
+
+For the complete checklist, including SSH access, monitoring and TLS migration, see
+xref:../about/upgrading_1_11_0.adoc[Upgrading from 1.10.14].
+
+=== Common tasks
+
+[source,bash]
+----
+cohctl create cluster local
+cohctl get members -c local
+cohctl stop cluster local
+cohctl start cluster local --jmx-port 9999
+----
+
+The final command starts the stopped cluster with loopback JMX for JConsole or VisualVM.
+For access from another machine, prefer the <<development-remote-access,SSH tunnel example>>.
 
 *Creating and controlling clusters*
 
@@ -65,6 +113,8 @@ these commands to create production clusters.
 * <<remove-profile, `cohctl remove profile`>> - removes a profile value from the list of profile
 * <<get-profiles, `cohctl get profiles`>> - displays the profiles that have been created
 
+=== Command reference
+
 [#create-cluster]
 ==== Create Cluster
 
@@ -72,6 +122,11 @@ include::../../build/_output/docs-gen/create_cluster.adoc[tag=text]
 
 NOTE: The log files are stored under the `.cohctl/logs/` directory off your home directory. You can
 change this for an individual cluster by specifying the `-L` option when you create the cluster.
+Cluster and member names must be single local path components. With `-B`, an existing member log is
+copied to its `.old` backup within the cluster's log directory. Missing logs are skipped; invalid paths,
+escaping symbolic links and other backup read or write errors stop startup.
+Member logs are also opened within that cluster directory when `-B` is omitted. Relative symbolic links
+within the directory are supported; absolute or escaping member-log links stop startup before launch.
 
 *Examples*
 
@@ -83,27 +138,15 @@ NOTE: After the cluster has been created, the current context is automatically s
 ----
 cohctl create cluster local
 ----
-Output:
-[source,bash,subs="attributes"]
+Example abbreviated output:
+[source,text]
 ----
-Cluster name:           local
-Cluster version:        {coherence-version}
-Cluster port:           7574
-Partition count:        257
-Management port:        30000
-Server count:           3
-Initial memory:         128m
-Persistence mode:       on-demand
-Group ID:               com.oracle.coherence.ce
-Additional artifacts:
-Log destination root:
-Dependency tool:        mvn
+Management REST: http://127.0.0.1:30000/management/coherence/cluster (bind 127.0.0.1)
+JMX remote connector: disabled
+These endpoint settings will be saved after successful startup/readiness and configuration write.
+...
 Are you sure you want to create the cluster with the above details? (y/n) y
-
-Checking 3 Maven dependencies...
-- com.oracle.coherence.ce:coherence:{coherence-version}
-- com.oracle.coherence.ce:coherence-json:{coherence-version}
-- org.jline:jline:3.20.0
+...
 Starting 3 cluster members for cluster local
 Starting cluster member storage-0...
 Starting cluster member storage-1...
@@ -136,75 +179,19 @@ NOTE: By default, Coherence CE groupId is used and the version is {coherence-ver
 
 NOTE: Additional dependencies `coherence-json` is included to enable Management over REST and `jline` is included for `CohQL` history support.
 
-Add and start a commercial Coherence cluster (14.1.1.2206.5) and set initial memory for each cluster to 1g and use active persistence mode.
+Add and start a commercial Coherence cluster using Maven version `14.1.1-2206-5`,
+with a 1g heap per member and active persistence. Use an unused cluster name and available ports.
 
 [source,bash]
 ----
-cohctl create cluster local -C -v 14.1.1-2206-5 -M 1g -P active
+cohctl create cluster local -C -v 14.1.1-2206-5 -M 1g -s active
 ----
-Output:
-[source,bash]
-----
-Cluster name:         local
-Cluster version:      14.1.1-2206-5
-Cluster port:         7574
-Partition count:      257
-Management port:      30000
-Server count:         3
-Initial memory:       1g
-Persistence mode:     active
-Group ID:             com.oracle.coherence
-Additional artifacts:
-Log destination root:
-Dependency tool:      mvn
-Are you sure you want to create the cluster with the above details? (y/n) y
-
-Skipping downloading Maven artifcts
-Starting 3 cluster members for cluster local
-Starting cluster member storage-0...
-Starting cluster member storage-1...
-Starting cluster member storage-2...
-Cluster added and started
-----
-
-NOTE: In this example we are using the `-I` option to skip downloading maven artifacts as we know they are already installed locally.
 
 Add and start a cluster using all default values but include additional `coherence-rest` and opentracing dependencies.
 
 [source,bash]
 ----
 cohctl create cluster local -a coherence-rest,io.opentracing:opentracing-api:0.33.0,io.opentracing:opentracing-util:0.33.0
-----
-
-Output:
-[source,bash,subs="attributes"]
-----
-Cluster name:           local
-Cluster version:        {coherence-version}
-Cluster port:           7574
-Partition count:        257
-Management port:        30000
-Server count:           3
-Initial memory:         128m
-Persistence mode:       on-demand
-Group ID:               com.oracle.coherence.ce
-Additional artifacts:   coherence-rest,io.opentracing:opentracing-api:0.33.0,io.opentracing:opentracing-util:0.33.0
-Log destination root:
-Dependency tool:        mvn
-Are you sure you want to create the cluster with the above details? (y/n) y
-
-Checking 6 Maven dependencies...
-- com.oracle.coherence.ce:coherence:{coherence-version}
-- com.oracle.coherence.ce:coherence-json:{coherence-version}
-- com.oracle.coherence.ce:coherence-rest:{coherence-version}
-- io.opentracing:opentracing-api:0.33.0
-- io.opentracing:opentracing-util:0.33.0
-- org.jline:jline:3.20.0
-Starting 3 cluster members for cluster local
-Starting cluster member storage-0...
-Starting cluster member storage-1...
-Starting cluster member storage-2...
-Cluster added and started with process ids: [3324 3330 3331]
 ----
 
 [#scale-cluster]
@@ -219,9 +206,9 @@ cohctl scale cluster local -r 4
 Output:
 [source,bash]
 ----
-Are you sure you want to scale the cluster local up by 1 member(s) to 4 members? (y/n) y
+Scaling the cluster local up by 1 member(s) to 4 members
 Starting cluster member storage-3...
-Cluster local scaled
+Cluster local scale cluster completed
 ----
 
 NOTE: It is not yet supported to scale down a cluster.
@@ -235,14 +222,14 @@ include::../../build/_output/docs-gen/stop_cluster.adoc[tag=text]
 ----
 cohctl stop cluster local
 ----
-Output:
-[source,bash]
+Example abbreviated output:
+[source,text]
 ----
 Are you sure you want to stop 3 members for the cluster local? (y/n) y
 killed process 47760
 killed process 47761
 killed process 47762
-3 processes were stopped for cluster local
+3 of 3 processes stopped for cluster local (3 killed, 0 already exited, 0 failed)
 ----
 
 [#start-cluster]
@@ -252,7 +239,8 @@ include::../../build/_output/docs-gen/start_cluster.adoc[tag=text]
 
 *Examples*
 
-Start a cluster and specify heap size of `1g`. (default is 128m)
+Start a stopped cluster and specify a heap size of `1g` (default is 128m).
+Start runs without an interactive confirmation. The examples below assume the saved defaults: loopback REST and JMX disabled.
 
 [source,bash]
 ----
@@ -261,11 +249,14 @@ cohctl start cluster local -M 1g
 Output:
 [source,bash]
 ----
-Are you sure you want to start 3 members for cluster local? (y/n) y
+Management REST: http://127.0.0.1:30000/management/coherence/cluster (bind 127.0.0.1)
+JMX remote connector: disabled
+These endpoint settings will be saved after successful startup/readiness and configuration write.
 Starting cluster member storage-0...
 Starting cluster member storage-1...
 Starting cluster member storage-2...
-Cluster local and started
+Saved management settings and URL http://127.0.0.1:30000/management/coherence/cluster
+Cluster local start cluster completed
 ----
 
 Start a cluster and specify heap size of `1g` with 4 replicas/members.
@@ -277,23 +268,51 @@ cohctl start cluster local -M 1g -r 4
 Output:
 [source,bash]
 ----
-Are you sure you want to start 4 members for cluster local? (y/n) y
+Management REST: http://127.0.0.1:30000/management/coherence/cluster (bind 127.0.0.1)
+JMX remote connector: disabled
+These endpoint settings will be saved after successful startup/readiness and configuration write.
 Starting cluster member storage-0...
 Starting cluster member storage-1...
 Starting cluster member storage-2...
 Starting cluster member storage-3...
-Cluster local and started
+Saved management settings and URL http://127.0.0.1:30000/management/coherence/cluster
+Cluster local start cluster completed
 ----
 
-If you wish to enable remote RMI management on you cluster, as well as HTTP management,
-you will need to use the following:
+[#development-remote-access]
+===== JMX and access from another machine
+
+To enable the JDK JMX connector on loopback for a stopped cluster, alongside REST management:
 [source,bash]
 ----
-cohctl start cluster local -J 9999 -j hostname
+cohctl start cluster local -J 9999
 ----
 
-* `-J` is the rmi port
-* `-j` is the rmi host. You should set this to the hostname the cluster is running on. It will default to WKA address if not set.
+Connect JConsole to `127.0.0.1:9999`. Both the registry and RMI connector use this port.
+For access from another machine, keep the loopback defaults and use an SSH tunnel:
+
+[source,bash]
+----
+ssh -N -L 127.0.0.1:9999:127.0.0.1:9999 -L 127.0.0.1:30000:127.0.0.1:30000 user@development-host
+----
+
+Connect JConsole to the forwarded local port. For REST, use `http://127.0.0.1:30000/management/coherence/cluster`.
+Use the same local JMX port as the advertised port so the RMI stub follows the tunnel.
+
+If you deliberately need insecure remote management on an isolated development network, select the bind addresses and
+acknowledge the exposure on every invocation that starts a non-loopback listener:
+
+[source,bash]
+----
+cohctl start cluster local --management-address 192.0.2.10 \
+  -J 9999 --jmx-address 192.0.2.10 --jmx-host development-host.example \
+  --allow-insecure-remote-management
+----
+
+Replace the documentation address with a real local interface. The CLI warns before launch, including with `--yes`.
+The acknowledgement is never saved: subsequent start/restart needs it again, as does dynamic scale when it adds
+non-loopback REST listeners. A wildcard REST bind stores `127.0.0.1` as the CLI destination, never `0.0.0.0`.
+Authenticated remote JMX/REST and TLS provisioning are separate work; these commands are for development/testing only.
 
 
 [#restart-cluster]
@@ -305,18 +324,16 @@ include::../../build/_output/docs-gen/restart_cluster.adoc[tag=text]
 ----
 cohctl restart cluster local -M 1g
 ----
-Output:
-[source,bash]
+Example abbreviated output:
+[source,text]
 ----
 Are you sure you want to stop 3 members for the cluster local? (y/n) y
-killed process 8522
-killed process 8524
-killed process 8523
-3 processes were stopped for cluster local
+...
 Starting cluster member storage-0...
 Starting cluster member storage-1...
 Starting cluster member storage-2...
-Cluster local started
+Saved management settings and URL http://127.0.0.1:30000/management/coherence/cluster
+Cluster local restart cluster completed
 ----
 
 [#start-console]
@@ -525,10 +542,67 @@ profile1   -Dproperty1.value=2
 profile2   -Dproperty2.value=2 -Dproperty3.value=4
 ----
 
+[#advanced-endpoints]
+=== Advanced: endpoint selection
+
+The bind flags `--management-address` and `--jmx-address` accept IPv4 literals or `localhost` (normalized to `127.0.0.1`).
+DNS and IPv6 binds are unsupported. Use the concrete JMX bind as the advertised host, or explicitly set `--jmx-host`
+for remote use. A wildcard JMX bind needs an explicit concrete advertised host. `--jmx-host` alone cannot make a
+loopback listener remote. `--jmx-port=0` disables JMX and clears saved JMX address/host overrides.
+
+[#advanced-lifecycle]
+=== Advanced: startup, cancellation and dynamic listeners
+
+During startup delay or readiness waiting, Ctrl-C (or SIGTERM on macOS/Linux) cancels the operation and stops
+only members launched by that invocation. Existing members remain running during cancelled scale-up. Cancellation
+before a stop pass leaves existing members untouched; once a stop pass begins, every listed member is attempted.
+An interrupted restart cannot restore members already stopped. Previous saved settings and URL are retained until
+startup is accepted for saving. If a signal arrives while settings are already being saved, a successful save completes
+the operation. Successfully started members remain running after the command exits. During confirmation and dependency
+resolution, interrupts retain their normal process-exit behavior; no new cluster members have been launched yet.
+
+With `--dynamic-http`, create/start retain fixed REST on the first member and use ephemeral REST on later members.
+Scale preserves its existing selection: the first added member has no REST listener and subsequent added members use
+ephemeral REST. Every selected listener uses the chosen bind. Only the initial create/start member owns fixed-port JMX;
+scale never adds another JMX connector. Scale accepts identical endpoint flags but requires restart to change endpoints.
+
+[#advanced-jvm-options]
+=== Advanced: JVM options and trusted inputs
+
+Saved server arguments, the selected profile and `JAVA_TOOL_OPTIONS`, `_JAVA_OPTIONS` and `JDK_JAVA_OPTIONS` cannot set
+`com.sun.management.jmxremote` or its dot-qualified children, `com.sun.management.config.file`,
+`com.sun.management.agent.class`, `java.rmi.server.hostname`, or the Coherence REST controls
+`coherence.management.http`, `.http.address` and `.http.port`. The actual `tangosol.coherence.*` and `tangosol.*`
+aliases of those Coherence controls are also reserved. The exact `coherence.management.config` key and its Coherence
+aliases remain reserved pending release-specific consumer evidence. Use the endpoint flags for these settings.
+Authentication/provider properties and `coherence.management` can pass through; this does not add authenticated REST
+support or qualify a custom provider's listeners. Console and CohQL retain their client arguments.
+
+Java/native agents, classpath and module-path options can pass through unchanged. Java checks their values and loads
+user-selected code/resources. Saved managed arguments and profiles use CLI quoting; legacy saved arguments retain
+literal space splitting. Environment options use matching quotes and ASCII whitespace, with literal backslashes and
+non-ASCII text. The environment values are not rewritten. Environment agents also apply to the existing `java -version` check.
+This lexical boundary is qualified only for the tested JDKs and locales.
+
+The launcher accepts separate operands for `-cp`, `-classpath`, `--class-path`, `-p`, `--module-path`,
+`--upgrade-module-path`, `--patch-module`, `--describe-module`, `-d`, and the five module options
+`--add-opens`, `--add-exports`, `--add-reads`, `--add-modules` and `--limit-modules`.
+Modular split forms require Java 9 or later; split `--enable-native-access` requires Java 17 or later.
+These are parsing requirements, not vendor certification or a new global Java minimum. Long forms also accept an
+attached `=value`. The VM-only variables `JAVA_TOOL_OPTIONS` and `_JAVA_OPTIONS` require attached forms;
+`JDK_JAVA_OPTIONS` uses launcher operand rules. Empty classpath values are permitted in quote-aware sources.
+Module names, packages, paths and their semantic validity are left to Java.
+
+Uninspected option sources remain unsupported: raw leading-`@` tokens (including `@@`), `-XX:VMOptionsFile=`,
+`-XX:Flags=` and `-Xoptionsfile=`. Direct `ManagementServer` and `-Xmanagement` switches are reserved.
+Alternate launch targets (`-jar`, `-m`, `--module`, `--source` and their long attached forms), packed source-option
+tokens and unclaimed bare operands are rejected before startup or restart stop. An unknown single option can pass
+through, but its separate operand cannot be inferred. Use an attached spelling if the JVM supports it.
+A parser pass is not proof of JVM support, successful startup or listener behavior. An unrelated invalid JVM value
+can still fail after restart stops the old members.
+
 === See Also
 
 * xref:clusters.adoc[Clusters]
-
-
-
-
+* xref:../about/upgrading_1_11_0.adoc[Upgrading from 1.10.14]
+* xref:monitoring.adoc[Local Monitoring]

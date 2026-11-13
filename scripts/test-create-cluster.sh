@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #
-# Copyright (c) 2022, 2025 Oracle and/or its affiliates.
+# Copyright (c) 2022, 2026 Oracle and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at
 # https://oss.oracle.com/licenses/upl.
 #
@@ -17,9 +17,12 @@ if [ $# -ne 1 ] ; then
 fi
 
 VERSION=$1
+MANAGEMENT_PORT=${COHCTL_TEST_HTTP_PORT:-30000}
+ALT_MANAGEMENT_PORT=$((MANAGEMENT_PORT + 1))
+CLUSTER_PORT=${COHCTL_TEST_CLUSTER_PORT:-7574}
 
 # Use WORKSPACE directory if running under Jenkins
-TEMP_DIR=/tmp
+TEMP_DIR=${TMPDIR:-/tmp}
 [ ! -z "$WORKSPACE" ] && TEMP_DIR=$WORKSPACE
 
 CONFIG_DIR=${TEMP_DIR}/$$.create
@@ -27,7 +30,16 @@ DIR=`pwd`
 OUTPUT=${TEMP_DIR}/$$.output
 
 mkdir -p ${CONFIG_DIR}
-trap "rm -rf ${CONFIG_DIR} $OUTPUT" EXIT SIGINT
+function cleanup() {
+  if [ -n "$COHCTL" ] && [ -f "${CONFIG_DIR}/cohctl.yaml" ]; then
+    $COHCTL stop cluster local -y >/dev/null 2>&1 || true
+  fi
+  rm -rf "${CONFIG_DIR}" "$OUTPUT"
+  [ -z "$SCRIPT" ] || rm -f "$SCRIPT"
+  [ -z "$LOGS_DEST" ] || rm -rf "$LOGS_DEST"
+}
+trap cleanup EXIT
+trap 'exit 130' SIGINT
 
 echo
 echo "Config Dir: ${CONFIG_DIR}"
@@ -38,11 +50,18 @@ echo
 # Build the Java project so we get any deps downloaded
 
 COHERENCE_GROUP_ID=com.oracle.coherence.ce
+COMMERCIAL_ARGS=()
 if [ ! -z "$COM" ] ; then
   COHERENCE_GROUP_ID=com.oracle.coherence
+  COMMERCIAL_ARGS+=(--commercial)
 fi
 
 mvn -f java/coherence-cli-test dependency:build-classpath -Dcoherence.group.id=${COHERENCE_GROUP_ID} -Dcoherence.version=${VERSION}
+DEPENDENCY_STATUS=$?
+if [ "$DEPENDENCY_STATUS" -ne 0 ]; then
+  echo "Dependency resolution failed before cluster creation (exit $DEPENDENCY_STATUS)"
+  exit "$DEPENDENCY_STATUS"
+fi
 
 # Default command
 COHCTL="$DIR/bin/cohctl --config-dir ${CONFIG_DIR}"
@@ -56,7 +75,7 @@ function wait_for_ready() {
   counter=10
   PORT=$1
   if [ -z "$PORT" ] ; then
-    PORT=30000
+    PORT=$MANAGEMENT_PORT
   fi
   pause
   echo "waiting for management to be ready on $PORT ..."
@@ -90,7 +109,11 @@ function save_logs() {
 function runCommand() {
     echo "========================================================="
     echo "Running command: cohctl $*"
-    $COHCTL $* > $OUTPUT 2>&1
+    if [ "$1" = create ] && [ "$2" = cluster ]; then
+      case " $* " in *" -H "*|*" --http-port "*) ;; *) set -- "$@" -H "$MANAGEMENT_PORT" ;; esac
+      set -- "$@" -p "$CLUSTER_PORT"
+    fi
+    $COHCTL "$@" > $OUTPUT 2>&1
     ret=$?
     cat $OUTPUT
     if [ $ret -ne 0 ] ; then
@@ -107,7 +130,7 @@ runCommand set debug on
 
 # Create a cluster
 message "Create Cluster"
-runCommand create cluster local -y -v $VERSION $COM -S com.tangosol.net.Coherence --machine machine1
+runCommand create cluster local -y -v $VERSION "${COMMERCIAL_ARGS[@]}" -S com.tangosol.net.Coherence --machine machine1
 
 wait_for_ready
 
@@ -115,7 +138,7 @@ runCommand get clusters
 runCommand get members
 
 # Check the option to specify host:port for name service
-runCommand get members -c localhost:7574
+runCommand get members -c localhost:${CLUSTER_PORT}
 
 # Check the members of PartitionedCache
 runCommand get services -o jsonpath="$.items[?(@.name=='PartitionedCache')].memberCount"
@@ -151,7 +174,7 @@ runCommand get services -o jsonpath="$.items[?(@.name=='PartitionedCache')].memb
 grep "[5,5,5,]" $OUTPUT
 
 # Monitor the heath
-runCommand monitor health -n localhost:7574 -N
+runCommand monitor health -n localhost:${CLUSTER_PORT} -N
 grep "NODE ID" $OUTPUT
 grep "STARTED" $OUTPUT
 
@@ -163,7 +186,7 @@ pause && pause && pause
 if [ -z "$COM" -a -z "`echo $VERSION | grep SNAPSHOT`" ] ; then
   echo "Test -F Startup and profile"
   runCommand set profile grpc -v "-Dcoherence.grpc.server.port=1408" -y
-  runCommand create cluster local -y -v $VERSION $COM -P grpc -a coherence-grpc-proxy -F
+  runCommand create cluster local -y -v $VERSION "${COMMERCIAL_ARGS[@]}" -P grpc -a coherence-grpc-proxy -F
   wait_for_ready
 
   runCommand stop cluster local -y
@@ -177,14 +200,14 @@ if [ -z "$COM" -a -z "`echo $VERSION | grep SNAPSHOT`" ] ; then
 fi
 
 message "Test CohQL commands via extend and gRPC Proxy via NS"
-SCRIPT=`mktemp`
+SCRIPT=`mktemp "${TEMP_DIR}/cohctl-query.XXXXXX"`
 cat > $SCRIPT <<EOF
 insert into test key(1) value('one')
 EOF
 
 # Don't run concurrent test for commercial or if we have a snapshot
 if [ -z "$COM" -a -z "`echo $VERSION | grep SNAPSHOT`" ] ; then
-  runCommand create cluster local -y -v $VERSION $COM -a coherence-grpc-proxy,coherence-java-client
+  runCommand create cluster local -y -v $VERSION "${COMMERCIAL_ARGS[@]}" -a coherence-grpc-proxy,coherence-java-client
   wait_for_ready
   runCommand start cohql -X -f $SCRIPT
   runCommand start cohql -X -f $SCRIPT
@@ -197,9 +220,9 @@ fi
 
 pause && pause && pause
 
-LOGS_DEST=$(mktemp -d)
+LOGS_DEST=$(mktemp -d "${TEMP_DIR}/cohctl-logs.XXXXXX")
 message "Test different log location - ${LOGS_DEST}"
-runCommand create cluster local -y -M 512m -I $COM -v $VERSION -L ${LOGS_DEST} --rack rack1
+runCommand create cluster local -y -M 512m -I "${COMMERCIAL_ARGS[@]}" -v $VERSION -L ${LOGS_DEST} --rack rack1
 wait_for_ready
 
 # check to see a storage-0.log file exists
@@ -240,11 +263,11 @@ runCommand remove cluster local -y
 pause && pause && pause
 
 message "Start cluster using different HTTP port"
-runCommand create cluster local -H 30001 -l 9 $COM -v $VERSION -y
-wait_for_ready 30001
+runCommand create cluster local -H ${ALT_MANAGEMENT_PORT} -l 9 "${COMMERCIAL_ARGS[@]}" -v $VERSION -y
+wait_for_ready ${ALT_MANAGEMENT_PORT}
 
-message "Add a cluster to point to newly created cluster on port 30001"
-runCommand add cluster local2 -u http://127.0.0.1:30001/management/coherence/cluster
+message "Add a cluster to point to newly created cluster on port ${ALT_MANAGEMENT_PORT}"
+runCommand add cluster local2 -u http://127.0.0.1:${ALT_MANAGEMENT_PORT}/management/coherence/cluster
 runCommand get members -c local2
 runCommand remove cluster local2 -y
 
@@ -255,7 +278,7 @@ message "Startup cluster using different memory setting"
 runCommand clear default-heap
 runCommand start cluster local -r 4 -M 1g
 runCommand set bytes-format m
-wait_for_ready 30001
+wait_for_ready ${ALT_MANAGEMENT_PORT}
 
 runCommand set context local
 runCommand get members
@@ -268,11 +291,12 @@ pause
 runCommand remove cluster local -y
 
 message "Run CohQL"
-runCommand create cluster local -y -M 512m -I $COM -v $VERSION
+runCommand create cluster local -y -M 512m -I "${COMMERCIAL_ARGS[@]}" -v $VERSION
 wait_for_ready
 
-echo "insert into test key(1) value(1);" > /tmp/file.cohql
-runCommand start cohql -f /tmp/file.cohql
+SCRIPT=`mktemp "${TEMP_DIR}/cohctl-query.XXXXXX"`
+echo "insert into test key(1) value(1);" > "$SCRIPT"
+runCommand start cohql -f "$SCRIPT"
 runCommand get caches
 runCommand describe cache test -s PartitionedCache
 
@@ -305,7 +329,7 @@ if [ -z "$COM" -a -z "`echo $VERSION | grep SNAPSHOT`" ] ; then
 
   message "Create Cluster Using Gradle"
   gradle -v
-  runCommand create cluster local -y -v $VERSION $COM
+  runCommand create cluster local -y -v $VERSION "${COMMERCIAL_ARGS[@]}"
 
   wait_for_ready
 
@@ -316,6 +340,17 @@ if [ -z "$COM" -a -z "`echo $VERSION | grep SNAPSHOT`" ] ; then
   pause
   runCommand remove cluster local -y
 fi
+
+# Inspect actual management listeners and perform JDK-only JMX/PID checks.
+# Missing socket inspection or a real interface is missing coverage, not a pass.
+MANAGEMENT_TEST_ARGS=()
+if [ -n "$COM" ]; then
+  MANAGEMENT_TEST_ARGS+=(--commercial)
+fi
+if [ -n "$COHCTL_MANAGEMENT_TEST_OUTPUT" ]; then
+  MANAGEMENT_TEST_ARGS+=(--output "$COHCTL_MANAGEMENT_TEST_OUTPUT")
+fi
+python3 "$DIR/scripts/test-local-management.py" "$VERSION" --cli "$DIR/bin/cohctl" "${MANAGEMENT_TEST_ARGS[@]}" || exit 1
 
 # Test the environment variable for setting the home directory
 message "Setting COHCTL_HOME to ${CONFIG_DIR}"

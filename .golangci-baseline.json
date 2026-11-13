@@ -1,0 +1,1695 @@
+{
+  "version": 1,
+  "tool_version": "2.15.0",
+  "go_version": "go1.27.3",
+  "config_sha256": "1161f99a16f120ce3f43e1d2c70fa7fcf7fb5defc4a87519faa2ed51ec047ee9",
+  "platforms": [
+    "darwin/arm64",
+    "linux/amd64",
+    "windows/amd64"
+  ],
+  "review": "CONTRIBUTING.md#local-checks",
+  "issues": [
+    {
+      "linter": "goconst",
+      "path": "pkg/cmd/cache.go",
+      "text": "string `cache cache-name` has 4 occurrences, make it a constant",
+      "source": [
+        "\tUse:   \"cache cache-name\","
+      ],
+      "reason": "Repeated CLI/configuration/fixture literal; constant extraction is deferred style cleanup."
+    },
+    {
+      "linter": "goconst",
+      "path": "pkg/cmd/cluster.go",
+      "text": "string `loggingLevel` has 3 occurrences, make it a constant",
+      "source": [
+        "\t\t\"bufferPublishSize\", \"bufferReceiveSize\", \"loggingLevel\", \"loggingLimit\", \"loggingFormat\","
+      ],
+      "reason": "Repeated CLI/configuration/fixture literal; constant extraction is deferred style cleanup."
+    },
+    {
+      "linter": "goconst",
+      "path": "pkg/cmd/cluster.go",
+      "text": "string `loggingFormat` has 4 occurrences, make it a constant",
+      "source": [
+        "\t\t\"bufferPublishSize\", \"bufferReceiveSize\", \"loggingLevel\", \"loggingLimit\", \"loggingFormat\","
+      ],
+      "reason": "Repeated CLI/configuration/fixture literal; constant extraction is deferred style cleanup."
+    },
+    {
+      "linter": "goconst",
+      "path": "pkg/cmd/cluster.go",
+      "text": "string `cluster connection-name` has 3 occurrences, make it a constant",
+      "source": [
+        "\tUse:   \"cluster connection-name\","
+      ],
+      "reason": "Repeated CLI/configuration/fixture literal; constant extraction is deferred style cleanup."
+    },
+    {
+      "linter": "goconst",
+      "path": "pkg/cmd/cluster.go",
+      "text": "string `cluster` has 6 occurrences, make it a constant",
+      "source": [
+        "\t\t\t\t[]string{\"cluster\", \"machines\", \"members\", \"services\", \"caches\", \"proxies\", \"reporters\", constants.RAMJournal,"
+      ],
+      "reason": "Repeated CLI/configuration/fixture literal; constant extraction is deferred style cleanup."
+    },
+    {
+      "linter": "goconst",
+      "path": "pkg/cmd/cluster.go",
+      "text": "string `members` has 5 occurrences, but such constant `memberPanelData` already exists",
+      "source": [
+        "\t\t\t\t[]string{\"cluster\", \"machines\", \"members\", \"services\", \"caches\", \"proxies\", \"reporters\", constants.RAMJournal,"
+      ],
+      "reason": "Repeated CLI/configuration/fixture literal; constant extraction is deferred style cleanup."
+    },
+    {
+      "linter": "goconst",
+      "path": "pkg/cmd/cluster.go",
+      "text": "string `services` has 5 occurrences, but such constant `servicesPanelData` already exists",
+      "source": [
+        "\t\t\t\t[]string{\"cluster\", \"machines\", \"members\", \"services\", \"caches\", \"proxies\", \"reporters\", constants.RAMJournal,"
+      ],
+      "reason": "Existing repeated CLI, configuration or fixture literal; defer constant cleanup without changing behavior."
+    },
+    {
+      "linter": "goconst",
+      "path": "pkg/cmd/cluster.go",
+      "text": "string `proxies` has 3 occurrences, but such constant `proxiesPanelData` already exists",
+      "source": [
+        "\t\t\t\t[]string{\"cluster\", \"machines\", \"members\", \"services\", \"caches\", \"proxies\", \"reporters\", constants.RAMJournal,"
+      ],
+      "reason": "Repeated CLI/configuration/fixture literal; constant extraction is deferred style cleanup."
+    },
+    {
+      "linter": "goconst",
+      "path": "pkg/cmd/cluster.go",
+      "text": "string `health` has 3 occurrences, but such constant `healthPanelData` already exists",
+      "source": [
+        "\t\t\t\t\tconstants.FlashJournal, \"httpServers\", \"executors\", \"federationDestinations\", \"federationOrigins\", \"health\"})"
+      ],
+      "reason": "Repeated CLI/configuration/fixture literal; constant extraction is deferred style cleanup."
+    },
+    {
+      "linter": "goconst",
+      "path": "pkg/cmd/cluster.go",
+      "text": "string `coherence` has 3 occurrences, make it a constant",
+      "source": [
+        "\t\t\t\tif entry.Artifact != \"jline\" && entry.Artifact != \"coherence\" {"
+      ],
+      "reason": "Repeated CLI/configuration/fixture literal; constant extraction is deferred style cleanup."
+    },
+    {
+      "linter": "goconst",
+      "path": "pkg/cmd/cluster_utils.go",
+      "text": "string `coherence` has 3 occurrences, make it a constant",
+      "source": [
+        "\t\t{GroupID: ceGroupID, Artifact: \"coherence\", IsCoherence: true},"
+      ],
+      "reason": "Repeated CLI/configuration/fixture literal; constant extraction is deferred style cleanup."
+    },
+    {
+      "linter": "goconst",
+      "path": "pkg/cmd/health.go",
+      "text": "string `health` has 3 occurrences, but such constant `healthPanelData` already exists",
+      "source": [
+        "\tUse:   \"health\","
+      ],
+      "reason": "Repeated CLI/configuration/fixture literal; constant extraction is deferred style cleanup."
+    },
+    {
+      "linter": "goconst",
+      "path": "pkg/cmd/member.go",
+      "text": "string `loggingLevel` has 3 occurrences, make it a constant",
+      "source": [
+        "\tvalidAttributes = []string{\"loggingLevel\", \"resendDelay\", \"sendAckDelay\","
+      ],
+      "reason": "Repeated CLI/configuration/fixture literal; constant extraction is deferred style cleanup."
+    },
+    {
+      "linter": "goconst",
+      "path": "pkg/cmd/member.go",
+      "text": "string `loggingFormat` has 4 occurrences, make it a constant",
+      "source": [
+        "\t\t\"trafficJamCount\", \"trafficJamDelay\", \"loggingLimit,\", \"loggingFormat\"}"
+      ],
+      "reason": "Repeated CLI/configuration/fixture literal; constant extraction is deferred style cleanup."
+    },
+    {
+      "linter": "goconst",
+      "path": "pkg/cmd/member.go",
+      "text": "string `members` has 5 occurrences, but such constant `memberPanelData` already exists",
+      "source": [
+        "\tUse:   \"members\","
+      ],
+      "reason": "Repeated CLI/configuration/fixture literal; constant extraction is deferred style cleanup."
+    },
+    {
+      "linter": "goconst",
+      "path": "pkg/cmd/monitor_cluster.go",
+      "text": "string `default` has 3 occurrences, but such constant `defaultLayoutName` already exists",
+      "source": [
+        "\t\t\"default\":            \"summary-cluster,summary-members,machines:services,caches:proxies,http-servers:health-summary,persistence:federation-all,elastic-data:network-stats\","
+      ],
+      "reason": "Repeated CLI/configuration/fixture literal; constant extraction is deferred style cleanup."
+    },
+    {
+      "linter": "goconst",
+      "path": "pkg/cmd/monitor_cluster.go",
+      "text": "string `cluster connection-name` has 3 occurrences, make it a constant",
+      "source": [
+        "\tUse:   \"cluster connection-name\","
+      ],
+      "reason": "Repeated CLI/configuration/fixture literal; constant extraction is deferred style cleanup."
+    },
+    {
+      "linter": "goconst",
+      "path": "pkg/cmd/monitoring.go",
+      "text": "string `monitoring` has 4 occurrences, but such constant `monitoringDirectory` already exists",
+      "source": [
+        "\tUse:   \"monitoring\","
+      ],
+      "reason": "Repeated CLI/configuration/fixture literal; constant extraction is deferred style cleanup."
+    },
+    {
+      "linter": "goconst",
+      "path": "pkg/cmd/monitoring_grafana_integration_test.go",
+      "text": "string `compose` has 3 occurrences, but such constant `checkoutComposeCommand` already exists",
+      "source": [
+        "\targs := []string{\"compose\", \"-p\", f.volume, \"-f\", f.composeFile, \"-f\", overrideFile}"
+      ],
+      "reason": "Existing repeated CLI, configuration or fixture literal; defer constant cleanup without changing behavior."
+    },
+    {
+      "linter": "goconst",
+      "path": "pkg/cmd/monitoring_grafana_integration_test.go",
+      "text": "string `unreadable` has 5 occurrences, make it a constant",
+      "source": [
+        "\tfor _, name := range []string{\"password\", \"unreadable\", \"missing\", \"empty\", \"invalid\", \"directory\"} {"
+      ],
+      "reason": "Existing repeated CLI, configuration or fixture literal; defer constant cleanup without changing behavior."
+    },
+    {
+      "linter": "goconst",
+      "path": "pkg/cmd/monitoring_grafana_integration_test.go",
+      "text": "string `missing` has 39 occurrences, make it a constant",
+      "source": [
+        "\tfor _, name := range []string{\"password\", \"unreadable\", \"missing\", \"empty\", \"invalid\", \"directory\"} {"
+      ],
+      "reason": "Existing repeated CLI, configuration or fixture literal; defer constant cleanup without changing behavior."
+    },
+    {
+      "linter": "goconst",
+      "path": "pkg/cmd/monitoring_grafana_integration_test.go",
+      "text": "string `invalid` has 5 occurrences, make it a constant",
+      "source": [
+        "\tfor _, name := range []string{\"password\", \"unreadable\", \"missing\", \"empty\", \"invalid\", \"directory\"} {"
+      ],
+      "reason": "Existing repeated CLI, configuration or fixture literal; defer constant cleanup without changing behavior."
+    },
+    {
+      "linter": "goconst",
+      "path": "pkg/cmd/monitoring_grafana_integration_test.go",
+      "text": "string `directory` has 8 occurrences, make it a constant",
+      "source": [
+        "\tfor _, name := range []string{\"password\", \"unreadable\", \"missing\", \"empty\", \"invalid\", \"directory\"} {"
+      ],
+      "reason": "Existing repeated CLI, configuration or fixture literal; defer constant cleanup without changing behavior."
+    },
+    {
+      "linter": "goconst",
+      "path": "pkg/cmd/monitoring_grafana_integration_test.go",
+      "text": "string `run` has 4 occurrences, make it a constant",
+      "source": [
+        "\t\t\targs := []string{\"run\", \"--rm\", \"--user\", f.user, \"--mount\", \"type=bind,source=\" + f.source + \"/run.sh,target=/run.sh,readonly\", \"--mount\", \"type=bind,source=\" + f.source + \"/passwd,target=/etc/passwd,readonly\", \"--mount\", \"type=bind,source=\" + f.source + \"/expected,target=/expected-password,readonly\"}"
+      ],
+      "reason": "Existing repeated CLI, configuration or fixture literal; defer constant cleanup without changing behavior."
+    },
+    {
+      "linter": "goconst",
+      "path": "pkg/cmd/monitoring_grafana_integration_test.go",
+      "text": "string `--rm` has 3 occurrences, make it a constant",
+      "source": [
+        "\t\t\targs := []string{\"run\", \"--rm\", \"--user\", f.user, \"--mount\", \"type=bind,source=\" + f.source + \"/run.sh,target=/run.sh,readonly\", \"--mount\", \"type=bind,source=\" + f.source + \"/passwd,target=/etc/passwd,readonly\", \"--mount\", \"type=bind,source=\" + f.source + \"/expected,target=/expected-password,readonly\"}"
+      ],
+      "reason": "Existing repeated CLI, configuration or fixture literal; defer constant cleanup without changing behavior."
+    },
+    {
+      "linter": "goconst",
+      "path": "pkg/cmd/monitoring_grafana_integration_test.go",
+      "text": "string `--user` has 3 occurrences, make it a constant",
+      "source": [
+        "\t\t\targs := []string{\"run\", \"--rm\", \"--user\", f.user, \"--mount\", \"type=bind,source=\" + f.source + \"/run.sh,target=/run.sh,readonly\", \"--mount\", \"type=bind,source=\" + f.source + \"/passwd,target=/etc/passwd,readonly\", \"--mount\", \"type=bind,source=\" + f.source + \"/expected,target=/expected-password,readonly\"}"
+      ],
+      "reason": "Existing repeated CLI, configuration or fixture literal; defer constant cleanup without changing behavior."
+    },
+    {
+      "linter": "goconst",
+      "path": "pkg/cmd/monitoring_grafana_integration_test.go",
+      "text": "string `--mount` has 6 occurrences, make it a constant",
+      "source": [
+        "\t\t\targs := []string{\"run\", \"--rm\", \"--user\", f.user, \"--mount\", \"type=bind,source=\" + f.source + \"/run.sh,target=/run.sh,readonly\", \"--mount\", \"type=bind,source=\" + f.source + \"/passwd,target=/etc/passwd,readonly\", \"--mount\", \"type=bind,source=\" + f.source + \"/expected,target=/expected-password,readonly\"}"
+      ],
+      "reason": "Existing repeated CLI, configuration or fixture literal; defer constant cleanup without changing behavior."
+    },
+    {
+      "linter": "goconst",
+      "path": "pkg/cmd/monitoring_rotation_integration_test.go",
+      "text": "string `1.10.11` has 3 occurrences, make it a constant",
+      "source": [
+        "\tcfgDirectory, Version = t.TempDir(), \"1.10.11\""
+      ],
+      "reason": "Existing repeated CLI, configuration or fixture literal; defer constant cleanup without changing behavior."
+    },
+    {
+      "linter": "goconst",
+      "path": "pkg/cmd/monitoring_rotation_integration_test.go",
+      "text": "string `compose` has 3 occurrences, but such constant `checkoutComposeCommand` already exists",
+      "source": [
+        "\t\treturn f.mustDocker(append([]string{\"compose\"}, options...)...)"
+      ],
+      "reason": "Existing repeated CLI, configuration or fixture literal; defer constant cleanup without changing behavior."
+    },
+    {
+      "linter": "goconst",
+      "path": "pkg/cmd/monitoring_rotation_test.go",
+      "text": "string `1.10.11` has 3 occurrences, make it a constant",
+      "source": [
+        "\tVersion, automaticallyConfirm = \"1.10.11\", true"
+      ],
+      "reason": "Existing repeated CLI, configuration or fixture literal; defer constant cleanup without changing behavior."
+    },
+    {
+      "linter": "goconst",
+      "path": "pkg/cmd/monitoring_rotation_test.go",
+      "text": "string `valid` has 9 occurrences, make it a constant",
+      "source": [
+        "\t\t{\"generated\", \"valid\", \"valid\", false},"
+      ],
+      "reason": "Existing repeated CLI, configuration or fixture literal; defer constant cleanup without changing behavior."
+    },
+    {
+      "linter": "goconst",
+      "path": "pkg/cmd/monitoring_rotation_test.go",
+      "text": "string `missing` has 39 occurrences, make it a constant",
+      "source": [
+        "\t\t{\"legacy\", \"missing\", \"valid\", false},"
+      ],
+      "reason": "Existing repeated CLI, configuration or fixture literal; defer constant cleanup without changing behavior."
+    },
+    {
+      "linter": "goconst",
+      "path": "pkg/cmd/monitoring_rotation_test.go",
+      "text": "string `corrupt` has 6 occurrences, make it a constant",
+      "source": [
+        "\t\t{\"corrupt generated fallback\", \"corrupt\", \"valid\", false},"
+      ],
+      "reason": "Existing repeated CLI, configuration or fixture literal; defer constant cleanup without changing behavior."
+    },
+    {
+      "linter": "goconst",
+      "path": "pkg/cmd/monitoring_security.go",
+      "text": "string `services` has 5 occurrences, but such constant `servicesPanelData` already exists",
+      "source": [
+        "\t\tif key != \"services\" && key != \"networks\" && key != \"secrets\" {"
+      ],
+      "reason": "Existing repeated CLI, configuration or fixture literal; defer constant cleanup without changing behavior."
+    },
+    {
+      "linter": "goconst",
+      "path": "pkg/cmd/monitoring_security.go",
+      "text": "string `networks` has 3 occurrences, make it a constant",
+      "source": [
+        "\t\tif key != \"services\" && key != \"networks\" && key != \"secrets\" {"
+      ],
+      "reason": "Existing repeated CLI, configuration or fixture literal; defer constant cleanup without changing behavior."
+    },
+    {
+      "linter": "goconst",
+      "path": "pkg/cmd/monitoring_security.go",
+      "text": "string `secrets` has 3 occurrences, make it a constant",
+      "source": [
+        "\t\tif key != \"services\" && key != \"networks\" && key != \"secrets\" {"
+      ],
+      "reason": "Existing repeated CLI, configuration or fixture literal; defer constant cleanup without changing behavior."
+    },
+    {
+      "linter": "goconst",
+      "path": "pkg/cmd/monitoring_security_posix_test.go",
+      "text": "string `stopped` has 3 occurrences, but such constant `stopped` already exists",
+      "source": [
+        "\t\tcase \"stopped\":"
+      ],
+      "reason": "Existing repeated CLI, configuration or fixture literal; defer constant cleanup without changing behavior."
+    },
+    {
+      "linter": "goconst",
+      "path": "pkg/cmd/monitoring_security_posix_test.go",
+      "text": "string `fifo` has 12 occurrences, make it a constant",
+      "source": [
+        "\t\t\t\t{\"generated fallback\", \"fifo\", \"regular\", \"missing\", \"missing\", dockerComposeYAML, \"\"},"
+      ],
+      "reason": "Existing repeated CLI, configuration or fixture literal; defer constant cleanup without changing behavior."
+    },
+    {
+      "linter": "goconst",
+      "path": "pkg/cmd/monitoring_security_posix_test.go",
+      "text": "string `regular` has 25 occurrences, make it a constant",
+      "source": [
+        "\t\t\t\t{\"generated fallback\", \"fifo\", \"regular\", \"missing\", \"missing\", dockerComposeYAML, \"\"},"
+      ],
+      "reason": "Existing repeated CLI, configuration or fixture literal; defer constant cleanup without changing behavior."
+    },
+    {
+      "linter": "goconst",
+      "path": "pkg/cmd/monitoring_security_posix_test.go",
+      "text": "string `missing` has 39 occurrences, make it a constant",
+      "source": [
+        "\t\t\t\t{\"generated fallback\", \"fifo\", \"regular\", \"missing\", \"missing\", dockerComposeYAML, \"\"},"
+      ],
+      "reason": "Existing repeated CLI, configuration or fixture literal; defer constant cleanup without changing behavior."
+    },
+    {
+      "linter": "goconst",
+      "path": "pkg/cmd/monitoring_security_posix_test.go",
+      "text": "string `invalid` has 5 occurrences, make it a constant",
+      "source": [
+        "\t\t\t\t{\"corrupt generated and special legacy\", \"invalid\", \"fifo\", \"missing\", \"missing\", \"\", \"\"},"
+      ],
+      "reason": "Existing repeated CLI, configuration or fixture literal; defer constant cleanup without changing behavior."
+    },
+    {
+      "linter": "goconst",
+      "path": "pkg/cmd/monitoring_security_posix_test.go",
+      "text": "string `compose` has 3 occurrences, but such constant `checkoutComposeCommand` already exists",
+      "source": [
+        "\t\twantArgs = []string{\"compose\", \"-f\", filepath.Join(mon.monitoringDir, wantBase), \"ps\", \"--all\", \"-q\"}"
+      ],
+      "reason": "Existing repeated CLI, configuration or fixture literal; defer constant cleanup without changing behavior."
+    },
+    {
+      "linter": "goconst",
+      "path": "pkg/cmd/monitoring_security_test.go",
+      "text": "string `1.10.11` has 3 occurrences, make it a constant",
+      "source": [
+        "\t\t{\"1.10.11\", \"https://raw.githubusercontent.com/oracle/coherence-cli/refs/tags/1.10.11/monitoring\", true},"
+      ],
+      "reason": "Existing repeated CLI, configuration or fixture literal; defer constant cleanup without changing behavior."
+    },
+    {
+      "linter": "goconst",
+      "path": "pkg/cmd/monitoring_security_test.go",
+      "text": "string `::1` has 4 occurrences, make it a constant",
+      "source": [
+        "\t\t{\"::1\", \"::1\", \"\", \"http://[::1]:3000/api/health\"},"
+      ],
+      "reason": "Existing repeated CLI, configuration or fixture literal; defer constant cleanup without changing behavior."
+    },
+    {
+      "linter": "goconst",
+      "path": "pkg/cmd/monitoring_security_test.go",
+      "text": "string `directory` has 8 occurrences, make it a constant",
+      "source": [
+        "\t\t{\"directory\", func(t *testing.T, path string) {"
+      ],
+      "reason": "Existing repeated CLI, configuration or fixture literal; defer constant cleanup without changing behavior."
+    },
+    {
+      "linter": "goconst",
+      "path": "pkg/cmd/monitoring_security_test.go",
+      "text": "string `regular` has 25 occurrences, make it a constant",
+      "source": [
+        "\t\t{\"generated directory\", \"directory\", \"regular\", \"missing\", dockerComposeYAML, defaultMonitoringAddress, false},"
+      ],
+      "reason": "Existing repeated CLI, configuration or fixture literal; defer constant cleanup without changing behavior."
+    },
+    {
+      "linter": "goconst",
+      "path": "pkg/cmd/monitoring_security_test.go",
+      "text": "string `missing` has 39 occurrences, make it a constant",
+      "source": [
+        "\t\t{\"generated directory\", \"directory\", \"regular\", \"missing\", dockerComposeYAML, defaultMonitoringAddress, false},"
+      ],
+      "reason": "Existing repeated CLI, configuration or fixture literal; defer constant cleanup without changing behavior."
+    },
+    {
+      "linter": "goconst",
+      "path": "pkg/cmd/monitoring_security_test.go",
+      "text": "string `symlink` has 4 occurrences, make it a constant",
+      "source": [
+        "\t\t{\"generated symlink\", \"symlink\", \"regular\", \"regular\", generatedDockerComposeYAML, \"::1\", true},"
+      ],
+      "reason": "Existing repeated CLI, configuration or fixture literal; defer constant cleanup without changing behavior."
+    },
+    {
+      "linter": "goconst",
+      "path": "pkg/cmd/monitoring_security_test.go",
+      "text": "string `dangling` has 4 occurrences, make it a constant",
+      "source": [
+        "\t\t{\"dangling generated symlink\", \"dangling\", \"regular\", \"missing\", dockerComposeYAML, defaultMonitoringAddress, false},"
+      ],
+      "reason": "Existing repeated CLI, configuration or fixture literal; defer constant cleanup without changing behavior."
+    },
+    {
+      "linter": "goconst",
+      "path": "pkg/cmd/monitoring_security_test.go",
+      "text": "string `invalid` has 5 occurrences, make it a constant",
+      "source": [
+        "\t\t{\"invalid environment\", \"regular\", \"regular\", \"invalid\", generatedDockerComposeYAML, defaultMonitoringAddress, false},"
+      ],
+      "reason": "Existing repeated CLI, configuration or fixture literal; defer constant cleanup without changing behavior."
+    },
+    {
+      "linter": "goconst",
+      "path": "pkg/cmd/monitoring_security_test.go",
+      "text": "string `valid` has 9 occurrences, make it a constant",
+      "source": [
+        "\t\t{name: \"valid\", contents: password, valid: true},"
+      ],
+      "reason": "Existing repeated CLI, configuration or fixture literal; defer constant cleanup without changing behavior."
+    },
+    {
+      "linter": "goconst",
+      "path": "pkg/cmd/proxy.go",
+      "text": "string `proxies` has 3 occurrences, but such constant `proxiesPanelData` already exists",
+      "source": [
+        "\tUse:   \"proxies\","
+      ],
+      "reason": "Repeated CLI/configuration/fixture literal; constant extraction is deferred style cleanup."
+    },
+    {
+      "linter": "goconst",
+      "path": "pkg/cmd/proxy.go",
+      "text": "string `services` has 5 occurrences, but such constant `servicesPanelData` already exists",
+      "source": [
+        "\t\tfinalResult, err = utils.CombineByteArraysForJSON([][]byte{serviceResult, proxyResults}, []string{\"services\", \"members\"})"
+      ],
+      "reason": "Existing repeated CLI, configuration or fixture literal; defer constant cleanup without changing behavior."
+    },
+    {
+      "linter": "goconst",
+      "path": "pkg/cmd/proxy.go",
+      "text": "string `members` has 5 occurrences, but such constant `memberPanelData` already exists",
+      "source": [
+        "\t\tfinalResult, err = utils.CombineByteArraysForJSON([][]byte{serviceResult, proxyResults}, []string{\"services\", \"members\"})"
+      ],
+      "reason": "Repeated CLI/configuration/fixture literal; constant extraction is deferred style cleanup."
+    },
+    {
+      "linter": "goconst",
+      "path": "pkg/cmd/root.go",
+      "text": "string `default` has 3 occurrences, but such constant `defaultLayoutName` already exists",
+      "source": [
+        "\t\tConfig.DefaultStyle = \"default\""
+      ],
+      "reason": "Repeated CLI/configuration/fixture literal; constant extraction is deferred style cleanup."
+    },
+    {
+      "linter": "goconst",
+      "path": "pkg/cmd/root_test.go",
+      "text": "string `http` has 3 occurrences, but such constant `httpType` already exists",
+      "source": [
+        "\tnewCluster := ClusterConnection{Name: \"cluster1\", ConnectionType: \"http\", ConnectionURL: \"dummy\","
+      ],
+      "reason": "Repeated CLI/configuration/fixture literal; constant extraction is deferred style cleanup."
+    },
+    {
+      "linter": "goconst",
+      "path": "pkg/cmd/service.go",
+      "text": "string `services` has 5 occurrences, but such constant `servicesPanelData` already exists",
+      "source": [
+        "\tUse:   \"services\","
+      ],
+      "reason": "Existing repeated CLI, configuration or fixture literal; defer constant cleanup without changing behavior."
+    },
+    {
+      "linter": "goconst",
+      "path": "pkg/cmd/service.go",
+      "text": "string `proxies` has 3 occurrences, but such constant `proxiesPanelData` already exists",
+      "source": [
+        "\t\t\t\t[]string{\"services\", \"proxies\", \"members\", \"partitions\", \"distribution\"})"
+      ],
+      "reason": "Repeated CLI/configuration/fixture literal; constant extraction is deferred style cleanup."
+    },
+    {
+      "linter": "goconst",
+      "path": "pkg/cmd/service.go",
+      "text": "string `members` has 5 occurrences, but such constant `memberPanelData` already exists",
+      "source": [
+        "\t\t\t\t[]string{\"services\", \"proxies\", \"members\", \"partitions\", \"distribution\"})"
+      ],
+      "reason": "Repeated CLI/configuration/fixture literal; constant extraction is deferred style cleanup."
+    },
+    {
+      "linter": "goconst",
+      "path": "pkg/cmd/topics.go",
+      "text": "string `members` has 5 occurrences, but such constant `memberPanelData` already exists",
+      "source": [
+        "\t\t\t\t[]string{\"topics\", \"subscribers\", \"members\"})"
+      ],
+      "reason": "Repeated CLI/configuration/fixture literal; constant extraction is deferred style cleanup."
+    },
+    {
+      "linter": "goconst",
+      "path": "test/common/common.go",
+      "text": "string `true` has 4 occurrences, make it a constant",
+      "source": [
+        "\tif string(result) != \"true\" {"
+      ],
+      "reason": "Repeated CLI/configuration/fixture literal; constant extraction is deferred style cleanup."
+    },
+    {
+      "linter": "revive",
+      "path": "test/common/common.go",
+      "text": "dot-imports: should not use dot imports",
+      "source": [
+        "\t. \"github.com/onsi/gomega\""
+      ],
+      "reason": "Existing Gomega assertion import style; no security or correctness diagnostic is accepted."
+    },
+    {
+      "linter": "revive",
+      "path": "test/common/common.go",
+      "text": "var-naming: var restUrl should be restURL",
+      "source": [
+        "\t\trestUrl = context.RestUrl"
+      ],
+      "reason": "Existing identifier acronym spelling; naming cleanup is deferred."
+    },
+    {
+      "linter": "revive",
+      "path": "test/common/common.go",
+      "text": "var-naming: var shortUrl should be shortURL",
+      "source": [
+        "\tshortUrl := strings.ReplaceAll(strings.ReplaceAll(context.Url,"
+      ],
+      "reason": "Existing identifier acronym spelling; naming cleanup is deferred."
+    },
+    {
+      "linter": "revive",
+      "path": "test/common/common.go",
+      "text": "var-naming: func parameter restUrl should be restURL",
+      "source": [
+        "func getVersion(restUrl string) (string, error) {"
+      ],
+      "reason": "Existing identifier acronym spelling; naming cleanup is deferred."
+    },
+    {
+      "linter": "revive",
+      "path": "test/common/common.go",
+      "text": "var-naming: var restUrl should be restURL",
+      "source": [
+        "\t\trestUrl       = context.RestUrl"
+      ],
+      "reason": "Existing identifier acronym spelling; naming cleanup is deferred."
+    },
+    {
+      "linter": "revive",
+      "path": "test/common/common.go",
+      "text": "var-naming: var restUrl should be restURL",
+      "source": [
+        "\t\trestUrl       = context.RestUrl"
+      ],
+      "reason": "Existing identifier acronym spelling; naming cleanup is deferred."
+    },
+    {
+      "linter": "revive",
+      "path": "test/common/common.go",
+      "text": "var-naming: var restUrl should be restURL",
+      "source": [
+        "\t\trestUrl = context.RestUrl"
+      ],
+      "reason": "Existing identifier acronym spelling; naming cleanup is deferred."
+    },
+    {
+      "linter": "revive",
+      "path": "test/common/common.go",
+      "text": "var-naming: var restUrl should be restURL",
+      "source": [
+        "\t\trestUrl       = context.RestUrl"
+      ],
+      "reason": "Existing identifier acronym spelling; naming cleanup is deferred."
+    },
+    {
+      "linter": "revive",
+      "path": "test/common/common.go",
+      "text": "var-naming: var restUrl should be restURL",
+      "source": [
+        "\t\trestUrl       = context.RestUrl"
+      ],
+      "reason": "Existing identifier acronym spelling; naming cleanup is deferred."
+    },
+    {
+      "linter": "revive",
+      "path": "test/common/common.go",
+      "text": "var-naming: func RunTestHttpSessionCommands should be RunTestHTTPSessionCommands",
+      "source": [
+        "func RunTestHttpSessionCommands(t *testing.T) {"
+      ],
+      "reason": "Existing identifier acronym spelling; naming cleanup is deferred."
+    },
+    {
+      "linter": "revive",
+      "path": "test/common/common.go",
+      "text": "var-naming: var restUrl should be restURL",
+      "source": [
+        "\t\trestUrl = context.RestUrl"
+      ],
+      "reason": "Existing identifier acronym spelling; naming cleanup is deferred."
+    },
+    {
+      "linter": "revive",
+      "path": "test/common/common.go",
+      "text": "var-naming: var restUrl should be restURL",
+      "source": [
+        "\t\trestUrl = context.RestUrl"
+      ],
+      "reason": "Existing identifier acronym spelling; naming cleanup is deferred."
+    },
+    {
+      "linter": "revive",
+      "path": "test/common/common.go",
+      "text": "var-naming: var restUrl should be restURL",
+      "source": [
+        "\trestUrl := context.RestUrl"
+      ],
+      "reason": "Existing identifier acronym spelling; naming cleanup is deferred."
+    },
+    {
+      "linter": "revive",
+      "path": "test/common/common.go",
+      "text": "var-naming: var restUrl should be restURL",
+      "source": [
+        "\trestUrl := context.RestUrl"
+      ],
+      "reason": "Existing identifier acronym spelling; naming cleanup is deferred."
+    },
+    {
+      "linter": "revive",
+      "path": "test/common/common.go",
+      "text": "var-naming: func RunTestHttpProxyCommands should be RunTestHTTPProxyCommands",
+      "source": [
+        "func RunTestHttpProxyCommands(t *testing.T) {"
+      ],
+      "reason": "Existing identifier acronym spelling; naming cleanup is deferred."
+    },
+    {
+      "linter": "revive",
+      "path": "test/common/common.go",
+      "text": "var-naming: var restUrl should be restURL",
+      "source": [
+        "\trestUrl := context.RestUrl"
+      ],
+      "reason": "Existing identifier acronym spelling; naming cleanup is deferred."
+    },
+    {
+      "linter": "revive",
+      "path": "test/common/common.go",
+      "text": "var-naming: var restUrl should be restURL",
+      "source": [
+        "\t\trestUrl = context.RestUrl"
+      ],
+      "reason": "Existing identifier acronym spelling; naming cleanup is deferred."
+    },
+    {
+      "linter": "revive",
+      "path": "test/common/common.go",
+      "text": "var-naming: var restUrl2 should be restURL2",
+      "source": [
+        "\trestUrl2 := strings.ReplaceAll(restUrl, \"8080\", \"8081\")"
+      ],
+      "reason": "Existing identifier acronym spelling; naming cleanup is deferred."
+    },
+    {
+      "linter": "revive",
+      "path": "test/common/common.go",
+      "text": "var-naming: var restUrl should be restURL",
+      "source": [
+        "\t\trestUrl = context.RestUrl"
+      ],
+      "reason": "Existing identifier acronym spelling; naming cleanup is deferred."
+    },
+    {
+      "linter": "revive",
+      "path": "test/common/common.go",
+      "text": "var-naming: var restUrl should be restURL",
+      "source": [
+        "\t\trestUrl = context.RestUrl"
+      ],
+      "reason": "Existing identifier acronym spelling; naming cleanup is deferred."
+    },
+    {
+      "linter": "revive",
+      "path": "test/common/common.go",
+      "text": "var-naming: func parameter restUrl should be restURL",
+      "source": [
+        "func isHealthEnabled(restUrl string) bool {"
+      ],
+      "reason": "Existing identifier acronym spelling; naming cleanup is deferred."
+    },
+    {
+      "linter": "revive",
+      "path": "test/common/common.go",
+      "text": "var-naming: var restUrl should be restURL",
+      "source": [
+        "\t\trestUrl = context.RestUrl"
+      ],
+      "reason": "Existing identifier acronym spelling; naming cleanup is deferred."
+    },
+    {
+      "linter": "revive",
+      "path": "test/test_utils/test_utils.go",
+      "text": "dot-imports: should not use dot imports",
+      "source": [
+        "\t. \"github.com/onsi/gomega\""
+      ],
+      "reason": "Existing Gomega assertion import style; no security or correctness diagnostic is accepted."
+    },
+    {
+      "linter": "revive",
+      "path": "test/test_utils/test_utils.go",
+      "text": "var-naming: struct field HttpPort should be HTTPPort",
+      "source": [
+        "\tHttpPort        int"
+      ],
+      "reason": "Existing identifier acronym spelling; naming cleanup is deferred."
+    },
+    {
+      "linter": "revive",
+      "path": "test/test_utils/test_utils.go",
+      "text": "var-naming: struct field Url should be URL",
+      "source": [
+        "\tUrl             string"
+      ],
+      "reason": "Existing identifier acronym spelling; naming cleanup is deferred."
+    },
+    {
+      "linter": "revive",
+      "path": "test/test_utils/test_utils.go",
+      "text": "var-naming: struct field RestUrl should be RestURL",
+      "source": [
+        "\tRestUrl         string"
+      ],
+      "reason": "Existing identifier acronym spelling; naming cleanup is deferred."
+    },
+    {
+      "linter": "revive",
+      "path": "test/test_utils/test_utils.go",
+      "text": "indent-error-flow: if block ends with a return statement, so drop this else and outdent its block",
+      "source": [
+        "\t} else {",
+        "\t\t// wait for ready and dump logs if not available",
+        "\t\tif err = WaitForHttpReady(url, 120); err != nil {",
+        "\t\t\tfmt.Println(\"Collecting logs...\")",
+        "\t\t\t_ = CollectDockerLogs()",
+        "\t\t\treturn errors.New(\"Unable to start cluster: \" + err.Error())",
+        "\t\t}",
+        "\t}"
+      ],
+      "reason": "Existing else after a returning branch; indentation simplification only."
+    },
+    {
+      "linter": "revive",
+      "path": "test/test_utils/test_utils.go",
+      "text": "redefines-builtin-id: redefinition of the built-in function delete",
+      "source": [
+        "func StartDockerImage(t *testing.T, image string, name string, httpPort int, clusterName string, delete bool) (string, error) {"
+      ],
+      "reason": "Existing fixture parameter spelling shadows a builtin; renaming only."
+    },
+    {
+      "linter": "revive",
+      "path": "test/test_utils/test_utils.go",
+      "text": "var-naming: func GetManagementUrl should be GetManagementURL",
+      "source": [
+        "func GetManagementUrl(httpPort int) string {"
+      ],
+      "reason": "Existing identifier acronym spelling; naming cleanup is deferred."
+    },
+    {
+      "linter": "revive",
+      "path": "test/test_utils/test_utils.go",
+      "text": "var-naming: func GetRestUrl should be GetRestURL",
+      "source": [
+        "func GetRestUrl(restPort int) string {"
+      ],
+      "reason": "Existing identifier acronym spelling; naming cleanup is deferred."
+    },
+    {
+      "linter": "revive",
+      "path": "test/test_utils/test_utils.go",
+      "text": "unused-parameter: parameter 'req' seems to be unused, consider removing or renaming it as _",
+      "source": [
+        "\t\tCheckRedirect: func(req *http.Request, via []*http.Request) error {"
+      ],
+      "reason": "Existing redirect callback parameter is unused; signature-preserving underscore cleanup only."
+    },
+    {
+      "linter": "revive",
+      "path": "test/test_utils/test_utils.go",
+      "text": "unused-parameter: parameter 'via' seems to be unused, consider removing or renaming it as _",
+      "source": [
+        "\t\tCheckRedirect: func(req *http.Request, via []*http.Request) error {"
+      ],
+      "reason": "Existing redirect callback parameter is unused; signature-preserving underscore cleanup only."
+    },
+    {
+      "linter": "revive",
+      "path": "test/test_utils/test_utils.go",
+      "text": "var-naming: func WaitForHttpReady should be WaitForHTTPReady",
+      "source": [
+        "func WaitForHttpReady(url string, timeout int) error {"
+      ],
+      "reason": "Existing identifier acronym spelling; naming cleanup is deferred."
+    },
+    {
+      "linter": "revive",
+      "path": "test/test_utils/test_utils.go",
+      "text": "error-strings: error strings should not be capitalized or end with punctuation or a newline",
+      "source": [
+        "\treturn fmt.Errorf(\"Unable to connect to url %s after %d seconds\\n\", url, timeout)"
+      ],
+      "reason": "Existing error capitalization/punctuation style; error handling remains enforced."
+    },
+    {
+      "linter": "revive",
+      "path": "test/test_utils/test_utils.go",
+      "text": "var-naming: func WaitForHttpBalancedServices should be WaitForHTTPBalancedServices",
+      "source": [
+        "func WaitForHttpBalancedServices(url string, timeout int) error {"
+      ],
+      "reason": "Existing identifier acronym spelling; naming cleanup is deferred."
+    },
+    {
+      "linter": "revive",
+      "path": "test/test_utils/test_utils.go",
+      "text": "error-strings: error strings should not be capitalized or end with punctuation or a newline",
+      "source": [
+        "\treturn fmt.Errorf(\"Unable to connect to url %s after %d seconds\\n\", url, timeout)"
+      ],
+      "reason": "Existing error capitalization/punctuation style; error handling remains enforced."
+    },
+    {
+      "linter": "staticcheck",
+      "path": "pkg/cmd/cache.go",
+      "text": "QF1003: could use tagged switch on displayType",
+      "source": [
+        "\t\tif displayType == access {"
+      ],
+      "reason": "Existing conditional chain could use a tagged switch; optional syntax cleanup."
+    },
+    {
+      "linter": "staticcheck",
+      "path": "pkg/cmd/cluster.go",
+      "text": "ST1005: error strings should not be capitalized",
+      "source": [
+        "\t\treturn fmt.Errorf(\"A connection for cluster named %s already exists with url=%s and type=%s\","
+      ],
+      "reason": "Existing error capitalization/punctuation style; error handling remains enforced."
+    },
+    {
+      "linter": "staticcheck",
+      "path": "pkg/cmd/cluster_utils.go",
+      "text": "QF1012: Use fmt.Fprintf(...) instead of WriteString(fmt.Sprintf(...))",
+      "source": [
+        "\t\tsb.WriteString(fmt.Sprintf(\"implementation '%s:%s:%s'\\n\", v.GroupID, v.Artifact, v.Version))"
+      ],
+      "reason": "Existing WriteString(fmt.Sprintf(...)) could use fmt.Fprintf; optional output construction cleanup."
+    },
+    {
+      "linter": "staticcheck",
+      "path": "pkg/cmd/color.go",
+      "text": "QF1003: could use tagged switch on value",
+      "source": [
+        "\t\tif value == on {"
+      ],
+      "reason": "Existing conditional chain could use a tagged switch; optional syntax cleanup."
+    },
+    {
+      "linter": "staticcheck",
+      "path": "pkg/cmd/debug.go",
+      "text": "QF1003: could use tagged switch on value",
+      "source": [
+        "\t\tif value == on {"
+      ],
+      "reason": "Existing conditional chain could use a tagged switch; optional syntax cleanup."
+    },
+    {
+      "linter": "staticcheck",
+      "path": "pkg/cmd/elastic_data.go",
+      "text": "QF1003: could use tagged switch on journalType",
+      "source": [
+        "\t\tif journalType == ram {"
+      ],
+      "reason": "Existing conditional chain could use a tagged switch; optional syntax cleanup."
+    },
+    {
+      "linter": "staticcheck",
+      "path": "pkg/cmd/elastic_data.go",
+      "text": "QF1003: could use tagged switch on journalType",
+      "source": [
+        "\t\tif journalType == ram {"
+      ],
+      "reason": "Existing conditional chain could use a tagged switch; optional syntax cleanup."
+    },
+    {
+      "linter": "staticcheck",
+      "path": "pkg/cmd/federation.go",
+      "text": "QF1003: could use tagged switch on args[0]",
+      "source": [
+        "\t\tif args[0] == destinations {"
+      ],
+      "reason": "Existing conditional chain could use a tagged switch; optional syntax cleanup."
+    },
+    {
+      "linter": "staticcheck",
+      "path": "pkg/cmd/federation.go",
+      "text": "QF1012: Use fmt.Fprintf(...) instead of WriteString(fmt.Sprintf(...))",
+      "source": [
+        "\t\tsb.WriteString(fmt.Sprintf(\"Service:     %s\\n\", serviceName))"
+      ],
+      "reason": "Existing WriteString(fmt.Sprintf(...)) could use fmt.Fprintf; optional output construction cleanup."
+    },
+    {
+      "linter": "staticcheck",
+      "path": "pkg/cmd/federation.go",
+      "text": "QF1012: Use fmt.Fprintf(...) instead of WriteString(fmt.Sprintf(...))",
+      "source": [
+        "\tsb.WriteString(fmt.Sprintf(\"Type:        %s\\n\", federationType))"
+      ],
+      "reason": "Existing WriteString(fmt.Sprintf(...)) could use fmt.Fprintf; optional output construction cleanup."
+    },
+    {
+      "linter": "staticcheck",
+      "path": "pkg/cmd/federation.go",
+      "text": "QF1012: Use fmt.Fprintf(...) instead of WriteString(fmt.Sprintf(...))",
+      "source": [
+        "\tsb.WriteString(fmt.Sprintf(\"Participant: %s\\n\\n\", participantName))"
+      ],
+      "reason": "Existing WriteString(fmt.Sprintf(...)) could use fmt.Fprintf; optional output construction cleanup."
+    },
+    {
+      "linter": "staticcheck",
+      "path": "pkg/cmd/federation.go",
+      "text": "QF1012: Use fmt.Fprintf(...) instead of WriteString(fmt.Sprintf(...))",
+      "source": [
+        "\t\tsb.WriteString(fmt.Sprintf(\"Service:     %s\\n\", service))"
+      ],
+      "reason": "Existing WriteString(fmt.Sprintf(...)) could use fmt.Fprintf; optional output construction cleanup."
+    },
+    {
+      "linter": "staticcheck",
+      "path": "pkg/cmd/federation.go",
+      "text": "QF1012: Use fmt.Fprintf(...) instead of WriteString(fmt.Sprintf(...))",
+      "source": [
+        "\tsb.WriteString(fmt.Sprintf(\"Type:        %s\\n\", federationType))"
+      ],
+      "reason": "Existing WriteString(fmt.Sprintf(...)) could use fmt.Fprintf; optional output construction cleanup."
+    },
+    {
+      "linter": "staticcheck",
+      "path": "pkg/cmd/federation.go",
+      "text": "QF1012: Use fmt.Fprintf(...) instead of WriteString(fmt.Sprintf(...))",
+      "source": [
+        "\tsb.WriteString(fmt.Sprintf(\"Participant: %s\\n\", participantName))"
+      ],
+      "reason": "Existing WriteString(fmt.Sprintf(...)) could use fmt.Fprintf; optional output construction cleanup."
+    },
+    {
+      "linter": "staticcheck",
+      "path": "pkg/cmd/formatting.go",
+      "text": "QF1012: Use fmt.Fprintf(...) instead of WriteString(fmt.Sprintf(...))",
+      "source": [
+        "\tsb.WriteString(fmt.Sprintf(\"Cluster Name:       %s\\n\", cluster.ClusterName))"
+      ],
+      "reason": "Existing WriteString(fmt.Sprintf(...)) could use fmt.Fprintf; optional output construction cleanup."
+    },
+    {
+      "linter": "staticcheck",
+      "path": "pkg/cmd/formatting.go",
+      "text": "QF1012: Use fmt.Fprintf(...) instead of WriteString(fmt.Sprintf(...))",
+      "source": [
+        "\tsb.WriteString(fmt.Sprintf(\"Version:            %s\\n\", cluster.Version))"
+      ],
+      "reason": "Existing WriteString(fmt.Sprintf(...)) could use fmt.Fprintf; optional output construction cleanup."
+    },
+    {
+      "linter": "staticcheck",
+      "path": "pkg/cmd/formatting.go",
+      "text": "QF1012: Use fmt.Fprintf(...) instead of WriteString(fmt.Sprintf(...))",
+      "source": [
+        "\tsb.WriteString(fmt.Sprintf(\"Cluster TotalSize:  %d\\n\", cluster.ClusterSize))"
+      ],
+      "reason": "Existing WriteString(fmt.Sprintf(...)) could use fmt.Fprintf; optional output construction cleanup."
+    },
+    {
+      "linter": "staticcheck",
+      "path": "pkg/cmd/formatting.go",
+      "text": "QF1012: Use fmt.Fprintf(...) instead of WriteString(fmt.Sprintf(...))",
+      "source": [
+        "\tsb.WriteString(fmt.Sprintf(\"License Mode:       %s\\n\", cluster.LicenseMode))"
+      ],
+      "reason": "Existing WriteString(fmt.Sprintf(...)) could use fmt.Fprintf; optional output construction cleanup."
+    },
+    {
+      "linter": "staticcheck",
+      "path": "pkg/cmd/formatting.go",
+      "text": "QF1012: Use fmt.Fprintf(...) instead of WriteString(fmt.Sprintf(...))",
+      "source": [
+        "\tsb.WriteString(fmt.Sprintf(\"Departure Count:    %d\\n\", cluster.MembersDepartureCount))"
+      ],
+      "reason": "Existing WriteString(fmt.Sprintf(...)) could use fmt.Fprintf; optional output construction cleanup."
+    },
+    {
+      "linter": "staticcheck",
+      "path": "pkg/cmd/formatting.go",
+      "text": "QF1012: Use fmt.Fprintf(...) instead of WriteString(fmt.Sprintf(...))",
+      "source": [
+        "\tsb.WriteString(fmt.Sprintf(\"Running:            %v\\n\", cluster.Running))"
+      ],
+      "reason": "Existing WriteString(fmt.Sprintf(...)) could use fmt.Fprintf; optional output construction cleanup."
+    },
+    {
+      "linter": "staticcheck",
+      "path": "pkg/cmd/formatting.go",
+      "text": "ST1017: don't use Yoda conditions",
+      "source": [
+        "\t\tif \"Durable\" == value.SubType {"
+      ],
+      "reason": "Existing reversed equality operands; expression style only."
+    },
+    {
+      "linter": "staticcheck",
+      "path": "pkg/cmd/formatting.go",
+      "text": "QF1012: Use fmt.Fprintf(...) instead of WriteString(fmt.Sprintf(...))",
+      "source": [
+        "\t\t\t\tsb.WriteString(fmt.Sprintf(format, node, v))"
+      ],
+      "reason": "Existing WriteString(fmt.Sprintf(...)) could use fmt.Fprintf; optional output construction cleanup."
+    },
+    {
+      "linter": "staticcheck",
+      "path": "pkg/cmd/formatting.go",
+      "text": "QF1012: Use fmt.Fprintf(...) instead of WriteString(fmt.Sprintf(...))",
+      "source": [
+        "\t\t\t\tsb.WriteString(fmt.Sprintf(keyFormat, v.Key, str))"
+      ],
+      "reason": "Existing WriteString(fmt.Sprintf(...)) could use fmt.Fprintf; optional output construction cleanup."
+    },
+    {
+      "linter": "staticcheck",
+      "path": "pkg/cmd/formatting.go",
+      "text": "QF1012: Use fmt.Fprintf(...) instead of WriteString(fmt.Sprintf(...))",
+      "source": [
+        "\t\t\t\tsb.WriteString(fmt.Sprintf(keyFormat, \"\", str))"
+      ],
+      "reason": "Existing WriteString(fmt.Sprintf(...)) could use fmt.Fprintf; optional output construction cleanup."
+    },
+    {
+      "linter": "staticcheck",
+      "path": "pkg/cmd/formatting.go",
+      "text": "QF1012: Use fmt.Fprintf(...) instead of WriteString(fmt.Sprintf(...))",
+      "source": [
+        "\t\tsb.WriteString(fmt.Sprintf(keyFormat, v.Key, value))"
+      ],
+      "reason": "Existing WriteString(fmt.Sprintf(...)) could use fmt.Fprintf; optional output construction cleanup."
+    },
+    {
+      "linter": "staticcheck",
+      "path": "pkg/cmd/formatting.go",
+      "text": "QF1012: Use fmt.Fprintf(...) instead of WriteString(fmt.Sprintf(...))",
+      "source": [
+        "\t\t\t\t\t\tsb2.WriteString(fmt.Sprintf(\"... output truncated, %v more line(s)\", remainingLines))"
+      ],
+      "reason": "Existing WriteString(fmt.Sprintf(...)) could use fmt.Fprintf; optional output construction cleanup."
+    },
+    {
+      "linter": "staticcheck",
+      "path": "pkg/cmd/health.go",
+      "text": "QF1004: could use strings.ReplaceAll instead",
+      "source": [
+        "\t\t\t\tresult = strings.Replace(result, \" \", \"\", -1)"
+      ],
+      "reason": "Existing strings.Replace with count -1 could use ReplaceAll; optional syntax cleanup."
+    },
+    {
+      "linter": "staticcheck",
+      "path": "pkg/cmd/ingore_certs.go",
+      "text": "QF1003: could use tagged switch on value",
+      "source": [
+        "\t\tif value == stringTrue {"
+      ],
+      "reason": "Existing conditional chain could use a tagged switch; optional syntax cleanup."
+    },
+    {
+      "linter": "staticcheck",
+      "path": "pkg/cmd/jfr.go",
+      "text": "QF1003: could use tagged switch on operation",
+      "source": [
+        "\t\tif operation == fetcher.StopJFR {"
+      ],
+      "reason": "Existing conditional chain could use a tagged switch; optional syntax cleanup."
+    },
+    {
+      "linter": "staticcheck",
+      "path": "pkg/cmd/jfr.go",
+      "text": "QF1004: could use strings.ReplaceAll instead",
+      "source": [
+        "\t\tfinalResult = strings.Replace(strings.Replace(result, \"\\n\\n\", \"\\n\", -1), \"->\", \"->\\n\", -1)"
+      ],
+      "reason": "Existing strings.Replace with count -1 could use ReplaceAll; optional syntax cleanup."
+    },
+    {
+      "linter": "staticcheck",
+      "path": "pkg/cmd/jfr.go",
+      "text": "QF1004: could use strings.ReplaceAll instead",
+      "source": [
+        "\t\tfinalResult = strings.Replace(strings.Replace(result, \"\\n\\n\", \"\\n\", -1), \"->\", \"->\\n\", -1)"
+      ],
+      "reason": "Existing strings.Replace with count -1 could use ReplaceAll; optional syntax cleanup."
+    },
+    {
+      "linter": "staticcheck",
+      "path": "pkg/cmd/member.go",
+      "text": "QF1012: Use fmt.Fprintf(...) instead of WriteString(fmt.Sprintf(...))",
+      "source": [
+        "\t\t\tsb.WriteString(fmt.Sprintf(\"Viewing Node Id:     %s\\n\", member.NodeID))"
+      ],
+      "reason": "Existing WriteString(fmt.Sprintf(...)) could use fmt.Fprintf; optional output construction cleanup."
+    },
+    {
+      "linter": "staticcheck",
+      "path": "pkg/cmd/member.go",
+      "text": "QF1012: Use fmt.Fprintf(...) instead of WriteString(fmt.Sprintf(...))",
+      "source": [
+        "\t\t\tsb.WriteString(fmt.Sprintf(\"Viewing Member Name: %s\\n\\n\", member.MemberName))"
+      ],
+      "reason": "Existing WriteString(fmt.Sprintf(...)) could use fmt.Fprintf; optional output construction cleanup."
+    },
+    {
+      "linter": "staticcheck",
+      "path": "pkg/cmd/member.go",
+      "text": "QF1003: could use tagged switch on command",
+      "source": [
+        "\tif command == dumpClusterHeap {"
+      ],
+      "reason": "Existing conditional chain could use a tagged switch; optional syntax cleanup."
+    },
+    {
+      "linter": "staticcheck",
+      "path": "pkg/cmd/monitor_cluster.go",
+      "text": "QF1003: could use tagged switch on displayType",
+      "source": [
+        "\tif displayType == access {"
+      ],
+      "reason": "Existing conditional chain could use a tagged switch; optional syntax cleanup."
+    },
+    {
+      "linter": "staticcheck",
+      "path": "pkg/cmd/monitor_cluster.go",
+      "text": "QF1012: Use fmt.Fprintf(...) instead of WriteString(fmt.Sprintf(...))",
+      "source": [
+        "\t\tsb.WriteString(fmt.Sprintf(\"%-25s: %s\\n\", k, v))"
+      ],
+      "reason": "Existing WriteString(fmt.Sprintf(...)) could use fmt.Fprintf; optional output construction cleanup."
+    },
+    {
+      "linter": "staticcheck",
+      "path": "pkg/cmd/monitor_cluster.go",
+      "text": "QF1012: Use fmt.Fprintf(...) instead of WriteString(fmt.Sprintf(...))",
+      "source": [
+        "\t\tsb.WriteString(fmt.Sprintf(\"%-25s: %s\\n\", p.GetPanelName(), p.GetDescription()))"
+      ],
+      "reason": "Existing WriteString(fmt.Sprintf(...)) could use fmt.Fprintf; optional output construction cleanup."
+    },
+    {
+      "linter": "staticcheck",
+      "path": "pkg/cmd/monitoring.go",
+      "text": "ST1005: error strings should not be capitalized",
+      "source": [
+        "\t\treturn fmt.Errorf(\"Docker Compose V2 is required for generated monitoring configurations: %w\", err)"
+      ],
+      "reason": "Existing formatting or simplification advice; no SA correctness finding is accepted."
+    },
+    {
+      "linter": "staticcheck",
+      "path": "pkg/cmd/monitoring.go",
+      "text": "ST1005: error strings should not be capitalized",
+      "source": [
+        "\t\treturn fmt.Errorf(\"Docker Compose V2 is required but its version could not be verified; upgrade Docker Compose: %w\", err)"
+      ],
+      "reason": "Existing formatting or simplification advice; no SA correctness finding is accepted."
+    },
+    {
+      "linter": "staticcheck",
+      "path": "pkg/cmd/monitoring.go",
+      "text": "ST1005: error strings should not be capitalized",
+      "source": [
+        "\t\treturn fmt.Errorf(\"Docker Compose V2 or newer is required for generated monitoring configurations; found version %s\", strings.TrimSpace(output))"
+      ],
+      "reason": "Existing formatting or simplification advice; no SA correctness finding is accepted."
+    },
+    {
+      "linter": "staticcheck",
+      "path": "pkg/cmd/monitoring_permissions_unix.go",
+      "text": "ST1005: error strings should not be capitalized",
+      "source": [
+        "\t\treturn fmt.Errorf(\"Grafana password file %s must be a regular, non-symbolic-link file\", file)"
+      ],
+      "reason": "Existing formatting or simplification advice; no SA correctness finding is accepted."
+    },
+    {
+      "linter": "staticcheck",
+      "path": "pkg/cmd/monitoring_permissions_unix.go",
+      "text": "ST1005: error strings should not be capitalized",
+      "source": [
+        "\t\treturn fmt.Errorf(\"Grafana password file %s has insecure permissions %04o; expected no group or other access\", file, info.Mode().Perm())"
+      ],
+      "reason": "Existing formatting or simplification advice; no SA correctness finding is accepted."
+    },
+    {
+      "linter": "staticcheck",
+      "path": "pkg/cmd/monitoring_permissions_unix.go",
+      "text": "ST1005: error strings should not be capitalized",
+      "source": [
+        "\t\treturn fmt.Errorf(\"Grafana password file %s is owned by user ID %d, expected %d\", file, stat.Uid, os.Geteuid())"
+      ],
+      "reason": "Existing formatting or simplification advice; no SA correctness finding is accepted."
+    },
+    {
+      "linter": "staticcheck",
+      "path": "pkg/cmd/monitoring_permissions_unix.go",
+      "text": "ST1005: error strings should not be capitalized",
+      "source": [
+        "\t\treturn fmt.Errorf(\"Grafana password file %s is not readable: %w\", file, err)"
+      ],
+      "reason": "Existing formatting or simplification advice; no SA correctness finding is accepted."
+    },
+    {
+      "linter": "staticcheck",
+      "path": "pkg/cmd/monitoring_permissions_unix.go",
+      "text": "ST1005: error strings should not be capitalized",
+      "source": [
+        "\t\treturn fmt.Errorf(\"Grafana password file %s is invalid: %w\", file, err)"
+      ],
+      "reason": "Existing formatting or simplification advice; no SA correctness finding is accepted."
+    },
+    {
+      "linter": "staticcheck",
+      "path": "pkg/cmd/monitoring_security.go",
+      "text": "ST1005: error strings should not be capitalized",
+      "source": [
+        "\t\treturn errors.New(\"Grafana must use the restricted credential bootstrap; rerun 'cohctl init monitoring'\")"
+      ],
+      "reason": "Existing formatting or simplification advice; no SA correctness finding is accepted."
+    },
+    {
+      "linter": "staticcheck",
+      "path": "pkg/cmd/monitoring_security.go",
+      "text": "ST1005: error strings should not be capitalized",
+      "source": [
+        "\t\treturn errors.New(\"Grafana must use the fail-closed credential entrypoint; rerun 'cohctl init monitoring'\")"
+      ],
+      "reason": "Existing formatting or simplification advice; no SA correctness finding is accepted."
+    },
+    {
+      "linter": "staticcheck",
+      "path": "pkg/cmd/monitoring_security.go",
+      "text": "ST1005: error strings should not be capitalized",
+      "source": [
+        "\t\treturn errors.New(\"Grafana must use the image's default command\")"
+      ],
+      "reason": "Existing formatting or simplification advice; no SA correctness finding is accepted."
+    },
+    {
+      "linter": "staticcheck",
+      "path": "pkg/cmd/monitoring_security.go",
+      "text": "ST1005: error strings should not be capitalized",
+      "source": [
+        "\t\treturn errors.New(\"Grafana administrator environment is not authoritative\")"
+      ],
+      "reason": "Existing formatting or simplification advice; no SA correctness finding is accepted."
+    },
+    {
+      "linter": "staticcheck",
+      "path": "pkg/cmd/monitoring_security.go",
+      "text": "ST1005: error strings should not be capitalized",
+      "source": [
+        "\t\t\treturn fmt.Errorf(\"Grafana credential bootstrap does not permit environment setting %s\", key)"
+      ],
+      "reason": "Existing formatting or simplification advice; no SA correctness finding is accepted."
+    },
+    {
+      "linter": "staticcheck",
+      "path": "pkg/cmd/monitoring_security.go",
+      "text": "ST1005: error strings should not be capitalized",
+      "source": [
+        "\t\t\treturn fmt.Errorf(\"Grafana contains competing administrator password setting %s\", key)"
+      ],
+      "reason": "Existing formatting or simplification advice; no SA correctness finding is accepted."
+    },
+    {
+      "linter": "staticcheck",
+      "path": "pkg/cmd/monitoring_security.go",
+      "text": "ST1005: error strings should not be capitalized",
+      "source": [
+        "\t\treturn errors.New(\"Grafana must receive exactly one password secret\")"
+      ],
+      "reason": "Existing formatting or simplification advice; no SA correctness finding is accepted."
+    },
+    {
+      "linter": "staticcheck",
+      "path": "pkg/cmd/monitoring_security.go",
+      "text": "ST1005: error strings should not be capitalized",
+      "source": [
+        "\t\treturn errors.New(\"Grafana password secret grant is invalid\")"
+      ],
+      "reason": "Existing formatting or simplification advice; no SA correctness finding is accepted."
+    },
+    {
+      "linter": "staticcheck",
+      "path": "pkg/cmd/monitoring_security.go",
+      "text": "ST1005: error strings should not be capitalized",
+      "source": [
+        "\t\treturn errors.New(\"Prometheus must not receive the Grafana password secret\")"
+      ],
+      "reason": "Existing formatting or simplification advice; no SA correctness finding is accepted."
+    },
+    {
+      "linter": "staticcheck",
+      "path": "pkg/cmd/monitoring_security.go",
+      "text": "ST1005: error strings should not be capitalized",
+      "source": [
+        "\t\treturn errors.New(\"Grafana password secret source is invalid\")"
+      ],
+      "reason": "Existing formatting or simplification advice; no SA correctness finding is accepted."
+    },
+    {
+      "linter": "staticcheck",
+      "path": "pkg/cmd/reset_stats.go",
+      "text": "QF1003: could use tagged switch on operation",
+      "source": [
+        "\tif operation == fetcher.ResetCache {"
+      ],
+      "reason": "Existing conditional chain could use a tagged switch; optional syntax cleanup."
+    },
+    {
+      "linter": "staticcheck",
+      "path": "pkg/cmd/root_test.go",
+      "text": "QF1003: could use tagged switch on value.AppID",
+      "source": [
+        "\t\tif value.AppID == \"app1\" {"
+      ],
+      "reason": "Existing conditional chain could use a tagged switch; optional syntax cleanup."
+    },
+    {
+      "linter": "staticcheck",
+      "path": "pkg/cmd/snapshot.go",
+      "text": "QF1003: could use tagged switch on operation",
+      "source": [
+        "\t\t\tif operation == fetcher.RemoveSnapshot {"
+      ],
+      "reason": "Existing conditional chain could use a tagged switch; optional syntax cleanup."
+    },
+    {
+      "linter": "staticcheck",
+      "path": "pkg/cmd/topics.go",
+      "text": "QF1012: Use fmt.Fprintf(...) instead of WriteString(fmt.Sprintf(...))",
+      "source": [
+        "\t\t\t\tsb.WriteString(fmt.Sprintf(\"Service:      %s\\n\", serviceName))"
+      ],
+      "reason": "Existing WriteString(fmt.Sprintf(...)) could use fmt.Fprintf; optional output construction cleanup."
+    },
+    {
+      "linter": "staticcheck",
+      "path": "pkg/cmd/topics.go",
+      "text": "QF1012: Use fmt.Fprintf(...) instead of WriteString(fmt.Sprintf(...))",
+      "source": [
+        "\t\t\t\tsb.WriteString(fmt.Sprintf(\"Topic:        %s\\n\", topicNameChannels))"
+      ],
+      "reason": "Existing WriteString(fmt.Sprintf(...)) could use fmt.Fprintf; optional output construction cleanup."
+    },
+    {
+      "linter": "staticcheck",
+      "path": "pkg/cmd/topics.go",
+      "text": "QF1012: Use fmt.Fprintf(...) instead of WriteString(fmt.Sprintf(...))",
+      "source": [
+        "\t\t\t\tsb.WriteString(fmt.Sprintf(\"Node ID:      %d\\n\", topicsNodeID))"
+      ],
+      "reason": "Existing WriteString(fmt.Sprintf(...)) could use fmt.Fprintf; optional output construction cleanup."
+    },
+    {
+      "linter": "staticcheck",
+      "path": "pkg/cmd/topics.go",
+      "text": "QF1012: Use fmt.Fprintf(...) instead of WriteString(fmt.Sprintf(...))",
+      "source": [
+        "\t\t\t\tsb.WriteString(fmt.Sprintf(\"ChannelCount: %d\\n\\n\", numChannels))"
+      ],
+      "reason": "Existing WriteString(fmt.Sprintf(...)) could use fmt.Fprintf; optional output construction cleanup."
+    },
+    {
+      "linter": "staticcheck",
+      "path": "pkg/cmd/topics.go",
+      "text": "QF1012: Use fmt.Fprintf(...) instead of WriteString(fmt.Sprintf(...))",
+      "source": [
+        "\t\t\t\tsb.WriteString(fmt.Sprintf(\"Service:          %s\\n\", serviceName))"
+      ],
+      "reason": "Existing WriteString(fmt.Sprintf(...)) could use fmt.Fprintf; optional output construction cleanup."
+    },
+    {
+      "linter": "staticcheck",
+      "path": "pkg/cmd/topics.go",
+      "text": "QF1012: Use fmt.Fprintf(...) instead of WriteString(fmt.Sprintf(...))",
+      "source": [
+        "\t\t\t\tsb.WriteString(fmt.Sprintf(\"Topic:            %s\\n\", topicName))"
+      ],
+      "reason": "Existing WriteString(fmt.Sprintf(...)) could use fmt.Fprintf; optional output construction cleanup."
+    },
+    {
+      "linter": "staticcheck",
+      "path": "pkg/cmd/topics.go",
+      "text": "QF1012: Use fmt.Fprintf(...) instead of WriteString(fmt.Sprintf(...))",
+      "source": [
+        "\t\t\t\tsb.WriteString(fmt.Sprintf(\"Node ID:          %d\\n\", topicsNodeID))"
+      ],
+      "reason": "Existing WriteString(fmt.Sprintf(...)) could use fmt.Fprintf; optional output construction cleanup."
+    },
+    {
+      "linter": "staticcheck",
+      "path": "pkg/cmd/topics.go",
+      "text": "QF1012: Use fmt.Fprintf(...) instead of WriteString(fmt.Sprintf(...))",
+      "source": [
+        "\t\t\t\tsb.WriteString(fmt.Sprintf(\"ChannelCount:     %d\\n\", numChannels))"
+      ],
+      "reason": "Existing WriteString(fmt.Sprintf(...)) could use fmt.Fprintf; optional output construction cleanup."
+    },
+    {
+      "linter": "staticcheck",
+      "path": "pkg/cmd/topics.go",
+      "text": "QF1012: Use fmt.Fprintf(...) instead of WriteString(fmt.Sprintf(...))",
+      "source": [
+        "\t\t\t\tsb.WriteString(fmt.Sprintf(\"Subscriber Group: %d\\n\\n\", subscriber))"
+      ],
+      "reason": "Existing WriteString(fmt.Sprintf(...)) could use fmt.Fprintf; optional output construction cleanup."
+    },
+    {
+      "linter": "staticcheck",
+      "path": "pkg/cmd/topics.go",
+      "text": "QF1012: Use fmt.Fprintf(...) instead of WriteString(fmt.Sprintf(...))",
+      "source": [
+        "\t\t\t\tsb.WriteString(fmt.Sprintf(\"Service:          %s\\n\", serviceName))"
+      ],
+      "reason": "Existing WriteString(fmt.Sprintf(...)) could use fmt.Fprintf; optional output construction cleanup."
+    },
+    {
+      "linter": "staticcheck",
+      "path": "pkg/cmd/topics.go",
+      "text": "QF1012: Use fmt.Fprintf(...) instead of WriteString(fmt.Sprintf(...))",
+      "source": [
+        "\t\t\t\tsb.WriteString(fmt.Sprintf(\"Topic:            %s\\n\", topicName))"
+      ],
+      "reason": "Existing WriteString(fmt.Sprintf(...)) could use fmt.Fprintf; optional output construction cleanup."
+    },
+    {
+      "linter": "staticcheck",
+      "path": "pkg/cmd/topics.go",
+      "text": "QF1012: Use fmt.Fprintf(...) instead of WriteString(fmt.Sprintf(...))",
+      "source": [
+        "\t\t\t\tsb.WriteString(fmt.Sprintf(\"Node ID:          %d\\n\", topicsNodeID))"
+      ],
+      "reason": "Existing WriteString(fmt.Sprintf(...)) could use fmt.Fprintf; optional output construction cleanup."
+    },
+    {
+      "linter": "staticcheck",
+      "path": "pkg/cmd/topics.go",
+      "text": "QF1012: Use fmt.Fprintf(...) instead of WriteString(fmt.Sprintf(...))",
+      "source": [
+        "\t\t\t\tsb.WriteString(fmt.Sprintf(\"ChannelCount:     %d\\n\", numChannels))"
+      ],
+      "reason": "Existing WriteString(fmt.Sprintf(...)) could use fmt.Fprintf; optional output construction cleanup."
+    },
+    {
+      "linter": "staticcheck",
+      "path": "pkg/cmd/topics.go",
+      "text": "QF1012: Use fmt.Fprintf(...) instead of WriteString(fmt.Sprintf(...))",
+      "source": [
+        "\t\t\t\tsb.WriteString(fmt.Sprintf(\"Subscriber Group: %s\\n\\n\", subscriberGroup))"
+      ],
+      "reason": "Existing WriteString(fmt.Sprintf(...)) could use fmt.Fprintf; optional output construction cleanup."
+    },
+    {
+      "linter": "staticcheck",
+      "path": "pkg/cmd/use-gradle.go",
+      "text": "QF1003: could use tagged switch on value",
+      "source": [
+        "\t\tif value == stringTrue {"
+      ],
+      "reason": "Existing conditional chain could use a tagged switch; optional syntax cleanup."
+    },
+    {
+      "linter": "staticcheck",
+      "path": "pkg/fetcher/http_fetcher.go",
+      "text": "QF1003: could use tagged switch on mode",
+      "source": [
+        "\t\tif mode == WithSync {"
+      ],
+      "reason": "Existing conditional chain could use a tagged switch; optional syntax cleanup."
+    },
+    {
+      "linter": "staticcheck",
+      "path": "pkg/fetcher/http_fetcher.go",
+      "text": "QF1003: could use tagged switch on operation",
+      "source": [
+        "\tif operation == SuspendService {"
+      ],
+      "reason": "Existing conditional chain could use a tagged switch; optional syntax cleanup."
+    },
+    {
+      "linter": "staticcheck",
+      "path": "pkg/fetcher/http_fetcher.go",
+      "text": "QF1003: could use tagged switch on operation",
+      "source": [
+        "\tif operation == ResetMembers {"
+      ],
+      "reason": "Existing conditional chain could use a tagged switch; optional syntax cleanup."
+    },
+    {
+      "linter": "staticcheck",
+      "path": "pkg/fetcher/http_fetcher.go",
+      "text": "QF1003: could use tagged switch on operation",
+      "source": [
+        "\tif operation == CreateSnapshot {"
+      ],
+      "reason": "Existing conditional chain could use a tagged switch; optional syntax cleanup."
+    },
+    {
+      "linter": "staticcheck",
+      "path": "pkg/fetcher/http_fetcher.go",
+      "text": "QF1003: could use tagged switch on operation",
+      "source": [
+        "\tif operation == RemainingMessages {"
+      ],
+      "reason": "Existing conditional chain could use a tagged switch; optional syntax cleanup."
+    },
+    {
+      "linter": "staticcheck",
+      "path": "pkg/fetcher/http_fetcher.go",
+      "text": "QF1003: could use tagged switch on jfrType",
+      "source": [
+        "\tif jfrType == JfrTypeRole {"
+      ],
+      "reason": "Existing conditional chain could use a tagged switch; optional syntax cleanup."
+    },
+    {
+      "linter": "staticcheck",
+      "path": "test/common/common.go",
+      "text": "ST1001: should not use dot imports",
+      "source": [
+        "\t. \"github.com/onsi/gomega\""
+      ],
+      "reason": "Existing Gomega assertion dot import; import style only."
+    },
+    {
+      "linter": "staticcheck",
+      "path": "test/common/common.go",
+      "text": "S1007: should use raw string (`...`) with regexp.MustCompile to avoid having to escape twice",
+      "source": [
+        "\tvar re1 = regexp.MustCompile(\"^((.|\\\\n)*)server1\")"
+      ],
+      "reason": "Existing regexp literal could use raw-string syntax; spelling cleanup only."
+    },
+    {
+      "linter": "staticcheck",
+      "path": "test/common/common.go",
+      "text": "S1007: should use raw string (`...`) with regexp.MustCompile to avoid having to escape twice",
+      "source": [
+        "\tvar re2 = regexp.MustCompile(\" ((.|\\\\n)*)\")"
+      ],
+      "reason": "Existing regexp literal could use raw-string syntax; spelling cleanup only."
+    },
+    {
+      "linter": "staticcheck",
+      "path": "test/test_utils/test_utils.go",
+      "text": "ST1001: should not use dot imports",
+      "source": [
+        "\t. \"github.com/onsi/gomega\""
+      ],
+      "reason": "Existing Gomega assertion dot import; import style only."
+    },
+    {
+      "linter": "staticcheck",
+      "path": "test/test_utils/test_utils.go",
+      "text": "S1038: should use t.Logf(...) instead of t.Log(fmt.Sprintf(...))",
+      "source": [
+        "\tt.Log(fmt.Sprintf(\"Starting docker image %s with image name %s, httpPort %d and clusterName %s\","
+      ],
+      "reason": "Existing t.Log(fmt.Sprintf(...)) could use t.Logf; fixture logging style only."
+    },
+    {
+      "linter": "staticcheck",
+      "path": "test/test_utils/test_utils.go",
+      "text": "ST1005: error strings should not be capitalized",
+      "source": [
+        "\treturn fmt.Errorf(\"Unable to connect to url %s after %d seconds\\n\", url, timeout)"
+      ],
+      "reason": "Existing error capitalization/punctuation style; error handling remains enforced."
+    },
+    {
+      "linter": "staticcheck",
+      "path": "test/test_utils/test_utils.go",
+      "text": "ST1005: error strings should not end with punctuation or newlines",
+      "source": [
+        "\treturn fmt.Errorf(\"Unable to connect to url %s after %d seconds\\n\", url, timeout)"
+      ],
+      "reason": "Existing error capitalization/punctuation style; error handling remains enforced."
+    },
+    {
+      "linter": "staticcheck",
+      "path": "test/test_utils/test_utils.go",
+      "text": "ST1005: error strings should not be capitalized",
+      "source": [
+        "\treturn fmt.Errorf(\"Unable to connect to url %s after %d seconds\\n\", url, timeout)"
+      ],
+      "reason": "Existing error capitalization/punctuation style; error handling remains enforced."
+    },
+    {
+      "linter": "staticcheck",
+      "path": "test/test_utils/test_utils.go",
+      "text": "ST1005: error strings should not end with punctuation or newlines",
+      "source": [
+        "\treturn fmt.Errorf(\"Unable to connect to url %s after %d seconds\\n\", url, timeout)"
+      ],
+      "reason": "Existing error capitalization/punctuation style; error handling remains enforced."
+    },
+    {
+      "linter": "staticcheck",
+      "path": "test/test_utils/test_utils.go",
+      "text": "ST1005: error strings should not be capitalized",
+      "source": [
+        "\treturn fmt.Errorf(\"Unable to get to idle for service %s after %d seconds. Last status %s\","
+      ],
+      "reason": "Existing error capitalization/punctuation style; error handling remains enforced."
+    }
+  ]
+}

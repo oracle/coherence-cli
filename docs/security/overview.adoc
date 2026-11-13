@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 
-    Copyright (c) 2021, 2025 Oracle and/or its affiliates.
+    Copyright (c) 2021, 2026 Oracle and/or its affiliates.
     Licensed under the Universal Permissive License v 1.0 as shown at
     https://oss.oracle.com/licenses/upl.
 
@@ -36,43 +36,106 @@ section of the Coherence documentation.
 
 === Connecting to a TLS enabled cluster
 
-Once you have enabled TLS you can configure the following environment variables if you need to add client certificates or additional trust stores.
+HTTPS connections verify the server certificate, expiry and hostname by default. Use a valid certificate
+whose subject alternative names match the hostname or IP in the management URL. For a private CA or a
+self-signed certificate, configure a PEM trust file rather than disabling verification:
 
 [source,bash]
 ----
-export COHERENCE_TLS_CLIENT_CERT=/path/to/client/certificate
-export COHERENCE_TLS_CLIENT_KEY=/path/path/to/client/key
-export COHERENCE_TLS_CERTS_PATH=/path/to/cert/to/be/added/for/trust
-----
-
-If you are connecting a cluster with self-signed certificates, you must set the following to ignore invalid certificates:
-
-[source,bash]
-----
-cohctl set ignore-certs true
-----
-
-Output:
-[source,bash]
-----
-Value is now set to true
-----
-
-NOTE: This is not recommended and should not be used for production systems.
-
-You can then add your cluster via specifying HTTPS as the protocol:
-
-[source,bash]
-----
+export COHERENCE_TLS_CERTS_PATH=/path/to/trusted-ca.pem
 cohctl add cluster tls -u https://host:30000/management/coherence/cluster
 ----
 
-You will receive the following message every time you run a command if you ignore certificate errors:
+If the server requires mutual TLS, also provide the client certificate and private key:
 
 [source,bash]
 ----
-WARNING: SSL Certificate validation has been explicitly disabled
+export COHERENCE_TLS_CLIENT_CERT=/path/to/client.crt
+export COHERENCE_TLS_CLIENT_KEY=/path/to/client.key
 ----
+
+For cluster management, `COHERENCE_TLS_CERTS_PATH` replaces the system root pool. Include all CAs needed
+by your management endpoints in that file. General HTTPS downloads always verify certificates and add
+this file's roots to system trust instead. HTTPS proxy certificates are verified independently, including
+when the target connection has an exception. Trusting a CA cannot repair an expired certificate or a
+hostname mismatch; renew or replace the server certificate, or use its valid matching hostname.
+
+==== Explicit exceptions for saved HTTPS connections
+
+Use an exception only when you are sure of the target server's identity. It is not recommended for
+production. To permit an invalid certificate during the initial add probe and save that choice:
+
+[source,bash]
+----
+cohctl add cluster development -u https://host:30000/management/coherence/cluster --ignore-certs
+cohctl get ignore-certs -c development
+cohctl set ignore-certs false -c development
+----
+
+`false` enables verification; `true` allows invalid certificates only for the selected saved HTTPS
+connection's origin (scheme, hostname/IP and effective port). Without `-c`/`--connection`, get/set use
+the current saved context, for example after `cohctl set context development`. They require an existing
+saved connection. HTTP remains usable: its getter reports `n/a` and its setter rejects both values.
+`--ignore-certs`, including an explicit `--ignore-certs=false`, is rejected when adding an HTTP connection.
+Use `cohctl get config -v` to inspect each saved connection's setting.
+
+Before the first actual bypassed request per connection and origin in each command execution, stderr shows:
+
+[source,text]
+----
+WARNING: TLS certificate verification is disabled for connection "development" at "https://host:30000".
+----
+
+Every dispatched bypassed request attempt also receives a warning in the application log, even if the
+request fails. Repeated requests to that connection/origin in a monitoring command share one terminal
+warning. Selecting or changing settings alone does not emit a bypass warning.
+
+==== Upgrading from the global setting
+
+On first startup with a persisted global `ignoreinvalidcerts: true`, the CLI copies that exception only
+to existing saved connections with valid HTTPS URLs and no connection-level choice. Explicit `false`
+and `true`, HTTP entries and unrelated configuration data are retained. The CLI creates a uniquely named,
+timestamped `.tls-backup-*.bak` backup beside the selected configuration file before replacing it,
+clears the legacy global value, and reports the affected names on stderr. If backup or replacement fails,
+startup stops before network access and retains recovery material. Keep the backup until you have
+reviewed the result; it contains the original configuration and may include sensitive data.
+
+Migration preserves existing access but cannot know which saved HTTPS entries needed the old exception.
+Review them with `cohctl get ignore-certs -c NAME` or `cohctl get config -v` and remove unnecessary exceptions
+with `cohctl set ignore-certs false -c NAME`. Subsequent startups do not repeat migration. There is no
+global or environment fallback, and new connections verify by default.
+
+[cols="1,2"]
+|===
+|Previous usage |Upgrade behavior
+
+|Saved HTTPS under persisted global true
+|Migrates once only when its own choice is absent; explicit false/true is preserved.
+
+|Saved HTTPS under global false or absent; new HTTPS connection
+|Verifies certificates by default. New connections never inherit a previous global exception.
+
+|HTTP connection
+|Connectivity is unchanged; its TLS setting is `n/a` and cannot be set.
+
+|Script setting global true before adding a connection
+|Use valid certificates and trust, or explicitly use `add cluster ... --ignore-certs` for that connection.
+
+|Ad hoc HTTPS discovery
+|Requires valid trust; it cannot inherit a saved context's exception. Alternatively, explicitly add the
+specific management HTTPS URL with a scoped choice. Bulk discovery remains verified.
+
+|Other-origin Coherence*Web links or HTTPS health destinations
+|Require valid certificates and trust at that destination. A management connection's exception cannot
+follow another hostname or port.
+
+|General HTTPS downloads
+|Always verify. Custom download roots supplement system trust; cluster custom roots retain their
+replacement behavior. A saved exception cannot authorize an untrusted download.
+|===
+
+For step-by-step comparisons with the previous commands, see
+xref:../examples/tls_certificate_validation.adoc[TLS Certificate Validation Changes].
 
 === Working with basic authentication REST endpoints
 

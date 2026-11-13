@@ -37,6 +37,8 @@ type TestContext struct {
 	ExpectedServers int
 	Username        string
 	Password        string
+
+	AdditionalHTTPOrigins []string // Explicitly assigned extra fixture origins (for example federation).
 }
 
 const (
@@ -306,7 +308,7 @@ func StartDockerImage(t *testing.T, image string, name string, httpPort int, clu
 	output = strings.ReplaceAll(output, "\n", "")
 	t.Log("Started container " + output)
 
-	return output, WaitForHttpReady(GetManagementUrl(httpPort), 120)
+	return output, waitForHTTPReady(GetManagementUrl(httpPort), 120, []string{GetManagementUrl(httpPort)})
 }
 
 // GetManagementUrl returns the management URL given a management port.
@@ -321,21 +323,7 @@ func GetRestUrl(restPort int) string {
 
 // IssueGetRequest issues a HTTP GET request using the URL.
 func IssueGetRequest(url string) ([]byte, error) {
-	resp, err := http.Get(url)
-	if err != nil {
-		return emptyByte, err
-	}
-
-	if resp.StatusCode != 200 {
-		return emptyByte, errors.New("Did not receive a 200 response code: " + resp.Status)
-	}
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return emptyByte, err
-	}
-
-	return body, nil
+	return fixtureGet(url, configuredHTTPOrigins())
 }
 
 // IssuePostRequest issues a HTTP POST request using the URL.
@@ -382,9 +370,13 @@ func issueRequest(requestType, url string, data []byte) (*http.Response, error) 
 
 // WaitForHttpReady waits for the HTTP endpoint to be ready.
 func WaitForHttpReady(url string, timeout int) error {
+	return waitForHTTPReady(url, timeout, configuredHTTPOrigins())
+}
+
+func waitForHTTPReady(url string, timeout int, origins []string) error {
 	var duration = 0
 	for duration < timeout {
-		_, err := IssueGetRequest(url)
+		_, err := fixtureGet(url, origins)
 		if err != nil {
 			// unable to connect, so wait 5 seconds
 			fmt.Println("Waiting to connect to " + url + ", sleeping 5")

@@ -1,41 +1,74 @@
-#
-# Copyright (c) 2021, 2025 Oracle and/or its affiliates.
+# Copyright (c) 2021, 2026 Oracle and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at
 # https://oss.oracle.com/licenses/upl.
 #
-
+# v2 migration: gosimple is part of staticcheck; type checking is mandatory.
+# Formatting is checked without rewriting files by make golangci.
+# Existing exclusions are retained and narrowed to their original linter/path.
+version: "2"
+run:
+  relative-path-mode: gomod
+  modules-download-mode: readonly
+  tests: true
+  timeout: 10m
+issues:
+  max-issues-per-linter: 0
+  max-same-issues: 0
+  uniq-by-line: false
 linters:
+  default: none
   enable:
-    - govet
-    - ineffassign
-    - gofmt
-    - revive
-    - gosimple
-    - gosec
     - errcheck
     - errname
     - goconst
+    - gosec
+    - govet
+    - ineffassign
+    - revive
     - staticcheck
-    - typecheck
     - unused
-  disable-all: true
-  fast: true
-
-issues:
-  exclude:
-    - stutter
-  exclude-rules:
-    - path: "pkg/cmd/formatting.go"
-      text: "G115"
-    - path: "pkg/cmd/health.go"
-      text: "G115"
-    - path: "pkg/cmd/cluster.go"
-      text: "G115"
-    - path: "pkg/cmd/session.go"
-      text: "G115"
-    - path: "pkg/cmd/cache.go"
-      text: "G115"
-    - path: "pkg/cmd/http_session.go"
-      text: "G115"
-    - path: "pkg/cmd/root_test.go"
-      text: "G115"
+  exclusions:
+    generated: lax
+    presets:
+      - comments
+      - common-false-positives
+      - legacy
+      - std-error-handling
+    rules:
+      - path: '^pkg/cmd/formatting\.go$'
+        linters: [gosec]
+        text: '^G115:'
+      - path: '^pkg/cmd/health\.go$'
+        linters: [gosec]
+        text: '^G115:'
+      - path: '^pkg/cmd/cluster\.go$'
+        linters: [gosec]
+        text: '^G115:'
+      - path: '^pkg/cmd/session\.go$'
+        linters: [gosec]
+        text: '^G115:'
+      - path: '^pkg/cmd/cache\.go$'
+        linters: [gosec]
+        text: '^G115:'
+      - path: '^pkg/cmd/http_session\.go$'
+        linters: [gosec]
+        text: '^G115:'
+      - path: '^pkg/cmd/root_test\.go$'
+        linters: [gosec]
+        text: '^G115:'
+      - path: (.+)\.go$
+        linters: [revive]
+        text: stutter
+    paths:
+      - third_party$
+      - builtin$
+      - examples$
+formatters:
+  enable:
+    - gofmt
+  exclusions:
+    generated: lax
+    paths:
+      - third_party$
+      - builtin$
+      - examples$

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #
-# Copyright (c) 2021, 2025 Oracle and/or its affiliates.
+# Copyright (c) 2021, 2026 Oracle and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at
 # https://oss.oracle.com/licenses/upl.
 #
@@ -15,9 +15,9 @@ DOCS_DIR=$1
 mkdir -p $DOCS_DIR
 BIN_DIR=$2
 COHCTL=${BIN_DIR}/cohctl
-TMP_FILE=/tmp/generate.$$
+TMP_FILE=$(mktemp "${TMPDIR:-/tmp}/cohctl-docs.XXXXXX")
 
-trap "rm -f $TMP_FILE" EXIT SIGINT
+trap 'rm -f "$TMP_FILE"' EXIT
 
 # Creates a adoc section for the given command help
 function create_doc {
@@ -26,11 +26,11 @@ function create_doc {
   COMMAND="$*"
 
   echo "$COMMAND"
-  eval $COMMAND > $TMP_FILE
+  eval $COMMAND > "$TMP_FILE"
 
-  DESC=`cat $TMP_FILE  | sed -n '/^Usage:/!p;//q'`
-  USAGE=`cat $TMP_FILE | sed -ne '/^Usage:/,$ p' | sed -n '/^Flags:/!p;//q'`
-  FLAGS=`cat $TMP_FILE | sed -ne '/^Flags:/,$ p' | sed -n '/^Global Flags:/!p;//q'`
+  DESC=`cat "$TMP_FILE"  | sed -n '/^Usage:/!p;//q'`
+  USAGE=`cat "$TMP_FILE" | sed -ne '/^Usage:/,$ p' | sed -n '/^Flags:/!p;//q'`
+  FLAGS=`cat "$TMP_FILE" | sed -ne '/^Flags:/,$ p' | sed -n '/^Global Flags:/!p;//q'`
 
   (echo "// # tag::text[]" && \
    echo "$DESC" && echo && \

@@ -45,3 +45,6 @@ utils/linkcheck/go.sum
 
 # Examples noise
 node_modules
+
+# Reviewed lint policy is source, not generated JSON output.
+!/.golangci-baseline.json

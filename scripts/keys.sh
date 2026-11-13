@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# Copyright (c) 2024 Oracle and/or its affiliates.
+# Copyright (c) 2024, 2026 Oracle and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at
 # https://oss.oracle.com/licenses/upl.
 #
@@ -34,12 +34,12 @@ echo "${CAPASS}" | openssl genrsa -passout stdin -aes256 \
 
 echo Generate Guardians CA certificate:
 echo "${CAPASS}" | openssl req -passin stdin -new -x509 -days 3650 \
-    -reqexts SAN \
+    -extensions CA \
     -config <(cat /etc/ssl/openssl.cnf \
-        <(printf "\n[SAN]\nsubjectAltName=IP:127.0.0.1")) \
+        <(printf "\n[CA]\nbasicConstraints=critical,CA:TRUE\nkeyUsage=critical,keyCertSign,cRLSign\nsubjectKeyIdentifier=hash\n")) \
     -key ${CERTS_DIR}/guardians-ca.key \
     -out ${CERTS_DIR}/guardians-ca.crt \
-    -subj "/CN=${COMPUTERNAME}" # guardians-ca.crt is a trustCertCollectionFile
+    -subj "/CN=Guardians CA" # guardians-ca.crt is a trustCertCollectionFile
 
 echo Generate Ravagers CA key:
 echo "${CAPASS}" | openssl genrsa -passout stdin -aes256 \
@@ -47,12 +47,12 @@ echo "${CAPASS}" | openssl genrsa -passout stdin -aes256 \
 
 echo Generate Ravagers CA certificate:
 echo "${CAPASS}" | openssl req -passin stdin -new -x509 -days 3650 \
-    -reqexts SAN \
+    -extensions CA \
     -config <(cat /etc/ssl/openssl.cnf \
-        <(printf "\n[SAN]\nsubjectAltName=IP:127.0.0.1")) \
+        <(printf "\n[CA]\nbasicConstraints=critical,CA:TRUE\nkeyUsage=critical,keyCertSign,cRLSign\nsubjectKeyIdentifier=hash\n")) \
     -key ${CERTS_DIR}/ravagers-ca.key \
     -out ${CERTS_DIR}/ravagers-ca.crt \
-    -subj "/CN=${COMPUTERNAME}" # ravagers-ca.crt is a trustCertCollectionFile
+    -subj "/CN=Ravagers CA" # ravagers-ca.crt is a trustCertCollectionFile
 
 echo Generate Icarus key:
 echo "${CAPASS}" |  openssl genrsa -passout stdin -aes256 \
@@ -64,12 +64,13 @@ echo "${CAPASS}" | openssl req -passin stdin -new -key \
     -out ${CERTS_DIR}/icarus.csr \
     -subj "/CN=${COMPUTERNAME}"
 
-echo Self-signed Icarus certificate:
+echo CA-signed Icarus server certificate:
 echo "${CAPASS}" | openssl x509 -req -passin stdin -days 3650 \
     -in ${CERTS_DIR}/icarus.csr \
     -CA ${CERTS_DIR}/guardians-ca.crt \
     -CAkey ${CERTS_DIR}/guardians-ca.key \
     -set_serial 01 \
+    -extfile <(printf 'authorityKeyIdentifier=keyid,issuer\nsubjectKeyIdentifier=hash\nbasicConstraints=CA:FALSE\nkeyUsage=digitalSignature,keyEncipherment\nextendedKeyUsage=serverAuth\nsubjectAltName=DNS:localhost,DNS:server1,DNS:server2,DNS:%s,IP:127.0.0.1\n' "${COMPUTERNAME}") \
     -out ${CERTS_DIR}/icarus.crt # icarus.crt is the certChainFile for the server
 
 echo Remove passphrase from Icarus key:

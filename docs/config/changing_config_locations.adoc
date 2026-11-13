@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 
-    Copyright (c) 2021, 2025 Oracle and/or its affiliates.
+    Copyright (c) 2021, 2026 Oracle and/or its affiliates.
     Licensed under the Universal Permissive License v 1.0 as shown at
     https://oss.oracle.com/licenses/upl.
 
@@ -15,9 +15,13 @@
 By default, the CLI creates a directory `.cohctl` off the user's home to store connection information,
 log files and various other information.
 
+On Windows, CLI diagnostics are appended to `cohctl.log` within this directory. Directory names are used
+literally, including `%` and `#`. A directory selected through a symbolic link is supported; a `cohctl.log`
+symbolic link must use a relative target within the selected directory.
+
 NOTE: It is recommended to leave these values as default unless you have a good reason to change them.
 If you do want to change the location, setting the `COHCTL_HOME` environment variable is the best option
-otherwise you would need to specify the `--config` option on each command execution.
+otherwise you would need to specify the `--config-dir` option on each command execution.
 
 If you wish to change this directory from the default, you can use the following options:
 

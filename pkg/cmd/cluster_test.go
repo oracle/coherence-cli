@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, 2025 Oracle and/or its affiliates.
+ * Copyright (c) 2021, 2026 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -41,7 +41,7 @@ func TestSanitizeConnectionName(t *testing.T) {
 
 func TestFormatCluster(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
-	cluster := discovery.DiscoveredCluster{ClusterName: "tim", Host: "localhost", NSPort: 7574}
+	cluster := discovery.DiscoveredCluster{ClusterName: "tim", Host: loopbackHostname, NSPort: 7574}
 	g.Expect(formatCluster(cluster)).To(gomega.Equal("Cluster: tim, Name Service address: localhost:7574\n"))
 }
 

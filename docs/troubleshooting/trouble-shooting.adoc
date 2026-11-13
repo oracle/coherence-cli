@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 
-    Copyright (c) 2021, 2025 Oracle and/or its affiliates.
+    Copyright (c) 2021, 2026 Oracle and/or its affiliates.
     Licensed under the Universal Permissive License v 1.0 as shown at
     https://oss.oracle.com/licenses/upl.
 
@@ -283,7 +283,16 @@ show the cluster information using a command such as `cohctl get members`, then 
 the following to check if there are any issues.
 
 NOTE: The main reasons for clusters not starting up are that you have not used the correct JDK version.
-For example for 22.09 and above clusters you must have JDK 17+.
+For CE 22.09 through 25.09, use JDK 17 or later. CE 22.06.x retains the Java 11 path;
+commercial 14.1.1.2206.x requires Java 11.0.15 or later. The 14.1.2 and 15.1.1 requirements document Java 17/21.
+Consult the chosen release's compatibility policy for other combinations. The CLI completes `java -version` before launch;
+a missing executable, nonzero query exit or unrecognized output prevents startup. Restart validates the replacement first,
+so an invalid runtime does not stop the running cluster. Stop does not require Java.
+
+Management REST and optional JMX now default to loopback. Remote tools and containers need a tunnel or explicitly
+acknowledged insecure remote mode; `--wka` no longer changes JMX addresses. Legacy records do not contain a JMX port,
+so use `--jmx-port` to re-enable it on startup. See xref:../reference/create_clusters.adoc[Creating Clusters] for persistence, IPv4 bind options,
+scope boundaries and the per-invocation remote acknowledgement. Changing the CLI does not rebind already-running JVMs.
 
 ==== Solution
 

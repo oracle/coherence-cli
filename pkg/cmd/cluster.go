@@ -56,10 +56,15 @@ var addClusterCmd = &cobra.Command{
 	Long: `The 'add cluster' command adds a new connection to a Coherence cluster. You can
 specify the full url such as https://<host>:<management-port>/management/coherence/cluster.
 You can also specify host:port (for http connections) and the url will be automatically
-populated constructed.`,
-	Args: func(cmd *cobra.Command, args []string) error {
+constructed. Use --ignore-certs only to allow invalid certificates for this
+saved HTTPS connection's origin, including the initial probe. Verification is enabled
+by default. Prefer a valid matching certificate and COHERENCE_TLS_CERTS_PATH for
+private CA trust. Trusting a CA cannot fix expiry or a hostname mismatch.
+Downloads, discovery and other-origin destinations remain verified. The exception
+warns on stderr before its first use per connection/origin in each execution.`,
+	Args: func(_ *cobra.Command, args []string) error {
 		if len(args) != 1 {
-			displayErrorAndExit(cmd, youMustProviderConnectionMessage)
+			return errors.New(youMustProviderConnectionMessage)
 		}
 		return nil
 	},
@@ -75,7 +80,14 @@ populated constructed.`,
 			return errors.New("you must provide a connection url")
 		}
 
-		if err = addCluster(cmd, connection, connectionURL, "manual", ""); err != nil {
+		ignoreInvalidCerts, err := cmd.Flags().GetBool("ignore-certs")
+		if err != nil {
+			return err
+		}
+		if cmd.Flags().Changed("ignore-certs") && !fetcher.IsValidHTTPSURL(connectionURL) {
+			return errors.New("--ignore-certs requires a valid HTTPS connection URL")
+		}
+		if err = addCluster(cmd, connection, connectionURL, "manual", "", ignoreInvalidCerts); err != nil {
 			return err
 		}
 
@@ -656,7 +668,7 @@ you can confirm if you wish to add the discovered clusters.`,
 		for _, cluster := range discoveredClusters {
 			if cluster.SelectedURL != "" {
 				nsAddress := fmt.Sprintf("%s:%d", cluster.Host, cluster.NSPort)
-				err = addCluster(cmd, cluster.ConnectionName, cluster.SelectedURL, "nslookup", nsAddress)
+				err = addCluster(cmd, cluster.ConnectionName, cluster.SelectedURL, "nslookup", nsAddress, false)
 				err = logErrorAndCheck(cmd, "unable to discover cluster "+cluster.ConnectionName, err)
 				if err != nil {
 					return err
@@ -677,7 +689,10 @@ you can confirm if you wish to add the discovered clusters.`,
 }
 
 // addCluster adds a new cluster.
-func addCluster(cmd *cobra.Command, connection, connectionURL, discoveryType, nsAddress string) error {
+func addCluster(cmd *cobra.Command, connection, connectionURL, discoveryType, nsAddress string, ignoreInvalidCerts bool) error {
+	if ignoreInvalidCerts && !fetcher.IsValidHTTPSURL(connectionURL) {
+		return errors.New("--ignore-certs requires a valid HTTPS connection URL")
+	}
 	// check to see if the url is just host:port and then build the full management URL using http as default
 	// otherwise let it fall through and get validated
 	if !strings.Contains(connectionURL, httpType) {
@@ -692,7 +707,7 @@ func addCluster(cmd *cobra.Command, connection, connectionURL, discoveryType, ns
 
 	isWebLogic := fetcher.IsWebLogicServer(connectionURL)
 
-	dataFetcher, err := fetcher.GetFetcherOrError(connectionType, connectionURL, Username, "")
+	dataFetcher, err := fetcher.GetFetcherForConnection(connectionType, connectionURL, Username, "", connection, ignoreInvalidCerts)
 	if err != nil {
 		return err
 	}
@@ -720,16 +735,29 @@ func addCluster(cmd *cobra.Command, connection, connectionURL, discoveryType, ns
 	newCluster := ClusterConnection{Name: connection, ConnectionType: connectionType, ConnectionURL: connectionURL,
 		DiscoveryType: discoveryType, ClusterVersion: cluster.Version, ClusterName: cluster.ClusterName,
 		ClusterType: clusterType, NameServiceDiscovery: nsAddress}
+	if fetcher.IsValidHTTPSURL(connectionURL) {
+		newCluster.IgnoreInvalidCerts = &ignoreInvalidCerts
+	}
 
-	Config.Clusters = append(Config.Clusters, newCluster)
-
-	viper.Set(clusterKey, Config.Clusters)
-	err = WriteConfig()
-	if err != nil {
+	connections := append(append([]ClusterConnection(nil), Config.Clusters...), newCluster)
+	if err = saveClusterConnections(connections); err != nil {
 		return err
 	}
 
 	cmd.Printf("Added cluster %s with type %s and URL %s\n", connection, connectionType, connectionURL)
+	return nil
+}
+
+// Publish live changes only after persistence succeeds; a failed write must not
+// leave a connection or exception available to a subsequent command.
+func saveClusterConnections(connections []ClusterConnection) error {
+	previous := viper.Get(clusterKey)
+	viper.Set(clusterKey, connections)
+	if err := WriteConfig(); err != nil {
+		viper.Set(clusterKey, previous)
+		return err
+	}
+	Config.Clusters = connections
 	return nil
 }
 
@@ -775,6 +803,7 @@ var (
 const (
 	defaultCoherenceVersion = "14.1.2-0-5"
 	startClusterCommand     = "start cluster"
+	restartClusterCommand   = "restart cluster"
 	scaleClusterCommand     = "scale cluster"
 	stopClusterCommand      = "stop cluster"
 	defaultHeap             = "128m"
@@ -788,7 +817,7 @@ var createClusterCmd = &cobra.Command{
 	Use:   "cluster cluster-name",
 	Short: "create a local Coherence cluster",
 	Long: `The 'create cluster' command creates a local cluster, adds to the cohctl.yaml file 
-and starts it. You must have the 'mvn' executable and 'java' 17+ executable in your PATH for 
+and starts it. You must have the dependency tool and a Coherence-compatible Java executable in your PATH for
 this to work. This cluster is only for development/testing purposes and should not be used, 
 and is not supported in a production capacity. Supported versions are: CE 22.06 and above and 
 commercial 14.1.1.2206.1 and above. Default version is currently CE ` + defaultCoherenceVersion + `.
@@ -800,6 +829,9 @@ NOTE: This is an experimental feature and my be altered or removed in the future
 		return nil
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
+		if err := cmd.Context().Err(); err != nil {
+			return err
+		}
 		var (
 			clusterName    = sanitizeConnectionName(args[0])
 			err            error
@@ -808,75 +840,14 @@ NOTE: This is an experimental feature and my be altered or removed in the future
 			splitArtifacts []string
 		)
 
-		// validate the Java and Maven/Gradle executable are present and in the path
-		if err = checkRuntimeRequirements(); err != nil {
-			return err
-		}
-
-		if err = checkDepsRequirements(); err != nil {
-			return err
-		}
-
 		// validate persistence mode
 		if !utils.SliceContains(validPersistenceModes, persistenceModeParam) {
 			return fmt.Errorf("invalid persistence mode %s. Must be one of %v", persistenceModeParam, validPersistenceModes)
 		}
 
-		// validate log level
-		if err = validateLogLevel(logLevelParam); err != nil {
-			return err
-		}
-
-		// validate http port
-		if err = utils.ValidatePort(httpPortParam); err != nil {
-			return err
-		}
-
-		// validate cluster port
-		if err = utils.ValidatePort(clusterPortParam); err != nil {
-			return err
-		}
-
 		// validate partition count
 		if partitionCountParam < minPartitionCount || partitionCountParam > maxPartitionCount {
 			return fmt.Errorf("partition count must be between %v and %v", minPartitionCount, maxPartitionCount)
-		}
-
-		// validate metrics port
-		if metricsStartPortParam > 0 {
-			if err = utils.ValidatePort(metricsStartPortParam); err != nil {
-				return err
-			}
-		}
-
-		// validate jmx remote port
-		if jmxRemotePortParam > 0 {
-			if err = utils.ValidatePort(jmxRemotePortParam); err != nil {
-				return err
-			}
-		}
-
-		// validate health port
-		if healthStartPortParam > 0 {
-			if err = utils.ValidatePort(healthStartPortParam); err != nil {
-				return err
-			}
-		}
-
-		// validate the server start class
-		if err = utils.ValidateStartClass(serverStartClassParam); err != nil {
-			return err
-		}
-
-		// ensure the http port is not already used by a running cluster
-		if isPortUsed(httpPortParam) {
-			return fmt.Errorf("the management port %d is already used, please choose another", httpPortParam)
-		}
-
-		// validate startup delay
-		_, err = utils.GetStartupDelayInMillis(startupDelayParam)
-		if err != nil {
-			return err
 		}
 
 		err = validateOverrideParams()
@@ -897,10 +868,6 @@ NOTE: This is an experimental feature and my be altered or removed in the future
 					return fmt.Errorf("invalid additional artifact specified: %s.\nValid values are: %v", v, validCoherenceArtifacts)
 				}
 			}
-		}
-
-		if replicaCountParam < 1 {
-			return errors.New("replica count must be 1 or more")
 		}
 
 		// validate ensure unique cluster name
@@ -925,10 +892,24 @@ NOTE: This is an experimental feature and my be altered or removed in the future
 			logsDirectory = logDestinationParam
 		}
 
-		// validate profile
-		if err = validateProfile(); err != nil {
+		arguments := fmt.Sprintf("-Dcoherence.cluster=%s -Dcoherence.clusterport=%d -Dcoherence.ttl=0 -Dcoherence.wka=%s -Djava.net.preferIPv4Stack=true"+
+			" -Dcoherence.distributed.partitioncount=%d -Dcoherence.distributed.partitions=%d%s%s",
+			clusterName, clusterPortParam, wkaParam, partitionCountParam, partitionCountParam, getCacheConfigProperty(), getOperationalOverrideConfigProperty())
+		startupConnection := ClusterConnection{Name: clusterName, ConnectionType: httpType, ClusterName: clusterName, ManuallyCreated: true,
+			Arguments: arguments, ManagementPort: httpPortParam, ClusterVersion: clusterVersionParam,
+			ClusterType: "Standalone", PersistenceMode: persistenceModeParam,
+			LoggingDestination: logDestinationParam, StartupClass: serverStartClassParam}
+		plan, err := preflightManagedStartup(cmd, startupConnection, replicaCountParam, 0, false)
+		if err != nil {
 			return err
 		}
+		if err = checkManagementPorts(startupConnection, *plan.connection.Management, false); err != nil {
+			return err
+		}
+		if err = checkDepsRequirements(); err != nil {
+			return err
+		}
+		showManagedSettings(cmd, startupConnection, *plan.connection.Management)
 
 		cmd.Printf("\nCluster name:         %s\n", clusterName)
 		cmd.Printf("Cluster version:      %s\n", clusterVersionParam)
@@ -948,8 +929,14 @@ NOTE: This is an experimental feature and my be altered or removed in the future
 		cmd.Printf("Dependency tool:      %v\n", getExecType())
 
 		// confirm the operation
+		if err = cmd.Context().Err(); err != nil {
+			return err
+		}
 		if !confirmOperation(cmd, "Are you sure you want to create the cluster with the above details? (y/n) ") {
-			return nil
+			return cmd.Context().Err()
+		}
+		if err = cmd.Context().Err(); err != nil {
+			return err
 		}
 
 		// update default jars based up coherence group and version
@@ -1025,38 +1012,18 @@ NOTE: This is an experimental feature and my be altered or removed in the future
 			}
 		}
 
-		// generate startup arguments. Note we save the cache config or override but this can be overridden
-		arguments := fmt.Sprintf("-Dcoherence.cluster=%s -Dcoherence.clusterport=%d -Dcoherence.ttl=0 -Dcoherence.wka=%s -Djava.net.preferIPv4Stack=true"+
-			" -Djava.rmi.server.hostname=%s -Dcoherence.distributed.partitioncount=%d -Dcoherence.distributed.partitions=%d%s%s",
-			clusterName, clusterPortParam, wkaParam, wkaParam, partitionCountParam, partitionCountParam, getCacheConfigProperty(),
-			getOperationalOverrideConfigProperty())
-
-		// add the new cluster
-		newCluster := ClusterConnection{Name: clusterName, ConnectionType: httpType,
-			ConnectionURL:   fmt.Sprintf("http://localhost:%d/management/coherence/cluster", httpPortParam),
-			ManuallyCreated: true, ClusterVersion: clusterVersionParam, ClusterName: clusterName,
-			ClusterType: "Standalone", BaseClasspath: strings.Join(classpath, getClasspathSeparator()),
-			Arguments: arguments, ManagementPort: httpPortParam, PersistenceMode: persistenceModeParam,
-			LoggingDestination: logDestinationParam, StartupClass: serverStartClassParam}
+		plan.connection.BaseClasspath = strings.Join(classpath, getClasspathSeparator())
 
 		cmd.Printf("Starting %d cluster members for cluster %s\n", replicaCountParam, clusterName)
 
-		err = startCluster(cmd, newCluster, replicaCountParam, 0)
-
-		if err != nil {
+		// No children exist during validation, dependency resolution or confirmation;
+		// retain normal OS signal behavior there, including blocking terminal input.
+		restore := managedOperationSignals(cmd)
+		defer restore()
+		if _, err = runPreparedStartup(cmd, plan, managedCreate); err != nil {
 			return err
 		}
-
-		Config.Clusters = append(Config.Clusters, newCluster)
-
-		viper.Set(clusterKey, Config.Clusters)
-		if err = WriteConfig(); err != nil {
-			return err
-		}
-
-		if err = setContext(cmd, clusterName); err != nil {
-			return err
-		}
+		cmd.Printf("Saved management settings and URL %s\n", plan.connection.ConnectionURL)
 
 		cmd.Println("Cluster added and started")
 
@@ -1167,9 +1134,6 @@ var startClusterCmd = &cobra.Command{
 		return nil
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
-		if err := utils.ValidateStartClass(serverStartClassParam); err != nil {
-			return err
-		}
 		return runClusterOperation(cmd, args[0], startClusterCommand)
 	},
 }
@@ -1271,9 +1235,11 @@ var stopClusterCmd = &cobra.Command{
 
 // restartClusterCmd represents the stop cluster command.
 var restartClusterCmd = &cobra.Command{
-	Use:               "cluster",
-	Short:             "restart a local Coherence cluster",
-	Long:              `The 'restart cluster' command stops and restart a cluster that was manually created or started.`,
+	Use:   "cluster",
+	Short: "restart a local Coherence cluster",
+	Long: `The 'restart cluster' command stops and restarts a manually created cluster.
+It requires a usable member snapshot and a matching positive membership count from
+the saved management URL before stopping any JVMs. Use 'start cluster' for an actually stopped cluster.`,
 	ValidArgsFunction: completionAllManualClusters,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
@@ -1282,14 +1248,7 @@ var restartClusterCmd = &cobra.Command{
 		return nil
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
-		cluster := args[0]
-		if err := runClusterOperation(cmd, cluster, stopClusterCommand); err != nil {
-			cmd.Println(err)
-		}
-
-		time.Sleep(time.Duration(3) * time.Second)
-
-		return runClusterOperation(cmd, cluster, startClusterCommand)
+		return runClusterOperation(cmd, args[0], restartClusterCommand)
 	},
 }
 
@@ -1370,155 +1329,126 @@ func runStartClientOperation(cmd *cobra.Command, class string, extraArgs ...stri
 }
 
 func runClusterOperation(cmd *cobra.Command, connectionName, operation string) error {
-	var (
-		err            error
-		proc           *os.Process
-		processIDs     []int
-		serverDelta    int32
-		scaleType      string
-		dataFetcher    fetcher.Fetcher
-		confirmMessage string
-		cluster        = config.Cluster{}
-		clusterResult  []byte
-	)
-
-	// validate the Java executable are present and in the path
-	if err = checkRuntimeRequirements(); err != nil {
+	if err := cmd.Context().Err(); err != nil {
 		return err
 	}
-
-	// validate metrics port
-	if metricsStartPortParam > 0 {
-		if err = utils.ValidatePort(metricsStartPortParam); err != nil {
-			return err
-		}
-	}
-
-	// validate health port
-	if healthStartPortParam > 0 {
-		if err = utils.ValidatePort(healthStartPortParam); err != nil {
-			return err
-		}
-	}
-
-	// validate profile
-	if err = validateProfile(); err != nil {
-		return err
-	}
-
 	found, connection := GetClusterConnection(connectionName)
 	if !found {
 		return errors.New(UnableToFindClusterMsg + connectionName)
 	}
-
-	if err = checkOperation(connection, operation); err != nil {
+	if err := checkOperation(connection, operation); err != nil {
 		return err
 	}
-
-	dataFetcher, err = GetDataFetcher(connectionName)
+	var plan managedStartPlan
+	var err error
+	// Stop deliberately bypasses all JVM, profile and startup-option checks.
+	if operation == startClusterCommand || operation == restartClusterCommand {
+		plan, err = preflightManagedStartup(cmd, connection, replicaCountParam, 0, false)
+		if err != nil {
+			return err
+		}
+		showManagedSettings(cmd, connection, *plan.connection.Management)
+	}
+	dataFetcher, err := GetDataFetcher(connectionName) // always the old saved URL
 	if err != nil {
 		return err
 	}
-
-	// retrieve the slice of running PIDS
-	processIDs = getRunningProcesses(dataFetcher)
-
+	var processIDs []int
+	if operation == restartClusterCommand {
+		processIDs, err = discoverLifecycleMembers(dataFetcher)
+		if err != nil {
+			return fmt.Errorf("cannot restart cluster %s: old-member snapshot unavailable or unusable; no stop or replacement attempted; use start cluster for an actually stopped cluster: %w", connection.Name, err)
+		}
+	} else {
+		processIDs = getRunningProcesses(dataFetcher)
+	}
 	numProcesses := int32(len(processIDs))
-
+	if numProcesses > 0 {
+		result, err := dataFetcher.GetClusterDetailsJSON()
+		if err != nil {
+			return err
+		}
+		var cluster config.Cluster
+		if err = json.Unmarshal(result, &cluster); err != nil {
+			return err
+		}
+		if cluster.ClusterName != connection.ClusterName {
+			return fmt.Errorf("a different cluster %s is running at the saved management URL; refusing %s", cluster.ClusterName, operation)
+		}
+		// Missing/null clusterSize decodes to zero. Restart needs a positive
+		// count matching every validated distinct PID before acquiring observers
+		// or requesting any stops. REST views can still change concurrently.
+		if operation == restartClusterCommand && (cluster.ClusterSize <= 0 || cluster.ClusterSize != len(processIDs)) {
+			return fmt.Errorf("cannot restart cluster %s: old-member snapshot has unusable or inconsistent clusterSize %d for %d distinct member PIDs; require a positive matching count; no stop or replacement attempted", connection.Name, cluster.ClusterSize, len(processIDs))
+		}
+	}
 	if (operation == stopClusterCommand || operation == scaleClusterCommand) && numProcesses == 0 {
 		return fmt.Errorf("the cluster %s does not appear to be started", connection.Name)
 	}
 	if operation == startClusterCommand && numProcesses > 0 {
-		// Retrieve the cluster details to see if the cluster name matches as
-		// a different cluster could already be running on this http management port
-		clusterResult, err = dataFetcher.GetClusterDetailsJSON()
+		return fmt.Errorf("the cluster %s appears to be already started with process ids: %v", connection.Name, processIDs)
+	}
+	count := replicaCountParam
+	if operation == startClusterCommand || operation == restartClusterCommand {
+		if err = checkManagementPorts(connection, *plan.connection.Management, operation == restartClusterCommand && numProcesses > 0); err != nil {
+			return err
+		}
+	}
+	if operation == scaleClusterCommand {
+		if count <= numProcesses {
+			return fmt.Errorf("replicas must exceed the current %d members; scaling down is not supported", numProcesses)
+		}
+		count -= numProcesses
+		plan, err = preflightManagedStartup(cmd, connection, count, numProcesses, true)
 		if err != nil {
 			return err
 		}
-
-		err = json.Unmarshal(clusterResult, &cluster)
-		if err != nil {
-			return utils.GetError("unable to decode cluster details", err)
-		}
-
-		// We now have the cluster which is running based upon the management port
-		if connection.ClusterName != cluster.ClusterName {
-			return fmt.Errorf("A different cluster %s is running on this management port with process id: %v, please stop this cluster first", cluster.ClusterName, processIDs)
-		}
-
-		return fmt.Errorf("the cluster %s appears to be already started with process ids: %v", connection.Name, processIDs)
+		cmd.Printf("Scaling the cluster %s up by %d member(s) to %d members\n", connection.Name, count, replicaCountParam)
 	}
-
-	if operation == scaleClusterCommand {
-		if replicaCountParam < 1 {
-			return errors.New("replicas must be a positive value")
-		} else if replicaCountParam == numProcesses {
-			return fmt.Errorf("the cluster already running %d members. Please privde a different replica value", numProcesses)
-		}
-		if replicaCountParam <= numProcesses {
-			return errors.New("scaling down a cluster is not yet supported")
-		}
-		serverDelta = replicaCountParam - numProcesses
-		if serverDelta > 0 {
-			scaleType = "up"
+	stopping := operation == stopClusterCommand || operation == restartClusterCommand && numProcesses > 0
+	if err = cmd.Context().Err(); err != nil {
+		return err
+	}
+	if stopping && !confirmOperation(cmd, fmt.Sprintf("Are you sure you want to stop %d members for the cluster %s? (y/n) ", numProcesses, connection.Name)) {
+		return cmd.Context().Err()
+	}
+	// Register only after all terminal input and preflight, before any stop or
+	// launch. Unrelated commands retain their existing signal behavior.
+	restore := managedOperationSignals(cmd)
+	defer restore()
+	if err = cmd.Context().Err(); err != nil {
+		return err
+	}
+	if stopping {
+		if operation == restartClusterCommand {
+			if err = stopClusterForRestart(cmd, connection, *plan.connection.Management, processIDs); err != nil {
+				return err
+			}
 		} else {
-			scaleType = "down"
+			if err = stopClusterProcesses(cmd, connection.Name, processIDs); err != nil {
+				return fmt.Errorf("unable to stop cluster %s: stop incomplete: %w", connection.Name, err)
+			}
+			return cmd.Context().Err()
 		}
-
-		confirmMessage = ""
-		cmd.Printf("Scaling the cluster %s %s by %d member(s) to %d members\n", connection.Name, scaleType, serverDelta, replicaCountParam)
-		replicaCountParam = serverDelta
-	} else if operation == startClusterCommand {
-		if replicaCountParam < 1 {
-			return errors.New("replica count must be 1 or more")
-		}
-
-		confirmMessage = ""
-	} else {
-		confirmMessage = fmt.Sprintf("Are you sure you want to stop %d members for the cluster %s? (y/n) ", numProcesses, connection.Name)
 	}
-
-	// confirm the operation
-	if confirmMessage != "" && !confirmOperation(cmd, confirmMessage) {
-		return nil
-	}
-
-	// if the logging destination has been set on the connection then override it
 	if connection.LoggingDestination != "" {
 		logsDirectory = connection.LoggingDestination
 	}
-
-	if operation == stopClusterCommand {
-		count := 0
-		for _, v := range processIDs {
-			proc, err = os.FindProcess(v)
-			if err == nil {
-				err = proc.Kill()
-				if err != nil {
-					// ignore as process may have exited
-					cmd.Printf("unable to kill process %v\n", proc.Pid)
-				} else {
-					count++
-					cmd.Printf("killed process %d\n", proc.Pid)
-				}
-			}
-		}
-
-		cmd.Printf("%d processes were stopped for cluster %s\n", count, connection.Name)
-	} else {
-		var message = "started"
-		if operation == scaleClusterCommand {
-			message = "scaled"
-		}
-
-		err = startCluster(cmd, connection, replicaCountParam, numProcesses)
-		if err != nil {
-			return err
-		}
-
-		cmd.Printf("Cluster %s %s\n", connection.Name, message)
+	save := managedUpdate
+	if operation == scaleClusterCommand {
+		save = managedNoSave
 	}
-
+	_, err = runPreparedStartup(cmd, plan, save)
+	if err == nil && save != managedNoSave {
+		cmd.Printf("Saved management settings and URL %s\n", plan.connection.ConnectionURL)
+	}
+	if err != nil {
+		if operation == restartClusterCommand && numProcesses > 0 {
+			return fmt.Errorf("replacement failed after stop requests for the old cluster; previous configuration retained; stopped members cannot be restored automatically: %w", err)
+		}
+		return err
+	}
+	cmd.Printf("Cluster %s %s completed\n", connection.Name, operation)
 	return nil
 }
 
@@ -1526,6 +1456,7 @@ func init() {
 	addClusterCmd.Flags().StringVarP(&connectionURL, "url", "u", "", "connection URL")
 	_ = addClusterCmd.MarkFlagRequired("url")
 	addClusterCmd.Flags().StringVarP(&connectionType, "type", "t", httpType, "connection type, http")
+	addClusterCmd.Flags().Bool("ignore-certs", false, "allow invalid certificates only for this saved HTTPS connection")
 
 	describeClusterCmd.Flags().BoolVarP(&verboseOutput, "verbose", "v", false,
 		"include verbose output including individual members, reporters and executor details")
@@ -1560,6 +1491,7 @@ func init() {
 	createClusterCmd.Flags().StringVarP(&operationalConfigParam, operationalConfigArg, "", "", operationalConfigMessage)
 	createClusterCmd.Flags().Int32VarP(&jmxRemotePortParam, jmxPortArg, "J", 0, jmxPortMessage)
 	createClusterCmd.Flags().StringVarP(&jmxRemoteHostParam, jmxHostArg, "j", "", jmxHostMessage)
+	managementFlags(createClusterCmd)
 	createClusterCmd.Flags().BoolVarP(&profileFirstParam, profileFirstArg, "F", false, profileFirstMessage)
 	createClusterCmd.Flags().StringVarP(&machineParam, machineArg, "", "", machineMessage)
 	createClusterCmd.Flags().StringVarP(&rackParam, rackArg, "", "", rackMessage)
@@ -1612,6 +1544,7 @@ func applyStartParams(cmd *cobra.Command) {
 	cmd.Flags().StringVarP(&serverStartClassParam, startClassArg, "S", "", startClassMessage)
 	cmd.Flags().Int32VarP(&jmxRemotePortParam, jmxPortArg, "J", 0, jmxPortMessage)
 	cmd.Flags().StringVarP(&jmxRemoteHostParam, jmxHostArg, "j", "", jmxHostMessage)
+	managementFlags(cmd)
 	cmd.Flags().BoolVarP(&profileFirstParam, profileFirstArg, "F", false, profileFirstMessage)
 	cmd.Flags().BoolVarP(&backupLogFilesParam, backupLogFilesArg, "B", false, backupLogFilesMessage)
 	cmd.Flags().StringVarP(&machineParam, machineArg, "", "", machineMessage)
@@ -1731,7 +1664,10 @@ func ensureUniqueCluster(connection string) error {
 
 // validateProfile validates the given profile param
 func validateProfile() error {
-	startupProfile := getProfileValue(profileValueParam)
+	return validateProfileValue(getProfileValue(profileValueParam))
+}
+
+func validateProfileValue(startupProfile string) error {
 	if profileValueParam != "" && startupProfile == "" {
 		return fmt.Errorf("a profile with the name %s does not exist", profileValueParam)
 	}

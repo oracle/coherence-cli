@@ -25,6 +25,7 @@ https://oss.oracle.com/licenses/upl.
 * [Overview](#overview)
 * [Why use the Coherence CLI?](#why-use-the-coherence-cli)
 * [Install the CLI](#install-the-cli)
+* [Upgrading from 1.10.14](#upgrading-from-11014)
 * [Getting Started](#getting-started)
 * [Supported Coherence Versions](#supported-coherence-versions)
 * [Get Involved](#need-more-help-have-a-suggestion-come-and-say-hello)
@@ -60,12 +61,15 @@ The CLI complements your existing Coherence management tools and allows you to:
 
 The Coherence CLI is available for macOS, Linux and Windows for x86 and Arm based processors.
 
-### Mac / Linux
+### Linux
 
-For macOS and Linux platforms, use the following to install the latest version of the CLI:
+On Linux, the installer downloads the release checksum manifest and verifies the selected binary before making it executable or copying it to `/usr/local/bin`:
+
+<details>
+<summary>Show automatic Linux installation commands</summary>
 
 ```bash
-curl -sL https://raw.githubusercontent.com/oracle/coherence-cli/main/scripts/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/oracle/coherence-cli/main/scripts/install.sh | bash
 ```
 
 When you install the CLI, normally administrative privileges are required as the `cohctl` executable is moved to the `/usr/local/bin` directory.
@@ -73,18 +77,115 @@ When you install the CLI, normally administrative privileges are required as the
 If you do not want to copy to `/usr/local/bin` automatically, you can set the following environment variable `export COPY=false`, before running the above to download only and then
 manually copy to your desired location.
 
-### Windows
+</details>
 
-For Windows, use the curl command below, then copy `cohctl.exe` to a directory in your PATH:
+Alternatively, download and verify the Linux artifact manually without running the installer:
 
-```cmd
-curl -sLo cohctl.exe "https://github.com/oracle/coherence-cli/releases/download/1.10.14/cohctl-1.10.14-windows-amd64.exe"
+<details>
+<summary>Show manual Linux download and checksum verification commands</summary>
+
+```bash
+(
+set -euo pipefail
+VERSION=$(curl -fsSL https://oracle.github.io/coherence-cli/stable.txt)
+while [[ "${VERSION}" == *$'\r' ]]; do VERSION=${VERSION%$'\r'}; done
+[[ "${VERSION}" =~ ^[0-9A-Za-z][0-9A-Za-z._-]*$ ]] || { echo "Invalid version" >&2; exit 1; }
+ARCH=amd64 # use arm64 on Arm systems
+ASSET="cohctl-${VERSION}-linux-${ARCH}"
+MANIFEST="cohctl-${VERSION}-checksums.txt"
+RELEASE_URL="https://github.com/oracle/coherence-cli/releases/download/${VERSION}"
+DESTINATION="${PWD}/${ASSET}"
+TEMP=$(mktemp -d)
+trap 'rm -rf -- "${TEMP}"' EXIT
+cd "${TEMP}"
+
+curl -fsSL -o "${ASSET}" "${RELEASE_URL}/${ASSET}"
+curl -fsSL -o "${MANIFEST}" "${RELEASE_URL}/${MANIFEST}"
+awk -v target="${ASSET}" '
+    $2 == target {
+        matches++
+        if (NF == 2 && length($1) == 64 && $1 !~ /[^0-9a-f]/) {
+            valid++
+            entry = $1 "  " $2
+        }
+    }
+    END {
+        if (matches != 1 || valid != 1) exit 1
+        print entry
+    }
+' "${MANIFEST}" > "${ASSET}.sha256"
+sha256sum -c "${ASSET}.sha256"
+chmod u+x "${ASSET}"
+mv -- "${ASSET}" "${DESTINATION}"
+)
 ```
 
-> Note: Change the **amd64** to **arm** for ARM based processor in the URL above.
+</details>
+
+### Windows
+
+Download a Windows executable using the following command in Command Prompt or PowerShell, then copy `cohctl.exe` to a directory on your `PATH`:
+
+```cmd
+curl.exe -fLo cohctl.exe "https://github.com/oracle/coherence-cli/releases/download/1.10.14/cohctl-1.10.14-windows-amd64.exe"
+```
+
+The example downloads `1.10.14` for x86-64. Replace `1.10.14` in both places with your desired [released version](https://github.com/oracle/coherence-cli/releases), or change `amd64` to `arm64` for Arm.
+
+The command above only downloads the executable. To download and verify the latest stable Windows executable using SHA-256 checksums, use the PowerShell procedure below. Use `amd64` for x86-64 or change it to `arm64` for Arm. Before running, replace `C:\path\on\your\PATH\cohctl.exe` with your chosen destination in a directory on your `PATH`.
+
+<details>
+<summary>Show PowerShell installation commands</summary>
+
+```powershell
+& {
+    $ErrorActionPreference = 'Stop'
+    Set-StrictMode -Version Latest
+    $Version = (Invoke-WebRequest "https://oracle.github.io/coherence-cli/stable.txt" -UseBasicParsing -ErrorAction Stop).Content.TrimEnd("`r", "`n")
+    if ($Version -cnotmatch '\A[0-9A-Za-z][0-9A-Za-z._-]*\z') { throw 'Invalid version' }
+    $Asset = "cohctl-$Version-windows-amd64.exe"
+    $Manifest = "cohctl-$Version-checksums.txt"
+    $ReleaseUrl = "https://github.com/oracle/coherence-cli/releases/download/$Version"
+    $Temp = Join-Path ([IO.Path]::GetTempPath()) ([Guid]::NewGuid().ToString())
+    $null = New-Item -ItemType Directory -Path $Temp
+    try {
+        $BinaryPath = Join-Path $Temp $Asset
+        $ManifestPath = Join-Path $Temp $Manifest
+        Invoke-WebRequest "$ReleaseUrl/$Asset" -OutFile $BinaryPath -ErrorAction Stop
+        Invoke-WebRequest "$ReleaseUrl/$Manifest" -OutFile $ManifestPath -ErrorAction Stop
+        $Entries = @(Get-Content -LiteralPath $ManifestPath -ErrorAction Stop | Where-Object {
+            $Fields = $_ -split '\s+'
+            $Fields.Count -ge 2 -and $Fields[1] -ceq $Asset
+        })
+        if ($Entries.Count -ne 1) { throw "Expected exactly one checksum entry for $Asset" }
+        $Pattern = '\A([0-9a-f]{64})  ' + [regex]::Escape($Asset) + '\z'
+        if ($Entries[0] -cnotmatch $Pattern) { throw "Malformed checksum entry for $Asset" }
+        $Expected = $Matches[1]
+        $Actual = (Get-FileHash -LiteralPath $BinaryPath -Algorithm SHA256 -ErrorAction Stop).Hash.ToLowerInvariant()
+        if ($Actual -cne $Expected) { throw "Checksum verification failed for $Asset" }
+        Copy-Item -LiteralPath $BinaryPath -Destination C:\path\on\your\PATH\cohctl.exe -ErrorAction Stop
+    } finally {
+        Remove-Item -LiteralPath $Temp -Recurse -Force -ErrorAction Stop
+    }
+}
+```
+
+</details>
+
+For additional information, see the [Install guide](https://docs.coherence.community/coherence-cli/docs/latest/docs/installation/installation#install-windows).
+
+Release checksums detect corruption or mismatched downloads. Because the manifest is distributed with the release, it does not provide independent provenance if both the artifact and manifest are compromised.
 
 See the [Install guide](https://docs.coherence.community/coherence-cli/docs/latest/docs/installation/installation) for
 more information on downloading and installing the CLI.
+
+## Upgrading from 1.10.14
+
+Preparing for **1.11.0**? Read the [upgrade checklist](docs/about/upgrading_1_11_0.adoc)
+before restarting local development clusters, reinitializing monitoring, or updating TLS-related scripts.
+It explains automatic migrations and the steps you need to take. See also the
+[1.11.0 release notes](release-notes/1.11.0.md). These describe the upcoming release;
+published versions are listed on [GitHub Releases](https://github.com/oracle/coherence-cli/releases).
 
 ## Getting Started
 
@@ -101,6 +202,7 @@ The CLI supports and is certified against the following Community and Commercial
 * 24.09+
 * 22.06+
 * 14.1.2-0-+
+* 15.1.1-0-*
 
 > Note: As CE 14.1.2-0-0 is out, CE 14.1.1-0+ is no longer supported or tested. Please use CE 14.1.2-0+
 
@@ -109,6 +211,7 @@ The CLI supports and is certified against the following Community and Commercial
 * 14.1.1.0.x - minimum patch level of 14.1.1.0.5+ required
 * 14.1.1.2206.x Feature Pack
 * 14.1.2.0.x
+* 15.1.1.0.x
 
 > Note: If you are on a patch set below the minimum recommended above, then CLI may work, but some functionality may not be available. It
 > is always recommended to upgrade to the latest Coherence patch as soon as you are able to.
@@ -132,7 +235,7 @@ Please consult the [security guide](./SECURITY.md) for our responsible security 
 
 ## License
 
-Copyright (c) 2021, 2025 Oracle and/or its affiliates.
+Copyright (c) 2021, 2026 Oracle and/or its affiliates.
 
 Released under the Universal Permissive License v1.0 as shown at
 <https://oss.oracle.com/licenses/upl/>.

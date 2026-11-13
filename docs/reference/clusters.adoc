@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 
-    Copyright (c) 2021, 2025 Oracle and/or its affiliates.
+    Copyright (c) 2021, 2026 Oracle and/or its affiliates.
     Licensed under the Universal Permissive License v 1.0 as shown at
     https://oss.oracle.com/licenses/upl.
 
@@ -69,6 +69,26 @@ Added cluster local with type http and URL http://localhost:30000/management/coh
 
 NOTE: If you wish to add a `https` connection, you must enter the entire URL.
 
+HTTPS verifies certificates by default. For private trust, set `COHERENCE_TLS_CERTS_PATH` to the CA PEM
+file and use a valid certificate matching the URL hostname/IP. Mutual TLS also uses
+`COHERENCE_TLS_CLIENT_CERT` and `COHERENCE_TLS_CLIENT_KEY`. Trusting a CA cannot fix expiry or a hostname
+mismatch. See xref:../security/overview.adoc[Securing CLI Access] for trust-pool and upgrade behavior.
+
+If an exception is necessary and you are sure of the server's identity, explicitly apply it to the
+initial probe and saved HTTPS connection:
+
+[source,bash]
+----
+cohctl add cluster development -u https://host:30000/management/coherence/cluster --ignore-certs
+cohctl get ignore-certs -c development
+cohctl set ignore-certs false -c development
+----
+
+New connections never inherit another connection's choice or the old global setting. The exception
+covers only the saved HTTPS origin (hostname/IP and effective port); other-origin Coherence*Web and
+health URLs still verify. `get config -v` shows each saved connection's false/true/n/a value. HTTP
+remains supported, but explicitly passing either value of `--ignore-certs` for HTTP is rejected.
+
 NOTE: You can set the `HTTP_PROXY` environment variable to use a Proxy Server to connect to your cluster endpoint.
 
 [#discover-clusters]
@@ -115,6 +135,10 @@ NOTE: The cluster connection is automatically generated from the cluster name. I
 be asked for specify a name.
 
 NOTE: If there are two or more Management URL's, you will be asked to select one.
+
+HTTPS discovery always verifies, including ad hoc `-c host:port` lookups. Configure valid certificates
+and trust for discovered endpoints; the current context's exception cannot authorize them. To use an
+explicit exception, add the specific HTTPS management URL as a saved connection instead.
 
 [#remove-cluster]
 ==== Remove Cluster

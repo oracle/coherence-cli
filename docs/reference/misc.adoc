@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 
-    Copyright (c) 2021, 2025 Oracle and/or its affiliates.
+    Copyright (c) 2021, 2026 Oracle and/or its affiliates.
     Licensed under the Universal Permissive License v 1.0 as shown at
     https://oss.oracle.com/licenses/upl.
 
@@ -16,8 +16,8 @@
 This section contains miscellaneous commands for various settings.
 
 * <<version, `cohctl version`>> - displays the CLI version
-* <<get-ingore-certs, `cohctl get ignore-certs`>> - displays the current setting for ignoring invalid SSL certificates
-* <<set-ignore-certs, `cohctl set ignore-certs`>> - sets the current setting for ignoring invalid SSL certificates to true or false
+* <<get-ingore-certs, `cohctl get ignore-certs`>> - displays the saved connection's certificate-validation setting
+* <<set-ignore-certs, `cohctl set ignore-certs`>> - sets the selected saved HTTPS connection's certificate-validation setting
 * <<get-logs, `cohctl get logs`>> - displays the cohctl logs
 * <<get-debug, `cohctl set debug`>> - displays the debug level
 * <<set-debug, `cohctl get debug`>> - sets the debug level on or off
@@ -58,13 +58,14 @@ set the environment variable HTTP_PROXY=http://proxy-host:proxy-port/ so that th
 
 include::../../build/_output/docs-gen/get_ignore_certs.adoc[tag=text]
 
-NOTE: WARNING: You should only use this option when you are sure of the identity of the target server
+The selected saved HTTPS connection reports `false` (verification enabled) or `true` (a scoped exception).
+HTTP reports `n/a`. Use `-c`/`--connection` or the current saved context; no global choice is used.
 
 *Examples*
 
 [source,bash]
 ----
-cohctl get ignore-certs
+cohctl get ignore-certs -c development
 ----
 Output:
 [source,bash]
@@ -81,7 +82,7 @@ include::../../build/_output/docs-gen/set_ignore_certs.adoc[tag=text]
 
 [source,bash]
 ----
-cohctl set ignore-certs true
+cohctl set ignore-certs true -c development
 ----
 Output:
 [source,bash]
@@ -89,8 +90,17 @@ Output:
 Value is now set to true
 ----
 
-NOTE: When you have this option set you will get the following warning every time you execute the CLI
-so it is clear you have disabled SSL validation: `WARNING: SSL Certificate validation has been explicitly disabled`
+Use `cohctl set ignore-certs false -c development` to restore verification. Without `-c`, the
+current saved context is selected. Missing or unknown saved connections are errors. HTTP connections
+reject both `true` and `false`; this command does not create an exception for a future add.
+For an initial HTTPS add probe, use valid trust or explicitly supply `add cluster ... --ignore-certs`.
+
+An exception applies only to that saved connection's HTTPS hostname/IP and effective port. Discovery,
+other-origin Coherence*Web/health destinations and general downloads remain verified. Stderr warns
+before the first bypassed request per connection/origin in each execution; the application log records
+every dispatched bypass attempt. Settings-only commands do not warn. See
+xref:../security/overview.adoc[Securing CLI Access] for private CA trust, warning frequency and one-time
+migration of the old persisted global setting.
 
 [#get-logs]
 ==== Get Logs

@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 
-    Copyright (c) 2021, 2025 Oracle and/or its affiliates.
+    Copyright (c) 2021, 2026 Oracle and/or its affiliates.
     Licensed under the Universal Permissive License v 1.0 as shown at
     https://oss.oracle.com/licenses/upl.
 
@@ -25,12 +25,16 @@ NOTE: See the {commercial-docs-base-url}/rest-reference/quick-start.html[Coheren
 for more information on setting up Management over REST.
 +
 If you do not have a cluster running with Management over REST, you can run the following Docker
-image to start a Coherence CE cluster and expose management on port 30000.
+image to start a Coherence CE cluster and publish management on the host's loopback address, port 30000.
 +
 [source,bash,subs="attributes"]
 ----
-docker run -d -p 30000:30000 ghcr.io/oracle/coherence-ce:{coherence-version}
+docker run -d -p 127.0.0.1:30000:30000 ghcr.io/oracle/coherence-ce:{coherence-version}
 ----
++
+Specifying `127.0.0.1` avoids publishing this unauthenticated management endpoint on every host interface.
+See Docker's https://docs.docker.com/engine/network/port-publishing/[port publishing guide] for networking details,
+including the localhost-publishing limitation in Docker releases older than 28.0.0.
 
 If you are connecting to a Coherence Commercial version you must be on at least the following patch sets:
 

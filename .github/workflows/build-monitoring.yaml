@@ -1,4 +1,4 @@
-# Copyright 2021, 2025 Oracle Corporation and/or its affiliates.
+# Copyright 2021, 2026 Oracle Corporation and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at
 # https://oss.oracle.com/licenses/upl.
 
@@ -47,20 +47,35 @@ jobs:
         with:
           go-version-file: 'go.mod'
 
+      - name: Validate Grafana credentials and stopped-container password rotation on Linux
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker pull busybox:1.37.0
+          docker compose -f monitoring/docker-compose.yaml pull grafana
+          COHCTL_TEST_MONITORING_DOCKER=1 go test -count=1 ./pkg/cmd -run '^TestGrafana(SecretDeliveryLinux|GeneratedPasswordAuthentication|StoppedContainerPasswordRotation)$'
+
       - name: Build and Test Monitoring
         shell: bash
         run: |
+          set -euo pipefail
           make cohctl
-          export PATH=`pwd`/bin:$PATH
-          cohctl init monitoring -y
-          cohctl start monitoring 
-          sleep 15
-          netstat -an | grep 9090
-          netstat -an | grep 3000
-          cohctl get monitoring
-          curl -s http://127.0.0.1:9090/-/healthy
-          curl -s http://127.0.0.1:3000/api/health
-          cohctl stop monitoring -y
+
+          # Validate the templates from this checkout rather than GitHub main.
+          if grep -Eq '^[[:space:]]*admin_password[[:space:]]*=' monitoring/grafana.ini; then
+            echo "The tracked Grafana configuration contains an administrator password" >&2
+            exit 1
+          fi
+          tracked_config="$(mktemp)"
+          docker compose -f monitoring/docker-compose.yaml config > "${tracked_config}"
+          test "$(grep -c 'host_ip: 127.0.0.1' "${tracked_config}")" -eq 2
+          rm -f "${tracked_config}"
+
+          # The shared initializer reads checkout support templates, including
+          # controlled markers/unsafe credential inputs, before staging and
+          # sanitization. Operator dashboards still use their separate main URL.
+          # No coherence-cli release tag needs to exist for this test.
+          COHCTL_TEST_MONITORING_DOCKER=1 go test -count=1 -v ./pkg/cmd -run '^TestMonitoringCheckoutStack$'
 
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: failure()

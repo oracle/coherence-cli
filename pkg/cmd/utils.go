@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, 2025 Oracle and/or its affiliates.
+ * Copyright (c) 2021, 2026 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -8,7 +8,6 @@ package cmd
 
 import (
 	"bytes"
-	"crypto/tls"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -512,17 +511,14 @@ func GetURLContents(resourceURL string) ([]byte, error) {
 	)
 	cookies, _ := cookiejar.New(nil)
 
-	certificates, certPool, _, _, _, err := utils.GetTLSDetails()
+	tlsConfig, err := utils.GetDownloadTLSConfig()
 	if err != nil {
 		return nil, err
 	}
 
 	tr := &http.Transport{
-		Proxy: http.ProxyFromEnvironment,
-		TLSClientConfig: &tls.Config{
-			InsecureSkipVerify: Config.IgnoreInvalidCerts, //nolint
-			Certificates:       certificates,
-			RootCAs:            certPool},
+		Proxy:           http.ProxyFromEnvironment,
+		TLSClientConfig: tlsConfig,
 	}
 
 	client := &http.Client{Transport: tr,
@@ -532,11 +528,13 @@ func GetURLContents(resourceURL string) ([]byte, error) {
 			return http.ErrUseLastResponse
 		}}
 
+	// #nosec G704 -- Downloads intentionally accept caller-selected URLs; every HTTPS peer, including proxies, is verified.
 	req, err = http.NewRequest("GET", resourceURL, bytes.NewBuffer(constants.EmptyByte))
 	if err != nil {
 		return body, err
 	}
 
+	// #nosec G704 -- Caller-selected download destinations and environment proxies are supported; TLS exceptions are never used here.
 	resp, err = client.Do(req)
 	if err != nil {
 		return body, err

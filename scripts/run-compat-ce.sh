@@ -30,12 +30,13 @@ COHERENCE_BASE_IMAGE=gcr.io/distroless/java17-debian12 PROFILES=,topics COHERENC
 echo "Coherence CE 15.1.1-0-1 with View Caches"
 COHERENCE_BASE_IMAGE=gcr.io/distroless/java17-debian12 PROFILES=,views COHERENCE_VERSION=15.1.1-0-1 make clean build-view-images test-e2e-views
 
-# Security Enabled
+# Security Enabled. Keep the CLI configuration separate from other matrix runs.
 export COMPUTERNAME=server1
-export COHERENCE_TLS_CERTS_PATH=`pwd`/test/test_utils/certs/guardians-ca.crt
-export COHERENCE_TLS_CLIENT_CERT=`pwd`/test/test_utils/certs/star-lord.crt
-export COHERENCE_TLS_CLIENT_KEY=`pwd`/test/test_utils/certs/star-lord.key COHERENCE_BASE_IMAGE=gcr.io/distroless/java17-debian12 COHERENCE_VERSION=24.09 PROFILES=,secure make clean certs build-test-images test-cluster-startup
-cohctl set ignore-certs true
-cohctl add cluster tls -u https://127.0.0.1:30000/management/coherence/cluster
-cohctl get members
-
+CERTS_DIR="$(pwd)/test/test_utils/certs"
+export COHERENCE_TLS_CERTS_PATH="${CERTS_DIR}/guardians-ca.crt"
+export COHERENCE_TLS_CLIENT_CERT="${CERTS_DIR}/star-lord.crt"
+export COHERENCE_TLS_CLIENT_KEY="${CERTS_DIR}/star-lord.key"
+trap 'make test-cluster-shutdown' EXIT
+COHERENCE_BASE_IMAGE=gcr.io/distroless/java17-debian12 COHERENCE_VERSION=26.07 PROFILES=,secure make clean certs build-test-images test-cluster-startup
+make cohctl
+./scripts/test-tls.sh

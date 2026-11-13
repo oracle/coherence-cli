@@ -58,7 +58,7 @@ jobs:
       with:
         go-version-file: 'go.mod'
 
-    - name: Code Review
+    - name: Lint
       shell: bash
       run: |
         make golangci
@@ -68,9 +68,17 @@ jobs:
       run: |
         make copyright
 
+    - name: Local Management Harness Tests
+      shell: bash
+      run: make test-local-management-support
+
     - name: Unit Tests
       shell: bash
       run: make test-cohctl
+
+    - name: Installer Tests
+      shell: bash
+      run: make test-install test-checksums test-install-docs
 
     - name: E2E Local Tests
       shell: bash

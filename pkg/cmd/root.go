@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, 2025 Oracle and/or its affiliates.
+ * Copyright (c) 2021, 2026 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -9,9 +9,11 @@ package cmd
 import (
 	"errors"
 	"fmt"
+	"github.com/go-viper/mapstructure/v2"
 	"github.com/oracle/coherence-cli/pkg/constants"
 	"github.com/oracle/coherence-cli/pkg/fetcher"
 	"github.com/oracle/coherence-cli/pkg/utils"
+	"github.com/oracle/coherence-go-client/v2/coherence/discovery"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
@@ -97,8 +99,8 @@ const (
 	dynamicHTTPMessage       = "enable dynamic http port for other members"
 	metricsPortMessage       = "starting port for metrics"
 	healthPortMessage        = "starting port for health"
-	jmxPortMessage           = "remote JMX port for management member"
-	jmxHostMessage           = "remote JMX RMI host for management member"
+	jmxPortMessage           = "JMX registry/RMI port for the initial management member (0 disables; saved after successful startup)"
+	jmxHostMessage           = "advertised JMX host (defaults to the JMX bind address, independent of WKA)"
 	machineMessage           = "the machine name to use"
 	rackMessage              = "the rack name to use"
 	siteMessage              = "the site name to use"
@@ -129,11 +131,13 @@ const (
 	OperationCompleted = "operation completed"
 
 	// config file related
-	configName  = "cohctl"
-	logsDirName = "logs"
-	configType  = "yaml"
-	configDir   = ".cohctl"
-	logFile     = "cohctl.log"
+	configName        = "cohctl"
+	logsDirName       = "logs"
+	configType        = "yaml"
+	configDir         = ".cohctl"
+	logFile           = "cohctl.log"
+	winFileSinkScheme = "winfile"
+	winFileSinkURL    = winFileSinkScheme + ":///" + logFile
 )
 
 var (
@@ -181,6 +185,7 @@ var (
 )
 
 // CoherenceCLIConfig describes the details stored in the .cohctl.yaml.
+// IgnoreInvalidCerts is retained only for legacy migration.
 type CoherenceCLIConfig struct {
 	Version            string              `json:"version"`
 	CurrentContext     string              `json:"currentContext"`
@@ -220,16 +225,20 @@ type ClusterConnection struct {
 	ClusterName          string `json:"clusterName"` // the actual cluster name
 	ClusterType          string `json:"clusterType"`
 
+	// IgnoreInvalidCerts records an optional connection-specific choice; nil stays absent in saved YAML.
+	IgnoreInvalidCerts *bool `json:"ignoreInvalidCerts,omitempty" mapstructure:"ignoreinvalidcerts,omitempty" yaml:"ignoreinvalidcerts,omitempty"`
+
 	// the following attributes are specific to manually created clusters
-	ManuallyCreated     bool   `json:"manuallyCreated"`     // indicates if this was created by the create cluster command
-	BaseClasspath       string `json:"baseClasspath"`       // the minimum required classes coherence.jar and coherence-json
-	AdditionalClasspath string `json:"additionalClasspath"` // additional classpath provided by the user
-	Arguments           string `json:"arguments"`           // arguments to start cluster with including cluster name, etc
-	ManagementPort      int32  `json:"managementPort"`      // arguments to start cluster with including cluster name, etc
-	PersistenceMode     string `json:"persistenceMode"`
-	LoggingDestination  string `json:"loggingDestination"` // logging destination, if empty then place under ~/.cohctl/logs
-	ManagementAvailable bool   // only used when using -o wide option
-	StartupClass        string `json:"startupClass"`
+	ManuallyCreated     bool               `json:"manuallyCreated"`     // indicates if this was created by the create cluster command
+	BaseClasspath       string             `json:"baseClasspath"`       // the minimum required classes coherence.jar and coherence-json
+	AdditionalClasspath string             `json:"additionalClasspath"` // additional classpath provided by the user
+	Arguments           string             `json:"arguments"`           // arguments to start cluster with including cluster name, etc
+	ManagementPort      int32              `json:"managementPort"`      // arguments to start cluster with including cluster name, etc
+	PersistenceMode     string             `json:"persistenceMode"`
+	LoggingDestination  string             `json:"loggingDestination"` // logging destination, if empty then place under ~/.cohctl/logs
+	ManagementAvailable bool               // only used when using -o wide option
+	StartupClass        string             `json:"startupClass"`
+	Management          *ClusterManagement `json:"management,omitempty" mapstructure:"management,omitempty" yaml:"management,omitempty"`
 }
 
 // rootCmd represents the base command when called without any subcommands
@@ -370,11 +379,15 @@ func initConfig() {
 
 	if err = viper.ReadInConfig(); err != nil {
 		_, foundError := err.(viper.ConfigFileNotFoundError)
-		_, pathError := err.(*os.PathError)
 
-		if foundError || pathError {
-			// It doesn't exist, so create it
-			if _, err := os.Create(cfgFile); err != nil {
+		if foundError || os.IsNotExist(err) {
+			// Create only a missing file; never truncate an unreadable/racing one.
+			file, createErr := os.OpenFile(cfgFile, os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0600)
+			if createErr != nil {
+				rootCmd.Println(utils.GetError("unable to create config file "+cfgFile, createErr))
+				os.Exit(1)
+			}
+			if err = file.Close(); err != nil {
 				rootCmd.Println(utils.GetError("unable to create config file "+cfgFile, err))
 				os.Exit(1)
 			}
@@ -400,25 +413,29 @@ func initConfig() {
 			}
 		} else {
 			// Config file was found but another error was produced
-			rootCmd.Println("unable to read config " + cfgFile)
+			fmt.Fprintln(os.Stderr, utils.GetError("unable to read config "+cfgFile, err))
 			os.Exit(1)
 		}
 	} else {
-		// load the config
-		if err = viper.Unmarshal(&Config); err != nil {
-			rootCmd.Println(err)
+		// Migrate the selected file before color/version writes or command work.
+		// The helper reads persisted values without AutomaticEnv overlays.
+		var loaded CoherenceCLIConfig
+		loaded, err = loadExistingConfig(viper.GetViper(), os.Stderr, defaultConfigMigrationOps())
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)
 		}
+		Config = loaded
 	}
 
 	if Config.Color == "" || Config.Color == "1" {
 		// default to "on"
-		Config.Color = on
-		viper.Set(colorContextKey, on)
-		if err = WriteConfig(); err != nil {
+		if err = writeStartupConfigValue(viper.GetViper(), colorContextKey, on); err != nil {
 			rootCmd.Println(err)
 			os.Exit(1)
 		}
+		Config.Color = on
+		viper.Set(colorContextKey, on)
 	}
 
 	// default defaultStyle
@@ -447,25 +464,18 @@ func initConfig() {
 			zap.String("newVersion", Version)}...)
 
 		// carry out any upgrade logic here
-		Config.Version = Version
-		viper.Set("version", Config.Version)
-		err = WriteConfig()
+		err = writeStartupConfigValue(viper.GetViper(), "version", Version)
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
 		}
+		Config.Version = Version
+		viper.Set("version", Config.Version)
 	}
 
 	fetcher.DebugEnabled = Config.Debug
-	fetcher.IgnoreInvalidCerts = Config.IgnoreInvalidCerts
 	utils.DebugEnabled = Config.Debug
 	fetcher.RequestTimeout = Config.RequestTimeout
-
-	if Config.IgnoreInvalidCerts {
-		msg := "WARNING: SSL Certificate validation has been explicitly disabled"
-		Logger.Info(msg)
-		_, _ = fmt.Fprintln(os.Stderr, msg)
-	}
 }
 
 // GetClusterConnection returns the URL for a given a cluster connection name.
@@ -478,11 +488,67 @@ func GetClusterConnection(connectionName string) (bool, ClusterConnection) {
 	return false, ClusterConnection{}
 }
 
-// WriteConfig writes the viper config and exit if there is an error.
-func WriteConfig() error {
-	err := viper.WriteConfig()
+// configurationClusters uses configuration decoder names, independently of the
+// public JSON output tags on ClusterConnection. Decode maps directly too, so
+// effective settings loaded from a file retain fields unknown to this CLI.
+func configurationClusters(clusters any) ([]map[string]any, error) {
+	var settings []map[string]any
+	if err := mapstructure.Decode(clusters, &settings); err != nil {
+		return nil, err
+	}
+	return settings, nil
+}
+
+type configurationEncoderRegistry struct {
+	viper.EncoderRegistry
+	clusters []map[string]any
+}
+
+func (r configurationEncoderRegistry) Encoder(format string) (viper.Encoder, error) {
+	encoder, err := r.EncoderRegistry.Encoder(format)
 	if err != nil {
-		return errors.New("unable to write config: " + err.Error())
+		return nil, err
+	}
+	return configurationEncoder{encoder, r.clusters}, nil
+}
+
+type configurationEncoder struct {
+	viper.Encoder
+	clusters []map[string]any
+}
+
+func (e configurationEncoder) Encode(settings map[string]any) ([]byte, error) {
+	// Viper supplies a fresh AllSettings map to the encoder. Never normalize
+	// its live override/config maps or replace them with the stale Config.
+	if _, present := settings[clusterKey]; present {
+		settings[clusterKey] = e.clusters
+	}
+	return e.Encoder.Encode(settings)
+}
+
+// WriteConfig writes effective Viper settings using configuration field names.
+func WriteConfig() error {
+	clusters, err := configurationClusters(viper.Get(clusterKey))
+	if err != nil {
+		return fmt.Errorf("unable to write config: encode cluster settings: %w", err)
+	}
+	// Change only the encoder option for this call. A shallow value snapshot
+	// restores that option without mutating settings, bindings or defaults.
+	// Keep Viper's ordinary filename/codec/filesystem/write semantics intact.
+	current := viper.GetViper()
+	previous := *current
+	defer func() {
+		selectedFile := current.ConfigFileUsed()
+		*current = previous
+		// A successful first write can discover the new default file. Retain
+		// that selection for a managed save in the same CLI invocation.
+		if err == nil && selectedFile != "" {
+			current.SetConfigFile(selectedFile)
+		}
+	}()
+	viper.SetOptions(viper.WithEncoderRegistry(configurationEncoderRegistry{viper.NewCodecRegistry(), clusters}))
+	if err = viper.WriteConfig(); err != nil {
+		return fmt.Errorf("unable to write config: %w", err)
 	}
 	return nil
 }
@@ -516,6 +582,12 @@ func Initialize(command *cobra.Command) *cobra.Command {
 
 	if command == nil {
 		command = createRootCommand()
+	}
+
+	// Reset at execution, not construction: tests and embedded callers may run
+	// the same Cobra command repeatedly in one process.
+	command.PersistentPreRun = func(cmd *cobra.Command, _ []string) {
+		fetcher.BeginCommandTLSWarnings(cmd.ErrOrStderr())
 	}
 
 	// set command sub-flags
@@ -792,14 +864,22 @@ func Initialize(command *cobra.Command) *cobra.Command {
 
 // GetDataFetcher returns a Fetcher given a cluster name.
 func GetDataFetcher(clusterName string) (fetcher.Fetcher, error) {
+	return getDataFetcher(clusterName, getDiscoveredClusters)
+}
+
+// Pass discovery explicitly so the selection policy can be exercised without a
+// running Name Service or mutable package-level test hooks.
+func getDataFetcher(clusterName string, discoverClusters func(*cobra.Command, []string) ([]discovery.DiscoveredCluster, []int, error)) (fetcher.Fetcher, error) {
 	var (
 		finalClusterName, finalConnectionURL, finalConnectionType string
+		connectionName                                            string
+		ignoreInvalidCerts                                        bool
 	)
 
 	// check to see if we have a ':' in the cluster, then we assume this is a host:port of
 	// the cluster, and we look up the http url dynamically
 	if strings.Contains(clusterName, ":") {
-		discoveredClusters, _, err := getDiscoveredClusters(nil, []string{clusterName})
+		discoveredClusters, _, err := discoverClusters(nil, []string{clusterName})
 		if err != nil {
 			return nil, err
 		}
@@ -832,11 +912,13 @@ func GetDataFetcher(clusterName string) (fetcher.Fetcher, error) {
 		finalClusterName = connection.ClusterName
 		finalConnectionType = connection.ConnectionType
 		finalConnectionURL = connection.ConnectionURL
+		connectionName = connection.Name
+		ignoreInvalidCerts = connection.IgnoreInvalidCerts != nil && *connection.IgnoreInvalidCerts
 		httpManagementURL = ""
 		httpManagementCluster = ""
 	}
 
-	return fetcher.GetFetcherOrError(finalConnectionType, finalConnectionURL, Username, finalClusterName)
+	return fetcher.GetFetcherForConnection(finalConnectionType, finalConnectionURL, Username, finalClusterName, connectionName, ignoreInvalidCerts)
 }
 
 func randomize(arr []string) string {
@@ -921,9 +1003,37 @@ func checkOutputFormat() error {
 	return nil
 }
 
-// newWinFileSink returns a Zap.Sink to get around windows issue.
-func newWinFileSink(u *url.URL) (zap.Sink, error) {
-	return os.OpenFile(u.Path[1:], os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0644)
+// newWinFileSink binds the Windows sink to the selected directory, not a URL
+// containing its native path. Relative selections are resolved once so later
+// working-directory changes cannot redirect the factory.
+func newWinFileSink(directory string) (func(*url.URL) (zap.Sink, error), error) {
+	if directory == "" {
+		return nil, errors.New("missing CLI log directory")
+	}
+	rootDirectory, err := filepath.Abs(directory)
+	if err != nil {
+		return nil, err
+	}
+	return func(u *url.URL) (zap.Sink, error) {
+		if u == nil || u.Scheme != winFileSinkScheme || u.Path != "/"+logFile ||
+			u.Host != "" || u.User != nil || u.Opaque != "" || u.OmitHost ||
+			u.RawPath != "" || u.ForceQuery || u.RawQuery != "" || u.Fragment != "" || u.RawFragment != "" {
+			return nil, errors.New("invalid Windows log sink URL")
+		}
+		root, err := os.OpenRoot(rootDirectory)
+		if err != nil {
+			return nil, err
+		}
+		file, openErr := root.OpenFile(logFile, os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0644)
+		closeErr := root.Close()
+		if openErr != nil {
+			return nil, errors.Join(openErr, closeErr)
+		}
+		if closeErr != nil {
+			return nil, errors.Join(closeErr, file.Close())
+		}
+		return file, nil
+	}, nil
 }
 
 // initLogging initializes the logging.
@@ -933,11 +1043,15 @@ func initLogging(homeDir string) (*zap.Logger, error) {
 	logFilePath = filepath.Join(homeDir, logFile)
 	if isWindows() {
 		// workaround for logging issue on Windows
-		err := zap.RegisterSink("winfile", newWinFileSink)
+		factory, err := newWinFileSink(homeDir)
+		if err != nil {
+			return nil, err
+		}
+		err = zap.RegisterSink(winFileSinkScheme, factory)
 		if err != nil {
 			return nil, fmt.Errorf("unable to register sink %v", err)
 		}
-		cfg.OutputPaths = []string{"winfile:///" + logFilePath}
+		cfg.OutputPaths = []string{winFileSinkURL}
 	} else {
 		cfg.OutputPaths = []string{logFilePath}
 	}
@@ -964,7 +1078,7 @@ func confirmOperation(cmd *cobra.Command, message string) bool {
 	}
 
 	cmd.Print(message)
-	_, err = fmt.Scanln(&response)
+	_, err = fmt.Fscanln(cmd.InOrStdin(), &response)
 	if response != "y" || err != nil {
 		cmd.Println(constants.NoOperation)
 		return false
