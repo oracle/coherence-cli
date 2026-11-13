@@ -54,15 +54,19 @@ class DownloadPolicyTests(unittest.TestCase):
                                "/other": "file:///must-not-be-read"}
                     if self.path == "/failure":
                         self.send_response(404)
+                        self.send_header("Content-Length", "0")
                         self.end_headers()
                     elif self.path in targets:
                         self.send_response(302)
                         self.send_header("Location", targets[self.path])
+                        self.send_header("Content-Length", "0")
                         self.end_headers()
                     else:
+                        payload = b"trusted fixture payload"
                         self.send_response(200)
+                        self.send_header("Content-Length", str(len(payload)))
                         self.end_headers()
-                        self.wfile.write(b"trusted fixture payload")
+                        self.wfile.write(payload)
 
                 def log_message(self, *args):
                     pass
