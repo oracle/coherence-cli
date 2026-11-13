@@ -423,6 +423,14 @@ test-lint: ## Verify the strict lint baseline and Make failure controls
 test-local-management-support: ## Test management listener inspection and REST readiness without starting Coherence
 	PYTHONDONTWRITEBYTECODE=1 python3 scripts/test-local-management-support.py
 
+.PHONY: test-windows-console-support
+test-windows-console-support: ## Fault-inject the console driver on any host (not native Windows qualification)
+	PYTHONDONTWRITEBYTECODE=1 python3 scripts/test-windows-console-support.py
+
+.PHONY: test-download-policy
+test-download-policy: ## Test HTTPS download policies using trusted local TLS redirects (requires openssl/curl)
+	PYTHONDONTWRITEBYTECODE=1 python3 scripts/test-download-policy.py
+
 .PHONY: test-windows-console
 test-windows-console: ## Test Ctrl-C/Ctrl-Break cancellation on native Windows (requires Python and PowerShell)
 	@python3 -c 'import os, sys; sys.exit(0 if os.name == "nt" else "Native Windows is required for console tests")'

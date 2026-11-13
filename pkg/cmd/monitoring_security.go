@@ -32,6 +32,8 @@ const (
 	grafanaPasswordSecret      = "grafana_admin_password"
 	grafanaAdminFileTarget     = "/run/secrets/grafana_admin_password"
 	grafanaAdminUser           = "admin"
+	grafanaINIFile             = "grafana.ini"
+	grafanaAdminUserLine       = "admin_user = " + grafanaAdminUser
 	defaultMonitoringAddress   = "127.0.0.1"
 )
 
@@ -118,10 +120,11 @@ func monitoringExposureWarning(bindAddress string) string {
 	if ip == nil || ip.IsLoopback() {
 		return ""
 	}
+	const advice = " HTTP leaves Grafana credentials and session traffic unencrypted; Prometheus has no authentication. Prefer loopback binding with SSH port forwarding."
 	if ip.IsUnspecified() {
-		return fmt.Sprintf("WARNING: %s=%s exposes Grafana and Prometheus on every network interface.", monitoringBindAddressEnv, bindAddress)
+		return fmt.Sprintf("WARNING: %s=%s exposes Grafana and Prometheus on every network interface.", monitoringBindAddressEnv, bindAddress) + advice
 	}
-	return fmt.Sprintf("WARNING: %s=%s exposes Grafana and Prometheus on a non-loopback interface.", monitoringBindAddressEnv, bindAddress)
+	return fmt.Sprintf("WARNING: %s=%s exposes Grafana and Prometheus on a non-loopback interface.", monitoringBindAddressEnv, bindAddress) + advice
 }
 
 func legacyPortWarnings(contents []byte) []string {
@@ -327,7 +330,7 @@ func sanitizeGrafanaINI(contents []byte) []byte {
 		}
 		if strings.HasPrefix(trimmed, "[") && strings.HasSuffix(trimmed, "]") {
 			if inSecurity && !foundAdminUser {
-				result = append(result, "admin_user = "+grafanaAdminUser)
+				result = append(result, grafanaAdminUserLine)
 				foundAdminUser = true
 			}
 			inSecurity = strings.EqualFold(strings.TrimSpace(trimmed[1:len(trimmed)-1]), "security")
@@ -344,7 +347,7 @@ func sanitizeGrafanaINI(contents []byte) []byte {
 				switch strings.ToLower(strings.TrimSpace(key)) {
 				case "admin_user":
 					if !foundAdminUser {
-						result = append(result, "admin_user = "+grafanaAdminUser)
+						result = append(result, grafanaAdminUserLine)
 						foundAdminUser = true
 					}
 					continue
@@ -354,13 +357,13 @@ func sanitizeGrafanaINI(contents []byte) []byte {
 		result = append(result, line)
 	}
 	if inSecurity && !foundAdminUser {
-		result = append(result, "admin_user = "+grafanaAdminUser)
+		result = append(result, grafanaAdminUserLine)
 	}
 	if !foundSecurity {
 		if len(result) > 0 && result[len(result)-1] != "" {
 			result = append(result, "")
 		}
-		result = append(result, "[security]", "admin_user = "+grafanaAdminUser)
+		result = append(result, "[security]", grafanaAdminUserLine)
 	}
 	return []byte(strings.TrimRight(strings.Join(result, "\n"), "\n") + "\n")
 }

@@ -81,7 +81,8 @@ jobs:
         INSTALL=${DIR}/gradle-install
         mkdir -p "${DIR}/gradle-home" "${INSTALL}"
         VERSION=7.4.2
-        wget -q -c "https://services.gradle.org/distributions/gradle-${VERSION}-bin.zip" -P "${INSTALL}"
+        curl --fail --silent --show-error --location --proto '=https' --proto-redir '=https' \
+          -o "${INSTALL}/gradle-${VERSION}-bin.zip" "https://services.gradle.org/distributions/gradle-${VERSION}-bin.zip"
         ls -l "${INSTALL}"
         unzip -d "${DIR}/gradle-home" "${INSTALL}/gradle-${VERSION}-bin.zip"
         export GRADLE_HOME=${DIR}/gradle-home/gradle-${VERSION}

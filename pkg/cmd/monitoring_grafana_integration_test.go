@@ -87,11 +87,11 @@ func newGrafanaDockerFixture(t *testing.T) *grafanaDockerFixture {
 		t.Fatal("resolved Compose model has an unexpected password provider")
 	}
 	f.user, f.entrypoint, f.image = grafana.User, grafana.Entrypoint, grafana.Image
-	for _, cap := range grafana.CapDrop {
-		f.securityArgs = append(f.securityArgs, "--cap-drop", cap)
+	for _, capability := range grafana.CapDrop {
+		f.securityArgs = append(f.securityArgs, "--cap-drop", capability)
 	}
-	for _, cap := range grafana.CapAdd {
-		f.securityArgs = append(f.securityArgs, "--cap-add", cap)
+	for _, capability := range grafana.CapAdd {
+		f.securityArgs = append(f.securityArgs, "--cap-add", capability)
 	}
 	for _, opt := range grafana.SecurityOpt {
 		f.securityArgs = append(f.securityArgs, "--security-opt", opt)

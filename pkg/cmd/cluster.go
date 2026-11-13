@@ -43,6 +43,7 @@ var (
 )
 
 const (
+	ignoreCertsFlag                  = "ignore-certs"
 	clusterMessage                   = "A cluster connection already exists with the name %s for %s\n"
 	ignoreErrorsMessage              = "ignore errors from NS lookup"
 	youMustProviderConnectionMessage = "you must provide a single connection name"
@@ -80,11 +81,11 @@ warns on stderr before its first use per connection/origin in each execution.`,
 			return errors.New("you must provide a connection url")
 		}
 
-		ignoreInvalidCerts, err := cmd.Flags().GetBool("ignore-certs")
+		ignoreInvalidCerts, err := cmd.Flags().GetBool(ignoreCertsFlag)
 		if err != nil {
 			return err
 		}
-		if cmd.Flags().Changed("ignore-certs") && !fetcher.IsValidHTTPSURL(connectionURL) {
+		if cmd.Flags().Changed(ignoreCertsFlag) && !fetcher.IsValidHTTPSURL(connectionURL) {
 			return errors.New("--ignore-certs requires a valid HTTPS connection URL")
 		}
 		if err = addCluster(cmd, connection, connectionURL, "manual", "", ignoreInvalidCerts); err != nil {
@@ -1456,7 +1457,7 @@ func init() {
 	addClusterCmd.Flags().StringVarP(&connectionURL, "url", "u", "", "connection URL")
 	_ = addClusterCmd.MarkFlagRequired("url")
 	addClusterCmd.Flags().StringVarP(&connectionType, "type", "t", httpType, "connection type, http")
-	addClusterCmd.Flags().Bool("ignore-certs", false, "allow invalid certificates only for this saved HTTPS connection")
+	addClusterCmd.Flags().Bool(ignoreCertsFlag, false, "allow invalid certificates only for this saved HTTPS connection")
 
 	describeClusterCmd.Flags().BoolVarP(&verboseOutput, "verbose", "v", false,
 		"include verbose output including individual members, reporters and executor details")

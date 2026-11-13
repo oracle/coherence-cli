@@ -101,7 +101,7 @@ class MakeGateTests(unittest.TestCase):
         self.assertIn("--issues-exit-code=0", run)
         self.assertEqual(run[-1], "./...")
         self.assertEqual(calls[-1][-1], "darwin/arm64")
-        self.assertTrue(calls[-1][:2] == ["go", "run"])
+        self.assertEqual(calls[-1][:2], ["go", "run"])
         self.assertEqual(list(self.root.glob("tmp.*")), [])
 
     def test_formatting_failure_stops_analysis(self):

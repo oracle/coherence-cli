@@ -22,6 +22,7 @@ import secrets
 import shutil
 import socket
 import subprocess
+import sys
 import tempfile
 import threading
 import time
@@ -149,6 +150,8 @@ def inspect(label, expected_http, with_jmx, bind_address="127.0.0.1", *,
 
 
 def main():
+    if sys.flags.optimize:
+        raise RuntimeError("Management qualification requires assertions; run without -O, -OO or PYTHONOPTIMIZE")
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("version")
     parser.add_argument("--cli", default="bin/cohctl")

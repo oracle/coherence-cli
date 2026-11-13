@@ -81,7 +81,8 @@ with pathlib.Path(os.environ['CURL_LOG']).open('a') as log:
 name = args[-1].rsplit('/', 1)[1]
 url = 'https://github.com/' + os.environ['EXPECTED_REPOSITORY'] + '/releases/download/' + os.environ['EXPECTED_VERSION'] + '/' + name
 # Exact arguments also prohibit authentication flags, headers or config files.
-assert args == ['-fsSL', '--retry', '5', '--retry-all-errors', '--retry-delay', '2',
+assert args == ['-fsSL', '--proto', '=https', '--proto-redir', '=https',
+                '--retry', '5', '--retry-all-errors', '--retry-delay', '2',
                 '--retry-max-time', '600', '--connect-timeout', '10', '--max-time', '180',
                 '-o', args[-2], url], args
 if os.environ['FAIL_DOWNLOAD'] == name: sys.exit(22)

@@ -51,6 +51,9 @@ class LinuxDocs(unittest.TestCase):
                         (mock / 'curl').write_text('''#!/usr/bin/env python3
 import os, shutil, sys
 args = sys.argv[1:]; url = args[-1]; mode = os.environ['MODE']
+expected = ['-fsSL', '--proto', '=https', '--proto-redir', '=https']
+if not url.endswith('stable.txt'): expected += ['-o', args[-2]]
+if args != expected + [url]: raise RuntimeError('Unexpected curl arguments: ' + repr(args))
 if url.endswith('stable.txt'):
  print('bad/version' if mode == 'invalid-version' else os.environ['MOCK_VERSION']); sys.exit(0)
 manifest = url.endswith('checksums.txt')

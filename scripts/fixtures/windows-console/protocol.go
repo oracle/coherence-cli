@@ -85,7 +85,7 @@ func readConsoleRequest(root *os.Root) (request consoleRequest, resultErr error)
 	if err := decoder.Decode(&request); err != nil {
 		return request, err
 	}
-	if err := decoder.Decode(new(any)); err != io.EOF {
+	if decoder.Decode(new(any)) != io.EOF {
 		return request, errors.New("trailing or oversized console request")
 	}
 	return request, nil

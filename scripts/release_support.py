@@ -57,7 +57,7 @@ def parse_manifest(data, names):
     require(len(lines) == 7 and lines[-1] == b"", "Expected six newline-terminated checksum entries.")
     checksums = {}
     for line in lines[:-1]:
-        match = re.fullmatch(rb"([0-9a-f]{64})  ([A-Za-z0-9._-]+)", line)
+        match = re.fullmatch(rb"([0-9a-f]{64})[ ]{2}([A-Za-z0-9._-]+)", line)
         require(match is not None, "Malformed checksum entry.")
         digest, name = (part.decode("ascii") for part in match.groups())
         require(name in names and name not in checksums, "Unexpected or duplicate checksum name.")

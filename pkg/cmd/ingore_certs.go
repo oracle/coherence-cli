@@ -28,7 +28,7 @@ var (
 
 // getIgnoreCertsCmd represents the get ignore-certs.
 var getIgnoreCertsCmd = &cobra.Command{
-	Use:   "ignore-certs",
+	Use:   ignoreCertsFlag,
 	Short: "display the saved connection's certificate-validation setting",
 	Long: `The 'get ignore-certs' command displays the certificate-validation setting for
 the saved connection selected by -c/--connection, or the current context.

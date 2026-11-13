@@ -30,13 +30,17 @@ import uuid
 import management_platform as native
 
 
+class QualificationError(RuntimeError):
+    """A required native-console check failed."""
+
+
 def eventually(check, description, timeout=15):
     deadline = time.monotonic() + timeout
     while time.monotonic() < deadline:
         if check():
             return
         time.sleep(.03)
-    raise AssertionError("timeout: " + description)
+    raise QualificationError("timeout: " + description)
 
 
 def free_port():
@@ -126,8 +130,9 @@ def main():
 
                         def reached():
                             nonlocal scale_armed
-                            assert controller.poll() is None or phase == "success", {
-                                "cli": output(), "controller": (work / "controller.err").read_text(errors="replace")}
+                            if controller.poll() is not None and phase != "success":
+                                raise QualificationError({
+                                    "cli": output(), "controller": (work / "controller.err").read_text(errors="replace")})
                             if phase == "confirmation":
                                 return "Are you sure you want to stop" in output()
                             if phase == "readiness":
@@ -142,29 +147,38 @@ def main():
                         eventually(reached, operation + " " + phase)
                         if phase != "success":
                             (work / "signal").touch()
-                        assert controller.wait(timeout=15) == 0, (work / "controller.err").read_text()
+                        controller_status = controller.wait(timeout=15)
+                        if controller_status != 0:
+                            raise QualificationError((work / "controller.err").read_text())
                         controller.stdin.close()
                     result = json.loads((work / "controller.log").read_text())
-                    assert result["argv"] == [str(shim / "cohctl.exe")] + command[1:], "controller changed approved CLI arguments"
+                    if result["argv"] != [str(shim / "cohctl.exe")] + command[1:]:
+                        raise QualificationError("controller changed approved CLI arguments")
                     record.update(controller=result, command=command, cli_output=output())
                     owned = native.processes(marker)
                     record["owned_after_operation"] = owned
                     if phase == "success":
-                        assert result["exit"] == 0 and not result["sent"] and len(owned) == 1
-                        assert config.read_bytes() != before, "accepted success did not save endpoint"
+                        if result["exit"] != 0 or result["sent"] or len(owned) != 1:
+                            raise QualificationError("success control failed: " + repr(result))
+                        if config.read_bytes() == before:
+                            raise QualificationError("accepted success did not save endpoint")
                     else:
-                        assert result["sent"] and result["exit"] != 0 and not result["rescue"]
-                        assert config.read_bytes() == before, "cancellation changed saved bytes"
+                        if not result["sent"] or result["exit"] == 0 or result["rescue"]:
+                            raise QualificationError("cancellation or rescue check failed: " + repr(result))
+                        if config.read_bytes() != before:
+                            raise QualificationError("cancellation changed saved bytes")
                         if phase != "confirmation":
-                            assert "context canceled" in output(), "console event bypassed lifecycle cancellation"
+                            if "context canceled" not in output():
+                                raise QualificationError("console event bypassed lifecycle cancellation")
                         expected = {old.pid} if old and (operation == "scale" or phase == "confirmation") else set()
                         eventually(lambda: set(native.processes(marker)) == expected, "only original members survive cancellation")
                         if old:
-                            assert (old.poll() is None) == bool(expected), "original process ownership changed"
+                            if (old.poll() is None) != bool(expected):
+                                raise QualificationError("original process ownership changed")
                     record["result"] = "PASS"
                 except Exception as error:
                     # Retain the failed case and run the remaining planned cases.
-                    # Every assertion above remains a qualification requirement.
+                    # Every explicit check above remains a qualification requirement.
                     record["result"] = "FAIL"
                     record["failure"] = repr(error)
                 finally:
@@ -187,8 +201,9 @@ def main():
                     eventually(lambda: not native.processes(marker), "owned Windows cleanup")
                     record["cleanup_survivors"] = native.processes(marker)
                     if record.get("controller_rescue"):
-                        raise AssertionError("controller rescue leaves CLI ownership unresolved; qualification failed")
-        assert all(record.get("result") == "PASS" for record in evidence["checks"]), "one or more native console cases failed"
+                        raise QualificationError("controller rescue leaves CLI ownership unresolved; qualification failed")
+        if len(evidence["checks"]) != 2 * len(phases) + 1 or not all(record.get("result") == "PASS" for record in evidence["checks"]):
+            raise QualificationError("one or more native console cases failed")
         evidence["status"] = "PASS"
     except BaseException as error:
         evidence["status"] = "FAIL"

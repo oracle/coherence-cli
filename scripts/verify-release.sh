@@ -35,7 +35,7 @@ download() {
     # Allow slow transfers and retry HTTP availability errors.
     # The retry window limits when another attempt starts; the final attempt
     # may finish after the window.
-    curl -fsSL --retry 5 --retry-all-errors --retry-delay 2 --retry-max-time 600 \
+    curl -fsSL --proto '=https' --proto-redir '=https' --retry 5 --retry-all-errors --retry-delay 2 --retry-max-time 600 \
         --connect-timeout 10 --max-time 180 -o "${temp}/$1" "${url}/$1"
 }
 
