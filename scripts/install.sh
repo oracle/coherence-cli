@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Copyright (c) 2023, 2025 Oracle and/or its affiliates.
+# Copyright (c) 2023, 2026 Oracle and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at
 # https://oss.oracle.com/licenses/upl.
 #
@@ -11,20 +11,15 @@
 #
 #   curl -L https://raw.githubusercontent.com/oracle/coherence-cli/main/scripts/install.sh | bash
 #
-# for Linux, export COPY=false, to just download the cohctl executable and not copy to the /usr/local/bin directory
+# for Linux, export COPY=false, to just download the verified cohctl executable and not copy to the /usr/local/bin directory
 #
-VERSION=$(curl -s https://oracle.github.io/coherence-cli/stable.txt)
-OS=`uname`
-ARCH=`uname -m`
-copy=true
-if [ "$COPY" == "false" ]; then
-  copy=false
-fi
+OS=$(uname)
+ARCH=$(uname -m)
 
 function set_arch() {
-    if [ "$ARCH" == "x86_64" ] ; then
+    if [ "$ARCH" = "x86_64" ] ; then
         ARCH="amd64"
-    elif [ "$ARCH" == "aarch64" -o "$ARCH" == "arm64" ] ; then
+    elif [ "$ARCH" = "aarch64" ] || [ "$ARCH" = "arm64" ] ; then
         ARCH="arm64"
     else
         echo "Unsupported architecture: $ARCH"
@@ -39,29 +34,109 @@ function installed() {
     echo
 }
 
-echo "Installing Coherence CLI ${VERSION} for ${OS}/${ARCH}"
+function fail() {
+    echo "Error: $*" >&2
+    exit 1
+}
+
+function install_linux() (
+    set -euo pipefail
+
+    local copy=true
+    local version
+    local temp=""
+    local keep_temp=false
+    local asset
+    local manifest
+    local release_url
+    local checksum_entry
+
+    if [ "${COPY:-}" = "false" ]; then
+        copy=false
+    fi
+
+    set_arch
+    command -v sha256sum >/dev/null 2>&1 ||
+        fail "sha256sum is required to verify the Linux download"
+
+    version=$(curl -fsSL https://oracle.github.io/coherence-cli/stable.txt) ||
+        fail "unable to retrieve the stable Coherence CLI version"
+    while [[ "${version}" == *$'\r' ]]; do
+        version=${version%$'\r'}
+    done
+    if [[ ! "${version}" =~ ^[0-9A-Za-z][0-9A-Za-z._-]*$ ]]; then
+        fail "stable.txt did not contain exactly one valid Coherence CLI version"
+    fi
+
+    echo "Installing Coherence CLI ${version} for ${OS}/${ARCH}"
+
+    # shellcheck disable=SC2329 # Invoked indirectly by the EXIT trap.
+    function cleanup_linux() {
+        if [ "${keep_temp}" != "true" ] && [ -n "${temp}" ]; then
+            rm -rf -- "${temp}"
+        fi
+    }
+    trap cleanup_linux EXIT
+
+    temp=$(mktemp -d) || fail "unable to create a temporary directory"
+    asset="cohctl-${version}-linux-${ARCH}"
+    manifest="cohctl-${version}-checksums.txt"
+    release_url="https://github.com/oracle/coherence-cli/releases/download/${version}"
+    checksum_entry="${asset}.sha256"
+
+    curl -fsSL -o "${temp}/${manifest}" "${release_url}/${manifest}" ||
+        fail "unable to download checksum manifest ${manifest}"
+    curl -fsSL -o "${temp}/${asset}" "${release_url}/${asset}" ||
+        fail "unable to download ${asset}"
+
+    if ! awk -v target="${asset}" '
+        $2 == target {
+            matches++
+            if (NF == 2 && length($1) == 64 && $1 !~ /[^0-9a-f]/) {
+                valid++
+                entry = $1 "  " $2
+            }
+        }
+        END {
+            if (matches != 1 || valid != 1) {
+                exit 1
+            }
+            print entry
+        }
+    ' "${temp}/${manifest}" > "${temp}/${checksum_entry}"; then
+        fail "checksum manifest must contain exactly one valid entry for ${asset}"
+    fi
+
+    if ! (cd "${temp}" && sha256sum -c "${checksum_entry}"); then
+        fail "checksum verification failed for ${asset}"
+    fi
+
+    mv "${temp}/${asset}" "${temp}/cohctl"
+    chmod u+x "${temp}/cohctl"
+
+    if [ "${copy}" = "false" ]; then
+        keep_temp=true
+        echo "cohctl downloaded to ${temp}/cohctl, please move to your required location"
+    else
+        echo "Using 'sudo' to mv cohctl binary to /usr/local/bin"
+        sudo mv "${temp}/cohctl" /usr/local/bin/
+        installed
+    fi
+)
 
 if [ "$OS" == "Darwin" ]; then
     set_arch
-    TEMP=`mktemp -d`
+    TEMP=$(mktemp -d)
     # Default the version to the last know valid installer, until MacOS installer is re-instated
     VERSION=1.10.1
     PKG="Oracle-Coherence-CLI-${VERSION}-darwin-${ARCH}.pkg"
     DEST=${TEMP}/${PKG}
+    echo "Installing Coherence CLI ${VERSION} for ${OS}/${ARCH}"
     echo "Downloading and opening ${DEST}"
     URL=https://github.com/oracle/coherence-cli/releases/download/${VERSION}/${PKG}
-    curl -sLo  ${DEST} $URL && open ${DEST} && installed
+    curl -sLo "${DEST}" "${URL}" && open "${DEST}" && installed
 elif [ "$OS" == "Linux" ]; then
-    set_arch
-    TEMP=`mktemp -d`
-    URL=https://github.com/oracle/coherence-cli/releases/download/${VERSION}/cohctl-${VERSION}-linux-${ARCH}
-    curl -sLo ${TEMP}/cohctl $URL && chmod u+x ${TEMP}/cohctl
-    if [ "$copy" == "false" ]; then
-       echo "cohctl downloaded to ${TEMP}/cohctl, please move to your required location"
-    else
-       echo "Using 'sudo' to mv cohctl binary to /usr/local/bin"
-       sudo mv ${TEMP}/cohctl /usr/local/bin/ && installed
-    fi
+    install_linux
 else
     echo "For all other platforms, please see: https://github.com/oracle/coherence-cli/releases"
     exit 1

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, 2025 Oracle and/or its affiliates.
+ * Copyright (c) 2021, 2026 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -9,6 +9,7 @@ package fetcher
 import (
 	"bufio"
 	"bytes"
+	"context"
 	"crypto/tls"
 	"crypto/x509"
 	"encoding/json"
@@ -23,8 +24,10 @@ import (
 	"io"
 	"net/http"
 	"net/http/cookiejar"
+	"net/netip"
 	"net/url"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -70,6 +73,69 @@ type HTTPFetcher struct {
 	WebLogicServer bool
 	Username       string
 	ClusterName    string
+	// Context is optional; managed restart supplies it during shutdown waiting.
+	Context context.Context
+
+	// Bound at construction, independent of later changes to the exported URL.
+	connectionName string
+	insecureOrigin httpsOrigin
+}
+
+// httpsOrigin is a value so by-value fetcher copies share no mutable policy state.
+// Its zero value cannot authorize a bypass. Hostnames are compared without DNS
+// lookups; IP literals are normalized only by their numeric representation.
+type httpsOrigin struct {
+	hostname string
+	port     string
+}
+
+func parseHTTPSOrigin(rawURL string) httpsOrigin {
+	u, err := url.Parse(rawURL)
+	if err != nil {
+		return httpsOrigin{}
+	}
+	return normalizedHTTPSOrigin(u)
+}
+
+// IsValidHTTPSURL reports whether a URL can bind a connection certificate exception.
+// Command validation and the request policy must use the same origin eligibility.
+func IsValidHTTPSURL(rawURL string) bool {
+	return parseHTTPSOrigin(rawURL).hostname != ""
+}
+
+func normalizedHTTPSOrigin(u *url.URL) httpsOrigin {
+	if u == nil || !strings.EqualFold(u.Scheme, "https") || u.Opaque != "" || u.Host == "" || strings.HasSuffix(u.Host, ":") {
+		return httpsOrigin{}
+	}
+	hostname := u.Hostname()
+	if hostname == "" {
+		return httpsOrigin{}
+	}
+	if ip, err := netip.ParseAddr(hostname); err == nil {
+		if ip.Is6() != strings.HasPrefix(u.Host, "[") {
+			return httpsOrigin{}
+		}
+		hostname = ip.String()
+	} else {
+		// Brackets and colons are valid only for an IPv6 literal.
+		if strings.ContainsAny(u.Host, "[]") || strings.Contains(hostname, ":") {
+			return httpsOrigin{}
+		}
+		hostname = strings.ToLower(hostname)
+	}
+	port := "443"
+	if u.Port() != "" {
+		n, err := strconv.Atoi(u.Port())
+		if err != nil || n < 1 || n > 65535 {
+			return httpsOrigin{}
+		}
+		port = strconv.Itoa(n)
+	}
+	return httpsOrigin{hostname: hostname, port: port}
+}
+
+func (h HTTPFetcher) permitsInvalidCertificate(u *url.URL) bool {
+	return h.insecureOrigin.hostname != "" && h.insecureOrigin == normalizedHTTPSOrigin(u)
 }
 
 func (h HTTPFetcher) Init() error {
@@ -1310,14 +1376,38 @@ func httpRequestWithHeaders(h HTTPFetcher, requestType, urlAppend string, absolu
 	var empty = make([]byte, 0)
 	start := time.Now()
 
+	requestContext := h.Context
+	if requestContext == nil {
+		requestContext = context.Background()
+	}
+	// #nosec G704 -- This CLI intentionally accepts user-selected management URLs; certificate exceptions are restricted to the bound origin.
+	req, err = http.NewRequestWithContext(requestContext, requestType, finalURL, bytes.NewBuffer(content))
+	if err != nil {
+		return constants.EmptyByte, nil, err
+	}
+
 	cookies, _ := cookiejar.New(nil)
 
+	proxyURL, err := http.ProxyFromEnvironment(req)
+	if err != nil {
+		return constants.EmptyByte, nil, err
+	}
+
 	tr := &http.Transport{
-		Proxy: http.ProxyFromEnvironment,
+		Proxy: http.ProxyURL(proxyURL),
 		TLSClientConfig: &tls.Config{
-			InsecureSkipVerify: IgnoreInvalidCerts, //nolint
+			// #nosec G402 -- Only the construction-bound connection origin may bypass verification.
+			InsecureSkipVerify: h.permitsInvalidCertificate(req.URL),
 			Certificates:       certificates,
 			RootCAs:            certPool},
+	}
+	if proxyURL != nil && proxyURL.Scheme == "https" {
+		// DialTLSContext handles the HTTPS proxy's first hop. Go performs the
+		// target handshake after CONNECT using TLSClientConfig separately.
+		// The proxy must verify even when the target has an explicit exception.
+		proxyTLS := tr.TLSClientConfig.Clone()
+		proxyTLS.InsecureSkipVerify = false
+		tr.DialTLSContext = (&tls.Dialer{Config: proxyTLS}).DialContext
 	}
 
 	client := &http.Client{Transport: tr,
@@ -1326,11 +1416,6 @@ func httpRequestWithHeaders(h HTTPFetcher, requestType, urlAppend string, absolu
 		CheckRedirect: func(_ *http.Request, _ []*http.Request) error {
 			return http.ErrUseLastResponse
 		}}
-
-	req, err = http.NewRequest(requestType, finalURL, bytes.NewBuffer(content))
-	if err != nil {
-		return constants.EmptyByte, nil, err
-	}
 
 	if h.IsWebLogicServer() {
 		// required for WLS REST requests
@@ -1351,6 +1436,11 @@ func httpRequestWithHeaders(h HTTPFetcher, requestType, urlAppend string, absolu
 		req.Header.Set("Content-Type", "application/xml")
 	}
 
+	if tr.TLSClientConfig.InsecureSkipVerify {
+		h.recordTLSBypass()
+	}
+
+	// #nosec G704 -- User-selected management destinations and environment proxies are supported; HTTPS proxies always verify certificates.
 	resp, err = client.Do(req)
 	if err != nil {
 		return empty, nil, err

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #
-# Copyright (c) 2022, 2025 Oracle and/or its affiliates.
+# Copyright (c) 2022, 2026 Oracle and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at
 # https://oss.oracle.com/licenses/upl.
 #
@@ -15,36 +15,67 @@
 
 set -e
 
-if [ $# -ne 1 ] ; then
-   echo "Usage: $0 WebLogic-URL"
-   exit
+if [ $# -lt 1 ] || [ $# -gt 2 ] || { [ $# -eq 2 ] && [ "$2" != "--tls-settings-only" ]; }; then
+   echo "Usage: $0 http[s]://WebLogic-URL [--tls-settings-only]" >&2
+   exit 1
 fi
 
-# Use WORKSPACE directory if running under Jenkins
-TEMP_DIR=/tmp
-[ ! -z "$WORKSPACE" ] && TEMP_DIR=$WORKSPACE
+URL=${1%/}
+case "$URL" in
+    https://*) TLS_SCHEME=https ;;
+    http://*) TLS_SCHEME=http ;;
+    *) echo 'WebLogic URL must use http:// or https://' >&2; exit 1 ;;
+esac
 
-URL=$1
-CONFIG_DIR=${TEMP_DIR}/$$.weblogic
-DIR=`pwd`
-OUTPUT=${TEMP_DIR}/$$.output
-
-mkdir -p ${CONFIG_DIR}
-trap "cp ${CONFIG_DIR}/cohctl.log /tmp; rm -rf ${CONFIG_DIR} $OUTPUT" EXIT SIGINT
+# Use a private directory, including logs and diagnostic output. Never remove
+# another run's files or copy over a shared /tmp/cohctl.log.
+CONFIG_DIR=$(mktemp -d "${WORKSPACE:-${TMPDIR:-/tmp}}/cohctl-weblogic.XXXXXX")
+DIR=$(pwd)
+OUTPUT="$CONFIG_DIR/output"
+trap 'rm -rf "$CONFIG_DIR"' EXIT
+trap 'exit 130' INT
+trap 'exit 143' TERM
 
 echo
 echo "Using URL:  ${URL}"
 echo "Config Dir: ${CONFIG_DIR}"
 echo
 
-# Default command
-COHCTL="$DIR/bin/cohctl -i --config-dir ${CONFIG_DIR} -U weblogic"
+COHCTL=("$DIR/bin/cohctl" -i --config-dir "$CONFIG_DIR" -U weblogic)
 
 function runCommand() {
+    local result=0
     echo "========================================================="
     echo "Running command: cohctl $*"
-    echo "welcome1" | $COHCTL $* > $OUTPUT
-    cat $OUTPUT
+    echo "welcome1" | "${COHCTL[@]}" "$@" > "$OUTPUT" || result=$?
+    cat "$OUTPUT"
+    return "$result"
+}
+
+function checkTLSSettings() {
+    runCommand get ignore-certs -c wls
+    if [ "$TLS_SCHEME" = https ]; then
+        grep -Fx 'Current setting: false' "$OUTPUT"
+        runCommand set ignore-certs true -c wls
+        runCommand get ignore-certs -c wls
+        grep -Fx 'Current setting: true' "$OUTPUT"
+        runCommand get members -c wls
+        runCommand set ignore-certs false -c wls
+        runCommand get ignore-certs -c wls
+        grep -Fx 'Current setting: false' "$OUTPUT"
+        runCommand get members -c wls
+    else
+        grep -Fx 'Current setting: n/a' "$OUTPUT"
+        for setting in true false; do
+            if runCommand set ignore-certs "$setting" -c wls 2>"$CONFIG_DIR/rejected.err"; then
+                echo "HTTP unexpectedly accepted ignore-certs $setting" >&2
+                exit 1
+            fi
+            grep -F 'must have a valid HTTPS URL to set ignore-certs' "$CONFIG_DIR/rejected.err"
+        done
+        runCommand get ignore-certs -c wls
+        grep -Fx 'Current setting: n/a' "$OUTPUT"
+    fi
 }
 
 # If this has not been set then assume its true
@@ -54,7 +85,7 @@ fi
 
 
 # Sleep to ensure WLS is ready to accept requests
-sleep 30
+if [ "${2:-}" != --tls-settings-only ]; then sleep 30; fi
 
 runCommand version
 
@@ -62,9 +93,14 @@ runCommand set debug on
 
 # Add cluster
 runCommand get clusters
-runCommand add cluster -u $URL/management/coherence/latest/clusters wls
+runCommand add cluster -u "$URL/management/coherence/latest/clusters" wls
 runCommand get clusters
 runCommand set context wls
+checkTLSSettings
+if [ "${2:-}" = --tls-settings-only ]; then
+    runCommand remove cluster wls -y
+    exit 0
+fi
 
 # Describe the cluster
 runCommand describe cluster wls
@@ -75,10 +111,10 @@ runCommand describe cluster wls -o json
 runCommand get machines
 runCommand get machines -o jsonpath="$.items[0].machineName"
 
-MACHINE=`cat $OUTPUT | sed -e 's/\[\"//' -e 's/\"]//'`
-if [ "${MACHINE}" != "null"] ; then
-  runCommand describe machine ${MACHINE}
-  runCommand describe machine ${MACHINE} -o json
+MACHINE=$(sed -e 's/\[\"//' -e 's/\"]//' "$OUTPUT")
+if [ "${MACHINE}" != "null" ] ; then
+  runCommand describe machine "${MACHINE}"
+  runCommand describe machine "${MACHINE}" -o json
 fi
 
 # Members
@@ -129,45 +165,37 @@ runCommand start reporter 1 -y
 
 sleep 10
 runCommand describe reporter 1
-grep Started $OUTPUT
+grep Started "$OUTPUT"
 
 runCommand stop reporter 1 -y || true
 sleep 10
 runCommand describe reporter 1
-grep Stopped $OUTPUT
+grep Stopped "$OUTPUT"
 
 # Diagnostics
 runCommand log cluster-state -y
 runCommand dump cluster-heap -y
-runCommand retrieve thread-dumps -O /tmp -y all
-rm /tmp/thread-dump-node-*
+runCommand retrieve thread-dumps -O "$CONFIG_DIR" -y all
 
 # Miscellaneous
 runCommand get debug
 runCommand set debug on
-grep on $OUTPUT
+grep on "$OUTPUT"
 
 runCommand set debug off
 runCommand get debug
-grep off $OUTPUT
+grep off "$OUTPUT"
 
 runCommand get timeout
 runCommand set timeout 120
 runCommand get timeout
-grep 120 $OUTPUT
+grep 120 "$OUTPUT"
 
 runCommand set timeout 60
 runCommand get timeout
-grep 60 $OUTPUT
+grep 60 "$OUTPUT"
 
 runCommand get management
-runCommand get ignore-certs
-runCommand set ignore-certs true
-runCommand get ignore-certs
-grep true $OUTPUT
-runCommand set ignore-certs false
-runCommand get ignore-certs
-grep false $OUTPUT
 
 runCommand remove cluster wls -y
 

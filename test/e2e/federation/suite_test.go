@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, 2024 Oracle and/or its affiliates.
+ * Copyright (c) 2021, 2026 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -23,7 +23,8 @@ func TestMain(m *testing.M) {
 	)
 
 	context := test_utils.TestContext{ClusterName: "cluster1", HttpPort: httpPort,
-		Url: test_utils.GetManagementUrl(httpPort), ExpectedServers: 1, RestUrl: test_utils.GetRestUrl(restPort)}
+		Url: test_utils.GetManagementUrl(httpPort), ExpectedServers: 1, RestUrl: test_utils.GetRestUrl(restPort),
+		AdditionalHTTPOrigins: []string{test_utils.GetRestUrl(8081)}}
 	test_utils.SetTestContext(&context)
 
 	var fileName = test_utils.GetFilePath("docker-compose-2-members.yaml")

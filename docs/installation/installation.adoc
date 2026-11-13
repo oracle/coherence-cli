@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 
-    Copyright (c) 2021, 2025 Oracle and/or its affiliates.
+    Copyright (c) 2021, 2026 Oracle and/or its affiliates.
     Licensed under the Universal Permissive License v 1.0 as shown at
     https://oss.oracle.com/licenses/upl.
 
@@ -17,7 +17,8 @@ Refer to your operating system below:
 
 *The latest version of the CLI is {cli-version}*.
 
-* <<install-macos-linux, Install on macOS or Linux>>
+* <<install-linux, Install on Linux>>
+* <<install-macos, Install on macOS>>
 * <<install-windows, Install on Windows>>
 * <<uninstall, Removing the CLI>>
 
@@ -25,32 +26,111 @@ See https://github.com/oracle/coherence-cli/releases[here] for all supported pla
 
 NOTE: If there is a platform you would like included, please submit an issue https://github.com/oracle/coherence-cli/issues/new/choose[here].
 
-[#install-macos-linux]
-=== macOS or Linux
+[#install-linux]
+=== Linux
 
-For macOS or Linux platforms, use the following to install the latest version of the CLI:
+The Linux installer downloads the release checksum manifest and verifies the selected binary before making it executable or copying it to `/usr/local/bin`:
 
 [source,bash,subs="attributes"]
 ----
-curl -sL https://raw.githubusercontent.com/oracle/coherence-cli/main/scripts/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/oracle/coherence-cli/main/scripts/install.sh | bash
 ----
 
 NOTE: When you install the CLI, normally administrative privileges are required as the `cohctl` executable is moved to the `/usr/local/bin` directory.
 If you do not want to copy to `/usr/local/bin` automatically, you can set the following environment variable `export COPY=false`, before running the above to download only and then
 manually copy to your desired location.
 
-[#install-windows]
-=== Windows
-
-Install the latest version using the `curl` command below and copy to a directory in your `PATH`:
-Alternatively you can download the relevant exe from https://github.com/oracle/coherence-cli/releases[here].
+As a first-class alternative to piping the installer into Bash, download and verify the artifact and manifest manually:
 
 [source,bash,subs="attributes"]
 ----
-curl -Lo cohctl.exe "https://github.com/oracle/coherence-cli/releases/download/{cli-version}/cohctl-{cli-version}-windows-amd64.exe"
+(
+set -euo pipefail
+VERSION="{cli-version}"
+while [[ "${VERSION}" == *$'\r' ]]; do VERSION=${VERSION%$'\r'}; done
+[[ "${VERSION}" =~ ^[0-9A-Za-z][0-9A-Za-z._-]*$ ]] || { echo "Invalid version" >&2; exit 1; }
+ARCH=amd64 # use arm64 on Arm systems
+ASSET="cohctl-${VERSION}-linux-${ARCH}"
+MANIFEST="cohctl-${VERSION}-checksums.txt"
+RELEASE_URL="https://github.com/oracle/coherence-cli/releases/download/${VERSION}"
+DESTINATION="${PWD}/${ASSET}"
+TEMP=$(mktemp -d)
+trap 'rm -rf -- "${TEMP}"' EXIT
+cd "${TEMP}"
+
+curl -fsSL -o "${ASSET}" "${RELEASE_URL}/${ASSET}"
+curl -fsSL -o "${MANIFEST}" "${RELEASE_URL}/${MANIFEST}"
+awk -v target="${ASSET}" '
+    $2 == target {
+        matches++
+        if (NF == 2 && length($1) == 64 && $1 !~ /[^0-9a-f]/) {
+            valid++
+            entry = $1 "  " $2
+        }
+    }
+    END {
+        if (matches != 1 || valid != 1) exit 1
+        print entry
+    }
+' "${MANIFEST}" > "${ASSET}.sha256"
+sha256sum -c "${ASSET}.sha256"
+chmod u+x "${ASSET}"
+mv -- "${ASSET}" "${DESTINATION}"
+)
 ----
 
-NOTE: Change the `amd64` to `arm` for ARM based processor.
+[#install-macos]
+=== macOS
+
+The installer command remains available on macOS:
+
+[source,bash]
+----
+curl -fsSL https://raw.githubusercontent.com/oracle/coherence-cli/main/scripts/install.sh | bash
+----
+
+[#install-windows]
+=== Windows
+
+Download the executable and checksum manifest, require exactly one matching manifest entry, and compare it with the locally calculated SHA-256 value:
+
+[source,powershell,subs="attributes"]
+----
+& {
+    $ErrorActionPreference = 'Stop'
+    Set-StrictMode -Version Latest
+    $Version = "{cli-version}"
+    if ($Version -cnotmatch '\A[0-9A-Za-z][0-9A-Za-z._-]*\z') { throw 'Invalid version' }
+    $Asset = "cohctl-$Version-windows-amd64.exe"
+    $Manifest = "cohctl-$Version-checksums.txt"
+    $ReleaseUrl = "https://github.com/oracle/coherence-cli/releases/download/$Version"
+    $Temp = Join-Path ([IO.Path]::GetTempPath()) ([Guid]::NewGuid().ToString())
+    $null = New-Item -ItemType Directory -Path $Temp
+    try {
+        $BinaryPath = Join-Path $Temp $Asset
+        $ManifestPath = Join-Path $Temp $Manifest
+        Invoke-WebRequest "$ReleaseUrl/$Asset" -OutFile $BinaryPath -ErrorAction Stop
+        Invoke-WebRequest "$ReleaseUrl/$Manifest" -OutFile $ManifestPath -ErrorAction Stop
+        $Entries = @(Get-Content -LiteralPath $ManifestPath -ErrorAction Stop | Where-Object {
+            $Fields = $_ -split '\s+'
+            $Fields.Count -ge 2 -and $Fields[1] -ceq $Asset
+        })
+        if ($Entries.Count -ne 1) { throw "Expected exactly one checksum entry for $Asset" }
+        $Pattern = '\A([0-9a-f]{64})  ' + [regex]::Escape($Asset) + '\z'
+        if ($Entries[0] -cnotmatch $Pattern) { throw "Malformed checksum entry for $Asset" }
+        $Expected = $Matches[1]
+        $Actual = (Get-FileHash -LiteralPath $BinaryPath -Algorithm SHA256 -ErrorAction Stop).Hash.ToLowerInvariant()
+        if ($Actual -cne $Expected) { throw "Checksum verification failed for $Asset" }
+        Copy-Item -LiteralPath $BinaryPath -Destination C:\path\on\your\PATH\cohctl.exe -ErrorAction Stop
+    } finally {
+        Remove-Item -LiteralPath $Temp -Recurse -Force -ErrorAction Stop
+    }
+}
+----
+
+NOTE: Change `amd64` to `arm64` for an Arm-based processor. You can also download the relevant files from https://github.com/oracle/coherence-cli/releases[GitHub Releases].
+
+Release checksums detect corruption or mismatched content. Because the checksum manifest is published with the same release, it does not provide independent provenance if an attacker can replace both the artifact and manifest.
 
 [#uninstall]
 === Removing the CLI

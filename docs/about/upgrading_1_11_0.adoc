@@ -1,0 +1,200 @@
+///////////////////////////////////////////////////////////////////////////////
+
+    Copyright (c) 2026 Oracle and/or its affiliates.
+    Licensed under the Universal Permissive License v 1.0 as shown at
+    https://oss.oracle.com/licenses/upl.
+
+///////////////////////////////////////////////////////////////////////////////
+
+= Upgrading from 1.10.14
+:description: Prepare for Coherence CLI 1.11.0 management, monitoring, TLS and installation changes
+:keywords: oracle coherence, coherence-cli, upgrade, management, monitoring, tls
+
+== Upgrading from 1.10.14
+
+This guide describes the upcoming *1.11.0* behavior. Check
+https://github.com/oracle/coherence-cli/releases[GitHub Releases] for published versions.
+
+The local cluster changes apply to development clusters created with `cohctl create cluster`.
+Ordinary connections added with `cohctl add cluster` to externally managed clusters do not change those
+servers' listeners, authentication or TLS configuration. The connection-level TLS changes apply to saved
+HTTPS connections to either kind of cluster.
+
+=== Upgrade checklist
+
+. *Before replacing the CLI*, save your CLI configuration and review scripts that start local clusters,
+  initialize monitoring, or set `ignore-certs`. Protect configuration backups because they may contain sensitive data.
+. *Restart existing CLI-created clusters* when you are ready to apply the new management defaults.
+  Installing the new executable does not change running Java processes. Explicitly re-enable JMX if you need it.
+. *Preserve monitoring customizations and needed Grafana UI state before stopping the stack.*
+  Then reinitialize to obtain loopback bindings and a generated password. Existing bundles are not migrated automatically.
+. *Review TLS exceptions after the first invocation.* Legacy global exceptions migrate automatically to eligible
+  saved HTTPS connections; remove exceptions that are no longer needed and update scripts that set a global default.
+. *Verify downloads.* The Linux installer verifies the selected binary's checksum. Manual Linux and Windows
+  verification commands are in xref:../installation/installation.adoc[the installation guide].
+
+[#local-clusters]
+=== Restart local development clusters
+
+New clusters use loopback REST (`127.0.0.1`) and disable the JDK remote JMX connector by default.
+When JMX is enabled with a positive `--jmx-port`, its registry and RMI connector also bind to loopback.
+These endpoints have no authentication or encryption; other users on the same host can access them.
+Metrics, health, cluster transports, user code and custom management providers require separate configuration and review.
+
+Existing running clusters retain their old exposure until restarted. Legacy saved cluster records have no JMX port,
+so the first start or restart with 1.11.0 selects loopback REST and disables JMX unless you explicitly enable it.
+For an existing cluster named `local`, choose one of these commands:
+
+[source,bash]
+----
+# Apply loopback REST and leave JMX disabled.
+cohctl restart cluster local --management-address 127.0.0.1 --jmx-port 0
+
+# Or enable JMX on loopback for JConsole/VisualVM as well.
+cohctl restart cluster local --management-address 127.0.0.1 \
+  --jmx-port 9999 --jmx-address 127.0.0.1 --jmx-host 127.0.0.1
+----
+
+Use `start cluster` instead if the cluster is stopped. Start does not ask for confirmation;
+restart asks before stopping running members. Settings and the CLI REST URL are saved after successful
+startup/readiness and configuration persistence. Later starts reuse those settings.
+Review old JVM arguments or profiles that set management properties: use the endpoint flags instead.
+See xref:../reference/create_clusters.adoc#advanced-jvm-options[advanced JVM options] for reserved properties and parser restrictions.
+
+Restart must query a usable old-member snapshot through the saved REST URL before stopping any JVMs, with a positive
+integer `clusterSize` matching the number of distinct member PIDs. If discovery fails, returns malformed data,
+has empty/invalid member identities or lacks a consistent membership count, restart refuses to proceed.
+Restore access to a known running cluster before retrying; use `cohctl start cluster NAME` for an actually stopped
+cluster. An unreachable REST endpoint does not prove that its old JVMs or listeners have stopped.
+
+==== Prefer an SSH tunnel for access from another machine
+
+Keep management bound to loopback on the development host. On your workstation, forward the REST and JMX ports:
+
+[source,bash]
+----
+ssh -N -L 127.0.0.1:30000:127.0.0.1:30000 \
+  -L 127.0.0.1:9999:127.0.0.1:9999 user@development-host
+----
+
+Keep the tunnel open. In another terminal, add a workstation connection using an unused name:
+
+[source,bash]
+----
+cohctl add cluster dev-tunnel -u http://127.0.0.1:30000/management/coherence/cluster
+cohctl get members -c dev-tunnel
+----
+
+Connect JConsole to `127.0.0.1:9999`. Use the same local JMX port as the remote port so the RMI stub follows the tunnel.
+
+==== Intentionally expose management on a development network
+
+Previously, scripts could rely on non-loopback management without an explicit acknowledgement.
+Now every invocation that starts a non-loopback management listener must pass
+`--allow-insecure-remote-management`, even with `--yes`. The acknowledgement is never saved.
+For a stopped cluster, replace `192.0.2.10` with an address on the development host:
+
+[source,bash]
+----
+cohctl start cluster local --management-address 192.0.2.10 \
+  --jmx-port 9999 --jmx-address 192.0.2.10 --jmx-host 192.0.2.10 \
+  --allow-insecure-remote-management
+----
+
+This exposes unauthenticated, unencrypted management. Restrict network access before using it.
+Subsequent starts and restarts need the acknowledgement again; dynamic scale also needs it when adding
+non-loopback REST listeners. The flag does not configure authentication or TLS.
+For endpoint rules and examples, see xref:../reference/create_clusters.adoc[Creating Clusters].
+
+[#monitoring]
+=== Migrate local monitoring deliberately
+
+Legacy monitoring bundles remain usable with warnings. Upgrading the CLI or running `start monitoring`
+does not change their bindings or credentials. New and reinitialized stacks bind Grafana and Prometheus to
+`127.0.0.1` by default and generate a Grafana administrator password instead of using `admin/admin`.
+Prometheus still has no authentication; this stack is for development use.
+
+*Before stopping or reinitializing*, follow
+xref:../reference/monitoring.adoc#monitoring-customizations[Preserve customizations]: save scrape targets,
+Grafana configuration and provisioning files, dashboard files, and export dashboards changed in the Grafana UI.
+Record other UI settings you need to recreate. Keep protected backups outside the monitoring directory.
+Stopping removes containers and can discard Grafana UI state; reinitialization replaces the complete monitoring directory.
+
+[source,bash]
+----
+cohctl stop monitoring
+cohctl init monitoring
+# Review and reapply required customizations before starting.
+cohctl start monitoring
+cohctl get monitoring
+----
+
+Use the same CLI configuration directory and Compose project throughout. All project containers, including stopped
+ones, must be removed before initialization; `docker compose stop` is not sufficient.
+Do not restore old copies of the generated Compose model, `monitoring.env`, or password file.
+Initialization downloads support files from the matching CLI release tag, so that tag must be available.
+
+Sign in to Grafana as `admin`. Initialization displays the new password once and saves it in
+`~/.cohctl/monitoring/grafana-admin-password` by default, or under the selected configuration directory.
+If you missed the output, read that protected file locally; for example, in a private POSIX terminal:
+
+[source,bash]
+----
+cat ~/.cohctl/monitoring/grafana-admin-password
+----
+
+Keep the value out of shared logs and screenshots. Automation should read the file without printing it.
+Every successful reinitialization generates a new password; start and status do not display or rotate it.
+For password protection, bind selection and recovery, see xref:../reference/monitoring.adoc[Local Monitoring].
+
+[#tls]
+=== Review migrated TLS exceptions and update scripts
+
+On first startup, a persisted global `ignoreinvalidcerts: true` migrates only to eligible existing saved HTTPS
+connections without an explicit choice. Explicit per-connection `false` or `true` is preserved, as are HTTP entries.
+The CLI clears the global value, reports affected connections, and creates a timestamped `.tls-backup-*.bak`
+beside the configuration file. If backup or persistence fails, startup stops before network access.
+Keep the protected backup until review is complete.
+
+[source,bash]
+----
+cohctl get config -v
+cohctl get ignore-certs -c prod
+# After confirming prod has a valid, trusted certificate:
+cohctl set ignore-certs false -c prod
+cohctl get members -c prod
+----
+
+Each exception is limited to the saved connection's HTTPS origin (hostname/IP and effective port).
+New connections, discovery, other-origin requests, downloads and HTTPS proxies do not inherit that exception.
+The CLI warns when an exception is used. Prefer valid certificates and configure `COHERENCE_TLS_CERTS_PATH`
+for a private CA; see xref:../security/overview.adoc[Securing CLI Access].
+
+*Before (1.10.14)*, a script might set a global exception before adding a development connection:
+
+[source,bash]
+----
+cohctl set ignore-certs true
+cohctl add cluster dev -u https://dev.example.com:30000/management/coherence/cluster
+----
+
+*With 1.11.0*, if an exception is still necessary and you have independently established the server's identity:
+
+[source,bash]
+----
+cohctl add cluster dev -u https://dev.example.com:30000/management/coherence/cluster --ignore-certs
+cohctl get ignore-certs -c dev
+----
+
+Omit `--ignore-certs` when the certificate is valid and trusted. `set ignore-certs` now selects an existing saved
+HTTPS connection using `-c NAME` or the current context; it cannot set a default for a future connection.
+See xref:../examples/tls_certificate_validation.adoc[TLS Certificate Validation Changes] for full before/after examples.
+
+=== Verify Linux and Windows downloads
+
+The Linux installer downloads the same release's checksum manifest and verifies the selected binary before
+making it executable or copying it into place. For installation without piping a script into Bash, use the
+xref:../installation/installation.adoc#install-linux[manual Linux verification procedure].
+The xref:../installation/installation.adoc#install-windows[Windows procedure] also verifies before installation.
+Same-release checksums detect corruption or mismatched downloads; they do not provide independent provenance
+against replacement of both the artifact and manifest. These changes do not remediate the macOS installer.

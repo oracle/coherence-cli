@@ -1,4 +1,4 @@
-# Copyright 2025 Oracle Corporation and/or its affiliates.
+# Copyright 2025, 2026 Oracle Corporation and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at
 # https://oss.oracle.com/licenses/upl.
 services:
@@ -11,7 +11,9 @@ services:
     command:
       - '--config.file=/etc/prometheus/prometheus.yaml'
     ports:
-      - 9090:9090
+      - target: 9090
+        published: "9090"
+        host_ip: ${COHCTL_MONITORING_BIND_ADDRESS:-127.0.0.1}
 
   grafana:
     networks:
@@ -23,7 +25,9 @@ services:
       - ./dashboards.yaml:/etc/grafana/provisioning/dashboards/dashboards.yaml
       - ./dashboards:/etc/grafana/provisioning/dashboards/dashboards
     ports:
-      - 3000:3000
+      - target: 3000
+        published: "3000"
+        host_ip: ${COHCTL_MONITORING_BIND_ADDRESS:-127.0.0.1}
 
 networks:
   coherence:

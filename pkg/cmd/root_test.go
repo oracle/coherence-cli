@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, 2024 Oracle and/or its affiliates.
+ * Copyright (c) 2021, 2026 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -82,6 +82,12 @@ func TestContextCommands(t *testing.T) {
 	newCluster := ClusterConnection{Name: "cluster1", ConnectionType: "http", ConnectionURL: "dummy",
 		DiscoveryType: "manual", ClusterVersion: "21.06.1"}
 	Config.Clusters = append(Config.Clusters, newCluster)
+	// Startup reloads persisted configuration; make this a saved connection rather
+	// than depending on an absent YAML field retaining stale process-local data.
+	viper.Set(clusterKey, Config.Clusters)
+	if err = WriteConfig(); err != nil {
+		t.Fatal(err)
+	}
 
 	// set the context
 	test_utils.EnsureCommandOutputEquals(g, t, cliCmd, setContextMsg+"cluster1\n", configOption, file, "set", "context", "cluster1")
@@ -148,39 +154,6 @@ func TestColoCommands(t *testing.T) {
 
 	// set the debug to invalid value
 	test_utils.EnsureCommandErrorContains(g, t, cliCmd, setColorError, configOption, file, "set", "color", "dont-know")
-}
-
-// TestIgnoreCertsCommands tests the get and set ignore-certs commands
-func TestIgnoreCertsCommands(t *testing.T) {
-
-	var (
-		cliCmd      = Initialize(nil)
-		g           = gomega.NewGomegaWithT(t)
-		ignoreCerts = "ignore-certs"
-	)
-
-	file, err := test_utils.CreateNewConfigYaml(configYaml)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	t.Cleanup(func() {
-		_ = os.RemoveAll(file)
-	})
-
-	// get the default value
-	test_utils.EnsureCommandOutputEquals(g, t, cliCmd, getIgnoreCertsMsg+"false\n", configOption, file, "get", ignoreCerts)
-
-	// set the ignore-certs to true
-	test_utils.EnsureCommandOutputEquals(g, t, cliCmd, setIgnoreCertsMsg+"true\n", configOption, file, "set", ignoreCerts, "true")
-
-	test_utils.EnsureCommandOutputEquals(g, t, cliCmd, getIgnoreCertsMsg+"true\n", configOption, file, "get", ignoreCerts)
-
-	// set the ignore-certs to false
-	test_utils.EnsureCommandOutputEquals(g, t, cliCmd, setIgnoreCertsMsg+"false\n", configOption, file, "set", ignoreCerts, "false")
-
-	// set the ignore-certs to invalid value
-	test_utils.EnsureCommandErrorContains(g, t, cliCmd, setIgnoreCertsError, configOption, file, "set", ignoreCerts, "dont-know")
 }
 
 // TestGetLogsCommands tests the get logs command

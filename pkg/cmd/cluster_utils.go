@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, 2025 Oracle and/or its affiliates.
+ * Copyright (c) 2022, 2026 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -8,6 +8,7 @@ package cmd
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/oracle/coherence-cli/pkg/config"
 	"github.com/oracle/coherence-cli/pkg/fetcher"
@@ -15,7 +16,6 @@ import (
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
-	"net"
 	"os"
 	"os/exec"
 	"path"
@@ -79,18 +79,6 @@ var (
 		"coherence-mp-metrics", "coherence-rest", "coherence-hnsw", "coherence-mp-health"}
 )
 
-// checkCreateRequirements validates that all the necessary requirements are fulfilled
-// for creating a cluster. This includes mvn and java executables. Nil is returned to
-// indicate everything is ok, otherwise an error is returned.
-func checkRuntimeRequirements() error {
-	processJava := exec.Command(javaExec, "--version")
-	if err := processJava.Start(); err != nil {
-		return utils.GetError(fmt.Sprintf("unable to get Java version using %s --version: %v", javaExec, processJava), err)
-	}
-
-	return nil
-}
-
 // checkDepsRequirements checks for either mvn or gradle depending upon the
 // setting of Config.useGradle.
 func checkDepsRequirements() error {
@@ -100,7 +88,7 @@ func checkDepsRequirements() error {
 	)
 
 	proc := exec.Command(execName, "-v")
-	if err = proc.Start(); err != nil {
+	if err = proc.Run(); err != nil {
 		return utils.GetError(fmt.Sprintf("unable to get depdencies tool using %s -v, %v", execName, proc), err)
 	}
 
@@ -228,129 +216,34 @@ func updateDefaultJars() {
 	}
 }
 
-// startCluster starts a cluster. If existingCount > 1 then this means we are
-// scaling a cluster, otherwise we are starting one.
-func startCluster(cmd *cobra.Command, connection ClusterConnection, serverCount, existingCount int32) error {
-	var (
-		err              error
-		mgmtPort         = connection.ManagementPort
-		counter          int32
-		metricsStartPort = metricsStartPortParam
-		healthStartPort  = healthStartPortParam
-		startupProfile   = getProfileValue(profileValueParam)
-		profileArgs      = make([]string, 0)
-		startupDelay     int64
-	)
-
-	startupDelay, err = utils.GetStartupDelayInMillis(startupDelayParam)
+// getCommonArguments returns arguments that are common to clients and servers.
+func getCommonArguments(connection ClusterConnection) ([]string, error) {
+	splitArguments, err := savedJVMOptions(connection)
 	if err != nil {
-		return err
+		return nil, fmt.Errorf("saved client arguments: %w", err)
 	}
-
-	// check if any profiles have been specified
-	if profileValueParam != "" {
-		// this profile param has already been validated
-		profileArgs = strings.Split(startupProfile, " ")
-	}
-
-	// if we are scaling then set the http port to -1 so no more management servers are started
-	if existingCount > 0 {
-		mgmtPort = -1
-	}
-
-	if err = checkOperation(connection, startClusterCommand); err != nil {
-		return err
-	}
-
-	if jmxRemotePortParam > 0 {
-		// validate jmx remote port
-		if err = utils.ValidatePort(jmxRemotePortParam); err != nil {
-			return err
-		}
-	}
-
-	for counter = existingCount; counter < serverCount+existingCount; counter++ {
-		var (
-			member        = fmt.Sprintf("storage-%d", counter)
-			arguments     = getCommonArguments(connection)
-			memberLogFile string
-		)
-
-		// check if metrics start port specified
-		if metricsStartPort > 0 {
-			metricsArgs := []string{"-Dcoherence.metrics.http.enabled=true", fmt.Sprintf("-Dcoherence.metrics.http.port=%d", metricsStartPort)}
-			metricsStartPort++
-			arguments = append(arguments, metricsArgs...)
-		}
-
-		// if -F is specified, and we are the first management or -F is not specified then add profile
-		if (profileFirstParam && mgmtPort != -1) || (!profileFirstParam && len(profileArgs) > 0) {
-			arguments = append(arguments, profileArgs...)
-		}
-
-		// check if health start port specified
-		if healthStartPort > 0 {
-			arguments = append(arguments, fmt.Sprintf("-Dcoherence.health.http.port=%d", healthStartPort))
-			healthStartPort++
-		}
-
-		arguments = append(arguments, getCacheServerArgs(connection, member, mgmtPort, connection.ClusterVersion)...)
-
-		// reset so only first member has management enabled
-		if dynamicHTTPParam {
-			mgmtPort = 0
-		} else {
-			mgmtPort = -1
-		}
-
-		memberLogFile, err = getLogFile(connection.Name, member)
-		if err != nil {
-			return err
-		}
-
-		if backupLogFilesParam {
-			// backup log files before starting cluster
-			backupLogFile := memberLogFile + ".old"
-			input, err1 := os.ReadFile(memberLogFile)
-			if err1 == nil {
-				// original file exists so backup
-				err1 = os.WriteFile(backupLogFile, input, 0600)
-				if err1 != nil {
-					return fmt.Errorf("unable to write to log file %s: %v", backupLogFile, err1)
-				}
-				cmd.Printf("creating backup log file %s\n", backupLogFile)
-			}
-		}
-
-		cmd.Printf("Starting cluster member %s...\n", member)
-		_, err = runCommandAsync(javaExec, memberLogFile, arguments)
-		if err != nil {
-			return utils.GetError(fmt.Sprintf("unable to start member %s", member), err)
-		}
-
-		if startupDelay > 0 {
-			time.Sleep(time.Duration(startupDelay) * time.Millisecond)
-		}
-	}
-
-	return nil
+	return append(splitArguments, commonJVMOptions(connection)...), nil
 }
 
-// getCommonArguments returns arguments that are common to clients and servers.
-func getCommonArguments(connection ClusterConnection) []string {
-	splitArguments := strings.Split(connection.Arguments, " ")
-	return append(splitArguments, "-cp", connection.BaseClasspath, getPersistenceProperty(connection.PersistenceMode),
-		getLogLevelProperty(logLevelParam), "-Dcom.oracle.coherence.common.util.Threads.dumpLocks=FULL")
+func commonJVMOptions(connection ClusterConnection) []string {
+	return append([]string{"-cp", connection.BaseClasspath}, commonRuntimeOptions(connection)...)
+}
+
+func commonRuntimeOptions(connection ClusterConnection) []string {
+	return []string{getPersistenceProperty(connection.PersistenceMode),
+		getLogLevelProperty(logLevelParam), "-Dcom.oracle.coherence.common.util.Threads.dumpLocks=FULL"}
 }
 
 func startClient(cmd *cobra.Command, connection ClusterConnection, class string, extraArgs ...string) error {
 	var (
-		err            error
 		result         string
 		startupProfile = getProfileValue(profileValueParam)
 		profileArgs    []string
-		arguments      = getCommonArguments(connection)
 	)
+	arguments, err := getCommonArguments(connection)
+	if err != nil {
+		return err
+	}
 
 	// check if any profiles have been specified
 	if profileValueParam != "" {
@@ -390,7 +283,7 @@ func startClient(cmd *cobra.Command, connection ClusterConnection, class string,
 	return process.Wait()
 }
 
-func getCacheServerArgs(connection ClusterConnection, member string, httpPort int32, version string) []string {
+func getCacheServerArgs(connection ClusterConnection, member string, httpPort int32, management ClusterManagement, jmxOwner bool) []string {
 	var (
 		baseArgs  = make([]string, 0)
 		heap      string
@@ -398,60 +291,40 @@ func getCacheServerArgs(connection ClusterConnection, member string, httpPort in
 	)
 
 	// override only if we specify the class
-	if serverStartClassParam != "" || connection.StartupClass == "" {
+	if serverStartClassParam != "" {
 		mainClass = serverStartClassParam
 	}
 
+	baseArgs = append(baseArgs, "-Dcoherence.management.http.address="+management.RESTAddress)
 	if httpPort != -1 {
-		baseArgs = append(baseArgs, "-Dcoherence.management.http=all", fmt.Sprintf("-Dcoherence.management.http.port=%d", httpPort),
-			"-Dcoherence.management=all", "-Dcom.sun.management.jmxremote.ssl=false", "-Dcom.sun.management.jmxremote",
-			"-Dcom.sun.management.jmxremote.authenticate=false")
-
-		// add remote JMX port is specified
-		if jmxRemotePortParam > 0 {
-			rmiHost := jmxRemoteHostParam
-			if rmiHost == "" {
-				rmiHost = wkaParam
-			}
-			baseArgs = append(baseArgs, fmt.Sprintf("-Dcom.sun.management.jmxremote.port=%d", jmxRemotePortParam),
-				fmt.Sprintf("-Dcom.sun.management.jmxremote.rmi.port=%d", jmxRemotePortParam),
-				fmt.Sprintf("-Djava.rmi.server.hostname=%s", rmiHost))
-		}
-	}
-
-	if machineParam != "" {
-		baseArgs = append(baseArgs, fmt.Sprintf("-Dcoherence.machine=%s", machineParam))
-	}
-
-	if rackParam != "" {
-		baseArgs = append(baseArgs, fmt.Sprintf("-Dcoherence.rack=%s", rackParam))
-	}
-
-	if siteParam != "" {
-		baseArgs = append(baseArgs, fmt.Sprintf("-Dcoherence.site=%s", siteParam))
-	}
-
-	if roleParam != "" {
-		baseArgs = append(baseArgs, fmt.Sprintf("-Dcoherence.role=%s", roleParam))
-	}
-
-	// if default heap is overridden, then use this
-	if heapMemoryParam != defaultHeap {
-		heap = heapMemoryParam
+		baseArgs = append(baseArgs, "-Dcoherence.management.http=all", fmt.Sprintf("-Dcoherence.management.http.port=%d", httpPort), "-Dcoherence.management=all")
 	} else {
-		// if the default-heap is set in config then use this
-		if Config.DefaultHeap != "" {
-			heap = Config.DefaultHeap
-		} else {
-			heap = heapMemoryParam
+		baseArgs = append(baseArgs, "-Dcoherence.management.http=none")
+	}
+	if jmxOwner && management.JMXPort > 0 {
+		baseArgs = append(baseArgs, "-Dcom.sun.management.jmxremote", "-Dcom.sun.management.jmxremote.ssl=false",
+			"-Dcom.sun.management.jmxremote.authenticate=false", "-Dcom.sun.management.jmxremote.host="+management.JMXAddress,
+			fmt.Sprintf("-Dcom.sun.management.jmxremote.port=%d", management.JMXPort),
+			fmt.Sprintf("-Dcom.sun.management.jmxremote.rmi.port=%d", management.JMXPort), "-Djava.rmi.server.hostname="+management.JMXHost)
+	}
+
+	for _, property := range []struct{ key, value string }{
+		{"machine", machineParam}, {"rack", rackParam}, {"site", siteParam}, {"role", roleParam},
+	} {
+		if property.value != "" {
+			baseArgs = append(baseArgs, "-Dcoherence."+property.key+"="+property.value)
 		}
+	}
+	heap = heapMemoryParam
+	if heapMemoryParam == defaultHeap && Config.DefaultHeap != "" {
+		heap = Config.DefaultHeap
 	}
 
 	baseArgs = append(baseArgs, "-Xms"+heap, "-Xmx"+heap)
 
 	// default the main class if not specified
 	if mainClass == "" {
-		mainClass = utils.GetCoherenceMainClass(version)
+		mainClass = utils.GetCoherenceMainClass(connection.ClusterVersion)
 	}
 
 	return append(baseArgs, getMemberProperty(member), mainClass)
@@ -556,11 +429,44 @@ func getRunningProcesses(dataFetcher fetcher.Fetcher) []int {
 	}
 
 	for _, v := range members.Members {
-		pid, _ := strconv.Atoi(v.ProcessName)
-		PIDS = append(PIDS, pid)
+		pid, err := strconv.Atoi(v.ProcessName)
+		if err == nil && pid > 0 {
+			PIDS = append(PIDS, pid)
+		}
 	}
 
 	return PIDS
+}
+
+// Lifecycle discovery fails closed. A failed query, missing/empty items, or
+// even one invalid PID cannot establish the original process set for restart.
+// REST-reported local PIDs remain trusted; this is not a process registry.
+func discoverLifecycleMembers(dataFetcher fetcher.Fetcher) ([]int, error) {
+	result, err := dataFetcher.GetMemberDetailsJSON(false)
+	if err != nil {
+		return nil, fmt.Errorf("query members: %w", err)
+	}
+	var members config.Members
+	if err = json.Unmarshal(result, &members); err != nil {
+		return nil, fmt.Errorf("decode members: %w", err)
+	}
+	if len(members.Members) == 0 {
+		return nil, fmt.Errorf("member snapshot is empty")
+	}
+	pids := make([]int, 0, len(members.Members))
+	seen := map[int]bool{}
+	for _, member := range members.Members {
+		pid, err := strconv.Atoi(member.ProcessName)
+		if err != nil || pid <= 0 {
+			return nil, fmt.Errorf("invalid member PID %q", member.ProcessName)
+		}
+		if seen[pid] {
+			return nil, fmt.Errorf("duplicate member PID %d", pid)
+		}
+		seen[pid] = true
+		pids = append(pids, pid)
+	}
+	return pids, nil
 }
 
 func checkOperation(connection ClusterConnection, operation string) error {
@@ -651,23 +557,12 @@ func getMavenClasspath(groupID, artifact, version, fileType string) (string, err
 	return filepath.Join(baseDir, artifact, version, fmt.Sprintf("%s-%s.%s", artifact, version, fileType)), nil
 }
 
+// runCommand waits for a dependency tool and captures its output.
 func runCommand(command string, arguments []string) (string, error) {
-	return runCommandBase(command, "", arguments)
-}
-
-func runCommandAsync(command, logFileName string, arguments []string) (string, error) {
-	return runCommandBase(command, logFileName, arguments)
-}
-
-// runCommandBase runs a command. If logFileName is supplied then this is done async and the
-// processId is returned, otherwise the result of the combined stdout and stderr is returned.
-func runCommandBase(command, logFileName string, arguments []string) (string, error) {
 	var (
-		err            error
-		result         []byte
-		processLogFile *os.File
+		err    error
+		result []byte
 	)
-
 	if Config.Debug {
 		fields := []zapcore.Field{
 			zap.String("command", command),
@@ -678,22 +573,7 @@ func runCommandBase(command, logFileName string, arguments []string) (string, er
 
 	startTime := time.Now()
 	process := exec.Command(command, arguments...)
-	if len(logFileName) > 0 {
-		// a log file was supplied, so we are assuming this command will be async and
-		// stdout and stderr should be redirected to log file specified
-		processLogFile, err = os.Create(logFileName)
-		if err != nil {
-			return "", utils.GetError("unable to create log file"+logFileName, err)
-		}
-		process.Stdout = processLogFile
-		process.Stderr = processLogFile
-		// detach the process from the cohctl executable
-		setForkProcess(process)
-		if err = process.Start(); err != nil {
-			return "", utils.GetError(fmt.Sprintf("unable to start process %v", process), err)
-		}
-		return fmt.Sprintf("%d", process.Process.Pid), nil
-	}
+
 	// wait for result
 	result, err = process.CombinedOutput()
 
@@ -712,13 +592,74 @@ func runCommandBase(command, logFileName string, arguments []string) (string, er
 }
 
 func getLogFile(clusterName, processName string) (string, error) {
-	clusterLogsDir := filepath.Join(logsDirectory, clusterName)
-	if err := utils.EnsureDirectory(clusterLogsDir); err != nil {
+	if err := validateClusterLogName(processName); err != nil {
 		return "", err
 	}
+	root, err := openClusterLogs(clusterName)
+	if err != nil {
+		return "", err
+	}
+	if err := root.Close(); err != nil {
+		return "", err
+	}
+	return filepath.Join(logsDirectory, clusterName, processName+".log"), nil
+}
 
-	clusterLogFile := filepath.Join(clusterLogsDir, processName+".log")
-	return clusterLogFile, nil
+// Cluster and member names are single path components, including on a host
+// loading configuration written on another OS. The selected log root may be
+// absolute, relative, or a symlink chosen by the user.
+func validateClusterLogName(name string) error {
+	if name == "." || !filepath.IsLocal(name) || strings.ContainsAny(name, "/\\:\x00") {
+		return fmt.Errorf("invalid cluster log path component %q", name)
+	}
+	return nil
+}
+
+// openClusterLogs confines directory creation and symlink resolution to the
+// configured log root, then pins the cluster directory for log operations.
+func openClusterLogs(clusterName string) (*os.Root, error) {
+	if err := validateClusterLogName(clusterName); err != nil {
+		return nil, err
+	}
+	logs, err := os.OpenRoot(logsDirectory)
+	if err != nil {
+		return nil, err
+	}
+	if err := logs.Mkdir(clusterName, 0700); err != nil && !errors.Is(err, os.ErrExist) {
+		return nil, errors.Join(err, logs.Close())
+	}
+	cluster, openErr := logs.OpenRoot(clusterName)
+	closeErr := logs.Close()
+	if openErr != nil {
+		return nil, errors.Join(openErr, closeErr)
+	}
+	if closeErr != nil {
+		return nil, errors.Join(closeErr, cluster.Close())
+	}
+	return cluster, nil
+}
+
+func backupClusterLogFile(clusterName, processName string) (backedUp bool, err error) {
+	if err = validateClusterLogName(processName); err != nil {
+		return false, err
+	}
+	root, err := openClusterLogs(clusterName)
+	if err != nil {
+		return false, err
+	}
+	defer func() { err = errors.Join(err, root.Close()) }()
+	name := processName + ".log"
+	input, err := root.ReadFile(name)
+	if errors.Is(err, os.ErrNotExist) {
+		return false, nil
+	}
+	if err != nil {
+		return false, fmt.Errorf("unable to read log file %s: %w", name, err)
+	}
+	if err := root.WriteFile(name+".old", input, 0600); err != nil {
+		return false, fmt.Errorf("unable to write backup log file %s: %w", name, err)
+	}
+	return true, nil
 }
 
 func getClasspathSeparator() string {
@@ -736,19 +677,6 @@ func getConnection(connectionName string) (bool, ClusterConnection) {
 		}
 	}
 	return false, ClusterConnection{}
-}
-
-// isPortUsed checks to see if a port on localhost can be connected to.
-func isPortUsed(managementPort int32) bool {
-	conn, err := net.DialTimeout("tcp", fmt.Sprintf("%s:%d", localHost, managementPort), time.Duration(fetcher.RequestTimeout)*time.Second)
-	if err != nil {
-		return false
-	}
-	defer conn.Close()
-
-	// if err was nil it means we were successful in connecting to the port
-	// as there was something running on it and listening
-	return err == nil
 }
 
 type clusterSummaryInfo struct {

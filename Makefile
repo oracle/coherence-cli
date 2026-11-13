@@ -15,7 +15,7 @@
 # ======================================================================================================================
 
 # The version of the CLI being build - this should be a valid SemVer format
-VERSION ?= 1.10.14
+VERSION ?= 1.11.0
 MILESTONE ?=
 SHELL := /bin/bash
 
@@ -70,6 +70,8 @@ override COPYRIGHT_JAR       := glassfish-copyright-maven-plugin-2.4.jar
 # ----------------------------------------------------------------------------------------------------------------------
 TOOLS_DIRECTORY   = $(CURRDIR)/build/tools
 TOOLS_BIN         = $(TOOLS_DIRECTORY)/bin
+GOLANGCI_LINT_VERSION := 2.15.0
+GOLANGCI_LINT = $(TOOLS_BIN)/golangci-lint
 
 # ----------------------------------------------------------------------------------------------------------------------
 # The test application images used in integration tests
@@ -375,6 +377,7 @@ copyright: getcopyright ## Check copyright headers
 	  -X mvnw.cmd \
 	  -X .png \
 	  -X .sh \
+	  -X ./scripts/test-install-docs.ps1 \
 	  -X temp/ \
 	  -X /test-report.xml \
 	  -X THIRD_PARTY_LICENSES.txt \
@@ -388,8 +391,18 @@ copyright: getcopyright ## Check copyright headers
 # Executes golangci-lint to perform various code review checks on the source.
 # ----------------------------------------------------------------------------------------------------------------------
 .PHONY: golangci
-golangci: $(TOOLS_BIN)/golangci-lint ## Go code review
-	#go mod tidy && $(TOOLS_BIN)/golangci-lint run -v --timeout=5m --max-same-issues 20 ./pkg/...
+golangci: golangci-lint ## Check formatting and all linters against reviewed style debt
+	"$(GOLANGCI_LINT)" fmt --diff --config .golangci.yaml
+	@set -eu; lint_tmp=$$(mktemp -d); trap 'rm -rf "$$lint_tmp"' EXIT; \
+	  lint_os=$$(go env GOOS); lint_arch=$$(go env GOARCH); \
+	  CGO_ENABLED=0 GOFLAGS= GOEXPERIMENT= GOWORK=off "$(GOLANGCI_LINT)" run --config .golangci.yaml --issues-exit-code=0 --show-stats=false \
+	    --output.json.path="$$lint_tmp/issues.json" --output.text.path="$$lint_tmp/issues.txt" ./...; \
+	  GOOS= GOARCH= CGO_ENABLED=0 GOFLAGS= GOEXPERIMENT= GOWORK=off go run -mod=readonly ./utils/lintbaseline "$(GOLANGCI_LINT_VERSION)" "$$lint_os/$$lint_arch" < "$$lint_tmp/issues.json"
+
+.PHONY: golangci-full
+golangci-full: golangci-lint ## Report all issues, including reviewed style debt
+	"$(GOLANGCI_LINT)" fmt --diff --config .golangci.yaml
+	CGO_ENABLED=0 GOFLAGS= GOEXPERIMENT= GOWORK=off "$(GOLANGCI_LINT)" run --config .golangci.yaml ./...
 
 # ======================================================================================================================
 # Miscellaneous targets
@@ -400,6 +413,27 @@ golangci: $(TOOLS_BIN)/golangci-lint ## Go code review
 # Test targets
 # ======================================================================================================================
 ##@ Test
+
+.PHONY: test-lint
+test-lint: ## Verify the strict lint baseline and Make failure controls
+	CGO_ENABLED=0 go test -mod=readonly ./utils/lintbaseline
+	python3 scripts/test-lint-gate.py
+
+.PHONY: test-local-management-support
+test-local-management-support: ## Test management listener inspection and REST readiness without starting Coherence
+	PYTHONDONTWRITEBYTECODE=1 python3 scripts/test-local-management-support.py
+
+.PHONY: test-windows-console
+test-windows-console: ## Test Ctrl-C/Ctrl-Break cancellation on native Windows (requires Python and PowerShell)
+	@python3 -c 'import os, sys; sys.exit(0 if os.name == "nt" else "Native Windows is required for console tests")'
+	go test -mod=readonly -count=1 ./scripts/fixtures/windows-console
+	mkdir -p "$(BUILD_OUTPUT)/windows-console" "$(TEST_LOGS_DIR)"
+	go build -mod=readonly -trimpath -o "$(BUILD_OUTPUT)/windows-console/cohctl.exe" ./cohctl
+	go build -mod=readonly -trimpath -o "$(BUILD_OUTPUT)/windows-console/controller.exe" ./scripts/fixtures/windows-console
+	PYTHONDONTWRITEBYTECODE=1 python3 scripts/test-windows-console.py \
+	  --cli "$(BUILD_OUTPUT)/windows-console/cohctl.exe" \
+	  --fixture "$(BUILD_OUTPUT)/windows-console/controller.exe" \
+	  --scratch-dir "$(BUILD_OUTPUT)/windows-console" --output "$(TEST_LOGS_DIR)/windows-console.json"
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Startup cluster members via docker compose
@@ -452,8 +486,40 @@ test-coherence-shutdown: ## shutdown standalone cluster
 test-cohctl: test-clean gotestsum $(BUILD_PROPS) ## Run the CLI unit tests
 	@echo "Running Coherence CLI tests"
 	CGO_ENABLED=0 $(GOTESTSUM) --format testname --junitfile $(TEST_LOGS_DIR)/cohctl-test.xml \
-	  -- $(GO_TEST_FLAGS) -v -coverprofile=$(COVERAGE_DIR)/cover-unit.out ./pkg/cmd/... ./pkg/utils/...
+	  -- $(GO_TEST_FLAGS) -v -coverprofile=$(COVERAGE_DIR)/cover-unit.out ./pkg/cmd/... ./pkg/utils/... ./pkg/fetcher/...
 	go tool cover -html=$(COVERAGE_DIR)/cover-unit.out -o $(COVERAGE_DIR)/cover-unit.html
+
+# ----------------------------------------------------------------------------------------------------------------------
+# Executes the installer integrity tests
+# ----------------------------------------------------------------------------------------------------------------------
+.PHONY: test-install
+test-install: ## Run the hermetic installer integrity tests
+	./scripts/test-install.sh
+
+.PHONY: test-checksums
+test-checksums: ## Test checksum generation and public-release verification
+	python3 ./scripts/test-checksums.py
+
+.PHONY: test-release-gh
+test-release-gh: ## Test the pinned release GitHub CLI setup without network access
+	python3 ./scripts/test-setup-release-gh.py
+
+.PHONY: test-release-preflight
+test-release-preflight: ## Test publication's internal read-only identity and absence gate
+	python3 ./scripts/test-preflight-release.py
+
+.PHONY: test-release-staging
+test-release-staging: ## Test exact release asset staging and checksum validation
+	python3 ./scripts/test-stage-release-assets.py
+
+.PHONY: test-release-publication
+test-release-publication: ## Test draft creation, exact uploads and publication with local fixtures
+	python3 ./scripts/test-publish-release.py
+
+.PHONY: test-install-docs
+test-install-docs: ## Exercise documented Bash and PowerShell procedures
+	python3 ./scripts/test-install-docs.py
+	pwsh -NoProfile -File ./scripts/test-install-docs.ps1
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Executes the Go end to end tests for standalone Coherence
@@ -581,9 +647,16 @@ test-clean: gotestsum ## Clean the go test cache
 # ----------------------------------------------------------------------------------------------------------------------
 # Obtain the golangci-lint binary
 # ----------------------------------------------------------------------------------------------------------------------
-$(TOOLS_BIN)/golangci-lint:
-	@mkdir -p $(TOOLS_BIN)
-	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(TOOLS_BIN) v2.4.0
+.PHONY: golangci-lint
+golangci-lint:
+	@set -eu; if [ ! -x "$(GOLANGCI_LINT)" ]; then \
+	  test "$(GOLANGCI_LINT)" = "$(TOOLS_BIN)/golangci-lint"; \
+	  mkdir -p "$(TOOLS_BIN)"; \
+	  lint_installer=$$(mktemp); trap 'rm -f "$$lint_installer"' EXIT; \
+	  curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/v$(GOLANGCI_LINT_VERSION)/install.sh -o "$$lint_installer"; \
+	  sh "$$lint_installer" -b "$(TOOLS_BIN)" v$(GOLANGCI_LINT_VERSION); \
+	fi
+	@set -eu; lint_version=$$("$(GOLANGCI_LINT)" version --short); test "$$lint_version" = "$(GOLANGCI_LINT_VERSION)"
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Find or download gotestsum

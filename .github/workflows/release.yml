@@ -15,6 +15,11 @@ on:
 permissions:
   contents: write
 
+# Serialize this repository/tag without interrupting a release already in progress.
+concurrency:
+  group: release-${{ github.repository }}-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   build_release:
     name: build_release
@@ -36,13 +41,26 @@ jobs:
       with:
         go-version-file: 'go.mod'
 
-    - name: Code Review
+    - name: Release CLI setup, preflight, staging and publication tests
       shell: bash
-      run: echo make golangci
+      run: make test-release-gh test-release-preflight test-release-staging test-release-publication
+
+    - name: Set up pinned GitHub CLI
+      id: release_gh
+      shell: bash
+      run: ./scripts/setup-release-gh.sh
+
+    - name: Lint
+      shell: bash
+      run: make golangci
 
     - name: Copyright Check
       shell: bash
       run: make copyright
+
+    - name: Installer integrity tests
+      shell: bash
+      run: make test-install test-checksums test-install-docs
 
     - name: Unit Tests
       shell: bash
@@ -50,7 +68,9 @@ jobs:
 
     - name: Set Version
       shell: bash
-      run: echo "version=`./bin/cohctl version | grep 'CLI Version:' | awk '{print $3}'`" >> "$GITHUB_OUTPUT"
+      run: |
+        version=$(./bin/cohctl version | awk '/CLI Version:/ {print $3}')
+        echo "version=${version}" >> "$GITHUB_OUTPUT"
       id: version
 
     - name: E2E Local Tests
@@ -65,106 +85,54 @@ jobs:
       shell: bash
       run: |
         make docs
-        DIR=`pwd`
         cd build/_output/docs
-        zip -r ../docs.zip *
-        # Save the docs.zip
-        cp ../docs.zip /tmp
+        zip -r ../docs.zip ./*
 
     - name: Build Binaries
       shell: bash
       run: |
         make cohctl-all
-        # Save the bin directory
-        CLI_TMP_BIN=/tmp/coherence-cli-bin
-        mkdir -p ${CLI_TMP_BIN} || true
-        cp -R bin/* ${CLI_TMP_BIN}
+
+    - name: Generate SHA-256 checksums
+      shell: bash
+      env:
+        RELEASE_VERSION: ${{ steps.version.outputs.version }}
+      run: ./scripts/generate-checksums.sh "$RELEASE_VERSION" ./bin ./build/_output/docs.zip "cohctl-${RELEASE_VERSION}-checksums.txt"
+
+    - name: Stage and verify release assets
+      id: release_assets
+      shell: bash
+      env:
+        RELEASE_VERSION: ${{ steps.version.outputs.version }}
+      run: python3 ./scripts/stage-release-assets.py
+
+    - name: Create, validate and publish release
+      shell: bash
+      env:
+        RELEASE_GH: ${{ steps.release_gh.outputs.path }}
+        RELEASE_ASSETS: ${{ steps.release_assets.outputs.path }}
+        RELEASE_VERSION: ${{ steps.version.outputs.version }}
+        RELEASE_REPOSITORY: ${{ github.repository }}
+        RELEASE_REF: ${{ github.ref }}
+        RELEASE_REF_TYPE: ${{ github.ref_type }}
+        RELEASE_SHA: ${{ github.sha }}
+        GH_TOKEN: ${{ github.token }}
+      run: python3 ./scripts/publish-release.py
+
+    - name: Verify public release downloads
+      shell: bash
+      env:
+        RELEASE_VERSION: ${{ steps.version.outputs.version }}
+        RELEASE_REPOSITORY: ${{ github.repository }}
+      run: ./scripts/verify-release.sh "$RELEASE_VERSION" "cohctl-${RELEASE_VERSION}-checksums.txt"
 
     - name: Release GitHub Pages Stable.txt
+      if: ${{ success() }}
       shell: bash
       run: |
         git config --local user.name "Github Action"
         git config --local user.email "$GITHUB_ACTOR@users.noreply.github.com"
         make release-ghpages
-        # Restore the Binaries directories
-        CLI_TMP_BIN=/tmp/coherence-cli-bin
-        mkdir bin || true
-        cp -R ${CLI_TMP_BIN}/* bin/
-        # Restore the docs.zip
-        mkdir -p ./build/_output
-        mv /tmp/docs.zip ./build/_output/docs.zip
-
-    - name: Create Release
-      uses: actions/create-release@0cb9c9b65d5d1901c1f53e5e66eaf4afd303e70e # v1.1.4
-      id: create_release
-      with:
-        draft: false
-        prerelease: false
-        release_name: Coherence CLI - ${{ steps.version.outputs.version }}
-        tag_name: ${{ github.ref }}
-        body: Coherence CLI Release ${{ steps.version.outputs.version }}
-      env:
-        GITHUB_TOKEN: ${{ github.token }}
-
-    - name: Upload linux amd64 artifact
-      uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 # v1.0.2
-      env:
-         GITHUB_TOKEN: ${{ github.token }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./bin/linux/amd64/cohctl
-        asset_name: cohctl-${{ steps.version.outputs.version }}-linux-amd64
-        asset_content_type: application/x-mach-binary
-
-    - name: Upload linux arm64 artifact
-      uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 # v1.0.2
-      env:
-         GITHUB_TOKEN: ${{ github.token }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./bin/linux/arm64/cohctl
-        asset_name: cohctl-${{ steps.version.outputs.version }}-linux-arm64
-        asset_content_type: application/x-executable
-
-    - name: Upload linux 386 artifact
-      uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 # v1.0.2
-      env:
-         GITHUB_TOKEN: ${{ github.token }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./bin/linux/386/cohctl
-        asset_name: cohctl-${{ steps.version.outputs.version }}-linux-386
-        asset_content_type: application/x-executable
-
-    - name: Upload Windows amd64 artifact
-      uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 # v1.0.2
-      env:
-         GITHUB_TOKEN: ${{ github.token }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./bin/windows/amd64/cohctl.exe
-        asset_name: cohctl-${{ steps.version.outputs.version }}-windows-amd64.exe
-        asset_content_type: application/x-dosexec
-
-    - name: Upload Windows arm64 artifact
-      uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 # v1.0.2
-      env:
-         GITHUB_TOKEN: ${{ github.token }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./bin/windows/arm64/cohctl.exe
-        asset_name: cohctl-${{ steps.version.outputs.version }}-windows-arm64.exe
-        asset_content_type: application/x-dosexec
-
-    - name: Upload docs.zip
-      uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 # v1.0.2
-      env:
-         GITHUB_TOKEN: ${{ github.token }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./build/_output/docs.zip
-        asset_name: docs.zip
-        asset_content_type: application/zip
 
     - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
       if: failure()

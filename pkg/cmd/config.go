@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023, 2024 Oracle and/or its affiliates.
+ * Copyright (c) 2023, 2026 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -27,7 +27,7 @@ in a human readable format.`,
 		cmd.Println("------")
 
 		value, err := FormatJSONForDescribe(data, false, "Version", "Current Context",
-			"Debug", "Color", "Request Timeout", "Ignore Invalid Certs", "Default Bytes Format", "Default Heap", "Use Gradle")
+			"Debug", "Color", "Request Timeout", "Default Bytes Format", "Default Heap", "Use Gradle")
 		if err != nil {
 			return err
 		}
@@ -38,7 +38,10 @@ in a human readable format.`,
 			cmd.Println("-------------------")
 
 			for _, con := range Config.Clusters {
-				data, err := json.Marshal(con)
+				data, err := json.Marshal(struct {
+					ClusterConnection
+					IgnoreInvalidCerts string `json:"ignoreInvalidCerts"`
+				}{con, connectionCertificateSetting(con)})
 				if err != nil {
 					return err
 				}

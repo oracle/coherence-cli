@@ -1,0 +1,228 @@
+///////////////////////////////////////////////////////////////////////////////
+
+    Copyright (c) 2026 Oracle and/or its affiliates.
+    Licensed under the Universal Permissive License v 1.0 as shown at
+    https://oss.oracle.com/licenses/upl.
+
+///////////////////////////////////////////////////////////////////////////////
+
+= TLS Certificate Validation Changes
+:description: Coherence CLI - TLS certificate validation changes and upgrade examples
+:keywords: oracle coherence, coherence-cli, tls, certificates, ignore-certs, upgrade
+
+== TLS Certificate Validation Changes
+
+The CLI now saves certificate-validation exceptions per HTTPS connection. Previously,
+`cohctl set ignore-certs true` disabled verification globally. Now it changes only one
+saved HTTPS connection, and new connections verify certificates by default.
+Scripts that enabled the global setting before adding a cluster must change.
+
+An exception covers the saved connection's HTTPS origin: its hostname or IP and
+effective port (`443` when omitted). It does not extend to another saved connection,
+another hostname or port, discovery, general downloads, or an HTTPS proxy's certificate.
+Other-origin Coherence*Web and health requests still verify their destination certificates.
+HTTP connections continue to work.
+
+=== Commands and Options
+
+`false` means verify certificates; `true` means allow invalid certificates for the selected connection.
+
+[cols="2,3",options="header"]
+|===
+|Command or option |Change
+
+|`cohctl add cluster NAME -u HTTPS_URL --ignore-certs`
+|New option. Allows an invalid certificate during the initial connection probe and saves
+the exception for that connection. Omit it, or use `--ignore-certs=false`, to verify.
+Explicitly passing either value with an HTTP URL is rejected.
+
+|`cohctl get ignore-certs -c NAME`
+|Updated command. Reads one saved connection's choice instead of a global value.
+HTTPS reports `false` or `true`; HTTP reports `n/a`.
+
+|`cohctl set ignore-certs true -c NAME` +
+`cohctl set ignore-certs false -c NAME`
+|Updated command. Changes one existing saved HTTPS connection. HTTP rejects both values.
+It cannot set a default for a connection that has not yet been added.
+
+|`-c NAME` / `--connection NAME` +
+`cohctl set context NAME`
+|Existing selection mechanisms now select the connection for `get/set ignore-certs`.
+Without `-c`, those commands use the current saved context. An unknown name, missing
+context, or ad hoc `host:port` selection is an error.
+
+|`cohctl get config -v`
+|Updated output. Shows each saved connection's `false`/`true`/`n/a` choice;
+the global certificate-validation row is removed.
+|===
+
+The existing `COHERENCE_TLS_CERTS_PATH` variable supplies a PEM trust file.
+For management requests it replaces system roots, so include every CA needed by your
+management endpoints. For general HTTPS downloads, its CAs supplement system roots;
+downloads always verify. The existing `COHERENCE_TLS_CLIENT_CERT` and
+`COHERENCE_TLS_CLIENT_KEY` variables provide client identity when mutual TLS is required.
+CA trust does not fix an expired certificate or a hostname mismatch.
+
+On actual use of an exception, stderr warns once per connection and origin in each
+command execution. Every dispatched bypass attempt is also logged, including failed
+requests. Reading or changing a setting alone does not emit that warning.
+
+=== Examples
+
+The commands below use Bash syntax. Replace the example hosts and file paths with your
+own. Management endpoints must already be running; new connection names must be unused.
+Examples assume endpoints that do not require username/password authentication.
+The *Before* and *Now* blocks are alternative sequences for the same scenario.
+
+==== Connect Using a Private CA
+
+The server has an unexpired certificate whose hostname matches `prod.example.com`.
+The same trust variable works before and after the change.
+
+*Before*
+
+[source,bash]
+----
+# 1. Enable verification globally.
+cohctl set ignore-certs false
+# 2. Trust the issuing CA and add the connection.
+export COHERENCE_TLS_CERTS_PATH=/path/to/management-ca.pem
+cohctl add cluster prod -u https://prod.example.com:30000/management/coherence/cluster
+# 3. Read cluster members.
+cohctl get members -c prod
+----
+
+*Now*
+
+[source,bash]
+----
+# 1. Trust the issuing CA.
+export COHERENCE_TLS_CERTS_PATH=/path/to/management-ca.pem
+# 2. Add the connection; verification is the default.
+cohctl add cluster prod -u https://prod.example.com:30000/management/coherence/cluster
+# 3. Check its choice, then read cluster members.
+cohctl get ignore-certs -c prod  # Current setting: false
+cohctl get members -c prod
+----
+
+If the server also requires mutual TLS, export `COHERENCE_TLS_CLIENT_CERT` and
+`COHERENCE_TLS_CLIENT_KEY` before adding or querying the connection in either version.
+
+==== Add a Development Connection With an Untrusted Certificate
+
+Use an exception only when you have established the server's identity independently.
+Prefer trusted, valid certificates for production.
+
+*Before*
+
+[source,bash]
+----
+# 1. Disable verification globally, including for later adds.
+cohctl set ignore-certs true
+# 2. Add the development connection and query it.
+cohctl add cluster dev -u https://dev.example.com:30000/management/coherence/cluster
+cohctl get members -c dev
+----
+
+*Now*
+
+[source,bash]
+----
+# 1. Allow the initial probe and save the exception for dev.
+cohctl add cluster dev -u https://dev.example.com:30000/management/coherence/cluster --ignore-certs
+# 2. Confirm the saved choice.
+cohctl get ignore-certs -c dev  # Current setting: true
+# 3. Query dev using its saved exception.
+cohctl get members -c dev
+----
+
+Both the add probe and the later query emit a warning like this:
+
+[source,text]
+----
+WARNING: TLS certificate verification is disabled for connection "dev" at "https://dev.example.com:30000".
+----
+
+The flag belongs to `add cluster`; later commands use the saved choice. A subsequent
+`add cluster other -u HTTPS_URL` still verifies unless it has its own explicit flag.
+
+==== Keep Development and Production Settings Separate
+
+Assume `dev` and `prod` are already saved HTTPS connections. Development needs an
+exception; production has a valid certificate trusted by the CLI.
+
+*Before*
+
+[source,bash]
+----
+# 1. Change the global setting before querying dev.
+cohctl set ignore-certs true
+cohctl get members -c dev
+# 2. Change it back before querying prod.
+cohctl set ignore-certs false
+cohctl get members -c prod
+# 3. Repeat both changes whenever switching between these policies.
+----
+
+*Now*
+
+[source,bash]
+----
+# 1. Save each connection's choice once.
+cohctl set ignore-certs true -c dev
+cohctl set ignore-certs false --connection prod
+# 2. Query either connection; each keeps its own policy.
+cohctl get members -c dev
+cohctl get members -c prod
+# 3. The current context can also select a saved connection.
+cohctl set context dev
+cohctl get ignore-certs  # Current setting: true
+# 4. After dev's certificate is repaired and trusted, restore verification for dev.
+cohctl set ignore-certs false -c dev
+cohctl get members -c dev
+----
+
+Previously the final `set ignore-certs false` affected all connections. Now it affects
+only `dev`; `prod` keeps its own setting throughout.
+
+==== Upgrade an Existing Global Exception
+
+Assume the old configuration contains saved HTTPS connections `dev` and `prod`, with
+no connection-level choices, and the old CLI persisted a global exception:
+
+*Before*
+
+[source,bash]
+----
+# 1. Persist the global exception using the old CLI.
+cohctl set ignore-certs true
+# 2. Both saved connections use that global choice.
+cohctl get members -c dev
+cohctl get members -c prod
+----
+
+*Now*
+
+[source,bash]
+----
+# 1. Run the upgraded CLI. Startup migrates the configuration automatically.
+cohctl get config -v
+# 2. Review the inherited choices.
+cohctl get ignore-certs -c dev   # Current setting: true
+cohctl get ignore-certs -c prod  # Current setting: true
+# 3. Remove prod's inherited exception after confirming its certificate is valid and trusted.
+cohctl set ignore-certs false -c prod
+cohctl get members -c prod
+# 4. Confirm dev retains its own exception.
+cohctl get ignore-certs -c dev   # Current setting: true
+----
+
+Migration copies a persisted global `true` only to eligible existing HTTPS entries
+without an explicit choice. Existing `false`/`true` choices and HTTP entries are retained;
+new connections continue to verify. The CLI clears the global value and reports the
+affected names and a timestamped `.tls-backup-*.bak` backup beside the configuration file.
+Keep that backup until review is complete; it contains the original configuration and
+may include sensitive data. A backup or replacement failure stops startup before network
+access. There is no global or environment fallback after upgrade.
+
+For full trust and migration details, see xref:../security/overview.adoc[Securing CLI Access].

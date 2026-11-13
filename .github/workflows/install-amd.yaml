@@ -27,7 +27,7 @@ jobs:
 
         INSTALL_SCRIPT_URL="https://raw.githubusercontent.com/oracle/coherence-cli/main/scripts/install.sh"
         # Update this hash whenever scripts/install.sh changes intentionally.
-        EXPECTED_SHA256="45ac74a3d9e5fbe8e7f4d412e8a04a56d3cf6e0670f127d9ad0d8a71ce09e27c"
+        EXPECTED_SHA256="ad7a69cb842d945abb4bd9635512fbf3a374d2628392a85d093ef1d726c0cbfe"
         script_path="$(mktemp)"
 
         curl -fsSL -o "${script_path}" "${INSTALL_SCRIPT_URL}"

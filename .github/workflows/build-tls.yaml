@@ -61,19 +61,14 @@ jobs:
     - name: TLS Tests
       shell: bash
       run: |
-        export COHERENCE_TLS_CERTS_PATH=`pwd`/test/test_utils/certs/guardians-ca.crt
-        export COHERENCE_TLS_CLIENT_CERT=`pwd`/test/test_utils/certs/star-lord.crt
-        export COHERENCE_TLS_CLIENT_KEY=`pwd`/test/test_utils/certs/star-lord.key
+        CERTS_DIR="$(pwd)/test/test_utils/certs"
+        export COHERENCE_TLS_CERTS_PATH="$CERTS_DIR/guardians-ca.crt"
+        export COHERENCE_TLS_CLIENT_CERT="$CERTS_DIR/star-lord.crt"
+        export COHERENCE_TLS_CLIENT_KEY="$CERTS_DIR/star-lord.key"
+        trap 'make test-cluster-shutdown' EXIT
         COHERENCE_BASE_IMAGE=gcr.io/distroless/java17 COHERENCE_VERSION=14.1.2-0-5 PROFILES=,secure make clean certs build-test-images test-cluster-startup
-        echo "Sleeping 30..."
-        sleep 30
-        export PATH=`pwd`/bin:$PATH
         make cohctl
-        cohctl set ignore-certs true
-        cohctl add cluster tls -u https://127.0.0.1:30000/management/coherence/cluster
-        cohctl get clusters
-        cohctl get members
-        cohctl remove cluster tls -y
+        ./scripts/test-tls.sh
 
     - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
       if: failure()

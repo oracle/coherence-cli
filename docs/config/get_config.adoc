@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 
-    Copyright (c) 2023, 2025 Oracle and/or its affiliates.
+    Copyright (c) 2023, 2026 Oracle and/or its affiliates.
     Licensed under the Universal Permissive License v 1.0 as shown at
     https://oss.oracle.com/licenses/upl.
 
@@ -31,10 +31,13 @@ Current Context     :  fp1
 Debug               :  true
 Color               :  on
 Request Timeout     :  30
-Ignore Invalid Certs:  false
 Default Bytes Format:  m
 Default Heap        :  512m
 Use Gradle          :  false
 ----
 
-NOTE: You can use the `-v` option to display cluster connections and profiles.
+NOTE: Use `cohctl get config -v` to display cluster connections and profiles, including each
+saved connection's `Ignore Invalid Certs` value. Use `cohctl get ignore-certs -c NAME` to inspect
+one saved connection. For HTTPS, `false` verifies certificates; `true` allows invalid certificates
+only for that connection's HTTPS origin. HTTP and other connections report `n/a`.
+See xref:../examples/tls_certificate_validation.adoc[TLS Certificate Validation Changes].
